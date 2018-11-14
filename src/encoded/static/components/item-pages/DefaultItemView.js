@@ -3,14 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { Collapse } from 'react-bootstrap';
+import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
 import { content_views } from './../globals';
 import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
     FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
-import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
+import { BasicStaticSectionBody, BasicUserContentBody } from './../static-pages/components/BasicStaticSectionBody';
 
 var { TabObject, Item } = typedefs;
 
@@ -41,7 +41,6 @@ export default class DefaultItemView extends React.PureComponent {
         this.getTabViewWidth = this.getTabViewWidth.bind(this);
         this.setTabViewKey = this.setTabViewKey.bind(this);
         this.itemHeader = this.itemHeader.bind(this);
-        this.render = this.render.bind(this);
 
         /**
          * Empty state object. May be extended by sub-classes.
@@ -114,10 +113,10 @@ export default class DefaultItemView extends React.PureComponent {
             { context, schemas, windowWidth } = this.props;
     
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(context));
+            returnArr.push(AttributionTabView.getTabObject(this.props));
         }
-        returnArr.push(ItemDetailList.getTabObject(context, schemas));
-        returnArr.push(AuditTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(this.props));
+        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 
@@ -131,9 +130,11 @@ export default class DefaultItemView extends React.PureComponent {
      */
     getDefaultTabs(context = this.props.context){
         var returnArr = [];
-        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
-        returnArr.push(AuditTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(this.props));
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+            returnArr.push(AttributionTabView.getTabObject(this.props));
+        }
+        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 
@@ -343,11 +344,24 @@ export class OverviewHeadingContainer extends React.Component {
         this.toggle = _.throttle(this.toggle.bind(this), 500);
         this.renderInner = this.renderInner.bind(this);
         this.renderInnerBody = this.renderInnerBody.bind(this);
-        this.state = { 'open' : props.defaultOpen };
+        this.state = { 'open' : props.defaultOpen, 'closing' : false };
     }
 
     toggle(){
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function(currState){
+            var open    = !currState.open,
+                closing = !open;
+            return { open, closing };
+        }, ()=>{
+            setTimeout(()=>{
+                this.setState(function(currState){
+                    if (!currState.open && currState.closing){
+                        return { 'closing' : false };
+                    }
+                    return null;
+                });
+            }, 750);
+        });
     }
 
     renderTitle(){
@@ -361,10 +375,11 @@ export class OverviewHeadingContainer extends React.Component {
     }
 
     renderInner(){
+        var { open, closing } = this.state;
         return (
             <div className="inner">
                 <hr className="tab-section-title-horiz-divider"/>
-                { this.renderInnerBody() }
+                { open || closing ? this.renderInnerBody() : <div/> }
             </div>
         );
     }
@@ -393,14 +408,23 @@ export class StaticHeadersArea extends React.PureComponent {
 
     render(){
         var context = this.props.context,
-            headersToShow = _.filter(context.static_headers || [], function(s){ return s.content; }); // Only sections with a content (incl check for permissions).
+            headersToShow = _.filter(
+                context.static_headers || [],
+                function(s){
+                    if (!s || s.error) return false; // No view permission(s)
+                    if (s.content || s.viewconfig) return true;
+                    return false; // Shouldn't happen
+                }
+            );
 
         if (!headersToShow || headersToShow.length === 0) return null;
         return (
             <div className="static-headers-area">
                 { _.map(headersToShow, (section, i) =>
-                    <ExpandableStaticHeader title={section.title || 'Informational Notice ' + (i + 1)} content={section.content}
-                        defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i}
+                    <ExpandableStaticHeader
+                        title={section.title || 'Informational Notice ' + (i + 1)}
+                        context={section}
+                        defaultOpen={(section.options && section.options.default_open) || false} key={section.name || i} index={i}
                         titleIcon={section.options && section.options.title_icon} />
                 )}
                 <hr />
@@ -414,7 +438,7 @@ export class StaticHeadersArea extends React.PureComponent {
 export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     static propTypes = {
-        'section' : PropTypes.object.isRequired
+        'context' : PropTypes.object.isRequired
     }
 
     static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
@@ -428,9 +452,27 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     })
 
     renderInnerBody(){
+        var { context, href } = this.props,
+            open = this.state.open,
+            isHiGlassDisplay = Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1,
+            extraInfo = null;
+
+        if (isHiGlassDisplay){
+            extraInfo = (
+                <div className="extra-info description clearfix pt-08">
+                    { context.description }
+                    <Button href={object.itemUtil.atId(context)} className="pull-right" data-tip="Open HiGlass Display" style={{ marginTop : -5, marginLeft: 10 }}>
+                        <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
+                        View Larger
+                    </Button>
+                </div>
+            );
+        }
+
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicStaticSectionBody {..._.pick(this.props, 'content', 'filetype')} />
+                { extraInfo }
+                <BasicUserContentBody context={context} href={href} height={isHiGlassDisplay ? 300 : null} />
             </div>
         );
     }
