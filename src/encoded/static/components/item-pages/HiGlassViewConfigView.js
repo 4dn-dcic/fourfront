@@ -142,7 +142,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     Alerts.queue({
                         'title' : "Saved " + this.props.context.title,
-                        'message' : "",
+                        'message' : "This HiGlass Display Item has been updated with the current viewport. This may take some minutes to take effect.",
                         'style' : 'success'
                     });
                     this.setState({ 'saveLoading' : false });
