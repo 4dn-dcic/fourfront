@@ -110,21 +110,22 @@ export class WorkflowView extends DefaultItemView {
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
-            {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
-                key : 'graph',
-                content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
-            }
-        ];
+        var { context, windowHeight } = this.props,
+            tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+                {
+                    tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
+                    key : 'graph',
+                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
+                }
+            ];
 
-        return listWithGraph.concat([
-            AttributionTabView.getTabObject(this.props.context),
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
-        ]).map((tabObj)=>{ // Common properties
+        tabs.push(AttributionTabView.getTabObject(this.props));
+        tabs.push(ItemDetailList.getTabObject(this.props));
+        tabs.push(AuditTabView.getTabObject(this.props));
+
+        return _.map(tabs, (tabObj) =>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
+                'style' : { 'minHeight' : Math.max((this.state.mounted && windowHeight && windowHeight - 300) || 0, 600) }
             });
         });
     }
@@ -204,7 +205,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return (
                 <div className="inline-block for-state-fullscreenViewEnabled" key="toggle-fullscreen">
                     <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
-                        <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
+                        <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'expand' : 'compress')}/>
                     </Button>
                 </div>
             );

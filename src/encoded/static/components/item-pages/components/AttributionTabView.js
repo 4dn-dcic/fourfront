@@ -68,7 +68,8 @@ export function generateContactPersonListItem(contactPerson, idx){
 
 export class AttributionTabView extends React.PureComponent {
 
-    static getTabObject(context){
+    static getTabObject(props){
+        var context = props.context;
         return {
             tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
             key : "attribution",
@@ -79,7 +80,7 @@ export class AttributionTabView extends React.PureComponent {
                         <span>Attribution</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider mb-1"/>
-                    <AttributionTabView context={context} />
+                    <AttributionTabView {...props} />
                 </div>
             )
         };

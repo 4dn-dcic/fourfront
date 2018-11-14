@@ -512,6 +512,12 @@ export const HiGlassConfigurator = {
                     "name"          : bigWigFile.display_title,
                     "valueScaling"  : "linear",
                     "coordSystem"   : chromosome.infoid || "NOT SET",
+                    "colorRange"    : [
+                        "white",
+                        "rgba(245,166,35,1.0)",
+                        "rgba(208,2,27,1.0)",
+                        "black"
+                    ]
                 }, contentTrackOptions || {})
             };
         },
