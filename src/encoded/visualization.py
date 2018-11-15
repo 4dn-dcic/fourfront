@@ -694,160 +694,48 @@ def add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
     return True, None
 
 def repack_higlass_views(views, views_file_counts_by_position):
-    """Set up the higlass views.
+    """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
+    1 2 5
+    3 4 6
     """
 
+    # Get the number of views. Do nothing if there are more than 6.
     views_count = len(views)
-
-    # No views are present, stop
     if views_count < 1:
         return
-
-    # Too many views to deal with, stop
     if views_count > 6:
         return
 
-    # TODO: Remove most of this. Since we're using views all of these will fit on a 2D grid.
+    # Determine the width and height of each view, evenly dividing a 12 x 12 area.
+    width = 12
+    if views_count >= 5:
+        width = 4
+    elif views_count > 1:
+        width = 6
 
-    # Here are lookup tables to decide on the size of each 1-D and 2-D components per axis.
-    # * 2-D content should take up the majority of each axis.
-    # * 2-D content should be at least twice as large as 1-D content.
-    # * Size for all components should not exceed 12 units.
+    height = 12
+    if views_count > 2:
+        height = 6
 
-    # Lookup is organized by the number of 1-D items, then the number of 2-D items. 2-D items will never exceed 3 (because we're using a 3x2 arrangement,) and 1-D items will never exceed 6 (since we assume a max of 6 views.)
-    size_for_1d_items = {
-        1 : {
-            0 : 12,
-            1 : 2,
-            2 : 2,
-            3 : 3
-        },
-        2 : {
-            0 : 6,
-            1 : 2,
-            2 : 1,
-            3 : 1
-        },
-        3 : {
-            0 : 4,
-            1 : 1,
-            2 : 1,
-            3 : 1
-        },
-        4 : {
-            0 : 3,
-            1 : 1,
-            2 : 1,
-        },
-        5 : {
-            0 : 2,
-            1 : 1,
-        },
-        6 : {
-            0 : 2,
-        },
-    }
-    size_for_2d_items = {
-        0 : {
-            1 : 12,
-            2 : 6,
-            3 : 4
-        },
-        1 : {
-            1 : 10,
-            2 : 5,
-            3 : 3
-        },
-        2 : {
-            1 : 8,
-            2 : 5,
-            3 : 3
-        },
-        3 : {
-            1 : 9,
-            2 : 4,
-            3 : 3
-        },
-        4 : {
-            1 : 8,
-            2 : 4,
-        },
-        5 : {
-            1 : 7,
-        },
-    }
-
-    # Count the number of 1-D views.
-    horizontal_1d_views = views_file_counts_by_position["left"]
-    vertical_1d_views = views_file_counts_by_position["top"]
-
-    # Count the number of 2-D views.
-    count_2d_views = views_file_counts_by_position["center"]
-
-    # Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
-    # 1 2 5
-    # 3 4 6
-    horizontal_2d_views = 0
-    if count_2d_views == 1:
-        horizontal_2d_views = 1
-    elif count_2d_views in (2, 3, 4):
-        horizontal_2d_views = 2
-    elif count_2d_views in (5, 6):
-        horizontal_2d_views = 3
-
-    vertical_2d_views = 0
-    if count_2d_views in (1, 2):
-        vertical_2d_views = 1
-    elif count_2d_views > 2:
-        vertical_2d_views = 2
-
-    # Handle horizontal placement.
+    # Keep track of the x and y coordinates, starting with (0, 0).
     x = 0
-    for higlass_view in views:
-        # For each left track,
-        for track in higlass_view["tracks"]["left"]:
-            # Set the x location, then increment it.
-            higlass_view["layout"]["x"] = x
-            width = size_for_1d_items[horizontal_1d_views][horizontal_2d_views]
-            x += width
-            higlass_view["layout"]["w"] = width
-
-        # For each top track,
-        for track in higlass_view["tracks"]["top"]:
-            # Set the x location.
-            higlass_view["layout"]["x"] = x
-
-        # For each center track,
-        for track in higlass_view["tracks"]["center"]:
-            # Set the x location, then increment it.
-            higlass_view["layout"]["x"] = x
-            width = size_for_2d_items[horizontal_1d_views][horizontal_2d_views]
-            x += width
-            higlass_view["layout"]["w"] = width
-
-    # Handle vertical placement.
     y = 0
+
+    # For each view
     for higlass_view in views:
-        # For each left track,
-        for track in higlass_view["tracks"]["left"]:
-            # Set the y location.
-            higlass_view["layout"]["y"] = y
+        # Set the x and y coordinate for this view
+        higlass_view["layout"]["x"] = x
+        higlass_view["layout"]["y"] = y
+        higlass_view["layout"]["w"] = width
+        higlass_view["layout"]["h"] = height
 
-        # For each top track,
-        for track in higlass_view["tracks"]["top"]:
-            # Set the y location, then increment it.
-            higlass_view["layout"]["y"] = y
-            height = size_for_1d_items[horizontal_1d_views][horizontal_2d_views]
-            y += height
-            higlass_view["layout"]["h"] = height
+        # Increment the x counter
+        x += width
 
-        # For each center track,
-        for track in higlass_view["tracks"]["center"]:
-            # Set the y location, then increment it.
-            higlass_view["layout"]["y"] = y
-            height = size_for_2d_items[horizontal_1d_views][horizontal_2d_views]
+        # Increment the x & y counter if the x counter needs to wrap around
+        if x >= 12:
             y += height
-            higlass_view["layout"]["h"] = height
+            x = 0
 
 """ End Chad's section
 """
