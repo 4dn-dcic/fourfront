@@ -665,7 +665,6 @@ def add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, 
     new_view["uid"] = uuid.uuid4()
     new_view["layout"]["i"] = new_view["uid"]
 
-    # TODO Copy to 1d file
     new_content = {}
     new_content["tilesetUid"] = new_file["higlass_uid"]
     new_content["name"] = new_file["display_title"]
