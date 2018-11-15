@@ -83,6 +83,7 @@ export class WorkflowRunTracingView extends DefaultItemView {
 
     loadGraphSteps(force = false, cb = null, cache = false){
         var context = this.props.context;
+
         if (typeof context.uuid !== 'string') return;
         if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
         if (
@@ -95,18 +96,18 @@ export class WorkflowRunTracingView extends DefaultItemView {
             )
         ) return;
 
-        var callback = function(r){
-            requestAnimationFrame(()=>{
-                if (Array.isArray(r) && r.length > 0){
-                    this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
-                } else {
-                    this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
-                }
-            });
-        }.bind(this);
+        var tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/',
+            callback = (r) => {
+                requestAnimationFrame(()=>{
+                    if (Array.isArray(r) && r.length > 0){
+                        this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
+                    } else {
+                        this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
+                    }
+                });
+            },
+            opts = {};
 
-        var tracingHref = '/trace_workflow_run_steps/' + this.props.context.uuid + '/';
-        var opts = {};
         if (!cache) {
             opts['timestamp'] = moment.utc().unix();
         }
@@ -159,13 +160,28 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
 }
 
 export class FileViewGraphSection extends WorkflowGraphSection {
-    
-    static getTabObject(parentItemViewProps, parentItemViewState, onToggleAllRuns){
-        var { loadingGraphSteps, steps, mounted, allRuns } = parentItemViewState;
-        var { context } = parentItemViewProps;
 
-        var iconClass = "icon icon-fw icon-";
-        var tooltip = null;
+    /**
+     * Returns tab object representation for Graph section.
+     * Used by any ItemView which loads provenance graph steps into its state.steps.
+     *
+     * @param {Object} parentProps - All props from parent Item view.
+     * @param {Object} parentState - All properties from parent Item view state.
+     * @param {!Object[]} parentState.steps - Steps of provenance graph, AJAXed-in by parent Item view.
+     * @param {boolean} parentState.mounted - Whether parent component/view has been mounted yet.
+     * @param {boolean} parentState.allRuns - Whether 'all runs' (vs grouped runs) are currently being loaded.
+     * @param {boolean} parentState.loadingGraphSteps - Whether steps are currently being loaded.
+     * @param {function} onToggleAllRuns - Callback function passed from parent Item view. Called when 'toggle all runs' checkbox is changed.
+     * @returns {{ tab: JSX.Element, key: string, disabled: boolean, isDefault: boolean, content: JSX.Element }} Tab object
+     */
+    static getTabObject(parentProps, parentState, onToggleAllRuns){
+        var { loadingGraphSteps, steps, mounted, allRuns } = parentState,
+            { context } = parentProps,
+            iconClass   = "icon icon-fw icon-",
+            tooltip     = null,
+            parts       = url.parse(parentProps.href),
+            hash        = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
+
         if (steps === null || loadingGraphSteps){
             iconClass += 'circle-o-notch icon-spin';
             tooltip = "Graph is loading";
@@ -175,24 +191,19 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         } else {
             iconClass += 'sitemap icon-rotate-90';
         }
-        var parts = url.parse(parentItemViewProps.href);
-        var hash = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
+
         return {
             'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
-            'isDefault' : isGraphSectionOpen(parentItemViewProps.href, hash),
+            'isDefault' : isGraphSectionOpen(parentProps.href, hash),
             'content'   : (
                 <FileViewGraphSection
-                    {...parentItemViewProps}
-                    steps={steps}
-                    mounted={mounted}
+                    {...parentProps}
+                    {..._.pick(parentState, 'steps', 'mounted', 'allRuns')}
                     key={"graph-for-" + context.uuid}
                     onToggleAllRuns={onToggleAllRuns}
-                    allRuns={allRuns}
-                    loading={loadingGraphSteps}
-                    urlHash={hash}
-                />
+                    loading={loadingGraphSteps} urlHash={hash} />
             )
         };
     }
@@ -226,7 +237,6 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'stacked',
-            'fullscreenViewEnabled' : false,
             'showParameters' : false,
             'anyIndirectPathIONodes' : true, // Overriden
             'anyReferenceFileNodes' : true // Overriden
@@ -292,17 +302,19 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     render(){
-        var graphProps = Array.isArray(this.props.steps) ? this.commonGraphProps() : null,
-            isReferenceFilesCheckboxDisabled = !this.state.anyReferenceFileNodes,
-            isAllRunsCheckboxDisabled = this.props.loading || (!this.props.allRuns && !this.anyGroupNodesExist ? true : false),
-            isShowMoreContextCheckboxDisabled = !this.state.showIndirectFiles && !this.state.anyIndirectPathIONodes;
+        var { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props,
+            { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state,
+            graphProps = Array.isArray(steps) ? this.commonGraphProps() : null,
+            isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes,
+            isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false),
+            isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
 
         return (
-            <div ref="container" className={"workflow-view-container workflow-viewing-" + (this.state.showChart) + (this.state.fullscreenViewEnabled ? ' full-screen-view' : '')}>
+            <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <TracedGraphSectionControls
-                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')} loading={this.props.loadingGraphSteps}
+                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')} loading={loadingGraphSteps} fullscreenViewEnabled={isFullscreen}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType} onToggleFullScreenView={this.onToggleFullScreenView} onToggleShowParameters={this.onToggleShowParameters}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />

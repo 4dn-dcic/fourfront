@@ -346,7 +346,8 @@ class File(Item):
                 # just need a filename to trigger creation of credentials
                 xfile['filename'] = xfile['accession']
                 xfile['uuid'] = str(uuid)
-                xfile['status'] = properties.get('status')
+                # if not 'status' in xfile or not bool(xfile['status']):
+                #    xfile['status'] = properties.get('status')
                 ext = self.build_external_creds(self.registry, uuid, xfile)
                 # build href
                 file_extension = xfile_format.properties.get('standard_file_extension')
@@ -754,7 +755,6 @@ def post_upload(context, request):
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
-
     accession_or_external = properties.get('accession')
     external = context.propsheets.get('external', None)
 
@@ -826,6 +826,9 @@ def is_file_to_download(properties, file_format, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        raise HTTPForbidden('This is a restricted file not available for download')
     try:
         user_props = session_properties(request)
     except Exception as e:
@@ -870,7 +873,6 @@ def download(context, request):
             tracking_values['file_format'] = file_format.get('file_format')
     tracking_values['filename'] = filename
 
-
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
@@ -893,20 +895,7 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
-    # get the experiment type associated with this file
-    experiments_using_file = context.experiments(request)
-    found_experiment_type = 'None'
-    for file_experiment in experiments_using_file:
-        exp_info = get_item_if_you_can(request, file_experiment)
-        if exp_info is None:
-            break
-        exp_type = exp_info.get('experiment_type')
-        if found_experiment_type == 'None' or found_experiment_type == exp_type:
-            found_experiment_type = exp_type
-        else:  # multiple experiment types
-            found_experiment_type = 'Integrative analysis'
-            break
-    tracking_values['experiment_type'] = found_experiment_type
+    tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
     tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
     tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
@@ -944,6 +933,40 @@ def download(context, request):
 
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
+
+
+def get_file_experiment_type(request, context, properties):
+    """
+    Get the string experiment_type value given a File context and properties.
+    Checks the source_experiments, rev_linked experiments and experiment_sets
+    """
+    # identify which experiments to use
+    experiments_using_file = []
+    if properties.get('source_experiments'):
+        experiments_using_file = properties['source_experiments']
+    else:
+        rev_exps = context.experiments(request)
+        if rev_exps:
+            experiments_using_file = rev_exps
+        elif hasattr(context, 'experiment_sets'):  # FileProcessed only
+            rev_exp_sets = context.experiment_sets(request)
+            if rev_exp_sets:
+                for exp_set in rev_exp_sets:
+                    exp_set_info = get_item_if_you_can(request, exp_set)
+                    if exp_set_info:
+                        experiments_using_file.extend(exp_set_info.get('experiments_in_set', []))
+    found_experiment_type = 'None'
+    for file_experiment in experiments_using_file:
+        exp_info = get_item_if_you_can(request, file_experiment)
+        if exp_info is None:
+            continue
+        exp_type = exp_info.get('experiment_type')
+        if found_experiment_type == 'None' or found_experiment_type == exp_type:
+            found_experiment_type = exp_type
+        else:  # multiple experiment types
+            found_experiment_type = 'Integrative analysis'
+            break
+    return found_experiment_type
 
 
 def validate_file_format_validity_for_file_type(context, request):

@@ -671,9 +671,6 @@ class DimensioningContainer extends React.PureComponent {
     constructor(props){
         super(props);
         this.calculateStickyTopOffset = this.calculateStickyTopOffset.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
         this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
@@ -683,7 +680,6 @@ class DimensioningContainer extends React.PureComponent {
         this.getTableDims = this.getTableDims.bind(this);
         this.setResults = this.setResults.bind(this);
         this.renderHeadersRow = this.renderHeadersRow.bind(this);
-        this.render = this.render.bind(this);
         this.state = {
             'mounted'   : false,
             'widths'    : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, false, props.windowWidth),
@@ -725,6 +721,8 @@ class DimensioningContainer extends React.PureComponent {
 
         this.lastResponsiveGridSize = layout.responsiveGridState(windowWidth || null);
         this.setState(state);
+
+        window.TEST = this;
     }
 
     componentWillUnmount(){
@@ -750,26 +748,28 @@ class DimensioningContainer extends React.PureComponent {
         // Or, reset widths on change in columns
         } else {
             var responsiveGridSize = layout.responsiveGridState(nextProps.windowWidth || null);
-
             if (nextProps.windowWidth !== this.props.windowWidth || nextProps.columnDefinitions.length !== this.props.columnDefinitions.length || this.lastResponsiveGridSize !== responsiveGridSize){
-
-                this.lastResponsiveGridSize = responsiveGridSize;
-                // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
-                this.setState({
-                    'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted, nextProps.windowWidth),
-                    'stickyHeaderTopOffset' : this.calculateStickyTopOffset(nextProps, responsiveGridSize)
-                }, ()=>{
-                    vizUtil.requestAnimationFrame(()=>{
-                        // 2. Upon render into DOM, decrease col sizes.
-                        this.setState(_.extend(
-                            this.getTableDims(),
-                            { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions, 30, nextProps.windowWidth) }
-                        ));
-                    });
-                });
-
+                this.resetWidths(nextProps, responsiveGridSize);
             }
         }
+    }
+
+    resetWidths(props = this.props, responsiveGridSize){
+        //var responsiveGridSize = layout.responsiveGridState(props.windowWidth || null);
+        this.lastResponsiveGridSize = responsiveGridSize;
+        // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
+        this.setState({
+            'widths' : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, this.state.mounted, props.windowWidth),
+            'stickyHeaderTopOffset' : this.calculateStickyTopOffset(props, responsiveGridSize)
+        }, () => {
+            vizUtil.requestAnimationFrame(()=>{
+                // 2. Upon render into DOM, decrease col sizes.
+                this.setState(_.extend(
+                    this.getTableDims(),
+                    { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(props.columnDefinitions, 30, props.windowWidth) }
+                ));
+            });
+        });
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -952,13 +952,11 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     render(){
-        var { columnDefinitions, stickyHeaderTopOffset, windowWidth } = this.props;
-        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset, mounted, widths } = this.state;
-
-        var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, mounted, widths, windowWidth);
-
-        var canLoadMore = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
-            typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
+        var { columnDefinitions, stickyHeaderTopOffset, windowWidth } = this.props,
+            { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset, mounted, widths } = this.state,
+            fullRowWidth    = ResultRow.fullRowWidth(columnDefinitions, mounted, widths, windowWidth),
+            canLoadMore     = (this.refs && this.refs.loadMoreAsYouScroll && this.refs.loadMoreAsYouScroll.state &&
+                typeof this.refs.loadMoreAsYouScroll.state.canLoad === 'boolean') ? this.refs.loadMoreAsYouScroll.state.canLoad : null;
 
         return (
             <div className="search-results-outer-container">
@@ -1060,9 +1058,14 @@ export class SearchResultTable extends React.PureComponent {
     constructor(props){
         super(props);
         this.fullColumnDefinitions = this.fullColumnDefinitions.bind(this);
+        this.getDimensionContainer = this.getDimensionContainer.bind(this);
         this.state = {
             'columnDefinitions' : this.fullColumnDefinitions(props)
         };
+    }
+
+    getDimensionContainer(){
+        return this.refs.container;
     }
 
     componentWillReceiveProps(nextProps){

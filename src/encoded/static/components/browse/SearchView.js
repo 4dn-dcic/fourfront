@@ -9,7 +9,9 @@ import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, typedefs } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
+    AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
+    AboveSearchTablePanel } from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
@@ -52,9 +54,7 @@ class ResultTableHandlersContainer extends React.PureComponent {
         return ['status'].concat(defaultHiddenColumnsFromSchemas);
     }
 
-    isTermSelected(term, facet){
-        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
-    }
+    isTermSelected(term, facet){ return Filters.determineIfTermFacetSelected(term, facet, this.props); }
 
     render(){
         return (
@@ -79,8 +79,14 @@ class ControlsAndResults extends React.PureComponent {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
+    }
+
+    forceUpdateOnSelf(){
+        var searchResultTable   = this.refs.searchResultTable,
+            dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
+        return dimContainer && dimContainer.resetWidths();
     }
 
     handleClearFilters(evt){
@@ -204,7 +210,7 @@ class ControlsAndResults extends React.PureComponent {
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                     <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
-                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight')}
+                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
                         hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                             SearchResultTable.defaultProps.constantColumnDefinitions,
@@ -214,6 +220,7 @@ class ControlsAndResults extends React.PureComponent {
                         )} />
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                         'currentAction', 'windowWidth', 'registerWindowOnScrollHandler')}
+                        ref="searchResultTable"
                         results={results} totalExpected={context.total} columns={context.columns || {}}
                         hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
                         renderDetailPane={(result, rowNumber, containerWidth) =>
@@ -252,7 +259,7 @@ export default class SearchView extends React.PureComponent {
                 'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
                 'render' : function(result, columnDefinition, props, width){
                     if (!result.google_analytics || !result.google_analytics.for_date) return null;
-                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' />;
+                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
                 }
             }
         },

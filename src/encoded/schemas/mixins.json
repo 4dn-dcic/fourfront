@@ -84,6 +84,7 @@
                 "replaced",
                 "in review by lab",
                 "submission in progress",
+                "pre-release",
                 "released to project",
                 "archived to project"
             ]
@@ -570,7 +571,7 @@
                 "title": "Static Header",
                 "description": "Static section displayed at the top of an item page",
                 "type": "string",
-                "linkTo": "StaticSection"
+                "linkTo": "UserContent"
             }
         }
     },

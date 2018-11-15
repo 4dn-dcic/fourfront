@@ -118,6 +118,25 @@
                         "description": "Size of file of the extra file.",
                         "comment": "File size is specified in bytes",
                         "type": "integer"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "string",
+                        "exclude_from": ["submit4dn"],
+                        "enum" : [
+                            "uploading",
+                            "uploaded",
+                            "upload failed",
+                            "deleted",
+                            "replaced",
+                            "revoked",
+                            "archived",
+                            "pre-release",
+                            "released",
+                            "released to project",
+                            "archived to project",
+                            "to be uploaded by workflow"
+                        ]
                     }
                 }
             }
@@ -175,10 +194,12 @@
                 "replaced",
                 "revoked",
                 "archived",
+                "pre-release",
                 "released",
                 "released to project",
                 "archived to project",
-                "to be uploaded by workflow"
+                "to be uploaded by workflow",
+                "restricted"
             ]
         },
         "quality_metric": {
@@ -188,8 +209,6 @@
             "exclude_from": ["submit4dn", "FFedit-create"],
             "linkTo": "QualityMetric"
         }
-    },
-    "file_format_file_extension": {
     },
     "facets": {
         "file_type" : {

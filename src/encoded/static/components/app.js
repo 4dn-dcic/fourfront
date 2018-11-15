@@ -608,25 +608,40 @@ export default class App extends React.Component {
         // Skip @@download links
         if (href.indexOf('/@@download') != -1) return;
 
-        // Don't cache requests to user profile.
-        var navOpts = {};
-        if (target.getAttribute('data-no-cache')) navOpts.cache = false;
-
         // With HTML5 history supported, local navigation is passed
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            navigate(href, navOpts, ()=>{
-                var hrefParts = url.parse(href);
-                var hrefHash = hrefParts.hash;
-                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1){
+
+            var navOpts      = {},
+                hrefParts    = url.parse(href),
+                pHrefParts   = url.parse(this.props.href),
+                hrefHash     = hrefParts.hash,
+                targetOffset = target.getAttribute('data-target-offset'),
+                noCache      = target.getAttribute('data-no-cache');
+
+            // Don't cache requests to user profile.
+            if (noCache) navOpts.cache = false;
+
+            if ((!hrefParts.path || hrefParts.path === pHrefParts.path) && hrefParts.hash !== pHrefParts.hash){
+                navOpts.skipRequest = navOpts.dontScrollToTop = true;
+            }
+
+            navigate(href, navOpts, function(){
+
+                if (targetOffset) targetOffset = parseInt(targetOffset);
+                if (!targetOffset || isNaN(targetOffset)) targetOffset = 112;
+
+                if (hrefHash && typeof hrefHash === 'string' && hrefHash.length > 1 && hrefHash[1] !== '!'){
                     hrefHash = hrefHash.slice(1); // Strip out '#'
-                    setTimeout(layout.animateScrollTo.bind(layout.animateScrollTo, hrefHash), 100);
+                    setTimeout(layout.animateScrollTo.bind(null, hrefHash, 750, targetOffset), 100);
                 }
             });
+
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
+
             if (target && target.blur) target.blur();
         }
     }
@@ -799,9 +814,10 @@ export default class App extends React.Component {
      */
     updateUserInfo(callback = null){
         // get user actions (a function of log in) from local storage
-        var userActions = [];
-        var session = false;
-        var userInfo = JWT.getUserInfo();
+        var userActions = [],
+            session     = false,
+            userInfo    = JWT.getUserInfo();
+
         if (userInfo){
             userActions = userInfo.user_actions;
             var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
@@ -1034,10 +1050,10 @@ export default class App extends React.Component {
 
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
-                        callback = function(response){
+                        callback = (response) => {
                             Alerts.queue(Alerts.LoggedOut);
                             if (typeof oldCallback === 'function') oldCallback(response);
-                        }.bind(this);
+                        };
                     }
 
                     // Update state.session after (possibly) removing expired JWT.
@@ -1045,15 +1061,13 @@ export default class App extends React.Component {
                     this.updateUserInfo();
 
                     if (repeatIfError) {
-                        setTimeout(function(){
-                            if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
-                                // Redirect to home if on a 'private' page (e.g. user profile).
-                                if (setupRequest.call(this, '/')) doRequest.call(this, false);
-                            } else {
-                                // Otherwise redo request after any other error handling (unset JWT, etc.).
-                                doRequest.call(this, false);
-                            }
-                        }.bind(this), 0);
+                        if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
+                            // Redirect to home if on a 'private' page (e.g. user profile).
+                            if (setupRequest.call(this, '/')) doRequest.call(this, false);
+                        } else {
+                            // Otherwise redo request after any other error handling (unset JWT, etc.).
+                            doRequest.call(this, false);
+                        }
                         throw new Error('HTTPForbidden');   // Cancel out of this request's promise chain
                     } else {
                         console.error("Authentication-related error -", response); // Log error & continue down promise chain.
@@ -1108,6 +1122,8 @@ export default class App extends React.Component {
                     fallbackCallback(err);
                 }
 
+                console.error('Error in App.navigate():', err);
+
                 if (err.status === 500){
                     analytics.exception('Server Error: ' + err.status + ' - ' + href);
                 }
@@ -1117,15 +1133,19 @@ export default class App extends React.Component {
                 }
 
                 // Err could be an XHR object if could not parse JSON.
-                if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
+                if (err.message === 'HTTPForbidden'){
+                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response
+                    if (typeof callback === 'function'){
+                        callback(err);
+                    }
+                    return request; // We return out so this request href isn't set.
+                } else if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
                     analytics.exception('Network Error: ' + err.status + ' - ' + href);
-                } else if (err.message === 'HTTPForbidden'){
-                    // An error may be thrown in Promise response chain with this message ("HTTPForbidden") if received a 403 status code in response.
-                    console.info("Logged Out");
                 } else {
-                    console.error('Error in App.navigate():', err);
+                    Alerts.queue(Alerts.ConnectionError);
+                    analytics.exception('Unknown Network Error: ' + err.status + ' - ' + href);
                     throw err; // Unknown/unanticipated error: Bubble it up.
                 }
 
@@ -1156,7 +1176,7 @@ export default class App extends React.Component {
         if (setupRequest.call(this, href)){
             var request = doRequest.call(this, true);
             if (request === null){
-                if (typeof callback === 'function') callback();
+                if (typeof callback === 'function') setTimeout(callback, 100);
             }
             return request;
         } else {
@@ -1427,6 +1447,7 @@ class BodyElement extends React.PureComponent {
         this.registerWindowOnScrollHandler = this.registerWindowOnScrollHandler.bind(this);
         this.addToBodyClassList         = this.addToBodyClassList.bind(this);
         this.removeFromBodyClassList    = this.removeFromBodyClassList.bind(this);
+        this.toggleFullScreen           = this.toggleFullScreen.bind(this);
 
         /**
          * State object for BodyElement.
@@ -1446,7 +1467,8 @@ class BodyElement extends React.PureComponent {
             'windowHeight'          : null,
             'classList'             : [],
             'hasError'              : false,
-            'errorInfo'             : null
+            'errorInfo'             : null,
+            'isFullscreen'          : false
         };
 
         /**
@@ -1735,6 +1757,16 @@ class BodyElement extends React.PureComponent {
         });
     }
 
+    toggleFullScreen(isFullscreen, callback){
+        if (typeof isFullscreen === 'boolean'){
+            this.setState({ isFullscreen }, callback);
+        } else {
+            this.setState(function(currState){
+                return { 'isFullscreen' : !currState.isFullscreen };
+            }, callback);
+        }
+    }
+
     renderErrorState(){
         return (
             <body>
@@ -1762,19 +1794,21 @@ class BodyElement extends React.PureComponent {
                 currentAction, hrefParts, isLoading, slowLoad,
                 children
             } = this.props,
-            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError } = this.state,
+            { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
             bodyClassList = (classList && classList.slice(0)) || [],
             registerWindowOnResizeHandler = this.registerWindowOnResizeHandler,
             registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
             addToBodyClassList            = this.addToBodyClassList,
-            removeFromBodyClassList       = this.removeFromBodyClassList;
+            removeFromBodyClassList       = this.removeFromBodyClassList,
+            toggleFullScreen              = this.toggleFullScreen;
 
         if (hasError) return this.renderErrorState();
 
         if (isLoading)          bodyClassList.push('loading-request');
         if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
         if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
+        if (isFullscreen)       bodyClassList.push('is-full-screen');
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
@@ -1812,7 +1846,7 @@ class BodyElement extends React.PureComponent {
                             <div className="container" id="content">
                                 { React.cloneElement(children, {
                                     windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
-                                    addToBodyClassList, removeFromBodyClassList
+                                    addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen
                                 }) }
                             </div>
 
@@ -1884,4 +1918,3 @@ class ContentErrorBoundary extends React.Component {
         return <div className="container" id="content">{ this.props.children }</div>;
     }
 }
-

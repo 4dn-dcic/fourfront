@@ -510,22 +510,23 @@ class ProfileWorkFields extends React.Component {
     * @return {Item[]} List of all unique awards in labs.
     */
     static getAwardsList(labDetails){
+
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return [];
+        }
+
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
 
         function addAwardToList(award){
-            if (_.pluck(awardsList, 'uuid').indexOf(labDetails[i].awards[j].uuid) === -1){
-                awardsList.push(labDetails[i].awards[j]);
-            }
+            if (!award || typeof award['@id'] !== 'string' || _.pluck(awardsList, '@id').indexOf(award['@id']) > -1) return;
+            awardsList.push(award);
         }
 
-        for (var i = 0; i < labDetails.length; i++){
-            if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
-                for (var j = 0; j < labDetails[i].awards.length; j++){
-                    addAwardToList(labDetails[i].awards[j]);
-                }
-            }
-        }
+        _.forEach(labDetails, function(lab){
+            if (!lab || !lab.awards || !Array.isArray(lab.awards) || lab.awards.length === 0) return;
+            _.forEach(lab.awards, addAwardToList);
+        });
 
         return awardsList;
     }
@@ -556,13 +557,12 @@ class ProfileWorkFields extends React.Component {
      */
     updateAwardsList(labDetails){
 
-        if (!labDetails){
-            return null;
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return;
         }
 
-        this.setState((currState)=>{
+        this.setState(function(currState){
             // As of React 16 we can return null in setState func to cancel out of state update.
-
             var currAwardsList      = (currState.awards_list && currState.awards_list.slice(0)) || [],
                 currAwardsListIDs   = new Set(currAwardsList.map(object.atIdFromObject)),
                 newAwards           = ProfileWorkFields.getAwardsList(labDetails);
@@ -623,7 +623,7 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
                             renderItem={object.itemUtil.generateLink}
-                            endpoints={(submits_for && _.map(submits_for, object.itemUtil.atId)) || []}
+                            endpoints={(submits_for && _.filter(_.map(submits_for, object.itemUtil.atId))) || []}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
                             ajaxCallback={this.updateAwardsList}
@@ -704,6 +704,11 @@ export class ImpersonateUserForm extends React.Component {
         'updateUserInfo': PropTypes.func.isRequired
     }
 
+    constructor(props){
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
     /**
      * Handler for Impersonate User submit button/action.
      * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
@@ -713,20 +718,20 @@ export class ImpersonateUserForm extends React.Component {
      * @param {Object} data - User ID or email address.
      */
     handleSubmit(data) {
-        var url = "/impersonate-user";
-        var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function(payload) {
-            alert('Success! ' + data + ' is being impersonated.');
-            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            //    localStorage.setItem("user_info", JSON.stringify(payload));
-            //}
-            JWT.saveUserInfo(payload);
-            this.props.updateUserInfo();
-            navigate('/');
-        }.bind(this);
-        var fallbackFxn = function() {
-            alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-        };
+        var url = "/impersonate-user",
+            postData = { 'userid' : data },
+            callbackFxn = (resp) => {
+                //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                //    localStorage.setItem("user_info", JSON.stringify(payload));
+                //}
+                JWT.saveUserInfo(resp);
+                this.props.updateUserInfo();
+                navigate('/', { 'inPlace' : true });
+                alert('Success! ' + data + ' is being impersonated.');
+            },
+            fallbackFxn = function() {
+                alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+            };
 
         //var userInfo = localStorage.getItem('user_info') || null;
         //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
@@ -734,7 +739,7 @@ export class ImpersonateUserForm extends React.Component {
         //if(userInfo){
         //    reqHeaders['Authorization'] = 'Bearer '+idToken;
         //}
-        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, JSON.stringify(postData));
     }
 
     render() {

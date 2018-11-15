@@ -70,6 +70,7 @@
                 "Image processing",
                 "Visualization processing",
                 "Repli-seq data processing",
+                "ChIP-seq data processing",
                 "Data QC",
                 "Other"
             ]
@@ -135,6 +136,36 @@
                 "type": "string"
             }
         },
+        "wdl_directory_url": {
+            "title": "WDL directory url",
+            "description": "URL of the directory that contains main and other WDL files needed for the workflow",
+            "type": "string"
+        },
+        "wdl_main_filename": {
+            "title": "WDL main file name",
+            "description": "Name of the main WDL file for the workflow",
+            "type": "string"
+        },
+        "wdl_child_filenames": {
+            "title": "WDL child file names",
+            "description": "Names of the other WDL files used by the main WDL file for the workflow",
+            "type": "array",
+            "items": {
+                "title": "WDL child file name",
+                "description": "name of a wdl file",
+                "type": "string"
+            }
+        },
+        "workflow_language": {
+            "title": "Workflow language",
+            "description": "Language used to describe workflow, either CWL or WDL",
+            "type": "string",
+            "enum": [
+                "CWL",
+                "WDL"
+            ],
+            "default": "CWL"
+        },
         "docker_registry_url": {
             "title": "Docker Registry URL",
             "description": "Docker Hub or 7 bridges registry URL.",
@@ -192,6 +223,7 @@
                             "Output processed file",
                             "Output QC file",
                             "Output report file",
+                            "Output to-be-extra-input file",
                             "parameter",
                             "NA"
                         ]

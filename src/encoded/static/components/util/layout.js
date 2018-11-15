@@ -280,7 +280,7 @@ export function getPageVerticalScrollPosition(){
  * @param {?function} [callback=null] - Optional callback.
  * @returns {void}
  */
-export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 72, callback = null){
+export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 112, callback = null){
 
     if (!document || !document.body) return null;
 

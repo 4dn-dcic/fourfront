@@ -122,6 +122,16 @@ export default class Graph extends React.Component {
         this.setState({ 'mounted' : true });
     }
 
+    componentDidUpdate(pastProps){
+        if (pastProps.width && !this.props.width){
+            requestAnimationFrame(()=> {
+                // Force an update once to let this.width() get proper width after resize/redraw.
+                // If we're losing an explicit width.
+                this.forceUpdate();
+            });
+        }
+    }
+
     width()  {
         var width = this.props.width;
         if ((!width || isNaN(width)) && this.state.mounted && !isServerSide()){

@@ -35,7 +35,7 @@ export class BuildField extends React.PureComponent {
     static fieldTypeFromFieldSchema(fieldSchema){
         var fieldType = fieldSchema.type ? fieldSchema.type : "text";
         // transform some types...
-        if(fieldType === 'string'){
+        if (fieldType === 'string'){
             fieldType = 'text';
             if (typeof fieldSchema.formInput === 'string'){
                 if (['textarea', 'html', 'code'].indexOf(fieldSchema.formInput) > -1) return fieldSchema.formInput;
@@ -802,15 +802,19 @@ class LinkedObj extends React.PureComponent{
 class PreviewField extends React.Component {
 
     render(){
-        var { value, filetype, field, onChange } = this.props;
+        var { value, filetype, field, onChange } = this.props,
+            preview = value && (
+                <React.Fragment>
+                    <h6 className="mt-1 text-600">Preview:</h6>
+                    <hr className="mb-1 mt-05" />
+                    <BasicStaticSectionBody content={value || ''} filetype={filetype} />
+                </React.Fragment>
+            );
         return (
             <div className="preview-field-container">
-                { value && <h6 className="mt-0 text-600">Preview:</h6> }
-                { value && <hr className="mb-1 mt-05" /> }
-                { value &&  <BasicStaticSectionBody content={value || ''} filetype={filetype} /> }
-                { value && <hr className="mb-05 mt-05" /> }
                 <FormControl onChange={onChange} id={"field_for_" + field} name={field} value={value} type="text" inputMode="latin" componentClass="textarea" rows={8}
                     wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />
+                { preview }
             </div>
         );
     }

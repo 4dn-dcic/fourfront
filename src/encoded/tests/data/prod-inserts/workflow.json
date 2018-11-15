@@ -7771,5 +7771,415 @@
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme",
         "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
         "workflow_type": "Hi-C data analysis"
+    },
+    {
+        "accession": "4DNWJV73GVL",
+        "app_name": "bedGraphToBigWig",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bgpairs"
+            },
+            {   
+                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsize"
+            },
+            {   
+                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Output to-be-extra-input file",
+                "workflow_argument_name": "bwfile"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "format conversion",
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/master/cwl/",
+        "cwl_main_filename": "bedGraphToBigWig.cwl",
+        "cwl_pointer": "",
+        "data_types": [
+            "Hi-C", "Repli-seq"
+        ],
+        "description": "Converting bedgraph to bigwig",
+        "docker_image_name": "4dn-dcic/docker-4dn-bedgraphtobigwig",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "bedGraphToBigWig",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bgpairs",
+                        "source": [
+                            {
+                                "name": "bgpairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chromsize",
+                        "source": [
+                            {
+                                "name": "chromsize"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/00eda937-3149-4252-8dc9-c27de59d75ed/"
+                    ]
+                },
+                "name": "bedGraphToBigWig",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bwfile",
+                        "target": [
+                            {
+                                "name": "bwfile"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Converting bedgraph to bigwig",
+        "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e",
+        "workflow_diagram": "",
+        "workflow_type": "Other"
+    },
+    {
+        "accession": "4DNWJL752HA",
+        "app_name": "encode-chipseq",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.fastqs"
+            },
+            {   
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.ctl_fastqs"
+            },
+            {   
+                "argument_format": "96809e57-4ccd-40b4-9fcb-ce27c4f16df9",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.bwa_idx_tar"
+            },
+            {   
+                "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.blacklist"
+            },
+            {   
+                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.chrsz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.paired_end"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.name"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.desc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.gensz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
+            },
+            {   
+                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.peak_calls"
+            },
+            {   
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "chip.report"
+            },
+            {   
+                "argument_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.qc_json"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "Other",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL",
+        "data_types": [
+            "ChIP-seq"
+        ],
+        "description": "ChIP-seq data processing pipeline",
+        "docker_image_name": "4dndcic/encode-chipseq:v1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-chipseq",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.fastqs",
+                        "source": [
+                            {
+                                "name": "chip.fastqs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.ctl_fastqs",
+                        "source": [
+                            {
+                                "name": "chip.ctl_fastqs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "96809e57-4ccd-40b4-9fcb-ce27c4f16df9",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.bwa_idx_tar",
+                        "source": [
+                            {
+                                "name": "chip.bwa_idx_tar"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.blacklist",
+                        "source": [
+                            {
+                                "name": "chip.blacklist"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.chrsz",
+                        "source": [
+                            {
+                                "name": "chip.chrsz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.pipeline_type",
+                        "source": [
+                            {
+                                "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.paired_end",
+                        "source": [
+                            {
+                                "name": "chip.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.choose_ctl.always_use_pooled_ctl",
+                        "source": [
+                            {
+                                "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.gensz",
+                        "source": [
+                            {
+                                "name": "chip.gensz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                    ]
+                },
+                "name": "chip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.peak_calls",
+                        "target": [
+                            {
+                                "name": "chip.peak_calls"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "chip.report",
+                        "target": [
+                            {
+                                "name": "chip.report"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.qc_json",
+                        "target": [
+                            {
+                                "name": "chip.qc_json"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Chip-seq data processing pipeline",
+        "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
+        "workflow_diagram": "",
+        "workflow_type": "Other"
     }
 ]

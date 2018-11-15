@@ -418,23 +418,28 @@ export class HeadersRow extends React.PureComponent {
     }
 
     render(){
-        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane } = this.props;
-        var isAdjustable = this.props.headerColumnWidths && this.state.widths;
+        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane, headerColumnWidths } = this.props,
+            isAdjustable = headerColumnWidths && this.state.widths;
         return (
-            <div className={"search-headers-row" + (isAdjustable ? '' : ' non-adjustable') + (isSticky ? ' stickied' : '') + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')} style={
-                isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
-                : null}
-            >
+            <div className={
+                    "search-headers-row"
+                    + (isAdjustable ? '' : ' non-adjustable')
+                    + (isSticky ? ' stickied' : '')
+                    + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')
+                } style={
+                    isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
+                : null}>
                 <div className="columns clearfix" style={{
                     'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
                     'width' : (stickyStyle && stickyStyle.width) || null
                 }}>
                 {
                     columnDefinitions.map((colDef, i)=>{
-                        var w = this.getWidthFor(i);
-                        var sorterIcon;
-                        if (!colDef.noSort && typeof this.props.sortBy === 'function' && w >= 50){
-                            var { sortColumn, sortBy, sortReverse } = this.props;
+                        var { sortColumn, sortBy, sortReverse } = this.props,
+                            w = this.getWidthFor(i),
+                            sorterIcon;
+
+                        if (!colDef.noSort && typeof sortBy === 'function' && w >= 50){                            
                             sorterIcon = <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />;
                         }
                         return (
@@ -442,16 +447,15 @@ export class HeadersRow extends React.PureComponent {
                                 data-field={colDef.field}
                                 key={colDef.field}
                                 className={"search-headers-column-block" + (colDef.noSort ? " no-sort" : '')}
-                                style={{ width : w }}
-                            >
+                                style={{ width : w }}>
                                 <div className="inner">
                                     <span className="column-title">{ colDef.title }</span>
                                     { sorterIcon }
                                 </div>
-                                { Array.isArray(this.props.headerColumnWidths) ?
-                                <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
-                                    <div className="width-adjuster"/>
-                                </Draggable>
+                                { Array.isArray(headerColumnWidths) ?
+                                    <Draggable position={{x:w,y:0}} axis="x" onDrag={this.onAdjusterDrag.bind(this, i)} onStop={this.setHeaderWidths.bind(this, i)}>
+                                        <div className="width-adjuster"/>
+                                    </Draggable>
                                 : null }
                             </div>
                         );

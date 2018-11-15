@@ -33,6 +33,10 @@
         "schema_version": {
             "default": "2"
         },
+        "higlass_uid": {
+            "title": "Higlass UID",
+            "type": "string"
+        },
         "file_format": {
             "title": "File Format",
             "type": "string",
@@ -74,15 +78,5 @@
                 "galGal5"
             ]
         }
-    },
-    "file_format_file_extension": {
-        "bwaIndex": ".bwaIndex.tgz",
-        "chromsizes": ".chrom.sizes",
-        "barcode_file": ".txt",
-        "compressed_fasta": ".fasta.gz",
-        "fasta": ".fasta",
-        "juicer_format_restriction_site_file": ".txt",
-        "conc": ".fasta.conc",
-        "other": ""
     }
 }

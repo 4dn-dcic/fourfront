@@ -30,6 +30,7 @@
                 "in review by lab",
                 "planned",
                 "submission in progress",
+                "pre-release",
                 "released to project",
                 "archived to project"
             ]

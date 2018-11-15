@@ -108,24 +108,21 @@ export class WorkflowRunView extends DefaultItemView {
 
     getTabViewContents(){
 
-        var { context, schemas } = this.props;
+        var { context, windowHeight } = this.props,
+            tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+                {
+                    tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
+                    key : 'graph',
+                    content : <GraphSection {...this.props} mounted={this.state.mounted} />
+                }
+            ];
 
-        //context = WFR_JSON;
+        tabs.push(ItemDetailList.getTabObject(this.props));
+        tabs.push(AuditTabView.getTabObject(this.props));
 
-        var listWithGraph = !doValidAnalysisStepsExist(context.steps) ? [] : [
-            {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
-                key : 'graph',
-                content : <GraphSection {...this.props} mounted={this.state.mounted} context={context} />
-            }
-        ];
-
-        return listWithGraph.concat([
-            ItemDetailList.getTabObject(context, schemas),
-            AuditTabView.getTabObject(context)
-        ]).map((tabObj)=>{ // Common properties
+        return _.map(tabs, (tabObj) =>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
+                'style' : { 'minHeight' : Math.max((this.state.mounted && windowHeight - 300) || 0, 600) }
             });
         });
     }

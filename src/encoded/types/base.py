@@ -66,10 +66,6 @@ ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-#ALLOW_VIEWING_GROUP_VIEW = [
-#    (Allow, 'role.viewing_group_member', 'view'),
-#] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
-
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
 ] + ALLOW_LAB_MEMBER_VIEW
@@ -90,17 +86,29 @@ ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-ALLOW_CURRENT = [
-    (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+ALLOW_CURRENT = ALLOW_EVERYONE_VIEW
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
 ] + ONLY_ADMIN_VIEW
 
-# Collection acls
+# For running pipelines
+ALLOW_LAB_VIEW_ADMIN_EDIT = [
+    (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.lab_submitter', 'view'),
+] + ONLY_ADMIN_VIEW
 
+ALLOW_OWNER_EDIT = [
+    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
+]
+
+# Collection acls
 ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
+
+ALLOW_ANY_USER_ADD = [
+    (Allow, Authenticated, 'add'),
+    (Allow, Authenticated, 'create')
+] + ALLOW_EVERYONE_VIEW
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -298,9 +306,11 @@ class Item(snovault.Item):
         'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
-
+        'restricted': ALLOW_CURRENT,
         # publication
         'published': ALLOW_CURRENT,
+        # experiment sets
+        'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
 
     def __init__(self, registry, models):
@@ -371,6 +381,10 @@ class Item(snovault.Item):
                             grps.append(group)
                     for g in grps:
                         del roles[g]
+        # This emulates __ac_local_roles__ of User.py (role.owner)
+        if 'submitted_by' in properties:
+            submitter = 'userid.%s' % properties['submitted_by']
+            roles[submitter] = 'role.owner'
         return roles
 
     def add_accession_to_title(self, title):

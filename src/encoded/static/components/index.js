@@ -25,6 +25,7 @@ require('./item-pages/ExperimentSetView');
 require('./item-pages/ExperimentView');
 require('./item-pages/FileSetCalibrationView');
 require('./item-pages/HealthView');
+require('./item-pages/HiGlassViewConfigView');
 require('./item-pages/UserView');
 require('./item-pages/WorkflowRunView');
 require('./item-pages/WorkflowView');

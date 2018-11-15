@@ -192,7 +192,9 @@ export var ColumnDefinition;
 export var NavigateOpts;
 
 /**
- * @typedef {Object} AlertObj - Object used to represent alert message element contents at top of page.
+ * Object used to represent alert message element contents at top of page.
+ *
+ * @typedef {Object} AlertObj
  * @property {string} title                 Title to be shown at top of alert box.
  * @property {string|JSX.Element} message   Message to be shown in body of alert box. May be JSX if no plans for alert to be rendered server-side.
  * @property {?string} style                Style of alert box. May be any Bootstrap-compliant style, e.g. "danger", "warning", "info".
