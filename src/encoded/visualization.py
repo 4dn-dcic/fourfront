@@ -27,6 +27,9 @@ from .types.workflow import (
 )
 from .types.base import get_item_if_you_can
 
+import logging # TODO DELETE ME
+log = logging.getLogger(__name__) # TODO DELETE ME
+
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
@@ -441,6 +444,12 @@ def add_files_to_higlass_viewconf(request):
 
     higlass_viewconf = get_item_if_you_can(request, base_higlass_viewconf_uuid)
 
+    if not higlass_viewconf:
+        return {
+            "success" : False,
+            "errors": "Viewconf does not exist.",
+        }
+
     # Get the file list.
     filestring = request.json_body.get('files')
     new_file_uuids = []
@@ -467,7 +476,7 @@ def add_files_to_higlass_viewconf(request):
     return {
         "success" : True,
         "errors": "",
-        "viewconf" : higlass_viewconf #new_viewconf,
+        "viewconf" : new_viewconf
     }
 
 def add_single_file_to_higlass_viewconf(viewconf, new_file_dict):
@@ -651,15 +660,17 @@ def add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, 
             }
         }
 
-    # TODO Do I need to add 1-D tracks?
+    # TODO Need to clone other 2-D view and replace contents
     new_view = deepcopy(base_view)
     new_view["uid"] = uuid.uuid4()
     new_view["layout"]["i"] = new_view["uid"]
 
+    # TODO Copy to 1d file
     new_content = {}
     new_content["tilesetUid"] = new_file["higlass_uid"]
     new_content["name"] = new_file["display_title"]
-    new_content["type"] = "combined"
+    new_content["type"] = "heatmap"
+    new_content["server"] = "https://higlass.4dnucleome.org/api/v1"
     new_content["options"] = {}
 
     new_content["options"]["coordSystem"] = new_file["genome_assembly"]
@@ -670,6 +681,11 @@ def add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, 
                 "contents":[]
             }
         ]
+
+    new_view["tracks"]["center"][0]["type"] = "combined"
+    new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
+    new_view["tracks"]["center"][0]["position"] = "center"
+
     new_view["tracks"]["center"][0]["contents"].append(new_content)
 
     viewconf_file_counts_by_position["center"] += 1
