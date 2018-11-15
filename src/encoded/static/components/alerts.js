@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 import {  Button, Fade } from 'react-bootstrap';
 import _ from 'underscore';
 import * as store from '../store';
+import { typedefs } from './util';
+
+var { AlertObj } = typedefs;
 
 const defaultNavigateDisappearThreshold = 1;
 
@@ -27,7 +30,7 @@ export default class Alerts extends React.Component {
      * @param {AlertObj} alert              Object used to represent alert message element contents at top of page.
      * @param {function} [callback]         Optional function to be ran after queuing.
      * @param {AlertObj[]} [currentAlerts]  Current alerts, if any. Pass in for performance, else will retrieve them from Redux.
-     * @returns {undefined}                 Nothing
+     * @returns {void} Nothing
      */
     static queue(alert, callback, currentAlerts = null){
         if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;
@@ -51,7 +54,7 @@ export default class Alerts extends React.Component {
      * @public
      * @param {AlertObj} alert - Object with at least 'title'.
      * @param {AlertObj[]} [currentAlerts] - Current alerts, if any. Pass in for performance, else will retrieve them from Redux.
-     * @returns {undefined} Nothing
+     * @returns {void} Nothing
      */
     static deQueue(alert, currentAlerts = null){
         if (!Array.isArray(currentAlerts)) currentAlerts = store.getState().alerts;

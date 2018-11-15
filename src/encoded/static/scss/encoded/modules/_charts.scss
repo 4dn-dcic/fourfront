@@ -1678,15 +1678,19 @@ $workflow-node-color-type-global-context: #ffb3b3;
         @include button-no-focus-outline;
     }
 
+    > .btn-toolbar {
+        > .btn-group {
+            float: none;
+        }
+    }
+
     > .inner-panel {
         float: left;
         > div.inline-block {
             vertical-align: middle;
             line-height: 20px;
             height: 34px;
-            
-            
-            
+
             button#rowspacingtype-select {
                 min-width: 120px;
             }

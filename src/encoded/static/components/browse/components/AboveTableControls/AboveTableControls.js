@@ -119,27 +119,35 @@ export class AboveTableControls extends React.Component {
      * @todo Refactor, move to BodyElement
      */
     setWideLayout(){
-        if (isServerSide() || !document || !document.getElementsByClassName || !document.body) return null;
+        var { windowWidth, toggleFullScreen, parentForceUpdate } = this.props;
+
+        if (isServerSide() || typeof windowWidth !== 'number' || typeof toggleFullScreen !== 'function'){
+            console.error("Make sure toggleFullScreen and windowWidth are being passed down to AboveTableControls.");
+            return null;
+        }
+
         vizUtil.requestAnimationFrame(()=>{
             var browsePageContainer = document.getElementsByClassName('search-page-container')[0];
-            var bodyWidth = document.body.offsetWidth || window.innerWidth;
-            if (bodyWidth < 1200) {
+            if (windowWidth < 1200) {
                 this.handleLayoutToggle(); // Cancel
                 throw new Error('Not large enough window width to expand. Aborting.');
             }
-            var extraWidth = bodyWidth - 1180;
+            var extraWidth = windowWidth - 1180;
             browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = -(extraWidth / 2) + 'px';
-            this.lastBodyWidth = bodyWidth;
-            setTimeout(this.props.parentForceUpdate, 100);
+            this.lastBodyWidth = windowWidth;
+            setTimeout(parentForceUpdate, 100);
         });
     }
 
     unsetWideLayout(){
+        var { windowWidth, toggleFullScreen, parentForceUpdate } = this.props;
+
         if (isServerSide() || !document || !document.getElementsByClassName) return null;
+
         vizUtil.requestAnimationFrame(()=>{
             var browsePageContainer = document.getElementsByClassName('search-page-container')[0];
             browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = '';
-            setTimeout(this.props.parentForceUpdate, 100);
+            setTimeout(parentForceUpdate, 100);
         });
     }
 
@@ -262,9 +270,9 @@ export class AboveTableControls extends React.Component {
         var { open, layout, gridState } = this.state;
 
         var expandLayoutButton = (
-                <Button bsStyle="primary" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')}
+                <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')}
                     onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
-                    <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'arrows-alt' : 'crop')}></i>
+                    <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'expand' : 'compress')}></i>
                 </Button>
             ),
             configureColumnsButton = (

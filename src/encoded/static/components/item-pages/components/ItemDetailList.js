@@ -944,7 +944,7 @@ export class ItemDetailList extends React.Component {
 
     static Detail = Detail
 
-    static getTabObject(context, schemas = null){
+    static getTabObject(props){
         return {
             tab : <span><i className="icon icon-list icon-fw"/> Details</span>,
             key : 'details',
@@ -954,7 +954,7 @@ export class ItemDetailList extends React.Component {
                         <span>Details</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider mb-05"/>
-                    <ItemDetailList context={context} schemas={schemas} />
+                    <ItemDetailList {...props} />
                 </div>
             )
         };

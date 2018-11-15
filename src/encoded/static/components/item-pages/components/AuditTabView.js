@@ -8,17 +8,19 @@ import ReactTooltip from 'react-tooltip';
 
 export class AuditTabView extends React.PureComponent {
 
-    static getTabObject(context){
-        var auditIconClass = AuditTabView.getItemIndicatorIcon(context);
+    static getTabObject(props){
+        var context         = props.context,
+            audits          = context.audit,
+            auditIconClass  = AuditTabView.getItemIndicatorIcon(context);
         return {
             tab : (
-                <span className={context.audit && _.keys(context.audit).length ? 'active' : null}>
+                <span className={audits && _.keys(audits).length > 0 ? 'active' : null}>
                     <i className={"icon icon-fw icon-" + auditIconClass}/> Audits
                 </span>
             ),
             key : "audits",
             disabled : !AuditTabView.doAnyAuditsExist(context),
-            content : <AuditTabView audits={context.audit} />
+            content : <AuditTabView {...props} audits={audits} />
         };
     }
 

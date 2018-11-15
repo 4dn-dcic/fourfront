@@ -7926,6 +7926,15 @@
                 "workflow_argument_name": "chip.gensz"
             },
             {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
+            },
+            {   
+                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.peak_calls"
+            },
+            {   
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
@@ -7933,11 +7942,6 @@
                 "argument_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
-            },
-            {   
-                "argument_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "chip.qc_json_match"
             }
         ],
         "award": "1U01CA200059-01",
@@ -8104,6 +8108,19 @@
                                 "name": "chip.gensz"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
@@ -8116,6 +8133,20 @@
                 },
                 "name": "chip",
                 "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.peak_calls",
+                        "target": [
+                            {
+                                "name": "chip.peak_calls"
+                            }
+                        ]
+                    },
                     {
                         "meta": {
                             "cardinality": "single",
@@ -8140,20 +8171,6 @@
                         "target": [
                             {
                                 "name": "chip.qc_json"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "chip.qc_json_match",
-                        "target": [
-                            {
-                                "name": "chip.qc_json_match"
                             }
                         ]
                     }

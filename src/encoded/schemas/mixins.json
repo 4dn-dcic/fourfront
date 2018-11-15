@@ -571,7 +571,7 @@
                 "title": "Static Header",
                 "description": "Static section displayed at the top of an item page",
                 "type": "string",
-                "linkTo": "StaticSection"
+                "linkTo": "UserContent"
             }
         }
     },
