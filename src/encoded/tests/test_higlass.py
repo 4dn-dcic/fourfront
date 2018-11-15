@@ -320,18 +320,23 @@ def test_higlass_noop(testapp, higlass_mcool_viewconf):
     # Patch a request, passing in the current viewconf with no additional data.
     # Get the new json.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
-        'higlass_viewconf': higlass_conf_uuid
+        'higlass_viewconfig': higlass_json["viewconfig"]
     })
 
-    new_higlass_json = response.json["viewconf"]
+    new_higlass_json = response.json["new_viewconfig"]
 
-    # The new viewconfig should be a subset of the old one.
-    for key in new_higlass_json:
-        assert higlass_json[key] == new_higlass_json[key]
+    # The new views should be a subset of the old ones.
+    assert len(higlass_json["viewconfig"]["views"]) == len(new_higlass_json["views"])
+    assert len(new_higlass_json["views"]) == 1
+    for index in range(len(new_higlass_json["views"])):
+        new_higlass = new_higlass_json["views"][index]
+        old_higlass = higlass_json["viewconfig"]["views"][index]
+        for key in new_higlass:
+            assert old_higlass[key] == new_higlass[key]
 
-def test_create_new_higlass_viewconf(testapp, higlass_blank_viewconf, mcool_file_json):
+def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_json):
     """ Don't pass in an existing higlass viewconf, but do add a file.
-    Expect a new higlass viewconf with a file.
+    Expect a new higlass view containing the file.
     """
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
@@ -339,26 +344,22 @@ def test_create_new_higlass_viewconf(testapp, higlass_blank_viewconf, mcool_file
     mcool_file_json['genome_assembly'] = "GRCm38"
     mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
 
-    # Try to create a viewconf, adding a file but no viewconf.
+    # Try to create a view, adding a file but no base view.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'files': f"{mcool_file['uuid']}"
     })
+    
+    new_higlass_view_json = response.json["new_viewconfig"]
 
-    new_higlass_json = response.json["viewconf"]
-
-    assert "name" in new_higlass_json
-    assert "title" in new_higlass_json
-    assert "viewconfig" in new_higlass_json
-    assert "description" in new_higlass_json
-    assert "date_created" in new_higlass_json
-    assert "schema_version" in new_higlass_json
-    assert "@id" in new_higlass_json
-    assert "@type" in new_higlass_json
-    assert "uuid" in new_higlass_json
-    assert "external_references" in new_higlass_json
-    assert "display_title" in new_higlass_json
-    assert "link_id" in new_higlass_json
-    assert "principals_allowed" in new_higlass_json
+    assert len(new_higlass_view_json["views"]) == 2
+    assert "layout" in new_higlass_view_json["views"][1]
+    assert "uid" in new_higlass_view_json["views"][1]
+    assert "tracks" in new_higlass_view_json["views"][1]
+    assert "center" in new_higlass_view_json["views"][1]["tracks"]
+    assert new_higlass_view_json["views"][1]["tracks"]["center"][0]["type"] == "combined"
+    assert "contents" in new_higlass_view_json["views"][1]["tracks"]["center"][0]
+    contents = new_higlass_view_json["views"][1]["tracks"]["center"][0]["contents"]
+    assert contents[0]["type"] == "heatmap"
 
 def test_add_bigwig_higlass(testapp):
     """ Given a viewconf with an mcool file, the viewconf should add a bigwig on top.
