@@ -78,10 +78,14 @@
             "description": "The type of dataset to which this file is associated",
             "type": "string"
         },
-        "replicate_identifier": {
-            "title": "Replicate Number",
-            "description": "If file is part of an identified replicate - the ID for that replicate",
-            "type": "string"
+        "replicate_identifiers": {
+            "title": "Replicates",
+            "type": "array",
+            "items": {
+                "title": "Replicate Info",
+                "description": "Replicate identifiers that this file is associated with",
+                "type": "string"
+            }
         },
         "project_lab": {
             "title": "Wet Lab",
