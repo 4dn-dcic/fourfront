@@ -64,6 +64,7 @@ class PublicationSummary extends React.PureComponent {
     attribution(){
         var { context }     = this.props,
             authors         = Array.isArray(context.authors) && context.authors.length > 0 && context.authors,
+            authorsLastIdx  = authors && (authors.length - 1),
             url             = context.url,
             retArr          = [];
 
@@ -75,7 +76,14 @@ class PublicationSummary extends React.PureComponent {
                     </h4>
                     <p>
                     { _.map(authors, function(author, i){
-                        return <span>{ i !== 0 ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }{ author }</span>;
+                        return (
+                            <React.Fragment>
+                                <span className="no-wrap">
+                                    { author }
+                                </span>
+                                { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }
+                            </React.Fragment>
+                        );
                     }) }
                     </p>
                 </React.Fragment>
