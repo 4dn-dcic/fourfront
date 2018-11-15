@@ -372,14 +372,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     saveButton(){
         var { session, context } = this.props,
-            { saveLoading } = this.state;
+            { saveLoading } = this.state,
+            tooltip = "Save the current view shown below to this display";
 
         if (!session) return null;
 
         var editPermission  = this.havePermissionToEdit();
 
         return (
-            <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success" key="savebtn">
+            <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success" key="savebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
             </Button>
         );
@@ -387,21 +388,29 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     cloneButton(){
         var { session } = this.props,
-            { cloneLoading } = this.state;
+            { cloneLoading } = this.state,
+            tooltip = "Create your own new HiGlass Display based off of this one";
 
         if (!session) return null;
 
         return (
-            <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="saveasbtn">
-                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Clone
+            <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="saveasbtn" data-tip={tooltip}>
+                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Clone
             </Button>
         );
     }
 
     copyURLButton(){
+        var gridState   = layout.responsiveGridState(this.props.windowWidth),
+            isMobile    = gridState !== 'lg',
+            valToCopy   = this.props.href;
         return (
-            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement={Button} value={this.props.href}>
-                <i className="icon icon-fw icon-copy"/>
+            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement={Button} value={valToCopy}>
+                <i className="icon icon-fw icon-copy"/>{ isMobile ?
+                    <React.Fragment>
+                        &nbsp;&nbsp; Copy URL
+                    </React.Fragment>
+                : null }
             </object.CopyWrapper>
         );
     }
@@ -439,7 +448,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>HiGlass Browser</span>
-                    <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()}>
+                    <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
+                        return (
+                            <span>
+                                <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
+                            </span>
+                        );
+                    }}>
                         { this.saveButton() }
                         { this.cloneButton() }
                         { this.statusChangeButton() }

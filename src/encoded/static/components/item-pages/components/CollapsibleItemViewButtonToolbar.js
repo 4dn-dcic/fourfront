@@ -11,6 +11,16 @@ import { layout } from './../../util';
 
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
 
+    static defaultProps = {
+        'collapseButtonTitle' : function(isOpen){
+            return (
+                <span>
+                    <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options
+                </span>
+            );
+        }
+    };
+
     constructor(props){
         super(props);
         this.toggleOpenMenu = _.throttle(this.toggleOpenMenu.bind(this), 1000);
@@ -38,7 +48,15 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
     }
 
     render(){
-        var { children, windowWidth } = this.props,
+        if (!this.state.mounted) {
+            return (
+                <div className="pull-right pt-23 text-medium">
+                    <i className="icon icon-fw icon-circle-o-notch icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
+            );
+        }
+
+        var { children, windowWidth, collapseButtonTitle } = this.props,
             gridState       = this.state.mounted && layout.responsiveGridState(windowWidth),
             isMobileSize    = gridState && gridState !== 'lg',
             isOpen          = !isMobileSize || this.state.open;
@@ -55,9 +73,9 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                 : null }
                 <div className="toolbar-wrapper text-right">
                     <ButtonToolbar>
-                        { this.state.mounted && !isMobileSize && this.props.children }
+                        { !isMobileSize && this.props.children }
                         <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu}>
-                            <i className={"icon icon-fw icon-" + ((isMobileSize && isOpen) ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options&nbsp;
+                            { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }
                         </Button>
                         { this.props.constantButtons }
                     </ButtonToolbar>
