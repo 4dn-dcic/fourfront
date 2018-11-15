@@ -287,7 +287,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var file_uuid = "d273d710-6b6d-4e43-a84c-5658a891c034";
 
         var payload = {
-            'higlass_viewconf': currentViewConf.uuid,
+            'higlass_viewconfig': currentViewConf,
             'files' : file_uuid
         };
 
@@ -316,7 +316,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             }
 
                             // Update the Higlass display with the new viewconf.
-                            hgc.api.setViewConfig(resp.viewconf.viewconfig).then(() => {
+                            hgc.api.setViewConfig(resp.new_viewconfig).then(() => {
                                 // Show alert indicating success
                                 Alerts.queue({
                                     'title'     : "Added mcool file",
