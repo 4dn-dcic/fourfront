@@ -88,7 +88,8 @@ export class AttributionTabView extends React.PureComponent {
 
     render(){
         var { context } = this.props,
-            { produced_in_pub, publications_of_set, lab, award, submitted_by } = context,
+            { produced_in_pub, publications_of_set, lab, award, submitted_by, contributing_labs } = context,
+            labsExist           = lab || (Array.isArray(contributing_labs) && contributing_labs.length > 0),
             awardExists         = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
             submittedByExists   = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
 
@@ -104,18 +105,19 @@ export class AttributionTabView extends React.PureComponent {
 
                 <div className="row">
 
-                    <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
-                        <LabsSection context={context} />
-                        { awardExists ? FormattedInfoBlock.Award(award) : null }
-                    </div>
+                    { labsExist ?
+                        <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
+                            <LabsSection context={context} />
+                            { awardExists ? FormattedInfoBlock.Award(award) : null }
+                        </div>
+                    : null }
 
                     { submittedByExists ?
-                        <div className="col-xs-12 col-md-5">
+                        <div className={"col-xs-12 col-md-" + (labsExist ? '5' : '12')}>
                             { FormattedInfoBlock.User(submitted_by) }
                         </div>
                     : null }
 
-                    
                 </div>
 
                 <ItemFooterRow context={context} schemas={this.props.schemas} />
@@ -149,7 +151,7 @@ class LabsSection extends React.PureComponent {
             });
 
         return (
-            <div className="lab" key={atId || idx}>
+            <div className={"lab" + (all.length === 1 && (!contactPersons || contactPersons.length === 0)  ? ' mt-1' : '')} key={atId || idx}>
                 <h5>
                     <a className="text-500" href={atId}>{ lab.display_title }</a>
                 </h5>
