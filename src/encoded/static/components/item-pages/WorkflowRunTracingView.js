@@ -137,21 +137,20 @@ export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
     indirectFilesCheckbox(){
         if (typeof this.props.showIndirectFiles !== 'boolean' || typeof this.props.onToggleIndirectFiles !== 'function') return null;
         return (
-            <div className="inline-block checkbox-container" key="show-indirect-files-checkbox">
-                <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles} disabled={this.props.isShowMoreContextCheckboxDisabled}>
-                    Show More Context
-                </Checkbox>
-            </div>
+            <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles}
+                disabled={this.props.isShowMoreContextCheckboxDisabled} className="checkbox-container"
+                key="show-indirect-files-checkbox">
+                Show More Context
+            </Checkbox>
         );
     }
     allRunsCheckbox(){
         if (typeof this.props.allRuns !== 'boolean' || typeof this.props.onToggleAllRuns !== 'function') return null;
         return (
-            <div className="inline-block checkbox-container" key="show-all-runs-checkbox">
-                <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns} disabled={this.props.isAllRunsCheckboxDisabled}>
-                    { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
-                </Checkbox>
-            </div>
+            <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns}
+                disabled={this.props.isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
+                { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+            </Checkbox>
         );
     }
     render(){
@@ -314,7 +313,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <TracedGraphSectionControls
-                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns')} loading={loadingGraphSteps} fullscreenViewEnabled={isFullscreen}
+                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'windowWidth')} loading={loadingGraphSteps} fullscreenViewEnabled={isFullscreen}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType} onToggleFullScreenView={this.onToggleFullScreenView} onToggleShowParameters={this.onToggleShowParameters}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />
