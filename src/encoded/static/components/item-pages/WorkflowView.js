@@ -89,7 +89,7 @@ export function doValidAnalysisStepsExist(steps){
 }
 
 
-export class WorkflowView extends DefaultItemView {
+export default class WorkflowView extends DefaultItemView {
 
     static defaultProps = {
         'checkHrefForSelectedNode' : true,
@@ -146,9 +146,9 @@ export class WorkflowGraphSectionControls extends React.Component {
     }
 
     static keyTitleMap = {
-        'detail' : 'Analysis Steps',
-        'basic' : 'Basic Inputs & Outputs',
-        'cwl' : 'CWL Graph'
+        'detail'    : 'Analysis Steps',
+        'basic'     : 'Basic Inputs & Outputs',
+        'cwl'       : 'CWL Graph'
     }
 
     chartTypeDropdown(){
@@ -165,7 +165,7 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
 
         return (
-            <DropdownButton id="detail-granularity-selector"
+            <DropdownButton id="detail-granularity-selector" key="chart-type"
                 className="for-state-showChart" pullRight
                 onSelect={this.props.onChangeShowChartType}
                 title={WorkflowGraphSectionControls.keyTitleMap[this.props.showChartType]}>
@@ -179,7 +179,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType}/>
+            <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType} key="row-spacing-type"/>
         );
     }
 
@@ -187,7 +187,8 @@ export class WorkflowGraphSectionControls extends React.Component {
         var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
         if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled" data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
+                <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled"
+                    data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null} key="full-screen-btn">
                     <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'expand' : 'compress')}/>
                 </Button>
             );

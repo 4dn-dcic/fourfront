@@ -50,7 +50,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
     render(){
         if (!this.state.mounted) {
             return (
-                <div className="pull-right pt-23 text-medium">
+                <div className="pull-right pt-23 text-medium" key="loading-indicator">
                     <i className="icon icon-fw icon-circle-o-notch icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
             );
@@ -65,16 +65,16 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
             <div className="pull-right tabview-title-controls-container">
                 { isMobileSize ?
                     <Collapse in={isOpen}>
-                        <div className="inner-panel">
+                        <div className="inner-panel" key="inner-collapsible-panel">
                             { Array.isArray(children) ? _.map(children, this.wrapChildForMobile) : this.wrapChildForMobile(children) }
                             <hr/>
                         </div>
                     </Collapse>
                 : null }
-                <div className="toolbar-wrapper text-right">
+                <div className="toolbar-wrapper text-right" key="toolbar">
                     <ButtonToolbar>
                         { !isMobileSize && this.props.children }
-                        <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu}>
+                        <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
                             { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }
                         </Button>
                         { this.props.constantButtons }

@@ -46,7 +46,7 @@ export function isGraphSectionOpen(href, hash){
 }
 
 
-export class WorkflowRunTracingView extends DefaultItemView {
+export default class WorkflowRunTracingView extends DefaultItemView {
     
     constructor(props){
         super(props);
