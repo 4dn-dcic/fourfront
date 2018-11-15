@@ -215,18 +215,12 @@ describe('Testing Workflow Graph', function() {
 });
 
 describe('Find nodes from other columns', function() {
-    var React, ItemView, TestUtils, context, schemas, _, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
+    var context, schemas, testWorkflowInstance, sinon, server;
 
-    function getShowParamsCheckBox(){
-        var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showParameters')[0];
-        showParamsBox = showParamsBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
-        return showParamsBox;
-    }
-
-    function getShowReferenceFilesCheckBox(){
+    function getShowReferenceFilesCheckBox(testInstance = testWorkflowInstance){
         // Returns the checkbox element responsible for toggling the Reference Files on the graph.
-        var showReferenceFilesBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showReferenceFiles')[0];
-        showReferenceFilesBox = showReferenceFilesBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
+        var showReferenceFilesBox = TestUtils.scryRenderedDOMComponentsWithClass(testInstance, 'checkbox-container for-state-showReferenceFiles')[0];
+        showReferenceFilesBox = showReferenceFilesBox.childNodes[0].childNodes[0]; // Get down to checkbox element.
         return showReferenceFilesBox;
     }
 
@@ -241,34 +235,20 @@ describe('Find nodes from other columns', function() {
 
     beforeEach(function() {
 
-        // 3rd Party Deps
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
-
-        // Our own deps
-        WorkflowRunView = require('./../item-pages/WorkflowRunView').WorkflowRunView;
-
-
         // Make a workflow run with at least 5 graph columns (including arrows.) The node in column 4 refers to a chromsize file whose node is already in column 0.
         context = require('./../testdata/workflow_run/awsem-node-dupe-check').default;
-        // Get test Data
         schemas = require('../testdata/schemas');
 
-        // Setup
-        Wrapper = React.createClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
+        var viewProps = {
+            schemas, context,
+            'checkHrefForSelectedNode' : false,
+            'checkWindowLocationHref' : false,
+            'onNodeClick' : null,
+            'windowWidth' : 1200
+        };
+
         // If we do not unset checkHrefForSelectedNode, checkWindowLocationHref, and onNodeClick -- graph will try to append '#nodeID' to document.location and use href to inform selected node state. Document location and href are not supported by test suite/lib so we must disable this.
-        testWorkflowInstance = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <WorkflowRunView schemas={schemas} context={context} checkHrefForSelectedNode={false} checkWindowLocationHref={false} onNodeClick={null} />
-            </Wrapper>
-        );
+        testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
 
         jest.runAllTimers();
 
@@ -293,6 +273,7 @@ describe('Find nodes from other columns', function() {
         let column0Nodes = _.filter(nodes, function(n){
             return n.getAttribute('data-node-column') === '0';
         });
+
         expect(column0Nodes.length).toEqual(2);
 
         // There should be 11 edges in total.
