@@ -474,9 +474,11 @@ def add_single_file_to_higlass_viewconf(viewconf, new_file_dict):
     """ Add a single file to the view config.
     """
 
-    # Make sure the file has a higlass uid.
+    # Make sure the file has a higlass uid and a genome_assembly
     if not "higlass_uid" in new_file_dict:
         return None, "File does not have higlass_uid"
+    if not "genome_assembly" in new_file_dict:
+        return None, "File does not have genome_assembly"
 
     # Find all of the files in the viewconf. Determine their type and their dimension (1 or 2).
     viewconf_file_counts_by_position = {
@@ -496,17 +498,16 @@ def add_single_file_to_higlass_viewconf(viewconf, new_file_dict):
 
             # TODO this may be the wrong spot to check.
             # All files should have the same genome assembly (or have no assembly). Return an error if they don't match.
-            if "genome_assembly" in new_file_dict and new_file_dict["genome_assembly"]:
-                for track in tracks:
-                    # If it doesn't have a genome, skip.
-                    if not "options" in track:
-                        continue
-                    if not "coordSystem" in track["options"]:
-                        continue
+            for track in tracks:
+                # If it doesn't have a genome, skip.
+                if not "options" in track:
+                    continue
+                if not "coordSystem" in track["options"]:
+                    continue
 
-                    # coordSystem is set to file.genome_assembly when registering higlass files, so we can compare the two and make sure they match.
-                    if track["options"]["coordSystem"] != new_file_dict["genome_assembly"]:
-                        return None, f"Genome Assemblies do not match, cannot add. Expected {new_file_dict['genome_assembly']}, found {track['options']['coordSystem']} instead"
+                # coordSystem is set to file.genome_assembly when registering higlass files, so we can compare the two and make sure they match.
+                if track["options"]["coordSystem"] != new_file_dict["genome_assembly"]:
+                    return None, f"Genome Assemblies do not match, cannot add. Expected {new_file_dict['genome_assembly']}, found {track['options']['coordSystem']} instead"
 
             viewconf_file_counts_by_position[direction] += len(tracks)
 
@@ -587,6 +588,8 @@ def add_1d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, 
     new_view["uid"] = uuid.uuid4()
     new_view["layout"]["i"] = new_view["uid"]
 
+    if len(new_view["tracks"]["top"]) < 1:
+        new_view["tracks"]["top"] = [{}]
     new_view["tracks"]["top"][0]["tilesetUid"] = new_file["higlass_uid"]
     new_view["tracks"]["top"][0]["name"] = new_file["display_title"]
     new_view["tracks"]["top"][0]["type"] = "horizontal-divergent-bar"
@@ -661,6 +664,12 @@ def add_2d_file_to_higlass_viewconf(viewconf, viewconf_file_counts_by_position, 
 
     new_content["options"]["coordSystem"] = new_file["genome_assembly"]
     new_content["options"]["name"] = new_file["display_title"]
+    if len(new_view["tracks"]["center"]) < 1:
+        new_view["tracks"]["center"] = [
+            {
+                "contents":[]
+            }
+        ]
     new_view["tracks"]["center"][0]["contents"].append(new_content)
 
     viewconf_file_counts_by_position["center"] += 1

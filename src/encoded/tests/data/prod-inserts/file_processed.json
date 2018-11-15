@@ -71,6 +71,15 @@
     "uuid":"d273d710-6b6d-4e43-a84c-5658a891c032",
     "accession": "4DNFIMCOOL01"
 },{
+    "lab":"/labs/4dn-dcic-lab/",
+    "award":"/awards/1U01CA200059-01/",
+    "status": "released",
+    "file_format":"mcool",
+    "uuid":"d273d710-6b6d-4e43-a84c-5658a891c034",
+    "accession": "4DNFIMCOOL03",
+    "higlass_uid": "OxZJjFLwRYq8PA_cRgipbR",
+    "genome_assembly": "GRCm38"
+},{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "165e9eeb-49e5-4c33-afab-9ec90d65faf3",
@@ -248,7 +257,7 @@
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
-    "uuid": "fbdbe727-49e5-4c33-afab-9ec90d65faf3", 
+    "uuid": "fbdbe727-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
