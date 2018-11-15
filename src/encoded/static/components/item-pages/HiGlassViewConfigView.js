@@ -57,6 +57,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
+        this.handleAddMcool = _.throttle(this.handleAddMcool.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
 
@@ -266,6 +267,72 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     }
 
+    /**
+    * Update the current Viewconf to add a new view with a mcool file.
+    * @returns {void}
+    */
+    handleAddMcool(evt){
+        evt.preventDefault();
+
+        var { context }         = this.props,
+            hgc                 = this.getHiGlassComponent(),
+            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        if (!currentViewConf){
+            throw new Error('Could not get current view configuration.');
+        }
+
+        // Get a sample mcool file to add. Just grab a master insert.
+        var file_uuid = "d273d710-6b6d-4e43-a84c-5658a891c034";
+
+        var payload = {
+            'higlass_viewconf': currentViewConf.uuid,
+            'files' : file_uuid
+        };
+
+        // If it failed, show the error in the popup window.
+        var fallbackCallback = (errResp, xhr) => {
+            // Error callback
+            Alerts.queue({
+                'title' : "Failed to add mcool file.",
+                'message' : errResp.errors,
+                'style' : 'danger'
+            });
+            this.setState({ 'cloneLoading' : false });
+        };
+
+        // Make an AJAX call to add the mcool file.
+        this.setState(
+            { 'cloneLoading' : true }, // TODO: Change to a different state
+            () => {
+                ajax.load(
+                    "/add_files_to_higlass_viewconf/",
+                    (resp) => {
+                        this.setState({ 'cloneLoading' : false }, ()=>{
+                            // If it failed, return an error message.
+                            if (!resp.success) {
+                                return fallbackCallback(resp);
+                            }
+
+                            // Update the Higlass display with the new viewconf.
+                            hgc.api.setViewConfig(resp.viewconf.viewconfig).then(() => {
+                                // Show alert indicating success
+                                Alerts.queue({
+                                    'title'     : "Added mcool file",
+                                    'message'   : "Added new file.",
+                                    'style'     : 'success'
+                                });
+                            });
+                        });
+                    },
+                    'POST',
+                    fallbackCallback,
+                    JSON.stringify(payload)
+                );
+            }
+        );
+    }
 
     /**
     * Copies current URL to clipbard.
@@ -385,6 +452,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 </Button>
                 <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="saveasbtn">
                     <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Clone
+                </Button>
+                <Button onClick={this.handleAddMcool} disabled={cloneLoading} bsStyle="success" key="addmcoolbtn">
+                    <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Add mcool file
                 </Button>
             </React.Fragment>
         );
