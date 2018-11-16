@@ -280,64 +280,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     handleAddMcool(evt){
         evt.preventDefault();
 
-        var { context }         = this.props,
-            hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
-
-        if (!currentViewConf){
-            throw new Error('Could not get current view configuration.');
-        }
-
         // Get a sample mcool file to add. Just grab a master insert.
         var file_uuid = "d273d710-6b6d-4e43-a84c-5658a891c034";
-
-        var payload = {
-            'higlass_viewconfig': currentViewConf,
-            'files' : file_uuid
-        };
-
-        // If it failed, show the error in the popup window.
-        var fallbackCallback = (errResp, xhr) => {
-            // Error callback
-            Alerts.queue({
-                'title' : "Failed to add mcool file.",
-                'message' : errResp.errors,
-                'style' : 'danger'
-            });
-            this.setState({ 'mcoolLoading' : false });
-        };
-
-        // Make an AJAX call to add the mcool file.
-        this.setState(
-            { 'mcoolLoading' : true },
-            () => {
-                ajax.load(
-                    "/add_files_to_higlass_viewconf/",
-                    (resp) => {
-                        this.setState({ 'mcoolLoading' : false }, ()=>{
-                            // If it failed, return an error message.
-                            if (!resp.success) {
-                                return fallbackCallback(resp);
-                            }
-
-                            // Update the Higlass display with the new viewconf.
-                            hgc.api.setViewConfig(resp.new_viewconfig).then(() => {
-                                // Show alert indicating success
-                                Alerts.queue({
-                                    'title'     : "Added mcool file",
-                                    'message'   : "Added new file.",
-                                    'style'     : 'success'
-                                });
-                            });
-                        });
-                    },
-                    'POST',
-                    fallbackCallback,
-                    JSON.stringify(payload)
-                );
-            }
-        );
+        this.handleAddFileToHiglass(file_uuid, "mcool", "mcoolLoading");
     }
 
     /**
@@ -347,6 +292,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     handleAddBigwig(evt){
         evt.preventDefault();
 
+        // Get a sample bigwig file to add. Just grab a master insert.
+        var file_uuid = "a661a518-efd5-496e-9b76-85ca93493921";
+        this.handleAddFileToHiglass(file_uuid, "bigwig", "bigwigLoading");
+    }
+
+    /**
+    * TODO Add a description
+    **/
+    handleAddFileToHiglass(file_uuid, file_type, loadingStateName) {
         var { context }         = this.props,
             hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
@@ -355,9 +309,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
-
-        // Get a sample bigwig file to add. Just grab a master insert.
-        var file_uuid = "a661a518-efd5-496e-9b76-85ca93493921";
 
         var payload = {
             'higlass_viewconfig': currentViewConf,
@@ -368,21 +319,21 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
-                'title' : "Failed to add bigwig file.",
+                'title' : "Failed to add "+ file_type +" file.",
                 'message' : errResp.errors,
                 'style' : 'danger'
             });
-            this.setState({ 'bigwigLoading' : false });
+            this.setState({ loadingStateName : false });
         };
 
         // Make an AJAX call to add the mcool file.
         this.setState(
-            { 'bigwigLoading' : true },
+            { loadingStateName : true },
             () => {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        this.setState({ 'bigwigLoading' : false }, ()=>{
+                        this.setState({ loadingStateName : false }, ()=>{
                             // If it failed, return an error message.
                             if (!resp.success) {
                                 return fallbackCallback(resp);
@@ -392,7 +343,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             hgc.api.setViewConfig(resp.new_viewconfig).then(() => {
                                 // Show alert indicating success
                                 Alerts.queue({
-                                    'title'     : "Added bigwig file",
+                                    'title'     : "Added " + file_type + " file",
                                     'message'   : "Added new file.",
                                     'style'     : 'success'
                                 });
