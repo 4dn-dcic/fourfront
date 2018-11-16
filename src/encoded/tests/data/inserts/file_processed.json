@@ -331,4 +331,31 @@
        }
     ]
 }
+,{
+    "lab":"/labs/4dn-dcic-lab/",
+    "award":"/awards/1U01CA200059-01/",
+    "status": "released",
+    "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+    "uuid": "5bca8842-0f3c-4224-9763-016caa0eec84",
+    "accession": "4DNFIU37KWB1",
+    "higlass_uid": "Tjm04dCjSBCuFR0pGYEaGw",
+    "genome_assembly": "GRCm38"
+}
+,{
+    "lab":"/labs/4dn-dcic-lab/",
+    "award":"/awards/1U01CA200059-01/",
+    "status": "released",
+    "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+    "uuid": "a661a518-efd5-496e-9b76-85ca93493921",
+    "accession": "4DNFI9UM7MDC",
+    "higlass_uid": "Y08H_toDQ-OxidYJAzFPXA",
+    "genome_assembly": "GRCh38",
+    "display_title" : "4DNFI9UM7MDC.bedGraph.gz",
+    "extra_files": [
+       {
+          "file_format": "pairs_px2",
+          "status": "to be uploaded by workflow"
+       }
+    ]
+}
 ]
