@@ -218,6 +218,13 @@ export const defaultColumnDefinitionMap = {
             return <DateUtility.LocalizedTime timestamp={result.public_release} formatType='date-sm' />;
         }
     },
+    'date_published' : {
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.date_published) return null;
+            return <DateUtility.LocalizedTime timestamp={result.date_published} formatType='date-sm' />;
+        }
+    },
     'number_of_experiments' : {
         'title' : '# of Experiments',
         'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},

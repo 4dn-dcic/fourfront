@@ -11,7 +11,7 @@ import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
     AttributionTabView, SimpleFilesTable, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow } from './components';
 import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
-import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { requestAnimationFrame } from './../viz/utilities';
 

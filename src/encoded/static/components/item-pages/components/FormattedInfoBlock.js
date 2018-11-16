@@ -95,7 +95,7 @@ export class WrappedCollapsibleList extends React.Component {
     renderItems(){
         var { itemClassName, persistentCount, items, itemRenderFxn, wrapperElement } = this.props;
 
-        var itemsToElements = ((pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback));
+        var itemsToElements = (pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback);
 
         if (items.length <= persistentCount){
             return React.createElement(wrapperElement || 'ul', {}, itemsToElements(items));

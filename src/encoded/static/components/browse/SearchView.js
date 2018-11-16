@@ -11,7 +11,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel } from './components';
+    AboveSearchTablePanel, defaultColumnDefinitionMap} from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
@@ -253,7 +253,7 @@ export default class SearchView extends React.PureComponent {
     static defaultProps = {
         'href'          : null,
         'currentAction' : null,
-        'columnDefinitionOverrideMap' : {
+        'columnDefinitionOverrideMap' : _.extend({}, defaultColumnDefinitionMap, {
             'google_analytics.for_date' : {
                 'title' : 'Analytics Date',
                 'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
@@ -262,7 +262,7 @@ export default class SearchView extends React.PureComponent {
                     return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
                 }
             }
-        },
+        }),
         'restrictions'  : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
     };
 

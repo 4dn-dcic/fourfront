@@ -1668,7 +1668,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
 .tabview-title-controls-container {
     font-size: 1rem;
     margin-bottom: 8px;
-    padding-top: 10px;
     padding-left: 5px;
     float: right;
     padding-top: 17px;
@@ -1678,75 +1677,55 @@ $workflow-node-color-type-global-context: #ffb3b3;
         @include button-no-focus-outline;
     }
 
-    > .btn-toolbar {
+    > .toolbar-wrapper > .btn-toolbar {
         > .btn-group {
             float: none;
         }
     }
 
-    > .inner-panel {
-        float: left;
-        > div.inline-block {
-            vertical-align: middle;
-            line-height: 20px;
-            height: 34px;
-
-            button#rowspacingtype-select {
-                min-width: 120px;
-            }
+    .checkbox-container {
+        margin-right: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+        display: block;
+        padding-top: 7px;
+        padding-bottom: 5px;
+        font-size: 0.9rem;
+        @include user-select(none);
+        &.disabled{
+            color: #999;
         }
+    }
 
-        &:not(.constant-panel) {
-            > div.inline-block {
-
-                &.checkbox-container {
-                    padding: 8px 12px 6px 0;
-                    vertical-align: middle;
-                    font-size: 0.9rem;
-                    @include user-select(none);
-                    div.checkbox {
-                        margin: 0;
-                        input[type="checkbox"]{
-                            margin-top: 3px;
-                        }
-                        &.disabled{
-                            color: #999;
-                        }
-                    }
-                }
-
-                @media screen and (max-width: $screen-md-max){
-                    display: block;
-                    &.checkbox-container {
-                        padding-top: 5px;
-                        padding-bottom: 5px;
-                        height: auto;
-                    }
-                }
-            }
-        }
-
-        &.constant-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
-        }
+    button#rowspacingtype-select {
+        min-width: 120px;
     }
     
     @media screen and (min-width: $screen-lg-min){
-        
-        > .inner-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
+
+        .checkbox-container {
+            float: left;
         }
+
     }
     @media screen and (max-width: $screen-md-max){
-        float: left;
         > .inner-panel:first-child {
-            padding-right: 10px;
+            min-width: 200px;
+            padding-left: 10px;
+            padding-bottom: 12px;
+            > hr {
+                margin-top: 12px;
+                margin-bottom: 0;
+            }
+            > .mobile-size-elem {
+                > .dropdown.btn-group,
+                > .dropdown.btn-group > button.btn,
+                > button.btn {
+                    width: 100%;
+                    text-align: left;
+                }
+            }
         }
     }
 }
