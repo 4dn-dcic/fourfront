@@ -104,7 +104,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0 && Array.isArray(rawFiles) && rawFiles.length > 0){
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
-                key : 'experiments',
+                key : 'raw-files',
                 content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} {...this.state} />
             });
         }
@@ -125,7 +125,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
-                key : 'other-processed-files',
+                key : 'supplementary-files',
                 content : <OtherProcessedFilesStackedTableSection {...commonProps} {...this.state} />
             });
         }
@@ -149,10 +149,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     <i className="expand-icon icon icon-th-list" />
                 } />
         );
-    }
-
-    tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} />;
     }
 }
 

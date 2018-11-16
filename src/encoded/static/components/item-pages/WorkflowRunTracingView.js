@@ -52,7 +52,6 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         super(props);
         this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        this.tabbedView = this.tabbedView.bind(this);
         var steps = _testing_data || null;
         this.state = {
             'mounted' : false,
@@ -126,11 +125,6 @@ export default class WorkflowRunTracingView extends DefaultItemView {
             this.loadGraphSteps(true);
         });
     }
-
-    tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} ref="tabbedView" />;
-    }
-
 }
 
 export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
