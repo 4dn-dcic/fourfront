@@ -90,19 +90,19 @@ export function allFilesForWorkflowRunMappedByUUID(item){
 }
 
 
-export class WorkflowRunView extends DefaultItemView {
+export default class WorkflowRunView extends DefaultItemView {
 
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
-            mounted : false
+            'mounted' : false
         };
     }
 
     componentDidMount(){
-        this.setState({ mounted : true });
+        this.setState({ 'mounted' : true });
     }
 
     getTabViewContents(){

@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
+import WorkflowRunView from './../item-pages/WorkflowRunView';
 
 jest.autoMockOff();
 
@@ -12,11 +12,11 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing Workflow Graph', function() {
-    var ItemView, context, schemas, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
+    var context, schemas, testWorkflowInstance, sinon, server;
 
     function getShowParamsCheckBox(){
         var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showParameters')[0];
-        showParamsBox = showParamsBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
+        showParamsBox = showParamsBox.childNodes[0].childNodes[0]; // Get down to checkbox element.
         return showParamsBox;
     }
 
@@ -30,27 +30,21 @@ describe('Testing Workflow Graph', function() {
     });
 
     beforeEach(function() {
-        // Our own deps
-        WorkflowRunView = require('./../item-pages/WorkflowRunView').WorkflowRunView;
 
         // Get test Data
         context = require('./../testdata/workflow_run/awsem-partc').default;
         schemas = require('../testdata/schemas');
 
-        // Setup
-        Wrapper = createReactClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
+        var viewProps = {
+            schemas, context,
+            'checkHrefForSelectedNode' : false,
+            'checkWindowLocationHref' : false,
+            'onNodeClick' : null,
+            'windowWidth' : 1200
+        };
+
         // If we do not unset checkHrefForSelectedNode, checkWindowLocationHref, and onNodeClick -- graph will try to append '#nodeID' to document.location and use href to inform selected node state. Document location and href are not supported by test suite/lib so we must disable this.
-        testWorkflowInstance = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <WorkflowRunView schemas={schemas} context={context} checkHrefForSelectedNode={false} checkWindowLocationHref={false} onNodeClick={null} />
-            </Wrapper>
-        );
+        testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
 
         jest.runAllTimers();
 
