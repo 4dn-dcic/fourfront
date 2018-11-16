@@ -62,8 +62,6 @@ export function commonGraphPropsFromProps(props){
         'rowSpacingType'    : 'wide',
         'nodeClassName'     : null,
         'onNodeClick'       : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
-        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : false,
-        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false,
         'windowWidth'       : props.windowWidth
     };
 
@@ -91,21 +89,16 @@ export function doValidAnalysisStepsExist(steps){
 
 export default class WorkflowView extends DefaultItemView {
 
-    static defaultProps = {
-        'checkHrefForSelectedNode' : true,
-        'checkWindowLocationHref' : true
-    }
-
     constructor(props){
         super(props);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
-            mounted : false
+            'mounted' : false
         };
     }
 
     componentDidMount(){
-        this.setState({ mounted : true });
+        this.setState({ 'mounted' : true });
     }
 
     getTabViewContents(){

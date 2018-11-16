@@ -37,13 +37,10 @@ describe('Testing Workflow Graph', function() {
 
         var viewProps = {
             schemas, context,
-            'checkHrefForSelectedNode' : false,
-            'checkWindowLocationHref' : false,
             'onNodeClick' : null,
             'windowWidth' : 1200
         };
 
-        // If we do not unset checkHrefForSelectedNode, checkWindowLocationHref, and onNodeClick -- graph will try to append '#nodeID' to document.location and use href to inform selected node state. Document location and href are not supported by test suite/lib so we must disable this.
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
 
         jest.runAllTimers();
