@@ -371,7 +371,13 @@ export class ItemPageTableSearchLoader extends React.Component {
 
     handleResponse(resp){
         var results = (resp && resp['@graph']) || [];
-        this.setState({ 'loading' : false, 'results' : results });
+        this.setState({
+            'loading' : false,
+            'results' : results
+        });
+        if (typeof this.props.onLoad === 'function'){
+            this.props.onLoad(resp);
+        }
     }
 
     render(){

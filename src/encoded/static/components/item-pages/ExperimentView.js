@@ -14,7 +14,7 @@ import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/W
 import { requestAnimationFrame } from './../viz/utilities';
 import { RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 
 
 export default class ExperimentView extends WorkflowRunTracingView {
