@@ -67,7 +67,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'originalViewConfig' : null, //object.deepClone(props.viewConfig)
             'saveLoading' : false,
             'cloneLoading' : false,
-            'releaseLoading' : false
+            'releaseLoading' : false,
+            'mcoolLoading' : false,
+            'bigwigLoading' : false,
         };
     }
 
@@ -300,17 +302,17 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 'message' : errResp.errors,
                 'style' : 'danger'
             });
-            this.setState({ 'cloneLoading' : false });
+            this.setState({ 'mcoolLoading' : false });
         };
 
         // Make an AJAX call to add the mcool file.
         this.setState(
-            { 'cloneLoading' : true }, // TODO: Change to a different state
+            { 'mcoolLoading' : true },
             () => {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        this.setState({ 'cloneLoading' : false }, ()=>{
+                        this.setState({ 'mcoolLoading' : false }, ()=>{
                             // If it failed, return an error message.
                             if (!resp.success) {
                                 return fallbackCallback(resp);
@@ -367,17 +369,17 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 'message' : errResp.errors,
                 'style' : 'danger'
             });
-            this.setState({ 'cloneLoading' : false });
+            this.setState({ 'bigwigLoading' : false });
         };
 
         // Make an AJAX call to add the mcool file.
         this.setState(
-            { 'cloneLoading' : true }, // TODO: Change to a different state
+            { 'bigwigLoading' : true },
             () => {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        this.setState({ 'cloneLoading' : false }, ()=>{
+                        this.setState({ 'bigwigLoading' : false }, ()=>{
                             // If it failed, return an error message.
                             if (!resp.success) {
                                 return fallbackCallback(resp);
@@ -468,7 +470,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     statusChangeButton(){
         var { session, context } = this.props,
-            { saveLoading, cloneLoading, releaseLoading } = this.state,
+            { saveLoading, cloneLoading, releaseLoading, mcoolLoading, bigwigLoading } = this.state,
             editPermission = this.havePermissionToEdit();
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
@@ -506,7 +508,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     saveButtons(){
         var { session, context } = this.props,
-            { saveLoading, cloneLoading, releaseLoading } = this.state;
+            { saveLoading, cloneLoading, releaseLoading, mcoolLoading, bigwigLoading } = this.state;
 
         if (!session) return null;
 
@@ -521,11 +523,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="saveasbtn">
                     <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Clone
                 </Button>
-                <Button onClick={this.handleAddMcool} disabled={cloneLoading} bsStyle="success" key="addmcoolbtn">
-                    <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Add mcool file
+                <Button onClick={this.handleAddMcool} disabled={mcoolLoading} bsStyle="success" key="addmcoolbtn">
+                    <i className={"icon icon-fw icon-" + (mcoolLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Add mcool file
                 </Button>
-                <Button onClick={this.handleAddBigwig} disabled={cloneLoading} bsStyle="success" key="addbigwigbtn">
-                    <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Add bigwig file
+                <Button onClick={this.handleAddBigwig} disabled={bigwigLoading} bsStyle="success" key="addbigwigbtn">
+                    <i className={"icon icon-fw icon-" + (bigwigLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Add bigwig file
                 </Button>
             </React.Fragment>
         );
