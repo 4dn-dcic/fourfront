@@ -350,10 +350,9 @@
     "accession": "4DNFI9UM7MDC",
     "higlass_uid": "Y08H_toDQ-OxidYJAzFPXA",
     "genome_assembly": "GRCh38",
-    "display_title" : "4DNFI9UM7MDC.bedGraph.gz",
     "extra_files": [
        {
-          "file_format": "pairs_px2",
+          "file_format": "bg_px2",
           "status": "to be uploaded by workflow"
        }
     ]

@@ -467,7 +467,7 @@ def add_files_to_higlass_viewconf(request):
         if errors:
             return {
                 "success" : False,
-                "errors" : f"errors found while adding {file_uuid} : {errors}",
+                "errors" : "errors found while adding {file_uuid} : {errors}".format(file_uuid=file_uuid, errors=errors),
                 "new_viewconfig": None
             }
 
@@ -507,7 +507,7 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
         if errors:
             return None, errors
     else:
-        return None, f"Unknown new file format {new_file_dict['file_format']}"
+        return None, "Unknown new file format {file_format}".format(file_format = new_file_dict['file_format'])
 
     # Resize the sections so they fit into a 12 x 12 grid.
     repack_higlass_views(views)
@@ -599,7 +599,10 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
 
             # coordSystem is set to file.genome_assembly when registering higlass files, so we can compare the two and make sure they match.
             if track["options"]["coordSystem"] != new_file["genome_assembly"]:
-                return False, f"Genome Assemblies do not match, cannot add. Expected {new_file['genome_assembly']}, found {track['options']['coordSystem']} instead"
+                return False, "Genome Assemblies do not match, cannot add. Expected {expected}, found {actual} instead".format(
+                    expected = new_file['genome_assembly'],
+                    actual = track['options']['coordSystem']
+                )
 
     # Choose the first available view. If there are no views, make up some defaults.
     base_view = None
