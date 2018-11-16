@@ -20,13 +20,6 @@ describe('Testing Workflow Graph', function() {
         return showParamsBox;
     }
 
-    function getShowReferenceFilesCheckBox(testInstance = testWorkflowInstance){
-        // Returns the checkbox element responsible for toggling the Reference Files on the graph.
-        var showReferenceFilesBox = TestUtils.scryRenderedDOMComponentsWithClass(testInstance, 'checkbox-container for-state-showReferenceFiles')[0];
-        showReferenceFilesBox = showReferenceFilesBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
-        return showReferenceFilesBox;
-    }
-
     beforeAll(function(){
         sinon = require('sinon');
         server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
@@ -49,9 +42,7 @@ describe('Testing Workflow Graph', function() {
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
-
         jest.runAllTimers();
-
     });
 
     it('Given no extra configuration, it has the correct number of nodes & edges, and proper step names', function() {
@@ -238,17 +229,12 @@ describe('Find nodes from other columns', function() {
 
         var viewProps = {
             schemas, context,
-            'checkHrefForSelectedNode' : false,
-            'checkWindowLocationHref' : false,
             'onNodeClick' : null,
             'windowWidth' : 1200
         };
 
-        // If we do not unset checkHrefForSelectedNode, checkWindowLocationHref, and onNodeClick -- graph will try to append '#nodeID' to document.location and use href to inform selected node state. Document location and href are not supported by test suite/lib so we must disable this.
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
-
         jest.runAllTimers();
-
     });
 
     it('Should match Nodes with previous columns', function() {
