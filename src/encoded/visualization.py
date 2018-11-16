@@ -496,6 +496,7 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
         "center" : 0,
     }
 
+    # TODO I don't need this loop? What is views_file_counts_by_position for?
     for direction in ("top", "left", "center"):
         for new_view in views:
             if direction == "top":
@@ -504,19 +505,6 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
                 tracks = new_view["tracks"]["left"]
             elif direction == "center":
                 tracks = [ c["contents"] for c in new_view["tracks"]["center"] ]
-
-            # TODO this may be the wrong spot to check.
-            # All files should have the same genome assembly (or have no assembly). Return an error if they don't match.
-            for track in tracks:
-                # If it doesn't have a genome, skip.
-                if not "options" in track:
-                    continue
-                if not "coordSystem" in track["options"]:
-                    continue
-
-                # coordSystem is set to file.genome_assembly when registering higlass files, so we can compare the two and make sure they match.
-                if track["options"]["coordSystem"] != new_file_dict["genome_assembly"]:
-                    return None, f"Genome Assemblies do not match, cannot add. Expected {new_file_dict['genome_assembly']}, found {track['options']['coordSystem']} instead"
 
             views_file_counts_by_position[direction] += len(tracks)
 
@@ -547,7 +535,70 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
     # Success! Return the modified view conf.
     return views, None
 
-def add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file_higlass_uid):
+# TODO: views_file_counts_by_position has gotta go, it's not used the way I thought it was
+def add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file):
+    """Add the given 1-D file to the higlass views.
+
+    Returns:
+    - a boolean indicating succes
+    - a string containing an error message, if any (may be None)
+    """
+
+    # Use the new file's information to create a new top track.
+    new_track = {
+        "tilesetUid": new_file["higlass_uid"],
+        "name": new_file["display_title"],
+        "type": "horizontal-divergent-bar", # TODO for bigwigs, use horizontal-divergent-bar but use horizontal-divergent-line for others... maybe look up  HiGlassConfigurator and HiGlassContainer whichGenerateViewConfigFxnToUse(props) for ideas
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "options": {
+            "name": new_file["display_title"],
+            "coordSystem" : new_file["genome_assembly"],
+        }
+    }
+
+    # If there are no views, create a default.
+    if not views:
+        new_view = {
+            initialYDomain: [
+                -10000,
+                10000
+            ],
+            initialXDomain: [
+                -10000,
+                10000
+            ],
+            tracks: {
+                right: [ ],
+                gallery: [ ],
+                left: [ ],
+                whole: [ ],
+                bottom: [ ],
+                top: [],
+                center: [],
+            },
+            uid: "Not set yet",
+            layout: {
+                w: 12,
+                static: true,
+                h: 12,
+                y: 0,
+                i: "Not set yet",
+                moved: false,
+                x: 0
+            }
+        }
+        new_view["uid"] = uuid.uuid4()
+        new_view["layout"]["i"] = new_view["uid"]
+        views = [new_view, ]
+
+    for higlass_view in views:
+        # Add the new top track to the current top facing tracks.
+        higlass_view["tracks"]["top"].append(new_track)
+
+    # Success!
+    return True, None
+
+def add_1d_file_to_higlass_viewconf2(views, views_file_counts_by_position, new_file):
     """Decide on the best location to add a 1-D file to the Higlass View Config's top track.
 
     Returns:
@@ -608,8 +659,6 @@ def add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
     views_file_counts_by_position["top"] += 1
 
     views.append(new_view)
-    # TODO exportAsViewConfString - Is this needed?
-    # TODO zoomToDataExtent - Is this needed?
     return True, None
 
 def add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file):
@@ -619,6 +668,22 @@ def add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
     - a boolean indicating succes
     - a string containing an error message, if any (may be None)
     """
+
+    # Make sure all of the views have the same Genome Assembly as the given file.
+    #new_file["genome_assembly"]
+    for new_view in views:
+        center_tracks = [ c["contents"] for c in new_view["tracks"]["center"] ]
+
+        for track in center_tracks:
+            # If it doesn't have a coordSystem, skip.
+            if not "options" in track:
+                continue
+            if not "coordSystem" in track["options"]:
+                continue
+
+            # coordSystem is set to file.genome_assembly when registering higlass files, so we can compare the two and make sure they match.
+            if track["options"]["coordSystem"] != new_file["genome_assembly"]:
+                return False, f"Genome Assemblies do not match, cannot add. Expected {new_file['genome_assembly']}, found {track['options']['coordSystem']} instead"
 
     # Choose the first available view. If there are no views, make up some defaults.
     base_view = None

@@ -1,5 +1,5 @@
 import pytest
-from .test_file import mcool_file_json # TODO move to centralized fixture file
+from .test_file import mcool_file_json, bg_file_json # TODO move to centralized fixture file
 pytestmark = pytest.mark.working
 
 # Test HiGlass config view endpoints on fourfront.
@@ -348,7 +348,7 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'files': f"{mcool_file['uuid']}"
     })
-    
+
     new_higlass_view_json = response.json["new_viewconfig"]
 
     assert len(new_higlass_view_json["views"]) == 2
@@ -361,19 +361,42 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
     contents = new_higlass_view_json["views"][1]["tracks"]["center"][0]["contents"]
     assert contents[0]["type"] == "heatmap"
 
-def test_add_bigwig_higlass(testapp):
+def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bg_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bigwig on top.
     """
 
-    # Get the Higlass Viewconf that will be edited.
     # Get a bigwig file to add.
+    bg_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bg_file_json['genome_assembly'] = "GRCm38"
+    bg_file = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
 
-    # Patch a request, trying to add the bigwig to the existing viewconf.
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get(f"/higlass-view-configs/{higlass_conf_uuid}/?format=json")
+    higlass_json = response.json
+
+    # Try to add the bigwig to the existing viewconf.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'files': f"{bg_file['uuid']}"
+    })
 
     # Get the new json.
+    new_higlass_json = response.json["new_viewconfig"]
 
     # Make sure the bigwig has been added above the mcool file.
-    pass
+    assert len(new_higlass_json["views"]) == 1
+
+    tracks = new_higlass_json["views"][0]["tracks"]
+    old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
+
+    # Assert there is still 1 central view
+    assert len(tracks["center"][0]["contents"]) == 1
+    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+
+    # Only one new top track should have appeared.
+    assert len(tracks["left"]) == len(old_tracks["left"])
+    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
 
 def test_add_bigwig_to_bigwig(testapp):
     """ Given a viewconf with a bigwig file, the viewconf should add a bigwig on top.
