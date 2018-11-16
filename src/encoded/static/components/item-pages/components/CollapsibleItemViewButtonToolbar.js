@@ -71,7 +71,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                         </div>
                     </Collapse>
                 : null }
-                <div className="toolbar-wrapper text-right" key="toolbar">
+                <div className="toolbar-wrapper pull-right" key="toolbar">
                     <ButtonToolbar>
                         { !isMobileSize && this.props.children }
                         <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
