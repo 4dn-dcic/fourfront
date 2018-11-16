@@ -489,54 +489,33 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
     if not "genome_assembly" in new_file_dict:
         return None, "File does not have genome_assembly"
 
-    # Find all of the files in the viewconf. Determine their type and their dimension (1 or 2).
-    views_file_counts_by_position = {
-        "top" : 0,
-        "left" : 0,
-        "center" : 0,
-    }
-
-    # TODO I don't need this loop? What is views_file_counts_by_position for?
-    for direction in ("top", "left", "center"):
-        for new_view in views:
-            if direction == "top":
-                tracks = new_view["tracks"]["top"]
-            elif direction == "left":
-                tracks = new_view["tracks"]["left"]
-            elif direction == "center":
-                tracks = [ c["contents"] for c in new_view["tracks"]["center"] ]
-
-            views_file_counts_by_position[direction] += len(tracks)
-
     # If there are already 6 views, stop and return an error.
     views_count = len(views)
     if views_count >= 6:
         return None, "You cannot have more than 6 views in a single display."
 
     # Based on the filetype's dimensions, try to add the file to the viewconf
-    # TODO Handle other file types
     file_format = new_file_dict["file_format"]
     known_1d_formats = ("bg", "bw")
     known_2d_formats = ("mcool", "hic")
     if [x for x in known_2d_formats if x in file_format]:
-        status, errors = add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file_dict)
+        status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
         if errors:
             return None, errors
     elif [x for x in known_1d_formats if x in file_format]:
-        status, errors = add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file_dict)
+        status, errors = add_1d_file_to_higlass_viewconf(views, new_file_dict)
         if errors:
             return None, errors
     else:
         return None, f"Unknown new file format {new_file_dict['file_format']}"
 
     # Resize the sections so they fit into a 12 x 12 grid.
-    repack_higlass_views(views, views_file_counts_by_position)
+    repack_higlass_views(views)
 
     # Success! Return the modified view conf.
     return views, None
 
-# TODO: views_file_counts_by_position has gotta go, it's not used the way I thought it was
-def add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file):
+def add_1d_file_to_higlass_viewconf(views, new_file):
     """Add the given 1-D file to the higlass views.
 
     Returns:
@@ -548,7 +527,7 @@ def add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
     new_track = {
         "tilesetUid": new_file["higlass_uid"],
         "name": new_file["display_title"],
-        "type": "horizontal-divergent-bar", # TODO for bigwigs, use horizontal-divergent-bar but use horizontal-divergent-line for others... maybe look up  HiGlassConfigurator and HiGlassContainer whichGenerateViewConfigFxnToUse(props) for ideas
+        "type": "horizontal-divergent-bar",
         "server": "https://higlass.4dnucleome.org/api/v1",
         "options": {
             "name": new_file["display_title"],
@@ -598,70 +577,7 @@ def add_1d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
     # Success!
     return True, None
 
-def add_1d_file_to_higlass_viewconf2(views, views_file_counts_by_position, new_file):
-    """Decide on the best location to add a 1-D file to the Higlass View Config's top track.
-
-    Returns:
-    - a boolean indicating succes
-    - a string containing an error message, if any (may be None)
-    """
-
-    # Choose the first available view. If there are no views, make up some defaults.
-    base_view = None
-
-    if views:
-        base_view = views[0]
-    else:
-        base_view = {
-            initialYDomain: [
-                -10000,
-                10000
-            ],
-            initialXDomain: [
-                -10000,
-                10000
-            ],
-            tracks: {
-                right: [ ],
-                gallery: [ ],
-                left: [ ],
-                whole: [ ],
-                bottom: [ ],
-                top: [
-                    {}
-                ],
-                center: [],
-            },
-            uid: "Not set yet",
-            layout: {
-                w: 12,
-                static: true,
-                h: 12,
-                y: 0,
-                i: "Not set yet",
-                moved: false,
-                x: 0
-            }
-        }
-
-    new_view = deepcopy(base_view)
-    new_view["uid"] = uuid.uuid4()
-    new_view["layout"]["i"] = new_view["uid"]
-
-    if len(new_view["tracks"]["top"]) < 1:
-        new_view["tracks"]["top"] = [{}]
-    new_view["tracks"]["top"][0]["tilesetUid"] = new_file["higlass_uid"]
-    new_view["tracks"]["top"][0]["name"] = new_file["display_title"]
-    new_view["tracks"]["top"][0]["type"] = "horizontal-divergent-bar"
-    new_view["tracks"]["top"][0]["options"]["coordSystem"] = new_file["genome_assembly"]
-    new_view["tracks"]["top"][0]["options"]["name"] = new_file["display_title"]
-
-    views_file_counts_by_position["top"] += 1
-
-    views.append(new_view)
-    return True, None
-
-def add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_file):
+def add_2d_file_to_higlass_viewconf(views, new_file):
     """Decide on the best location to add a 2-D file to the Higlass View Config's center track.
 
     Returns:
@@ -725,7 +641,6 @@ def add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
             }
         }
 
-    # TODO Need to clone other 2-D view and replace contents
     new_view = deepcopy(base_view)
     new_view["uid"] = uuid.uuid4()
     new_view["layout"]["i"] = new_view["uid"]
@@ -752,13 +667,11 @@ def add_2d_file_to_higlass_viewconf(views, views_file_counts_by_position, new_fi
 
     new_view["tracks"]["center"][0]["contents"].append(new_content)
 
-    views_file_counts_by_position["center"] += 1
-
     views.append(new_view)
 
     return True, None
 
-def repack_higlass_views(views, views_file_counts_by_position):
+def repack_higlass_views(views):
     """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
     1 2 5
     3 4 6
