@@ -314,7 +314,7 @@ def test_higlass_noop(testapp, higlass_mcool_viewconf):
     # Get the Higlass Viewconf that will be edited.
     # Get the JSON.
     higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
-    response = testapp.get(f"/higlass-view-configs/{higlass_conf_uuid}/?format=json")
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
 
     # Patch a request, passing in the current viewconf with no additional data.
@@ -346,7 +346,7 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
 
     # Try to create a view, adding a file but no base view.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
-        'files': f"{mcool_file['uuid']}"
+        'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
     new_higlass_view_json = response.json["new_viewconfig"]
@@ -372,13 +372,13 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bg_file_json):
 
     # Get the Higlass Viewconf that will be edited.
     higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
-    response = testapp.get(f"/higlass-view-configs/{higlass_conf_uuid}/?format=json")
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
 
     # Try to add the bigwig to the existing viewconf.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
-        'files': f"{bg_file['uuid']}"
+        'files': "{uuid}".format(uuid=bg_file['uuid'])
     })
 
     # Get the new json.
