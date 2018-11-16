@@ -9,12 +9,16 @@
     "lab": "encode-dcc-lab",
     "award": "encode-award",
     "accession": "4DNFIENCODEDV",
+    "description": "bigWig file of fold change values on H3K79me2 ChIP-seq in H1-hESC cells",
     "biosource": "331111bc-8535-4448-903e-854ab460b254",
     "file_type": "fold change values",
     "genome_assembly": "GRCh38",
     "dbxrefs": ["ENC:ENCFF798HCY", "ENC:ENCSR301HRV"],
-    "experiment_description": "Reference Epigenome: ChIP-Seq Analysis of H3K79me2 in hESC Cells",
+    "dataset_description": "Reference Epigenome: ChIP-Seq Analysis of H3K79me2 in hESC Cells",
+    "dataset_type": "ChIP-seq",
     "project_lab": "Bing Ren, UCSD",
-    "project_release_date": "2013-07-31"
+    "project_release_date": "2013-07-31",
+    "replicate_identifiers": ["biorep 1 tecrep 1", "biorep 2 tecrep 1"],
+    "assay_info": "H3K79me2"
  }
 ]

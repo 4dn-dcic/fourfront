@@ -78,6 +78,11 @@
             "description": "The type of dataset to which this file is associated",
             "type": "string"
         },
+        "assay_info": {
+            "title": "Assay details",
+            "description": "Information that helps distinguish the assay eg. ChIP-seq target or repliseq phase",
+            "type": "string"
+        },
         "replicate_identifiers": {
             "title": "Replicates",
             "type": "array",
