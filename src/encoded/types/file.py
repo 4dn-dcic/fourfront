@@ -688,6 +688,21 @@ class FileReference(File):
 
 
 @collection(
+    name='files-vistrack',
+    unique_key='accession',
+    properties={
+        'title': 'Visualization Track Files',
+        'description': 'Listing of External Files available as HiGlass visualization tracks',
+    })
+class FileVistrack(File):
+    """Collection for individual visualization track files."""
+    item_type = 'file_vistrack'
+    schema = load_schema('encoded:schemas/file_vistrack.json')
+    embedded_list = File.embedded_list
+    name_key = 'accession'
+
+
+@collection(
     name='files-calibration',
     unique_key='accession',
     properties={
