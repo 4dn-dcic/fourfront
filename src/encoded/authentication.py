@@ -161,7 +161,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         if not jwt_info:
             return None
 
-        email = request._auth0_authenticated = jwt_info['email']
+        email = request._auth0_authenticated = jwt_info['email'].lower()
 
         # At this point, email has been authenticated with their Auth0 provider, but we don't know yet if this email is in our database.
         # If not authenticated (not in our DB), request.user_info will throw an HTTPForbidden error.
