@@ -5,8 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
-import { HiGlassPlainContainer } from '../../item-pages/components';
+import { HiGlassPlainContainer } from './../../item-pages/components';
 import * as store from './../../../store';
+import { OverviewHeadingContainer } from './../../item-pages/DefaultItemView';
 
 
 export class BasicUserContentBody extends React.PureComponent {
@@ -63,6 +64,87 @@ export class BasicUserContentBody extends React.PureComponent {
                 </div>
             );
         }
+    }
+
+}
+
+
+export class ExpandableStaticHeader extends OverviewHeadingContainer {
+
+    static propTypes = {
+        'context' : PropTypes.object.isRequired
+    }
+
+    static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
+        'className' : 'with-background mb-1 mt-1',
+        'title'     : "Information",
+        'prependTitleIconFxn' : function(open, props){
+            if (!props.titleIcon) return null;
+            return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
+        },
+        'prependTitleIcon' : true
+    })
+
+    renderInnerBody(){
+        var { context, href } = this.props,
+            open = this.state.open,
+            isHiGlassDisplay = Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1,
+            extraInfo = null;
+
+        if (isHiGlassDisplay){
+            extraInfo = (
+                <div className="extra-info description clearfix pt-08">
+                    { context.description }
+                    <Button href={object.itemUtil.atId(context)} className="pull-right" data-tip="Open HiGlass Display" style={{ marginTop : -5, marginLeft: 10 }}>
+                        <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
+                        View Larger
+                    </Button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="static-section-header pt-1 clearfix">
+                { extraInfo }
+                <BasicUserContentBody context={context} href={href} height={isHiGlassDisplay ? 300 : null} />
+            </div>
+        );
+    }
+
+}
+
+
+export class UserContentBodyList extends React.PureComponent {
+
+    static defaultProps = {
+        'headerElement' : 'h4',
+        'headerProps'   : {
+            'className' : 'text-500 mt-2'
+        }
+    };
+
+    contentList(){
+        var { contents, headerElement, headerProps } = this.props;
+        if (!contents || !Array.isArray(contents) || contents.length === 0) return null;
+
+        return _.filter(_.map(contents, function(c,i,all){
+            if (!c || c.error) return null;
+            var isCollapsible = c.options && c.options.collapsible;
+            return (
+                <div className="static-content-item" key={c.name || c.uuid || object.itemUtil.atId(c) || i}>
+                    { c.title && !isCollapsible ? React.createElement(headerElement, headerProps, c.title) : null }
+                    { c.options && c.options.collapsible ?
+                        <ExpandableStaticHeader context={c} defaultOpen={c.options.default_open} title={c.title} />
+                        :
+                        <BasicUserContentBody context={c} />
+                    }
+                </div>
+            );
+        }));
+    }
+
+    render(){
+        return <div className="static-content-list" children={this.contentList()} />;
     }
 
 }

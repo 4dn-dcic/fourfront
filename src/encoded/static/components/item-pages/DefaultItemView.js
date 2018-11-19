@@ -10,7 +10,7 @@ import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
     FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
-import { BasicStaticSectionBody, BasicUserContentBody } from './../static-pages/components/BasicStaticSectionBody';
+import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
 
 var { TabObject, Item } = typedefs;
 
@@ -115,6 +115,7 @@ export default class DefaultItemView extends React.PureComponent {
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
+
         returnArr.push(ItemDetailList.getTabObject(this.props));
         returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
@@ -241,7 +242,10 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element}
      */
     tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} ref="tabbedView" key="tabbedView" {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href')} />;
+        return (
+            <TabbedView contents={this.getTabViewContents} ref="tabbedView" key="tabbedView"
+                {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')} />
+        );
     }
 
     /**
@@ -408,16 +412,21 @@ export class StaticHeadersArea extends React.PureComponent {
 
     render(){
         var context = this.props.context,
-            headersToShow = _.filter(
-                context.static_headers || [],
+            headersFromStaticContent = _.pluck(_.filter(
+                context.static_content || [],
+                function(s){ return s.location === 'header'; }
+            ), 'content'),
+            headersToShow = _.uniq(_.filter(
+                headersFromStaticContent.concat(context.static_headers || []),
                 function(s){
                     if (!s || s.error) return false; // No view permission(s)
                     if (s.content || s.viewconfig) return true;
                     return false; // Shouldn't happen
                 }
-            );
+            ), false, object.itemUtil.atId);
 
         if (!headersToShow || headersToShow.length === 0) return null;
+
         return (
             <div className="static-headers-area">
                 { _.map(headersToShow, (section, i) =>
@@ -434,50 +443,6 @@ export class StaticHeadersArea extends React.PureComponent {
 
 }
 
-
-export class ExpandableStaticHeader extends OverviewHeadingContainer {
-
-    static propTypes = {
-        'context' : PropTypes.object.isRequired
-    }
-
-    static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
-        'className' : 'with-background mb-1 mt-1',
-        'title'     : "Information",
-        'prependTitleIconFxn' : function(open, props){
-            if (!props.titleIcon) return null;
-            return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
-        },
-        'prependTitleIcon' : true
-    })
-
-    renderInnerBody(){
-        var { context, href } = this.props,
-            open = this.state.open,
-            isHiGlassDisplay = Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1,
-            extraInfo = null;
-
-        if (isHiGlassDisplay){
-            extraInfo = (
-                <div className="extra-info description clearfix pt-08">
-                    { context.description }
-                    <Button href={object.itemUtil.atId(context)} className="pull-right" data-tip="Open HiGlass Display" style={{ marginTop : -5, marginLeft: 10 }}>
-                        <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
-                        View Larger
-                    </Button>
-                </div>
-            );
-        }
-
-        return (
-            <div className="static-section-header pt-1 clearfix">
-                { extraInfo }
-                <BasicUserContentBody context={context} href={href} height={isHiGlassDisplay ? 300 : null} />
-            </div>
-        );
-    }
-
-}
 
 
 export class EmbeddedItemWithAttachment extends React.Component {

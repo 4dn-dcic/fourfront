@@ -7,6 +7,7 @@ import url from 'url';
 import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
 import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
 import { navigate } from './../../util';
+import { BasicUserContentBody, UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
 
 
 /**
@@ -111,10 +112,78 @@ export class TabbedView extends React.Component {
         }
     }
 
+    additionalTabs(){
+        var { context, contents } = this.props,
+            staticTabContent = _.filter(
+                (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [],
+                function(s){ return s.content && !s.content.error && typeof s.location === 'string' && s.location.slice(0,4) === 'tab:'; }
+            );
+
+        if (staticTabContent.length === 0) return [];
+
+        if (typeof contents === 'function') contents = contents();
+
+        var existingTabKeys = _.pluck(contents, 'key');
+
+        // Filter down to locations which don't already exist in our tabs.
+        staticTabContent = _.filter(
+            _.map(staticTabContent, function(s){
+                return _.extend({ 'tabKey' : s.location.slice(4) }, s);
+            }),
+            function(s){
+                return existingTabKeys.indexOf(s.tabKey) === -1;
+            }
+        );
+
+        var groupedContent = _.groupBy(staticTabContent, 'tabKey');
+
+        return _.map(_.pairs(groupedContent), function([ tabKey, contentForTab ]){
+
+            var xformedKeyAsTitle = _.map(
+                tabKey.split('_'),
+                function(str){
+                    return str.charAt(0).toUpperCase() + str.slice(1);
+                }
+            ).join(' ');
+
+            return {
+                'key' : tabKey,
+                'tab' : <span className="text-500">{ xformedKeyAsTitle }</span>,
+                'content' : (
+                    <div className="overflow-hidden">
+                        <h3 className="tab-section-title">
+                            <span>{ xformedKeyAsTitle }</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider mb-1"/>
+                        <UserContentBodyList contents={_.pluck(contentForTab, 'content')} />
+                    </div>
+                )
+            };
+        });
+
+    }
+
     render(){
         var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, renderTabContent } = this.props;
         if (typeof contents === 'function') contents = contents();
         if (!Array.isArray(contents)) return null;
+
+        var additionalTabs = this.additionalTabs(),
+            allTabs;
+
+        if (additionalTabs.length === 0){
+            allTabs = contents;
+        } else {
+            var addBeforeTabs   = ['details', 'audits', 'attribution'],
+                addIdx          = _.findIndex(contents, function(t){ return addBeforeTabs.indexOf(t.key) > -1; });
+
+            if (typeof addIdx !== 'number'){
+                allTabs = contents.concat(additionalTabs);
+            } else {
+                allTabs = contents.slice(0);
+                allTabs.splice(addIdx, 0, ...additionalTabs);
+            }
+        }
 
         var tabsProps = {
             'renderTabBar'          : () => <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent} className="extra-style-2" />,
@@ -122,11 +191,17 @@ export class TabbedView extends React.Component {
             'onChange'              : onChange,
             'destroyInactiveTabPane': destroyInactiveTabPane,
             'ref'                   : 'tabs',
-            'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents)
+            'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents),
+            'children'              : _.map(allTabs, TabbedView.renderTabPane)
         };
 
         if (activeKey) tabsProps.activeKey = activeKey;
-        return <Tabs {...tabsProps} children={_.map(contents, TabbedView.renderTabPane)}/>;
+
+        return <Tabs {...tabsProps} />;
     }
 
 }
+
+
+//export class 
+
