@@ -586,9 +586,13 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
     """
 
     # Make sure all of the views have the same Genome Assembly as the given file.
-    #new_file["genome_assembly"]
     for new_view in views:
-        center_tracks = [ c["contents"] for c in new_view["tracks"]["center"] ]
+
+        # Extract the lists of contents from each view.
+        center_contents = [ c["contents"] for c in new_view["tracks"]["center"] ]
+
+        # Flatten the list of lists.
+        center_tracks = [item for sublist in center_contents for item in sublist]
 
         for track in center_tracks:
             # If it doesn't have a coordSystem, skip.
