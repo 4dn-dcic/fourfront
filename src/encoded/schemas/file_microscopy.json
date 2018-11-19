@@ -40,11 +40,7 @@
             "title": "Description"
         },
         "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "linkTo": "FileFormat",
-            "lookup": 30,
-            "ff_flag": "filter:valid_item_types"
+            "lookup": 30
         },
         "file_type": {
             "title": "File Type",

@@ -38,12 +38,6 @@
             "type": "string",
             "title": "Description"
         },
-        "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "linkTo": "FileFormat",
-            "ff_flag": "filter:valid_item_types"
-        },
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
