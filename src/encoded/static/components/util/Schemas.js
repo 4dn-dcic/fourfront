@@ -31,7 +31,7 @@ export const itemTypeHierarchy = {
         'ExperimentSet', 'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
+        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy', 'FileVistrack'
     ],
     'FileSet': [
         'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
