@@ -16,7 +16,7 @@
         },
         "description": {
             "title": "Description",
-            "description": "A plain text description of the task.",
+            "description": "A plain text description of the file.",
             "type": "string",
             "lookup": 10,
             "formInput": "textarea"
@@ -54,7 +54,8 @@
                 "raw file",
                 "processed file",
                 "ancillary file",
-                "other file"
+                "other file",
+                "visualization"
             ]
         },
         "md5sum": {

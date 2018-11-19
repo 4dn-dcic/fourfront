@@ -42,5 +42,14 @@
         "url": "https://projectreporter.nih.gov/project_info_details.cfm?aid=8146738&icde=30734626",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334c",
         "project": "External"
+    },
+    {
+        "description": "Funding source is an ENCODE grant",
+        "project": "ENCODE",
+        "status": "current",
+        "uuid": "8842e72e-7b38-4a2a-9557-e6b22616ecaa",
+        "name": "encode-award",
+        "title": "ENCODE AWARD",
+        "viewing_group": "Not 4DN"
     }
 ]
