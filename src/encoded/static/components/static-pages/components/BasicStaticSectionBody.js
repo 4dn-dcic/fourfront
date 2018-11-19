@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { Button } from 'react-bootstrap';
 import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { HiGlassPlainContainer } from './../../item-pages/components';
@@ -42,7 +43,7 @@ export class BasicUserContentBody extends React.PureComponent {
     }
 
     render(){
-        var { context, markdownCompilerOptions } = this.props;
+        var { context, markdownCompilerOptions, parentComponentType } = this.props;
         if (this.state.hasError){
             return (
                 <div className="error">
@@ -56,7 +57,12 @@ export class BasicUserContentBody extends React.PureComponent {
         if (itemType === 'StaticSection') {
             return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} />;
         } else if (itemType === 'HiglassViewConfig') {
-            return <HiGlassPlainContainer viewConfig={context.viewconfig} />;
+            return (
+                <React.Fragment>
+                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
+                    <HiGlassPlainContainer viewConfig={context.viewconfig} />
+                </React.Fragment>
+            );
         } else {
             return (
                 <div className="error">
@@ -87,56 +93,81 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     renderInnerBody(){
         var { context, href } = this.props,
-            open = this.state.open,
-            isHiGlassDisplay = Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1,
-            extraInfo = null;
+            open        = this.state.open,
+            isHiGlass   = isHiGlassDisplay(context);
 
-        if (isHiGlassDisplay){
-            extraInfo = (
-                <div className="extra-info description clearfix pt-08">
+        return (
+            <div className="static-section-header pt-1 clearfix">
+                <BasicUserContentBody context={context} href={href} height={isHiGlass ? 300 : null} parentComponentType={ExpandableStaticHeader} />
+            </div>
+        );
+    }
+}
+
+
+export class EmbeddedHiglassActions extends React.PureComponent {
+
+    static defaultProps = {
+        'parentComponentType' : BasicUserContentBody
+    };
+
+    render(){
+        var { context, parentComponentType } = this.props,
+            btnProps = {
+                'href'      : object.itemUtil.atId(context),
+                'data-tip'  : "Open HiGlass Display",
+                'className' : 'pull-right extra-info-higlass-btn'
+            };
+
+        if (parentComponentType === BasicUserContentBody) {
+            btnProps.bsSize = 'sm';
+        }
+
+        return (
+            <div className="extra-info extra-info-for-higlass-display">
+                <div className="description">
                     { context.description }
-                    <Button href={object.itemUtil.atId(context)} className="pull-right" data-tip="Open HiGlass Display" style={{ marginTop : -5, marginLeft: 10 }}>
+                </div>
+                <div className="btn-container">
+                    <Button {...btnProps}>
                         <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                         View Larger
                     </Button>
                 </div>
-            );
-        }
-
-        return (
-            <div className="static-section-header pt-1 clearfix">
-                { extraInfo }
-                <BasicUserContentBody context={context} href={href} height={isHiGlassDisplay ? 300 : null} />
             </div>
         );
     }
-
 }
 
 
 export class UserContentBodyList extends React.PureComponent {
 
     static defaultProps = {
-        'headerElement' : 'h4',
-        'headerProps'   : {
-            'className' : 'text-500 mt-2'
-        }
+        'hideTitles'        : false,
+        'headerElement'     : 'h4',
+        'headerProps'       : {
+            'className'         : 'text-500 mt-2'
+        },
+        'allCollapsible'    : null
     };
 
     contentList(){
-        var { contents, headerElement, headerProps } = this.props;
+        var { contents, headerElement, headerProps, allCollapsible, href, hideTitles } = this.props;
         if (!contents || !Array.isArray(contents) || contents.length === 0) return null;
 
         return _.filter(_.map(contents, function(c,i,all){
             if (!c || c.error) return null;
-            var isCollapsible = c.options && c.options.collapsible;
+
+            // If props.allCollapsible is a boolean, let it override whatever section option is.
+            var isCollapsible = (allCollapsible === true) || (allCollapsible !== false && c.options && c.options.collapsible);
+
             return (
                 <div className="static-content-item" key={c.name || c.uuid || object.itemUtil.atId(c) || i}>
-                    { c.title && !isCollapsible ? React.createElement(headerElement, headerProps, c.title) : null }
-                    { c.options && c.options.collapsible ?
-                        <ExpandableStaticHeader context={c} defaultOpen={c.options.default_open} title={c.title} />
+                    { !hideTitles && c.title && !isCollapsible ? React.createElement(headerElement, headerProps, c.title) : null }
+                    { isCollapsible ?
+                        <ExpandableStaticHeader context={c} defaultOpen={c.options.default_open} title={c.title} href={href} titleTip={c.description} />
                         :
-                        <BasicUserContentBody context={c} />
+                        <BasicUserContentBody context={c} href={href} />
                     }
                 </div>
             );
@@ -178,3 +209,9 @@ export class BasicStaticSectionBody extends React.PureComponent {
     }
 
 }
+
+
+export function isHiGlassDisplay(context){
+    return Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1;
+}
+

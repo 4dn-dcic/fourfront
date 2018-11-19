@@ -38,6 +38,25 @@ export class TabbedView extends React.Component {
         );
     }
 
+    static createTabObject(key, title, icon, tabContent, extraProps = {}){
+        return {
+            'key' : key,
+            'tab' : (
+                <span>
+                    { icon ? <React.Fragment><i className={"icon icon-fw icon-" + icon}/> </React.Fragment> : null }
+                    { title }
+                </span>
+            ),
+            'content' : (
+                <div className="overflow-hidden">
+                    <h3 className="tab-section-title">{ title }</h3>
+                    <hr className="tab-section-title-horiz-divider mb-1"/>
+                    <UserContentBodyList contents={_.pluck(tabContent, 'content')} {...extraProps} />
+                </div>
+            )
+        };
+    }
+
     static propTypes = {
         'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
             'tab'       : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
@@ -46,7 +65,7 @@ export class TabbedView extends React.Component {
             'disabled'  : PropTypes.bool
         }))  ]).isRequired,
         'href' : PropTypes.string.isRequired
-    }
+    };
 
     static defaultProps = {
         'contents' : [
@@ -55,7 +74,7 @@ export class TabbedView extends React.Component {
         ],
         'animated' : false,
         'destroyInactiveTabPane' : false // Maybe make true? Need to profile performance
-    }
+    };
 
     constructor(props){
         super(props);
@@ -114,21 +133,29 @@ export class TabbedView extends React.Component {
 
     additionalTabs(){
         var { context, contents } = this.props,
-            staticTabContent = _.filter(
-                (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [],
-                function(s){ return s.content && !s.content.error && typeof s.location === 'string' && s.location.slice(0,4) === 'tab:'; }
-            );
+            resultArr = [],
+            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
 
-        if (staticTabContent.length === 0) return [];
+        if (staticContentList.length === 0) return []; // No content defined for Item.
 
         if (typeof contents === 'function') contents = contents();
 
-        var existingTabKeys = _.pluck(contents, 'key');
+        //
+        // PART 1
+        // Content grouped by 'tab:some_title' is put into new tab with 'Some Title' as title.
+        //
+
+        var existingTabKeys = _.pluck(contents, 'key'),
+            staticTabContent = _.filter(staticContentList, function(s){
+                return s.content && !s.content.error && typeof s.location === 'string' && s.location.slice(0,4) === 'tab:';
+            });
 
         // Filter down to locations which don't already exist in our tabs.
         staticTabContent = _.filter(
             _.map(staticTabContent, function(s){
-                return _.extend({ 'tabKey' : s.location.slice(4) }, s);
+                var splitLocation   = s.location.split(':'),
+                    tabKey          = splitLocation.slice(1).join(':'); // This could have more ':'s in it, theoretically.
+                return _.extend({ tabKey }, s);
             }),
             function(s){
                 return existingTabKeys.indexOf(s.tabKey) === -1;
@@ -137,29 +164,40 @@ export class TabbedView extends React.Component {
 
         var groupedContent = _.groupBy(staticTabContent, 'tabKey');
 
-        return _.map(_.pairs(groupedContent), function([ tabKey, contentForTab ]){
+        _.forEach(_.pairs(groupedContent), function([ tabKey, contentForTab ]){
 
-            var xformedKeyAsTitle = _.map(
-                tabKey.split('_'),
-                function(str){
-                    return str.charAt(0).toUpperCase() + str.slice(1);
-                }
-            ).join(' ');
+            var splitTabKey = tabKey.split(':'), // This could have more ':'s in it, theoretically. Use only first part, and assume 2nd part is icon.
+                xformedKeyAsTitle = _.map(
+                    splitTabKey[0].split('_'),
+                    function(str){
+                        return str.charAt(0).toUpperCase() + str.slice(1);
+                    }
+                ).join(' '),
+                icon = splitTabKey.length > 1 ? splitTabKey[1] : null;
 
-            return {
-                'key' : tabKey,
-                'tab' : <span className="text-500">{ xformedKeyAsTitle }</span>,
-                'content' : (
-                    <div className="overflow-hidden">
-                        <h3 className="tab-section-title">
-                            <span>{ xformedKeyAsTitle }</span>
-                        </h3>
-                        <hr className="tab-section-title-horiz-divider mb-1"/>
-                        <UserContentBodyList contents={_.pluck(contentForTab, 'content')} />
-                    </div>
-                )
-            };
+            resultArr.push(TabbedView.createTabObject(tabKey, xformedKeyAsTitle, icon, contentForTab));
         });
+
+        //
+        // PART 2
+        // Content with position : 'tab' gets its own tab.
+        //
+
+        var staticTabContentSingles = _.filter(staticContentList, function(s){
+            return s.content && !s.content.error && s.location === 'tab';
+        });
+
+
+        _.forEach(staticTabContentSingles, function(s, idx){
+            var content = s.content,
+                title   = content.title || 'Custom Tab ' + (idx + 1),
+                tabKey  = title.toLowerCase().split(' ').join('_'),
+                icon    = (content.options && content.options.title_icon) || null;
+
+            resultArr.push(TabbedView.createTabObject(tabKey, title, icon, [s], { 'hideTitles' : true }));
+        });
+    
+        return resultArr;
 
     }
 
@@ -201,7 +239,4 @@ export class TabbedView extends React.Component {
     }
 
 }
-
-
-//export class 
 

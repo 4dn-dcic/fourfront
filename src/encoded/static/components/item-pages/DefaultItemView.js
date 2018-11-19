@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 import { content_views } from './../globals';
 import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
@@ -361,6 +362,8 @@ export class OverviewHeadingContainer extends React.Component {
                 this.setState(function(currState){
                     if (!currState.open && currState.closing){
                         return { 'closing' : false };
+                    } else if (currState.open){
+                        ReactTooltip.rebuild();
                     }
                     return null;
                 });
@@ -393,11 +396,17 @@ export class OverviewHeadingContainer extends React.Component {
     }
 
     render(){
-        var { title, titleElement, titleClassName, className, onStartOpen, onStartClose, onFinishClose, onFinishOpen } = this.props;
-        var open = this.state.open;
+        var { title, titleElement, titleClassName, titleTip, className, onStartOpen, onStartClose, onFinishClose, onFinishOpen } = this.props,
+            open        = this.state.open,
+            titleProps  = title && titleElement && {
+                'className' : 'tab-section-title clickable with-accent' + (titleClassName ? ' ' + titleClassName : ''),
+                'onClick'   : this.toggle,
+                'data-tip'  : titleTip
+            };
+
         return (
             <div className={"overview-blocks-header" + (open ? ' is-open' : ' is-closed') + (typeof className === 'string' ? ' ' + className : '')}>
-                { title && titleElement ? React.createElement(titleElement, { 'className' : 'tab-section-title clickable with-accent' + (titleClassName ? ' ' + titleClassName : ''), 'onClick' : this.toggle }, this.renderTitle()) : null }
+                { title && titleElement ? React.createElement(titleElement, titleProps, this.renderTitle()) : null }
                 <Collapse in={open} onEnter={onStartOpen} onEntered={onFinishOpen} onExit={onStartClose} onExited={onFinishClose} children={this.renderInner()} />
             </div>
         );
