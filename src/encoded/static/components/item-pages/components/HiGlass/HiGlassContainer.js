@@ -581,9 +581,9 @@ export const HiGlassConfigurator = {
 
     },
 
-    'bedgraph' : {
+    'beddb' : {
         'generateTopContentTrack' : function(bedFile, options, { chromosome, annotation }, idx, all){
-            var track = HiGlassConfigurator.bigwig.generateTopContentTrack();
+            var track = HiGlassConfigurator.bigwig.generateTopContentTrack(...arguments);
             track.type = 'bedlike';
             return track;
         },
@@ -607,11 +607,11 @@ export const HiGlassConfigurator = {
 
             _.forEach(files, function(file, idx, all){
                 tracks.push(
-                    HiGlassConfigurator.bedgraph.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
+                    HiGlassConfigurator.beddb.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
                 );
             });
 
-            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-bedgraph-" + index, chromosomeAndAnnotation, options), {
+            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-beddb-" + index, chromosomeAndAnnotation, options), {
                 "tracks": {
                     "top" : tracks,
                     "left" : [],
@@ -639,7 +639,7 @@ export const HiGlassConfigurator = {
             }
 
             return _.extend(HiGlassConfigurator.generateViewConfigBase(options), {
-                "views": [ HiGlassConfigurator.bedgraph.generateView(files, options) ]
+                "views": [ HiGlassConfigurator.beddb.generateView(files, options) ]
             });
         }
     }
@@ -671,8 +671,8 @@ export class HiGlassContainer extends React.PureComponent {
                 'mcool' : HiGlassConfigurator.mcool.generateViewConfig,
                 'bw'    : HiGlassConfigurator.bigwig.generateViewConfig,
                 'bg'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bed'   : HiGlassConfigurator.bedgraph.generateViewConfig,
-                'beddb' : HiGlassConfigurator.bedgraph.generateViewConfig
+                'bed'   : HiGlassConfigurator.beddb.generateViewConfig,
+                'beddb' : HiGlassConfigurator.beddb.generateViewConfig
             };
 
             if (allFileFormats.length === 1){
