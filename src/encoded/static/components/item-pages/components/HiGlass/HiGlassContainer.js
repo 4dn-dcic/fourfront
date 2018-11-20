@@ -507,7 +507,7 @@ export const HiGlassConfigurator = {
                 "height"    : trackHeight,
                 "position"  : "top",
                 "server"    : options.baseUrl + "/api/v1",
-                "type"      : "horizontal-bar",
+                "type"      : "horizontal-divergent-bar",
                 "options"   : _.extend(styleOptions, {
                     "name"          : bigWigFile.display_title,
                     "valueScaling"  : "linear",
