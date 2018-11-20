@@ -20,7 +20,7 @@ def audit_experiments_have_raw_files(value, system):
     '''
     if "ExperimentMic" in value.get('@type'):
         return
-    ok_stati = ['uploaded', 'released', 'submission in progress', 'released to project']
+    ok_stati = ['uploaded', 'released', 'submission in progress', 'released to project', 'pre-release', 'restricted']
     raw_types = ['fastq']
     files = value.get('files', None)
     has_raw = False
