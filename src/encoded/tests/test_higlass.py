@@ -703,3 +703,22 @@ def test_add_bigwig_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_vi
     assert len(top_track_count.keys()) == len(old_top_track_count.keys())
     for index in range(len(top_track_count.keys())):
         assert top_track_count[index] - old_top_track_count[index] == 1
+
+def test_bogus_fileuuid(testapp, mcool_file_json, higlass_mcool_viewconf, bg_file_json):
+    """ Function should fail gracefully if there is no file with the given uuid.
+    """
+
+    # Get the json for a viewconfig with a mcool file.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Add a nonexistent file.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'files': "Bogus"
+    })
+
+    # Expect failure.
+    assert response.json["success"] == False
+    assert "does not exist" in response.json["errors"]
