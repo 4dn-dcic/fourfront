@@ -11,7 +11,7 @@
     "accession": "4DNFIENCODEDV",
     "description": "bigWig file of fold change values on H3K79me2 ChIP-seq in H1-hESC cells",
     "biosource": "331111bc-8535-4448-903e-854ab460b254",
-    "file_type": "fold change values",
+    "file_type": "fold change over control",
     "genome_assembly": "GRCh38",
     "dbxrefs": ["ENC:ENCFF798HCY", "ENC:ENCSR301HRV"],
     "dataset_description": "Reference Epigenome: ChIP-Seq Analysis of H3K79me2 in hESC Cells",
