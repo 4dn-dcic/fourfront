@@ -192,6 +192,16 @@
                         "description": "Name of the argument of the workflow.",
                         "type": "string"
                     },
+                    "alternative_conditional_argument_names": {
+                        "title": "Alternative Conditional Argument Names",
+                        "description": "Alternative argument names, in case argument names may vary depending on condition",
+                        "type": "array",
+                        "items": {
+                             "title": "Alternative Conditional Argument Name",
+                             "description": "An alternative argument name, in case argument names may vary depending on condition",
+                             "type": "string"
+                        }
+                    },
                     "secondary_file_formats": {
                         "title": "secondary file formats",
                         "description": "formats for secondary files",
