@@ -7780,7 +7780,7 @@
             {   
                 "argument_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Input file",
-                "workflow_argument_name": "bgpairs"
+                "workflow_argument_name": "bgfile"
             },
             {   
                 "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
@@ -7817,10 +7817,10 @@
                             "global": true,
                             "type": "data file"
                         },
-                        "name": "bgpairs",
+                        "name": "bgfile",
                         "source": [
                             {
-                                "name": "bgpairs"
+                                "name": "bgfile"
                             }
                         ]
                     },
@@ -7932,7 +7932,8 @@
             {   
                 "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Output processed file",
-                "workflow_argument_name": "chip.peak_calls"
+                "workflow_argument_name": "chip.peak_calls",
+                "alternative_conditional_argument_names": ["chip.macs2.sig_fc", "chip.macs2_pooled.sig_fc"]
             },
             {   
                 "argument_type": "Output QC file",

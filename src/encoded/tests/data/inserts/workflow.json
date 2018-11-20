@@ -7817,7 +7817,7 @@
                             "global": true,
                             "type": "data file"
                         },
-                        "name": "bgpairs",
+                        "name": "bgfile",
                         "source": [
                             {
                                 "name": "bgfile"
