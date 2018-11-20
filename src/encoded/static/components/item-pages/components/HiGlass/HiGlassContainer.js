@@ -607,7 +607,9 @@ export class HiGlassContainer extends React.PureComponent {
             var fxnByFormatDict = {
                 'mcool' : HiGlassConfigurator.mcool.generateViewConfig,
                 'bw'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bg'    : HiGlassConfigurator.bigwig.generateViewConfig
+                'bg'    : HiGlassConfigurator.bigwig.generateViewConfig,
+                'bed'   : HiGlassConfigurator.bigwig.generateViewConfig,
+                'beddb' : HiGlassConfigurator.bigwig.generateViewConfig
             };
 
             if (allFileFormats.length === 1){
