@@ -484,6 +484,8 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
     """
 
     # Make sure the file has a higlass uid and a genome_assembly
+    if not new_file_dict:
+        return None, "File does not exist"
     if not "higlass_uid" in new_file_dict:
         return None, "File does not have higlass_uid"
     if not "genome_assembly" in new_file_dict:
