@@ -6,10 +6,9 @@ import _ from 'underscore';
 import { Button } from 'react-bootstrap';
 import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
-import { HiGlassPlainContainer } from './../../item-pages/components';
+import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
+import { HiGlassPlainContainer } from './../../item-pages/components/HiGlass/HiGlassPlainContainer';
 import * as store from './../../../store';
-import { OverviewHeadingContainer } from './../../item-pages/DefaultItemView';
-
 
 export class BasicUserContentBody extends React.PureComponent {
 
@@ -188,12 +187,12 @@ export class BasicStaticSectionBody extends React.PureComponent {
         "filetype" : PropTypes.string,
         "element" : PropTypes.string.isRequired,
         "markdownCompilerOptions" : PropTypes.any
-    }
+    };
 
     static defaultProps = {
         "filetype" : "md",
         "element" : "div"
-    }
+    };
 
     render(){
         var { content, filetype, element, markdownCompilerOptions } = this.props,
