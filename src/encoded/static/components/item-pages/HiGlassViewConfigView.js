@@ -68,8 +68,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'saveLoading' : false,
             'cloneLoading' : false,
             'releaseLoading' : false,
-            'mcoolLoading' : false,
-            'bigwigLoading' : false,
             'fileLoading': false,
         };
     }
@@ -399,7 +397,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     statusChangeButton(){
         var { session, context } = this.props,
-            { saveLoading, cloneLoading, releaseLoading, mcoolLoading, bigwigLoading } = this.state,
+            { saveLoading, cloneLoading, releaseLoading } = this.state,
             editPermission = this.havePermissionToEdit();
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
