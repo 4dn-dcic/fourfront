@@ -421,8 +421,6 @@ def date_histogram_aggregations(request):
 
     return search_result
 
-""" Begin Chad's section
-"""
 @view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
 def add_files_to_higlass_viewconf(request):
     """ Add multiple files to the given Higlass view config.
@@ -432,11 +430,11 @@ def add_files_to_higlass_viewconf(request):
 
     Returns a dict:
         "success"  : Boolean indicating success.
-        "errors"   : A string (may be None) containing errors.
-        "new_views" : New list representing the new views.
+        "errors"   : A string containing errors. Will be None if this is successful.
+        "new_viewconfig" : New dict representing the new viewconfig.
     """
 
-    # Get the view conf. If none is provided, use the empty higlass viewconf.
+    # Get the view conf. If none is provided, use the default empty higlass viewconf.
     higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     if not higlass_viewconfig:
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000003")
@@ -463,7 +461,6 @@ def add_files_to_higlass_viewconf(request):
         # Try to add the new file to the given viewconf.
         new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict)
 
-        # If any of the new files failed, abandon progress and return failure.
         if errors:
             return {
                 "success" : False,
@@ -471,7 +468,6 @@ def add_files_to_higlass_viewconf(request):
                 "new_viewconfig": None
             }
 
-    # Return success.
     higlass_viewconfig["views"] = new_views
     return {
         "success" : True,
@@ -509,9 +505,9 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
         if errors:
             return None, errors
     else:
-        return None, "Unknown new file format {file_format}".format(file_format = new_file_dict['file_format'])
+        return None, "Unknown file format {file_format}".format(file_format = new_file_dict['file_format'])
 
-    # Resize the sections so they fit into a 12 x 12 grid.
+    # Resize and reposition the Higlass views.
     repack_higlass_views(views)
 
     # Success! Return the modified view conf.
@@ -525,7 +521,6 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
     - a string containing an error message, if any (may be None)
     """
 
-    # Use the new file's information to create a new top track.
     new_track = {
         "tilesetUid": new_file["higlass_uid"],
         "name": new_file["display_title"],
@@ -576,11 +571,10 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
         # Add the new top track to the current top facing tracks.
         higlass_view["tracks"]["top"].append(new_track)
 
-    # Success!
     return True, None
 
 def add_2d_file_to_higlass_viewconf(views, new_file):
-    """Decide on the best location to add a 2-D file to the Higlass View Config's center track.
+    """Create a new view to contain the 2D file and add it to the list of current views.
 
     Returns:
     - a boolean indicating succes
@@ -704,7 +698,7 @@ def repack_higlass_views(views):
     if views_count > 2:
         height = 6
 
-    # Keep track of the x and y coordinates, starting with (0, 0).
+    # Keep track of the x and y coordinates for each view.
     x = 0
     y = 0
 
@@ -723,6 +717,3 @@ def repack_higlass_views(views):
         if x >= 12:
             y += height
             x = 0
-
-""" End Chad's section
-"""

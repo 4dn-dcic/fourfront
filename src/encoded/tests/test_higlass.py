@@ -1,8 +1,8 @@
 import pytest
-from .test_file import mcool_file_json, bg_file_json # TODO move to centralized fixture file
+from .test_file import mcool_file_json, bg_file_json
 pytestmark = pytest.mark.working
 
-# Test HiGlass config view endpoints on fourfront.
+# Test Higlass display endpoints.
 
 @pytest.fixture
 def higlass_mcool_viewconf(testapp):
@@ -311,25 +311,22 @@ def higlass_blank_viewconf(testapp):
     return testapp.post_json('/higlass-view-configs/', viewconf).json
 
 def test_higlass_noop(testapp, higlass_mcool_viewconf):
-    """ Test the python endpoint exists
+    """ Test the python endpoint exists.
     Given a viewconf and no experiments, the viewconf should remain unchanged.
     """
 
     # Get the Higlass Viewconf that will be edited.
-    # Get the JSON.
     higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
     response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
 
-    # Patch a request, passing in the current viewconf with no additional data.
-    # Get the new json.
+    # Try to add nothing to the viewconf.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"]
     })
-
     new_higlass_json = response.json["new_viewconfig"]
 
-    # The new views should be a subset of the old ones.
+    # The new viewconf should be a subset of the old one.
     assert len(higlass_json["viewconfig"]["views"]) == len(new_higlass_json["views"])
     assert len(new_higlass_json["views"]) == 1
     for index in range(len(new_higlass_json["views"])):
