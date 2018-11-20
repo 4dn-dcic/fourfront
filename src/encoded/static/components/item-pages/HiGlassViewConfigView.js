@@ -54,16 +54,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.fullscreenButton = this.fullscreenButton.bind(this);
         this.saveButton = this.saveButton.bind(this);
         this.cloneButton = this.cloneButton.bind(this);
-        this.addMcoolButton = this.addMcoolButton.bind(this);
-        this.addBigwigButton = this.addBigwigButton.bind(this);
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
-        this.handleAddMcool = _.throttle(this.handleAddMcool.bind(this), 3000, { 'trailing' : false });
-        this.handleAddBigwig = _.throttle(this.handleAddBigwig.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
+        this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
         this.state = {
             'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
@@ -73,6 +70,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading' : false,
             'mcoolLoading' : false,
             'bigwigLoading' : false,
+            'fileLoading': false,
         };
     }
 
@@ -274,33 +272,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     /**
-    * Update the current Viewconf to add a new view with a mcool file.
+    * Update the current Viewconf to add a new view with the file with the given uuid.
     * @returns {void}
     */
-    handleAddMcool(evt){
-        evt.preventDefault();
-
-        // Get a sample mcool file to add. Just grab a master insert.
-        var file_uuid = "d273d710-6b6d-4e43-a84c-5658a891c034";
-        this.handleAddFileToHiglass(file_uuid, "mcool", "mcoolLoading");
-    }
-
-    /**
-    * Update the current Viewconf to add a new view with a bigwig file.
-    * @returns {void}
-    */
-    handleAddBigwig(evt){
-        evt.preventDefault();
-
-        // Get a sample bigwig file to add. Just grab a master insert.
-        var file_uuid = "a661a518-efd5-496e-9b76-85ca93493921";
-        this.handleAddFileToHiglass(file_uuid, "bigwig", "bigwigLoading");
-    }
-
-    /**
-    * TODO Add a description
-    **/
-    handleAddFileToHiglass(file_uuid, file_type, loadingStateName) {
+    addFileToHiglass(file_uuid) {
         var { context }         = this.props,
             hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
@@ -319,21 +294,21 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
-                'title' : "Failed to add "+ file_type +" file.",
+                'title' : "Failed to add file.",
                 'message' : errResp.errors,
                 'style' : 'danger'
             });
-            this.setState({ loadingStateName : false });
+            this.setState({ fileLoading : false });
         };
 
         // Make an AJAX call to add the mcool file.
         this.setState(
-            { loadingStateName : true },
+            { fileLoading : true },
             () => {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        this.setState({ loadingStateName : false }, ()=>{
+                        this.setState({ fileLoading : false }, ()=>{
                             // If it failed, return an error message.
                             if (!resp.success) {
                                 return fallbackCallback(resp);
@@ -343,8 +318,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             hgc.api.setViewConfig(resp.new_viewconfig).then(() => {
                                 // Show alert indicating success
                                 Alerts.queue({
-                                    'title'     : "Added " + file_type + " file",
-                                    'message'   : "Added new file.",
+                                    'title'     : "Added file",
+                                    'message'   : "Added new file to Higlass display.",
                                     'style'     : 'success'
                                 });
                             });
@@ -490,34 +465,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
-    addMcoolButton(){
-        var { session } = this.props,
-            { mcoolLoading } = this.state,
-            tooltip = "Click to add a preset mcool file.";
-
-        if (!session) return null;
-
-        return (
-            <Button onClick={this.handleAddMcool} disabled={mcoolLoading} bsStyle="success" key="addmcoolbtn" data-tip={tooltip}>
-                <i className={"icon icon-fw icon-" + (mcoolLoading ? 'circle-o-notch icon-spin' : 'plus-square')}/>&nbsp; Add mcool file
-            </Button>
-        );
-    }
-
-    addBigwigButton(){
-        var { session } = this.props,
-            { bigwigLoading } = this.state,
-            tooltip = "Click to add a preset bigwig file.";
-
-        if (!session) return null;
-
-        return (
-            <Button onClick={this.handleAddBigwig} disabled={bigwigLoading} bsStyle="success" key="addbigwigbtn" data-tip={tooltip}>
-                <i className={"icon icon-fw icon-" + (bigwigLoading ? 'circle-o-notch icon-spin' : 'plus-square')}/>&nbsp; Add bigwig file
-            </Button>
-        );
-    }
-
     copyURLButton(){
         var gridState   = layout.responsiveGridState(this.props.windowWidth),
             isMobile    = gridState !== 'lg',
@@ -561,7 +508,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props;
-
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -575,10 +521,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     }}>
                         { this.saveButton() }
                         { this.cloneButton() }
-                        { this.addMcoolButton() }
-                        { this.addBigwigButton() }
                         { this.statusChangeButton() }
                         { this.copyURLButton() }
+                        <HiGlassAddFileButton addFileHandler={this.addFileToHiglass} fileLoading={this.state.fileLoading}/>
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
@@ -596,6 +541,54 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 }
 
+/**
+    This Component has a button and a text input and a button.
+    You will type a file uuid into the field and click the button to accept.
+*/
+class HiGlassAddFileButton extends React.PureComponent {
+    constructor(props){
+        super(props);
+
+        // A callback that is passed the file id input
+        this.addFileHandler = props.addFileHandler;
+
+        this.handleTextChange = this.handleTextChange.bind(this);
+        this.handleButtonClicked = _.throttle(this.handleButtonClicked.bind(this), 3000, { 'trailing' : false });
+
+        this.state = {
+            fileUuid : ""
+        };
+    }
+
+    handleTextChange(evt) {
+        this.setState({fileUuid: evt.target.value});
+    }
+
+    handleButtonClicked(evt) {
+        evt.preventDefault();
+
+        // Is it blank? Do nothing.
+        if (!this.state.fileUuid) {
+            return;
+        }
+
+        // Invoke the object callback function, using the text input.
+        this.addFileHandler(this.state.fileUuid);
+    }
+
+    render(){
+        var tooltip = "Type in the file uuid then click here to add it to the display.";
+
+        return (
+            <React.Fragment>
+                <input type="text" placeholder="File uuid" className="form-control search-query" value={this.state.fileUuid} onChange={this.handleTextChange} />
+                <Button onClick={this.handleButtonClicked} disabled={this.props.fileLoading} bsStyle="success" key="addfilebtn" data-tip={tooltip}>
+                    <i className={"icon icon-fw icon-" + (this.props.fileLoading ? 'circle-o-notch icon-spin' : 'plus-square')}/>&nbsp; Add
+                </Button>
+            </React.Fragment>
+        );
+    }
+}
 
 class StatusMenuItem extends React.PureComponent {
     render(){
