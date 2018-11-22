@@ -124,7 +124,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
         "file_format": "cool",
@@ -359,6 +359,6 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileReference"]
     }
 ]
