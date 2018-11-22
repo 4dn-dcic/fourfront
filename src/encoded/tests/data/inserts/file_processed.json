@@ -335,6 +335,11 @@
     "file_classification":"processed file",
     "higlass_uid":"FaEnMk6uRrK5lks8AjQCzA",
     "award":"/awards/1U01CA200059-01/",
-    "uuid":"e22ed503-e208-4fbd-a097-06022bb7a634"
+    "uuid":"e22ed503-e208-4fbd-a097-06022bb7a634",
+    "extra_files": [
+       {
+          "file_format": "beddb"
+       }
+    ]
 }
 ]
