@@ -118,6 +118,7 @@
     {
         "file_format": "bed",
         "standard_file_extension": "bed.gz",
+        "extrafile_formats": ["76dc8c06-67d8-487b-8fc8-d841752a0b60"],
         "description": "Bed format",
         "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
         "lab": "4dn-dcic-lab",
@@ -349,5 +350,15 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "valid_item_types": ["FileReference"]
+    },
+    {
+        "file_format": "beddb",
+        "standard_file_extension": "beddb",
+        "description": "Beddb format",
+        "uuid": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "status": "released",
+        "valid_item_types": ["FileProcessed"]
     }
 ]
