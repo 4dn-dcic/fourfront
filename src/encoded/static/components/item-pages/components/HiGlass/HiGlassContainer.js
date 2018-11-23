@@ -584,7 +584,8 @@ export const HiGlassConfigurator = {
     'beddb' : {
         'generateTopContentTrack' : function(bedFile, options, { chromosome, annotation }, idx, all){
             var track = HiGlassConfigurator.bigwig.generateTopContentTrack(...arguments);
-            track.type = 'bedlike';
+            track.type      = 'bedlike';
+            track.height    = Math.min(track.height, 50);
             return track;
         },
         'generateView' : function(files, options){
