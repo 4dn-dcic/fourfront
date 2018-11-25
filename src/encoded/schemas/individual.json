@@ -11,7 +11,7 @@
     },
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "properties": {
         "accession": {

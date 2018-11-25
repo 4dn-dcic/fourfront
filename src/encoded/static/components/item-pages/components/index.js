@@ -29,3 +29,4 @@ export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDes
 export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
 export { AdjustableDividerRow, DraggableVerticalBorder } from './AdjustableDividerRow';
 export { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
+export { OverviewHeadingContainer } from './OverviewHeadingContainer';

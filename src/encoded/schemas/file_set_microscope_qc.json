@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

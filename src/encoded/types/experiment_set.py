@@ -80,7 +80,9 @@ class ExperimentSet(Item):
         #"static_headers.section_type",
         #"static_headers.options.default_open",
         #"static_headers.options.title_icon",
-        "static_headers.*", # Type: UserContent, may have differing properties
+
+        "static_headers.*",             # Type: UserContent, may have differing properties
+        "static_content.content.*",    # Type: UserContent, may have differing properties
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",

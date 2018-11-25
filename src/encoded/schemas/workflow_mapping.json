@@ -17,7 +17,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "properties": {
         "schema_version": {

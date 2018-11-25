@@ -8,8 +8,9 @@ import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator } from './components';
-import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
+    HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
