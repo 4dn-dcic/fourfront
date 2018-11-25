@@ -363,8 +363,14 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
         if (file && file.higlass_uid && (
-            (fileFormat && (fileFormat === 'mcool' || fileFormat === 'bw' || fileFormat === 'bg'))
-            || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
+            (fileFormat && ['mcool', 'bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat))
+            || (file.file_type_detailed && (
+                file.file_type_detailed.indexOf('(mcool)') > -1 ||
+                file.file_type_detailed.indexOf('(bw)')    > -1 ||
+                file.file_type_detailed.indexOf('(bg)')    > -1 ||
+                file.file_type_detailed.indexOf('(bed)')   > -1 ||
+                file.file_type_detailed.indexOf('(beddb)') > -1
+            ))
         )){
 
             var onDragStart = function(evt){
@@ -538,7 +544,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
 
         function isValidBWVizFile(f){
             var fileFormat = fileUtil.getFileFormatStr(f);
-            return (fileFormat === 'bg' || fileFormat === 'bw') && f.higlass_uid;
+            return f.higlass_uid && ['bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat);
         }
 
         var bigwigFiles = _.filter(files || [], isValidBWVizFile);

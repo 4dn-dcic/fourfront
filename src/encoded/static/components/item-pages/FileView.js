@@ -41,8 +41,9 @@ export default class FileView extends WorkflowRunTracingView {
         if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
         var fileFormat  = fileUtil.getFileFormatStr(context),
             isMcoolFile = fileFormat === 'mcool',
-            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg');
-        return isMcoolFile || isBWFile;
+            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg'),
+            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed');
+        return isMcoolFile || isBWFile || isBEDDBFile;
     }
 
     constructor(props){
