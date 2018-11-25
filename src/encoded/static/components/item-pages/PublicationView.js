@@ -9,6 +9,7 @@ import { Button, Collapse } from 'react-bootstrap';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
 import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
+import { UserContentBodyList } from './../static-pages/components';
 
 
 export default class PublicationView extends DefaultItemView {
@@ -47,7 +48,7 @@ class PublicationSummary extends React.PureComponent {
     static getTabObject(props, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
-            'key' : 'pub-summary',
+            'key' : 'overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">
@@ -126,7 +127,7 @@ class PublicationSummary extends React.PureComponent {
             retArr          = [];
 
         return (
-            <div>
+            <React.Fragment>
                 <hr className="mb-0" />
                 <div className="row">
                     <div className="col-xs-12 col-md-8">
@@ -164,11 +165,16 @@ class PublicationSummary extends React.PureComponent {
                         : null }
                     </div>
                 </div>
-            </div>
+            </React.Fragment>
         );
 
     }
 
+    /**
+     * Deprecated since Attribution tab was added.
+     *
+     * @deprecated
+     */
     contributingLabs(){
         var { context } = this.props,
             contributingLabs = _.filter(
@@ -198,17 +204,17 @@ class PublicationSummary extends React.PureComponent {
                 <h4 className="mt-2 mb-15 text-500">
                     { contributingLabs.length > 1 ? 'Contributing Labs' : 'Contributing Lab' }
                 </h4>
-                <ul>
-                    { _.map(contributingLabs, labListItem) }
-                </ul>
+                <ul children={ _.map(contributingLabs, labListItem) } />
             </div>
         );
     }
 
     render(){
         var { context } = this.props,
-            abstractCol = this.abstract();
-
+            abstractCol = this.abstract(),
+            staticContent = _.pluck(_.filter(context.static_content || [], function(s){
+                return s.content && !s.content.error && s.location === 'tab:overview';
+            }), 'content');
 
         return (
             <div>
@@ -223,11 +229,15 @@ class PublicationSummary extends React.PureComponent {
                     </div>
                 </div>
                 { this.details() }
-                { this.contributingLabs() }
+                { staticContent.length > 0 ? (
+                    <div className="mt-2">
+                        <hr/>
+                        <UserContentBodyList contents={staticContent} />
+                    </div>
+                ) : null }
             </div>
         );
     }
-
 }
 
 
@@ -282,9 +292,9 @@ class PublicationExperimentSets extends React.PureComponent {
         return (
             <div>
                 <ExperimentSetTablesLoadedFromSearch requestHref={requestHref} windowWidth={windowWidth} onLoad={this.getCountCallback} title={title} />
-                { this.state.totalCount && this.state.totalCount > 25 ?
+                { totalCount && totalCount > 25 ?
                     <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
-                        View all Experiment Sets ({ this.state.totalCount - 25 + ' more' })
+                        View all Experiment Sets ({ totalCount - 25 + ' more' })
                     </Button>
                 : null }
             </div>

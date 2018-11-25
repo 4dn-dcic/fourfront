@@ -559,7 +559,7 @@
             }
         }
     },
-    "static_headers": {
+    "static_embeds": {
         "static_headers": {
             "title": "Static Headers",
             "description": "Array of linkTos for static sections to be displayed at the top of an item page",
@@ -572,6 +572,39 @@
                 "description": "Static section displayed at the top of an item page",
                 "type": "string",
                 "linkTo": "UserContent"
+            }
+        },
+        "static_content": {
+            "title": "Static Content",
+            "description": "Array of objects containing linkTo UserContent and 'position' to be placed on Item view(s).",
+            "type": "array",
+            "uniqueItems": true,
+            "permission": "import_items",
+            "exclude_from" : ["submit4dn"],
+            "items": {
+                "title" : "Static Content Definition",
+                "description" : "Link to UserContent Item plus location.",
+                "type" : "object",
+                "required" : ["location", "content"],
+                "properties" : {
+                    "content" : {
+                        "type" : "string",
+                        "linkTo": "UserContent",
+                        "title" : "Link to Content",
+                        "description" : "A UserContent Item."
+                    },
+                    "location" : {
+                        "type" : "string",
+                        "title" : "Location of Content",
+                        "description" : "Where this content should be displayed. Item schemas could potentially define an enum to contrain values.",
+                        "default" : "header"
+                    },
+                    "description" : {
+                        "type" : "string",
+                        "title" : "Description",
+                        "description" : "Description or note about this content. Might be displayed as a footnote or caption, if applicable for view."
+                    }
+                }
             }
         }
     },

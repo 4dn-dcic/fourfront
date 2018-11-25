@@ -4,6 +4,8 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import { filtersToHref, contextFiltersToExpSetFilters, expSetFiltersToURLQuery } from './experiments-filters';
+import { NavigateOpts } from './typedefs';
+
 let store = null;
 
 let cachedNavFunction = null;
