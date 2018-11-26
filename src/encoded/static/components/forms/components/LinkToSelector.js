@@ -14,7 +14,23 @@ import { console, object } from './../../util';
  */
 let linkedObjChildWindow = null;
 
-
+/**
+ * Use to help select Items from a second/child window's SearchView.
+ *
+ * While `props.isSelecting` is true, this component will keep window event listeners active to
+ * listen for ondrag/ondrop events as well as for 'message' events (e.g. from other window(s)).
+ * 
+ * Upon receiving a drop or message of an Item, `props.onSelect` is called with the Item's @ID and
+ * its context (if available) as parameters. `props.onSelect` is expected to handle setting `props.isSelecting`
+ * to false and/or unmounting this component.
+ *
+ * Upon `props.isSelecting` becoming true (or component mounted with
+ * that value), component will initialize/open a child window which will be
+ * kept open until is closed or `props.isSelecting` becomes false (or this component becomes
+ * unmounted).
+ * 
+ * This component does not render any of its own JSX/HTML, but will render children if any are passed in.
+ */
 export class LinkToSelector extends React.PureComponent {
 
     static propTypes = {
