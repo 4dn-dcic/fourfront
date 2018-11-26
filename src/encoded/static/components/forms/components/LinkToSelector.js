@@ -34,16 +34,22 @@ let linkedObjChildWindow = null;
 export class LinkToSelector extends React.PureComponent {
 
     static propTypes = {
+        /** Whether component should be listening for Item to be selected */
         'isSelecting'       : PropTypes.bool.isRequired,
+        /** Callback called when Item is received. Should accept @ID and Item context (not guaranteed) as params. */
         'onSelect'          : PropTypes.func.isRequired,
+        /** Search URL to direct child window to */
         'searchURL'         : PropTypes.string.isRequired,
+        /** Text content of message filling window when being dragged over */
+        'dropMessage'       : PropTypes.string.isRequired,
+        /** Optional alert to show in child window upon initialization. Not guaranteed to appear in all browsers. */
         'childWindowAlert'  : PropTypes.shape({
             'title'             : PropTypes.string.isRequired,
             'message'           : PropTypes.any.isRequired,
             'style'             : PropTypes.string
         }),
-        'onCloseChildWindow': PropTypes.func,
-        'dropMessage'       : PropTypes.string.isRequired
+        /** Optional callback called with no params when child window is closed. Could/should unset `props.isSelecting`. */
+        'onCloseChildWindow': PropTypes.func
     };
 
     static defaultProps = {
@@ -342,11 +348,13 @@ export class LinkToSelector extends React.PureComponent {
      * THIS MAY NOT WORK FOR ALL BROWSERS
      */
     showAlertInChildWindow(){
-        var { childWindowAlert } = this.props;
+        var childWindowAlert = this.props.childWindowAlert;
         if (!childWindowAlert) return;
-
+        if (typeof childWindowAlert === 'function'){
+            childWindowAlert = childWindowAlert(this.props);
+        }
         var childAlerts = this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts;
-        if (!Array.isArray(childAlerts) || !childAlerts) return;
+        if (!childAlerts) return;
         childAlerts.queue(childWindowAlert);
     }
 

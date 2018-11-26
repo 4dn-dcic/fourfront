@@ -530,21 +530,28 @@ class LinkedObj extends React.PureComponent {
         if (this.isInSelectionField()){
             var prettyTitle      = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
                 dropMessage      = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
-                childWindowAlert = {
-                    'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
-                    'message' : (
-                        <div>
-                            <p className="mb-0">
-                                Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
-                            </p>
-                            <p className="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
-                        </div>
-                    ),
-                    'style' : 'info'
+                childWindowAlert = function(){
+                    // We have this inside a function instead of passing JSX element(s) because
+                    // as JSX elements they might gain non-serializable properties when being passed down thru props.
+                    return {
+                        'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
+                        'message' : (
+                            <div>
+                                <p class="mb-0">
+                                    Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
+                                </p>
+                                <p class="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
+                            </div>
+                        ),
+                        'style' : 'info'
+                    };
                 };
             return (
-                <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} searchURL={this.state.searchURL} onCloseChildWindow={selectCancel}
-                    childWindowAlert={childWindowAlert} dropMessage={dropMessage} children={this.renderSelectInputField()}/>
+                <React.Fragment>
+                    <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} searchURL={this.state.searchURL} onCloseChildWindow={selectCancel}
+                        childWindowAlert={childWindowAlert} dropMessage={dropMessage} />
+                    { this.renderSelectInputField() }
+                </React.Fragment>
             );
         }
 
