@@ -7777,17 +7777,17 @@
         "app_name": "bedGraphToBigWig",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bgfile"
             },
-            {   
+            {
                 "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
-            {   
+            {
                 "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Output to-be-extra-input file",
                 "workflow_argument_name": "bwfile"
@@ -7876,70 +7876,70 @@
         "app_name": "encode-chipseq",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.fastqs"
             },
-            {   
+            {
                 "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_fastqs"
             },
-            {   
+            {
                 "argument_format": "96809e57-4ccd-40b4-9fcb-ce27c4f16df9",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.peak_calls",
                 "alternative_conditional_argument_names": ["chip.macs2.sig_fc", "chip.macs2_pooled.sig_fc"]
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {   
+            {
                 "argument_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
@@ -8182,5 +8182,92 @@
         "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
         "workflow_diagram": "",
         "workflow_type": "Other"
+    },
+    {
+      "docker_registry_url": "https://hub.docker.com/",
+      "category": "format conversion",
+      "description": "Converting bed to beddb",
+      "app_version": "dev",
+      "workflow_diagram": "",
+      "title": "Converting bed to beddb",
+      "status": "in review by lab",
+      "app_name": "bedtobeddb",
+      "steps": [
+        {
+          "meta": {
+            "software_used": [
+              "d064191c-b2fc-4c7b-971f-5e2034dc902d"
+            ],
+            "analysis_step_types": [
+              "file format conversion"
+            ]
+          },
+          "outputs": [
+            {
+              "target": [
+                {
+                  "name": "beddbfile"
+                }
+              ],
+              "meta": {
+                "type": "data file",
+                "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "global": true,
+                "cardinality": "single"
+              },
+              "name": "beddbfile"
+            }
+          ],
+          "name": "bedtobeddb",
+          "inputs": [
+            {
+              "meta": {
+                "type": "data file",
+                "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "global": true,
+                "cardinality": "single"
+              },
+              "name": "bedfile",
+              "source": [
+                {
+                  "name": "bedfile"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+          "workflow_argument_name": "bedfile",
+          "argument_type": "Input file"
+        },
+        {
+          "argument_format": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
+          "workflow_argument_name": "beddbfile",
+          "argument_type": "Output to-be-extra-input file"
+        },
+        {
+          "workflow_argument_name": "assembly",
+          "argument_type": "parameter"
+        }
+      ],
+      "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+      "docker_image_name": "4dn-dcic/docker-4dn-bedtobeddb",
+      "accession": "4DNWLM174GGG",
+      "workflow_type": "Other",
+      "cwl_pointer": "",
+      "cwl_child_filenames": [],
+      "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtobeddb/master/cwl/",
+      "uuid": "9d575e99-5ffe-4ea4-b74f-ad40f621cd39",
+      "data_types": [
+        "Hi-C",
+        "DAM-ID"
+      ],
+      "cwl_main_filename": "bedtobeddb.cwl",
+      "workflow_language": "CWL",
+      "name": "bedtobeddb",
+      "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }
 ]
