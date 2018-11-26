@@ -719,3 +719,52 @@ def test_bogus_fileuuid(testapp, mcool_file_json, higlass_mcool_viewconf, bg_fil
     # Expect failure.
     assert response.json["success"] == False
     assert "does not exist" in response.json["errors"]
+
+def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf, bg_file_json):
+    """ Add files by the accession instead of the uuid.
+    """
+
+    # Add an mcool file. Add a higlass_uid.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = "GRCm38"
+    mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+    assert mcool_file["accession"]
+
+    # Add a bg file.
+    bg_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bg_file_json['genome_assembly'] = "GRCm38"
+    bg_file_json['md5sum'] = '00000000000000000000000000000001'
+    bg_file = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
+    assert bg_file["accession"]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000003"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the files to the viewconf by passing in the acession.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'files': "{accession1},{accession2}".format(accession1=mcool_file["accession"], accession2=bg_file["accession"])
+    })
+
+    assert response.json["success"] == True
+
+    # Get the new json.
+    new_higlass_json = response.json["new_viewconfig"]
+
+    # There should be 2 views.
+    assert len(new_higlass_json["views"]) == 2
+
+    old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
+
+    for index, view in enumerate(new_higlass_json["views"]):
+        tracks = view["tracks"]
+
+        # 1 central track should be in the new view.
+        if index == 1:
+            assert len(tracks["center"][0]["contents"]) == 1
+            assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+
+        # 1 more track should be on top.
+        assert len(tracks["top"]) == len(old_tracks["top"]) + 1

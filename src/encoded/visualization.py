@@ -498,11 +498,11 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
     known_2d_formats = ("mcool", "hic")
     if [x for x in known_2d_formats if x in file_format]:
         status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
-        if errors:
+        if errors and not status:
             return None, errors
     elif [x for x in known_1d_formats if x in file_format]:
         status, errors = add_1d_file_to_higlass_viewconf(views, new_file_dict)
-        if errors:
+        if errors and not status:
             return None, errors
     else:
         return None, "Unknown file format {file_format}".format(file_format = new_file_dict['file_format'])
@@ -517,7 +517,7 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
     """Add the given 1-D file to the higlass views.
 
     Returns:
-    - a boolean indicating succes
+    - a boolean indicating success
     - a string containing an error message, if any (may be None)
     """
 
@@ -577,7 +577,7 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
     """Create a new view to contain the 2D file and add it to the list of current views.
 
     Returns:
-    - a boolean indicating succes
+    - a boolean indicating success
     - a string containing an error message, if any (may be None)
     """
 

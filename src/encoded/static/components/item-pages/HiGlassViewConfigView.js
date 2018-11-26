@@ -579,7 +579,7 @@ class HiGlassAddFileButton extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <input type="text" placeholder="File uuid" className="form-control search-query" value={this.state.fileUuid} onChange={this.handleTextChange} />
+                <input type="text" placeholder="File accession or uuid" className="form-control search-query" value={this.state.fileUuid} onChange={this.handleTextChange} />
                 <Button onClick={this.handleButtonClicked} disabled={this.props.fileLoading} bsStyle="success" key="addfilebtn" data-tip={tooltip}>
                     <i className={"icon icon-fw icon-" + (this.props.fileLoading ? 'circle-o-notch icon-spin' : 'plus-square')}/>&nbsp; Add
                 </Button>
