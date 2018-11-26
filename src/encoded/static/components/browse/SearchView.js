@@ -158,9 +158,10 @@ class ControlsAndResults extends React.PureComponent {
                     newChildren.unshift(
                         <div className="select-button-container">
                             <button className="select-button" onClick={(e)=>{
-                                //e.preventDefault();
+                                // Standard - postMessage
                                 var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
                                 window.opener.postMessage(eventJSON, '*');
+                                // Nonstandard - in case browser doesn't support postMessage but does support other cross-window events (unlikely).
                                 window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
                             }}>
                                 <i className="icon icon-fw icon-check"/>
