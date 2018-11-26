@@ -49,7 +49,6 @@ export class LinkToSelector extends React.PureComponent {
         this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
         this.setChildWindowMessageHandler = this.setChildWindowMessageHandler.bind(this);
         this.handleChildWindowMessage = this.handleChildWindowMessage.bind(this);
-        this.handleChildFourFrontSelectionClick = this.handleChildFourFrontSelectionClick.bind(this);
         this.handleWindowDragOver = this.handleWindowDragOver.bind(this);
         this.refreshWindowDropReceiver = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
         this.closeWindowDropReceiver = this.closeWindowDropReceiver.bind(this);
@@ -57,6 +56,11 @@ export class LinkToSelector extends React.PureComponent {
         this.receiveData = this.receiveData.bind(this);
 
         this.windowDropReceiverHideTimeout = null;
+    }
+
+    componentDidMount(){
+        this.manageWindowOnDragHandler({ 'isSelecting' : false }, this.props);
+        this.manageChildWindow({ 'isSelecting' : false }, this.props);
     }
 
     componentDidUpdate(pastProps){
@@ -94,7 +98,7 @@ export class LinkToSelector extends React.PureComponent {
         } else if (hasSetInSelection){
             var _this = this;
             setTimeout(function(){
-                if (!_this || !this.props.isSelecting) return false;
+                if (!_this || !_this.props.isSelecting) return false;
                 //if (!_this || !_this.isInSelectionField(_this.props)) return false;
                 window.addEventListener('dragenter', _this.handleWindowDragEnter);
                 window.addEventListener('dragover',  _this.handleWindowDragOver);
