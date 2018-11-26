@@ -10,6 +10,8 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
+jest.mock('./../util/navigate');
+
 
 function getActiveTabIndex(tabs){
     return tabs.map(function(tb){
@@ -20,7 +22,7 @@ function getActiveTabIndex(tabs){
 
 describe('Testing ExperimentSetView', function() {
     var sinon, server;
-    var expFuncs, context, schemas, ExperimentSetView, testView, RawFilesStackedTable;
+    var context, schemas, ExperimentSetView, testView, RawFilesStackedTable;
 
     beforeAll(function() {
 
@@ -41,9 +43,13 @@ describe('Testing ExperimentSetView', function() {
         RawFilesStackedTable = require('../browse/components').RawFilesStackedTable;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
-        expFuncs = require('../util').expFxn;
 
-        testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} />);
+        testView = TestUtils.renderIntoDocument(
+            <ExperimentSetView
+                context={context} schemas={schemas} windowWidth={1200}
+                href="https://data.4dnucleome.org/experiment-set-replicates/4DNESH4MYRID/"
+            />
+        );
 
 
         //jest.runAllTimers();

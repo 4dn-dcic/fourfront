@@ -507,7 +507,7 @@ export const HiGlassConfigurator = {
                 "height"    : trackHeight,
                 "position"  : "top",
                 "server"    : options.baseUrl + "/api/v1",
-                "type"      : "horizontal-bar",
+                "type"      : "horizontal-divergent-bar",
                 "options"   : _.extend(styleOptions, {
                     "name"          : bigWigFile.display_title,
                     "valueScaling"  : "linear",
@@ -579,6 +579,70 @@ export const HiGlassConfigurator = {
             });
         }
 
+    },
+
+    'beddb' : {
+        'generateTopContentTrack' : function(bedFile, options, { chromosome, annotation }, idx, all){
+            var track = HiGlassConfigurator.bigwig.generateTopContentTrack(...arguments);
+            track.type      = 'bedlike';
+            track.height    = Math.min(track.height, 50);
+            return track;
+        },
+        'generateView' : function(files, options){
+            var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index, excludeAnnotationTracks } = options;
+
+            // Track definitions, default to human.
+            var commonGenomeAssembly = _.uniq(_.filter(_.pluck(files, 'genome_assembly')))[0]; // Use first for now.
+            var chromosomeAndAnnotation = HiGlassConfigurator.chromosomeAndAnnotationFromGenomeAssembly(commonGenomeAssembly);
+
+            var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
+
+            var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
+
+            const tracks = []; // Will be used as single 'top' tracks list.
+
+            if (!excludeAnnotationTracks) {
+                tracks.push(HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation));
+                tracks.push(HiGlassConfigurator.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation));
+            }
+
+            _.forEach(files, function(file, idx, all){
+                tracks.push(
+                    HiGlassConfigurator.beddb.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
+                );
+            });
+
+            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-beddb-" + index, chromosomeAndAnnotation, options), {
+                "tracks": {
+                    "top" : tracks,
+                    "left" : [],
+                    "center": [],
+                    "right": [],
+                    "bottom": []
+                },
+            });
+        },
+        'generateViewConfig' : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+            options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
+
+            // Make sure to override non-falsy-allowed values with defaults.
+            _.forEach(['baseUrl', 'supplementaryTracksBaseUrl', 'initialDomains', 'genomeAssembly', 'extraViewProps'], function(k){
+                options[k] = options[k] || DEFAULT_GEN_VIEW_CONFIG_OPTIONS[k];
+            });
+
+            if (!Array.isArray(files)) throw new Error('Files must be an array');
+            if (files.length === 0) throw new Error('Files list must have at least 1 file.');
+            var isMultipleViews = !!(Array.isArray(files[0])); // If we have files in nested arrays, then assume we subdivide them into multiple views.
+
+            if (isMultipleViews){
+                throw new Error('Subidividing bedgraph lists into multiple views is not supported __yet__.');
+                // TODO - generateMultipleViewConfigs
+            }
+
+            return _.extend(HiGlassConfigurator.generateViewConfigBase(options), {
+                "views": [ HiGlassConfigurator.beddb.generateView(files, options) ]
+            });
+        }
     }
 
 };
@@ -607,7 +671,9 @@ export class HiGlassContainer extends React.PureComponent {
             var fxnByFormatDict = {
                 'mcool' : HiGlassConfigurator.mcool.generateViewConfig,
                 'bw'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bg'    : HiGlassConfigurator.bigwig.generateViewConfig
+                'bg'    : HiGlassConfigurator.bigwig.generateViewConfig,
+                'bed'   : HiGlassConfigurator.beddb.generateViewConfig,
+                'beddb' : HiGlassConfigurator.beddb.generateViewConfig
             };
 
             if (allFileFormats.length === 1){

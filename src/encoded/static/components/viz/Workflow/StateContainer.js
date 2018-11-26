@@ -31,47 +31,24 @@ export default class StateContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.defaultOnNodeClick = this.defaultOnNodeClick.bind(this);
         this.handleNodeClick = this.handleNodeClick.bind(this);
-        this.href = this.href.bind(this);
         this.render = this.render.bind(this);
-
-        var state = {
+        this.state = {
             'selectedNode' : null
         };
-
-        if (props.checkHrefForSelectedNode){
-            var href = this.href(props.href, props.checkWindowLocationHref);
-            var foundNode = findNodeFromHref(href, props.nodes);
-            if (foundNode){
-                state.selectedNode = foundNode;
-            }
-        }
-
-        this.state = state;
     }
 
     componentWillReceiveProps(nextProps){
 
-        var newState = {};
-        var foundNode;
-
-        if (nextProps.checkHrefForSelectedNode){
-            // Update selectedNode from location hash.
-            foundNode = findNodeFromHref(this.href(nextProps.href, nextProps.checkWindowLocationHref), nextProps.nodes);
-            if (foundNode){
-                newState.selectedNode = foundNode;
-            } else {
-                newState.selectedNode = null;
-                if (window && window.location && window.location.hash) window.location.hash = '';
-            }
-        }
+        var selectedNode    = this.state.selectedNode,
+            newState        = {},
+            foundNode;
 
         // Update own selectedNode to latest v, if still exists & new one not otherwise set.
-        if ((typeof newState.selectedNode === 'undefined' && this.state.selectedNode) || this.state.selectedNode && ( this.props.nodes !== nextProps.nodes )){
-            var find = { 'name' : this.state.selectedNode.name, 'nodeType' : this.state.selectedNode.nodeType };
-            if (this.state.selectedNode.id) find.id = this.state.selectedNode.id; // Case: IO Node
+        if (selectedNode && ( this.props.nodes !== nextProps.nodes )){
+            var find = { 'name' : selectedNode.name, 'nodeType' : selectedNode.nodeType };
+            if (selectedNode.id) find.id = selectedNode.id; // Case: IO Node
             foundNode = _.findWhere(nextProps.nodes, find);
             if (foundNode){
                 newState.selectedNode = foundNode;
@@ -80,7 +57,9 @@ export default class StateContainer extends React.Component {
             }
         }
 
-        if (_.keys(newState).length > 0) this.setState(newState);
+        if (_.keys(newState).length > 0){
+            this.setState(newState);
+        }
     }
 
     defaultOnNodeClick(node, selectedNode, evt){
@@ -91,14 +70,6 @@ export default class StateContainer extends React.Component {
                 return { 'selectedNode' : node };
             }
         });
-    }
-
-    href(
-        fallbackHref = (this.props && this.props.href) || null,
-        checkWindowLocationHref = (this.props && typeof this.props.checkWindowLocationHref === 'boolean') ? this.props.checkWindowLocationHref : true
-    ){
-        if (checkWindowLocationHref) return windowHref(fallbackHref);
-        return fallbackHref;
     }
 
     handleNodeClick(node, evt){

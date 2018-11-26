@@ -38,7 +38,7 @@ export class HiGlassFileTabView extends React.Component {
             contentTrackOptions = {},
             fileFormat          = fileUtil.getFileFormatStr(file);
 
-        if (fileFormat === 'bg' || fileFormat === 'bw'){
+        if (['bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat) > -1){
             contentTrackOptions.showTooltip = true;
         }
         /**

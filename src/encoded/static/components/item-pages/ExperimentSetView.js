@@ -9,8 +9,8 @@ import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
-    AttributionTabView, SimpleFilesTable, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow } from './components';
-import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
+    AttributionTabView, SimpleFilesTable, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { requestAnimationFrame } from './../viz/utilities';
@@ -104,7 +104,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0 && Array.isArray(rawFiles) && rawFiles.length > 0){
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
-                key : 'experiments',
+                key : 'raw-files',
                 content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} {...this.state} />
             });
         }
@@ -125,7 +125,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
-                key : 'other-processed-files',
+                key : 'supplementary-files',
                 content : <OtherProcessedFilesStackedTableSection {...commonProps} {...this.state} />
             });
         }
@@ -149,10 +149,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     <i className="expand-icon icon icon-th-list" />
                 } />
         );
-    }
-
-    tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} />;
     }
 }
 
@@ -337,7 +333,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 25, minOpenHeight), maxOpenHeight)} ref="hiGlassContainer" />;
+                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref="hiGlassContainer" />;
                     }
                 }}
                 rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} ref="adjustableRow" />
@@ -367,8 +363,14 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
         if (file && file.higlass_uid && (
-            (fileFormat && (fileFormat === 'mcool' || fileFormat === 'bw' || fileFormat === 'bg'))
-            || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
+            (fileFormat && ['mcool', 'bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat))
+            || (file.file_type_detailed && (
+                file.file_type_detailed.indexOf('(mcool)') > -1 ||
+                file.file_type_detailed.indexOf('(bw)')    > -1 ||
+                file.file_type_detailed.indexOf('(bg)')    > -1 ||
+                file.file_type_detailed.indexOf('(bed)')   > -1 ||
+                file.file_type_detailed.indexOf('(beddb)') > -1
+            ))
         )){
 
             var onDragStart = function(evt){
@@ -542,7 +544,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
 
         function isValidBWVizFile(f){
             var fileFormat = fileUtil.getFileFormatStr(f);
-            return (fileFormat === 'bg' || fileFormat === 'bw') && f.higlass_uid;
+            return f.higlass_uid && ['bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat);
         }
 
         var bigwigFiles = _.filter(files || [], isValidBWVizFile);

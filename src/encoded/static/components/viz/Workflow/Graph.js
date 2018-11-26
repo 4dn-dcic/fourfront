@@ -24,9 +24,6 @@ import { DefaultNodeElement } from './Node';
  * @prop {function?}    renderDetailPane        Function to render out own custom Detail Pane. Accepts two params - 'selectedNode' and 'props' (of graph). Pass in null to perform your own logic in onNodeClick.
  * @prop {function}     [onNodeClick]           A function to be executed each time a node is clicked. 'this' will refer to internal statecontainer. Should accept params: {Object} 'node', {Object|null} 'selectedNode', and {MouseEvent} 'evt'. By default, it changes internal state's selectedNode. You should either disable props.checkHrefForSelectedNode -or- change href in this function.
  * @prop {function}     [isNodeDisabled]        Function which accepts a 'node' object and returns a boolean.
- * @prop {boolean}      [checkHrefForSelectedNode=true] - If true, will check props.href or window.location.href on updates as well as mounting and update selectedNode if '#' + node.name is in URL. Recommended to leave as true and in props.onNodeClick, to change href to contain '#' + node.name.
- * @prop {boolean}      [checkWindowLocationHref=true] - If true, checks window.location.href on updates instead of props.href. Must still trigger component update on page or href changes.
- * @prop {string}       [href]                  Must provide current HREF of page, if setting props.checkHrefForSelectedNode to true and turning off props.checkWindowLocationHref.
  * @prop {Object}       [innerMargin={top : 20, bottom: 48, left: 15, right: 15}]     Provide this object, containing numbers for 'top', 'bottom', 'left', and 'right', if want to adjust chart margins.
  * @prop {boolean}      [pathArrows=true]       Whether to display arrows at the end side of edges.
  * @prop {number}       [columnSpacing=56]      Adjust default spacing between columns, where edges are drawn.
@@ -90,8 +87,6 @@ export default class Graph extends React.Component {
             return <DefaultNodeElement {...props} node={node} />;
         },
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
-        'checkHrefForSelectedNode' : true,
-        'checkWindowLocationHref' : true,
         'innerMargin'   : {
             'top' : 60,
             'bottom' : 60,
@@ -288,14 +283,9 @@ export default class Graph extends React.Component {
             <div ref="outerContainer" className="worfklow-chart-outer-container">
                 <Fade appear in>
                     <div className="workflow-chart-inner-container">
-                        <StateContainer
-                            nodes={nodes}
-                            edges={edges}
-                            innerWidth={width}
-                            innerHeight={height}
-                            contentWidth={contentWidth}
-                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane', 'checkHrefForSelectedNode', 'checkWindowLocationHref')}
-                        >
+                        <StateContainer nodes={nodes} edges={edges}
+                            innerWidth={width} innerHeight={height} contentWidth={contentWidth}
+                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}>
                             <ScrollContainer outerHeight={fullHeight}>
                                 <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
                                 <NodesLayer {..._.pick(this.props, 'nodeElement', 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />

@@ -16,14 +16,15 @@ import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
-import { NavigateOpts } from './util/navigate';
+
+var { NavigateOpts } = typedefs;
 
 
 
@@ -939,9 +940,6 @@ export default class App extends React.Component {
      * @private
      * @param {string} href                 URI we're attempting to navigate to.
      * @param {NavigateOpts} [options={}]   Options for the navigation request.
-     * @param {boolean} options.replace     If true, browser history entry is replaced, not added.
-     * @param {boolean} options.skipRequest If true, request is skipped but browser URI and history is updated.
-     * @param {boolean} options.inPlace     If true, will re-load page even if is at same URL. Also won't scroll to top of page.
      * @param {function} [callback=null]    Optional callback, accepting response JSON as first argument.
      * @param {function} [fallbackCallback=null] - Optional callback to be called in case request fails.
      * @param {Object} [includeReduxDispatch={}] - Optional extra data to save to Redux store along with the next response.
