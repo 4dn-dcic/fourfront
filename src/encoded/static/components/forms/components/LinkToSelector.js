@@ -40,8 +40,6 @@ export class LinkToSelector extends React.PureComponent {
         'onSelect'          : PropTypes.func.isRequired,
         /** Search URL to direct child window to */
         'searchURL'         : PropTypes.string.isRequired,
-        /** Text content of message filling window when being dragged over */
-        'dropMessage'       : PropTypes.string.isRequired,
         /** Optional alert to show in child window upon initialization. Not guaranteed to appear in all browsers. */
         'childWindowAlert'  : PropTypes.shape({
             'title'             : PropTypes.string.isRequired,
@@ -49,7 +47,11 @@ export class LinkToSelector extends React.PureComponent {
             'style'             : PropTypes.string
         }),
         /** Optional callback called with no params when child window is closed. Could/should unset `props.isSelecting`. */
-        'onCloseChildWindow': PropTypes.func
+        'onCloseChildWindow': PropTypes.func,
+        /** If true, then allows to drag & drop Item to window */
+        'enableWindowDrop'  : PropTypes.bool.isRequired,
+        /** Text content of message filling window when being dragged over */
+        'dropMessage'       : PropTypes.string.isRequired
     };
 
     static defaultProps = {
@@ -62,7 +64,8 @@ export class LinkToSelector extends React.PureComponent {
         },
         'searchURL'         : '/search/?type=Item',
         'childWindowAlert'  : null,
-        'dropMessage'       : "Drop Item Here"
+        'dropMessage'       : "Drop Item Here",
+        'enableWindowDrop'  : true
     };
 
     constructor(props){
@@ -243,7 +246,10 @@ export class LinkToSelector extends React.PureComponent {
     }
 
     render(){
-        return <WindowDropReceiver {...this.props} />;
+        if (this.props.enableWindowDrop){
+            return <WindowDropReceiver {...this.props} />;
+        }
+        return null;
     }
 
 }
