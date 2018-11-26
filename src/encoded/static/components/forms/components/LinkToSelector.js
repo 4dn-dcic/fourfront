@@ -62,145 +62,29 @@ export class LinkToSelector extends React.PureComponent {
         },
         'searchURL'         : '/search/?type=Item',
         'childWindowAlert'  : null,
-        'children'          : null,
         'dropMessage'       : "Drop Item Here"
     };
 
     constructor(props){
         super(props);
-        this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
-        this.setChildWindowMessageHandler = this.setChildWindowMessageHandler.bind(this);
-        this.handleChildWindowMessage = this.handleChildWindowMessage.bind(this);
-        this.handleWindowDragOver = this.handleWindowDragOver.bind(this);
-        this.refreshWindowDropReceiver = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
-        this.closeWindowDropReceiver = this.closeWindowDropReceiver.bind(this);
-        this.handleDrop = this.handleDrop.bind(this);
-        this.receiveData = this.receiveData.bind(this);
-
-        this.windowDropReceiverHideTimeout = null;
+        this.showAlertInChildWindow         = this.showAlertInChildWindow.bind(this);
+        this.setChildWindowMessageHandler   = this.setChildWindowMessageHandler.bind(this);
+        this.handleChildWindowMessage       = this.handleChildWindowMessage.bind(this);
+        this.receiveData                    = this.receiveData.bind(this);
     }
 
     componentDidMount(){
-        this.manageWindowOnDragHandler({ 'isSelecting' : false }, this.props);
         this.manageChildWindow({ 'isSelecting' : false }, this.props);
     }
 
     componentDidUpdate(pastProps){
         if (pastProps.isSelecting !== this.props.isSelecting) {
-            this.manageWindowOnDragHandler(pastProps, this.props);
             this.manageChildWindow(pastProps, this.props);
         }
-        ReactTooltip.rebuild();
     }
 
     componentWillUnmount(){
-        this.manageWindowOnDragHandler(this.props, { 'isSelecting' : false });
         this.manageChildWindow(this.props, { 'isSelecting' : false }, true);
-    }
-
-    manageWindowOnDragHandler(pastProps, nextProps){
-
-        if (!window) {
-            console.error('No window object available. Fine if this appears in a test.');
-            return;
-        }
-
-        var pastInSelection       = pastProps.isSelecting,
-            nowInSelection        = nextProps.isSelecting,
-            hasUnsetInSelection   = pastInSelection && !nowInSelection,
-            hasSetInSelection     = !pastInSelection && nowInSelection;
-
-        if (hasUnsetInSelection){
-            window.removeEventListener('dragenter', this.handleWindowDragEnter);
-            window.removeEventListener('dragover',  this.handleWindowDragOver);
-            window.removeEventListener('drop',      this.handleDrop);
-            this.closeWindowDropReceiver();
-            //console.warn('Removed window event handlers for component', this);
-            //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
-        } else if (hasSetInSelection){
-            var _this = this;
-            setTimeout(function(){
-                if (!_this || !_this.props.isSelecting) return false;
-                //if (!_this || !_this.isInSelectionField(_this.props)) return false;
-                window.addEventListener('dragenter', _this.handleWindowDragEnter);
-                window.addEventListener('dragover',  _this.handleWindowDragOver);
-                window.addEventListener('drop',      _this.handleDrop);
-                //console.warn('Added window event handlers for field', _this.props.field);
-                //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
-            }, 250);
-        } else {
-            // No action occurred
-        }
-    }
-
-    /**
-     * Handles drop event for the (temporarily-existing-while-dragging-over) window drop receiver element.
-     * Grabs @ID of Item from evt.dataTransfer, attempting to grab from 'text/4dn-item-id', 'text/4dn-item-json', or 'text/plain'.
-     *
-     * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
-     * @param {DragEvent} Drag event.
-     */
-    handleDrop(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-        var draggedContext  = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json'),
-            draggedURI      = evt.dataTransfer && evt.dataTransfer.getData('text/plain'),
-            draggedID       = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-id'),
-            atId            = draggedID || (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname || null;
-
-        this.receiveData(atId, draggedContext);
-    }
-
-    handleWindowDragEnter(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-    }
-
-    handleWindowDragOver(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-        this.refreshWindowDropReceiver(evt);
-    }
-
-    closeWindowDropReceiver(evt){
-        var elem = this.windowDropReceiverElement;
-        if (!elem) return;
-        elem.style.opacity = 0;
-        setTimeout(()=>{
-            document.body.removeChild(elem);
-            this.windowDropReceiverElement = null;
-            this.windowDropReceiverHideTimeout = null;
-        }, 250);
-    }
-
-    refreshWindowDropReceiver(evt){
-        if (!document || !document.createElement) return;
-
-        if (this.windowDropReceiverHideTimeout !== null) {
-            clearTimeout(this.windowDropReceiverHideTimeout);
-            this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
-            return;
-        }
-
-        var { dropMessage } = this.props,
-            element     = document.createElement('div');
-
-        element.className = "full-window-drop-receiver";
-
-        var innerText       = dropMessage, //"Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
-            innerBoldElem   = document.createElement('h2');
-
-        innerBoldElem.appendChild(document.createTextNode(innerText));
-        element.appendChild(innerBoldElem);
-        element.appendChild(document.createElement('br'));
-        document.body.appendChild(element);
-        this.windowDropReceiverElement = element;
-
-        setTimeout(()=>{
-            this.windowDropReceiverElement.style.opacity = 1;
-        }, 10);
-
-        this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
     }
 
     manageChildWindow(pastProps, nextProps, willUnmount = false){
@@ -359,7 +243,170 @@ export class LinkToSelector extends React.PureComponent {
     }
 
     render(){
-        return this.props.children;
+        return <WindowDropReceiver {...this.props} />;
     }
 
 }
+
+
+
+
+export class WindowDropReceiver extends React.PureComponent {
+
+    static propTypes = {
+        /** Whether component should be listening for Item to be selected */
+        'isSelecting'       : PropTypes.bool.isRequired,
+        /** Callback called when Item is received. Should accept @ID and Item context (not guaranteed) as params. */
+        'onSelect'          : PropTypes.func.isRequired,
+        /** Text content of message filling window when being dragged over */
+        'dropMessage'       : PropTypes.string.isRequired
+    };
+
+    static defaultProps = {
+        'isSelecting'       : false,
+        'onSelect'          : function(itemAtID, itemContext){
+            console.log("Selected", itemAtID, itemContext);
+        },
+        'dropMessage'       : "Drop Item Here"
+    };
+
+    constructor(props){
+        super(props);
+        this.handleWindowDragOver       = this.handleWindowDragOver.bind(this);
+        this.refreshWindowDropReceiver  = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
+        this.closeWindowDropReceiver    = this.closeWindowDropReceiver.bind(this);
+        this.handleDrop                 = this.handleDrop.bind(this);
+        this.receiveData                = this.receiveData.bind(this);
+
+        this.windowDropReceiverHideTimeout = null;
+    }
+
+    componentDidMount(){
+        this.manageWindowOnDragHandler({ 'isSelecting' : false }, this.props);
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.isSelecting !== this.props.isSelecting) {
+            this.manageWindowOnDragHandler(pastProps, this.props);
+        }
+    }
+
+    componentWillUnmount(){
+        this.manageWindowOnDragHandler(this.props, { 'isSelecting' : false });
+    }
+
+    manageWindowOnDragHandler(pastProps, nextProps){
+
+        if (!window) {
+            console.error('No window object available. Fine if this appears in a test.');
+            return;
+        }
+
+        var pastInSelection       = pastProps.isSelecting,
+            nowInSelection        = nextProps.isSelecting,
+            hasUnsetInSelection   = pastInSelection && !nowInSelection,
+            hasSetInSelection     = !pastInSelection && nowInSelection;
+
+        if (hasUnsetInSelection){
+            window.removeEventListener('dragenter', this.handleWindowDragEnter);
+            window.removeEventListener('dragover',  this.handleWindowDragOver);
+            window.removeEventListener('drop',      this.handleDrop);
+            this.closeWindowDropReceiver();
+            console.log('Removed window event handlers for WindowDropReceiver');
+        } else if (hasSetInSelection){
+            var _this = this;
+            setTimeout(function(){
+                if (!_this || !_this.props.isSelecting) return false;
+                //if (!_this || !_this.isInSelectionField(_this.props)) return false;
+                window.addEventListener('dragenter', _this.handleWindowDragEnter);
+                window.addEventListener('dragover',  _this.handleWindowDragOver);
+                window.addEventListener('drop',      _this.handleDrop);
+                console.log('Added window event handlers for WindowDropReceiver');
+            }, 250);
+        } else {
+            // No action occurred
+        }
+    }
+
+    /**
+     * Handles drop event for the (temporarily-existing-while-dragging-over) window drop receiver element.
+     * Grabs @ID of Item from evt.dataTransfer, attempting to grab from 'text/4dn-item-id', 'text/4dn-item-json', or 'text/plain'.
+     *
+     * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
+     * @param {DragEvent} Drag event.
+     */
+    handleDrop(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        var draggedContext  = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json'),
+            draggedURI      = evt.dataTransfer && evt.dataTransfer.getData('text/plain'),
+            draggedID       = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-id'),
+            atId            = draggedID || (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname || null;
+
+        this.receiveData(atId, draggedContext);
+    }
+
+    handleWindowDragEnter(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
+
+    handleWindowDragOver(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.refreshWindowDropReceiver(evt);
+    }
+
+    closeWindowDropReceiver(evt){
+        var elem = this.windowDropReceiverElement;
+        if (!elem) return;
+        elem.style.opacity = 0;
+        setTimeout(()=>{
+            document.body.removeChild(elem);
+            this.windowDropReceiverElement = null;
+            this.windowDropReceiverHideTimeout = null;
+        }, 250);
+    }
+
+    refreshWindowDropReceiver(evt){
+        if (!document || !document.createElement) return;
+
+        if (this.windowDropReceiverHideTimeout !== null) {
+            clearTimeout(this.windowDropReceiverHideTimeout);
+            this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+            return;
+        }
+
+        var { dropMessage } = this.props,
+            element     = document.createElement('div');
+
+        element.className = "full-window-drop-receiver";
+
+        var innerText       = dropMessage, //"Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
+            innerBoldElem   = document.createElement('h2');
+
+        innerBoldElem.appendChild(document.createTextNode(innerText));
+        element.appendChild(innerBoldElem);
+        element.appendChild(document.createElement('br'));
+        document.body.appendChild(element);
+        this.windowDropReceiverElement = element;
+
+        setTimeout(()=>{
+            this.windowDropReceiverElement.style.opacity = 1;
+        }, 10);
+
+        this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+    }
+
+    receiveData(itemAtID, itemContext){
+        this.props.onSelect(itemAtID, itemContext);
+    }
+
+    render(){
+        return null;
+    }
+
+}
+
+
+
