@@ -523,7 +523,7 @@ class LinkedObj extends React.PureComponent {
     }
 
     render(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, fieldBeingSelected } = this.props,
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel } = this.props,
             isSelecting = this.isInSelectionField(),
             itemType    = schema.linkTo;
 
@@ -543,7 +543,7 @@ class LinkedObj extends React.PureComponent {
                     'style' : 'info'
                 };
             return (
-                <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} searchURL={this.state.searchURL}
+                <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} searchURL={this.state.searchURL} onCloseChildWindow={selectCancel}
                     childWindowAlert={childWindowAlert} dropMessage={dropMessage} children={this.renderSelectInputField()}/>
             );
         }

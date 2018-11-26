@@ -73,7 +73,7 @@ export class LinkToSelector extends React.PureComponent {
 
     componentWillUnmount(){
         this.manageWindowOnDragHandler(this.props, { 'isSelecting' : false });
-        this.manageChildWindow(this.props, { 'isSelecting' : false });
+        this.manageChildWindow(this.props, { 'isSelecting' : false }, true);
     }
 
     manageWindowOnDragHandler(pastProps, nextProps){
@@ -160,9 +160,7 @@ export class LinkToSelector extends React.PureComponent {
             return;
         }
 
-        var { schema, nestedField, dropMessage } = this.props,
-            itemType    = schema.linkTo,
-            prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
+        var { dropMessage } = this.props,
             element     = document.createElement('div');
 
         element.className = "full-window-drop-receiver";
@@ -183,7 +181,7 @@ export class LinkToSelector extends React.PureComponent {
         this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
     }
 
-    manageChildWindow(pastProps, nextProps){
+    manageChildWindow(pastProps, nextProps, willUnmount = false){
 
         if (!window) {
             console.error('No window object available. Fine if this appears in a test.');
@@ -241,7 +239,11 @@ export class LinkToSelector extends React.PureComponent {
             if (this.childWindowClosedInterval){
                 clearInterval(this.childWindowClosedInterval);
                 delete this.childWindowClosedInterval;
-                this.cleanChildWindowEventHandlers();
+                if (willUnmount){
+                    this.cleanChildWindow();
+                } else {
+                    this.cleanChildWindowEventHandlers();
+                }
             }
             
         }
