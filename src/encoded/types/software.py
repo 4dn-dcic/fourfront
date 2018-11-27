@@ -9,8 +9,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -24,7 +24,7 @@ class Software(Item):
     """The Software class that contains the software... used."""
     item_type = 'software'
     schema = load_schema('encoded:schemas/software.json')
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'software_relation' are stored in self.properties

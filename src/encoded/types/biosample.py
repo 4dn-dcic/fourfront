@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
     # paths_filtered_by_status,
 )
 
@@ -27,7 +28,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
     # name_key = 'accession'
-    embedded_list = [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'biosource.biosource_type',
         'biosource.individual.sex',
         'biosource.individual.organism.name',
@@ -55,8 +56,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
-        'biosample_protocols.description',
-        'award.project'
+        'biosample_protocols.description'
     ]
     name_key = 'accession'
 

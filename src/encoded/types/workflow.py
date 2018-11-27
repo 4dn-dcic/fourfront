@@ -16,7 +16,8 @@ from snovault import (
     TYPES
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 import cProfile
 import pstats
@@ -574,8 +575,7 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = workflow_schema
-    embedded_list = [
-        'award.project',
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'steps.name',
         'steps.inputs',
         'steps.outputs',
@@ -600,8 +600,7 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded_list = [
-        'award.project',
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'workflow.title',
         'workflow.steps.name',
         'workflow.steps.meta.software_used.name',
@@ -785,7 +784,7 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
-    embedded_list = []
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
 
 def validate_input_json(context, request):

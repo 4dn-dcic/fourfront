@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -20,12 +21,13 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded_list = ['award.project',
-                     'constructs.construct_type',
-                     'constructs.tags',
-                     'constructs.designed_to_target',
-                     'modified_regions.aliases',
-                     'target_of_mod.target_summary']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        'constructs.construct_type',
+        'constructs.tags',
+        'constructs.designed_to_target',
+        'modified_regions.aliases',
+        'target_of_mod.target_summary'
+    ]
 
     @calculated_property(schema={
         "title": "Modification name",

@@ -180,7 +180,14 @@ def validate_item_type_of_linkto_field(context, request):
     pass
 
 
-# Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+## Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+
+static_content_embed_list = [
+    "static_headers.*",            # Type: UserContent, may have differing properties
+    "static_content.content.*",    # Type: UserContent, may have differing properties
+]
 
 lab_award_attribution_embed_list = [
     "award.project",
@@ -312,6 +319,9 @@ class Item(snovault.Item):
         # experiment sets
         'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
+
+    # Default embed list for all 4DN Items
+    embedded_list = static_content_embed_list
 
     def __init__(self, registry, models):
         super().__init__(registry, models)

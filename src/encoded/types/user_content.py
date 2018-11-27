@@ -17,7 +17,8 @@ from .base import (
     ONLY_ADMIN_VIEW,
     ALLOW_OWNER_EDIT,
     ALLOW_ANY_USER_ADD,
-    get_item_if_you_can
+    get_item_if_you_can,
+    lab_award_attribution_embed_list
 )
 
 
@@ -33,7 +34,7 @@ class UserContent(Item):
 
     base_types = ['UserContent'] + Item.base_types
     schema = load_schema('encoded:schemas/user_content.json')
-    embedded_list = ["submitted_by.display_title"]
+    embedded_list = lab_award_attribution_embed_list
 
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
         'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,

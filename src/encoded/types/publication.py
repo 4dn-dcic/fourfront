@@ -168,14 +168,12 @@ class Publication(Item, ItemWithAttachment):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded_list = [
-        "static_headers.*",
-        "static_content.content.*",
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "exp_sets_prod_in_pub.experimentset_type",
         "exp_sets_prod_in_pub.accession",
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
-    ] + lab_award_attribution_embed_list
+    ]
 
     def _update(self, properties, sheets=None):
         # import pdb; pdb.set_trace()

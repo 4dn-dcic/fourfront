@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 from snovault.attachment import ItemWithAttachment
 
@@ -27,7 +28,7 @@ class Image(ItemWithAttachment, Item):
         'image/jpeg',
         'image/gif',
     ]
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
     def unique_keys(self, properties):
         """smth."""
