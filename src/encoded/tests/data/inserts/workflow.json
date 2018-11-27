@@ -7955,7 +7955,7 @@
             "ChIP-seq"
         ],
         "description": "ChIP-seq data processing pipeline",
-        "docker_image_name": "4dndcic/encode-chipseq:v1",
+        "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq",
@@ -8181,6 +8181,313 @@
         "title": "Chip-seq data processing pipeline",
         "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
         "workflow_diagram": "",
-        "workflow_type": "Other"
+        "workflow_type": "ChIP-seq data processing"
+    },
+    {
+        "accession": "4DNWB42C877",
+        "app_name": "encode-atacseq",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.fastqs"
+            },
+            {   
+                "argument_format": "ae164e66-4702-4647-91d6-0700c9f875c1",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.bowtie2_idx_tar"
+            },
+            {   
+                "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.blacklist"
+            },
+            {   
+                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.chrsz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.paired_end"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.enable_xcor"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.disable_ataqc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.qc_report.name"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.qc_report.desc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.gensz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
+            },
+            {   
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "atac.report"
+            },
+            {   
+                "argument_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.qc_json"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "Other",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL",
+        "data_types": [
+            "ATAC-seq"
+        ],
+        "description": "ATAC-seq data processing pipeline",
+        "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-atacseq",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.fastqs",
+                        "source": [
+                            {
+                                "name": "atac.fastqs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "ae164e66-4702-4647-91d6-0700c9f875c1",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "atac.bowtie2_idx_tar",
+                        "source": [
+                            {
+                                "name": "bowtie2_idx_tar"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "atac.blacklist",
+                        "source": [
+                            {
+                                "name": "atac.blacklist"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "atac.chrsz",
+                        "source": [
+                            {
+                                "name": "atac.chrsz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.pipeline_type",
+                        "source": [
+                            {
+                                "name": "atac.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.paired_end",
+                        "source": [
+                            {
+                                "name": "atac.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.disable_ataqc",
+                        "source": [
+                            {
+                                "name": "atac.disable_ataqc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.trim_adapter.auto_detect_adapter",
+                        "source": [
+                            {
+                                "name": "atac.trim_adapter.auto_detect_adapter"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.enable_xcor",
+                        "source": [
+                            {
+                                "name": "atac.enable_xcor"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.qc_report.name",
+                        "source": [
+                            {
+                                "name": "atac.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "atac.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.gensz",
+                        "source": [
+                            {
+                                "name": "atac.gensz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bam2ta.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "atac.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/6f2716b0-3c10-44d5-80ca-3d2e884d53bf"
+                    ]
+                },
+                "name": "atac",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "atac.report",
+                        "target": [
+                            {
+                                "name": "atac.report"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.qc_json",
+                        "target": [
+                            {
+                                "name": "atac.qc_json"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "ATAC-seq data processing pipeline",
+        "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5",
+        "workflow_diagram": "",
+        "workflow_type": "ATAC-seq data processing"
     }
 ]
