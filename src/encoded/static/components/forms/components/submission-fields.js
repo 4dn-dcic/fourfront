@@ -382,8 +382,7 @@ class LinkedObj extends React.PureComponent {
         this.handleAcceptTypedID = this.handleAcceptTypedID.bind(this);
 
         this.state = {
-            'textInputValue' : (typeof props.value === 'string' && props.value) || '',
-            'searchURL' : null
+            'textInputValue' : (typeof props.value === 'string' && props.value) || ''
         };
     }
 
@@ -429,22 +428,10 @@ class LinkedObj extends React.PureComponent {
 
         if (!window) return;
 
-        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props,
+            itemType = schema.linkTo;
 
-        var itemType    = schema.linkTo,
-            searchURL   = '/search/?type=' + itemType + '#!selection';
-
-        // check if we have any schema flags that will affect the searchUrl
-        if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
-            // the field to facet on could be set dynamically
-            if (schema.ff_flag == "filter:valid_item_types"){
-                searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
-            }
-        }
-
-        this.setState({ searchURL }, function(){
-            selectObj(itemType, nestedField, linkType, arrayIdx);
-        });
+        selectObj(itemType, nestedField, linkType, arrayIdx);
     }
 
     /**
@@ -523,13 +510,14 @@ class LinkedObj extends React.PureComponent {
     }
 
     render(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel } = this.props,
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel, currType } = this.props,
             isSelecting = this.isInSelectionField(),
             itemType    = schema.linkTo;
 
         if (this.isInSelectionField()){
             var prettyTitle      = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
                 dropMessage      = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
+                searchURL        = '/search/?type=' + itemType + '#!selection',
                 childWindowAlert = function(){
                     // We have this inside a function instead of passing JSX element(s) because
                     // as JSX elements they might gain non-serializable properties when being passed down thru props.
@@ -546,10 +534,19 @@ class LinkedObj extends React.PureComponent {
                         'style' : 'info'
                     };
                 };
+
+            // check if we have any schema flags that will affect the searchUrl
+            if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
+                // the field to facet on could be set dynamically
+                if (schema.ff_flag == "filter:valid_item_types"){
+                    searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+                }
+            }
+
             return (
                 <React.Fragment>
-                    <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} searchURL={this.state.searchURL} onCloseChildWindow={selectCancel}
-                        childWindowAlert={childWindowAlert} dropMessage={dropMessage} />
+                    <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} onCloseChildWindow={selectCancel}
+                        childWindowAlert={childWindowAlert} dropMessage={dropMessage} searchURL={searchURL} />
                     { this.renderSelectInputField() }
                 </React.Fragment>
             );
