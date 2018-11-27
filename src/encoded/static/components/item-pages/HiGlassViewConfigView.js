@@ -63,7 +63,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
         this.state = {
-            'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
+            'viewConfig' : props.viewConfig,
             'originalViewConfig' : null, //object.deepClone(props.viewConfig)
             'saveLoading' : false,
             'cloneLoading' : false,
@@ -327,8 +327,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             fileLoading : false
                         };
                         if (resp.success && resp.new_genome_assembly) {
-                            // Update the genome assembly if it changed
+                            // Update the genome assembly and view config.
                             updates["genome_assembly"] = resp.new_genome_assembly;
+                            updates["viewConfig"] = resp.new_viewconfig;
                         }
 
                         this.setState(updates, ()=>{
@@ -337,14 +338,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 return fallbackCallback(resp);
                             }
 
-                            // Update the Higlass display with the new viewconf.
-                            hgc.api.setViewConfig(resp.new_viewconfig).then(() => {
-                                // Show alert indicating success
-                                Alerts.queue({
-                                    'title'     : "Added file",
-                                    'message'   : "Added new file to Higlass display.",
-                                    'style'     : 'success'
-                                });
+                            // Show alert indicating success
+                            Alerts.queue({
+                                'title'     : "Added file",
+                                'message'   : "Added new file to Higlass display.",
+                                'style'     : 'success'
                             });
                         });
                     },
@@ -531,6 +529,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props;
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -552,9 +551,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
-                        <HiGlassPlainContainer {..._.omit(this.props, 'context')}
+                        <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
                             width={isFullscreen ? windowWidth : width + 20 }
                             height={isFullscreen ? windowHeight -120 : 500}
+                            viewConfig={this.state.viewConfig}
                             ref="higlass" />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
