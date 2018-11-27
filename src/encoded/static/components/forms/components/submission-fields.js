@@ -477,21 +477,54 @@ class LinkedObj extends React.PureComponent {
     }
 
     renderSelectInputField(){
-        var { value, selectCancel, selectComplete } = this.props;
-        var textInputValue              = this.state.textInputValue,
+        var { value, selectCancel, selectComplete, schema, currType, nestedField } = this.props,
+            textInputValue              = this.state.textInputValue,
             canShowAcceptTypedInput     = typeof textInputValue === 'string' && textInputValue.length > 3,
-            extClass                    = !canShowAcceptTypedInput && textInputValue ? ' has-error' : '';
+            extClass                    = !canShowAcceptTypedInput && textInputValue ? ' has-error' : '',
+            itemType                    = schema.linkTo,
+            prettyTitle                 = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
+            dropMessage                 = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
+            searchURL                   = '/search/?type=' + itemType + '#!selection',
+            childWindowAlert            = function(){
+                // We have this inside a function instead of passing JSX element(s) because
+                // as JSX elements they might gain non-serializable properties when being passed down thru props.
+                return {
+                    'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
+                    'message' : (
+                        <div>
+                            <p class="mb-0">
+                                Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
+                            </p>
+                            <p class="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
+                        </div>
+                    ),
+                    'style' : 'info'
+                };
+            };
+
+        // check if we have any schema flags that will affect the searchUrl
+        if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
+            // the field to facet on could be set dynamically
+            if (schema.ff_flag == "filter:valid_item_types"){
+                searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+            }
+        }
+
         return (
-            <div className="linked-object-text-input-container row flexrow">
-                <div className="field-column col-xs-10">
-                    <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
+            <React.Fragment>
+                <div className="linked-object-text-input-container row flexrow">
+                    <div className="field-column col-xs-10">
+                        <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
+                    </div>
+                    { canShowAcceptTypedInput ?
+                        <SquareButton show onClick={this.handleAcceptTypedID} icon="check"
+                            bsStyle="success" tip="Accept typed identifier and look it up in database." />
+                    : null }
+                    <SquareButton show onClick={selectCancel} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
                 </div>
-                { canShowAcceptTypedInput ?
-                    <SquareButton show onClick={this.handleAcceptTypedID} icon="check"
-                        bsStyle="success" tip="Accept typed identifier and look it up in database." />
-                : null }
-                <SquareButton show onClick={selectCancel} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
-            </div>
+                <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} onCloseChildWindow={selectCancel}
+                    childWindowAlert={childWindowAlert} dropMessage={dropMessage} searchURL={searchURL} />
+            </React.Fragment>
         );
     }
 
@@ -511,45 +544,10 @@ class LinkedObj extends React.PureComponent {
 
     render(){
         var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel, currType } = this.props,
-            isSelecting = this.isInSelectionField(),
-            itemType    = schema.linkTo;
+            isSelecting = this.isInSelectionField();
 
-        if (this.isInSelectionField()){
-            var prettyTitle      = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
-                dropMessage      = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
-                searchURL        = '/search/?type=' + itemType + '#!selection',
-                childWindowAlert = function(){
-                    // We have this inside a function instead of passing JSX element(s) because
-                    // as JSX elements they might gain non-serializable properties when being passed down thru props.
-                    return {
-                        'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
-                        'message' : (
-                            <div>
-                                <p class="mb-0">
-                                    Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
-                                </p>
-                                <p class="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
-                            </div>
-                        ),
-                        'style' : 'info'
-                    };
-                };
-
-            // check if we have any schema flags that will affect the searchUrl
-            if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
-                // the field to facet on could be set dynamically
-                if (schema.ff_flag == "filter:valid_item_types"){
-                    searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
-                }
-            }
-
-            return (
-                <React.Fragment>
-                    <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} onCloseChildWindow={selectCancel}
-                        childWindowAlert={childWindowAlert} dropMessage={dropMessage} searchURL={searchURL} />
-                    { this.renderSelectInputField() }
-                </React.Fragment>
-            );
+        if (isSelecting){
+            return this.renderSelectInputField();
         }
 
         // object chosen or being created
