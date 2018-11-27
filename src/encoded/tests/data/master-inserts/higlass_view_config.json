@@ -431,7 +431,7 @@
                                         "type":"heatmap",
                                         "position":"center",
                                         "uid":"GjuZed1ySGW1IzZZqFB9BA",
-                                        "name":"4DNFI6HDY7WZ.mcool",
+                                        "name":"H1-hESC - 4DNFI6HDY7WZ.mcool",
                                         "options":{
                                             "backgroundColor":"#eeeeee",
                                             "labelPosition":"bottomRight",
@@ -449,7 +449,7 @@
                                             "showMousePosition":false,
                                             "mousePositionColor":"#999999",
                                             "showTooltip":false,
-                                            "name":"H1-heESC - 4DNFI6HDY7WZ.mcool",
+                                            "name":"H1-hESC - 4DNFI6HDY7WZ.mcool",
                                             "scaleStartPercent":"0.00000",
                                             "scaleEndPercent":"1.00000"
                                         },
@@ -664,7 +664,8 @@
                                             "mousePositionColor":"#999999",
                                             "showTooltip":false,
                                             "scaleStartPercent":"0.00000",
-                                            "scaleEndPercent":"1.00000"
+                                            "scaleEndPercent":"1.00000",
+                                            "name":"HFFc6 - 4DNFIB59T7NN.mcool"
                                         },
                                         "transforms":[
                                             {
