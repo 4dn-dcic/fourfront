@@ -340,7 +340,10 @@
         "name" : "help.user-guide.data-organization.carousel-place-holder",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b012",
         "body" : "placeholder: <SlideCarousel />",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "txt"
+        }
     }, {
         "name" : "help.user-guide.data-organization.introduction2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b013",
