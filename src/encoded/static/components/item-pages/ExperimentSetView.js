@@ -542,9 +542,13 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
             return [firstMcoolFile]; // 1 MCOOL file, if present
         }
 
+        /**
+         * @todo Maybe rename this function to be 'is 1d horizontal track file' as has evolved since original form.
+         */
         function isValidBWVizFile(f){
-            var fileFormat = fileUtil.getFileFormatStr(f);
-            return f.higlass_uid && ['bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat);
+            var fileFormat   = fileUtil.getFileFormatStr(f),
+                horizTrackFormats = ['bg', 'bw', 'bed', 'beddb'];
+            return f.higlass_uid && horizTrackFormats.indexOf(fileFormat) > -1;
         }
 
         var bigwigFiles = _.filter(files || [], isValidBWVizFile);
