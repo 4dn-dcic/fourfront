@@ -621,7 +621,6 @@
     {
         "name" : "joint-analysis-data-plans.legend",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b025",
-        "title" : "Legend",
         "file" : "/src/encoded/static/data/joint_data_analysis-legend.html"
     },
 
@@ -632,6 +631,16 @@
         "body" : "<ol class='text-small mb-0'><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01_internal_JA'>First Data Freeze (January 2018)</a></li><li><a href='https://data.4dnucleome.org/release-updates?update_tag=2018_01updates_internal_JA_toJune'>June Interim Update (January-June 2018)</a></li></ol>",
         "options" : {
             "filetype" : "html"
+        }
+    },
+
+
+    {
+        "name" : "joint-analysis-data-plans.matrix",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af4600027",
+        "body" : "placeholder: <JointAnalysisMatrix/>",
+        "options": {
+            "filetype" : "txt"
         }
     },
 
@@ -859,124 +868,6 @@
         "name" : "joint-analysis-data-plans.jan2018.dev.matrix-4",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b041",
         "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-jan2018-dev.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[95],
-            "titleCell":[2,94],
-            "skipRows":[],
-            "startCell":[4,96],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    },
-
-
-    {
-        "name" : "joint-analysis-data-plans.july2018.matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b042",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[4],
-            "titleCell":[2,3],
-            "skipRows":[],
-            "startCell":[4,5],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, {
-        "name" : "joint-analysis-data-plans.july2018.matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b043",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[58],
-            "titleCell":[2,57],
-            "skipRows":[],
-            "startCell":[4,59],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, {
-        "name" : "joint-analysis-data-plans.july2018.matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b044",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[77],
-            "titleCell":[2,76],
-            "skipRows":[],
-            "startCell":[4,78],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, {
-        "name" : "joint-analysis-data-plans.july2018.matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b045",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[95],
-            "titleCell":[2,94],
-            "skipRows":[],
-            "startCell":[4,96],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    },
-
-
-    {
-        "name" : "joint-analysis-data-plans.july2018.dev.matrix-1",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b046",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[4],
-            "titleCell":[2,3],
-            "skipRows":[],
-            "startCell":[4,5],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, {
-        "name" : "joint-analysis-data-plans.july2018.dev.matrix-2",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b047",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[58],
-            "titleCell":[2,57],
-            "skipRows":[],
-            "startCell":[4,59],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, {
-        "name" : "joint-analysis-data-plans.july2018.dev.matrix-3",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b048",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
-        "options": {
-            "yaxisCols":[2,3],
-            "xaxisRows":[77],
-            "titleCell":[2,76],
-            "skipRows":[],
-            "startCell":[4,78],
-            "yaxisTitle":"Method",
-            "xaxisTitle":"Cell Line"
-        },
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
-    }, {
-        "name" : "joint-analysis-data-plans.july2018.dev.matrix-4",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b049",
-        "file" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/joint_data_analysis-july2018-dev.csv",
         "options": {
             "yaxisCols":[2,3],
             "xaxisRows":[95],

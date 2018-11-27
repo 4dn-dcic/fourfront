@@ -233,7 +233,7 @@ export class StaticEntry extends React.PureComponent {
 
         if (filetype === 'csv'){
             // Special case
-            return <CSVMatrixView csv={content} options={this.props.content.options} />;
+            return <CSVMatrixView csv={content} options={options} />;
         } else {
             // Common case - markdown, plaintext, etc.
             return <div className={className}>{ content }</div>;
