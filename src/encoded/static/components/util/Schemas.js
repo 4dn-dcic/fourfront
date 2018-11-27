@@ -51,6 +51,9 @@ export const itemTypeHierarchy = {
     ],
     'MicroscopeSetting' : [
         'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
+    ],
+    'UserContent' : [
+        'StaticSection', 'HiglassViewConfig' //, 'JupyterNotebook'
     ]
 };
 

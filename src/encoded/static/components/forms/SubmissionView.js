@@ -1370,7 +1370,9 @@ export default class SubmissionView extends React.PureComponent{
                     show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
                     handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
                 />
-                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} actionButtons={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
+                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}>
+                    { this.generateCancelButton() }{ this.generateValidationButton() }{ this.generateSubmitButton() }
+                </WarningBanner>
                 <DetailTitleBanner
                     hierarchy={this.state.keyHierarchy} setSubmissionState={this.setSubmissionState}
                     {..._.pick(this.state, 'keyContext', 'keyTypes', 'keyDisplay', 'currKey', 'fullScreen')}
@@ -1416,7 +1418,7 @@ class WarningBanner extends React.PureComponent {
                         Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.
                     </div>
                     <div className="col-md-5 col-lg-4">
-                        <div className="action-buttons-container text-right" children={this.props.actionButtons} />
+                        <div className="action-buttons-container text-right" children={this.props.children} />
                     </div>
                 </div>
             </div>
