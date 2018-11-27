@@ -725,6 +725,18 @@ h5.fourDN-header {
 
 }
 
+/**********************************************************
+		Slick Carousels - Embedded Images
+***********************************************************/
+
+.static-section-entry {
+	div.slick-slider {
+		div.slick-slide .slide-img-container > img {
+			display: inline-block;
+		}
+	}
+}
+
 
 /**********************************************************
 		Misc Static Pages

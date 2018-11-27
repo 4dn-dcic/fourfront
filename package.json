@@ -121,6 +121,7 @@
     "react-matrix-viz": "^0.2.2",
     "react-redux": "^5.0.7",
     "react-sticky": "^6.0.2",
+    "react-slick": "^0.23.2",
     "react-tooltip": "^3.8.4",
     "redux": "^3.7.0",
     "source-map-support": "^0.2.10",
