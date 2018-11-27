@@ -476,33 +476,39 @@ def add_files_to_higlass_viewconf(request):
                 "new_viewconfig": None,
                 "new_genome_assembly" : None
             }
+        if not "genome_assembly" in new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have genome assembly".format(uuid=file_uuid),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
 
         # If the display doesn't have a genome_assembly, set it to this one.
-        if "genome_assembly" in new_file_dict:
-            genome_assembly_mapping = {
-                'GRCm38' : ('GRCm38', 'mm10'),
-                'GRCh38' : ('GRCh38', 'hg38')
-            }
-            if not current_genome_assembly in genome_assembly_mapping.keys():
-                for new_assembly in genome_assembly_mapping:
-                    aliases = genome_assembly_mapping[new_assembly]
-                    if new_file_dict["genome_assembly"] in aliases:
-                        current_genome_assembly = new_assembly
-                        break
+        genome_assembly_mapping = {
+            'GRCm38' : ('GRCm38', 'mm10'),
+            'GRCh38' : ('GRCh38', 'hg38')
+        }
+        if not current_genome_assembly in genome_assembly_mapping.keys():
+            for new_assembly in genome_assembly_mapping:
+                aliases = genome_assembly_mapping[new_assembly]
+                if new_file_dict["genome_assembly"] in aliases:
+                    current_genome_assembly = new_assembly
+                    break
 
-            # Make sure the file's genome_assembly matches the viewConfig.
-            expected_genome_assemblies = genome_assembly_mapping[current_genome_assembly]
-            if not new_file_dict["genome_assembly"] in expected_genome_assemblies:
-                return {
-                    "success" : False,
-                    "errors" : "File {uuid} has the wrong Genome Assembly. Expected {expected}, found {actual} instead".format(
-                        uuid=file_uuid,
-                        expected = current_genome_assembly,
-                        actual = new_file_dict["genome_assembly"]
-                    ),
-                    "new_viewconfig": None,
-                    "new_genome_assembly" : None
-                }
+        # Make sure the file's genome_assembly matches the viewConfig.
+        expected_genome_assemblies = genome_assembly_mapping[current_genome_assembly]
+        if not new_file_dict["genome_assembly"] in expected_genome_assemblies:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} has the wrong Genome Assembly. Expected {expected}, found {actual} instead".format(
+                    uuid=file_uuid,
+                    expected = current_genome_assembly,
+                    actual = new_file_dict["genome_assembly"]
+                ),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
 
         # Try to add the new file to the given viewconf.
         new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict)
@@ -534,7 +540,7 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
 
     # Based on the filetype's dimensions, try to add the file to the viewconf
     file_format = new_file_dict["file_format"]
-    known_1d_formats = ("bg", "bw")
+    known_1d_formats = ("bg", "bw", "bed")
     known_2d_formats = ("mcool", "hic")
     if [x for x in known_2d_formats if x in file_format]:
         status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
@@ -570,6 +576,9 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
             "name": new_file["display_title"],
         }
     }
+
+    if "bed" in new_file["file_format"]:
+        new_track["type"] = "bedlike"
 
     if new_file["genome_assembly"] == "GRCh38":
         new_track["options"]["coordSystem"] = "hg38"
@@ -676,7 +685,8 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
     new_content["server"] = "https://higlass.4dnucleome.org/api/v1"
     new_content["options"] = {}
 
-    new_content["options"]["coordSystem"] = new_file["genome_assembly"]
+    if "genome_assembly" in new_file:
+        new_content["options"]["coordSystem"] = new_file["genome_assembly"]
     new_content["options"]["name"] = new_file["display_title"]
     if len(new_view["tracks"]["center"]) < 1:
         new_view["tracks"]["center"] = [
@@ -692,7 +702,6 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
     new_view["tracks"]["center"][0]["contents"].append(new_content)
 
     views.append(new_view)
-
     return True, None
 
 def repack_higlass_views(views):

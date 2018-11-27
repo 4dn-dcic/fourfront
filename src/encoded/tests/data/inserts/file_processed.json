@@ -338,6 +338,7 @@
     "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
     "date_created":"2018-11-19T18:45:35.066759+00:00",
     "accession":"4DNFIZMTKWDI",
+    "genome_assembly": "GRCh38",
     "filename":"test_file.bed.gz",
     "status":"uploading",
     "lab":"/labs/4dn-dcic-lab/",
