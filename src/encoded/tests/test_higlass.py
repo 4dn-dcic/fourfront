@@ -11,6 +11,7 @@ def higlass_mcool_viewconf(testapp):
         "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
         "uuid" : "00000000-1111-0000-1111-000000000002",
         "name" : "higlass-mcool-test-view",
+        "genome_assembly" : "GRCm38",
         "viewconfig" : {
             "editable": True,
             "zoomFixed": False,
@@ -243,6 +244,7 @@ def higlass_blank_viewconf(testapp):
         "description" : "No files in viewconf, ready to clone.",
         "uuid" : "00000000-1111-0000-1111-000000000003",
         "name" : "empty-higlass-viewconf",
+        "genome_assembly" : "",
         "viewconfig" : {
             "editable": True,
             "zoomFixed": False,
@@ -322,7 +324,8 @@ def test_higlass_noop(testapp, higlass_mcool_viewconf):
 
     # Try to add nothing to the viewconf.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
-        'higlass_viewconfig': higlass_json["viewconfig"]
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
     })
     new_higlass_json = response.json["new_viewconfig"]
 
@@ -350,8 +353,10 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
+
     new_higlass_view_json = response.json["new_viewconfig"]
 
+    assert response.json["new_genome_assembly"] == "GRCm38"
     assert len(new_higlass_view_json["views"]) == 2
     assert "layout" in new_higlass_view_json["views"][1]
     assert "uid" in new_higlass_view_json["views"][1]
@@ -368,8 +373,8 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bg_file_json):
 
     # Get a bigwig file to add.
     bg_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
-    bg_file_json['genome_assembly'] = "GRCm38"
     bg_file_json['md5sum'] = '00000000000000000000000000000001'
+    bg_file_json['genome_assembly'] = "GRCm38"
     bg_file = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
 
     # Get the Higlass Viewconf that will be edited.
@@ -380,6 +385,7 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bg_file_json):
     # Try to add the bigwig to the existing viewconf.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=bg_file['uuid'])
     })
 
@@ -417,6 +423,7 @@ def test_add_bigwig_to_bigwig(testapp, higlass_blank_viewconf, bg_file_json):
     # Add a bigwig file.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=bg_file['uuid'])
     })
 
@@ -451,25 +458,28 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
     mcool_file_json['genome_assembly'] = "GRCh38"
     mcool_file_json['md5sum'] = '00000000000000000000000000000001'
-    mcool_file_with_different_coord_system = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+    mcool_file_with_different_genome_assembly = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
 
     # Get the json for a viewconfig with a mcool file.
     higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
     response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
+    print (higlass_json["genome_assembly"])
 
     # Try to add the mcool with a different genome assembly, it should fail.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
-        'files': "{uuid}".format(uuid=mcool_file_with_different_coord_system['uuid'])
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': "{uuid}".format(uuid=mcool_file_with_different_genome_assembly['uuid'])
     })
 
     assert response.json["success"] == False
-    assert "Genome Assemblies do not match" in response.json["errors"]
+    assert "has the wrong Genome Assembly" in response.json["errors"]
 
     # Try to add an mcool with the same genome assembly.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -529,6 +539,7 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     # Add another mcool file.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -538,6 +549,7 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     # Add the third mcool file. It should be to the right of the first.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -554,6 +566,7 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     # Add the fourth mcool file. It should be underneath the second.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -571,6 +584,7 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     # Add the fifth mcool file. It should be to the right of the fourth.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -589,6 +603,7 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     # Add the sixth mcool file. It should be underneath the fifth.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -631,6 +646,7 @@ def test_add_multiple_mcool_at_once(testapp, higlass_mcool_viewconf, mcool_file_
     # Try to add 2 mcool files. Confirm there are now 3 mcool files.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid},{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -641,6 +657,7 @@ def test_add_multiple_mcool_at_once(testapp, higlass_mcool_viewconf, mcool_file_
     # Try to add 4 files. This should fail because you tried to have more than 6 views.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid},{uuid},{uuid},{uuid}".format(uuid=mcool_file['uuid'])
     })
     assert response.json["success"] == False
@@ -670,6 +687,7 @@ def test_add_bigwig_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_vi
     # Add another mcool file.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=mcool_file['uuid'])
     })
 
@@ -684,6 +702,7 @@ def test_add_bigwig_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_vi
     # Add a bigwig file.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{uuid}".format(uuid=bg_file['uuid'])
     })
 
@@ -701,7 +720,7 @@ def test_add_bigwig_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_vi
     for index in range(len(top_track_count.keys())):
         assert top_track_count[index] - old_top_track_count[index] == 1
 
-def test_bogus_fileuuid(testapp, mcool_file_json, higlass_mcool_viewconf, bg_file_json):
+def test_bogus_fileuuid(testapp, higlass_mcool_viewconf):
     """ Function should fail gracefully if there is no file with the given uuid.
     """
 
@@ -713,6 +732,7 @@ def test_bogus_fileuuid(testapp, mcool_file_json, higlass_mcool_viewconf, bg_fil
     # Add a nonexistent file.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "Bogus"
     })
 
@@ -745,6 +765,7 @@ def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf
     # Try to add the files to the viewconf by passing in the acession.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
         'files': "{accession1},{accession2}".format(accession1=mcool_file["accession"], accession2=bg_file["accession"])
     })
 
@@ -768,3 +789,46 @@ def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf
 
         # 1 more track should be on top.
         assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+
+def atest_add_bigwig_to_mcool(testapp, higlass_mcool_viewconf, bg_file_json):
+    """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
+    """
+
+    # Add the bigwig file with a higlass uid and a genome asssembly.
+    bg_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bg_file_json['genome_assembly'] = "GRCm38"
+    bg_file = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
+
+    # Add the bigwig file with a different genome asssembly.
+    bg_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bg_file_json['genome_assembly'] = "hg38"
+    bg_file_with_different_genome_assembly = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
+
+    # Get the json for a viewconfig with a mcool file.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the bigwig with a different genome assembly, it should fail.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': "{uuid}".format(uuid=bg_file_with_different_genome_assembly['uuid'])
+    })
+
+    assert response.json["success"] == False
+    assert "Genome Assemblies do not match" in response.json["errors"]
+
+    # Try to add an mcool with the same genome assembly.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': "{uuid}".format(uuid=bg_file['uuid'])
+    })
+
+    assert response.json["success"] == True
+
+    # Make sure the mcool displays are next to each other.
+    new_higlass_json = response.json["new_viewconfig"]
+
+    assert len(new_higlass_json["views"]) == 1

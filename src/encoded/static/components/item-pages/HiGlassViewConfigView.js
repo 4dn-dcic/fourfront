@@ -69,6 +69,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'cloneLoading' : false,
             'releaseLoading' : false,
             'fileLoading': false,
+            'genome_assembly' : null,
         };
     }
 
@@ -145,7 +146,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     Alerts.queue({
                         'title' : "Saved " + this.props.context.title,
-                        'message' : "This HiGlass Display Item has been updated with the current viewport. This may take some minutes to take effect.",
+                        'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
                     this.setState({ 'saveLoading' : false });
@@ -160,8 +161,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     });
                     this.setState({ 'saveLoading' : false });
                 },
-                // We're only updating this object's view conf.
-                JSON.stringify({ 'viewconfig' : currentViewConf })
+                // We're updating this object's view conf and the genome assembly.
+                JSON.stringify({
+                    'viewconfig' : currentViewConf,
+                    'genome_assembly' : this.state.genome_assembly,
+                })
             );
         });
     }
@@ -283,8 +287,21 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('Could not get current view configuration.');
         }
 
+
+        // Read the url of the higlass viewconfig and store the genome assembly.
+        ajax.load(
+            this.props.href,
+            (resp)=>{
+                if(resp.success) {
+                    this.setState({ 'genome_assembly' : resp.genome_assembly });
+                }
+            },
+            'GET'
+        );
+
         var payload = {
             'higlass_viewconfig': currentViewConf,
+            'genome_assembly': this.state.genome_assembly,
             'files' : file_uuid
         };
 
@@ -299,14 +316,22 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({ fileLoading : false });
         };
 
-        // Make an AJAX call to add the mcool file.
+        // Make an AJAX call to add the file.
         this.setState(
             { fileLoading : true },
             () => {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        this.setState({ fileLoading : false }, ()=>{
+                        let updates = {
+                            fileLoading : false
+                        };
+                        if (resp.success && resp.new_genome_assembly) {
+                            // Update the genome assembly if it changed
+                            updates["genome_assembly"] = resp.new_genome_assembly;
+                        }
+
+                        this.setState(updates, ()=>{
                             // If it failed, return an error message.
                             if (!resp.success) {
                                 return fallbackCallback(resp);
