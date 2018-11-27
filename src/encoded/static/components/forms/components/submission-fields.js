@@ -392,11 +392,6 @@ class LinkedObj extends React.PureComponent {
 
     componentDidUpdate(pastProps){
         this.updateContext();
-
-        //if (pastProps.fieldBeingSelected !== this.props.fieldBeingSelected || pastProps.fieldBeingSelectedArrayIdx !== this.props.fieldBeingSelectedArrayIdx) {
-        //    this.manageWindowOnDragHandler(pastProps, this.props);
-        //}
-
         ReactTooltip.rebuild();
     }
 
@@ -554,7 +549,6 @@ class LinkedObj extends React.PureComponent {
         if (value){
             var thisDisplay = keyDisplay[value] || value;
             if (isNaN(value)) {
-                //thisDisplay = keyDisplay[value] || value;
                 return(
                     <div className="submitted-linked-object-display-container text-ellipsis-container">
                         <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
@@ -566,7 +560,6 @@ class LinkedObj extends React.PureComponent {
                 // it's a custom object. Either render a link to editing the object
                 // or a pop-up link to the object if it's already submitted
                 var intKey = parseInt(value);
-                //thisDisplay = keyDisplay[value] || value;
                 // this is a fallback - shouldn't be int because value should be
                 // string once the obj is successfully submitted
                 if (keyComplete[intKey]){
