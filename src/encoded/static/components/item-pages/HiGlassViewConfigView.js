@@ -326,11 +326,17 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         let updates = {
                             fileLoading : false
                         };
+<<<<<<< HEAD
                         if (resp.success) {
                             // Update the genome assembly and view config.
                             if (resp.new_genome_assembly) {
                                 updates["genome_assembly"] = resp.new_genome_assembly;
                             }
+=======
+                        if (resp.success && resp.new_genome_assembly) {
+                            // Update the genome assembly and view config.
+                            updates["genome_assembly"] = resp.new_genome_assembly;
+>>>>>>> 672035151e14580e4fcb6f1fa47ae6ecbc21e731
                             updates["viewConfig"] = resp.new_viewconfig;
                         }
 
