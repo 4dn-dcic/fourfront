@@ -11,5 +11,3 @@ export { Announcements } from './Announcements';
 export { TableOfContents, MarkdownHeading, NextPreviousPageSection, HeaderWithLink } from './TableOfContents';
 export { StackedBlockVisual, sumPropertyFromList, groupByMultiple, cartesian } from './StackedBlockVisual';
 export { BasicStaticSectionBody, BasicUserContentBody, UserContentBodyList } from './BasicStaticSectionBody';
-//import * as p from './placeholders';
-//export const placeholders = p;
