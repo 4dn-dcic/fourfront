@@ -78,7 +78,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired
-    }
+    };
 
     static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
         'className' : 'with-background mb-1 mt-1',
@@ -88,7 +88,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
             return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
         },
         'prependTitleIcon' : true
-    })
+    });
 
     renderInnerBody(){
         var { context, href } = this.props,
