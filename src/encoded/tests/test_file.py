@@ -864,3 +864,13 @@ def test_file_format_patch_works_if_no_filename(testapp, file_formats, award, la
     patch_data = {"file_format": file_formats.get('bam').get('uuid')}
     res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
     assert not res2.json.get('errors')
+
+
+def test_file_track_title(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)

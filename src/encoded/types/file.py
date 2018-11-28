@@ -491,6 +491,28 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    def generate_track_title(self, request):
+            props = self.properties
+            dstype = props.get('dataset_type')
+            lab_uuid = props.get('lab')
+            lab = request.embed(lab_uuid, '@@object').get('display_title')
+            ff_uuid = props.get('file_format')
+            fformat = request.embed(ff_uuid, '@@object').get('file_format')
+            ftype = props.get('file_type', 'unspecified type')
+            assay = props.get('assay_info', '')
+            bios = props.get('biosource_name', 'unknown')
+            repinfo = ''
+            reps = props.get('replicate_identifiers')
+            if reps is not None:
+                if len(reps) > 1:
+                    repinfo = '(merged replicates)'
+                else:
+                    repinfo = "({})".format(reps[0])
+            title = '{ff} file of {ft} for {ai} {et} on {bs} from {lab} {rep}'.format(
+                ff=fformat, ft=ftype, ai=assay, et=dstype, bs=bios, lab=lab, rep=repinfo
+            )
+            return title.replace('  ', ' ')
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
@@ -671,6 +693,18 @@ class FileProcessed(File):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
 
+    @calculated_property(schema={
+        "title": "Track Name",
+        "description": "Title for the track in higlass views",
+        "type": "string"
+    })
+    def track_title(self, request):
+        '''for processed files always use track meta to derive
+        '''
+        if not self.properties.get('dataset_type'):
+            return
+        return self.generate_track_title(request)
+
 
 @collection(
     name='files-reference',
@@ -704,6 +738,21 @@ class FileVistrack(File):
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Track Name",
+        "description": "Title for the track in higlass views",
+        "type": "string"
+    })
+    def track_title(self, request):
+        '''for processed files always use track meta to derive
+        '''
+        if not self.properties.get('dataset_type'):
+            return
+        desc = self.properties.get('description')
+        if desc:
+            return desc
+        return self.generate_track_title(request)
 
 
 @collection(
