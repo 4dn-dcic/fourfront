@@ -403,7 +403,11 @@ def file_formats(testapp, lab, award):
         'chromsizes': {'standard_file_extension': 'chrom.sizes',
                        "valid_item_types": ["FileReference"]},
         'other': {'standard_file_extension': '',
-                  "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]}
+                  "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]},
+        'bw': {'standard_file_extension': 'bw',
+                "valid_item_types": ["FileProcessed"]},
+        'bg': {'standard_file_extension': 'bedGraph.gz',
+                "valid_item_types": ["FileProcessed"]},
     }
 
     for eff, info in ef_format_info.items():
