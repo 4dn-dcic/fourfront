@@ -669,11 +669,12 @@ export class HiGlassContainer extends React.PureComponent {
                 fileFormat = allFileFormats[0];
 
             var fxnByFormatDict = {
-                'mcool' : HiGlassConfigurator.mcool.generateViewConfig,
-                'bw'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bg'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bed'   : HiGlassConfigurator.beddb.generateViewConfig,
-                'beddb' : HiGlassConfigurator.beddb.generateViewConfig
+                'mcool'  : HiGlassConfigurator.mcool.generateViewConfig,
+                'bw'     : HiGlassConfigurator.bigwig.generateViewConfig,
+                'bg'     : HiGlassConfigurator.bigwig.generateViewConfig,
+                'bed'    : HiGlassConfigurator.beddb.generateViewConfig,
+                'bigbed' : HiGlassConfigurator.bigbed.generateViewConfig,
+                'beddb'  : HiGlassConfigurator.beddb.generateViewConfig
             };
 
             if (allFileFormats.length === 1){
