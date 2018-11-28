@@ -71,6 +71,8 @@
                 "Visualization processing",
                 "Repli-seq data processing",
                 "ChIP-seq data processing",
+                "ATAC-seq data processing",
+                "RNA-seq data processing",
                 "Data QC",
                 "Other"
             ]
