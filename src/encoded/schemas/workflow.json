@@ -19,7 +19,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -71,6 +71,8 @@
                 "Visualization processing",
                 "Repli-seq data processing",
                 "ChIP-seq data processing",
+                "ATAC-seq data processing",
+                "RNA-seq data processing",
                 "Data QC",
                 "Other"
             ]
@@ -191,6 +193,16 @@
                         "title": "Name",
                         "description": "Name of the argument of the workflow.",
                         "type": "string"
+                    },
+                    "alternative_conditional_argument_names": {
+                        "title": "Alternative Conditional Argument Names",
+                        "description": "Alternative argument names, in case argument names may vary depending on condition",
+                        "type": "array",
+                        "items": {
+                             "title": "Alternative Conditional Argument Name",
+                             "description": "An alternative argument name, in case argument names may vary depending on condition",
+                             "type": "string"
+                        }
                     },
                     "secondary_file_formats": {
                         "title": "secondary file formats",

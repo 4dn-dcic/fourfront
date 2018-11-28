@@ -72,7 +72,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
         "file_format": "bg_px2",
@@ -118,12 +118,13 @@
     {
         "file_format": "bed",
         "standard_file_extension": "bed.gz",
+        "extrafile_formats": ["76dc8c06-67d8-487b-8fc8-d841752a0b60"],
         "description": "Bed format",
         "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
         "file_format": "cool",
@@ -133,7 +134,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
         "file_format": "hdf5",
@@ -171,7 +172,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
         "file_format": "other",
@@ -345,6 +346,26 @@
         "standard_file_extension": "bwaIndex.tar",
         "description": "This format is used for bwaIndex files",
         "uuid": "96809e57-4ccd-40b4-9fcb-ce27c4f16df9",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "status": "released",
+        "valid_item_types": ["FileReference"]
+    },
+    {
+        "file_format": "beddb",
+        "standard_file_extension": "beddb",
+        "description": "Beddb format",
+        "uuid": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "status": "released",
+        "valid_item_types": ["FileProcessed", "FileReference"]
+    },
+    {
+        "file_format": "uncompressed_bowtie2Index",
+        "standard_file_extension": "bowtie2Index.tar",
+        "description": "This format is used for bowtie2Index files",
+        "uuid": "ae164e66-4702-4647-91d6-0700c9f875c1",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",

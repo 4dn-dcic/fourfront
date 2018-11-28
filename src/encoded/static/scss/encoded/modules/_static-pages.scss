@@ -809,6 +809,19 @@ h5.fourDN-header {
 }
 
 
+// Joint Analysis Page
+
+body[data-pathname="/joint-analysis"]{
+
+	#release-updates.static-section-entry > h2.section-title,
+	#higlass.static-section-entry > h2.section-title {
+		font-size: 20px;
+		line-height: 24px;
+	}
+
+}
+
+
 /*********************************************
  *** Temporary NOFIC Matrices Side by Side ***
  *********************************************/

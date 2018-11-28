@@ -13,6 +13,7 @@ import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStep
 // Test/Debug Data
 //import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
 //import { WFR_JSON } from './../testdata/workflow_run/awsem-bad-output-file';
+//import { WFR_JSON } from './../testdata/workflow_run/awsem-dupe-post-alignment';
 
 
 /**

@@ -19,7 +19,7 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -40,7 +40,7 @@
             "enum": [
                 "intensity values",
                 "peaks",
-                "fold change values"
+                "fold change over control"
             ]
         },
         "file_classification": {

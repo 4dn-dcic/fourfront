@@ -701,6 +701,10 @@ class FileVistrack(File):
     embedded_list = File.embedded_list
     name_key = 'accession'
 
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_wfout_bucket']
+
 
 @collection(
     name='files-calibration',

@@ -183,7 +183,7 @@ export var ColumnDefinition;
  * @typedef {Object} NavigateOpts
  * @property {boolean} inPlace              Don't cancel out if loading same HREF/URL (e.g. allow refresh).
  * @property {boolean} replace              Replace Browser History entry with new HREF/URL instead of adding.
- * @property {boolean} skipConfirmCheck
+ * @property {boolean} skipConfirmCheck     Skip confirm check.
  * @property {boolean} skipRequest          Don't perform request, just change URL.
  * @property {boolean} skipUpdateHref       Fetch/request new context, but don't update URL.
  * @property {boolean} cache                Set to false to explicitly not cache response. Shouldn't be necessary (browser does this by default).
