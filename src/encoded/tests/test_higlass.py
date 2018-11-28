@@ -242,7 +242,7 @@ def higlass_blank_viewconf(testapp):
     viewconf = {
         "title" : "Empty Higlass Viewconfig",
         "description" : "No files in viewconf, ready to clone.",
-        "uuid" : "00000000-1111-0000-1111-000000000004",
+        "uuid" : "00000000-1111-0000-1111-000000000000",
         "name" : "empty-higlass-viewconf",
         "genome_assembly" : "",
         "viewconfig" : {
@@ -416,7 +416,7 @@ def test_add_bigwig_to_bigwig(testapp, higlass_blank_viewconf, bg_file_json):
     bg_file = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
 
     # Add a higlass file and get the json.
-    higlass_conf_uuid = "00000000-1111-0000-1111-000000000004"
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
     response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
 
@@ -758,7 +758,7 @@ def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf
     assert bg_file["accession"]
 
     # Get the Higlass Viewconf that will be edited.
-    higlass_conf_uuid = "00000000-1111-0000-1111-000000000004"
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
     response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
 
