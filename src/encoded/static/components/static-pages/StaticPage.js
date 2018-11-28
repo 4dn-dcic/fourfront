@@ -7,10 +7,11 @@ import url from 'url';
 import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
-import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink, BasicUserContentBody } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, BasicUserContentBody } from './components';
 import * as globals from './../globals';
 import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
+import { replaceString as replacePlaceholderString } from './placeholders';
 
 
 
@@ -191,16 +192,14 @@ export class StaticEntry extends React.PureComponent {
         'content'   : null,
         'entryType' : 'help',
         'className' : null
-    }
+    };
 
     constructor(props){
         super(props);
-        this.replacePlaceholder = this.replacePlaceholder.bind(this);
         this.renderEntryContent = this.renderEntryContent.bind(this);
         this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 1000);
         var options = (props.section && props.section.options) || {};
         this.state = {
-            //'isCollapsible' : options.collapsible,
             'open' : options.default_open,
             'closing' : false
         };
@@ -216,13 +215,6 @@ export class StaticEntry extends React.PureComponent {
         });
     }
 
-    replacePlaceholder(placeholderString){
-        if (placeholderString === '<SlideCarousel/>'){
-            return (<placeholders.SlideCarousel />);
-        }
-        return placeholderString;
-    }
-
     renderEntryContent(baseClassName){
         var { context, section } = this.props,
             content     = (section && section.content) || null,
@@ -234,14 +226,14 @@ export class StaticEntry extends React.PureComponent {
 
         if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
             placeholder = true;
-            content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
+            content = replacePlaceholderString(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
         }
 
         var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
 
         if (filetype === 'csv'){
             // Special case
-            return <CSVMatrixView csv={content} options={this.props.content.options} />;
+            return <CSVMatrixView csv={content} options={options} />;
         } else {
             // Common case - markdown, plaintext, etc.
             return <div className={className}>{ content }</div>;
