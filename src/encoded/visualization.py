@@ -439,7 +439,7 @@ def add_files_to_higlass_viewconf(request):
     higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     current_genome_assembly = request.json_body.get('genome_assembly', None)
     if not higlass_viewconfig:
-        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000003")
+        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000004")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
         current_genome_assembly = None
 
