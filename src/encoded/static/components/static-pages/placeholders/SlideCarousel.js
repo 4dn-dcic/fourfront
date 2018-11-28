@@ -4,32 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button } from 'react-bootstrap';
-import Slider from 'react-slick';
+import { SlickCarousel } from './../components';
 
-
-export class SlickCarousel extends React.PureComponent {
-
-    static defaultProps = {
-        'settings' : {
-            'dots'          : true,
-            'infinite'      : true,
-            'speed'         : 500,
-            'slidesToShow'  : 1,
-            'slidesToScroll': 1
-        }
-    };
-
-    render(){
-        var { settings, children } = this.props;
-        return (
-            <div className="slider-container">
-                <link rel="stylesheet" type="text/css" charset="UTF-8" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
-                <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
-                <Slider {...settings} children={children} />
-            </div>
-        );
-    }
-}
 
 
 export class SlideCarousel extends React.PureComponent {
@@ -48,8 +24,9 @@ export class SlideCarousel extends React.PureComponent {
             slideName   = fileLocation + filename,
             image       = <img width={720} height={540} alt={filename} src={slideName}/>;
 
+        //return image;
         return (
-            <div className="slide-img-container text-center">
+            <div className="slide-img-container text-center mb-2">
                 { image }
             </div>
         );
@@ -58,14 +35,17 @@ export class SlideCarousel extends React.PureComponent {
     render(){
 
         var slides = [
-            "Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png",
-            "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png",
-            "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png",
-            "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"
-        ];
+                "Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png",
+                "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png",
+                "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png",
+                "Slide13.png", "Slide14.png", "Slide15.png", "Slide16.png"
+            ],
+            settings = _.extend({}, SlickCarousel.defaultProps.settings, {
+                'infinite' : false
+            });
 
         return (
-            <SlickCarousel children={_.map(slides, this.renderChildImage)} />
+            <SlickCarousel children={_.map(slides, this.renderChildImage)} settings={settings} />
         );
     }
 
