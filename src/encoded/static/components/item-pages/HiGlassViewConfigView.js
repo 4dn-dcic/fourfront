@@ -592,10 +592,10 @@ class AddFileButton extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.receiveFile = this.receiveFile.bind(this);
-        this.toggleIsSelecting = _.throttle(this.toggleIsSelecting.bind(this), 3000, { 'trailing' : false });
-        this.setIsSelecting = this.toggleIsSelecting.bind(this, true);
-        this.unsetIsSelecting = this.toggleIsSelecting.bind(this, false);
+        this.receiveFile            = this.receiveFile.bind(this);
+        this.setIsSelecting         = _.throttle(this.toggleIsSelecting.bind(this, true), 3000, { 'trailing' : false });
+        this.unsetIsSelecting       = this.toggleIsSelecting.bind(this, false);
+        this.toggleIsSelecting      = this.toggleIsSelecting.bind(this);
         this.state = {
             'isSelecting' : false
         };
@@ -635,7 +635,6 @@ class AddFileButton extends React.PureComponent {
 
         return (
             <React.Fragment>
-                {/* <input type="text" placeholder="File accession or uuid" className="form-control search-query" value={this.state.fileUuid} onChange={this.handleTextChange} /> */}
                 <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}>
                     <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add
                 </Button>
