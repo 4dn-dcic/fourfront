@@ -360,5 +360,15 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "valid_item_types": ["FileProcessed", "FileReference"]
+    },
+    {
+        "file_format": "uncompressed_bowtie2Index",
+        "standard_file_extension": "bowtie2Index.tar",
+        "description": "This format is used for bowtie2Index files",
+        "uuid": "ae164e66-4702-4647-91d6-0700c9f875c1",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "status": "released",
+        "valid_item_types": ["FileReference"]
     }
 ]

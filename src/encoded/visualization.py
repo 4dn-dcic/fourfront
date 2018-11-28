@@ -439,7 +439,7 @@ def add_files_to_higlass_viewconf(request):
     higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     current_genome_assembly = request.json_body.get('genome_assembly', None)
     if not higlass_viewconfig:
-        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000003")
+        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000004")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
         current_genome_assembly = None
 
@@ -451,11 +451,13 @@ def add_files_to_higlass_viewconf(request):
             "new_genome_assembly" : None
         }
 
+
     # Get the file list.
-    filestring = request.json_body.get('files')
-    new_file_uuids = []
-    if filestring:
-        new_file_uuids = filestring.split(',')
+    files = request.json_body.get('files')
+    if not isinstance(files, list):
+        raise Exception("Expecting list of files.")
+
+    new_file_uuids = files
     new_views = higlass_viewconfig["views"]
 
     for file_uuid in new_file_uuids:
