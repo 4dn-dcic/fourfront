@@ -7930,10 +7930,14 @@
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
             {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.peak_calls"
+            },
+            {   
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
-                "workflow_argument_name": "chip.peak_calls",
-                "alternative_conditional_argument_names": ["chip.macs2.sig_fc", "chip.macs2_pooled.sig_fc"]
+                "workflow_argument_name": "chip.sig_fc"
             },
             {   
                 "argument_type": "Output QC file",
@@ -8137,7 +8141,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "bw",
+                            "file_format": "bigbed",
                             "global": true,
                             "type": "data file"
                         },
@@ -8145,6 +8149,18 @@
                         "target": [
                             {
                                 "name": "chip.peak_calls"
+                            }
+                        ],
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.sig_fc",
+                        "target": [
+                            {
+                                "name": "chip.sig_fc"
                             }
                         ]
                     },
