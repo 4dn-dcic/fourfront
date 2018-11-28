@@ -21,15 +21,11 @@ export class SlideCarousel extends React.PureComponent {
 
     renderChildImage(filename){
         var { fileLocation } = this.props,
-            slideName   = fileLocation + filename,
-            image       = <img width={720} height={540} alt={filename} src={slideName}/>;
+            src     = fileLocation + filename,
+            style   = { 'width' : 720, 'height' : 540 },
+            image   = <img {...{ src, style }} alt={filename} />;
 
-        //return image;
-        return (
-            <div className="slide-img-container text-center mb-2">
-                { image }
-            </div>
-        );
+        return image;
     }
 
     render(){
