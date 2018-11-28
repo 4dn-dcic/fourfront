@@ -17,7 +17,6 @@ require('./static-pages/StaticPage');
 require('./static-pages/DirectoryPage');
 require('./static-pages/HomePage');
 require('./static-pages/PlannedDataSubmission');
-require('./static-pages/JointAnalysis');
 require('./static-pages/ReleaseUpdates');
 require('./static-pages/StatisticsPage');
 require('./item-pages/DefaultItemView');

@@ -6,12 +6,11 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import { Popover, Button } from 'react-bootstrap';
-import { console, object, ajax, fileUtil } from'./../util';
-import * as plansData from './../testdata/stacked-block-matrix-list';
-import * as globals from './../globals';
-import StaticPage from './StaticPage';
-import { StackedBlockVisual, sumPropertyFromList, BasicStaticSectionBody } from './components';
-import { HiGlassContainer } from './../item-pages/components';
+import { console, object, ajax, fileUtil } from'./../../util';
+import * as plansData from './../../testdata/stacked-block-matrix-list';
+import * as globals from './../../globals';
+import { StackedBlockVisual } from './../components';
+
 
 
 
@@ -63,7 +62,7 @@ const CELL_TYPE_NAME_MAP = {
 };
 
 
-export default class JointAnalysisPlansPage extends StaticPage {
+export class JointAnalysisMatrix extends React.PureComponent {
 
     static standardizeEncodeResult(result, idx){
         var cellType = result.biosample_term_name || FALLBACK_NAME_FOR_UNDEFINED;
@@ -156,7 +155,6 @@ export default class JointAnalysisPlansPage extends StaticPage {
     }
 
     componentDidMount(){
-        super.componentDidMount(...arguments);
         this.setState({ 'mounted' : true });
         this.loadSearchQueryResults();
         setTimeout(()=>{
@@ -188,9 +186,9 @@ export default class JointAnalysisPlansPage extends StaticPage {
             var updatedState = {};
             updatedState[source_name] = result['@graph'] || [];
             if (source_name === 'encode_results') {
-                updatedState[source_name] = _.map(updatedState[source_name], JointAnalysisPlansPage.standardizeEncodeResult);
+                updatedState[source_name] = _.map(updatedState[source_name], JointAnalysisMatrix.standardizeEncodeResult);
             } else if (source_name === 'self_results'){
-                updatedState[source_name] = _.map(updatedState[source_name], JointAnalysisPlansPage.standardize4DNResult);
+                updatedState[source_name] = _.map(updatedState[source_name], JointAnalysisMatrix.standardize4DNResult);
             }
             this.setState(updatedState);
         }
@@ -212,7 +210,7 @@ export default class JointAnalysisPlansPage extends StaticPage {
                     if (typeof req_url !== 'string' || !req_url) return;
 
                     // For testing
-                    if (this.props.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
+                    if (window && window.location.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
                         req_url = 'https://data.4dnucleome.org' + req_url;
                     }
 
@@ -227,40 +225,15 @@ export default class JointAnalysisPlansPage extends StaticPage {
         );
     }
 
-    renderSection(section, id){
-        return (
-            <div className="col-xs-12">
-                <div className="static-section-entry" id={id || null}>
-                    { section.title && <h5 className="section-title mt-1 mb-1">{ section.title }</h5> }
-                    <BasicStaticSectionBody content={section.content} filetype={section.filetype} />
-                </div>
-            </div>
-        );
-    }
-
-    legend(){
-        var context = this.props.context,
-            legendContentSection = Array.isArray(context.content) && _.findWhere(context.content, { 'name' : 'joint-analysis-data-plans.legend' });
-
-        return (legendContentSection && this.renderSection(legendContentSection, "legend")) || null;
-    }
-
-    releaseUpdates(){
-        var context = this.props.context,
-            releaseUpdatesSection = Array.isArray(context.content) && _.findWhere(context.content, { 'name' : 'joint-analysis-data-plans.release-updates' });
-
-        return (releaseUpdatesSection && this.renderSection(releaseUpdatesSection, "release-updates-section")) || null;
-    }
-
     render() {
 
         var isLoading = _.any(_.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')), ([key, resultsForKey]) => resultsForKey === null && this.props[key + '_url'] !== null );
 
         if (isLoading){
             return (
-                <StaticPage.Wrapper>
+                <div>
                     <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-o-notch"/></div>
-                </StaticPage.Wrapper>
+                </div>
             );
         }
 
@@ -273,11 +246,10 @@ export default class JointAnalysisPlansPage extends StaticPage {
         var resultListEncode = this.state.encode_results;
 
         return (
-            <StaticPage.Wrapper>
-                <div className="row">{ this.legend() }</div>
+            <div className="static-section joint-analysis-matrix">
                 <div className="row">
                     <div className="col-xs-12 col-md-6">
-                        <h3 className="mt-4 mb-0 text-300">4DN</h3>
+                        <h3 className="mt-2 mb-0 text-300">4DN</h3>
                         <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
                             <a href={this.props.self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
                         </h5>
@@ -296,7 +268,7 @@ export default class JointAnalysisPlansPage extends StaticPage {
                         />
                     </div>
                     <div className="col-xs-12 col-md-6">
-                        <h3 className="mt-4 mb-0 text-300">ENCODE</h3>
+                        <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
                         <VisualBody
                             groupingProperties={['experiment_category', 'experiment_type']}
                             columnGrouping='cell_type'
@@ -312,61 +284,10 @@ export default class JointAnalysisPlansPage extends StaticPage {
                         />
                     </div>
                 </div>
-                <div className="row">{ this.releaseUpdates() }</div>
-                <HiGlassSection disabled={!this.state.higlassVisible} results={resultList4DN} />
-            </StaticPage.Wrapper>
-        );
-    }
-
-}
-
-globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysis-plansPage');
-globals.content_views.register(JointAnalysisPlansPage, 'Joint-analysisPage');
-
-
-
-class HiGlassSection extends React.Component {
-    render(){
-        var { disabled, results } = this.props;
-        if (disabled) return null;
-
-        //defaults --
-        let tileset_h1 = 'VSIstZwyRIO0qx58rN2wLw';
-        let tileset_hff = 'PkEatkZ3SUqwjmI6cRIF_g';
-
-        const h1_access = '4DNES2M5JIGV';   // Override tileset_h1 with higlass_uid from mcool processed file from this expset, if found in results.
-        const hff_access = '4DNES2R6PUEK';  // Override tileset_hff with higlass_uid from mcool processed file from this expset, if found.
-
-        if (Array.isArray(results) && results.length > 0){
-            var h1_expset = _.findWhere(results, { 'accession' : h1_access });
-            var h1_mcool = h1_expset && Array.isArray(h1_expset.processed_files) && _.find(h1_expset.processed_files, function(pF){ return fileUtil.getFileFormatStr(pF) === 'mcool'; });
-            tileset_h1 = (h1_mcool && h1_mcool.higlass_uid) || tileset_h1;
-            var hff_expset = _.findWhere(results, { 'accession' : hff_access });
-            var hff_mcool = hff_expset && Array.isArray(hff_expset.processed_files) && _.find(hff_expset.processed_files, function(pF){ return fileUtil.getFileFormatStr(pF) === 'mcool'; });
-            tileset_hff = (hff_mcool && hff_mcool.higlass_uid) || tileset_hff;
-        }
-
-        return (
-            <div>
-                <h3 className="mt-4 mb-1 text-300" style={{ paddingBottom : 10, borderBottom : '1px solid #ddd' }}>
-                    HiGlass Views - 4DN <span className="text-400">in situ Hi-C</span> contact matrices
-                </h3>
-                <div className="row">
-                    <div className="col-xs-6">
-                        <h4 className="mt-05 mb-0 text-600">H1-hESC</h4>
-                    </div>
-                    <div className="col-xs-6">
-                        <h4 className="mt-05 mb-0 text-600">HFFc6</h4>
-                    </div>
-                </div>
-                <div className="row mb-2">
-                    <div className="col-xs-12" style={{ 'height' : 600 }}>
-                        <HiGlassContainer height={600} files={[h1_mcool, hff_mcool]} extraViewProps={[{ "layout" : {w: 6, h: 12, x: 0, y: 0} }, { "layout" : {w: 6, h: 12, x: 6, y: 0} } ]} />
-                    </div>
-                </div>
             </div>
         );
     }
+
 }
 
 
