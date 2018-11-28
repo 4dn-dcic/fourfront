@@ -9,6 +9,7 @@ import { compiler } from 'markdown-to-jsx';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 import { HiGlassPlainContainer } from './../../item-pages/components/HiGlass/HiGlassPlainContainer';
 import * as store from './../../../store';
+import { replaceString as replacePlaceholderString } from './../placeholders';
 
 export class BasicUserContentBody extends React.PureComponent {
 
@@ -78,7 +79,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     static propTypes = {
         'context' : PropTypes.object.isRequired
-    }
+    };
 
     static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
         'className' : 'with-background mb-1 mt-1',
@@ -88,7 +89,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
             return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
         },
         'prependTitleIcon' : true
-    })
+    });
 
     renderInnerBody(){
         var { context, href } = this.props,
@@ -202,6 +203,8 @@ export class BasicStaticSectionBody extends React.PureComponent {
             return React.createElement(element, passedProps, compiler(content, markdownCompilerOptions || undefined) );
         } else if (filetype === 'html' && typeof content === 'string'){
             return React.createElement(element, passedProps, object.htmlToJSX(content));
+        } else if (filetype === 'txt' && typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
+            return replacePlaceholderString(content.slice(12).trim().replace(/\s/g,''));
         } else {
             return React.createElement(element, passedProps, content );
         }

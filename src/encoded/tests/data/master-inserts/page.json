@@ -435,17 +435,6 @@
         "schema_version" : "3"
     },
     {
-        "name": "nofic-matrix/2017-05",
-        "uuid": "9061346d-bc61-4f59-bbe8-054b83978a0e",
-        "title": "NOFIC Matrix",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b022",
-            "442c8aa0-dc6c-43d7-814a-854af460b023",
-            "442c8aa0-dc6c-43d7-814a-854af460b024"
-        ],
-        "schema_version" : "3"
-    },
-    {
         "name": "joint-analysis-data-plans",
         "uuid": "e4e0ff82-ac00-4e05-9db3-ac6df59fb3bd",
         "title": "Joint Analysis Data",
@@ -464,73 +453,10 @@
         "schema_version" : "3"
     },
     {
-        "name": "joint-analysis-data-plans/dev",
-        "uuid": "80706e23-aabf-40e5-85b8-f0e41ceda669",
-        "title": "Joint Analysis Data",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025",
-            "442c8aa0-dc6c-43d7-814a-854af460b030",
-            "442c8aa0-dc6c-43d7-814a-854af460b031",
-            "442c8aa0-dc6c-43d7-814a-854af460b032",
-            "442c8aa0-dc6c-43d7-814a-854af460b033"
-        ],
-        "schema_version" : "3"
-    },
-    {
-        "name": "joint-analysis-data-plans/jan2018",
-        "uuid": "abf6c6de-a8d4-4610-9cbb-54d8366f535a",
-        "title": "Joint Analysis Data - January 2018",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025",
-            "442c8aa0-dc6c-43d7-814a-854af460b034"
-        ],
-        "schema_version" : "3"
-    },
-    {
-        "name": "joint-analysis-data-plans/jan2018/dev",
-        "uuid": "766acc78-8a9b-4f83-8d5b-b184654e527c",
-        "title": "Joint Analysis Data - January 2018",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025",
-            "442c8aa0-dc6c-43d7-814a-854af460b038"
-        ],
-        "schema_version" : "3"
-    },
-    {
-        "name": "joint-analysis-data-plans/july2018",
-        "uuid": "82695325-f27a-4adf-b741-a97287958c8b",
-        "title": "Joint Analysis Data - July 2018",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025",
-            "442c8aa0-dc6c-43d7-814a-854af460b042"
-        ],
-        "schema_version" : "3"
-    },
-    {
-        "name": "joint-analysis-data-plans/july2018/dev",
-        "uuid": "5ecf54fd-cc7c-459e-b011-1a58cad85ac7",
-        "title": "Joint Analysis Data - July 2018",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025",
-            "442c8aa0-dc6c-43d7-814a-854af460b046"
-        ],
-        "schema_version" : "3"
-    },
-    {
         "name": "planned-submissions",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
         "title": "Planned Data Submission",
         "content": [],
-        "schema_version" : "3"
-    },
-    {
-        "name": "planned-submissions-matrix",
-        "uuid": "d013f70e-1ad7-4f3b-ac43-b60cb1bc96f4",
-        "title": "Planned Data Submission",
-        "content": [
-            "442c8aa0-dc6c-43d7-814a-854af460b025",
-            "442c8aa0-dc6c-43d7-814a-854af460b050"
-        ],
         "schema_version" : "3"
     },
     {
@@ -553,7 +479,9 @@
         "title": "4DN Joint Analysis Portal",
         "content": [
             "joint-analysis-data-plans.legend",
-            "joint-analysis-data-plans.release-updates"
+            "joint-analysis-data-plans.matrix",
+            "joint-analysis-data-plans.release-updates",
+            "joint-analysis-data-plans.higlass"
         ],
         "schema_version" : "3"
     },
