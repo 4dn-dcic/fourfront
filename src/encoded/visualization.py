@@ -491,7 +491,9 @@ def add_files_to_higlass_viewconf(request):
         # If the display doesn't have a genome_assembly, set it to this one.
         genome_assembly_mapping = {
             'GRCm38' : ('GRCm38', 'mm10'),
-            'GRCh38' : ('GRCh38', 'hg38')
+            'GRCh38' : ('GRCh38', 'hg38'),
+            'dm6' : ('dm6'),
+            'galGal5' : ('galGal5'),
         }
         if not current_genome_assembly in genome_assembly_mapping.keys():
             for new_assembly in genome_assembly_mapping:
@@ -589,10 +591,7 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
     if "bed" in new_file["file_format"]:
         new_track["type"] = "bedlike"
 
-    if new_file["genome_assembly"] == "GRCh38":
-        new_track["options"]["coordSystem"] = "hg38"
-    if new_file["genome_assembly"] == "GRCm38":
-        new_track["options"]["coordSystem"] = "mm10"
+    new_track["options"]["coordSystem"] = new_file["genome_assembly"]
 
     # If there are no views, create a default.
     if not views:
