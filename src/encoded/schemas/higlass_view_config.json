@@ -24,6 +24,12 @@
             "lookup" : 1,
             "exclude_from": ["submit4dn","FFedit-create"]
         },
+        "genome_assembly" : {
+            "title": "Genome Assembly",
+            "description": "All data files will use this genome assembly.",
+            "type" : "string",
+            "default": ""
+        },
         "viewconfig": {
             "title": "View Configuration",
             "type": "object",
@@ -676,6 +682,15 @@
                                                                 "type" : "string",
                                                                 "default" : "heatmap",
                                                                 "comment" : "This might be an ENUM, need to figure out."
+                                                            },
+                                                            "options" : {
+                                                                "additionalProperties" : true,
+                                                                "type" : "object",
+                                                                "properties": {
+                                                                    "name" : {
+                                                                        "type" : "string"
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }

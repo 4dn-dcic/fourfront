@@ -1,6 +1,5 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
-import os, requests
 from snovault import (
     abstract_collection,
     calculated_property,
@@ -19,8 +18,8 @@ from .base import (
     ALLOW_ANY_USER_ADD,
     get_item_if_you_can
 )
-
-
+import os
+import requests
 
 @abstract_collection(
     name='user-contents',
@@ -209,4 +208,3 @@ def get_local_file_contents(filename, contentFilesLocation=None):
 def get_remote_file_contents(uri):
     resp = requests.get(uri)
     return resp.text
-

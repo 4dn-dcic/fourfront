@@ -95,6 +95,7 @@ DELETED = [
 # For running pipelines
 ALLOW_LAB_VIEW_ADMIN_EDIT = [
     (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view'),
     (Allow, 'role.lab_submitter', 'view'),
 ] + ONLY_ADMIN_VIEW
 
