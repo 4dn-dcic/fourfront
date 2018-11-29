@@ -8150,7 +8150,9 @@
                             {
                                 "name": "chip.peak_calls"
                             }
-                        ],
+                        ]
+                    },
+                    {
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bw",
