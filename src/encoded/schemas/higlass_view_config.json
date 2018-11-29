@@ -682,6 +682,15 @@
                                                                 "type" : "string",
                                                                 "default" : "heatmap",
                                                                 "comment" : "This might be an ENUM, need to figure out."
+                                                            },
+                                                            "options" : {
+                                                                "additionalProperties" : true,
+                                                                "type" : "object",
+                                                                "properties": {
+                                                                    "name" : {
+                                                                        "type" : "string"
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
