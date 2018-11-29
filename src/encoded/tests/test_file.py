@@ -406,6 +406,17 @@ def mcool_file_json(award, experiment, lab, file_formats):
     }
     return item
 
+@pytest.fixture
+def bg_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bg').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bedGraph.gz',
+        'status': 'uploaded',
+    }
+    return item
 
 @pytest.fixture
 def mcool_file(testapp, mcool_file_json):

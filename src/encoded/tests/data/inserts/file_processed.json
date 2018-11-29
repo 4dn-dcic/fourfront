@@ -295,7 +295,8 @@
     "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
     "uuid":"d273d710-6b6d-4e43-a84c-5658a891c032",
     "accession": "4DNFIMCOOL01",
-	  "higlass_uid": "OxZJjFLwRYq8PA_cRgipbQ"
+	"higlass_uid": "OxZJjFLwRYq8PA_cRgipbQ",
+    "genome_assembly": "GRCm38"
 },
 {
     "lab":"/labs/4dn-dcic-lab/",
@@ -305,6 +306,16 @@
     "uuid":"d273d710-6b6d-4e43-a84c-5658a891c033",
     "accession": "4DNFIMCOOL02",
     "higlass_uid": "X7xwYPNLT16kDqBe_hiY9Q"
+},
+{
+    "lab":"/labs/4dn-dcic-lab/",
+    "award":"/awards/1U01CA200059-01/",
+    "status": "released",
+    "file_format":"mcool",
+    "uuid":"d273d710-6b6d-4e43-a84c-5658a891c034",
+    "accession": "4DNFIMCOOL03",
+    "higlass_uid": "OxZJjFLwRYq8PA_cRgipbQ",
+    "genome_assembly": "GRCh38"
 },
 {
     "lab":"/labs/4dn-dcic-lab/",
@@ -327,6 +338,7 @@
     "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
     "date_created":"2018-11-19T18:45:35.066759+00:00",
     "accession":"4DNFIZMTKWDI",
+    "genome_assembly": "GRCh38",
     "filename":"test_file.bed.gz",
     "status":"uploading",
     "lab":"/labs/4dn-dcic-lab/",
@@ -339,6 +351,32 @@
     "extra_files": [
        {
           "file_format": "beddb"
+       }
+    ]
+}
+,{
+    "lab":"/labs/4dn-dcic-lab/",
+    "award":"/awards/1U01CA200059-01/",
+    "status": "released",
+    "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+    "uuid": "5bca8842-0f3c-4224-9763-016caa0eec84",
+    "accession": "4DNFIU37KWB1",
+    "higlass_uid": "Tjm04dCjSBCuFR0pGYEaGw",
+    "genome_assembly": "GRCm38"
+}
+,{
+    "lab":"/labs/4dn-dcic-lab/",
+    "award":"/awards/1U01CA200059-01/",
+    "status": "released",
+    "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+    "uuid": "a661a518-efd5-496e-9b76-85ca93493921",
+    "accession": "4DNFI9UM7MDC",
+    "higlass_uid": "Y08H_toDQ-OxidYJAzFPXA",
+    "genome_assembly": "GRCh38",
+    "extra_files": [
+       {
+          "file_format": "bg_px2",
+          "status": "to be uploaded by workflow"
        }
     ]
 }
