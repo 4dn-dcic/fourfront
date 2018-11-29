@@ -7907,6 +7907,10 @@
             },
             {   
                 "argument_type": "parameter",
+                "workflow_argument_name": "chip.peak_caller"
+            },
+            {   
+                "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
             {   
@@ -8046,6 +8050,19 @@
                         "source": [
                             {
                                 "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.peak_caller",
+                        "source": [
+                            {
+                                "name": "chip.peak_caller"
                             }
                         ]
                     },
