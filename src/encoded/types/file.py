@@ -494,12 +494,12 @@ class File(Item):
     def generate_track_title(self, request):
             props = self.properties
             dstype = props.get('dataset_type')
-            lab = props.get('project_lab', None)
-            if lab is None:
-                lab_uuid = props.get('lab')
-                lab = request.embed(lab_uuid, '@@object').get('display_title')
-            ff_uuid = props.get('file_format')
-            fformat = request.embed(ff_uuid, '@@object').get('file_format')
+            # lab = props.get('project_lab', None)
+            # if lab is None:
+            #    lab_uuid = props.get('lab')
+            #    lab = request.embed(lab_uuid, '@@object').get('display_title')
+            # ff_uuid = props.get('file_format')
+            # fformat = request.embed(ff_uuid, '@@object').get('file_format')
             ftype = props.get('file_type', 'unspecified type')
             assay = props.get('assay_info', '')
             bname = props.get('biosource_name', None)
@@ -510,15 +510,15 @@ class File(Item):
                     bname = request.embed(bios, '@@object').get('biosource_name', 'unknown sample')
                 except Exception:
                     bname = 'unknown sample'
-            repinfo = ''
-            reps = props.get('replicate_identifiers')
-            if reps is not None:
-                if len(reps) > 1:
-                    repinfo = '(merged replicates)'
-                else:
-                    repinfo = "({})".format(reps[0])
-            title = '{ff} file of {ft} for {ai} {et} on {bs} from {lab} {rep}'.format(
-                ff=fformat, ft=ftype, ai=assay, et=dstype, bs=bname, lab=lab, rep=repinfo
+            # repinfo = ''
+            # reps = props.get('replicate_identifiers')
+            # if reps is not None:
+            #    if len(reps) > 1:
+            #        repinfo = '(merged replicates)'
+            #    else:
+            #        repinfo = "({})".format(reps[0])
+            title = '{ft} for {bs} {et} {ai}'.format(
+                ft=ftype, ai=assay, et=dstype, bs=bname
             )
             return title.replace('  ', ' ').rstrip()
 

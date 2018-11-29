@@ -891,7 +891,7 @@ def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, 
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
-    assert pf.get('track_title') == 'mcool file of normalized counts for PARK1 DNase Hi-C on GM12878 from ENCODE lab (bio1 tec1)'
+    assert pf.get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
 
 
 def test_file_generate_track_title_fp_some_missing(testapp, file_formats, award, lab):
@@ -904,7 +904,7 @@ def test_file_generate_track_title_fp_some_missing(testapp, file_formats, award,
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
-    assert pf.get('track_title') == 'mcool file of unspecified type for DNase Hi-C on unknown sample from ENCODE lab'
+    assert pf.get('track_title') == 'unspecified type for unknown sample DNase Hi-C'
 
 
 def test_file_generate_track_title_fvis_no_desc(testapp, file_formats, award, lab, GM12878_biosource):
@@ -922,7 +922,7 @@ def test_file_generate_track_title_fvis_no_desc(testapp, file_formats, award, la
     }
     res1 = testapp.post_json('/files-vistrack', vistrack_meta)
     vt = res1.json.get('@graph')[0]
-    assert vt.get('track_title') == 'mcool file of fold change over control for PARK1 DNase Hi-C on GM12878 from Some Dude, Somewhere (bio1 tec1)'
+    assert vt.get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
 
 
 def test_file_generate_track_title_fvis_w_desc(testapp, file_formats, award, lab, GM12878_biosource):
