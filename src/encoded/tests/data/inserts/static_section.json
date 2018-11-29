@@ -1,0 +1,74 @@
+[
+    {
+        "title" : "First Slide",
+        "description" : "This is a cool feature which you should check out.",
+        "name" : "home.carousel.slide1",
+        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d6",
+        "body" : "<h4>Hello! World ABC</h4>",
+        "section_type" : "Home Page Slide",
+        "options" : {
+            "filetype" : "html"
+        },
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "title" : "Second Slide",
+        "description" : "This is a cool feature which you should check out.",
+        "name" : "home.carousel.slide2",
+        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d7",
+        "body" : "<h4>Hello! World DEF</h4>",
+        "section_type" : "Home Page Slide",
+        "options" : {
+            "filetype" : "html"
+        },
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "title" : "ɤɵɴϴΩ Slide",
+        "description" : "This is a cool feature which you should check out.",
+        "name" : "home.carousel.slide3",
+        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d8",
+        "body" : "<h4>Hello! World HIJ</h4>",
+        "section_type" : "Home Page Slide",
+        "options" : {
+            "filetype" : "html"
+        },
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "title" : "ɤɵɴϴΩ Slide2",
+        "description" : "This is a cool feature which you should check out.",
+        "name" : "home.carousel.slide4",
+        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d9",
+        "body" : "<h4>Hello! World KLM</h4>",
+        "section_type" : "Home Page Slide",
+        "options" : {
+            "filetype" : "html"
+        },
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "title" : "ɤɵɴϴΩ Slide3",
+        "description" : "This is a cool feature which you should check out.",
+        "name" : "home.carousel.slide5",
+        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e0",
+        "body" : "<h4>Hello! World NOP</h4>",
+        "section_type" : "Home Page Slide",
+        "options" : {
+            "filetype" : "html"
+        },
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "title" : "ɤɵɴϴΩ Slide4",
+        "description" : "This is a cool feature which you should check out.",
+        "name" : "home.carousel.slide6",
+        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e1",
+        "body" : "<h4>Hello! World QRS</h4>",
+        "section_type" : "Home Page Slide",
+        "options" : {
+            "filetype" : "html"
+        },
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    }
+]

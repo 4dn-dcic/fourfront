@@ -797,56 +797,74 @@ h5.fourDN-header {
 	margin-top: 30px;
 }
 
-.homepage-links-row {
+.home-content-area {
 
-	.links-wrapper {
+	margin-top: 15px;
 
-		display: flex;
-
-		.link-block {
-			
-			> a {
-				background: #f8f8f8;
-				padding: 8px 10px;
-				display: block;
-				/* text-align: center; */
-				font-weight: 400;
-				height: 100%;
-				border: 1px solid rgba(0,0,0,0.05);
-				/*
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				*/
-
-				&:hover {
-					background-color: #f4f4f4;
-				}
-
-				> span {
-					display: inline-block;
-					vertical-align: middle;
-				}
-			}
-			
-			
-			&:not(:first-child){
-				border-left: 1px solid #eee;
-			}
-			
+	.link-block {
+				
+		> a {
+			font-size: 14px;
+			padding: 7px 10px;
+			display: block;
+			/* text-align: center; */
+			font-weight: 400;
+			height: 100%;
 			/*
-			&:last-child {
-				border-right: 1px solid #ddd;
-			}
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 			*/
-		}
 
+			background: #f8f8f8;
+			border: 1px solid rgba(0,0,0,0.05);
+
+			&:hover {
+				background-color: #f4f4f4;
+			}
+
+			> span {
+				display: inline-block;
+				vertical-align: middle;
+			}
+
+			&.browse-btn {
+				/* Emulates btn-primary styling partially */
+				color: $btn-primary-color;
+				background-color: $btn-primary-bg;
+				border-color: $btn-primary-border;
+				&:hover, &:active, &.active, &:focus {
+					background-color: darken($btn-primary-bg, 8%);
+        			border-color: darken($btn-primary-border, 12%);
+				}
+			}
+		}
+		
+		/*
+		&:last-child {
+			border-right: 1px solid #ddd;
+		}
+		*/
 	}
 
-}
+	.homepage-links-row {
+		.links-wrapper {
+			display: flex;
+			.link-block:not(:first-child){
+				border-left: 1px solid #eee;
+			}
+		}
+	}
 
-.home-content-area {
-	margin-top: 15px;
+	.homepage-links-column {
+		.links-wrapper {
+			.link-block {
+				margin-bottom: 5px; //10px;
+			}
+		}
+	}
+
+
 }
 
 // Error
