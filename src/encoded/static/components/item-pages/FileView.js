@@ -290,6 +290,25 @@ export class FileOverViewBody extends React.Component {
         win.focus();
     }
 
+    handleEpigenomeClick(evt){
+        // TODO I need to get the genome_assembly somehow...
+        // http://epigenomegateway.wustl.edu/browser/?genome=hg38&hicUrl=https://data.4dnucleome.org/files-processed/4DNFIY3XPKPO/@@download/4DNFIY3XPKPO.hic
+        var file            = this.props.result,
+            pageHref        = this.props.href || (store && store.getState().href),
+            hrefParts       = url.parse(pageHref),
+            host            = hrefParts.protocol + '//' + hrefParts.host,
+            targetLocation  = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+
+        var targetLocation = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
+
+        if (isServerSide()) return null;
+        var win = window.open(targetLocation, '_blank');
+        win.focus();
+    }
+
+    /**
+    * TODO Add a note here
+    **/
     visualizeExternallyButton(){
         var file        = this.props.result,
             tips        = this.props.tips,
@@ -301,6 +320,9 @@ export class FileOverViewBody extends React.Component {
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
                     <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                </Button>
+                <Button bsStyle="primary" onClick={this.handleEpigenomeClick}>
+                    <span className="text-400">Visualize with</span> EpiGenome&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
                 </Button>
             } />
         );
