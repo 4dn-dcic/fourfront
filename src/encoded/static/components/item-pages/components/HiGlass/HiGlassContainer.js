@@ -738,7 +738,7 @@ export const HiGlassConfigurator = {
 
             _.forEach(files, function(file, idx, all){
                 tracks.push(
-                    HiGlassConfigurator.beddb.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
+                    HiGlassConfigurator.bigbed.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
                 );
             });
 
@@ -770,7 +770,7 @@ export const HiGlassConfigurator = {
             }
 
             return _.extend(HiGlassConfigurator.generateViewConfigBase(options), {
-                "views": [ HiGlassConfigurator.beddb.generateView(files, options) ]
+                "views": [ HiGlassConfigurator.bigbed.generateView(files, options) ]
             });
         }
     }
