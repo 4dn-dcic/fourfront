@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Checkbox, Button } from 'react-bootstrap';
+import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
 import * as globals from './../globals';
 import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
@@ -291,16 +291,14 @@ export class FileOverViewBody extends React.Component {
     }
 
     handleEpigenomeClick(evt){
-        // TODO I need to get the genome_assembly somehow...
-        // http://epigenomegateway.wustl.edu/browser/?genome=hg38&hicUrl=https://data.4dnucleome.org/files-processed/4DNFIY3XPKPO/@@download/4DNFIY3XPKPO.hic
         var file            = this.props.result,
             pageHref        = this.props.href || (store && store.getState().href),
             hrefParts       = url.parse(pageHref),
             host            = hrefParts.protocol + '//' + hrefParts.host,
-            targetLocation  = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+            genome_assembly = ("genome_assembly" in file) ? file.genome_assembly : null,
+            targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
 
-        var targetLocation = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
-
+        if (!genome_assembly) return null;
         if (isServerSide()) return null;
         var win = window.open(targetLocation, '_blank');
         win.focus();
@@ -318,12 +316,14 @@ export class FileOverViewBody extends React.Component {
         if (fileFormat !== 'hic' || !fileIsPublic) return null;
         return (
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
-                <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
-                    <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-                </Button>
-                <Button bsStyle="primary" onClick={this.handleEpigenomeClick}>
-                    <span className="text-400">Visualize with</span> EpiGenome&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-                </Button>
+                <React.Fragment>
+                    <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick} className="mr-05">
+                        <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                    </Button>
+                    <Button bsStyle="primary" onClick={this.handleEpigenomeClick}>
+                        <span className="text-400">Visualize with</span> EpiGenome&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                    </Button>
+                </React.Fragment>
             } />
         );
     }
