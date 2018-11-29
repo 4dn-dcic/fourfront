@@ -45,17 +45,12 @@ export default class HomePage extends React.PureComponent {
 
     introText(){
         var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
-        return (
-            <React.Fragment>
-                {/* <h2 className="homepage-section-title">{ (introContent && introContent.display_title) || "Introduction" }</h2> */}
-                { introContent ?
-                    <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} />
-                    : // Fallback -
-                    <p className="text-center">Introduction content not yet indexed.</p>
-                }
-                {/* <LinksRow {..._.pick(this.props, 'session', 'windowWidth')} /> */}
-            </React.Fragment>
-        );
+
+        if (introContent){
+            return <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} />;
+        }
+
+        return <p className="text-center">Introduction content not yet indexed.</p>;
     }
 
     announcements(){
@@ -75,16 +70,17 @@ export default class HomePage extends React.PureComponent {
         return (
             <div className="home-content-area">
                 { this.midHeader() }
-                <h2 className="homepage-section-title">Introduction</h2>
+                {/* <h2 className="homepage-section-title">Introduction</h2> */}
+                <HomePageCarousel />
                 <div className="row">
                     <div className="col-xs-12 col-md-8">
+                        <h2 className="homepage-section-title">Introduction</h2>
                         { this.introText() }
                     </div>
                     <div className="col-xs-12 col-md-4 pull-right">
                         <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
                     </div>
                 </div>
-                <HomePageCarousel />
                 <div className="mt-4">
                     { this.announcements() }
                 </div>
@@ -284,28 +280,28 @@ class LinksColumn extends LinksRow {
                 <h4 className="text-400 mb-15 mt-25">External Links</h4>
                 <div className="links-wrapper clearfix">
                     <div className="link-block">
-                        <a href="http://www.4dnucleome.org/" target="_blank">
+                        <a href="http://www.4dnucleome.org/" target="_blank" className="external-link">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>Main Portal</span>
                             </layout.VerticallyCenteredChild>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank">
+                        <a href="http://dcic.4dnucleome.org/" target="_blank" className="external-link">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>4DN DCIC</span>
                             </layout.VerticallyCenteredChild>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank">
+                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" className="external-link">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>NIH Common Fund</span>
                             </layout.VerticallyCenteredChild>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank">
+                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" className="external-link">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>Centers and Labs</span>
                             </layout.VerticallyCenteredChild>

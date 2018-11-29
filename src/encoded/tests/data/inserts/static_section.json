@@ -52,10 +52,11 @@
         "description" : "This is a cool feature which you should check out.",
         "name" : "home.carousel.slide5",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e0",
-        "body" : "<h4>Hello! World NOP</h4>",
+        "body" : "<style> .slide-container { background-image: url('https://i.gyazo.com/1e0e844e62a658308f1fc0ac19ce4339.png'); background-size: cover; position: absolute; width: 100%; height: 100%; } </style> <div class=\"slide-container\"> <div style=\"background: rgb(255, 167, 7); color: #fff; padding: 5px; display: inline-block;\"> New! </div> </div>",
         "section_type" : "Home Page Slide",
         "options" : {
-            "filetype" : "html"
+            "filetype" : "html",
+            "link" : "/joint-analysis"
         },
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
     },

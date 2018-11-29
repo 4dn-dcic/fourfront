@@ -79,6 +79,18 @@
                     "type" : "string",
                     "lookup" : 5
                 },
+                "link" : {
+                    "title" : "Link/URI",
+                    "description": "Another link with which this resource is associated with or should redirect to.",
+                    "type" : "string",
+                    "lookup" : 6
+                },
+                "image" : {
+                    "title" : "Preview Image",
+                    "description": "Image or screenshot URL for this Item to use as a preview.",
+                    "type" : "string",
+                    "lookup" : 7
+                },
                 "startCell" : {
                     "type" : "array",
                     "title" : "(CSV) First Table Cell",

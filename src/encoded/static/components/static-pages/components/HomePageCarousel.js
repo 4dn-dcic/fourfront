@@ -18,13 +18,26 @@ export class HomePageCarousel extends React.PureComponent {
             'wrapAround' : true,
             'slidesToScroll' : 1,
             'pauseOnHover' : true,
-            'renderCenterLeftControls' : null,
-            'renderCenterRightControls' : null
+            //'renderCenterLeftControls' : null,
+            //'renderCenterRightControls' : null,
+            'renderCenterLeftControls' : function({ previousSlide }){
+                return <i className="icon icon-fw icon-angle-left" onClick={previousSlide} />;
+            },
+            'renderCenterRightControls' : function({ nextSlide }){
+                return <i className="icon icon-fw icon-angle-right" onClick={nextSlide} />;
+            },
+            'renderBottomCenterControls' : null,
+            'autoGenerateStyleTag' : false,
+            'dragging' : false,
+            'cellAlign' : 'center',
+            'cellSpacing' : 20,
+            //'cellPadding' : '0px 10px'
         }
     };
 
     constructor(props){
         super(props);
+        this.refFunc = this.refFunc.bind(this);
         this.state = {
             'sections'  : null,
             'loading'   : true,
@@ -53,11 +66,36 @@ export class HomePageCarousel extends React.PureComponent {
     }
 
     renderSlide(section, idx){
-        return (
-            <div style={{ 'height' : 300, 'backgroundColor' : '#eee' }}>
-                <BasicStaticSectionBody {...section} />
-            </div>
-        );
+        var link    = (section && section.options && section.options.link) || null,
+            title   = (!section.title ? null :
+                <div className="title-container">
+                    <h4 className="text-500">{ section.title }</h4>
+                    { section.description ?
+                        <p>{ section.description }</p>
+                    : null }
+                </div>
+            ),
+            inner = (
+                <React.Fragment>
+                    <div className="inner">
+                        <BasicStaticSectionBody {..._.pick(section, 'filetype', 'options', 'content')} />
+                    </div>
+                    { title }
+                </React.Fragment>
+            );
+
+        if (link){
+            return <a className="homepage-carousel-slide is-link" key={idx} children={inner} href={link} />;
+        }
+
+        return <div className="homepage-carousel-slide" key={idx} children={inner} />;
+    }
+
+    refFunc(elem){
+        setTimeout(function(){
+            if (!elem) return;
+            elem.style.opacity = 1;
+        }, 0);
     }
 
     render(){
@@ -66,7 +104,7 @@ export class HomePageCarousel extends React.PureComponent {
 
         if (loading){
             return (
-                <div className="text-center pt-2 pb-2">
+                <div className="mb-3 mt-3 text-center pt-2 pb-2" key="placeholder">
                     <h4 style={{ 'opacity' : 0.5 }}>
                         <i className="icon icon-spin icon-circle-o-notch"/>
                     </h4>
@@ -79,8 +117,7 @@ export class HomePageCarousel extends React.PureComponent {
         }
 
         return (
-            <div>
-                <h3 className="text-300 mt-3 mb-15">Featured</h3>
+            <div className="homepage-carousel-container mb-3 mt-3" ref={this.refFunc} style={{ 'opacity' : 0 }} key="carousel">
                 <Carousel {...this.props.settings} children={_.map(sections, this.renderSlide)} />
             </div>
         );
