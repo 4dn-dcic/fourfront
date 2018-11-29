@@ -395,5 +395,17 @@
     "award":"/awards/1U01CA200059-01/",
     "higlass_uid": "FTv3kHMmSlm0YTmtdOYAPA",
     "uuid":"a34d5ea5-eada-4def-a4a7-c227b0d32395"
+},
+{
+    "lab":"/labs/4dn-dcic-lab/",
+    "status":"uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFI9OWA4XD",
+    "file_classification":"processed file",
+    "higlass_uid":"MRxj47AUSmSzoaiaN6pkKg",
+    "file_format":"bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
+    "uuid":"94827a84-2b65-45f4-ad4d-fc2219c52e7b"
 }
 ]
