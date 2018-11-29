@@ -188,7 +188,7 @@ class FileViewOverview extends React.Component {
                     <hr className="tab-section-title-horiz-divider"/>
                     <FileOverViewBody result={context} schemas={this.props.schemas} />
                 </div>
-                
+
                 <div className="col-md-12">
                     { table }
                 </div>
@@ -293,9 +293,10 @@ export class FileOverViewBody extends React.Component {
     visualizeExternallyButton(){
         var file        = this.props.result,
             tips        = this.props.tips,
-            fileFormat  = fileUtil.getFileFormatStr(file);
+            fileFormat  = fileUtil.getFileFormatStr(file),
+            fileIsPublic = (file.status === 'archived' || file.status === 'released');
 
-        if (fileFormat !== 'hic') return null;
+        if (fileFormat !== 'hic' || !fileIsPublic) return null;
         return (
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
@@ -453,4 +454,3 @@ export class RelatedFilesOverViewBlock extends React.Component {
 
     }
 }
-

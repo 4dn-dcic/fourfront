@@ -865,9 +865,11 @@ export class FileEntryBlock extends React.PureComponent {
                 (fileFormat && fileFormat === 'hic')
                 || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
             )),
-            externalLinkButton      = null;
+            externalLinkButton      = null,
+            fileIsPublic = (file.status === 'archived' || file.status === 'released');
 
-        if (fileIsHic) {
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
             // Make an external juicebox link.
             var onClick = function(evt){
 
