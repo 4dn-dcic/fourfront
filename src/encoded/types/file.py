@@ -494,13 +494,22 @@ class File(Item):
     def generate_track_title(self, request):
             props = self.properties
             dstype = props.get('dataset_type')
-            lab_uuid = props.get('lab')
-            lab = request.embed(lab_uuid, '@@object').get('display_title')
+            lab = props.get('project_lab', None)
+            if lab is None:
+                lab_uuid = props.get('lab')
+                lab = request.embed(lab_uuid, '@@object').get('display_title')
             ff_uuid = props.get('file_format')
             fformat = request.embed(ff_uuid, '@@object').get('file_format')
             ftype = props.get('file_type', 'unspecified type')
             assay = props.get('assay_info', '')
-            bios = props.get('biosource_name', 'unknown')
+            bname = props.get('biosource_name', None)
+            if bname is None:
+                # for vistrack - the calcprop does not get calc in time?
+                bios = props.get('biosource')
+                try:
+                    bname = request.embed(bios, '@@object').get('biosource_name', 'unknown sample')
+                except Exception:
+                    bname = 'unknown sample'
             repinfo = ''
             reps = props.get('replicate_identifiers')
             if reps is not None:
@@ -509,9 +518,9 @@ class File(Item):
                 else:
                     repinfo = "({})".format(reps[0])
             title = '{ff} file of {ft} for {ai} {et} on {bs} from {lab} {rep}'.format(
-                ff=fformat, ft=ftype, ai=assay, et=dstype, bs=bios, lab=lab, rep=repinfo
+                ff=fformat, ft=ftype, ai=assay, et=dstype, bs=bname, lab=lab, rep=repinfo
             )
-            return title.replace('  ', ' ')
+            return title.replace('  ', ' ').rstrip()
 
     @classmethod
     def get_bucket(cls, registry):
@@ -738,6 +747,15 @@ class FileVistrack(File):
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Biosource Name",
+        "type": "string"
+    })
+    def biosource_name(self, request):
+        bios = self.properties.get('biosource')
+        if bios is not None:
+            return request.embed(bios, '@@object').get('biosource_name')
 
     @calculated_property(schema={
         "title": "Track Name",
