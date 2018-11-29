@@ -6,7 +6,7 @@ describe("Individual Item Views", function(){
     context('FileProcessed MCOOL Collection', function(){
 
         it('Have at least 35 MCOOL FileProcessed files', function(){
-            cy.visit('/search/?type=FileProcessed&file_format.display_title=mcool').end()
+            cy.visit('/search/?type=FileProcessed&file_format.display_title=mcool&workflow_run_outputs.workflow.title!=No+value').end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('be.greaterThan', 34);
         });
