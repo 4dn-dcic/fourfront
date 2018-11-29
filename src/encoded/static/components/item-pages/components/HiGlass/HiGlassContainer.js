@@ -673,7 +673,7 @@ export class HiGlassContainer extends React.PureComponent {
                 'bw'     : HiGlassConfigurator.bigwig.generateViewConfig,
                 'bg'     : HiGlassConfigurator.bigwig.generateViewConfig,
                 'bed'    : HiGlassConfigurator.beddb.generateViewConfig,
-                'bigbed' : HiGlassConfigurator.bigbed.generateViewConfig,
+                'bigbed' : HiGlassConfigurator.bigwig.generateViewConfig,
                 'beddb'  : HiGlassConfigurator.beddb.generateViewConfig
             };
 
