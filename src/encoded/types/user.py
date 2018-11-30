@@ -27,6 +27,9 @@ from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
 
+import logging
+logging.getLogger('boto3').setLevel(logging.WARNING)
+log = logging.getLogger(__name__)
 
 ONLY_ADMIN_VIEW_DETAILS = [
     (Allow, 'group.admin', ['view', 'view_details', 'edit']),
@@ -164,6 +167,7 @@ def user_add(context, request):
     if we have a password in our request, create and auth entry
     for the user as well
     '''
+    import pdb; pdb.set_trace()
     # do we have valid data
     pwd = request.json.get('password', None)
     pwd_less_data = request.json.copy()
@@ -189,6 +193,23 @@ def user_add(context, request):
 
             import transaction
             transaction.commit()
+
+    # if we are on webprod/webprod2, also create a Jupyterhub account for user.
+    # this needs to be done because otherwise the user won't show up on JH
+    # until the server is restarted
+    ff_env = request.registry.settings.get('env.name')
+    if 'webprod' in ff_env and request.json.get('email'):
+        import requests
+        from dcicutils.s3_utils import s3Utils
+        s3Obj = s3Utils(env='data')
+        jh_key = s3Utils.get_jupyterhub_key()
+        jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', request.json['email']])
+        jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
+        try:
+            requests.post(jh_endpoint, headers=jh_headers)
+        except Exception as jh_exc:
+            log.warning('Error posting user %s to Jupyterhub' % request.json['email'],
+                        error=str(jh_exc))
 
     return result
 
