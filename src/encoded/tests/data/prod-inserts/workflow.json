@@ -8199,7 +8199,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "other",
+                            "file_format": "json",
                             "global": true,
                             "type": "data file"
                         },
@@ -8280,11 +8280,21 @@
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
             {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.peak_calls"
+            },
+            {   
+                "argument_format": "bw",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.sig_fc"
+            },
+            {   
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
             {   
-                "argument_format": "other",
+                "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.qc_json"
             }
@@ -8493,6 +8503,34 @@
                     {
                         "meta": {
                             "cardinality": "single",
+                            "file_format": "bigbed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.peak_calls",
+                        "target": [
+                            {
+                                "name": "atac.peak_calls"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.sig_fc",
+                        "target": [
+                            {
+                                "name": "atac.sig_fc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
                             "global": true,
                             "type": "QC"
                         },
@@ -8506,7 +8544,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "other",
+                            "file_format": "json",
                             "global": true,
                             "type": "data file"
                         },
