@@ -7,7 +7,7 @@ import url from 'url';
 import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
-import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, BasicUserContentBody } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, BasicUserContentBody, EmbeddedHiglassActions } from './components';
 import * as globals from './../globals';
 import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
@@ -51,8 +51,8 @@ export function parseSectionsContent(context = this.props.context){
             if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
             section =  _.extend({}, section, {
                 'content' : <React.Fragment>
-                  <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
-                  <HiGlassPlainContainer viewConfig={section.viewconfig} />
+                  <EmbeddedHiglassActions context={section} style={{ marginTop : -10 }} />
+                  <HiGlassPlainContainer viewConfig={section.viewconfig} parentComponentType={StaticEntry} />
                 </React.Fragment>
             });
         } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){

@@ -124,7 +124,7 @@ export class EmbeddedHiglassActions extends React.PureComponent {
         }
 
         return (
-            <div className="extra-info extra-info-for-higlass-display">
+            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'parentComponentType')}>
                 <div className="description">
                     { context.description }
                 </div>
