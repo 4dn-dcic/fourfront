@@ -7948,7 +7948,7 @@
                 "workflow_argument_name": "chip.report"
             },
             {   
-                "argument_format": "other",
+                "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
             }
