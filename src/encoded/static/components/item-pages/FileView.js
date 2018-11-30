@@ -42,8 +42,9 @@ export default class FileView extends WorkflowRunTracingView {
         var fileFormat  = fileUtil.getFileFormatStr(context),
             isMcoolFile = fileFormat === 'mcool',
             isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg'),
-            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed');
-        return isMcoolFile || isBWFile || isBEDDBFile;
+            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed'),
+            isBIGBEDFile = fileFormat === 'bigbed';
+        return isMcoolFile || isBWFile || isBEDDBFile || isBIGBEDFile;
     }
 
     constructor(props){
