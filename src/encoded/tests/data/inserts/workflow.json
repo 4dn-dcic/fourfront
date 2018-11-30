@@ -8280,6 +8280,10 @@
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
             {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bowtie2.cpu"
+            },
+            {   
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.peak_calls"
@@ -8486,6 +8490,19 @@
                         "source": [
                             {
                                 "name": "atac.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bowtie2.cpu",
+                        "source": [
+                            {
+                                "name": "atac.bowtie2.cpu"
                             }
                         ]
                     }
