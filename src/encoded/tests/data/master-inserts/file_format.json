@@ -380,5 +380,15 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "valid_item_types": ["FileProcessed", "FileReference"]
+    },
+    {
+        "file_format": "json",
+        "standard_file_extension": "json",
+        "description": "JSON format",
+        "uuid": "035a9572-3607-4741-89c9-53cd24003058",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "status": "released",
+        "valid_item_types": ["FileProcessed", "FileReference"]
     }
 ]
