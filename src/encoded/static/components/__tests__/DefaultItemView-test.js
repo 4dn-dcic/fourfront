@@ -14,6 +14,8 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
+jest.mock('./../util/navigate');
+
 
 describe('Testing DefaultItemView.js', function() {
     var DefaultItemView, testItem, FetchContext, context, schemas, Wrapper, sinon, server;
@@ -33,15 +35,6 @@ describe('Testing DefaultItemView.js', function() {
             ]
         );
 
-        server.respondWith(
-            "GET",
-            '/profiles/?format=json',
-            [
-                200, 
-                { "Content-Type" : "application/json" },
-                '<html></html>' // Don't actually need content JSON here for test. Just to silence loadSchemas XHR request error (no XHR avail in test)
-            ]
-        );
     });
 
     afterAll(function(){
@@ -52,17 +45,10 @@ describe('Testing DefaultItemView.js', function() {
         DefaultItemView = require('./../item-pages/DefaultItemView').default;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
-        Wrapper = createReactClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
+
         testItem = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <DefaultItemView schemas={schemas} context={context} />
-            </Wrapper>
+            <DefaultItemView schemas={schemas} context={context} windowWidth={1200}
+            href="https://data.4dnucleome.org/libraries/ENCLB055ZZZ/" />
         );
 
         jest.runAllTimers();

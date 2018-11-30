@@ -406,6 +406,17 @@ def mcool_file_json(award, experiment, lab, file_formats):
     }
     return item
 
+@pytest.fixture
+def bg_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bg').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bedGraph.gz',
+        'status': 'uploaded',
+    }
+    return item
 
 @pytest.fixture
 def mcool_file(testapp, mcool_file_json):
@@ -864,3 +875,69 @@ def test_file_format_patch_works_if_no_filename(testapp, file_formats, award, la
     patch_data = {"file_format": file_formats.get('bam').get('uuid')}
     res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
     assert not res2.json.get('errors')
+
+
+def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+        'file_type': 'normalized counts',
+        'assay_info': 'PARK1',
+        'biosource_name': 'GM12878',
+        'replicate_identifiers': ['bio1 tec1']
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
+
+
+def test_file_generate_track_title_fp_some_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_title') == 'unspecified type for unknown sample DNase Hi-C'
+
+
+def test_file_generate_track_title_fvis_no_desc(testapp, file_formats, award, lab, GM12878_biosource):
+    vistrack_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+        'file_type': 'fold change over control',
+        'project_lab': 'Some Dude, Somewhere',
+        'assay_info': 'PARK1',
+        'biosource': GM12878_biosource['@id'],
+        'replicate_identifiers': ['bio1 tec1']
+    }
+    res1 = testapp.post_json('/files-vistrack', vistrack_meta)
+    vt = res1.json.get('@graph')[0]
+    assert vt.get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
+
+
+def test_file_generate_track_title_fvis_w_desc(testapp, file_formats, award, lab, GM12878_biosource):
+    vistrack_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'description': 'test description',
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+        'file_type': 'fold change over control',
+        'assay_info': 'PARK1',
+        'biosource': GM12878_biosource['@id'],
+        'replicate_identifiers': ['bio1 tec1']
+    }
+    res1 = testapp.post_json('/files-vistrack', vistrack_meta)
+    vt = res1.json.get('@graph')[0]
+    assert vt.get('track_title') == 'test description'

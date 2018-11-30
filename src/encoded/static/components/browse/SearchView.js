@@ -11,7 +11,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel } from './components';
+    AboveSearchTablePanel, defaultColumnDefinitionMap} from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
@@ -79,8 +79,14 @@ class ControlsAndResults extends React.PureComponent {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
+    }
+
+    forceUpdateOnSelf(){
+        var searchResultTable   = this.refs.searchResultTable,
+            dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
+        return dimContainer && dimContainer.resetWidths();
     }
 
     handleClearFilters(evt){
@@ -152,9 +158,10 @@ class ControlsAndResults extends React.PureComponent {
                     newChildren.unshift(
                         <div className="select-button-container">
                             <button className="select-button" onClick={(e)=>{
-                                //e.preventDefault();
+                                // Standard - postMessage
                                 var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
                                 window.opener.postMessage(eventJSON, '*');
+                                // Nonstandard - in case browser doesn't support postMessage but does support other cross-window events (unlikely).
                                 window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
                             }}>
                                 <i className="icon icon-fw icon-check"/>
@@ -204,7 +211,7 @@ class ControlsAndResults extends React.PureComponent {
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
                     <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
-                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight')}
+                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
                         hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                             SearchResultTable.defaultProps.constantColumnDefinitions,
@@ -214,6 +221,7 @@ class ControlsAndResults extends React.PureComponent {
                         )} />
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                         'currentAction', 'windowWidth', 'registerWindowOnScrollHandler')}
+                        ref="searchResultTable"
                         results={results} totalExpected={context.total} columns={context.columns || {}}
                         hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
                         renderDetailPane={(result, rowNumber, containerWidth) =>
@@ -246,7 +254,7 @@ export default class SearchView extends React.PureComponent {
     static defaultProps = {
         'href'          : null,
         'currentAction' : null,
-        'columnDefinitionOverrideMap' : {
+        'columnDefinitionOverrideMap' : _.extend({}, defaultColumnDefinitionMap, {
             'google_analytics.for_date' : {
                 'title' : 'Analytics Date',
                 'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
@@ -255,7 +263,7 @@ export default class SearchView extends React.PureComponent {
                     return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
                 }
             }
-        },
+        }),
         'restrictions'  : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
     };
 

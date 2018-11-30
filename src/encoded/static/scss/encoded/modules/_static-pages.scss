@@ -105,14 +105,45 @@ h5.fourDN-header {
 		> i.icon-link {
 			opacity: 0.15;
 		}
+
+		&.can-collapse {
+			cursor: pointer;
+			padding-top: 15px;
+			padding-left: 5px;
+			border-top: 1px solid #f4f4f4;
+			transition: border-color .5s, background-color .5s, padding-left .5s;
+			&.closed {
+				border-color: #ddd;
+				background-color: rgba(0,0,0,0.04);
+				padding-left: 15px;
+			}
+			> i.icon-plus, > i.icon-minus {
+				font-size: 1rem;
+			}
+		}
+
 	}
 
 	h2.section-title, h2.homepage-section-title {
-		font-size: 32px; line-height: 38px;
+		font-size: 32px;
+		line-height: 38px;
+		&.can-collapse {
+			> i.icon-plus, > i.icon-minus {
+				font-size: 1.75rem;
+			}
+		}
 	}
 
 	h3.section-title, h3.homepage-section-title {
-		font-size: 24px; margin-bottom: 10px; padding-bottom: 8px;
+		font-size: 24px;
+		margin-bottom: 10px;
+		padding-bottom: 8px;
+		&.can-collapse {
+			padding-top: 8px;
+			> i.icon-plus, > i.icon-minus {
+				font-size: 1.35rem;
+			}
+		}
 	}
 
 	img {
@@ -775,6 +806,19 @@ h5.fourDN-header {
 	>.slide-controls{
 		text-align: center;
 	}
+}
+
+
+// Joint Analysis Page
+
+body[data-pathname="/joint-analysis"]{
+
+	#release-updates.static-section-entry > h2.section-title,
+	#higlass.static-section-entry > h2.section-title {
+		font-size: 20px;
+		line-height: 24px;
+	}
+
 }
 
 

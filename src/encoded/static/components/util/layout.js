@@ -454,6 +454,7 @@ export class VerticallyCenteredChild extends React.Component {
 }
 
 
+
 /**
  * Handle browser capabilities, a la Modernizr.
  *

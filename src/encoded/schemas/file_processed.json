@@ -19,7 +19,7 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -36,12 +36,6 @@
         "higlass_uid": {
             "title": "Higlass UID",
             "type": "string"
-        },
-        "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "linkTo": "FileFormat",
-            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",
@@ -106,6 +100,35 @@
                 "title": "Input File",
                 "type": "string"
             }
+        },
+        "dataset_type": {
+            "title": "Dataset Type",
+            "description": "The type of dataset to which this file is associated",
+            "type": "string"
+        },
+        "assay_info": {
+            "title": "Assay details",
+            "description": "Information that helps distinguish the assay eg. ChIP-seq target or repliseq phase",
+            "type": "string"
+        },
+        "replicate_identifiers": {
+            "title": "Replicates",
+            "type": "array",
+            "items": {
+                "title": "Replicate Info",
+                "description": "Replicate identifiers that this file is associated with",
+                "type": "string"
+            }
+        },
+        "biosource_name": {
+            "title": "Biosource",
+            "description": "The name of the cell line or tissue sample for this track",
+            "type": "string"
+        },
+        "experiment_bucket": {
+            "title": "Experiment Association",
+            "description": "Info about how the file is linked to the experiment",
+            "type": "string"
         }
      },
     "facets" : {

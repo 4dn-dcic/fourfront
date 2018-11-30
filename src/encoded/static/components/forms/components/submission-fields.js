@@ -11,6 +11,7 @@ import { ajax, console, object, Schemas } from './../../util';
 import Alerts from './../../alerts';
 import { BasicStaticSectionBody } from './../../static-pages/components/BasicStaticSectionBody';
 import { Line as ProgressBar } from 'rc-progress';
+import { LinkToSelector } from './LinkToSelector'; 
 
 
 /**
@@ -349,10 +350,10 @@ class SquareButton extends React.Component {
 
 
 
-var linkedObjChildWindow = null; // Global var
+//var linkedObjChildWindow = null; // Global var
 
 /** Case for a linked object. */
-class LinkedObj extends React.PureComponent{
+class LinkedObj extends React.PureComponent {
 
     /**
      * @param {Object} props - Props passed from LinkedObj or BuildField.
@@ -374,20 +375,12 @@ class LinkedObj extends React.PureComponent{
         super(props);
         this.updateContext = this.updateContext.bind(this);
         this.setSubmissionStateToLinkedToItem = this.setSubmissionStateToLinkedToItem.bind(this);
-        this.showAlertInChildWindow = this.showAlertInChildWindow.bind(this);
-        this.setChildWindowMessageHandler = this.setChildWindowMessageHandler.bind(this);
-        this.handleChildWindowMessage = this.handleChildWindowMessage.bind(this);
-        this.handleChildFourFrontSelectionClick = this.handleChildFourFrontSelectionClick.bind(this);
-        this.handleSelectItemClick = this.handleSelectItemClick.bind(this);
+        this.handleStartSelectItem = this.handleStartSelectItem.bind(this);
+        this.handleFinishSelectItem = this.handleFinishSelectItem.bind(this);
         this.handleCreateNewItemClick = this.handleCreateNewItemClick.bind(this);
-        this.handleWindowDragOver = this.handleWindowDragOver.bind(this);
-        this.refreshWindowDropReceiver = _.throttle(this.refreshWindowDropReceiver.bind(this), 300);
-        this.closeWindowDropReceiver = this.closeWindowDropReceiver.bind(this);
-        this.handleDrop = this.handleDrop.bind(this);
         this.handleTextInputChange = this.handleTextInputChange.bind(this);
         this.handleAcceptTypedID = this.handleAcceptTypedID.bind(this);
 
-        this.windowDropReceiverHideTimeout = null;
         this.state = {
             'textInputValue' : (typeof props.value === 'string' && props.value) || ''
         };
@@ -399,19 +392,7 @@ class LinkedObj extends React.PureComponent{
 
     componentDidUpdate(pastProps){
         this.updateContext();
-
-        if (pastProps.fieldBeingSelected !== this.props.fieldBeingSelected || pastProps.fieldBeingSelectedArrayIdx !== this.props.fieldBeingSelectedArrayIdx) {
-            this.manageWindowOnDragHandler(pastProps, this.props);
-        }
-
         ReactTooltip.rebuild();
-    }
-
-    componentWillUnmount(){
-        this.manageWindowOnDragHandler(this.props, null);
-        //if (this.props.fieldBeingSelected !== null){
-        //    this.cleanChildWindow();
-        //}
     }
 
     /**
@@ -426,36 +407,6 @@ class LinkedObj extends React.PureComponent{
         }
     }
 
-    manageWindowOnDragHandler(pastProps, nextProps){
-        var pastInSelection     = this.isInSelectionField(pastProps),
-            nowInSelection      = this.isInSelectionField(nextProps),
-            hasUnsetInSelection = pastInSelection && !nowInSelection,
-            hasSetInSelection   = !pastInSelection && nowInSelection;
-
-        if (hasUnsetInSelection){
-            window.removeEventListener('dragenter', this.handleWindowDragEnter);
-            window.removeEventListener('dragover',  this.handleWindowDragOver);
-            window.removeEventListener('drop',      this.handleDrop);
-            this.closeWindowDropReceiver();
-            if (this.childWindowClosedInterval){
-                clearInterval(this.childWindowClosedInterval);
-                delete this.childWindowClosedInterval;
-                this.cleanChildWindowEventHandlers();
-            }
-            console.warn('Removed window event handlers for field', this.props.field);
-            //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
-        } else if (hasSetInSelection){
-            var _this = this;
-            setTimeout(function(){
-                if (!_this || !_this.isInSelectionField(_this.props)) return false;
-                window.addEventListener('dragenter', _this.handleWindowDragEnter);
-                window.addEventListener('dragover',  _this.handleWindowDragOver);
-                window.addEventListener('drop',      _this.handleDrop);
-                console.warn('Added window event handlers for field', _this.props.field);
-                //console.log(pastInSelection, nowInSelection, _.clone(pastProps), _.clone(nextProps))
-            }, 250);
-        }
-    }
 
     setSubmissionStateToLinkedToItem(e){
         e.preventDefault();
@@ -467,155 +418,15 @@ class LinkedObj extends React.PureComponent{
 
     isInSelectionField(props = this.props){ return LinkedObj.isInSelectionField(props); }
 
-    showAlertInChildWindow(){
-        var { schema, nestedField, title } = this.props;
-        var itemType = schema.linkTo;
-        var prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
-        var childAlerts = this.windowObjectReference && this.windowObjectReference.fourfront && this.windowObjectReference.fourfront.alerts;
-        if (childAlerts){
-            childAlerts.queue({
-                'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
-                'message' : (
-                    <div>
-                        <p className="mb-0">
-                            Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
-                        </p>
-                        <p className="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
-                    </div>
-                ),
-                'style' : 'info'
-            });
-        }
-    }
-
-    handleSelectItemClick(e){
+    handleStartSelectItem(e){
         e.preventDefault();
 
         if (!window) return;
 
-        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props;
-
-        var itemType    = schema.linkTo,
-            searchURL   = '/search/?type=' + itemType + '#!selection';
-
-        // check if we have any schema flags that will affect the searchUrl
-        if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
-            // the field to facet on could be set dynamically
-            if (schema.ff_flag == "filter:valid_item_types"){
-                searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
-            }
-        }
-
-        if (linkedObjChildWindow && !linkedObjChildWindow.closed && linkedObjChildWindow.fourfront && typeof linkedObjChildWindow.fourfront.navigate === 'function'){
-            // We have access to the JS of our child window. Call app.navigate(URL) directly instead of reloading entire HTML. May not work for some browsers.
-            this.windowObjectReference = linkedObjChildWindow;
-            this.windowObjectReference.fourfront.navigate(searchURL, {}, this.showAlertInChildWindow);
-            this.windowObjectReference.focus();
-        } else {
-            // Some browsers (*cough* MS Edge *cough*) are strange and will encode '#' to '%23' initially.
-            this.windowObjectReference = linkedObjChildWindow = window.open(
-                "about:blank",
-                "selection-search",
-                "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1,width=1010,height=600"
-            );
-            setTimeout(()=>{
-                this.windowObjectReference.location.assign(searchURL);
-                this.windowObjectReference.location.hash = '#!selection';
-            }, 100);
-        }
-        this.setChildWindowMessageHandler();
+        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props,
+            itemType = schema.linkTo;
 
         selectObj(itemType, nestedField, linkType, arrayIdx);
-
-        this.childWindowClosedInterval = setInterval(()=>{
-            if (!this || !this.windowObjectReference || this.windowObjectReference.closed) {
-                clearInterval(this.childWindowClosedInterval);
-                delete this.childWindowClosedInterval;
-                if (this && this.windowObjectReference && this.windowObjectReference.closed){
-                    selectCancel();
-                }
-                this.cleanChildWindowEventHandlers();
-                this.windowObjectReference = linkedObjChildWindow = null;
-            }
-        }, 1000);
-    }
-
-    handleChildWindowMessage(evt){
-        var eventType = evt && evt.data && evt.data.eventType;
-        if (!eventType) {
-            console.error("No eventType specified in message. Canceling.");
-            return;
-        }
-
-        // Authenticate message origin to prevent XSS attacks.
-        var eventOriginParts = url.parse(evt.origin);
-        if (window.location.host !== eventOriginParts.host){
-            console.error('Received message from unauthorized host. Canceling.');
-            return;
-        }
-        if (window.location.protocol !== eventOriginParts.protocol){
-            console.error('Received message from unauthorized protocol. Canceling.');
-            return;
-        }
-
-        if (eventType === 'fourfrontselectionclick') {
-            return this.handleChildFourFrontSelectionClick(evt);
-        }
-
-        if (eventType === 'fourfrontinitialized') {
-            return this.showAlertInChildWindow();
-        }
-    }
-
-    setChildWindowMessageHandler(){
-        setTimeout(()=>{
-            window && window.addEventListener('message', this.handleChildWindowMessage);
-            console.log('Updated \'message\' event handler');
-        }, 200);
-    }
-
-    cleanChildWindowEventHandlers(){
-        window.removeEventListener('message', this.handleChildWindowMessage);
-        if (!this || !this.windowObjectReference) {
-            console.warn('Child window no longer available to unbind event handlers. Fine if closed.');
-            return;
-        }
-    }
-
-    cleanChildWindow(){
-        if (this && this.windowObjectReference){
-            if (!this.windowObjectReference.closed) this.windowObjectReference.close();
-            this.cleanChildWindowEventHandlers();
-            this.windowObjectReference = linkedObjChildWindow = null;
-        }
-    }
-
-    handleCreateNewItemClick(e){
-        e.preventDefault();
-        if (this.props.fieldBeingSelected !== null) {
-            this.props.selectCancel();
-        }
-        this.props.modifyNewContext(this.props.nestedField, null, 'new linked object', this.props.linkType, this.props.arrayIdx, this.props.schema.linkTo);
-    }
-
-    handleChildFourFrontSelectionClick(evt){
-        // Grab from custom event
-        var atId = evt && ((evt.data && evt.data.id) || (evt.detail && evt.detail.id) || null);
-
-        if (!object.isValidAtIDFormat(atId)) {
-            // Possibly unnecessary as all #!selection clicked items would have evt.detail.id in proper format, or not have it.
-            // Also more validation performed in SubmissionView.prototype.fetchAndValidateItem().
-
-            // TODO: Perhaps turn failureCallback to own func on SubmissionView.prototype and pass it in as prop here to be called.
-            throw new Error('No valid @id available.');
-        } else {
-            Alerts.deQueue({ 'title' : "Invalid Item Dropped" });
-        }
-
-        console.log('Fourfront Submissions - CLICKED SELECT BUTTON FOR', atId, evt, evt.detail);
-
-        this.props.selectComplete(atId);
-        this.cleanChildWindow();
     }
 
     /**
@@ -623,18 +434,11 @@ class LinkedObj extends React.PureComponent{
      * Grabs @ID of Item from evt.dataTransfer, attempting to grab from 'text/4dn-item-id', 'text/4dn-item-json', or 'text/plain'.
      * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
      */
-    handleDrop(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-        var draggedContext = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-json'),
-            draggedURI = evt.dataTransfer && evt.dataTransfer.getData('text/plain'),
-            draggedID = evt.dataTransfer && evt.dataTransfer.getData('text/4dn-item-id'),
-            atId = draggedID || (draggedContext && object.itemUtil.atId(draggedContext)) || url.parse(draggedURI).pathname || null;
+    handleFinishSelectItem(atId, itemContext){
+        var isValidAtId     = object.isValidAtIDFormat(atId),
+            invalidTitle    = "Invalid Item Selected";
 
-        var isValidAtId = object.isValidAtIDFormat(atId),
-            invalidTitle = "Invalid Item Dropped";
-
-        if (!atId || !isValidAtId){
+        if (!atId || !isValidAtId) {
             Alerts.queue({
                 'title' : invalidTitle,
                 'message': "You have dragged & dropped an item or link which doesn't have a valid 4DN ID or URL associated with it. Please try again.",
@@ -645,63 +449,14 @@ class LinkedObj extends React.PureComponent{
             Alerts.deQueue({ 'title' : invalidTitle });
         }
 
-        console.log('Fourfront Submissions - DROPPED', atId, evt, this.props);
-
         this.props.selectComplete(atId);
-        this.cleanChildWindow();
     }
 
-    handleWindowDragEnter(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-    }
-
-    handleWindowDragOver(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-        this.refreshWindowDropReceiver(evt);
-    }
-
-    closeWindowDropReceiver(evt){
-        var elem = this.windowDropReceiverElement;
-        if (!elem) return;
-        elem.style.opacity = 0;
-        setTimeout(()=>{
-            document.body.removeChild(elem);
-            this.windowDropReceiverElement = null;
-            this.windowDropReceiverHideTimeout = null;
-        }, 250);
-    }
-
-    refreshWindowDropReceiver(evt){
-        if (!document || !document.createElement) return;
-
-        if (this.windowDropReceiverHideTimeout !== null) {
-            clearTimeout(this.windowDropReceiverHideTimeout);
-            this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
-            return;
-        }
-
-        var { schema, nestedField } = this.props,
-            itemType = schema.linkTo,
-            prettyTitle = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title);
-
-        var element = document.createElement('div');
-        element.className = "full-window-drop-receiver";
-
-        var innerText = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'";
-        var innerBoldElem = document.createElement('h2');
-        innerBoldElem.appendChild(document.createTextNode(innerText));
-        element.appendChild(innerBoldElem);
-        element.appendChild(document.createElement('br'));
-        document.body.appendChild(element);
-        this.windowDropReceiverElement = element;
-
-        setTimeout(()=>{
-            this.windowDropReceiverElement.style.opacity = 1;
-        }, 10);
-
-        this.windowDropReceiverHideTimeout = setTimeout(this.closeWindowDropReceiver, 500);
+    handleCreateNewItemClick(e){
+        e.preventDefault();
+        var { fieldBeingSelected, selectCancel, modifyNewContext, nestedField, linkType, arrayIdx, schema } = this.props;
+        if (fieldBeingSelected !== null) selectCancel();
+        modifyNewContext(nestedField, null, 'new linked object', linkType, arrayIdx, schema.linkTo);
     }
 
     handleAcceptTypedID(evt){
@@ -710,7 +465,6 @@ class LinkedObj extends React.PureComponent{
             throw new Error('Invalid @id format.');
         }
         this.props.selectComplete(this.state.textInputValue);
-        this.cleanChildWindow();
     }
 
     handleTextInputChange(evt){
@@ -718,18 +472,54 @@ class LinkedObj extends React.PureComponent{
     }
 
     renderSelectInputField(){
-        var { value, selectCancel, selectComplete } = this.props;
-        var textInputValue              = this.state.textInputValue,
+        var { value, selectCancel, selectComplete, schema, currType, nestedField } = this.props,
+            textInputValue              = this.state.textInputValue,
             canShowAcceptTypedInput     = typeof textInputValue === 'string' && textInputValue.length > 3,
-            extClass                    = !canShowAcceptTypedInput && textInputValue ? ' has-error' : '';
+            extClass                    = !canShowAcceptTypedInput && textInputValue ? ' has-error' : '',
+            itemType                    = schema.linkTo,
+            prettyTitle                 = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
+            dropMessage                 = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
+            searchURL                   = '/search/?type=' + itemType + '#!selection',
+            childWindowAlert            = function(){
+                // We have this inside a function instead of passing JSX element(s) because
+                // as JSX elements they might gain non-serializable properties when being passed down thru props.
+                return {
+                    'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
+                    'message' : (
+                        <div>
+                            <p class="mb-0">
+                                Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
+                            </p>
+                            <p class="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
+                        </div>
+                    ),
+                    'style' : 'info'
+                };
+            };
+
+        // check if we have any schema flags that will affect the searchUrl
+        if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
+            // the field to facet on could be set dynamically
+            if (schema.ff_flag == "filter:valid_item_types"){
+                searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+            }
+        }
+
         return (
-            <div className="linked-object-text-input-container row flexrow">
-                <div className="field-column col-xs-10">
-                    <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
+            <React.Fragment>
+                <div className="linked-object-text-input-container row flexrow">
+                    <div className="field-column col-xs-10">
+                        <input onChange={this.handleTextInputChange} className={"form-control" + extClass} inputMode="latin" type="text" placeholder="Drag & drop Item from the search view or type in a valid @ID." value={this.state.textInputValue} onDrop={this.handleDrop} />
+                    </div>
+                    { canShowAcceptTypedInput ?
+                        <SquareButton show onClick={this.handleAcceptTypedID} icon="check"
+                            bsStyle="success" tip="Accept typed identifier and look it up in database." />
+                    : null }
+                    <SquareButton show onClick={selectCancel} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
                 </div>
-                { canShowAcceptTypedInput ? <SquareButton show onClick={this.handleAcceptTypedID} icon="check" bsStyle="success" tip="Accept typed identifier and look it up in database." /> : null }
-                <SquareButton show onClick={(e)=>{ selectCancel(); this.cleanChildWindow(); }} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
-            </div>
+                <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} onCloseChildWindow={selectCancel}
+                    childWindowAlert={childWindowAlert} dropMessage={dropMessage} searchURL={searchURL} />
+            </React.Fragment>
         );
     }
 
@@ -737,7 +527,7 @@ class LinkedObj extends React.PureComponent{
         var { schema, value, keyDisplay, keyComplete, setSubmissionState } = this.props;
         return (
             <div className="linked-object-buttons-container">
-                <Button className="select-create-linked-item-button" onClick={this.handleSelectItemClick}>
+                <Button className="select-create-linked-item-button" onClick={this.handleStartSelectItem}>
                     <i className="icon icon-fw icon-search"/> Select existing
                 </Button>
                 <Button className="select-create-linked-item-button" onClick={this.handleCreateNewItemClick}>
@@ -748,9 +538,10 @@ class LinkedObj extends React.PureComponent{
     }
 
     render(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, fieldBeingSelected } = this.props;
+        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel, currType } = this.props,
+            isSelecting = this.isInSelectionField();
 
-        if (this.isInSelectionField()){
+        if (isSelecting){
             return this.renderSelectInputField();
         }
 
@@ -758,7 +549,6 @@ class LinkedObj extends React.PureComponent{
         if (value){
             var thisDisplay = keyDisplay[value] || value;
             if (isNaN(value)) {
-                //thisDisplay = keyDisplay[value] || value;
                 return(
                     <div className="submitted-linked-object-display-container text-ellipsis-container">
                         <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
@@ -770,7 +560,6 @@ class LinkedObj extends React.PureComponent{
                 // it's a custom object. Either render a link to editing the object
                 // or a pop-up link to the object if it's already submitted
                 var intKey = parseInt(value);
-                //thisDisplay = keyDisplay[value] || value;
                 // this is a fallback - shouldn't be int because value should be
                 // string once the obj is successfully submitted
                 if (keyComplete[intKey]){
@@ -802,15 +591,19 @@ class LinkedObj extends React.PureComponent{
 class PreviewField extends React.Component {
 
     render(){
-        var { value, filetype, field, onChange } = this.props;
+        var { value, filetype, field, onChange } = this.props,
+            preview = value && (
+                <React.Fragment>
+                    <h6 className="mt-1 text-600">Preview:</h6>
+                    <hr className="mb-1 mt-05" />
+                    <BasicStaticSectionBody content={value || ''} filetype={filetype} />
+                </React.Fragment>
+            );
         return (
             <div className="preview-field-container">
-                { value && <h6 className="mt-0 text-600">Preview:</h6> }
-                { value && <hr className="mb-1 mt-05" /> }
-                { value &&  <BasicStaticSectionBody content={value || ''} filetype={filetype} /> }
-                { value && <hr className="mb-05 mt-05" /> }
                 <FormControl onChange={onChange} id={"field_for_" + field} name={field} value={value} type="text" inputMode="latin" componentClass="textarea" rows={8}
                     wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />
+                { preview }
             </div>
         );
     }

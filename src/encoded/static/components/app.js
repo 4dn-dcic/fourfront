@@ -16,14 +16,15 @@ import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
-import { NavigateOpts } from './util/navigate';
+
+var { NavigateOpts } = typedefs;
 
 
 
@@ -814,9 +815,10 @@ export default class App extends React.Component {
      */
     updateUserInfo(callback = null){
         // get user actions (a function of log in) from local storage
-        var userActions = [];
-        var session = false;
-        var userInfo = JWT.getUserInfo();
+        var userActions = [],
+            session     = false,
+            userInfo    = JWT.getUserInfo();
+
         if (userInfo){
             userActions = userInfo.user_actions;
             var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
@@ -938,9 +940,6 @@ export default class App extends React.Component {
      * @private
      * @param {string} href                 URI we're attempting to navigate to.
      * @param {NavigateOpts} [options={}]   Options for the navigation request.
-     * @param {boolean} options.replace     If true, browser history entry is replaced, not added.
-     * @param {boolean} options.skipRequest If true, request is skipped but browser URI and history is updated.
-     * @param {boolean} options.inPlace     If true, will re-load page even if is at same URL. Also won't scroll to top of page.
      * @param {function} [callback=null]    Optional callback, accepting response JSON as first argument.
      * @param {function} [fallbackCallback=null] - Optional callback to be called in case request fails.
      * @param {Object} [includeReduxDispatch={}] - Optional extra data to save to Redux store along with the next response.
@@ -1378,7 +1377,7 @@ export default class App extends React.Component {
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
             baseDomain = (href_url.protocol || '') + '//' + href_url.host,
             bodyElementProps = _.extend({}, this.state, this.props, {
-                baseDomain, isLoading,
+                baseDomain, isLoading, currentAction,
                 'updateUserInfo' : this.updateUserInfo,
                 'listActionsFor' : this.listActionsFor,
                 'onBodyClick'    : this.handleClick,
@@ -1493,6 +1492,26 @@ class BodyElement extends React.PureComponent {
         this.setupScrollHandler();
         window.addEventListener('resize', this.onResize);
         this.onResize();
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.href !== this.props.href){
+
+            // Remove tooltip if still lingering from previous page
+            var _tooltip    = this.refs && this.refs.tooltipComponent,
+                domElem     = ReactDOM.findDOMNode(_tooltip);
+
+            if (!domElem) return;
+
+            var className = domElem.className || '',
+                classList = className.split(' '),
+                isShowing = classList.indexOf('show') > -1;
+
+            if (isShowing){
+                domElem.className = _.without(classList, 'show').join(' ');
+            }
+
+        }
     }
 
     /**
@@ -1743,17 +1762,15 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     onTooltipAfterHide(){
-        var _tooltip = this.refs && this.refs.tooltipComponent,
-            domElem = ReactDOM.findDOMNode(_tooltip);
+        var _tooltip    = this.refs && this.refs.tooltipComponent,
+            domElem     = ReactDOM.findDOMNode(_tooltip);
+
         if (!domElem) {
             console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
             return;
         }
-        requestAnimationFrame(function(){
-            // Grab tip & unset style.left and style.top using same method tooltip does internally.
-            domElem.style.left = null;
-            domElem.style.top = null;
-        });
+        // Grab tip & unset style.left and style.top using same method tooltip does internally.
+        domElem.style.left = domElem.style.top = null;
     }
 
     toggleFullScreen(isFullscreen, callback){
@@ -1855,7 +1872,7 @@ class BodyElement extends React.PureComponent {
                     </div>
                 </div>
 
-                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" />
+                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" key="tooltip" />
 
                 <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
                     verticalAlign="center" /* cursor position relative to popover */

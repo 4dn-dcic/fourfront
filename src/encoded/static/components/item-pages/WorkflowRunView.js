@@ -13,6 +13,7 @@ import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStep
 // Test/Debug Data
 //import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
 //import { WFR_JSON } from './../testdata/workflow_run/awsem-bad-output-file';
+//import { WFR_JSON } from './../testdata/workflow_run/awsem-dupe-post-alignment';
 
 
 /**
@@ -90,37 +91,38 @@ export function allFilesForWorkflowRunMappedByUUID(item){
 }
 
 
-export class WorkflowRunView extends DefaultItemView {
+export default class WorkflowRunView extends DefaultItemView {
 
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
-            mounted : false
+            'mounted' : false
         };
     }
 
     componentDidMount(){
-        this.setState({ mounted : true });
+        this.setState({ 'mounted' : true });
     }
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
-            {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
-                key : 'graph',
-                content : <GraphSection {...this.props} mounted={this.state.mounted} />
-            }
-        ];
+        var { context, windowHeight } = this.props,
+            tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+                {
+                    tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
+                    key : 'graph',
+                    content : <GraphSection {...this.props} mounted={this.state.mounted} />
+                }
+            ];
 
-        return listWithGraph.concat([
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
-        ]).map((tabObj)=>{ // Common properties
+        tabs.push(ItemDetailList.getTabObject(this.props));
+        tabs.push(AuditTabView.getTabObject(this.props));
+
+        return _.map(tabs, (tabObj) =>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
+                'style' : { 'minHeight' : Math.max((this.state.mounted && windowHeight - 300) || 0, 600) }
             });
         });
     }

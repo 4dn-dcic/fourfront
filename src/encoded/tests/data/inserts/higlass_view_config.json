@@ -4,6 +4,7 @@
         "description" : "Two BigWig tracks plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
         "uuid" : "00000000-1111-0000-1111-000000000001",
         "status" : "released",
+        "genome_assembly" : "GRCm38",
         "viewconfig" : {
             "views":[
                 {
@@ -14,8 +15,8 @@
                         "w":12,
                         "x":0,
                         "y":0,
-                        "moved":false,
-                        "static":true
+                        "moved" : false,
+                        "static" : false
                     },
                     "tracks":{
                         "top":[
@@ -34,9 +35,8 @@
                                     "showTooltip":false,
                                     "valueScaling":"linear",
                                     "labelPosition":"hidden",
-                                    "plusStandColor":"blue",
-                                    "plusStrandColor":"blue",
-                                    "minusStrandColor":"red",
+                                    "plusStrandColor":"black",
+                                    "minusStrandColor":"black",
                                     "trackBorderColor":"black",
                                     "trackBorderWidth":0,
                                     "geneLabelPosition":"outside",
@@ -67,8 +67,8 @@
                                     "valueScaling":"linear",
                                     "fontIsAligned":false,
                                     "labelPosition":"hidden",
-                                    "plusStandColor":"blue",
-                                    "minusStrandColor":"red",
+                                    "plusStrandColor":"black",
+                                    "minusStrandColor":"black",
                                     "trackBorderColor":"black",
                                     "trackBorderWidth":0,
                                     "showMousePosition":false,
@@ -83,7 +83,7 @@
                             {
                                 "uid":"bigwig-content-track-0",
                                 "name":"4DNFIBAK3H3F.bw",
-                                "type":"horizontal-line",
+                                "type":"horizontal-bar",
                                 "height":75,
                                 "server":"https://higlass.4dnucleome.org/api/v1",
                                 "options":{
@@ -93,16 +93,20 @@
                                     "showTooltip":false,
                                     "valueScaling":"linear",
                                     "labelPosition":"topRight",
-                                    "plusStandColor":"blue",
                                     "lineStrokeColor":"#333",
                                     "lineStrokeWidth":1.25,
                                     "labelTextOpacity":0.5,
-                                    "minusStrandColor":"red",
                                     "trackBorderColor":"black",
                                     "trackBorderWidth":0,
                                     "showMousePosition":true,
                                     "mousePositionColor":"#999999",
-                                    "axisPositionHorizontal":"left"
+                                    "axisPositionHorizontal":"left",
+                                    "colorRange": [
+                                        "white",
+                                        "rgba(245,166,35,1.0)",
+                                        "rgba(208,2,27,1.0)",
+                                        "black"
+                                    ]
                                 },
                                 "position":"top",
                                 "tilesetUid":"LiQp5dy7SoycoZ7qF0sqxQ",
@@ -111,7 +115,7 @@
                             {
                                 "uid":"bigwig-content-track-1",
                                 "name":"4DNFIHN2B9WI.bw",
-                                "type":"horizontal-line",
+                                "type":"horizontal-bar",
                                 "height":75,
                                 "server":"https://higlass.4dnucleome.org/api/v1",
                                 "options":{
@@ -121,16 +125,20 @@
                                     "showTooltip":false,
                                     "valueScaling":"linear",
                                     "labelPosition":"topRight",
-                                    "plusStandColor":"blue",
                                     "lineStrokeColor":"#333",
                                     "lineStrokeWidth":1.25,
                                     "labelTextOpacity":0.5,
-                                    "minusStrandColor":"red",
                                     "trackBorderColor":"black",
                                     "trackBorderWidth":0,
                                     "showMousePosition":true,
                                     "mousePositionColor":"#999999",
-                                    "axisPositionHorizontal":"left"
+                                    "axisPositionHorizontal":"left",
+                                    "colorRange": [
+                                        "white",
+                                        "rgba(245,166,35,1.0)",
+                                        "rgba(208,2,27,1.0)",
+                                        "black"
+                                    ]
                                 },
                                 "position":"top",
                                 "tilesetUid":"KvHa6_NgT_WG1ilBfa9HLg",

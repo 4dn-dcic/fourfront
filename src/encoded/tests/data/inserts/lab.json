@@ -46,5 +46,13 @@
         "name": "some-other-guys-lab",
         "title": "Some Other Guy's lab",
         "uuid": "812cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
+    },
+    {
+        "title": "ENCODE-DCC, STANFORD",
+        "url": "https://www.encodeproject.org",
+        "awards": ["8842e72e-7b38-4a2a-9557-e6b22616ecaa"],
+        "status": "current",
+        "name": "encode-dcc-lab",
+        "uuid": "2319a476-9817-4c9d-9ad5-f2858c1aea50"
     }
 ]

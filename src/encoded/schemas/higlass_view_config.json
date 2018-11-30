@@ -4,23 +4,31 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,
-    "identifyingProperties": ["uuid"],
+    "identifyingProperties": ["uuid", "name"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/modified" }
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "user_content.json#/properties" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
         },
-        "title": {
-            "title": "Title",
-            "description": "Title for the ViewConfig.",
+        "name": {
+            "title": "Unique Identifier",
+            "description": "Unique name or ID of this display.",
             "type": "string",
-            "lookup" : 5
+            "uniqueKey": "user_content:name",
+            "lookup" : 1,
+            "exclude_from": ["submit4dn","FFedit-create"]
+        },
+        "genome_assembly" : {
+            "title": "Genome Assembly",
+            "description": "All data files will use this genome assembly.",
+            "type" : "string",
+            "default": ""
         },
         "viewconfig": {
             "title": "View Configuration",
@@ -674,6 +682,15 @@
                                                                 "type" : "string",
                                                                 "default" : "heatmap",
                                                                 "comment" : "This might be an ENUM, need to figure out."
+                                                            },
+                                                            "options" : {
+                                                                "additionalProperties" : true,
+                                                                "type" : "object",
+                                                                "properties": {
+                                                                    "name" : {
+                                                                        "type" : "string"
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -687,31 +704,6 @@
                     }
                 }
             }
-        },
-        "files": {
-            "title": "File List",
-            "type": "string",
-            "comment" : "There should be no 'viewconfig' if this is set.",
-            "description": "List of files from which to auto-generate a viewconfig. Used only if viewconfig itself is not defined.",
-            "lookup" : 10
-        },
-        "status": {
-            "title": "Status",
-            "type": "string",
-            "default": "draft",
-            "enum" : [
-                "released",
-                "released to project",
-                "draft",
-                "deleted"
-            ],
-            "lookup" : 20
-        },
-        "description": {
-            "title": "Description",
-            "type": "string",
-            "formInput" : "textarea",
-            "lookup" : 21
         }
     },
     "facets" : {

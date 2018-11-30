@@ -8,7 +8,8 @@ from snovault import (
 )
 from snovault.attachment import ItemWithAttachment
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 from html.parser import HTMLParser
 from encoded.types.experiment_set import invalidate_linked_items
@@ -168,13 +169,14 @@ class Publication(Item, ItemWithAttachment):
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
     embedded_list = [
-        'award.project',
+        "static_headers.*",
+        "static_content.content.*",
         "exp_sets_prod_in_pub.experimentset_type",
         "exp_sets_prod_in_pub.accession",
         "exp_sets_prod_in_pub.experiments_in_set.experiment_type",
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
-    ]
+    ] + lab_award_attribution_embed_list
 
     def _update(self, properties, sheets=None):
         # import pdb; pdb.set_trace()

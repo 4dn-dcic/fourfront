@@ -8,15 +8,16 @@ import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator } from './components';
-import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
+    HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING
@@ -40,8 +41,10 @@ export default class FileView extends WorkflowRunTracingView {
         if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
         var fileFormat  = fileUtil.getFileFormatStr(context),
             isMcoolFile = fileFormat === 'mcool',
-            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg');
-        return isMcoolFile || isBWFile;
+            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg'),
+            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed'),
+            isBIGBEDFile = fileFormat === 'bigbed';
+        return isMcoolFile || isBWFile || isBEDDBFile || isBIGBEDFile;
     }
 
     constructor(props){

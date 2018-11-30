@@ -491,6 +491,37 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    def generate_track_title(self, request):
+            props = self.properties
+            dstype = props.get('dataset_type')
+            # lab = props.get('project_lab', None)
+            # if lab is None:
+            #    lab_uuid = props.get('lab')
+            #    lab = request.embed(lab_uuid, '@@object').get('display_title')
+            # ff_uuid = props.get('file_format')
+            # fformat = request.embed(ff_uuid, '@@object').get('file_format')
+            ftype = props.get('file_type', 'unspecified type')
+            assay = props.get('assay_info', '')
+            bname = props.get('biosource_name', None)
+            if bname is None:
+                # for vistrack - the calcprop does not get calc in time?
+                bios = props.get('biosource')
+                try:
+                    bname = request.embed(bios, '@@object').get('biosource_name', 'unknown sample')
+                except Exception:
+                    bname = 'unknown sample'
+            # repinfo = ''
+            # reps = props.get('replicate_identifiers')
+            # if reps is not None:
+            #    if len(reps) > 1:
+            #        repinfo = '(merged replicates)'
+            #    else:
+            #        repinfo = "({})".format(reps[0])
+            title = '{ft} for {bs} {et} {ai}'.format(
+                ft=ftype, ai=assay, et=dstype, bs=bname
+            )
+            return title.replace('  ', ' ').rstrip()
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
@@ -671,6 +702,18 @@ class FileProcessed(File):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
 
+    @calculated_property(schema={
+        "title": "Track Name",
+        "description": "Title for the track in higlass views",
+        "type": "string"
+    })
+    def track_title(self, request):
+        '''for processed files always use track meta to derive
+        '''
+        if not self.properties.get('dataset_type'):
+            return
+        return self.generate_track_title(request)
+
 
 @collection(
     name='files-reference',
@@ -685,6 +728,49 @@ class FileReference(File):
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded_list = File.embedded_list
     name_key = 'accession'
+
+
+@collection(
+    name='files-vistrack',
+    unique_key='accession',
+    properties={
+        'title': 'Visualization Track Files',
+        'description': 'Listing of External Files available as HiGlass visualization tracks',
+    })
+class FileVistrack(File):
+    """Collection for individual visualization track files."""
+    item_type = 'file_vistrack'
+    schema = load_schema('encoded:schemas/file_vistrack.json')
+    embedded_list = File.embedded_list
+    name_key = 'accession'
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Biosource Name",
+        "type": "string"
+    })
+    def biosource_name(self, request):
+        bios = self.properties.get('biosource')
+        if bios is not None:
+            return request.embed(bios, '@@object').get('biosource_name')
+
+    @calculated_property(schema={
+        "title": "Track Name",
+        "description": "Title for the track in higlass views",
+        "type": "string"
+    })
+    def track_title(self, request):
+        '''for processed files always use track meta to derive
+        '''
+        if not self.properties.get('dataset_type'):
+            return
+        desc = self.properties.get('description')
+        if desc:
+            return desc
+        return self.generate_track_title(request)
 
 
 @collection(

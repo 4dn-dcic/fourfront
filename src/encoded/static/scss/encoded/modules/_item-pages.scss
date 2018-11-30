@@ -201,6 +201,82 @@ h3.submission-subtitle {
 	border-color: #f4f4f4;
 }
 
+
+@mixin statusColorStyles {
+	&[data-status="released"]:before,
+	&[data-status="current"]:before,
+	&[data-status="uploaded"]:before {
+		color: #fff;
+		background-color: #308756;
+	}
+
+	&[data-status="revoked"]:before,
+	&[data-status="obsolete"]:before,
+	&[data-status="restricted"]:before {
+		color: #fff;
+		background-color: #812423;
+	}
+
+	&[data-status="deleted"]:before,
+	&[data-status="upload failed"]:before {
+		color: #fff;
+		background-color: #a90d0b;
+	}
+
+	&[data-status="replaced"]:before,
+	&[data-status="planned"]:before,
+	&[data-status="to be uplodaded by workflow"]:before {
+		color: #fff;
+		background-color: #47419a;
+	}
+
+	&[data-status="in review by lab"]:before {
+		color: #fff;
+		background-color: #d8bd22;
+	}
+
+	&[data-status="submission in progress"]:before,
+	&[data-status="uploading"]:before,
+	&[data-status="draft"]:before {
+		color: #fff;
+		background-color: #d8bd22;
+	}
+
+	&[data-status="released to project"]:before {
+		color: #fff;
+		background-color: #397855;
+	}
+
+	&[data-status="released to lab"]:before {
+		color: #fff;
+		background-color: #80921c;
+	}
+
+	&[data-status="unspecified"]:before,
+	&[data-status="archived"]:before,
+	&[data-status="archived to project"]:before {
+		color: #fff;
+		background-color: #7b7b7b;
+		//display: none;
+	}
+}
+
+
+i.item-status-indicator-dot {
+	display: inline-block;
+	&:before {
+		content: "";
+		width: 9px;
+		height : 9px;
+		display: inline-block;
+		position: relative;
+		margin-right: 7px;
+		border-radius: 50%;
+	}
+	@include statusColorStyles;
+}
+
+
 .item-header-indicators {
 
 	margin-top: 8px;
@@ -255,56 +331,9 @@ h3.submission-subtitle {
 			border-radius: 50%;
 		}
 
-		&.expset-status[data-status="released"]:before,
-		&.expset-status[data-status="current"]:before,
-		&.expset-status[data-status="uploaded"]:before {
-			color: #fff;
-			background-color: #308756;
-		}
-
-		&.expset-status[data-status="revoked"]:before,
-		&.expset-status[data-status="obsolete"]:before,
-		&.expset-status[data-status="restricted"]:before {
-			color: #fff;
-			background-color: #812423;
-		}
-
-		&.expset-status[data-status="deleted"]:before,
-		&.expset-status[data-status="upload failed"]:before {
-			color: #fff;
-			background-color: #a90d0b;
-		}
-
-		&.expset-status[data-status="replaced"]:before,
-		&.expset-status[data-status="planned"]:before,
-		&.expset-status[data-status="to be uplodaded by workflow"]:before {
-			color: #fff;
-			background-color: #47419a;
-		}
-
-		&.expset-status[data-status="in review by lab"]:before {
-			color: #fff;
-			background-color: #d8bd22;
-		}
-
-		&.expset-status[data-status="submission in progress"]:before,
-		&.expset-status[data-status="uploading"]:before,
-		&.expset-status[data-status="draft"]:before {
-			color: #fff;
-			background-color: #d8bd22;
-		}
-
-		&.expset-status[data-status="released to project"]:before {
-			color: #fff;
-			background-color: #397855;
-		}
-
-		&.expset-status[data-status="unspecified"]:before,
-		&.expset-status[data-status="archived"]:before,
-		&.expset-status[data-status="archived to project"]:before {
-			color: #fff;
-			background-color: #7b7b7b;
-			//display: none;
+		&.expset-status,
+		&.item-status {
+			@include statusColorStyles;
 		}
 
 		/*
@@ -1006,6 +1035,31 @@ $download-button-width : 100px;
 }
 
 
+
+
+/**********************************************************
+		     Embedded Static Sections
+**********************************************************/
+
+.extra-info-for-higlass-display {
+	/** This gets placed at top of embedded HiGlass displays, which have their own 10px padding. **/
+	margin-bottom: -6px;
+
+	display: flex;
+	flex-direction: row;
+
+	> .description {
+		flex: 1;
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+	> .btn-container {
+		padding-left: 10px;
+	}
+}
+
+
 /**********************************************************
 					OverViewBody
 **********************************************************/
@@ -1119,6 +1173,16 @@ $download-button-width : 100px;
 				}
 			}
 		}
+
+
+		> .inner > .static-section-header > .extra-info-for-higlass-display {
+			margin-bottom: -4px;
+			> .description {
+				padding-top: 6px;
+				padding-bottom: 6px;
+			}
+		}
+
 	}
 	
 	.supplementary-files-section-part {

@@ -87,7 +87,7 @@
             "type": "array",
             "items": {
                 "type": "string",
-                "linkTo" : "StaticSection"
+                "linkTo" : "UserContent"
             },
             "lookup" : 70
         },

@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -40,11 +40,7 @@
             "title": "Description"
         },
         "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "linkTo": "FileFormat",
-            "lookup": 30,
-            "ff_flag": "filter:valid_item_types"
+            "lookup": 30
         },
         "file_type": {
             "title": "File Type",

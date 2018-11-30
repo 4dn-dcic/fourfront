@@ -28,3 +28,5 @@ export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';
 export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
 export { AdjustableDividerRow, DraggableVerticalBorder } from './AdjustableDividerRow';
+export { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
+export { OverviewHeadingContainer } from './OverviewHeadingContainer';

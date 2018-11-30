@@ -18,7 +18,12 @@
         "status": "released",
         "accession": "4DNESAAAAAA1",
         "processed_files": ["4DNFIAAAAAA4", "4DNFIAAAAAA5"],
-        "static_headers": ["item-page-headers.ExperimentSet.data-usage-guidelines", "release-updates.TEST1", "help.analysis.file-formats.hic"]
+        "static_headers": [
+            "item-page-headers.ExperimentSet.data-usage-guidelines",
+            "release-updates.TEST1",
+            "help.analysis.file-formats.hic",
+            "00000000-1111-0000-1111-000000000001"
+        ]
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b261",

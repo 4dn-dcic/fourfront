@@ -136,9 +136,13 @@ export class HiGlassPlainContainer extends React.PureComponent {
             outerKey        = "mount-number-" + this.state.mountCount;
 
         if (isValidating || !mounted){
-            var placeholderStyle = (typeof height === 'number' && height >= 140) ? { 'paddingTop' : (height / 2) - 70 } : null;
+            var placeholderStyle = {};
+            if (typeof height === 'number' && height >= 140){
+                placeholderStyle.height = height;
+                placeholderStyle.paddingTop = (height / 2) - 40;
+            }
             hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4" style={placeholderStyle} key={outerKey}>
+                <div className="col-sm-12 text-center" style={placeholderStyle} key={outerKey}>
                     <h3>
                         <i className="icon icon-lg icon-television"/>
                     </h3>
@@ -147,13 +151,13 @@ export class HiGlassPlainContainer extends React.PureComponent {
             );
         } else if (disabled) {
             hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4" key={outerKey}>
+                <div className="col-sm-12 text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Not Available</h4>
                 </div>
             );
         } else if (this.state.hasRuntimeError) {
             hiGlassInstance = (
-                <div className="col-sm-12 text-center mt-4" key={outerKey}>
+                <div className="col-sm-12 text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Runtime Error</h4>
                 </div>
             );
@@ -171,7 +175,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.5/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.8/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row" children={hiGlassInstance} />
             </div>

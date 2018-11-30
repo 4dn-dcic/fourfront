@@ -7,13 +7,13 @@ import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
     ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
-    WorkflowNodeElement
+    WorkflowNodeElement, CollapsibleItemViewButtonToolbar
 } from './components';
 import DefaultItemView from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { DropdownButton, MenuItem, Checkbox, Button, Collapse } from 'react-bootstrap';
+import { DropdownButton, MenuItem, Checkbox, Button, Collapse, ButtonToolbar } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 
 
@@ -62,8 +62,6 @@ export function commonGraphPropsFromProps(props){
         'rowSpacingType'    : 'wide',
         'nodeClassName'     : null,
         'onNodeClick'       : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
-        'checkHrefForSelectedNode' : typeof props.checkHrefForSelectedNode === 'boolean' ? props.checkHrefForSelectedNode : false,
-        'checkWindowLocationHref' : typeof props.checkWindowLocationHref === 'boolean' ? props.checkWindowLocationHref : false,
         'windowWidth'       : props.windowWidth
     };
 
@@ -89,42 +87,38 @@ export function doValidAnalysisStepsExist(steps){
 }
 
 
-export class WorkflowView extends DefaultItemView {
-
-    static defaultProps = {
-        'checkHrefForSelectedNode' : true,
-        'checkWindowLocationHref' : true
-    }
+export default class WorkflowView extends DefaultItemView {
 
     constructor(props){
         super(props);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
-            mounted : false
+            'mounted' : false
         };
     }
 
     componentDidMount(){
-        this.setState({ mounted : true });
+        this.setState({ 'mounted' : true });
     }
 
     getTabViewContents(){
 
-        var listWithGraph = !doValidAnalysisStepsExist(this.props.context.steps) ? [] : [
-            {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
-                key : 'graph',
-                content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
-            }
-        ];
+        var { context, windowHeight } = this.props,
+            tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+                {
+                    tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
+                    key : 'graph',
+                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
+                }
+            ];
 
-        return listWithGraph.concat([
-            AttributionTabView.getTabObject(this.props.context),
-            ItemDetailList.getTabObject(this.props.context, this.props.schemas),
-            AuditTabView.getTabObject(this.props.context)
-        ]).map((tabObj)=>{ // Common properties
+        tabs.push(AttributionTabView.getTabObject(this.props));
+        tabs.push(ItemDetailList.getTabObject(this.props));
+        tabs.push(AuditTabView.getTabObject(this.props));
+
+        return _.map(tabs, (tabObj) =>{ // Common properties
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
+                'style' : { 'minHeight' : Math.max((this.state.mounted && windowHeight && windowHeight - 300) || 0, 600) }
             });
         });
     }
@@ -145,19 +139,9 @@ export class WorkflowGraphSectionControls extends React.Component {
     }
 
     static keyTitleMap = {
-        'detail' : 'Analysis Steps',
-        'basic' : 'Basic Inputs & Outputs',
-        'cwl' : 'CWL Graph'
-    }
-
-    constructor(props){
-        super(props);
-        this.toggleOpenMenu = this.toggleOpenMenu.bind(this);
-        this.state = { 'open' : false, 'mounted' : false };
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
+        'detail'    : 'Analysis Steps',
+        'basic'     : 'Basic Inputs & Outputs',
+        'cwl'       : 'CWL Graph'
     }
 
     chartTypeDropdown(){
@@ -174,16 +158,12 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
 
         return (
-            <div className="inline-block for-state-showChart" key="chart-type-dropdown">
-                <DropdownButton
-                    id="detail-granularity-selector"
-                    pullRight
-                    onSelect={this.props.onChangeShowChartType}
-                    title={WorkflowGraphSectionControls.keyTitleMap[this.props.showChartType]}
-                >
-                    { basic }{ detail }
-                </DropdownButton>
-            </div>
+            <DropdownButton id="detail-granularity-selector" key="chart-type"
+                className="for-state-showChart" pullRight
+                onSelect={this.props.onChangeShowChartType}
+                title={WorkflowGraphSectionControls.keyTitleMap[this.props.showChartType]}>
+                { basic }{ detail }
+            </DropdownButton>
         );
     }
 
@@ -192,9 +172,7 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block" key="rowspacing-dropdown-block for-state-rowSpacingType">
-                <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType}/>
-            </div>
+            <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType} key="row-spacing-type"/>
         );
     }
 
@@ -202,11 +180,10 @@ export class WorkflowGraphSectionControls extends React.Component {
         var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
         if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <div className="inline-block for-state-fullscreenViewEnabled" key="toggle-fullscreen">
-                    <Button onClick={onToggleFullScreenView} data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null}>
-                        <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'arrows-alt' : 'crop')}/>
-                    </Button>
-                </div>
+                <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled"
+                    data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null} key="full-screen-btn">
+                    <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'expand' : 'compress')}/>
+                </Button>
             );
         }
         return null;
@@ -217,51 +194,33 @@ export class WorkflowGraphSectionControls extends React.Component {
             return null;
         }
         return (
-            <div className="inline-block checkbox-container for-state-showParameters" key="show-params">
-                <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}>
-                    Show Parameters
-                </Checkbox>
-            </div>
+            <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}
+                className="checkbox-container for-state-showParameters" key="params-checkbox">
+                Show Parameters
+            </Checkbox>
         );
     }
 
     referenceFilesCheckbox(){
         if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
         return (
-            <div className="inline-block checkbox-container for-state-showReferenceFiles" key="show-reference-files">
-                <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles} disabled={this.props.isReferenceFilesCheckboxDisabled}>
-                    Show Reference Files
-                </Checkbox>
-            </div>
+            <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles} key="ref-files-checkbox"
+                disabled={this.props.isReferenceFilesCheckboxDisabled} className="checkbox-container for-state-showReferenceFiles">
+                Show Reference Files
+            </Checkbox>
         );
-    }
-
-    toggleOpenMenu(){
-        this.setState({ 'open' : !this.state.open });
     }
 
     /**
      * @param {...JSX.Element} element - Element(s) to wrap in controls wrapper.
      * @returns {JSX.Element} Workflow Controls Element.
      */
-    wrapper(element){
-        var isOpen = (this.state.mounted && layout.responsiveGridState(this.props.windowWidth) === 'lg') || this.state.open;
+    wrapper(){
         return (
-            <div className="pull-right tabview-title-controls-container">
-                <Collapse in={isOpen}>
-                    <div className="inner-panel">
-                        {[...arguments]}
-                    </div>
-                </Collapse>
-                <div className="inner-panel constant-panel pull-right">
-                    <div className="inline-block">
-                        <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu}>
-                            <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options&nbsp;
-                        </Button>
-                    </div>
-                    { this.fullScreenButton() }
-                </div>
-            </div>
+            <CollapsibleItemViewButtonToolbar
+                children={[...arguments]}
+                constantButtons={this.fullScreenButton()}
+                windowWidth={this.props.windowWidth} />
         );
     }
 

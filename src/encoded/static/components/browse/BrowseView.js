@@ -149,8 +149,7 @@ class ResultTableContainer extends React.PureComponent {
         this.filterSelectedFilesToOnesInExpSet = this.filterSelectedFilesToOnesInExpSet.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
-        this.render = this.render.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
 
         // Primarily used here for caching some values re: PureComponents further down rendering tree.
         this.state = {
@@ -158,6 +157,12 @@ class ResultTableContainer extends React.PureComponent {
             'columnDefinitions' : this.getColumnDefinitions(),
             'colDefOverrides' : this.colDefOverrides()
         };
+    }
+
+    forceUpdateOnSelf(){
+        var searchResultTable   = this.refs.searchResultTable,
+            dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
+        return dimContainer && dimContainer.resetWidths();
     }
 
     componentWillReceiveProps(nextProps){
@@ -312,13 +317,13 @@ class ResultTableContainer extends React.PureComponent {
                     <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles',
-                            'selectedFilesUniqueCount', 'windowHeight', 'windowWidth'
+                            'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen'
                         )}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
-                        showSelectedFileCount
-                    />
+                        showSelectedFileCount />
                     <SearchResultTable
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth }}
+                        ref="searchResultTable"
                         registerWindowOnScrollHandler={this.props.registerWindowOnScrollHandler}
                         results={context['@graph']} columns={context.columns || {}}
                         renderDetailPane={this.browseExpSetDetailPane}
@@ -670,7 +675,7 @@ export default class BrowseView extends React.Component {
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets }}
-                                {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler')}
+                                {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen')}
                                 totalExpected={context && context.total} />
                         </SortController>
                     </CustomColumnController>
