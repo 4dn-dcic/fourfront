@@ -296,12 +296,11 @@ class File(Item):
             pass
         return outString
 
-    def _get_file_experiment_type(self, request, properties):
+    def _get_file_experiment_info(self, request):
         """
-        Get the string experiment_type value given a File and properties.
-        Checks the source_experiments, rev_linked experiments and experiment_sets
+        Get info about an experiment that a file belongs value given a File and properties.
+        Checks the rev_linked experiments and experiment_sets
         """
-        # identify which experiments to use
         experiment_of_file = None
         rev_exps = self.experiments(request)
         if rev_exps:
@@ -314,26 +313,65 @@ class File(Item):
                     expts_of_file = exp_set_info.get('experiments_in_set', [])
                     if expts_of_file:
                         experiment_of_file = expts_of_file[0]
+        if not experiment_of_file:
+            return {}
         exp_info = get_item_if_you_can(request, experiment_of_file)
         if exp_info is None:
-            return
-        exp_type = exp_info.get('experiment_type')
-        if exp_type is not None:
-            return exp_type
-        return
+            return {}
+        info = {'experiment_type': exp_info.get('experiment_type')}
+        assay_info = exp_info.get('experiment_categorizer')
+        if assay_info:
+            info['assay_info'] = assay_info.get('value')
+        sample_id = exp_info.get('biosample')
+        if sample_id is not None:
+            sample = get_item_if_you_can(request, sample_id)
+            if sample is not None:
+                info['biosource_name'] = sample.get('biosource_summary')
+        return {k: v for k, v in info.items() if v is not None}
 
     @calculated_property(schema={
-        "title": "Experiment Type",
-        "description": "Type of Dataset to which the file is linked",
-        "type": "string"
+        "title": "Track and Facet Info",
+        "description": "Useful faceting and visualization info",
+        "type": "object",
+        "properties": {
+            "experiment_type": {
+                "type": "string"
+            },
+            "assay_info": {
+                "type": "string"
+            },
+            "lab_name": {
+                "type": "string"
+            },
+            "biosource_name": {
+                "type": "string"
+            }
+        }
     })
-    def experiment_type(self, request):
-        # import pdb; pdb.set_trace()
+    def track_and_facet_info(self, request):
         props = self.properties
-        ds_type = props.get('dataset_type')
-        if ds_type:
-            return ds_type
-        return self._get_file_experiment_type(request, props)
+        track_info = {
+            'experiment_type': props.get('dataset_type'),
+            'assay_info': props.get('assay_info'),
+            'lab_name': props.get('project_lab'),
+            'biosource_name': props.get('biosource_name')
+        }
+        if track_info.get('biosource_name') is None:
+            if hasattr(self, 'biosource_name'):
+                bsname = self.biosource_name(request)
+                if bsname:
+                    track_info['biosource_name'] = bsname
+        if track_info.get('lab_name') is None:
+            labid = props.get('lab')
+            lab = get_item_if_you_can(request, labid)
+            if lab is not None:
+                track_info['lab_name'] = lab.get('display_title')
+        track_info = {k: v for k, v in track_info.items() if v is not None}
+        if len(track_info) != 4:
+            # import pdb; pdb.set_trace()
+            einfo = self._get_file_experiment_info(request)
+            track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+        return track_info
 
     def _update(self, properties, sheets=None):
         if not properties:
