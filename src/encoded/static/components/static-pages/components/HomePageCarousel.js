@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button } from 'react-bootstrap';
 import Carousel from 'nuka-carousel';
-import { ajax } from './../../util';
+import { ajax, layout } from './../../util';
 import { BasicStaticSectionBody } from './BasicStaticSectionBody';
 
 
@@ -111,11 +111,12 @@ export class HomePageCarousel extends React.PureComponent {
 
     render(){
 
-        var { loading, error, sections } = this.state;
+        var { settings, windowWidth } = this.props,
+            { loading, error, sections } = this.state;
 
         if (loading){
             return (
-                <div className="mb-3 mt-3 text-center homepage-carousel-placeholder" key="placeholder">
+                <div className="text-center homepage-carousel-placeholder" key="placeholder">
                     <i className="icon icon-spin icon-circle-o-notch"/>
                 </div>
             );
@@ -125,10 +126,24 @@ export class HomePageCarousel extends React.PureComponent {
             return null;
         }
 
+        // Do some responsive stuff
+        var gridState = layout.responsiveGridState(windowWidth);
+
+        if (gridState === 'sm'){
+            settings = _.extend({}, settings, {
+                'slidesToShow' : 2
+            });
+        } else if (gridState === 'xs'){
+            settings = _.extend({}, settings, {
+                'slidesToShow' : 1
+            });
+        }
+        
+
         return (
-            <div className="homepage-carousel-container mb-3 mt-3" ref={this.refFunc} style={{ 'opacity' : 0 }} key="carousel">
+            <div className="homepage-carousel-container" ref={this.refFunc} style={{ 'opacity' : 0 }} key="carousel">
                 <div className="row">
-                    <Carousel {...this.props.settings} children={_.map(sections, this.renderSlide)} />
+                    <Carousel {...settings} children={_.map(sections, this.renderSlide)} />
                 </div>
             </div>
         );

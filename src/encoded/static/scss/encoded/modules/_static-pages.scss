@@ -832,11 +832,13 @@ h5.fourDN-header {
 	}
 
 
-	$carousel-height : 210px;
+	$carousel-height : 280px;
 
 	.homepage-carousel-placeholder {
 		height: $carousel-height;
 		padding-top: (($carousel-height - 60px) / 2);
+		margin-top: 45px;
+		margin-bottom: 60px;
 		> i {
 			font-size: 2rem;
 			color: #bbb;
@@ -844,16 +846,37 @@ h5.fourDN-header {
 	}
 	
 	.homepage-carousel-container {
+		position: relative;
 		height: $carousel-height;
 		opacity: 0;
 		transition: opacity 1s;
 		transform: translate3d(0,0,0);
-		//overflow: hidden;
-		
-		//.row > .slider > .slider-frame {
-		//	padding-left: 10px !important;
-		//	padding-right: 10px !important;
-		//}
+
+		margin-top: 45px;
+		margin-bottom: 60px;
+
+		&:before {
+			content: "";
+			left: -1000px;
+			position: absolute;
+			top: -15px;
+			right: -1000px;
+			height: $carousel-height + 30px;
+			background: #f6f6f6;
+			box-shadow: inset 0 0 3px rgba(0,0,0,0.25);
+			//@include gradient-vertical(rgba(233,233,233,0.6), rgba(255,255,255,0), 0, 1);
+			transition: background-color .7s;
+		}
+
+		&:hover {
+			&:before {
+				background-color: #eee;
+			}
+			//.homepage-carousel-slide:not(:hover) > .inner-container > .bg-image {
+			//	opacity: 0.7 !important;
+			//	transition: opacity 1s !important;
+			//}
+		}
 	
 		.slider-list {
 			.slider-slide {
@@ -871,20 +894,25 @@ h5.fourDN-header {
 					> .inner-container {
 						position: relative;
 						min-height: $carousel-height - 10px;
-						background: #f4f4f4;
+						background: #fff;
 						display: flex;
 						flex-direction: column;
-						box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+						box-shadow: 0 1px 4px -1px rgba(0,0,0,0.5);
 						border-radius: 2px;
+						transition: box-shadow .4s, transform .4s;
+						background-color: #fff;
 						> .bg-image {
-							//position: absolute;
+							background-color: #fff;
+							opacity: 1;
 							left: 0;
 							top: 0;
 							bottom: 65px; //0;
 							right: 0;
 							background-size: cover;
 							background-position: 50%;
+							transition: opacity 0.4s;
 							flex: 1;
+							border-radius: 2px 2px 0 0;
 						}
 						> .title-container {
 							//position: absolute;
@@ -924,6 +952,20 @@ h5.fourDN-header {
 							border-radius: 5px;
 							margin: 4px 0 0 4px;
 							font-size: 1rem;
+						}
+					}
+					&.is-link:hover {
+						> .inner-container {
+							//outline: 1px solid orange;
+							//outline-offset: 4px;
+							//box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+							box-shadow: 0 2px 6px -1px rgba(0,0,0,0.7);
+							transform: translate3d(0, -3px, 0);
+							> .title-container {
+								> h4 {
+									text-shadow: 0 0 0;
+								}
+							}
 						}
 					}
 				}
