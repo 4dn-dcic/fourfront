@@ -296,6 +296,45 @@ class File(Item):
             pass
         return outString
 
+    def _get_file_experiment_type(self, request, properties):
+        """
+        Get the string experiment_type value given a File and properties.
+        Checks the source_experiments, rev_linked experiments and experiment_sets
+        """
+        # identify which experiments to use
+        experiment_of_file = None
+        rev_exps = self.experiments(request)
+        if rev_exps:
+            experiment_of_file = rev_exps[0]
+        elif hasattr(self, 'experiment_sets'):  # FileProcessed only
+            rev_exp_sets = self.experiment_sets(request)
+            if rev_exp_sets:
+                exp_set_info = get_item_if_you_can(request, rev_exp_sets[0])
+                if exp_set_info:
+                    expts_of_file = exp_set_info.get('experiments_in_set', [])
+                    if expts_of_file:
+                        experiment_of_file = expts_of_file[0]
+        exp_info = get_item_if_you_can(request, experiment_of_file)
+        if exp_info is None:
+            return
+        exp_type = exp_info.get('experiment_type')
+        if exp_type is not None:
+            return exp_type
+        return
+
+    @calculated_property(schema={
+        "title": "Experiment Type",
+        "description": "Type of Dataset to which the file is linked",
+        "type": "string"
+    })
+    def experiment_type(self, request):
+        # import pdb; pdb.set_trace()
+        props = self.properties
+        ds_type = props.get('dataset_type')
+        if ds_type:
+            return ds_type
+        return self._get_file_experiment_type(request, props)
+
     def _update(self, properties, sheets=None):
         if not properties:
             return

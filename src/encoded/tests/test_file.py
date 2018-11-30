@@ -941,3 +941,11 @@ def test_file_generate_track_title_fvis_w_desc(testapp, file_formats, award, lab
     res1 = testapp.post_json('/files-vistrack', vistrack_meta)
     vt = res1.json.get('@graph')[0]
     assert vt.get('track_title') == 'test description'
+
+
+def test_file_experiment_type(testapp, proc_file_json, rep_set_data):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    rep_set_data['processed_files'] = [res['@id']]
+    res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+    new_file = testapp.get(res['@id']).json
+    assert new_file['experiment_sets'][0]['@id'] == res2['@id']
