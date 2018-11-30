@@ -425,14 +425,15 @@ def date_histogram_aggregations(request):
 def add_files_to_higlass_viewconf(request):
     """ Add multiple files to the given Higlass view config.
     Assumes request's request is JSON and contains these keys:
-        "higlass_viewconfig"  : JSON of the current Higlass views. If None, uses a default view.
-        "files"          : A comma-separated list of file uuids to add.
+        higlass_viewconfig       : JSON of the current Higlass views. If None, uses a default view.
+        files                    : A list of file uuids to add.
+        firstViewLocationAndZoom : (Optional) A list of three numbers indicating the location and zoom levels of the first existing view.
 
     Returns a dict:
-        "success"  : Boolean indicating success.
-        "errors"   : A string containing errors. Will be None if this is successful.
-        "new_viewconfig" : New dict representing the new viewconfig.
-        "new_genome_assembly" : A string showing the new genome assembly.
+        success             : Boolean indicating success.
+        errors              : A string containing errors. Will be None if this is successful.
+        new_viewconfig      : New dict representing the new viewconfig.
+        new_genome_assembly : A string showing the new genome assembly.
     """
 
     # Get the viewconfig and its genome assembly. If none is provided, use the default empty higlass viewconf.
@@ -451,6 +452,7 @@ def add_files_to_higlass_viewconf(request):
             "new_genome_assembly" : None
         }
 
+    first_view_location_and_zoom = request.json_body.get('firstViewLocationAndZoom', [None, None, None])
 
     # Get the file list.
     files = request.json_body.get('files')
@@ -489,7 +491,9 @@ def add_files_to_higlass_viewconf(request):
         # If the display doesn't have a genome_assembly, set it to this one.
         genome_assembly_mapping = {
             'GRCm38' : ('GRCm38', 'mm10'),
-            'GRCh38' : ('GRCh38', 'hg38')
+            'GRCh38' : ('GRCh38', 'hg38'),
+            'dm6' : ('dm6'),
+            'galGal5' : ('galGal5'),
         }
         if not current_genome_assembly in genome_assembly_mapping.keys():
             for new_assembly in genome_assembly_mapping:
@@ -523,6 +527,12 @@ def add_files_to_higlass_viewconf(request):
                 "new_genome_assembly" : None
             }
 
+    # Resize and reposition the Higlass views.
+    repack_higlass_views(new_views)
+
+    # Set up the additional views so they all move and zoom with the first.
+    setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
+
     higlass_viewconfig["views"] = new_views
     return {
         "success" : True,
@@ -555,9 +565,6 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
     else:
         return None, "Unknown file format {file_format}".format(file_format = new_file_dict['file_format'])
 
-    # Resize and reposition the Higlass views.
-    repack_higlass_views(views)
-
     # Success! Return the modified view conf.
     return views, None
 
@@ -588,10 +595,7 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
         new_track["type"] = "horizontal-vector-heatmap"
         new_track["options"]["valueScaling"] = "linear"
 
-    if new_file["genome_assembly"] == "GRCh38":
-        new_track["options"]["coordSystem"] = "hg38"
-    if new_file["genome_assembly"] == "GRCm38":
-        new_track["options"]["coordSystem"] = "mm10"
+    new_track["options"]["coordSystem"] = new_file["genome_assembly"]
 
     # If there are no views, create a default.
     if not views:
@@ -778,3 +782,58 @@ def repack_higlass_views(views):
         if x >= 12:
             y += height
             x = 0
+
+def setZoomLocationLocks(views, view_config, scales_and_center_k):
+    """ Set the zoom and location of the views so they match the first one.
+    Then lock them so changing one changes all of them.
+    Modify the view_config.
+    """
+
+    if len(views) == 0:
+        return
+
+    # Get the x, y, zoom of the first view
+    view1_x = scales_and_center_k[0]
+    view1_y = scales_and_center_k[1]
+    view1_zoom = scales_and_center_k[2]
+
+    # Create new uuids to handle the zoom and location locks.
+    locationLockUuid = uuid.uuid4()
+    zoomLockUuid = uuid.uuid4()
+    lockUuids = {
+        "location" : str(locationLockUuid),
+        "zoom" : str(zoomLockUuid),
+    }
+
+    locks = {
+        "location" : {
+            "locksByViewUid": {},
+            "locksDict": {
+                lockUuids["location"] : {}
+            },
+        },
+        "zoom" : {
+            "locksByViewUid": {},
+            "locksDict": {
+                lockUuids["zoom"] : {}
+            },
+        },
+    }
+
+    # For each view,
+    for view in views:
+        uid = str(view["uid"])
+
+        # Add the new lock information.
+        for lockType in lockUuids:
+            lockUuid = lockUuids[lockType]
+            locks[lockType]["locksByViewUid"][uid] = lockUuid
+            locks[lockType]["locksDict"][lockUuid][uid] = [
+                view1_x,
+                view1_y,
+                view1_zoom
+            ]
+
+    # Set the view config.
+    view_config["locationLocks"] = locks["location"]
+    view_config["zoomLocks"] = locks["zoom"]

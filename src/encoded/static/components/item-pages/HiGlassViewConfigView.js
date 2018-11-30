@@ -301,7 +301,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('Could not get current view configuration.');
         }
 
-
         // Read the url of the higlass viewconfig and store the genome assembly.
         ajax.load(
             this.props.href,
@@ -313,10 +312,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'GET'
         );
 
+        // Get the x and y scales of the first view.
+        let firstViewLocationAndZoom = [null, null, null];
+        if (currentViewConf.views && currentViewConf.views.length > 0)
+        {
+            const firstViewUid = currentViewConf.views[0].uid;
+
+            const xScale = hgc.xScales[firstViewUid];
+            const yScale = hgc.yScales[firstViewUid];
+
+            // Transform the first view's location and zoom levels.
+            const xCenter = xScale.invert((xScale.range()[0] + xScale.range()[1]) / 2);
+            const yCenter = yScale.invert((yScale.range()[0] + yScale.range()[1]) / 2);
+            const k = xScale.invert(1) - xScale.invert(0);
+
+            firstViewLocationAndZoom = [xCenter, yCenter, k];
+        }
+
         var payload = {
             'higlass_viewconfig': currentViewConf,
             'genome_assembly': this.state.genome_assembly,
-            'files' : [fileAtID]
+            'files' : [fileAtID],
+            'firstViewLocationAndZoom': firstViewLocationAndZoom
         };
 
         // If it failed, show the error in the popup window.
