@@ -254,8 +254,8 @@ class Publication(Item, ItemWithAttachment):
         return Item.display_title(self)
 
     @calculated_property(schema={
-        "title": "Number of Experiments",
-        "description": "The number of Experiments in this Experiment Set.",
+        "title": "Number of Experiment Sets",
+        "description": "The number of experiment sets produced by this publication.",
         "type": "integer"
     })
     def number_of_experiment_sets(self, request, exp_sets_prod_in_pub=None):
