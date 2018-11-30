@@ -944,6 +944,18 @@ export class FileEntryBlock extends React.PureComponent {
         return externalLinkButton;
     }
 
+    renderExternalButtons(){
+        var { file } = this.props,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
+                (fileFormat && fileFormat === 'hic')
+                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+            )),
+            externalLinkButton      = null,
+            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+            fileIsPublic = (file.status === 'archived' || file.status === 'released');
+    }
+
     renderName(){
         var { file, colWidthStyles } = this.props;
         return <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
