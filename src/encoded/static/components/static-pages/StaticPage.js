@@ -50,7 +50,10 @@ export function parseSectionsContent(context = this.props.context){
             // HiglassViewConfig Parsing
             if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
             section =  _.extend({}, section, {
-                'content' : <HiGlassPlainContainer viewConfig={section.viewconfig} />
+                'content' : <React.Fragment>
+                  <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
+                  <HiGlassPlainContainer viewConfig={section.viewconfig} />
+                </React.Fragment>
             });
         } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
             // TODO

@@ -59,7 +59,7 @@ export class BasicUserContentBody extends React.PureComponent {
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
-                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
+                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
                     <HiGlassPlainContainer viewConfig={context.viewconfig} />
                 </React.Fragment>
             );
@@ -115,7 +115,7 @@ export class EmbeddedHiglassActions extends React.PureComponent {
         var { context, parentComponentType } = this.props,
             btnProps = {
                 'href'      : object.itemUtil.atId(context),
-                'data-tip'  : "Open HiGlass Display",
+                'data-tip'  : "Open HiGlass display to add other data",
                 'className' : 'pull-right extra-info-higlass-btn'
             };
 
@@ -131,7 +131,7 @@ export class EmbeddedHiglassActions extends React.PureComponent {
                 <div className="btn-container">
                     <Button {...btnProps}>
                         <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
-                        View Larger
+                        Explore Data
                     </Button>
                 </div>
             </div>
@@ -216,4 +216,3 @@ export class BasicStaticSectionBody extends React.PureComponent {
 export function isHiGlassDisplay(context){
     return Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1;
 }
-
