@@ -42,7 +42,8 @@
                 "Page Section",
                 "Announcement",
                 "Search Info Header",
-                "Item Page Header"
+                "Item Page Header",
+                "Home Page Slide"
             ],
             "lookup" : 10
         },
@@ -77,6 +78,18 @@
                     "description": "Icon to be showed next to title in selected places.",
                     "type" : "string",
                     "lookup" : 5
+                },
+                "link" : {
+                    "title" : "Link/URI",
+                    "description": "Another link with which this resource is associated with or should redirect to.",
+                    "type" : "string",
+                    "lookup" : 6
+                },
+                "image" : {
+                    "title" : "Preview Image",
+                    "description": "Image or screenshot URL for this Item to use as a preview.",
+                    "type" : "string",
+                    "lookup" : 7
                 },
                 "startCell" : {
                     "type" : "array",
