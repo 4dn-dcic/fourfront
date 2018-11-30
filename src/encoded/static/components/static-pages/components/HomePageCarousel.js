@@ -13,7 +13,7 @@ export class HomePageCarousel extends React.PureComponent {
 
     static defaultProps = {
         'settings' : {
-            'autoplay' : true,
+            //'autoplay' : true,
             'slidesToShow' : 3,
             'wrapAround' : true,
             'slidesToScroll' : 1,
@@ -45,6 +45,12 @@ export class HomePageCarousel extends React.PureComponent {
         };
     }
 
+    componentDidUpdate(pastProps){
+        if (pastProps.session !== this.props.session) {
+            this.searchForSlides();
+        }
+    }
+
     componentDidMount(){
         this.searchForSlides();
     }
@@ -67,6 +73,7 @@ export class HomePageCarousel extends React.PureComponent {
 
     renderSlide(section, idx){
         var link    = (section && section.options && section.options.link) || null,
+            image   = (section && section.options && section.options.image) || null,
             title   = (!section.title ? null :
                 <div className="title-container">
                     <h4 className="text-500">{ section.title }</h4>
@@ -76,12 +83,17 @@ export class HomePageCarousel extends React.PureComponent {
                 </div>
             ),
             inner = (
-                <React.Fragment>
-                    <div className="inner">
-                        <BasicStaticSectionBody {..._.pick(section, 'filetype', 'options', 'content')} />
-                    </div>
+                <div className="inner-container">
+                    { image ?
+                        <div className="bg-image" style={{ 'backgroundImage' : 'url(' + image + ')' }} />
+                    : null }
+                    { section.body ?
+                        <div className="inner">
+                            <BasicStaticSectionBody {..._.pick(section, 'filetype', 'options', 'content')} />
+                        </div>
+                    : null }
                     { title }
-                </React.Fragment>
+                </div>
             );
 
         if (link){

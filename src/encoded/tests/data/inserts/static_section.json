@@ -36,39 +36,44 @@
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
     },
     {
-        "title" : "ɤɵɴϴΩ Slide2",
-        "description" : "This is a cool feature which you should check out.",
+        "title" : "HiGlass Visualization",
+        "description" : "Visualize 4DN data with HiGlass",
         "name" : "home.carousel.slide4",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d9",
         "body" : "<h4>Hello! World KLM</h4>",
         "section_type" : "Home Page Slide",
         "options" : {
-            "filetype" : "html"
+            "filetype" : "html",
+            "link" : "/visualization/getting-started",
+            "image" : "https://i.gyazo.com/65640d9c398832c911d6904f2e81394e.png"
         },
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
     },
     {
-        "title" : "ɤɵɴϴΩ Slide3",
-        "description" : "This is a cool feature which you should check out.",
+        "title" : "Joint Analysis",
+        "description" : "View the Joint Analysis page",
         "name" : "home.carousel.slide5",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e0",
-        "body" : "<style> .slide-container { background-image: url('https://i.gyazo.com/1e0e844e62a658308f1fc0ac19ce4339.png'); background-size: cover; position: absolute; width: 100%; height: 100%; } </style> <div class=\"slide-container\"> <div style=\"background: rgb(255, 167, 7); color: #fff; padding: 5px; display: inline-block;\"> New! </div> </div>",
+        "body" : "<div style=\"background: rgb(255, 167, 7); color: #fff; padding: 5px 10px; display: inline-block;\">New!</div>",
         "section_type" : "Home Page Slide",
         "options" : {
             "filetype" : "html",
-            "link" : "/joint-analysis"
+            "link" : "/joint-analysis",
+            "image" : "https://i.gyazo.com/1e0e844e62a658308f1fc0ac19ce4339.png"
         },
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
     },
     {
-        "title" : "ɤɵɴϴΩ Slide4",
-        "description" : "This is a cool feature which you should check out.",
+        "title" : "4DN JupyterHub",
+        "description" : "Interactive Data Exploration with 4DN JupyterHub (requires account)",
         "name" : "home.carousel.slide6",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e1",
-        "body" : "<h4>Hello! World QRS</h4>",
+        "body" : "<div style=\"background: rgb(255, 167, 7); color: #fff; padding: 5px 10px; display: inline-block;\">BETA</div>",
         "section_type" : "Home Page Slide",
         "options" : {
-            "filetype" : "html"
+            "filetype" : "html",
+            "link" : "/jupyterhub",
+            "image" : "https://files.slack.com/files-pri/T0723UERE-FEE06KH2M/jupyterhub_x_4dn.png"
         },
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
     }

@@ -919,23 +919,33 @@ h5.fourDN-header {
 				&:hover, &:active {
 					text-decoration: none;
 				}
-				> .inner {
-
-				}
-				> .title-container {
-					position: absolute;
-					left: 0;
-					right: 0;
-					bottom: 0;
-					padding: 42px 12px 8px 12px;
-					//background: #f4f4f4;
-					//background: rgba(244, 244, 244, 0.933);
-					@include gradient-vertical(rgba(244, 244, 244,0), rgba(244, 244, 244, 0.933), 0, 0.5);
-					> h4 {
-						margin-bottom: 2px;
+				> .inner-container {
+					> .bg-image {
+						position: absolute;
+						left: 0;
+						top: 0;
+						bottom: 0;
+						right: 0;
+						background-size: cover;
 					}
-					> p {
-						margin-bottom: 2px;
+					> .inner {
+
+					}
+					> .title-container {
+						position: absolute;
+						left: 0;
+						right: 0;
+						bottom: 0;
+						padding: 42px 12px 8px 12px;
+						//background: #f4f4f4;
+						//background: rgba(244, 244, 244, 0.933);
+						@include gradient-vertical(rgba(244, 244, 244,0), rgba(244, 244, 244, 0.933), 0, 0.5);
+						> h4 {
+							margin-bottom: 2px;
+						}
+						> p {
+							margin-bottom: 2px;
+						}
 					}
 				}
 			}

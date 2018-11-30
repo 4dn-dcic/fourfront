@@ -142,6 +142,9 @@ class BigBrowseButton extends React.Component {
     }
 }
 
+/**
+ * @deprecated
+ */
 class LinksRow extends React.Component {
 
     static defaultProps = {
@@ -250,7 +253,7 @@ class LinksColumn extends LinksRow {
 
         return (
             <div className="homepage-links-column internal-links">
-                <h4 className="text-400 mb-15 mt-0">Recommended</h4>
+                <h4 className="text-400 mb-15 mt-0">Getting Started</h4>
                 <div className="links-wrapper clearfix">
                     <div className="link-block">
                         <BigBrowseButton className="browse-btn">
@@ -260,12 +263,35 @@ class LinksColumn extends LinksRow {
                         </BigBrowseButton>
                     </div>
                     <div className="link-block">
+                        <a href="/search/?award.project=4DN&type=Publication">
+                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
+                                <span>Browse 4DN Publications</span>
+                            </layout.VerticallyCenteredChild>
+                        </a>
+                    </div>
+                    <div className="link-block">
+                        <a href="/jupyterhub">
+                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
+                                <span>Explore 4DN Data (JupyterHub)</span>
+                            </layout.VerticallyCenteredChild>
+                        </a>
+                    </div>
+                    <div className="link-block">
+                        <a href="/visualization/getting-started">
+                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
+                                <span>Visualize 4DN Data (HiGlass)</span>
+                            </layout.VerticallyCenteredChild>
+                        </a>
+                    </div>
+                    {/*
+                    <div className="link-block">
                         <a href="/help/user-guide/data-organization">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>Introduction to 4DN Metadata</span>
                             </layout.VerticallyCenteredChild>
                         </a>
                     </div>
+                    */}
                     { (session && this.jointAnalysisPageLink()) || null }
                 </div>
             </div>
