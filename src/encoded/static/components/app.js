@@ -1377,7 +1377,7 @@ export default class App extends React.Component {
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
             baseDomain = (href_url.protocol || '') + '//' + href_url.host,
             bodyElementProps = _.extend({}, this.state, this.props, {
-                baseDomain, isLoading,
+                baseDomain, isLoading, currentAction,
                 'updateUserInfo' : this.updateUserInfo,
                 'listActionsFor' : this.listActionsFor,
                 'onBodyClick'    : this.handleClick,
