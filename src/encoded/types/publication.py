@@ -171,6 +171,7 @@ class Publication(Item, ItemWithAttachment):
         'award.project',
         "exp_sets_prod_in_pub.experimentset_type",
         "exp_sets_prod_in_pub.accession",
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type",
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
     ]
@@ -250,3 +251,11 @@ class Publication(Item, ItemWithAttachment):
             return title[0:120]
         return Item.display_title(self)
 
+    @calculated_property(schema={
+        "title": "Number of Experiments",
+        "description": "The number of Experiments in this Experiment Set.",
+        "type": "integer"
+    })
+    def number_of_experiment_sets(self, request, exp_sets_prod_in_pub=None):
+        if exp_sets_prod_in_pub:
+            return len(exp_sets_prod_in_pub)
