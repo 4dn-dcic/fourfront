@@ -370,5 +370,15 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "valid_item_types": ["FileReference"]
+    },
+    {
+        "file_format": "bigbed",
+        "standard_file_extension": "bb",
+        "description": "BigBed format",
+        "uuid": "bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "status": "released",
+        "valid_item_types": ["FileProcessed", "FileReference"]
     }
 ]

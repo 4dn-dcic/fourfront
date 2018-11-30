@@ -643,6 +643,136 @@ export const HiGlassConfigurator = {
                 "views": [ HiGlassConfigurator.beddb.generateView(files, options) ]
             });
         }
+    },
+
+    'bigbed' : {
+        'generateTopContentTrack' : function(bedFile, options, { chromosome, annotation }, idx, all){
+            var track = HiGlassConfigurator.bigwig.generateTopContentTrack(...arguments);
+            
+            track.type = 'horizontal-vector-heatmap';
+            track.options.colorRange = [
+                "rgba(0,0,3,1)", "rgba(0,0,4,1)", "rgba(0,0,6,1)", "rgba(1,0,7,1)",
+                "rgba(1,1,9,1)", "rgba(1,1,11,1)", "rgba(2,2,13,1)", "rgba(2,2,15,1)",
+                "rgba(3,3,17,1)", "rgba(4,3,19,1)", "rgba(4,4,21,1)", "rgba(5,4,23,1)",
+                "rgba(6,5,25,1)", "rgba(7,5,27,1)", "rgba(8,6,29,1)", "rgba(9,7,32,1)",
+                "rgba(10,7,34,1)", "rgba(11,8,36,1)", "rgba(12,9,38,1)", "rgba(13,10,40,1)",
+                "rgba(14,10,42,1)", "rgba(15,11,45,1)", "rgba(16,12,47,1)", "rgba(17,12,49,1)",
+                "rgba(19,13,51,1)", "rgba(20,13,54,1)", "rgba(21,14,56,1)", "rgba(22,14,58,1)",
+                "rgba(23,15,61,1)", "rgba(25,15,63,1)", "rgba(26,16,66,1)", "rgba(27,16,68,1)",
+                "rgba(28,16,70,1)", "rgba(30,17,73,1)", "rgba(31,17,75,1)", "rgba(33,17,78,1)",
+                "rgba(34,17,80,1)", "rgba(36,17,83,1)", "rgba(37,17,85,1)", "rgba(39,17,87,1)",
+                "rgba(40,17,90,1)", "rgba(42,17,92,1)", "rgba(43,17,94,1)", "rgba(45,17,97,1)",
+                "rgba(47,16,99,1)", "rgba(49,16,101,1)", "rgba(50,16,103,1)", "rgba(52,16,105,1)",
+                "rgba(54,15,107,1)", "rgba(55,15,108,1)", "rgba(57,15,110,1)", "rgba(59,15,112,1)",
+                "rgba(61,15,113,1)", "rgba(62,15,114,1)", "rgba(64,15,116,1)", "rgba(66,15,117,1)",
+                "rgba(67,15,118,1)", "rgba(69,15,119,1)", "rgba(71,15,120,1)", "rgba(72,16,120,1)",
+                "rgba(74,16,121,1)", "rgba(76,16,122,1)", "rgba(77,17,123,1)", "rgba(79,17,123,1)",
+                "rgba(81,18,124,1)", "rgba(82,18,124,1)", "rgba(84,19,125,1)", "rgba(85,20,125,1)",
+                "rgba(87,20,126,1)", "rgba(88,21,126,1)", "rgba(90,21,126,1)", "rgba(92,22,127,1)",
+                "rgba(93,23,127,1)", "rgba(95,23,127,1)", "rgba(96,24,128,1)", "rgba(98,25,128,1)",
+                "rgba(99,25,128,1)", "rgba(101,26,128,1)", "rgba(103,26,128,1)", "rgba(104,27,129,1)",
+                "rgba(106,28,129,1)", "rgba(107,28,129,1)", "rgba(109,29,129,1)", "rgba(110,30,129,1)",
+                "rgba(112,30,129,1)", "rgba(113,31,129,1)", "rgba(115,32,129,1)", "rgba(117,32,129,1)",
+                "rgba(118,33,129,1)", "rgba(120,33,129,1)", "rgba(121,34,130,1)", "rgba(123,35,130,1)",
+                "rgba(124,35,130,1)", "rgba(126,36,130,1)", "rgba(128,36,130,1)", "rgba(129,37,129,1)",
+                "rgba(131,37,129,1)", "rgba(132,38,129,1)", "rgba(134,39,129,1)", "rgba(136,39,129,1)",
+                "rgba(137,40,129,1)", "rgba(139,40,129,1)", "rgba(140,41,129,1)", "rgba(142,41,129,1)",
+                "rgba(144,42,129,1)", "rgba(145,42,129,1)", "rgba(147,43,128,1)", "rgba(148,43,128,1)",
+                "rgba(150,44,128,1)", "rgba(152,44,128,1)", "rgba(153,45,128,1)", "rgba(155,46,127,1)",
+                "rgba(157,46,127,1)", "rgba(158,47,127,1)", "rgba(160,47,127,1)", "rgba(161,48,126,1)",
+                "rgba(163,48,126,1)", "rgba(165,49,126,1)", "rgba(166,49,125,1)", "rgba(168,50,125,1)",
+                "rgba(170,50,125,1)", "rgba(171,51,124,1)", "rgba(173,51,124,1)", "rgba(175,52,123,1)",
+                "rgba(176,52,123,1)", "rgba(178,53,123,1)", "rgba(180,53,122,1)", "rgba(181,54,122,1)",
+                "rgba(183,55,121,1)", "rgba(185,55,121,1)", "rgba(186,56,120,1)", "rgba(188,56,120,1)",
+                "rgba(189,57,119,1)", "rgba(191,57,118,1)", "rgba(193,58,118,1)", "rgba(194,59,117,1)",
+                "rgba(196,59,117,1)", "rgba(198,60,116,1)", "rgba(199,61,115,1)", "rgba(201,61,115,1)",
+                "rgba(202,62,114,1)", "rgba(204,63,113,1)", "rgba(206,63,113,1)", "rgba(207,64,112,1)",
+                "rgba(209,65,111,1)", "rgba(210,66,110,1)", "rgba(212,67,110,1)", "rgba(213,67,109,1)",
+                "rgba(215,68,108,1)", "rgba(216,69,107,1)", "rgba(218,70,107,1)", "rgba(219,71,106,1)",
+                "rgba(221,72,105,1)", "rgba(222,73,104,1)", "rgba(223,74,103,1)", "rgba(225,75,103,1)",
+                "rgba(226,76,102,1)", "rgba(227,78,101,1)", "rgba(229,79,100,1)", "rgba(230,80,100,1)",
+                "rgba(231,81,99,1)", "rgba(232,83,98,1)", "rgba(233,84,97,1)", "rgba(234,85,97,1)",
+                "rgba(236,87,96,1)", "rgba(237,88,95,1)", "rgba(238,90,95,1)", "rgba(239,91,94,1)",
+                "rgba(239,93,94,1)", "rgba(240,95,93,1)", "rgba(241,96,93,1)", "rgba(242,98,93,1)",
+                "rgba(243,100,92,1)", "rgba(243,101,92,1)", "rgba(244,103,92,1)", "rgba(245,105,92,1)",
+                "rgba(246,107,92,1)", "rgba(246,108,92,1)", "rgba(247,110,92,1)", "rgba(247,112,92,1)",
+                "rgba(248,114,92,1)", "rgba(248,116,92,1)", "rgba(249,118,92,1)", "rgba(249,120,92,1)",
+                "rgba(250,121,93,1)", "rgba(250,123,93,1)", "rgba(250,125,94,1)", "rgba(251,127,94,1)",
+                "rgba(251,129,95,1)", "rgba(251,131,95,1)", "rgba(252,133,96,1)", "rgba(252,135,97,1)",
+                "rgba(252,137,97,1)", "rgba(252,139,98,1)", "rgba(253,140,99,1)", "rgba(253,142,100,1)",
+                "rgba(253,144,101,1)", "rgba(253,146,102,1)", "rgba(253,148,103,1)", "rgba(254,150,104,1)",
+                "rgba(254,152,105,1)", "rgba(254,154,106,1)", "rgba(254,156,107,1)", "rgba(254,157,108,1)",
+                "rgba(254,159,109,1)", "rgba(254,161,110,1)", "rgba(254,163,111,1)", "rgba(254,165,112,1)",
+                "rgba(255,167,114,1)", "rgba(255,169,115,1)", "rgba(255,171,116,1)", "rgba(255,172,118,1)",
+                "rgba(255,174,119,1)", "rgba(255,176,120,1)", "rgba(255,178,122,1)", "rgba(255,180,123,1)",
+                "rgba(255,182,124,1)", "rgba(255,184,126,1)", "rgba(255,185,127,1)", "rgba(255,187,129,1)",
+                "rgba(255,189,130,1)", "rgba(255,191,132,1)", "rgba(255,193,133,1)", "rgba(255,195,135,1)",
+                "rgba(255,197,136,1)", "rgba(255,198,138,1)", "rgba(255,200,140,1)", "rgba(255,202,141,1)",
+                "rgba(255,204,143,1)", "rgba(254,206,144,1)", "rgba(254,208,146,1)", "rgba(254,209,148,1)",
+                "rgba(254,211,149,1)", "rgba(254,213,151,1)", "rgba(254,215,153,1)", "rgba(254,217,155,1)",
+                "rgba(254,219,156,1)", "rgba(254,220,158,1)", "rgba(254,222,160,1)", "rgba(254,224,162,1)",
+                "rgba(254,226,163,1)", "rgba(253,228,165,1)", "rgba(253,230,167,1)", "rgba(253,231,169,1)",
+                "rgba(253,233,171,1)", "rgba(253,235,172,1)", "rgba(253,237,174,1)", "rgba(253,239,176,1)", 
+                "rgba(253,241,178,1)", "rgba(253,242,180,1)", "rgba(253,244,182,1)", "rgba(253,246,184,1)",
+                "rgba(252,248,186,1)", "rgba(252,250,188,1)", "rgba(252,251,189,1)", "rgba(252,253,191,1)"
+            ];
+            return track;
+        },
+        'generateView' : function(files, options){
+            var { height, baseUrl, supplementaryTracksBaseUrl, extraViewProps, index, excludeAnnotationTracks } = options;
+
+            // Track definitions, default to human.
+            var commonGenomeAssembly = _.uniq(_.filter(_.pluck(files, 'genome_assembly')))[0]; // Use first for now.
+            var chromosomeAndAnnotation = HiGlassConfigurator.chromosomeAndAnnotationFromGenomeAssembly(commonGenomeAssembly);
+
+            var genomeSearchUrl = supplementaryTracksBaseUrl || baseUrl; // Currently available on HiGlass servers.
+
+            var initialDomains = HiGlassConfigurator.getInitialDomainsFromStorage(options);
+
+            const tracks = []; // Will be used as single 'top' tracks list.
+
+            if (!excludeAnnotationTracks) {
+                tracks.push(HiGlassConfigurator.generateTopAnnotationTrack(genomeSearchUrl, chromosomeAndAnnotation));
+                tracks.push(HiGlassConfigurator.generateTopChromosomeTrack(genomeSearchUrl, chromosomeAndAnnotation));
+            }
+
+            _.forEach(files, function(file, idx, all){
+                tracks.push(
+                    HiGlassConfigurator.bigbed.generateTopContentTrack(file, options, chromosomeAndAnnotation, idx, all)
+                );
+            });
+
+            return _.extend(HiGlassConfigurator.generateViewConfigViewBase("view-4dn-beddb-" + index, chromosomeAndAnnotation, options), {
+                "tracks": {
+                    "top" : tracks,
+                    "left" : [],
+                    "center": [],
+                    "right": [],
+                    "bottom": []
+                },
+            });
+        },
+        'generateViewConfig' : function(files, options = DEFAULT_GEN_VIEW_CONFIG_OPTIONS){
+            options = _.extend({}, DEFAULT_GEN_VIEW_CONFIG_OPTIONS, options); // Use defaults for non-supplied options
+
+            // Make sure to override non-falsy-allowed values with defaults.
+            _.forEach(['baseUrl', 'supplementaryTracksBaseUrl', 'initialDomains', 'genomeAssembly', 'extraViewProps'], function(k){
+                options[k] = options[k] || DEFAULT_GEN_VIEW_CONFIG_OPTIONS[k];
+            });
+
+            if (!Array.isArray(files)) throw new Error('Files must be an array');
+            if (files.length === 0) throw new Error('Files list must have at least 1 file.');
+            var isMultipleViews = !!(Array.isArray(files[0])); // If we have files in nested arrays, then assume we subdivide them into multiple views.
+
+            if (isMultipleViews){
+                throw new Error('Subidividing bedgraph lists into multiple views is not supported __yet__.');
+                // TODO - generateMultipleViewConfigs
+            }
+
+            return _.extend(HiGlassConfigurator.generateViewConfigBase(options), {
+                "views": [ HiGlassConfigurator.bigbed.generateView(files, options) ]
+            });
+        }
     }
 
 };
@@ -669,11 +799,12 @@ export class HiGlassContainer extends React.PureComponent {
                 fileFormat = allFileFormats[0];
 
             var fxnByFormatDict = {
-                'mcool' : HiGlassConfigurator.mcool.generateViewConfig,
-                'bw'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bg'    : HiGlassConfigurator.bigwig.generateViewConfig,
-                'bed'   : HiGlassConfigurator.beddb.generateViewConfig,
-                'beddb' : HiGlassConfigurator.beddb.generateViewConfig
+                'mcool'  : HiGlassConfigurator.mcool.generateViewConfig,
+                'bw'     : HiGlassConfigurator.bigwig.generateViewConfig,
+                'bg'     : HiGlassConfigurator.bigwig.generateViewConfig,
+                'bed'    : HiGlassConfigurator.beddb.generateViewConfig,
+                'bigbed' : HiGlassConfigurator.bigbed.generateViewConfig,
+                'beddb'  : HiGlassConfigurator.beddb.generateViewConfig
             };
 
             if (allFileFormats.length === 1){

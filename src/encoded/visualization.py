@@ -542,7 +542,7 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
 
     # Based on the filetype's dimensions, try to add the file to the viewconf
     file_format = new_file_dict["file_format"]
-    known_1d_formats = ("bg", "bw", "bed")
+    known_1d_formats = ("bg", "bw", "bed", "bigbed")
     known_2d_formats = ("mcool", "hic")
     if [x for x in known_2d_formats if x in file_format]:
         status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
@@ -583,6 +583,10 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
 
     if "bed" in new_file["file_format"]:
         new_track["type"] = "bedlike"
+
+    if "bigbed" in new_file["file_format"]:
+        new_track["type"] = "horizontal-vector-heatmap"
+        new_track["options"]["valueScaling"] = "linear"
 
     if new_file["genome_assembly"] == "GRCh38":
         new_track["options"]["coordSystem"] = "hg38"
