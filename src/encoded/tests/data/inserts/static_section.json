@@ -40,7 +40,6 @@
         "description" : "Visualize 4DN data with HiGlass",
         "name" : "home.carousel.slide4",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d9",
-        "body" : "<h4>Hello! World KLM</h4>",
         "section_type" : "Home Page Slide",
         "options" : {
             "filetype" : "html",
@@ -54,7 +53,6 @@
         "description" : "View the Joint Analysis page",
         "name" : "home.carousel.slide5",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e0",
-        "body" : "<div style=\"background: rgb(255, 167, 7); color: #fff; padding: 5px 10px; display: inline-block;\">New!</div>",
         "section_type" : "Home Page Slide",
         "options" : {
             "filetype" : "html",
@@ -68,7 +66,7 @@
         "description" : "Interactive Data Exploration with 4DN JupyterHub (requires account)",
         "name" : "home.carousel.slide6",
         "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e1",
-        "body" : "<div style=\"background: rgb(255, 167, 7); color: #fff; padding: 5px 10px; display: inline-block;\">BETA</div>",
+        "body" : "<div class=\"slide-label\">BETA</div>",
         "section_type" : "Home Page Slide",
         "options" : {
             "filetype" : "html",

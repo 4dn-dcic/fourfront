@@ -26,7 +26,7 @@ export default class HomePage extends React.PureComponent {
     }
 
     midHeader(){
-        return <div className="mt-2" />; // Temporary -- remove and uncomment lines below when we have better "Getting Started" page or static section or w/e.
+        return null;// <div className="mt-2" />; // Temporary -- remove and uncomment lines below when we have better "Getting Started" page or static section or w/e.
         /*
         return (
             <div className="homepage-mid-header row mb-4 mt-2">

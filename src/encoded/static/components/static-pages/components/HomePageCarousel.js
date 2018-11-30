@@ -29,8 +29,7 @@ export class HomePageCarousel extends React.PureComponent {
             'renderBottomCenterControls' : null,
             'autoGenerateStyleTag' : false,
             'dragging' : false,
-            'cellAlign' : 'center',
-            'cellSpacing' : 20,
+            //'cellSpacing' : 20,
             //'cellPadding' : '0px 10px'
         }
     };
@@ -76,24 +75,24 @@ export class HomePageCarousel extends React.PureComponent {
             image   = (section && section.options && section.options.image) || null,
             title   = (!section.title ? null :
                 <div className="title-container">
-                    <h4 className="text-500">{ section.title }</h4>
+                    <h4>{ section.title }</h4>
                     { section.description ?
                         <p>{ section.description }</p>
                     : null }
                 </div>
             ),
             inner = (
-                <div className="inner-container">
-                    { image ?
-                        <div className="bg-image" style={{ 'backgroundImage' : 'url(' + image + ')' }} />
-                    : null }
+                <React.Fragment>
+                    <div className="inner-container">
+                        <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
+                        { title }
+                    </div>
                     { section.body ?
-                        <div className="inner">
-                            <BasicStaticSectionBody {..._.pick(section, 'filetype', 'options', 'content')} />
+                        <div className="inner-body">
+                            <BasicStaticSectionBody {..._.pick(section, 'filetype', 'content')} />
                         </div>
                     : null }
-                    { title }
-                </div>
+                    </React.Fragment>
             );
 
         if (link){
@@ -107,7 +106,7 @@ export class HomePageCarousel extends React.PureComponent {
         setTimeout(function(){
             if (!elem) return;
             elem.style.opacity = 1;
-        }, 0);
+        }, 100);
     }
 
     render(){
@@ -116,10 +115,8 @@ export class HomePageCarousel extends React.PureComponent {
 
         if (loading){
             return (
-                <div className="mb-3 mt-3 text-center pt-2 pb-2" key="placeholder">
-                    <h4 style={{ 'opacity' : 0.5 }}>
-                        <i className="icon icon-spin icon-circle-o-notch"/>
-                    </h4>
+                <div className="mb-3 mt-3 text-center homepage-carousel-placeholder" key="placeholder">
+                    <i className="icon icon-spin icon-circle-o-notch"/>
                 </div>
             );
         }
@@ -130,7 +127,9 @@ export class HomePageCarousel extends React.PureComponent {
 
         return (
             <div className="homepage-carousel-container mb-3 mt-3" ref={this.refFunc} style={{ 'opacity' : 0 }} key="carousel">
-                <Carousel {...this.props.settings} children={_.map(sections, this.renderSlide)} />
+                <div className="row">
+                    <Carousel {...this.props.settings} children={_.map(sections, this.renderSlide)} />
+                </div>
             </div>
         );
 
