@@ -52,7 +52,7 @@ export function parseSectionsContent(context = this.props.context){
             section =  _.extend({}, section, {
                 'content' : <React.Fragment>
                   <EmbeddedHiglassActions context={section} style={{ marginTop : -10 }} />
-                  <HiGlassPlainContainer viewConfig={section.viewconfig} parentComponentType={StaticEntry} />
+                  <HiGlassPlainContainer viewConfig={section.viewconfig} />
                 </React.Fragment>
             });
         } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
