@@ -855,19 +855,15 @@ export class FileEntryBlock extends React.PureComponent {
 
     /**
     * Add a link to an external JuiceBox site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {string} host              - The host part of the current url
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderJuiceboxlLink(){
-        var { file } = this.props,
-            fileFormat              = fileUtil.getFileFormatStr(file),
-            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
-                (fileFormat && fileFormat === 'hic')
-                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )),
-            externalLinkButton      = null,
-            fileIsPublic = (file.status === 'archived' || file.status === 'released');
-
+    renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
+        var externalLinkButton = null;
         // Do not show the link if the file cannot be viewed by the public.
         if (fileIsHic && fileIsPublic) {
             // Make an external juicebox link.
@@ -876,12 +872,7 @@ export class FileEntryBlock extends React.PureComponent {
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                // Get the protocol and host from storage before adding the juicebox link.
-                var currentPageUrlBase = store && store.getState().href,
-                    hrefParts = url.parse(currentPageUrlBase),
-                    host = hrefParts.protocol + '//' + hrefParts.host,
-                    targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
-
+                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
                 var win = window.open(targetLocation, '_blank');
                 win.focus();
             };
@@ -900,19 +891,16 @@ export class FileEntryBlock extends React.PureComponent {
 
     /**
     * Add a link to an external EpiGenome site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {string} host              - The host part of the current url
+    * @param {string} genome_assembly   - The file's genome assembly
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderEpiGenomeLink(){
-        var { file } = this.props,
-            fileFormat              = fileUtil.getFileFormatStr(file),
-            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
-                (fileFormat && fileFormat === 'hic')
-                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )),
-            externalLinkButton      = null,
-            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
-            fileIsPublic = (file.status === 'archived' || file.status === 'released');
+    renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+        var externalLinkButton = null;
 
         // Do not show the link if the file cannot be viewed by the public.
         if (fileIsHic && fileIsPublic && genome_assembly) {
@@ -922,19 +910,14 @@ export class FileEntryBlock extends React.PureComponent {
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                // Get the protocol and host from storage before adding the juicebox link.
-                var currentPageUrlBase = store && store.getState().href,
-                    hrefParts = url.parse(currentPageUrlBase),
-                    host = hrefParts.protocol + '//' + hrefParts.host,
-                    targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
-
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + fileHref;
                 var win = window.open(targetLocation, '_blank');
                 win.focus();
             };
 
             // Build the juicebox button
             externalLinkButton = (
-                <Button key="epigenome-link-button" bsSize="xs" bsStyle="secondary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in EpiGenome" onClick={onClick}>
+                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in EpiGenome" onClick={onClick}>
                     <i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
@@ -953,15 +936,24 @@ export class FileEntryBlock extends React.PureComponent {
             )),
             externalLinkButton      = null,
             genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
-            fileIsPublic = (file.status === 'archived' || file.status === 'released');
+            fileIsPublic = (file.status === 'archived' || file.status === 'released'),
+            fileHref = file.href,
+            currentPageUrlBase = store && store.getState().href,
+            hrefParts = url.parse(currentPageUrlBase),
+            host = hrefParts.protocol + '//' + hrefParts.host;
+
+        return (
+            this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
+            this.renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)
+        );
     }
 
     renderName(){
         var { file, colWidthStyles } = this.props;
         return <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
             style={colWidthStyles ? colWidthStyles.file : null} children={[
-                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderJuiceboxlLink(),
-                this.renderEpiGenomeLink(),
+                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(),
+                this.renderExternalButtons(),
             ]} />;
     }
 
@@ -1224,8 +1216,4 @@ export class StackedBlockTable extends React.Component {
             </div>
         );
     }
-
-
-
-
 }

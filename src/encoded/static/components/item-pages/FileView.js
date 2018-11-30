@@ -277,6 +277,7 @@ export class FileOverViewBody extends React.Component {
     constructor(props){
         super(props);
         this.handleJuiceBoxVizClick = this.handleJuiceBoxVizClick.bind(this);
+        this.handleEpigenomeClick = this.handleEpigenomeClick.bind(this);
     }
 
     handleJuiceBoxVizClick(evt){
@@ -306,24 +307,100 @@ export class FileOverViewBody extends React.Component {
     }
 
     /**
+    * Add a link to an external JuiceBox site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {string} host              - The host part of the current url
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
+        var externalLinkButton = null;
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the juicebox button
+            externalLinkButton = (
+                <Button bsStyle="primary" onClick={onClick} className="mr-05">
+                    <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    /**
+    * Add a link to an external EpiGenome site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {string} host              - The host part of the current url
+    * @param {string} genome_assembly   - The file's genome assembly
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+        var externalLinkButton = null;
+
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic && genome_assembly) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + fileHref;
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the EpiGenome button
+            externalLinkButton = (
+                <Button bsStyle="primary" onClick={onClick}>
+                    <span className="text-400 ml-05">Visualize with</span> EpiGenome&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    /**
     * TODO Add a note here
     **/
     visualizeExternallyButton(){
-        var file        = this.props.result,
-            tips        = this.props.tips,
-            fileFormat  = fileUtil.getFileFormatStr(file),
-            fileIsPublic = (file.status === 'archived' || file.status === 'released');
+        var file                    = this.props.result,
+            tips                    = this.props.tips,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
+            fileIsHic               = (fileFormat === 'hic'),
+            externalLinkButton      = null,
+            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+            fileHref                = file.href,
+            pageHref                = this.props.href || (store && store.getState().href),
+            hrefParts               = url.parse(pageHref),
+            host                    = hrefParts.protocol + '//' + hrefParts.host;
 
-        if (fileFormat !== 'hic' || !fileIsPublic) return null;
         return (
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <React.Fragment>
-                    <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick} className="mr-05">
-                        <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-                    </Button>
-                    <Button bsStyle="primary" onClick={this.handleEpigenomeClick}>
-                        <span className="text-400">Visualize with</span> EpiGenome&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-                    </Button>
+                    {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
+                    {this.renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
                 </React.Fragment>
             } />
         );
