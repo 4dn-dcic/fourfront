@@ -644,9 +644,18 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
 
     # Choose the first available view. If there are no views, make up some defaults.
     base_view = None
+    add_new_view = True
 
     if views:
         base_view = views[0]
+        # If this view does not have a center track, then reuse this view.
+        if not (
+            "center" in base_view["tracks"] \
+            and len(base_view["tracks"]["center"]) > 0 \
+            and "contents" in base_view["tracks"]["center"][0] \
+            and len(base_view["tracks"]["center"][0]["contents"]) > 0
+        ) :
+            add_new_view = False
     else:
         base_view = {
             initialYDomain: [
@@ -682,8 +691,11 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
             }
         }
 
-    new_view = deepcopy(base_view)
-    new_view["uid"] = uuid.uuid4()
+    if add_new_view:
+        new_view = deepcopy(base_view)
+        new_view["uid"] = uuid.uuid4()
+    else:
+        new_view = base_view
     new_view["layout"]["i"] = new_view["uid"]
 
     new_content = {}
@@ -709,7 +721,8 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
 
     new_view["tracks"]["center"][0]["contents"].append(new_content)
 
-    views.append(new_view)
+    if add_new_view:
+        views.append(new_view)
     return True, None
 
 def get_title(file):

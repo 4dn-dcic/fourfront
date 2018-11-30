@@ -107,7 +107,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         //    }
         // }
     }
-    
+
     // This is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
     // componentDidMount(){
     //     // Hacky... we need to wait for HGC to load up and resize itself and such...
@@ -548,7 +548,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
-                    <span>HiGlass Browser</span>
+                    <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
+                        className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>
@@ -556,11 +557,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             </span>
                         );
                     }}>
+                        {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
                         { this.statusChangeButton() }
-                        <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/>
-                        { this.copyURLButton() }
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
@@ -635,8 +635,9 @@ class AddFileButton extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}>
-                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add
+                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}
+                    {..._.pick(this.props, 'className', 'style')}>
+                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add Data
                 </Button>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
             </React.Fragment>
