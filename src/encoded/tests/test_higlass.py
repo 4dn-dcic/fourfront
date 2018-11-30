@@ -358,14 +358,16 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
     new_higlass_view_json = response.json["new_viewconfig"]
 
     assert response.json["new_genome_assembly"] == "GRCm38"
-    assert len(new_higlass_view_json["views"]) == 2
-    assert "layout" in new_higlass_view_json["views"][1]
-    assert "uid" in new_higlass_view_json["views"][1]
-    assert "tracks" in new_higlass_view_json["views"][1]
-    assert "center" in new_higlass_view_json["views"][1]["tracks"]
-    assert new_higlass_view_json["views"][1]["tracks"]["center"][0]["type"] == "combined"
-    assert "contents" in new_higlass_view_json["views"][1]["tracks"]["center"][0]
-    contents = new_higlass_view_json["views"][1]["tracks"]["center"][0]["contents"]
+
+    # There should be 1 view.
+    assert len(new_higlass_view_json["views"]) == 1
+    assert "layout" in new_higlass_view_json["views"][0]
+    assert "uid" in new_higlass_view_json["views"][0]
+    assert "tracks" in new_higlass_view_json["views"][0]
+    assert "center" in new_higlass_view_json["views"][0]["tracks"]
+    assert new_higlass_view_json["views"][0]["tracks"]["center"][0]["type"] == "combined"
+    assert "contents" in new_higlass_view_json["views"][0]["tracks"]["center"][0]
+    contents = new_higlass_view_json["views"][0]["tracks"]["center"][0]["contents"]
     assert contents[0]["type"] == "heatmap"
 
 def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bg_file_json):
@@ -774,23 +776,20 @@ def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf
     # Get the new json.
     new_higlass_json = response.json["new_viewconfig"]
 
-    # There should be 2 views.
-    assert len(new_higlass_json["views"]) == 2
+    # There should be 1 view.
+    assert len(new_higlass_json["views"]) == 1
 
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
+    tracks = new_higlass_json["views"][0]["tracks"]
 
-    for index, view in enumerate(new_higlass_json["views"]):
-        tracks = view["tracks"]
+    # 1 central track should be in the new view.
+    assert len(tracks["center"][0]["contents"]) == 1
+    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
 
-        # 1 central track should be in the new view.
-        if index == 1:
-            assert len(tracks["center"][0]["contents"]) == 1
-            assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+    # 1 more track should be on top.
+    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
 
-        # 1 more track should be on top.
-        assert len(tracks["top"]) == len(old_tracks["top"]) + 1
-
-def atest_add_bigwig_to_mcool(testapp, higlass_mcool_viewconf, bg_file_json):
+def test_add_bigwig_to_mcool(testapp, higlass_mcool_viewconf, bg_file_json):
     """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
     """
 
@@ -801,7 +800,8 @@ def atest_add_bigwig_to_mcool(testapp, higlass_mcool_viewconf, bg_file_json):
 
     # Add the bigwig file with a different genome asssembly.
     bg_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
-    bg_file_json['genome_assembly'] = "hg38"
+    bg_file_json['genome_assembly'] = "GRCh38"
+    bg_file_json['md5sum'] = '00000000000000000000000000000001'
     bg_file_with_different_genome_assembly = testapp.post_json('/file_processed', bg_file_json).json['@graph'][0]
 
     # Get the json for a viewconfig with a mcool file.
@@ -813,17 +813,17 @@ def atest_add_bigwig_to_mcool(testapp, higlass_mcool_viewconf, bg_file_json):
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
         'genome_assembly' : higlass_json["genome_assembly"],
-        'files': "{uuid}".format(uuid=bg_file_with_different_genome_assembly['uuid'])
+        'files': ["{uuid}".format(uuid=bg_file_with_different_genome_assembly['uuid'])]
     })
 
     assert response.json["success"] == False
-    assert "Genome Assemblies do not match" in response.json["errors"]
+    assert "has the wrong Genome Assembly" in response.json["errors"]
 
     # Try to add an mcool with the same genome assembly.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': higlass_json["viewconfig"],
         'genome_assembly' : higlass_json["genome_assembly"],
-        'files': "{uuid}".format(uuid=bg_file['uuid'])
+        'files': ["{uuid}".format(uuid=bg_file['uuid'])]
     })
 
     assert response.json["success"] == True

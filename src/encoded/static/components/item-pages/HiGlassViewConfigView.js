@@ -107,7 +107,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         //    }
         // }
     }
-    
+
     // This is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
     // componentDidMount(){
     //     // Hacky... we need to wait for HGC to load up and resize itself and such...
@@ -301,7 +301,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('Could not get current view configuration.');
         }
 
-
         // Read the url of the higlass viewconfig and store the genome assembly.
         ajax.load(
             this.props.href,
@@ -313,10 +312,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'GET'
         );
 
+        // Get the x and y scales of the first view.
+        let firstViewLocationAndZoom = [null, null, null];
+        if (currentViewConf.views && currentViewConf.views.length > 0)
+        {
+            const firstViewUid = currentViewConf.views[0].uid;
+
+            const xScale = hgc.xScales[firstViewUid];
+            const yScale = hgc.yScales[firstViewUid];
+
+            // Transform the first view's location and zoom levels.
+            const xCenter = xScale.invert((xScale.range()[0] + xScale.range()[1]) / 2);
+            const yCenter = yScale.invert((yScale.range()[0] + yScale.range()[1]) / 2);
+            const k = xScale.invert(1) - xScale.invert(0);
+
+            firstViewLocationAndZoom = [xCenter, yCenter, k];
+        }
+
         var payload = {
             'higlass_viewconfig': currentViewConf,
             'genome_assembly': this.state.genome_assembly,
-            'files' : [fileAtID]
+            'files' : [fileAtID],
+            'firstViewLocationAndZoom': firstViewLocationAndZoom
         };
 
         // If it failed, show the error in the popup window.
@@ -548,7 +565,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
-                    <span>HiGlass Browser</span>
+                    <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
+                        className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>
@@ -556,11 +574,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             </span>
                         );
                     }}>
+                        {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
                         { this.statusChangeButton() }
-                        <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/>
-                        { this.copyURLButton() }
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
@@ -635,8 +652,9 @@ class AddFileButton extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}>
-                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add
+                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}
+                    {..._.pick(this.props, 'className', 'style')}>
+                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add Data
                 </Button>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
             </React.Fragment>
