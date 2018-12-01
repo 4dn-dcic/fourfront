@@ -943,15 +943,15 @@ def test_file_generate_track_title_fvis_w_desc(testapp, file_formats, award, lab
     assert vt.get('track_title') == 'test description'
 
 
-def test_file_experiment_type(testapp, proc_file_json, rep_set_data, base_experiment):
-    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    rep_set_data['replicate_exps'] = [
-        {'replicate_exp': base_experiment['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 1}]
-    rep_set_data['processed_files'] = [res['@id']]
-    res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
-    new_file = testapp.get(res['@id']).json
-    import pdb; pdb.set_trace()
-    print(new_file.get('track_and_facet_info'))
-    assert new_file['experiment_sets'][0]['@id'] == res2['@id']
+# def test_file_experiment_type(testapp, proc_file_json, rep_set_data, base_experiment):
+#     res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+#     rep_set_data['replicate_exps'] = [
+#         {'replicate_exp': base_experiment['@id'],
+#          'bio_rep_no': 1,
+#          'tec_rep_no': 1}]
+#     rep_set_data['processed_files'] = [res['@id']]
+#     res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+#     new_file = testapp.get(res['@id']).json
+#     import pdb; pdb.set_trace()
+#     print(new_file.get('track_and_facet_info'))
+#     assert new_file['experiment_sets'][0]['@id'] == res2['@id']
