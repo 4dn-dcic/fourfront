@@ -1,54 +1,5 @@
 [
     {
-        "title" : "First Slide",
-        "description" : "This is a cool feature which you should check out.",
-        "name" : "home.carousel.slide1",
-        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d6",
-        "body" : "<h4>Hello! World ABC</h4>",
-        "section_type" : "Home Page Slide",
-        "options" : {
-            "filetype" : "html"
-        },
-        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
-    },
-    {
-        "title" : "Second Slide",
-        "description" : "This is a cool feature which you should check out.",
-        "name" : "home.carousel.slide2",
-        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d7",
-        "body" : "<h4>Hello! World DEF</h4>",
-        "section_type" : "Home Page Slide",
-        "options" : {
-            "filetype" : "html"
-        },
-        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
-    },
-    {
-        "title" : "ɤɵɴϴΩ Slide",
-        "description" : "This is a cool feature which you should check out.",
-        "name" : "home.carousel.slide3",
-        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d8",
-        "body" : "<h4>Hello! World HIJ</h4>",
-        "section_type" : "Home Page Slide",
-        "options" : {
-            "filetype" : "html"
-        },
-        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
-    },
-    {
-        "title" : "HiGlass Visualization",
-        "description" : "Visualize 4DN data with HiGlass",
-        "name" : "home.carousel.slide4",
-        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5d9",
-        "section_type" : "Home Page Slide",
-        "options" : {
-            "filetype" : "html",
-            "link" : "/visualization/getting-started",
-            "image" : "https://i.gyazo.com/65640d9c398832c911d6904f2e81394e.png"
-        },
-        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
-    },
-    {
         "title" : "Joint Analysis",
         "description" : "View the Joint Analysis page",
         "name" : "home.carousel.slide5",
@@ -58,20 +9,6 @@
             "filetype" : "html",
             "link" : "/joint-analysis",
             "image" : "https://i.gyazo.com/1e0e844e62a658308f1fc0ac19ce4339.png"
-        },
-        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
-    },
-    {
-        "title" : "4DN JupyterHub",
-        "description" : "Interactive Data Exploration with 4DN JupyterHub (requires account)",
-        "name" : "home.carousel.slide6",
-        "uuid" : "4570c6b5-dad9-4f34-b366-f7298c3ec5e1",
-        "body" : "<div class=\"slide-label\">BETA</div>",
-        "section_type" : "Home Page Slide",
-        "options" : {
-            "filetype" : "html",
-            "link" : "/jupyterhub",
-            "image" : "https://files.slack.com/files-pri/T0723UERE-FEE06KH2M/jupyterhub_x_4dn.png"
         },
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a"
     }
