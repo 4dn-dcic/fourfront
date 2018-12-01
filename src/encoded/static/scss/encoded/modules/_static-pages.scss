@@ -974,16 +974,25 @@ h5.fourDN-header {
 				}
 			}
 		}
-	
-		.slider-control-centerleft {
+
+		.slider-control-centerleft,
+		.slider-control-centerright {
 			font-size: 1.65rem;
 			cursor: pointer;
+			/* Works around glitch where parent slider has wrong height temp assigned and top: 50% isn't acccurate */
+			top: $carousel-height / 2 - 12px !important;
+			transform: none !important;
+			transition: transform .4s;
+			&:hover {
+				transform: scale(1.25) !important;
+			}
+		}
+	
+		.slider-control-centerleft {
 			left: -35px !important;
 		}
 	
 		.slider-control-centerright {
-			font-size: 1.65rem;
-			cursor: pointer;
 			right: -35px !important;
 		}
 	

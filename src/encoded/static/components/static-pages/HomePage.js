@@ -71,7 +71,7 @@ export default class HomePage extends React.PureComponent {
             <div className="home-content-area">
                 { this.midHeader() }
                 {/* <h2 className="homepage-section-title">Introduction</h2> */}
-                <HomePageCarousel {..._.pick(this.props, 'windowWidth')} />
+                <HomePageCarousel  />
                 <div className="row">
                     <div className="col-xs-12 col-md-8">
                         <h2 className="homepage-section-title">Introduction</h2>
@@ -82,7 +82,7 @@ export default class HomePage extends React.PureComponent {
                     </div>
                 </div>
                 <div className="mt-4">
-                    { this.announcements() }
+                    {/* this.announcements() */}
                 </div>
             </div>
         );
