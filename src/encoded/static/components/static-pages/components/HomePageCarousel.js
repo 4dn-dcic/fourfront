@@ -15,15 +15,18 @@ export class HomePageCarousel extends React.PureComponent {
         'settings' : {
             //'autoplay' : true,
             'slidesToShow' : 3,
-            'wrapAround' : true,
+            //'wrapAround' : true,
             'slidesToScroll' : 1,
             'pauseOnHover' : true,
             //'renderCenterLeftControls' : null,
             //'renderCenterRightControls' : null,
-            'renderCenterLeftControls' : function({ previousSlide }){
+            'renderCenterLeftControls' : function({ previousSlide, currentSlide }){
+                if (currentSlide === 0) return null;
                 return <i className="icon icon-fw icon-angle-left" onClick={previousSlide} />;
             },
-            'renderCenterRightControls' : function({ nextSlide }){
+            'renderCenterRightControls' : function(sliderProps){
+                var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
+                if (currentSlide >= slideCount - slidesToShow) return null;
                 return <i className="icon icon-fw icon-angle-right" onClick={nextSlide} />;
             },
             'renderBottomCenterControls' : null,
@@ -103,7 +106,7 @@ export class HomePageCarousel extends React.PureComponent {
     }
 
     refFunc(elem){
-        setTimeout(function(){
+        setTimeout(()=>{
             if (!elem) return;
             elem.style.opacity = 1;
         }, 100);
@@ -122,18 +125,18 @@ export class HomePageCarousel extends React.PureComponent {
             );
         }
 
-        if (error || sections.length < 6){ // = not enough results
+        if (error || !Array.isArray(sections) || sections.length === 0){
             return null;
         }
 
         // Do some responsive stuff
         var gridState = layout.responsiveGridState(windowWidth);
 
-        if (gridState === 'sm'){
+        if (gridState === 'sm' || sections.length === 2){
             settings = _.extend({}, settings, {
                 'slidesToShow' : 2
             });
-        } else if (gridState === 'xs'){
+        } else if (gridState === 'xs' || sections.length === 1){
             settings = _.extend({}, settings, {
                 'slidesToShow' : 1
             });
