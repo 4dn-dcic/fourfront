@@ -5,6 +5,7 @@
     margin: 0 auto -$footerHeight;
     min-height: 100%;
 	background-color: $appBackgroundColor;
+	overflow-x: hidden;
 }
 
 .homepage-main-box {
