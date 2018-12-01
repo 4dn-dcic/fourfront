@@ -832,7 +832,7 @@ h5.fourDN-header {
 	}
 
 
-	$carousel-height : 280px;
+	$carousel-height : 240px;
 
 	.homepage-carousel-placeholder {
 		height: $carousel-height;
@@ -929,6 +929,7 @@ h5.fourDN-header {
 							//background: rgba(244, 244, 244, 0.933);
 							//@include gradient-vertical(rgba(244, 244, 244,0), rgba(244, 244, 244, 0.933), 0, 0.5);
 							border-radius: 0 0 2px 2px;
+							min-height: 96px;
 							> h4 {
 								font-weight: 600;
 								margin-bottom: 3px;
