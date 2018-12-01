@@ -953,5 +953,4 @@ def test_file_experiment_type(testapp, proc_file_json, rep_set_data, base_experi
     res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
     new_file = testapp.get(res['@id']).json
     import pdb; pdb.set_trace()
-    print(new_file.get('track_and_facet_info'))
     assert new_file['experiment_sets'][0]['@id'] == res2['@id']
