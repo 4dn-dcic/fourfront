@@ -93,7 +93,7 @@
             }
         },
         "project_lab": {
-            "title": "Wet Lab",
+            "title": "Generating Lab",
             "description": "The lab that did the experiment from whence this file",
             "type": "string"
         },
@@ -135,20 +135,34 @@
         }
     },
     "columns": {
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
+        "track_and_facet_info.assay_info" : {
+            "title" : "Assay Details",
+            "description" : "Details of the experiment to which this file belongs"
+        },
+        "track_and_facet_info.biosource_name" : {
+            "title" : "Biosource"
+        },
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
+        },
         "file_type" : {
             "title" : "File Type"
         },
-        "file_format": {
+        "file_format.file_format": {
             "title" : "File Format"
-        },
-        "biosource.display_title": {
-            "title": "Biosource"
         },
         "file_size" : {
             "title" : "File Size"
         },
-        "project_release_date": {
-            "title": "Dataset Release"
+        "date_created": {
+            "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "default_hidden" : true
         }
     }
 }

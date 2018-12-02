@@ -210,20 +210,6 @@
         }
     },
     "facets": {
-        "track_and_facet_info.experiment_type" : {
-            "title" : "Experiment Type",
-            "description" : "Type of experiment to which this file belongs"
-        },
-        "track_and_facet_info.assay_info" : {
-            "title" : "Assay Details",
-            "description" : "Details of the experiment to which this file belongs"
-        },
-        "track_and_facet_info.biosource_name" : {
-            "title" : "Biosource"
-        },
-        "experiments.biosample.biosource.biosource_type" : {
-            "title" : "Biosource Type"
-        },
         "file_type" : {
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
@@ -232,11 +218,24 @@
             "title" : "File Format",
             "description" : "Format of the file, i.e. the file extension."
         },
+        "experiments.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
         "experiments.biosample.biosource.individual.organism.name" : {
             "title" : "Organism"
         },
-        "track_and_facet_info.lab_name": {
-            "title": "Generating Lab"
+        "experiments.biosample.biosource.biosource_type" : {
+            "title" : "Biosource Type"
+        },
+        "experiments.biosample.biosource_summary" : {
+            "title" : "Biosource"
+        },
+        "experiments.digestion_enzyme.name" : {
+            "title" : "Enzyme"
+        },
+        "lab.display_title": {
+            "title": "Lab"
         },
         "file_size" : {
             "title" : "File Size",
