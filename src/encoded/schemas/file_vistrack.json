@@ -23,7 +23,7 @@
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "file.json#/facets"}
     ],
     "mixinColumns": [],
     "properties": {
@@ -105,20 +105,33 @@
         }
     },
     "facets": {
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
+        "track_and_facet_info.assay_info" : {
+            "title" : "Assay Details",
+            "description" : "Details of the experiment to which this file belongs"
+        },
+        "track_and_facet_info.biosource_name" : {
+            "title" : "Biosource"
+        },
+        "experiments.biosample.biosource.biosource_type" : {
+            "title" : "Biosource Type"
+        },
         "file_type" : {
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
         },
         "file_format.file_format": {
             "title" : "File Format",
-            "description" : "Format of the file."
+            "description" : "Format of the file, i.e. the file extension."
         },
-        "biosource.display_title": {
-            "title": "Cell Line"
+        "experiments.biosample.biosource.individual.organism.name" : {
+            "title" : "Organism"
         },
-        "project_lab": {
-            "title": "Generating lab",
-            "description": "The lab that did the experiment"
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
         }
     },
     "columns": {

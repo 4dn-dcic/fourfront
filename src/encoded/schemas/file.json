@@ -236,7 +236,7 @@
             "title" : "Organism"
         },
         "track_and_facet_info.lab_name": {
-            "title": "Lab"
+            "title": "Generating Lab"
         },
         "file_size" : {
             "title" : "File Size",
