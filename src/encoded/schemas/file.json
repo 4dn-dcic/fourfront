@@ -276,17 +276,24 @@
         "track_and_facet_info.biosource_name" : {
             "title" : "Biosource"
         },
-        "track_and_facet_info.lab_name": {
-            "title": "Generating Lab"
-        },
         "file_type" : {
             "title" : "File Type"
         },
         "file_format.file_format": {
             "title" : "File Format"
         },
+        "track_and_facet_info.experiment_bucket": {
+            "title": "In experiment as"
+        },
+        "track_and_facet_info.replicate_info": {
+            "title": "Replicate info"
+        },
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
+        },
         "file_size" : {
-            "title" : "File Size"
+            "title" : "File Size",
+            "default_hiddent": true
         },
         "date_created": {
             "default_hidden" : true
