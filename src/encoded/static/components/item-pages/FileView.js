@@ -343,7 +343,7 @@ export class FileOverViewBody extends React.Component {
     }
 
     /**
-    * Add a link to an external EpiGenome site for some file types.
+    * Add a link to an external Epigenome site for some file types.
     * @param {string} fileHref          - URL path used to access the file
     * @param {boolean} fileIsHic        - If true the file format is HiC
     * @param {boolean} fileIsPublic     - If true the file can be publically viewed
@@ -352,10 +352,10 @@ export class FileOverViewBody extends React.Component {
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
         var externalLinkButton = null;
 
-        // We may need to map the genome assembly to EpiGenome's assemblies.
+        // We may need to map the genome assembly to Epigenome's assemblies.
         const assemblyMap = {
             'GRCh38' : 'hg38',
             'GRCm38' : 'mm10'
@@ -381,10 +381,10 @@ export class FileOverViewBody extends React.Component {
                 win.focus();
             };
 
-            // Build the EpiGenome button
+            // Build the Epigenome button
             externalLinkButton = (
                 <Button bsStyle="primary" onClick={onClick}>
-                    <span className="text-400 ml-05">Visualize with</span> EpiGenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                    <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
                 </Button>
             );
         }
@@ -413,7 +413,7 @@ export class FileOverViewBody extends React.Component {
             <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <React.Fragment>
                     {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
-                    {this.renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                    {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
                 </React.Fragment>
             } />
         );

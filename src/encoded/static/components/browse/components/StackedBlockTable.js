@@ -890,7 +890,7 @@ export class FileEntryBlock extends React.PureComponent {
     }
 
     /**
-    * Add a link to WashU EpiGenome site for some file types.
+    * Add a link to WashU Epigenome site for some file types.
     * @param {string} fileHref          - URL path used to access the file
     * @param {boolean} fileIsHic        - If true the file format is HiC
     * @param {boolean} fileIsPublic     - If true the file can be publically viewed
@@ -899,10 +899,10 @@ export class FileEntryBlock extends React.PureComponent {
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
         var externalLinkButton = null;
 
-        // We may need to map the genome assembly to EpiGenome's assemblies.
+        // We may need to map the genome assembly to Epigenome's assemblies.
         const assemblyMap = {
             'GRCh38' : 'hg38',
             'GRCm38' : 'mm10'
@@ -928,9 +928,9 @@ export class FileEntryBlock extends React.PureComponent {
                 win.focus();
             };
 
-            // Build the EpiGenome button
+            // Build the Epigenome button
             externalLinkButton = (
-                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in WashU EpiGenome Browser" onClick={onClick}>
+                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick}>
                     E<i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
@@ -958,7 +958,7 @@ export class FileEntryBlock extends React.PureComponent {
         return (
             <React.Fragment>
                 {this.renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host)}
-                {this.renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
             </React.Fragment>
         );
     }
