@@ -41,6 +41,53 @@
         }
     },
 
+
+    {
+        "section_type" : "Home Page Slide",
+        "name" : "homepage-carousel.slide1",
+        "title": "JupyterHub",
+        "description" : "Interactive Data Exploration with 4DN JupyterHub (requires account)",
+        "uuid" : "d92b38bc-84a7-417b-a6c8-5f30cba5c4e8",
+        "body" : "<div class=\"slide-label\">BETA</div>",
+        "submitted_by" : "4dndcic@gmail.com",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "html",
+            "image" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/carousel-images/jupyterhub_w_border.png",
+            "link" : "/jupyterhub"
+        }
+    },
+    {
+        "section_type" : "Home Page Slide",
+        "name" : "homepage-carousel.slide2",
+        "title": "HiGlass",
+        "description" : "Visualize 4DN data with HiGlass",
+        "uuid" : "e676e654-7ffa-4572-90e8-d9ab9005315d",
+        "submitted_by" : "4dndcic@gmail.com",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "html",
+            "image" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/carousel-images/higlassbwscreenshot.png",
+            "link" : "/visualization/getting-started"
+        }
+    },
+    {
+        "section_type" : "Home Page Slide",
+        "name" : "homepage-carousel.slide3",
+        "title": "Data Highlight",
+        "description": "Heterogeneity in Spatial Genome Organization",
+        "uuid" : "02e1c502-b7b7-47e3-b67c-f95428ccd46f",
+        "submitted_by" : "4dndcic@gmail.com",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "html",
+            "image" : "https://s3.amazonaws.com/4dn-dcic-public/static-pages/carousel-images/heterogeneitypublicationfigures.png",
+            "link" : "/publications/80007b23-7748-4492-9e49-c38400acbe60/"
+        }
+    },
+
+
+
     {
         "name" : "announcements.4dn-perspective-published",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b003",
