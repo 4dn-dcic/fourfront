@@ -7907,6 +7907,10 @@
             },
             {   
                 "argument_type": "parameter",
+                "workflow_argument_name": "chip.peak_caller"
+            },
+            {   
+                "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
             {   
@@ -7930,17 +7934,21 @@
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
             {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.peak_calls"
+            },
+            {   
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
-                "workflow_argument_name": "chip.peak_calls",
-                "alternative_conditional_argument_names": ["chip.macs2.sig_fc", "chip.macs2_pooled.sig_fc"]
+                "workflow_argument_name": "chip.sig_fc"
             },
             {   
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
             {   
-                "argument_format": "other",
+                "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -8051,6 +8059,19 @@
                             "global": true,
                             "type": "parameter"
                         },
+                        "name": "chip.peak_caller",
+                        "source": [
+                            {
+                                "name": "chip.peak_caller"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
                         "name": "chip.paired_end",
                         "source": [
                             {
@@ -8137,7 +8158,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "bw",
+                            "file_format": "bigbed",
                             "global": true,
                             "type": "data file"
                         },
@@ -8145,6 +8166,20 @@
                         "target": [
                             {
                                 "name": "chip.peak_calls"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.sig_fc",
+                        "target": [
+                            {
+                                "name": "chip.sig_fc"
                             }
                         ]
                     },
@@ -8164,7 +8199,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "other",
+                            "file_format": "json",
                             "global": true,
                             "type": "data file"
                         },
@@ -8245,11 +8280,25 @@
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
             {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bowtie2.cpu"
+            },
+            {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.peak_calls"
+            },
+            {   
+                "argument_format": "bw",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.sig_fc"
+            },
+            {   
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
             {   
-                "argument_format": "other",
+                "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.qc_json"
             }
@@ -8443,6 +8492,19 @@
                                 "name": "atac.bam2ta.regex_grep_v_ta"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bowtie2.cpu",
+                        "source": [
+                            {
+                                "name": "atac.bowtie2.cpu"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
@@ -8455,6 +8517,34 @@
                 },
                 "name": "atac",
                 "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bigbed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.peak_calls",
+                        "target": [
+                            {
+                                "name": "atac.peak_calls"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.sig_fc",
+                        "target": [
+                            {
+                                "name": "atac.sig_fc"
+                            }
+                        ]
+                    },
                     {
                         "meta": {
                             "cardinality": "single",
@@ -8471,7 +8561,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "other",
+                            "file_format": "json",
                             "global": true,
                             "type": "data file"
                         },

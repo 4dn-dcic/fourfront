@@ -365,11 +365,12 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         if (file && file.higlass_uid && (
             (fileFormat && ['mcool', 'bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat))
             || (file.file_type_detailed && (
-                file.file_type_detailed.indexOf('(mcool)') > -1 ||
-                file.file_type_detailed.indexOf('(bw)')    > -1 ||
-                file.file_type_detailed.indexOf('(bg)')    > -1 ||
-                file.file_type_detailed.indexOf('(bed)')   > -1 ||
-                file.file_type_detailed.indexOf('(beddb)') > -1
+                file.file_type_detailed.indexOf('(mcool)')  > -1 ||
+                file.file_type_detailed.indexOf('(bw)')     > -1 ||
+                file.file_type_detailed.indexOf('(bg)')     > -1 ||
+                file.file_type_detailed.indexOf('(bed)')    > -1 ||
+                file.file_type_detailed.indexOf('(bigbed)') > -1 ||
+                file.file_type_detailed.indexOf('(beddb)')  > -1
             ))
         )){
 
@@ -547,7 +548,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
          */
         function isValidBWVizFile(f){
             var fileFormat   = fileUtil.getFileFormatStr(f),
-                horizTrackFormats = ['bg', 'bw', 'bed', 'beddb'];
+                horizTrackFormats = ['bg', 'bw', 'bed', 'bigbed', 'beddb'];
             return f.higlass_uid && horizTrackFormats.indexOf(fileFormat) > -1;
         }
 

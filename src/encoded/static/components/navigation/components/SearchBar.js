@@ -115,17 +115,18 @@ export class SearchBar extends React.Component{
     }
 
     render() {
-        var { searchAllItems, typedSearchQuery } = this.state,
-            hrefParts           = url.parse(this.props.href, true),
+        var { href, currentAction } = this.props,
+            { searchAllItems, typedSearchQuery } = this.state,
+            hrefParts           = url.parse(href, true),
             searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '',
             resetIconButton     = searchQueryFromHref ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null,
             searchBoxHasInput   = this.hasInput(),
             query               = {}, // Don't preserve facets.
             browseBaseParams    = navigate.getBrowseBaseParams();
 
-        if (this.props.currentAction === 'selection'){
+        if (currentAction === 'selection'){
             _.extend(query, _.omit(hrefParts.query || {}, 'q')); // Preserve facets (except 'q'), incl type facet.
-        } else if (searchAllItems && this.props.currentAction !== 'selection') {
+        } else if (searchAllItems && currentAction !== 'selection') {
             _.extend(query, { 'type' : 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else {
             _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
