@@ -733,15 +733,9 @@ def get_title(file):
     """ Returns a string containing the title for the view.
     """
     # Use the track title. As a fallback, use the display title.
-<<<<<<< HEAD
     title = file.get("track_title", file["display_title"])
     return title
-=======
-    if "track_title" in file:
-        return "(" + file["track_title"] + ")"
 
-    return "(" + file["display_title"] + ")"
->>>>>>> adac53c74b3a1a4821cf54c809e968a50d046a7e
 
 def repack_higlass_views(views):
     """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
