@@ -23,10 +23,10 @@
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "file_vistrack.json#/facets"}
+        { "$ref": "file.json#/facets"}
     ],
     "mixinColumns": [
-        { "$ref": "file_vistrack.json#/columns"}
+        { "$ref": "file.json#/columns"}
     ],
     "properties": {
         "schema_version": {

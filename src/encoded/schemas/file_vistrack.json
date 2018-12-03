@@ -25,7 +25,9 @@
     "mixinFacets": [
         { "$ref": "file.json#/facets"}
     ],
-    "mixinColumns": [],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -102,67 +104,6 @@
             "description": "The date that the dataset associated with this file was first released by the project",
             "type": "string",
             "format": "date"
-        }
-    },
-    "facets": {
-        "track_and_facet_info.experiment_type" : {
-            "title" : "Experiment Type",
-            "description" : "Type of experiment to which this file belongs"
-        },
-        "track_and_facet_info.assay_info" : {
-            "title" : "Assay Details",
-            "description" : "Details of the experiment to which this file belongs"
-        },
-        "track_and_facet_info.biosource_name" : {
-            "title" : "Biosource"
-        },
-        "experiments.biosample.biosource.biosource_type" : {
-            "title" : "Biosource Type"
-        },
-        "file_type" : {
-            "title" : "File Type",
-            "descripton" : "Type or categorization of this file."
-        },
-        "file_format.file_format": {
-            "title" : "File Format",
-            "description" : "Format of the file, i.e. the file extension."
-        },
-        "experiments.biosample.biosource.individual.organism.name" : {
-            "title" : "Organism"
-        },
-        "track_and_facet_info.lab_name": {
-            "title": "Generating Lab"
-        }
-    },
-    "columns": {
-        "track_and_facet_info.experiment_type" : {
-            "title" : "Experiment Type",
-            "description" : "Type of experiment to which this file belongs"
-        },
-        "track_and_facet_info.assay_info" : {
-            "title" : "Assay Details",
-            "description" : "Details of the experiment to which this file belongs"
-        },
-        "track_and_facet_info.biosource_name" : {
-            "title" : "Biosource"
-        },
-        "track_and_facet_info.lab_name": {
-            "title": "Generating Lab"
-        },
-        "file_type" : {
-            "title" : "File Type"
-        },
-        "file_format.file_format": {
-            "title" : "File Format"
-        },
-        "file_size" : {
-            "title" : "File Size"
-        },
-        "date_created": {
-            "default_hidden" : true
-        },
-        "last_modified.date_modified": {
-            "default_hidden" : true
         }
     }
 }
