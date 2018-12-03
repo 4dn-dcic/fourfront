@@ -149,10 +149,12 @@ class User(Item):
         # user that reflects any email changes
         ff_env = self.registry.settings.get('env.name')
         # compare previous and updated emails, respectively
-        if self.properties.get('email') != properties.get('email'):
-            update_email = properties.get('email')
-        else:
-            update_email = None
+        try:
+            prev_email = self.properties.get('email')
+        except KeyError:  # if new user, previous properties do not exist
+            prev_email = None
+        new_email = properties.get('email')
+        update_email = new_email if prev_email != new_email else None
         if ff_env is not None and update_email is not None and 'webprod' in ff_env:
             s3Obj = s3Utils(env='data')
             jh_key = s3Obj.get_jupyterhub_key()
