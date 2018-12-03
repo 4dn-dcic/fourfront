@@ -862,7 +862,7 @@ export class FileEntryBlock extends React.PureComponent {
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
+    renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host){
         var externalLinkButton = null;
         // Do not show the link if the file cannot be viewed by the public.
         if (fileIsHic && fileIsPublic) {
@@ -880,7 +880,7 @@ export class FileEntryBlock extends React.PureComponent {
             // Build the juicebox button
             externalLinkButton = (
                 <Button key="juicebox-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                    <i className="icon icon-fw icon-external-link text-smaller"/>
+                    J<i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
         }
@@ -890,7 +890,7 @@ export class FileEntryBlock extends React.PureComponent {
     }
 
     /**
-    * Add a link to an external EpiGenome site for some file types.
+    * Add a link to WashU EpiGenome site for some file types.
     * @param {string} fileHref          - URL path used to access the file
     * @param {boolean} fileIsHic        - If true the file format is HiC
     * @param {boolean} fileIsPublic     - If true the file can be publically viewed
@@ -902,23 +902,36 @@ export class FileEntryBlock extends React.PureComponent {
     renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
         var externalLinkButton = null;
 
+        // We may need to map the genome assembly to EpiGenome's assemblies.
+        const assemblyMap = {
+            'GRCh38' : 'hg38',
+            'GRCm38' : 'mm10'
+        };
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+            return null;
+        }
+
         // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic && genome_assembly) {
+        if (fileIsHic && fileIsPublic) {
             // Make an external juicebox link.
             var onClick = function(evt){
 
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + fileHref;
+                const epiGenomeMapping = assemblyMap[genome_assembly];
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
+
                 var win = window.open(targetLocation, '_blank');
                 win.focus();
             };
 
-            // Build the juicebox button
+            // Build the EpiGenome button
             externalLinkButton = (
-                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in EpiGenome" onClick={onClick}>
-                    <i className="icon icon-fw icon-external-link text-smaller"/>
+                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in WashU EpiGenome Browser" onClick={onClick}>
+                    E<i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
         }
@@ -943,8 +956,10 @@ export class FileEntryBlock extends React.PureComponent {
             host = hrefParts.protocol + '//' + hrefParts.host;
 
         return (
-            this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
-            this.renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)
+            <React.Fragment>
+                {this.renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host)}
+                {this.renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+            </React.Fragment>
         );
     }
 

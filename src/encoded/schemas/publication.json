@@ -166,11 +166,11 @@
         }
     },
     "facets": {
-        "categories": {
-            "title": "Categories"
-        },
         "journal": {
             "title": "Journal"
+        },
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type": {
+            "title": "Experiment Types"
         }
     },
     "columns": {
@@ -179,6 +179,15 @@
         },
         "date_published": {
             "title": "Publication Date"
+        },
+        "number_of_experiment_sets": {
+            "title": "# Experiment Sets"
+        },
+        "date_created": {
+            "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "default_hidden" : true
         }
     }
 }

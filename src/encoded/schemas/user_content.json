@@ -72,6 +72,12 @@
                     "description": "Icon to be showed next to title in selected places.",
                     "type" : "string",
                     "lookup" : 5
+                },
+                "image" : {
+                    "title" : "Preview Image",
+                    "description": "Image or screenshot URL for this Item to use as a preview.",
+                    "type" : "string",
+                    "lookup" : 7
                 }
             }
         },

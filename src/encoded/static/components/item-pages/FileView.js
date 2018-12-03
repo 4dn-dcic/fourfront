@@ -355,15 +355,28 @@ export class FileOverViewBody extends React.Component {
     renderEpiGenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
         var externalLinkButton = null;
 
+        // We may need to map the genome assembly to EpiGenome's assemblies.
+        const assemblyMap = {
+            'GRCh38' : 'hg38',
+            'GRCm38' : 'mm10'
+        };
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+            return null;
+        }
+
         // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic && genome_assembly) {
+        if (fileIsHic && fileIsPublic) {
             // Make an external juicebox link.
             var onClick = function(evt){
 
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + fileHref;
+                const epiGenomeMapping = assemblyMap[genome_assembly];
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
+
                 var win = window.open(targetLocation, '_blank');
                 win.focus();
             };
@@ -371,7 +384,7 @@ export class FileOverViewBody extends React.Component {
             // Build the EpiGenome button
             externalLinkButton = (
                 <Button bsStyle="primary" onClick={onClick}>
-                    <span className="text-400 ml-05">Visualize with</span> EpiGenome&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                    <span className="text-400 ml-05">Visualize with</span> EpiGenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
                 </Button>
             );
         }
@@ -381,7 +394,7 @@ export class FileOverViewBody extends React.Component {
     }
 
     /**
-    * TODO Add a note here
+    * Generate the HTML markup for external visualization links.
     **/
     visualizeExternallyButton(){
         var file                    = this.props.result,
