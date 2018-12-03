@@ -732,12 +732,11 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
 def get_title(file):
     """ Returns a string containing the title for the view.
     """
-    title = file["display_title"]
-    if "file_classification" in file:
-        title += "({classification})".format(
-            classification = file["file_classification"]
-        )
-    return title
+    # Use the track title. As a fallback, use the display title.
+    if "track_title" in file:
+        return "(" + file["track_title"] + ")"
+
+    return "(" + file["display_title"] + ")"
 
 def repack_higlass_views(views):
     """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
