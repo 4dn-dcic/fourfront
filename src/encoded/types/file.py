@@ -296,29 +296,76 @@ class File(Item):
             pass
         return outString
 
+    def _get_file_expt_bucket(self, request, item2check):
+        fatid = self.jsonld_id(request)
+        if 'processed_files' in item2check:
+            if fatid in item2check.get('processed_files'):
+                return 'processed_files'
+        of_info = item2check.get('other_processed_files', [])
+        for obucket in of_info:
+            ofiles = obucket.get('files')
+            if [of for of in ofiles if of == fatid]:
+                return obucket.get('title')
+        return None
+
     def _get_file_experiment_info(self, request):
         """
-        Get info about an experiment that a file belongs value given a File and properties.
+        Get info about an experiment that a file belongs value given a File.
+        Also retrieve replicate_set info from the set
         Checks the rev_linked experiments and experiment_sets
         """
+        info = {}
         experiment_of_file = None
+        exp_info = None
+        repset = None
         rev_exps = self.experiments(request)
         if rev_exps:
             experiment_of_file = rev_exps[0]
-        elif hasattr(self, 'experiment_sets'):  # FileProcessed only
+            exp_info = get_item_if_you_can(request, experiment_of_file)
+            if exp_info:
+                repset_info = exp_info.get('experiment_sets')
+                repsetid = [rs for rs in repset_info if 'replicate' in rs]
+                if len(repsetid) == 1:
+                    repset = repsetid[0]
+                # see if we can get experiment_bucket from the experiment
+                ebucket = self._get_file_expt_bucket(request, exp_info)
+                if ebucket is not None:
+                    info['experiment_bucket'] = ebucket
+
+        if hasattr(self, 'experiment_sets') and repset is None:  # FileProcessed only
             rev_exp_sets = self.experiment_sets(request)
             if rev_exp_sets:
-                exp_set_info = get_item_if_you_can(request, rev_exp_sets[0])
-                if exp_set_info:
-                    expts_of_file = exp_set_info.get('experiments_in_set', [])
+                repsetid = [rs for rs in rev_exp_sets if 'replicate' in rs]
+                if len(repsetid) == 1:
+                    repset = repsetid[0]
+
+        # get replicate set info if we need to
+        if repset is not None:
+            if not experiment_of_file:
+                info['replicate_info'] = 'merged replicates'
+
+            rep_set_info = get_item_if_you_can(request, repset)
+            if rep_set_info:
+                # TODO figure out which experment of a repset has the file we are
+                # looking at is part of
+                # this seems very heavy i.e. need to get each expt of a set
+                # and look for the file in it is there another way
+
+                if 'experiment_bucket' not in info:
+                    info['experiment_bucket'] = self._get_file_expt_bucket(request, rep_set_info)
+
+                # get the first experiment of set and set to experiment of file for shared info
+                if not experiment_of_file:
+                    expts_of_file = rep_set_info.get('experiments_in_set', [])
                     if expts_of_file:
                         experiment_of_file = expts_of_file[0]
+
         if not experiment_of_file:
-            return {}
+            return info
         exp_info = get_item_if_you_can(request, experiment_of_file)
         if exp_info is None:
-            return {}
-        info = {'experiment_type': exp_info.get('experiment_type')}
+            return info
+        info['experiment_type'] = exp_info.get('experiment_type')
         assay_info = exp_info.get('experiment_categorizer')
         if assay_info:
             info['assay_info'] = assay_info.get('value')
@@ -345,6 +392,12 @@ class File(Item):
             },
             "biosource_name": {
                 "type": "string"
+            },
+            "replicate_info": {
+                "type": "string"
+            },
+            "experiment_bucket": {
+                "type": "string"
             }
         }
     })
@@ -366,8 +419,18 @@ class File(Item):
             lab = get_item_if_you_can(request, labid)
             if lab is not None:
                 track_info['lab_name'] = lab.get('display_title')
+        repinfo = props.get('replicate_identifiers')
+        if repinfo is not None:
+            if len(repinfo) > 1:
+                track_info['replicate_info'] = 'merged replicates'
+            else:
+                track_info['replicate_info'] = repinfo[0]
+        expt_bucket = props.get('experiment_bucket')
+        if expt_bucket is not None:
+            track_info['experiment_bucket'] = expt_bucket
+
         track_info = {k: v for k, v in track_info.items() if v is not None}
-        if len(track_info) != 4:
+        if len(track_info) != 6:
             # import pdb; pdb.set_trace()
             einfo = self._get_file_experiment_info(request)
             track_info.update({k: v for k, v in einfo.items() if k not in track_info})

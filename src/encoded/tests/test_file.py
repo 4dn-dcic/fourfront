@@ -927,7 +927,18 @@ def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM128
     assert vt.get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
 
 
-# def test_file_experiment_type(testapp, proc_file_json, rep_set_data, base_experiment):
+# @pytest.fixture
+# def custom_experiment_set_data(lab, award):
+#     return {
+#         'lab': lab['@id'],
+#         'award': award['@id'],
+#         'description': 'test experiment set',
+#         'experimentset_type': 'custom',
+#         'status': 'in review by lab'
+#     }
+#
+#
+# def test_file_experiment_type(testapp, proc_file_json, rep_set_data, custom_experiment_set_data, base_experiment):
 #     res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
 #     rep_set_data['replicate_exps'] = [
 #         {'replicate_exp': base_experiment['@id'],
@@ -935,6 +946,8 @@ def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM128
 #          'tec_rep_no': 1}]
 #     rep_set_data['processed_files'] = [res['@id']]
 #     res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+#     custom_experiment_set_data['processed_files'] = [res['@id']]
+#     res3 = testapp.post_json('/experiment_set', custom_experiment_set_data).json['@graph'][0]
 #     new_file = testapp.get(res['@id']).json
 #     import pdb; pdb.set_trace()
 #     print(new_file.get('track_and_facet_info'))
