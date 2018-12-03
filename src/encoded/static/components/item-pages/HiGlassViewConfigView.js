@@ -71,6 +71,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
          * @property {boolean} cloneLoading         True if AJAX request is en route to clone Item.
          * @property {boolean} releaseLoading       True if AJAX request is en route to change Item status.
          * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
+         * @property {integer} hiGlassComponentHeight   The height of the HiGlassComponent, in pixels.
          */
         this.state = {
             'viewConfig'            : props.viewConfig,
@@ -562,6 +563,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var { isFullscreen, windowWidth, windowHeight, width } = this.props,
             { addFileLoading, genome_assembly } = this.state;
 
+        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
+        // Set the height of the HiGlass Component to the width to make the display a square. Unless we're at fullscreen.
+        const hiGlassComponentHeight = isFullscreen ? windowHeight -120 : hiGlassComponentWidth;
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -584,8 +589,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={isFullscreen ? windowWidth : width + 20 }
-                            height={isFullscreen ? windowHeight -120 : 500}
+                            width={hiGlassComponentWidth}
+                            height={hiGlassComponentHeight}
                             viewConfig={this.state.viewConfig}
                             ref="higlass" />
                     </div>
