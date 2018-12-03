@@ -887,27 +887,28 @@ def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, 
         'file_type': 'normalized counts',
         'assay_info': 'PARK1',
         'biosource_name': 'GM12878',
-        'replicate_identifiers': ['bio1 tec1']
+        'replicate_identifiers': ['bio1 tec1'],
+        'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
     assert pf.get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
 
 
-def test_file_generate_track_title_fp_some_missing(testapp, file_formats, award, lab):
+def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, lab):
     pf_file_meta = {
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
-        'dataset_type': 'DNase Hi-C',
         'lab': lab['@id'],
+        'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
-    assert pf.get('track_title') == 'unspecified type for unknown sample DNase Hi-C'
+    assert pf.get('track_title') == 'unspecified type for unknown sample no experiment'
 
 
-def test_file_generate_track_title_fvis_no_desc(testapp, file_formats, award, lab, GM12878_biosource):
+def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM12878_biosource):
     vistrack_meta = {
         'award': award['@id'],
         'lab': lab['@id'],
@@ -918,29 +919,12 @@ def test_file_generate_track_title_fvis_no_desc(testapp, file_formats, award, la
         'project_lab': 'Some Dude, Somewhere',
         'assay_info': 'PARK1',
         'biosource': GM12878_biosource['@id'],
-        'replicate_identifiers': ['bio1 tec1']
+        'replicate_identifiers': ['bio1 tec1'],
+        'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-vistrack', vistrack_meta)
     vt = res1.json.get('@graph')[0]
     assert vt.get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
-
-
-def test_file_generate_track_title_fvis_w_desc(testapp, file_formats, award, lab, GM12878_biosource):
-    vistrack_meta = {
-        'award': award['@id'],
-        'lab': lab['@id'],
-        'description': 'test description',
-        'file_format': file_formats.get('mcool').get('uuid'),
-        'dataset_type': 'DNase Hi-C',
-        'lab': lab['@id'],
-        'file_type': 'fold change over control',
-        'assay_info': 'PARK1',
-        'biosource': GM12878_biosource['@id'],
-        'replicate_identifiers': ['bio1 tec1']
-    }
-    res1 = testapp.post_json('/files-vistrack', vistrack_meta)
-    vt = res1.json.get('@graph')[0]
-    assert vt.get('track_title') == 'test description'
 
 
 # def test_file_experiment_type(testapp, proc_file_json, rep_set_data, base_experiment):
