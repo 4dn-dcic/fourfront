@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Checkbox, Button } from 'react-bootstrap';
+import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
 import * as globals from './../globals';
 import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
@@ -189,7 +189,7 @@ class FileViewOverview extends React.Component {
                     <hr className="tab-section-title-horiz-divider"/>
                     <FileOverViewBody result={context} schemas={this.props.schemas} />
                 </div>
-                
+
                 <div className="col-md-12">
                     { table }
                 </div>
@@ -277,6 +277,7 @@ export class FileOverViewBody extends React.Component {
     constructor(props){
         super(props);
         this.handleJuiceBoxVizClick = this.handleJuiceBoxVizClick.bind(this);
+        this.handleEpigenomeClick = this.handleEpigenomeClick.bind(this);
     }
 
     handleJuiceBoxVizClick(evt){
@@ -291,17 +292,129 @@ export class FileOverViewBody extends React.Component {
         win.focus();
     }
 
-    visualizeExternallyButton(){
-        var file        = this.props.result,
-            tips        = this.props.tips,
-            fileFormat  = fileUtil.getFileFormatStr(file);
+    handleEpigenomeClick(evt){
+        var file            = this.props.result,
+            pageHref        = this.props.href || (store && store.getState().href),
+            hrefParts       = url.parse(pageHref),
+            host            = hrefParts.protocol + '//' + hrefParts.host,
+            genome_assembly = ("genome_assembly" in file) ? file.genome_assembly : null,
+            targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
 
-        if (fileFormat !== 'hic') return null;
-        return (
-            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
-                <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
+        if (!genome_assembly) return null;
+        if (isServerSide()) return null;
+        var win = window.open(targetLocation, '_blank');
+        win.focus();
+    }
+
+    /**
+    * Add a link to an external JuiceBox site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {string} host              - The host part of the current url
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
+        var externalLinkButton = null;
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the juicebox button
+            externalLinkButton = (
+                <Button bsStyle="primary" onClick={onClick} className="mr-05">
                     <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
                 </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    /**
+    * Add a link to an external Epigenome site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {string} host              - The host part of the current url
+    * @param {string} genome_assembly   - The file's genome assembly
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+        var externalLinkButton = null;
+
+        // We may need to map the genome assembly to Epigenome's assemblies.
+        const assemblyMap = {
+            'GRCh38' : 'hg38',
+            'GRCm38' : 'mm10'
+        };
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+            return null;
+        }
+
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                const epiGenomeMapping = assemblyMap[genome_assembly];
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
+
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the Epigenome button
+            externalLinkButton = (
+                <Button bsStyle="primary" onClick={onClick}>
+                    <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    /**
+    * Generate the HTML markup for external visualization links.
+    **/
+    visualizeExternallyButton(){
+        var file                    = this.props.result,
+            tips                    = this.props.tips,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
+            fileIsHic               = (fileFormat === 'hic'),
+            externalLinkButton      = null,
+            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+            fileHref                = file.href,
+            pageHref                = this.props.href || (store && store.getState().href),
+            hrefParts               = url.parse(pageHref),
+            host                    = hrefParts.protocol + '//' + hrefParts.host;
+
+        return (
+            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
+                <React.Fragment>
+                    {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
+                    {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                </React.Fragment>
             } />
         );
     }
@@ -454,4 +567,3 @@ export class RelatedFilesOverViewBlock extends React.Component {
 
     }
 }
-
