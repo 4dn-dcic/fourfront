@@ -71,7 +71,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
          * @property {boolean} cloneLoading         True if AJAX request is en route to clone Item.
          * @property {boolean} releaseLoading       True if AJAX request is en route to change Item status.
          * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
-         * @property {integer} hiGlassComponentHeight   (Optional) The height of the HiGlassComponent, in pixels.
          */
         this.state = {
             'viewConfig'            : props.viewConfig,
@@ -80,8 +79,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'saveLoading'           : false,
             'cloneLoading'          : false,
             'releaseLoading'        : false,
-            'addFileLoading'        : false,
-            'hiGlassComponentHeight': props.hiGlassComponentHeight || null
+            'addFileLoading'        : false
         };
     }
 
@@ -562,19 +560,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props,
-            { addFileLoading, genome_assembly, hiGlassComponentHeight } = this.state;
+            { addFileLoading, genome_assembly } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
+
         // Setting the height of the HiGlass Component follows one of these rules:
         // - If it's Fullscreen it should almost take up the entire window.
-        // - If the height was entered as a prop, use that.
         // - Set the height to around 3/4 of the width.
-
         if (isFullscreen) {
             const hiGlassComponentHeight = windowHeight -120;
-        }
-        else if (hiGlassComponentHeight) {
-            const hiGlassComponentHeight = hiGlassComponentHeight;
         }
         else {
             const hiGlassComponentHeight = Math.floor(hiGlassComponentWidth * 0.75);
