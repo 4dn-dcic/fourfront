@@ -819,6 +819,26 @@ class FileVistrack(File):
         if bios is not None:
             return request.embed(bios, '@@object').get('biosource_name')
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "Name of this File",
+        "type": "string"
+    })
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        dbxrefs = self.properties.get('dbxrefs')
+        if dbxrefs:
+            acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
+            if acclist:
+                accession = acclist[0]
+        if not accession:
+            accession = accession or external_accession
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+        try:
+            file_extension = '.' + file_format_item.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
+        return '{}{}'.format(accession, file_extension)
+
 
 @collection(
     name='files-calibration',
