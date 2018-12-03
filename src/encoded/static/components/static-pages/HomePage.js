@@ -166,6 +166,25 @@ class LinksRow extends React.Component {
         );
     }
 
+    /**
+    * Add a link for the NOFIC-AICS Collaboration page.
+    */
+    nofisAicsCollaborationPageLink(colSize){
+        var className = "link-block";
+        if (colSize){
+            className += (' col-sm-' + colSize);
+        }
+        return (
+            <div className={className}>
+                <a href="/4DN-AICS-Collaboration">
+                    <layout.VerticallyCenteredChild verticalPaddingOffset={this.props.linkBoxVerticalPaddingOffset}>
+                        <span>NOFIC-AICS Collaboration</span>
+                    </layout.VerticallyCenteredChild>
+                </a>
+            </div>
+        );
+    }
+
     componentDidUpdate(pastProps, pastState){
         if (pastProps.session !== this.props.session){
             setTimeout(this.forceUpdate.bind(this), 500);
@@ -292,6 +311,7 @@ class LinksColumn extends LinksRow {
                     </div>
                     */}
                     { (session && this.jointAnalysisPageLink()) || null }
+                    { (session && this.nofisAicsCollaborationPageLink()) || null }
                 </div>
             </div>
         );
