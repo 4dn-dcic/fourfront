@@ -564,8 +564,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
 
-        // Setting the height of the HiGlass Component:
-        const hiGlassComponentHeight = 600;
+        // Setting the height of the HiGlass Component follows one of these rules:
+        // - If it's Fullscreen it should almost take up the entire window.
+        // - Set to a fixed height.
+        var hiGlassComponentHeight;
+        if (isFullscreen) {
+            hiGlassComponentHeight = windowHeight -120;
+        }
+        else {
+            hiGlassComponentHeight = 600;
+        }
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
