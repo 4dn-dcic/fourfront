@@ -892,7 +892,7 @@ def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, 
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
-    assert pf.get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
 
 
 def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, lab):
@@ -905,7 +905,7 @@ def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, 
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
-    assert pf.get('track_title') == 'unspecified type for unknown sample no experiment'
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'unspecified type for unknown sample no experiment'
 
 
 def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM12878_biosource):
@@ -924,7 +924,7 @@ def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM128
     }
     res1 = testapp.post_json('/files-vistrack', vistrack_meta)
     vt = res1.json.get('@graph')[0]
-    assert vt.get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
+    assert vt.get('track_and_facet_info', {}).get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
 
 
 # @pytest.fixture

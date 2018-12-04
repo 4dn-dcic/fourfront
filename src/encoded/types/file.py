@@ -398,6 +398,9 @@ class File(Item):
             },
             "experiment_bucket": {
                 "type": "string"
+            },
+            "track_title": {
+                "type": "string"
             }
         }
     })
@@ -431,9 +434,11 @@ class File(Item):
 
         track_info = {k: v for k, v in track_info.items() if v is not None}
         if len(track_info) != 6:
-            # import pdb; pdb.set_trace()
             einfo = self._get_file_experiment_info(request)
             track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+        track_title = self.generate_track_title(track_info)
+        if track_title is not None:
+            track_info['track_title'] = track_title
         return track_info
 
     def _update(self, properties, sheets=None):
@@ -631,12 +636,10 @@ class File(Item):
                 extras.append(extra)
             return extras
 
-    def generate_track_title(self, request):
+    def generate_track_title(self, track_info):
         props = self.properties
         if not props.get('higlass_uid'):
-            return
-        track_info = self.track_and_facet_info(request)
-
+            return None
         exp_type = track_info.get('experiment_type', 'no experiment')
         bname = track_info.get('biosource_name', 'unknown sample')
         ftype = props.get('file_type', 'unspecified type')
@@ -646,18 +649,6 @@ class File(Item):
             ft=ftype, ai=assay, et=exp_type, bs=bname
         )
         return title.replace('  ', ' ').rstrip()
-
-    @calculated_property(schema={
-        "title": "Track Name",
-        "description": "Title for the track in higlass views",
-        "type": "string"
-    })
-    def track_title(self, request):
-        '''for processed files always use track meta to derive
-        '''
-        if not self.properties.get('higlass_uid'):
-            return
-        return self.generate_track_title(request)
 
     @classmethod
     def get_bucket(cls, registry):
