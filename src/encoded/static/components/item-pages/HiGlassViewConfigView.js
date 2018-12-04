@@ -566,13 +566,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         // Setting the height of the HiGlass Component follows one of these rules:
         // - If it's Fullscreen it should almost take up the entire window.
-        // - Set the height to around 3/4 of the width.
+        // - Set to a fixed height.
         var hiGlassComponentHeight;
         if (isFullscreen) {
             hiGlassComponentHeight = windowHeight -120;
         }
         else {
-            hiGlassComponentHeight = Math.floor(hiGlassComponentWidth * 0.75);
+            hiGlassComponentHeight = 600;
         }
 
         return (
