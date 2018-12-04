@@ -16,7 +16,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
     static does2DTrackExist(viewConfig){
 
         var found = false;
-        
+
         _.forEach(viewConfig.views || [], function(view){
             if (found) return;
             _.forEach((view.tracks && view.tracks.center) || [], function(centerTrack){
@@ -54,7 +54,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'options' : { 'bounded' : true },
         'isValidating' : false,
         'disabled' : false,
-        'height' : 400,
+        'height' : 500,
         'viewConfig' : null,
         'groupID' : null
     };

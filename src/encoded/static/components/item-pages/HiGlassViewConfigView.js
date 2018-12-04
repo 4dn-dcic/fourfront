@@ -562,6 +562,19 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var { isFullscreen, windowWidth, windowHeight, width } = this.props,
             { addFileLoading, genome_assembly } = this.state;
 
+        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
+
+        // Setting the height of the HiGlass Component follows one of these rules:
+        // - If it's Fullscreen it should almost take up the entire window.
+        // - Set the height to around 3/4 of the width.
+        var hiGlassComponentHeight;
+        if (isFullscreen) {
+            hiGlassComponentHeight = windowHeight -120;
+        }
+        else {
+            hiGlassComponentHeight = Math.floor(hiGlassComponentWidth * 0.75);
+        }
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -584,8 +597,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={isFullscreen ? windowWidth : width + 20 }
-                            height={isFullscreen ? windowHeight -120 : 500}
+                            width={hiGlassComponentWidth}
+                            height={hiGlassComponentHeight}
                             viewConfig={this.state.viewConfig}
                             ref="higlass" />
                     </div>

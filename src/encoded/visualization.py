@@ -600,32 +600,32 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
     # If there are no views, create a default.
     if not views:
         new_view = {
-            initialYDomain: [
+            "initialYDomain": [
                 -10000,
                 10000
             ],
-            initialXDomain: [
+            "initialXDomain": [
                 -10000,
                 10000
             ],
-            tracks: {
-                right: [ ],
-                gallery: [ ],
-                left: [ ],
-                whole: [ ],
-                bottom: [ ],
-                top: [],
-                center: [],
+            "tracks": {
+                "right": [ ],
+                "gallery": [ ],
+                "left": [ ],
+                "whole": [ ],
+                "bottom": [ ],
+                "top": [],
+                "center": [],
             },
-            uid: "Not set yet",
-            layout: {
-                w: 12,
-                static: true,
-                h: 12,
-                y: 0,
-                i: "Not set yet",
-                moved: false,
-                x: 0
+            "uid": "Not set yet",
+            "layout": {
+                "w": 12,
+                "static": False,
+                "h": 12,
+                "y": 0,
+                "i": "Not set yet",
+                "moved": False,
+                "x": 0
             }
         }
         new_view["uid"] = uuid.uuid4()
@@ -662,36 +662,36 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
             add_new_view = False
     else:
         base_view = {
-            initialYDomain: [
+            "initialYDomain": [
                 -10000,
                 10000
             ],
-            initialXDomain: [
+            "initialXDomain": [
                 -10000,
                 10000
             ],
-            tracks: {
-                right: [ ],
-                gallery: [ ],
-                left: [ ],
-                whole: [ ],
-                bottom: [ ],
-                top: [ ],
-                center: [
+            "tracks": {
+                "right": [ ],
+                "gallery": [ ],
+                "left": [ ],
+                "whole": [ ],
+                "bottom": [ ],
+                "top": [],
+                "center": [
                     {
                         "contents" : []
                     }
                 ],
             },
-            uid: "Not set yet",
-            layout: {
-                w: 12,
-                static: true,
-                h: 12,
-                y: 0,
-                i: "Not set yet",
-                moved: false,
-                x: 0
+            "uid": "Not set yet",
+            "layout": {
+                "w": 12,
+                "static": False,
+                "h": 12,
+                "y": 0,
+                "i": "Not set yet",
+                "moved": False,
+                "x": 0
             }
         }
 
