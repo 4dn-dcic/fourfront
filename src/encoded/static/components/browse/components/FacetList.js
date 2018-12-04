@@ -450,8 +450,8 @@ class Facet extends React.PureComponent {
 /**
  * Use this function as part of SearchView and BrowseView to be passed down to FacetList.
  * Should be bound to a component instance, with `this` providing 'href', 'context' (with 'filters' property), and 'navigate'.
- * 
- * @param {string} field - Field for which a Facet term was clicked on. 
+ *
+ * @param {string} field - Field for which a Facet term was clicked on.
  * @param {string} term - Term clicked on.
  * @param {function} callback - Any function to execute afterwards.
  * @param {boolean} [skipNavigation=false] - If true, will return next targetSearchHref instead of going to it. Use to e.g. batch up filter changes on multiple fields.
@@ -606,6 +606,22 @@ export class FacetList extends React.PureComponent {
         if (facet.field.indexOf('experiments.experiment_sets.') > -1) return false;
         if (facet.field === 'experiment_sets.@type') return false;
         if (facet.field === 'experiment_sets.experimentset_type') return false;
+        // logic for removing Data Type facet on submissions page-title
+        if (facet.field === 'type' && props.hideDataTypeFacet) return false;
+        // remove facets on selection view if schemas has exlude: FFseletction
+        var isThereParentWindow = typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
+        var selecting = props.currentAction === 'selection';
+        if (isThereParentWindow && selecting && state.thisSchema){
+            try {
+                var thisSchemaFacet = state.thisSchema.facets[facet.field];
+                if (thisSchemaFacet && thisSchemaFacet.exclude_from && thisSchemaFacet.exclude_from.indexOf('FFselection') > -1){
+                    console.log('Excluded facet due to schema:', facet.field);
+                    return false;
+                }
+            }catch(e){
+                console.log("Could not find schema property (for selection exclude_from) for field " + facet.field, e);
+            }
+        }
         if (facet.field.substring(0, 6) === 'audit.'){
             if (props.session && FacetList.isLoggedInAsAdmin()) return true;
             return false; // Ignore audit facets temporarily, esp if logged out.
@@ -655,13 +671,16 @@ export class FacetList extends React.PureComponent {
         this.componentDidMount = this.componentDidMount.bind(this);
         this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.searchQueryTerms = this.searchQueryTerms.bind(this);
+        this.loadSchemaForThisType = this.loadSchemaForThisType.bind(this);
         this.state = {
-            'mounted' : false
+            'mounted' : false,
+            'thisSchema': null
         };
     }
 
     componentDidMount(){
-        this.setState({ 'mounted' : true });
+        this.loadSchemaForThisType();
+        this.setState({ 'mounted' : true});
     }
 
     componentWillReceiveProps(nextProps){
@@ -676,6 +695,29 @@ export class FacetList extends React.PureComponent {
         var href = this.props.href || this.props.context && this.props.context['@id'] ? this.props.context['@id'] : null;
         if (!href) return null;
         return href && url.parse(href, true).query;
+    }
+
+    loadSchemaForThisType(){
+        // POSSIBLY TEMPORARY CODE
+        // Load in the schema for this type manually, to handle abstract schemas
+        // If we do not yet have schemas in props (from app.load_schema), wait
+        // The following line doesn't work because the componentDidMount
+        // is not called again after props change (?)
+
+        // if (!this.props.schemas) return;
+        var itemType = this.props.itemTypeForSchemas;
+        // see if the schema can be obtained from this.props.schemas
+        var res = Schemas.getSchemaForItemType(itemType, this.props.schemas);
+        // try to get the schema by loading it (works for abstract types)
+        if (!res){
+            ajax.promise('/profiles/' + itemType + '.json/?format=json').then(data => {
+                if (object.isValidJSON(data)){
+                    this.setState({'thisSchema': data});
+                }
+            });
+        }else{
+            this.setState({'thisSchema': res});
+        }
     }
 
     renderFacets(facets = this.props.facets, maxTermsToShow = 12){
