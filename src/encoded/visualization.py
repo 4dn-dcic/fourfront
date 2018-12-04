@@ -733,7 +733,7 @@ def get_title(file):
     """ Returns a string containing the title for the view.
     """
     # Use the track title. As a fallback, use the display title.
-    title = file.get("track_title", file["display_title"])
+    title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
     return title
 
 
