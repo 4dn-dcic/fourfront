@@ -5396,6 +5396,7 @@
     },
     {
         "app_name": "repliseq-parta",
+        "app_version": "v14",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -5794,6 +5795,7 @@
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
         "workflow_type": "Repli-seq data processing",
         "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364"
+        "accession": "4DNWFBT37VUW""
     },
     {
         "app_name": "hi-c-processing-pairs",
