@@ -210,6 +210,10 @@
         }
     },
     "facets": {
+        "lab.display_title": {
+            "title": "Lab",
+            "disabled" : true
+        },
         "track_and_facet_info.experiment_type" : {
             "title" : "Experiment Type",
             "description" : "Type of experiment to which this file belongs"
@@ -222,10 +226,12 @@
             "title" : "Biosource"
         },
         "experiments.biosample.biosource.biosource_type" : {
-            "title" : "Biosource Type"
+            "title" : "Biosource Type",
+            "exclude_from": ["FFselection"]
         },
         "experiments.biosample.biosource.individual.organism.name" : {
-            "title" : "Organism"
+            "title" : "Organism",
+            "exclude_from": ["FFselection"]
         },
         "file_type" : {
             "title" : "File Type",
