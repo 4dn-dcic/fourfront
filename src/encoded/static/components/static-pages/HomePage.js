@@ -295,7 +295,7 @@ class LinksColumn extends LinksRow {
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="/visualization/getting-started">
+                        <a href="/visualization/index">
                             <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
                                 <span>Visualize 4DN Data (HiGlass)</span>
                             </layout.VerticallyCenteredChild>
