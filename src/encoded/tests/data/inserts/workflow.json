@@ -5395,6 +5395,409 @@
         "workflow_type": "Repli-seq data processing"
     },
     {
+        "app_name": "repliseq-parta",
+        "app_version": "v14",
+        "arguments": [
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "fastq"
+            },
+            {
+                "argument_format": "bwaIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bwaIndex"
+            },
+            {
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsizes"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "memperthread"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "winsize"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "filtered_sorted_deduped_bam"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "dedup_qc_report"
+            },
+            {
+                "argument_format": "bg",
+                "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "bg_px2",
+                    "bw"
+                ],
+                "workflow_argument_name": "count_bg"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "align + filter + count",
+        "cwl_child_filenames": [
+            "clip.cwl",
+            "align.cwl",
+            "filtersort.cwl",
+            "dedup.cwl",
+            "count.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
+        "cwl_main_filename": "repliseq-parta.cwl",
+        "data_types": [
+            "Repli-seq"
+        ],
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "lab": "4dn-dcic-lab",
+        "name": "repliseq-parta",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "input_fastq",
+                        "source": [
+                            {
+                                "name": "fastq"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "adapter removal"
+                    ],
+                    "description": "Adapter removal according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/97ffd707-b673-4184-a0f6-ca1dfc324067/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "clip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false
+                        },
+                        "name": "out_clipped_fastq",
+                        "target": [
+                            {
+                                "name": "fastq1",
+                                "step": "align"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false
+                        },
+                        "name": "fastq1",
+                        "source": [
+                            {
+                                "name": "out_clipped_fastq",
+                                "step": "clip"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "bwa_index",
+                        "source": [
+                            {
+                                "name": "bwaIndex"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "nThreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "alignment"
+                    ],
+                    "description": "Alignment according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/5befdeda-66a8-43bc-a469-5a5e7248198e/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "align",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "out_bam",
+                        "target": [
+                            {
+                                "name": "input_bam",
+                                "step": "filtersort"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_bam",
+                                "step": "align"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "nthreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "memperthread",
+                        "source": [
+                            {
+                                "name": "memperthread"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "filtering",
+                        "sorting"
+                    ],
+                    "description": "Filtering and sorting according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "filtersort",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "out_filtered_sorted_bam",
+                        "target": [
+                            {
+                                "name": "input_bam",
+                                "step": "dedup"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_filtered_sorted_bam",
+                                "step": "filtersort"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "duplicate removal"
+                    ],
+                    "description": "PCR Duplicate removal according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "dedup",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_deduped_bam",
+                        "target": [
+                            {
+                                "name": "filtered_sorted_deduped_bam"
+                            },
+                            {
+                                "name": "input_bam",
+                                "step": "count"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "out_qc_report",
+                        "target": [
+                            {
+                                "name": "dedup_qc_report"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_deduped_bam",
+                                "step": "dedup"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chrsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "winsize",
+                        "source": [
+                            {
+                                "name": "winsize"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "binning",
+                        "aggregation"
+                    ],
+                    "description": "Read aggregation according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/",
+                        "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/",
+                        "/software/00eda937-3149-4252-8dc9-c27de59d75ed/"
+                    ]
+                },
+                "name": "count",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bg",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_count_bg",
+                        "target": [
+                            {
+                                "name": "count_bg"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
+        "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
+        "workflow_type": "Repli-seq data processing",
+        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
+        "accession": "4DNWFBT37VUW"
+    },
+    {
         "app_name": "hi-c-processing-pairs",
         "app_version": "0.2.5",
         "arguments": [
@@ -7934,6 +8337,26 @@
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
             {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.fraglen"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bwa.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.filter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.merge_fastq.cpu"
+            },
+            {   
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.peak_calls"
@@ -8143,6 +8566,71 @@
                                 "name": "chip.bam2ta.regex_grep_v_ta"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.fraglen",
+                        "source": [
+                            {
+                                "name": "chip.fraglen"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bwa.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bwa.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.filter.cpu",
+                        "source": [
+                            {
+                                "name": "chip.filter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.merge_fastq.cpu",
+                        "source": [
+                            {
+                                "name": "chip.merge_fastq.cpu"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
@@ -8282,6 +8770,18 @@
             {   
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bowtie2.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.trim_adapter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.filter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bam2ta.cpu"
             },
             {   
                 "argument_format": "bigbed",
@@ -8503,6 +9003,45 @@
                         "source": [
                             {
                                 "name": "atac.bowtie2.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.trim_adapter.cpu",
+                        "source": [
+                            {
+                                "name": "atac.trim_adapter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.filter.cpu",
+                        "source": [
+                            {
+                                "name": "atac.filter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bam2ta.cpu",
+                        "source": [
+                            {
+                                "name": "atac.bam2ta.cpu"
                             }
                         ]
                     }
