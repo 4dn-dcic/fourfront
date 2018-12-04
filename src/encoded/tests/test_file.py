@@ -905,7 +905,21 @@ def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, 
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
     pf = res1.json.get('@graph')[0]
-    assert pf.get('track_and_facet_info', {}).get('track_title') == 'unspecified type for unknown sample no experiment'
+    assert pf.get('track_and_facet_info', {}).get('track_title') is None
+
+
+def test_file_generate_track_title_fp_most_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['@id'],
+        'dataset_type': 'DNase Hi-C',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'unspecified type for unknown sample DNase Hi-C'
 
 
 def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM12878_biosource):

@@ -640,7 +640,9 @@ class File(Item):
         props = self.properties
         if not props.get('higlass_uid'):
             return None
-        exp_type = track_info.get('experiment_type', 'no experiment')
+        exp_type = track_info.get('experiment_type', None)
+        if exp_type is None:
+            return None
         bname = track_info.get('biosource_name', 'unknown sample')
         ftype = props.get('file_type', 'unspecified type')
         assay = props.get('assay_info', '')
