@@ -59,7 +59,7 @@ export class AuditTabView extends React.PureComponent {
 
     /**
      * Returns string broken into parts with a JSON segment in it.
-     * 
+     *
      * @param {string} String with potential JSON string.
      * @returns {string[]} Array with either 1 part (no valid JSON found) or 3 parts (beforestring, JSONstring, afterstring).
      */
@@ -232,7 +232,7 @@ class AuditLevelGrouping extends React.Component {
                         />
                     )}
                     </div>
-                    
+
                 </div>
             </div>
         );
@@ -263,7 +263,7 @@ class AuditCategoryGrouping extends React.Component {
     auditItemsList(){
         if (!this.state.open) return null;
         return this.props.audits.map((aud, i) =>
-            <AuditItem 
+            <AuditItem
                 audit={aud}
                 key={i}
                 level={aud.level_name || this.props.level || "ERROR"}
@@ -325,13 +325,13 @@ class AuditItem extends React.Component {
                             var detailParts = AuditTabView.findJSONinString(d);
                             return (
                                 <li key={i}>
-                                    { detailParts[0] ? 
+                                    { detailParts[0] ?
                                         <div>{ detailParts[0] }</div>
                                     : null }
-                                    { detailParts[1] ? 
+                                    { detailParts[1] ?
                                         <div>{ AuditTabView.convertJSONToTable(detailParts[1]) }</div>
                                     : null }
-                                    { detailParts[2] ? 
+                                    { detailParts[2] ?
                                         <div>{ detailParts[2] }</div>
                                     : null }
                                 </li>
