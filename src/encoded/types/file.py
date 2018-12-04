@@ -296,6 +296,151 @@ class File(Item):
             pass
         return outString
 
+    def _get_file_expt_bucket(self, request, item2check):
+        fatid = self.jsonld_id(request)
+        if 'processed_files' in item2check:
+            if fatid in item2check.get('processed_files'):
+                return 'processed_files'
+        of_info = item2check.get('other_processed_files', [])
+        for obucket in of_info:
+            ofiles = obucket.get('files')
+            if [of for of in ofiles if of == fatid]:
+                return obucket.get('title')
+        return None
+
+    def _get_file_experiment_info(self, request):
+        """
+        Get info about an experiment that a file belongs value given a File.
+        Also retrieve replicate_set info from the set
+        Checks the rev_linked experiments and experiment_sets
+        """
+        info = {}
+        experiment_of_file = None
+        exp_info = None
+        repset = None
+        rev_exps = self.experiments(request)
+        if rev_exps:
+            experiment_of_file = rev_exps[0]
+            exp_info = get_item_if_you_can(request, experiment_of_file)
+            if exp_info:
+                repset_info = exp_info.get('experiment_sets')
+                repsetid = [rs for rs in repset_info if 'replicate' in rs]
+                if len(repsetid) == 1:
+                    repset = repsetid[0]
+                # see if we can get experiment_bucket from the experiment
+                ebucket = self._get_file_expt_bucket(request, exp_info)
+                if ebucket is not None:
+                    info['experiment_bucket'] = ebucket
+
+        if hasattr(self, 'experiment_sets') and repset is None:  # FileProcessed only
+            rev_exp_sets = self.experiment_sets(request)
+            if rev_exp_sets:
+                repsetid = [rs for rs in rev_exp_sets if 'replicate' in rs]
+                if len(repsetid) == 1:
+                    repset = repsetid[0]
+
+        # get replicate set info if we need to
+        if repset is not None:
+            if not experiment_of_file:
+                info['replicate_info'] = 'merged replicates'
+
+            rep_set_info = get_item_if_you_can(request, repset)
+            if rep_set_info:
+                # TODO figure out which experment of a repset has the file we are
+                # looking at is part of
+                # this seems very heavy i.e. need to get each expt of a set
+                # and look for the file in it is there another way
+
+                if 'experiment_bucket' not in info:
+                    info['experiment_bucket'] = self._get_file_expt_bucket(request, rep_set_info)
+
+                # get the first experiment of set and set to experiment of file for shared info
+                if not experiment_of_file:
+                    expts_of_file = rep_set_info.get('experiments_in_set', [])
+                    if expts_of_file:
+                        experiment_of_file = expts_of_file[0]
+
+        if not experiment_of_file:
+            return info
+        exp_info = get_item_if_you_can(request, experiment_of_file)
+        if exp_info is None:
+            return info
+        info['experiment_type'] = exp_info.get('experiment_type')
+        assay_info = exp_info.get('experiment_categorizer')
+        if assay_info:
+            info['assay_info'] = assay_info.get('value')
+        sample_id = exp_info.get('biosample')
+        if sample_id is not None:
+            sample = get_item_if_you_can(request, sample_id)
+            if sample is not None:
+                info['biosource_name'] = sample.get('biosource_summary')
+        return {k: v for k, v in info.items() if v is not None}
+
+    @calculated_property(schema={
+        "title": "Track and Facet Info",
+        "description": "Useful faceting and visualization info",
+        "type": "object",
+        "properties": {
+            "experiment_type": {
+                "type": "string"
+            },
+            "assay_info": {
+                "type": "string"
+            },
+            "lab_name": {
+                "type": "string"
+            },
+            "biosource_name": {
+                "type": "string"
+            },
+            "replicate_info": {
+                "type": "string"
+            },
+            "experiment_bucket": {
+                "type": "string"
+            },
+            "track_title": {
+                "type": "string"
+            }
+        }
+    })
+    def track_and_facet_info(self, request):
+        props = self.properties
+        track_info = {
+            'experiment_type': props.get('dataset_type'),
+            'assay_info': props.get('assay_info'),
+            'lab_name': props.get('project_lab'),
+            'biosource_name': props.get('biosource_name')
+        }
+        if track_info.get('biosource_name') is None:
+            if hasattr(self, 'biosource_name'):
+                bsname = self.biosource_name(request)
+                if bsname:
+                    track_info['biosource_name'] = bsname
+        if track_info.get('lab_name') is None:
+            labid = props.get('lab')
+            lab = get_item_if_you_can(request, labid)
+            if lab is not None:
+                track_info['lab_name'] = lab.get('display_title')
+        repinfo = props.get('replicate_identifiers')
+        if repinfo is not None:
+            if len(repinfo) > 1:
+                track_info['replicate_info'] = 'merged replicates'
+            else:
+                track_info['replicate_info'] = repinfo[0]
+        expt_bucket = props.get('experiment_bucket')
+        if expt_bucket is not None:
+            track_info['experiment_bucket'] = expt_bucket
+
+        track_info = {k: v for k, v in track_info.items() if v is not None}
+        if len(track_info) != 6:
+            einfo = self._get_file_experiment_info(request)
+            track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+        track_title = self.generate_track_title(track_info)
+        if track_title is not None:
+            track_info['track_title'] = track_title
+        return track_info
+
     def _update(self, properties, sheets=None):
         if not properties:
             return
@@ -491,36 +636,21 @@ class File(Item):
                 extras.append(extra)
             return extras
 
-    def generate_track_title(self, request):
-            props = self.properties
-            dstype = props.get('dataset_type')
-            # lab = props.get('project_lab', None)
-            # if lab is None:
-            #    lab_uuid = props.get('lab')
-            #    lab = request.embed(lab_uuid, '@@object').get('display_title')
-            # ff_uuid = props.get('file_format')
-            # fformat = request.embed(ff_uuid, '@@object').get('file_format')
-            ftype = props.get('file_type', 'unspecified type')
-            assay = props.get('assay_info', '')
-            bname = props.get('biosource_name', None)
-            if bname is None:
-                # for vistrack - the calcprop does not get calc in time?
-                bios = props.get('biosource')
-                try:
-                    bname = request.embed(bios, '@@object').get('biosource_name', 'unknown sample')
-                except Exception:
-                    bname = 'unknown sample'
-            # repinfo = ''
-            # reps = props.get('replicate_identifiers')
-            # if reps is not None:
-            #    if len(reps) > 1:
-            #        repinfo = '(merged replicates)'
-            #    else:
-            #        repinfo = "({})".format(reps[0])
-            title = '{ft} for {bs} {et} {ai}'.format(
-                ft=ftype, ai=assay, et=dstype, bs=bname
-            )
-            return title.replace('  ', ' ').rstrip()
+    def generate_track_title(self, track_info):
+        props = self.properties
+        if not props.get('higlass_uid'):
+            return None
+        exp_type = track_info.get('experiment_type', None)
+        if exp_type is None:
+            return None
+        bname = track_info.get('biosource_name', 'unknown sample')
+        ftype = props.get('file_type', 'unspecified type')
+        assay = props.get('assay_info', '')
+
+        title = '{ft} for {bs} {et} {ai}'.format(
+            ft=ftype, ai=assay, et=exp_type, bs=bname
+        )
+        return title.replace('  ', ' ').rstrip()
 
     @classmethod
     def get_bucket(cls, registry):
@@ -702,18 +832,6 @@ class FileProcessed(File):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
 
-    @calculated_property(schema={
-        "title": "Track Name",
-        "description": "Title for the track in higlass views",
-        "type": "string"
-    })
-    def track_title(self, request):
-        '''for processed files always use track meta to derive
-        '''
-        if not self.properties.get('dataset_type'):
-            return
-        return self.generate_track_title(request)
-
 
 @collection(
     name='files-reference',
@@ -758,19 +876,24 @@ class FileVistrack(File):
             return request.embed(bios, '@@object').get('biosource_name')
 
     @calculated_property(schema={
-        "title": "Track Name",
-        "description": "Title for the track in higlass views",
+        "title": "Display Title",
+        "description": "Name of this File",
         "type": "string"
     })
-    def track_title(self, request):
-        '''for processed files always use track meta to derive
-        '''
-        if not self.properties.get('dataset_type'):
-            return
-        desc = self.properties.get('description')
-        if desc:
-            return desc
-        return self.generate_track_title(request)
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        dbxrefs = self.properties.get('dbxrefs')
+        if dbxrefs:
+            acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
+            if acclist:
+                accession = acclist[0]
+        if not accession:
+            accession = accession or external_accession
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+        try:
+            file_extension = '.' + file_format_item.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
+        return '{}{}'.format(accession, file_extension)
 
 
 @collection(
