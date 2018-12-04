@@ -179,7 +179,12 @@ class Publication(Item, ItemWithAttachment):
     ] + lab_award_attribution_embed_list
 
     def _update(self, properties, sheets=None):
-        # import pdb; pdb.set_trace()
+        # logic for determing whether to use manually-provided date_published
+        try:
+            prev_date_published = self.properties.get('date_published')
+        except KeyError:  # if new user, previous properties do not exist
+            prev_date_published = None
+        new_date_published = properties.get('date_published')
         self.upgrade_properties()
         title = ''
         abstract = ''
@@ -215,10 +220,13 @@ class Publication(Item, ItemWithAttachment):
             properties['authors'] = authors
         if url:
             properties['url'] = url
-        if date:
-            properties['date_published'] = date
         if journal:
             properties['journal'] = journal
+        # allow override of date_published
+        if new_date_published is not None and prev_date_published != new_date_published:
+            properties['date_published'] = new_date_published
+        elif new_date_published is None and date:
+            properties['date_published'] = date
 
         super(Publication, self)._update(properties, sheets)
         return
