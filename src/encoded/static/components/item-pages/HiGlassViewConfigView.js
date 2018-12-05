@@ -90,7 +90,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({
                 'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig)
                 'viewConfig' : nextProps.viewConfig,
-                'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || null
+                'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
         }
     }
