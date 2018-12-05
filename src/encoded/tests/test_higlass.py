@@ -244,7 +244,7 @@ def higlass_blank_viewconf(testapp):
         "description" : "No files in viewconf, ready to clone.",
         "uuid" : "00000000-1111-0000-1111-000000000000",
         "name" : "empty-higlass-viewconf",
-        "genome_assembly" : "",
+        "genome_assembly" : "GRCm38",
         "viewconfig" : {
             "editable": True,
             "zoomFixed": False,
@@ -745,7 +745,6 @@ def test_bogus_fileuuid(testapp, higlass_mcool_viewconf):
 def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf, bg_file_json):
     """ Add files by the accession instead of the uuid.
     """
-
     # Add an mcool file. Add a higlass_uid.
     mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
     mcool_file_json['genome_assembly'] = "GRCm38"
