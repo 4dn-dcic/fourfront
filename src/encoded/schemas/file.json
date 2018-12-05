@@ -225,14 +225,6 @@
         "track_and_facet_info.biosource_name" : {
             "title" : "Biosource"
         },
-        "experiments.biosample.biosource.biosource_type" : {
-            "title" : "Biosource Type",
-            "exclude_from": ["FFselection"]
-        },
-        "experiments.biosample.biosource.individual.organism.name" : {
-            "title" : "Organism",
-            "exclude_from": ["FFselection"]
-        },
         "file_type" : {
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
