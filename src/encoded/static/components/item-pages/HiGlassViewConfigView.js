@@ -84,9 +84,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     componentWillReceiveProps(nextProps){
+        // TODO: Improve, use var = nextState and conditionally set if have been updated,
+        // then setState(nextState) if keys.length > 0.
         if (nextProps.viewConfig !== this.props.viewConfig){
             this.setState({
-                'originalViewConfig' : null //object.deepClone(nextProps.viewConfig)
+                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig)
+                'viewConfig' : nextProps.viewConfig,
+                'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || null
             });
         }
     }
@@ -152,6 +156,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
+        // We're updating this object's view conf and the genome assembly.
+        var payload = {
+            'viewconfig' : currentViewConf
+        };
+
+        if (this.state.genome_assembly){
+            // If we always include this and its null, then we get validation error because
+            // is not of type string. It must be explictly excluded, not just set to null
+            // or undefined.
+            payload.genome_assembly = this.state.genome_assembly;
+        }
+
         this.setState({ 'saveLoading' : true }, ()=>{
             ajax.load(
                 this.props.href,
@@ -175,11 +191,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     });
                     this.setState({ 'saveLoading' : false });
                 },
-                // We're updating this object's view conf and the genome assembly.
-                JSON.stringify({
-                    'viewconfig' : currentViewConf,
-                    'genome_assembly' : this.state.genome_assembly,
-                })
+                JSON.stringify(payload)
             );
         });
     }
@@ -252,11 +264,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'title'          : viewConfTitle,
             'description'    : viewConfDesc,
             'viewconfig'     : currentViewConf,
-            'genome_assembly': context.genome_assembly,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
             // Lab and award do not carry over as current user might be from different lab.
         };
+
+        if (this.state.genome_assembly){
+            payload.genome_assembly = this.state.genome_assembly;
+        }
 
         // Try to POST/PUT a new viewconf.
         this.setState(
