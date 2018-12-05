@@ -645,7 +645,7 @@ class File(Item):
             return None
         bname = track_info.get('biosource_name', 'unknown sample')
         ftype = props.get('file_type', 'unspecified type')
-        assay = props.get('assay_info', '')
+        assay = track_info.get('assay_info', '')
 
         title = '{ft} for {bs} {et} {ai}'.format(
             ft=ftype, ai=assay, et=exp_type, bs=bname
