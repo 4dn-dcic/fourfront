@@ -28,7 +28,12 @@
             "title": "Genome Assembly",
             "description": "All data files will use this genome assembly.",
             "type" : "string",
-            "default": ""
+            "enum": [
+                "GRCh38",
+                "GRCm38",
+                "dm6",
+                "galGal5"
+            ]
         },
         "viewconfig": {
             "title": "View Configuration",
