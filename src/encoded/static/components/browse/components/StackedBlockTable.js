@@ -941,6 +941,7 @@ export class FileEntryBlock extends React.PureComponent {
     }
 
     renderExternalButtons(){
+        if (!this.props.file) return;
         var { file } = this.props,
             fileFormat              = fileUtil.getFileFormatStr(file),
             fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
