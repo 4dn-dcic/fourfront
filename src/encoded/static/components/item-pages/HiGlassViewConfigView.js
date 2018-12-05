@@ -249,15 +249,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         };
 
         var payload = {
-            'title'         : viewConfTitle,
-            'description'   : viewConfDesc,
-            'viewconfig'    : currentViewConf,
+            'title'          : viewConfTitle,
+            'description'    : viewConfDesc,
+            'viewconfig'     : currentViewConf,
+            'genome_assembly': context.genome_assembly,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
             // Lab and award do not carry over as current user might be from different lab.
         };
-        // add genome_assembly if it is present; must NOT be added if it is None
-        if (context.genome_assembly) payload.genome_assembly = context.genome_assembly;
 
         // Try to POST/PUT a new viewconf.
         this.setState(
