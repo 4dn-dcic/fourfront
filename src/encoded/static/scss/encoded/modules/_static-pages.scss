@@ -128,8 +128,9 @@ h5.fourDN-header {
 		font-size: 32px;
 		line-height: 38px;
 		&.can-collapse {
+			font-size: 27px;
 			> i.icon-plus, > i.icon-minus {
-				font-size: 1.75rem;
+				font-size: 24px;
 			}
 		}
 	}
@@ -1021,19 +1022,6 @@ h5.fourDN-header {
 	>.slide-controls{
 		text-align: center;
 	}
-}
-
-
-// Joint Analysis Page
-
-body[data-pathname="/joint-analysis"]{
-
-	#release-updates.static-section-entry > h2.section-title,
-	#higlass.static-section-entry > h2.section-title {
-		font-size: 20px;
-		line-height: 24px;
-	}
-
 }
 
 
