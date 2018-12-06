@@ -27,8 +27,7 @@
         "genome_assembly" : {
             "title": "Genome Assembly",
             "description": "All data files will use this genome assembly.",
-            "type" : "string",
-            "default": ""
+            "type" : "string"
         },
         "viewconfig": {
             "title": "View Configuration",
