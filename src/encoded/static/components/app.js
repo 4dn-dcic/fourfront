@@ -992,9 +992,19 @@ export default class App extends React.Component {
 
             if (options.skipRequest) {
                 if (options.replace) {
-                    window.history.replaceState(this.props.context, '', href + fragment);
+                    try {
+                        window.history.replaceState(this.props.context, '', href + fragment);
+                    } catch (exc) {
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
+                        window.history.replaceState(null, '', href + fragment);
+                    }
                 } else {
-                    window.history.pushState(this.props.context, '', href + fragment);
+                    try {
+                        window.history.pushState(this.props.context, '', href + fragment);
+                    } catch (exc) {
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
+                        window.history.pushState(null, '', href + fragment);
+                    }
                 }
                 var stuffToDispatch = _.clone(includeReduxDispatch);
                 if (!options.skipUpdateHref) {
@@ -1153,14 +1163,14 @@ export default class App extends React.Component {
                     try {
                         window.history.replaceState(err, '', href + fragment);
                     } catch (exc) {
-                        // Might fail due to too large data
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
                         window.history.replaceState(null, '', href + fragment);
                     }
                 } else {
                     try {
                         window.history.pushState(err, '', href + fragment);
                     } catch (exc) {
-                        // Might fail due to too large data
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
                         window.history.pushState(null, '', href + fragment);
                     }
                 }
@@ -1199,14 +1209,14 @@ export default class App extends React.Component {
             try {
                 window.history.replaceState(data, '', dispatch_dict.href);
             } catch (exc) {
-                // Might fail due to too large data
+                console.warn('Data too big, saving null to browser history in place of props.context.');
                 window.history.replaceState(null, '', dispatch_dict.href);
             }
         } else {
             try {
                 window.history.pushState(data, '', dispatch_dict.href);
             } catch (exc) {
-                // Might fail due to too large data
+                console.warn('Data too big, saving null to browser history in place of props.context.');
                 window.history.pushState(null, '', dispatch_dict.href);
             }
         }
