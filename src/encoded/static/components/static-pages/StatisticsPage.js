@@ -556,7 +556,7 @@ export const aggregationsToChartData = {
                             'count' : 0,
                             'children' : [
                                 { 'term' : 'Internally Released', 'count' : 0 }, // We'll fill these counts up shortly
-                                { 'term' : 'Publically Released', 'count' : 0 }
+                                { 'term' : 'Publicly Released', 'count' : 0 }
                             ]
                         };
 
@@ -731,7 +731,7 @@ class UsageStatsView extends StatsChartViewBase {
         //}
     };
 
-    
+
     constructor(props){
         super(props);
         this.changeCountByForChart = this.changeCountByForChart.bind(this);
@@ -786,7 +786,7 @@ class UsageStatsView extends StatsChartViewBase {
             };
             ddtitle = titles[currCountBy];
         }
-        
+
         return (
             <div className="inline-block" style={{ 'marginRight' : 5 }}>
                 <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID} onSelect={(ek, e) => this.changeCountByForChart(chartID, ek)} title={ddtitle}>
@@ -795,7 +795,7 @@ class UsageStatsView extends StatsChartViewBase {
             </div>
         );
     }
-    
+
     /*
     changeFieldFacetedByGrouping(toState){
         if (_.keys(UsageStatsView.fieldsFacetedByOptions).indexOf(toState) === -1){
@@ -1163,7 +1163,3 @@ function groupExternalChildren(children, externalTermMap){
     }
     return children;
 }
-
-
-
-

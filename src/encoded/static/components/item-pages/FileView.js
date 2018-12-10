@@ -310,7 +310,7 @@ export class FileOverViewBody extends React.Component {
     * Add a link to an external JuiceBox site for some file types.
     * @param {string} fileHref          - URL path used to access the file
     * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
     * @param {string} host              - The host part of the current url
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
@@ -346,7 +346,7 @@ export class FileOverViewBody extends React.Component {
     * Add a link to an external Epigenome site for some file types.
     * @param {string} fileHref          - URL path used to access the file
     * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publically viewed
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
     * @param {string} host              - The host part of the current url
     * @param {string} genome_assembly   - The file's genome assembly
     *
