@@ -68,6 +68,13 @@ describe('Post-Deployment Search View Tests', function () {
 
         });
 
+        it('We can press button at right to scroll to right side of search results table', function(){
+            cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge').trigger('mousedown', { 'button' : 0 })
+                .wait(3000) // Simulate holding down for 3 seconds.
+                .get('#content div.shadow-border-layer div.edge-scroll-button.right-edge').trigger('mouseup', { 'force' : true }) // Might become invisible
+                .end();
+        });
+
 
     });
 

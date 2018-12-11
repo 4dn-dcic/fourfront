@@ -3,7 +3,7 @@ import { testGraphTabClick } from './../support/macros';
 
 describe("Individual Item Views", function(){
 
-    context('FileProcessed MCOOL Collection', function(){
+    context.only('FileProcessed MCOOL Collection', function(){
 
         it('Have at least 35 MCOOL FileProcessed files', function(){
             cy.visit('/search/?type=FileProcessed&file_format.display_title=mcool&workflow_run_outputs.workflow.title!=No+value').end()
@@ -11,9 +11,18 @@ describe("Individual Item Views", function(){
                 .searchPageTotalResultCount().should('be.greaterThan', 34);
         });
 
-
         it('Default sort ordering is by date_created', function(){
-            cy.get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon').should('have.class', 'active');
+            // First we must add the column to the view
+            // Open column selector panel
+            cy.get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
+                // Check the 'Date Created' checkbox
+                .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]').click().end()
+                // Perform check
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
+                .should('have.class', 'active')
+                .within(()=>{
+                    cy.get('i').should('have.class', 'icon-sort-desc');
+                });
         });
 
     });

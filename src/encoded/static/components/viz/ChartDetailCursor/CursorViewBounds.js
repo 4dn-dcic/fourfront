@@ -102,9 +102,10 @@ export default class CursorViewBounds extends React.Component {
             // And set ChartDetailCursor to be 'stickied'. This is the only place where the ChartDetailCursor state should be updated.
             if (typeof this.state.selectedTerm === 'string'){
                 ChartDetailCursor.update({ 'sticky' : true });
-                setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
-                setTimeout(window.addEventListener, 100, 'mousemove', this.handleMouseMoveToUnsticky);
-                //window.addEventListener('click', this.handleClickAnywhere);
+                setTimeout(()=>{
+                    window.addEventListener('click', this.handleClickAnywhere);
+                    window.addEventListener('mousemove', this.handleMouseMoveToUnsticky);
+                }, 100);
             } else {
                 window.removeEventListener('click', this.handleClickAnywhere);
                 window.removeEventListener('mousemove', this.handleMouseMoveToUnsticky);
