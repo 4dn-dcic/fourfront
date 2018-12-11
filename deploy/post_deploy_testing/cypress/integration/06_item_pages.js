@@ -13,7 +13,13 @@ describe("Individual Item Views", function(){
 
 
         it('Default sort ordering is by date_created', function(){
-            cy.get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon').should('have.class', 'active');
+            // First we must add the column to the view
+            // Open column selector panel
+            cy.get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
+                // Check the 'Date Created' checkbox
+                .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]').click().end()
+                // Perform check
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon').should('have.class', 'active');
         });
 
     });
