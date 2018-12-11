@@ -799,6 +799,7 @@
         
                 }
             }
-        }
+        },
+        "status" : "released"
     }
 ]
