@@ -3,14 +3,13 @@ import { testGraphTabClick } from './../support/macros';
 
 describe("Individual Item Views", function(){
 
-    context('FileProcessed MCOOL Collection', function(){
+    context.only('FileProcessed MCOOL Collection', function(){
 
         it('Have at least 35 MCOOL FileProcessed files', function(){
             cy.visit('/search/?type=FileProcessed&file_format.display_title=mcool&workflow_run_outputs.workflow.title!=No+value').end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('be.greaterThan', 34);
         });
-
 
         it('Default sort ordering is by date_created', function(){
             // First we must add the column to the view
@@ -19,7 +18,11 @@ describe("Individual Item Views", function(){
                 // Check the 'Date Created' checkbox
                 .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]').click().end()
                 // Perform check
-                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon').should('have.class', 'active');
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
+                .should('have.class', 'active')
+                .within(()=>{
+                    cy.get('i').should('have.class', 'icon-sort-desc');
+                });
         });
 
     });
