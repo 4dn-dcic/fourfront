@@ -14,6 +14,12 @@ from snovault.resource_views import collection_view_listing_db
 from snovault.fourfront_utils import get_jsonld_types_from_collection_type
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
+from elasticsearch import (
+    TransportError,
+    RequestError,
+    ConnectionTimeout,
+    ConnectionError
+)
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.security import effective_principals
 from urllib.parse import urlencode
@@ -104,6 +110,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
     search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations, size, from_)
+
+    ### Add 10 second search timeout, if we are using a query string
+    if prepared_terms.get('q'):
+        search = search.params(request_timeout=10)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -797,7 +807,7 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
 
             # use the last part of the split field to get the title
             title_field = split_field[-1]
-    
+
             if title_field in used_facets or title_field in disabled_facets:
                 continue  # Cancel if already in facets or is disabled
 
@@ -1033,14 +1043,41 @@ def set_additional_aggregations(search_as_dict, types, doc_types, extra_aggregat
 
     return search_as_dict
 
+
 def execute_search(search):
     """
-    Use a general try-except here for now
+    Execute the given Elasticsearch-dsl search. Raise HTTPBadRequest for any
+    exceptions that arise.
+    Args:
+        search: the Elasticsearch-dsl prepared in the search() function
+    Returns:
+        Dictionary search results
     """
+    err_exp = None
     try:
         es_results = search.execute().to_dict()
-    except:
-        raise HTTPBadRequest(explanation='Failed search query')
+    except ConnectionTimeout as exc:
+        err_exp = 'The search failed due to a timeout. Please try a different query.'
+    except RequestError as exc:
+        # try to get a specific error message. May fail in some cases
+        try:
+            err_detail = str(exc.info['error']['root_cause'][0]['reason'])
+        except:
+            err_detail = str(exc)
+        err_exp = 'The search failed due to a request error: ' + err_detail
+    except ConnectionError as exc:
+        err_exp = 'The search failed due to a connection error.'
+    except TransportError as exc:
+        # most general exception
+        exc_status = getattr(exc, 'status_code')
+        if exc_status == 'TIMEOUT':
+            err_exp = 'The search failed due to a timeout. Please try a different query.'
+        else:
+            err_exp = 'The search failed due to a transport error: ' + str(exc)
+    except Exception as exc:
+        err_exp = 'The search failed. The DCIC team has been notified.'
+    if err_exp:
+        raise HTTPBadRequest(explanation=err_exp)
     return es_results
 
 
