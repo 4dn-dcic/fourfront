@@ -532,7 +532,7 @@ def add_files_to_higlass_viewconf(request):
 
     # Set up the additional views so they all move and zoom with the first.
     setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
-
+    higlass_viewconfig["zoomFixed"] = False
     higlass_viewconfig["views"] = new_views
     return {
         "success" : True,
@@ -552,8 +552,16 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
 
     # Based on the filetype's dimensions, try to add the file to the viewconf
     file_format = new_file_dict["file_format"]
-    known_1d_formats = ("bg", "bw", "bed", "bigbed")
-    known_2d_formats = ("mcool", "hic")
+    known_1d_formats = (
+        "/file-formats/bg/",
+        "/file-formats/bw/",
+        "/file-formats/bed/",
+        "/file-formats/bigbed/"
+    )
+    known_2d_formats = (
+        "/file-formats/mcool/",
+        "/file-formats/hic/"
+    )
     if [x for x in known_2d_formats if x in file_format]:
         status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
         if errors and not status:
@@ -588,12 +596,26 @@ def add_1d_file_to_higlass_viewconf(views, new_file):
 
     new_track["options"]["name"] = get_title(new_file)
 
-    if "bed" in new_file["file_format"]:
+    if new_file["file_format"] == "/file-formats/bed/":
         new_track["type"] = "bedlike"
 
-    if "bigbed" in new_file["file_format"]:
+    if new_file["file_format"] == "/file-formats/bigbed/":
+        new_track["height"] = "100"
         new_track["type"] = "horizontal-vector-heatmap"
         new_track["options"]["valueScaling"] = "linear"
+        # Add the color range options. A list of 256 strings, each containing an integer.
+        new_track["options"]["colorRange"] = []
+        for index in range(256):
+            red = int(index * 252 / 255)
+            green = int(index * 253 / 255)
+            blue = int((index * 188 / 255) + 3)
+            new_track["options"]["colorRange"].append(
+                "rgba({r},{g},{b},1)".format(
+                    r=red,
+                    g=green,
+                    b=blue,
+                )
+            )
 
     new_track["options"]["coordSystem"] = new_file["genome_assembly"]
 

@@ -1,5 +1,5 @@
 import pytest
-from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json
+from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json
 pytestmark = pytest.mark.working
 
 # Test Higlass display endpoints.
@@ -870,3 +870,69 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bigwig_file_json):
     # Only one new top track should have appeared.
     assert len(tracks["left"]) == len(old_tracks["left"])
     assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+
+def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
+    """ Given a viewconf with an mcool file, the viewconf should add a bigbed on top.
+    """
+
+    # Get a bigbed file to add.
+    bigbed_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bigbed_file_json['md5sum'] = '00000000000000000000000000000001'
+    bigbed_file_json['genome_assembly'] = "GRCm38"
+    bigbed_file = testapp.post_json('/file_processed', bigbed_file_json).json['@graph'][0]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the bigbed to the existing viewconf.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=bigbed_file['uuid'])]
+    })
+
+    # Get the new json.
+    new_higlass_json = response.json["new_viewconfig"]
+
+    # Make sure the bigbed has been added above the mcool file.
+    assert len(new_higlass_json["views"]) == 1
+
+    tracks = new_higlass_json["views"][0]["tracks"]
+    old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
+
+    # Assert there is still 1 central view
+    assert len(tracks["center"][0]["contents"]) == 1
+    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+
+    # Only one new top track should have appeared.
+    assert len(tracks["left"]) == len(old_tracks["left"])
+    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+
+    # TODO Get the top track and check the format.
+    found_annotation_track = False
+    found_chromosome_track = False
+    found_data_track = False
+
+    for track in tracks["top"]:
+        if not found_annotation_track and "annotation-track" in track["uid"]:
+            found_annotation_track = True
+        if not found_chromosome_track and "chromosome-track" in track["uid"]:
+            found_chromosome_track = True
+        if not found_data_track and "tilesetUid" in track and track["tilesetUid"] == bigbed_file_json['higlass_uid']:
+            found_data_track = True
+
+            assert track["type"] == "horizontal-vector-heatmap"
+
+            assert "options" in track
+            options = track["options"]
+            assert "valueScaling" in options
+            assert options["valueScaling"] == "linear"
+
+            assert "colorRange" in options
+            assert len(options["colorRange"]) == 256
+
+    assert found_annotation_track == True
+    assert found_chromosome_track == True
+    assert found_data_track == True

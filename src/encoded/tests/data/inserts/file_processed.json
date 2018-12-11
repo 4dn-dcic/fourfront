@@ -447,14 +447,15 @@
     "higlass_uid":"MRxj47AUSmSzoaiaN6pkKg",
     "file_format":"bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
     "date_created":"2018-11-29T01:37:58.357095+00:00",
-    "submitted_by":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
+    "submitted_by": "4dndcic@gmail.com",
     "uuid":"94827a84-2b65-45f4-ad4d-fc2219c52e7b",
     "dataset_type": "Dataset",
+    "genome_assembly": "GRCm38",
     "file_type": "File",
     "assay_info": "Assay",
     "biosource_name" : "Biosource"
 }
-{
+,{
     "lab": "/labs/4dn-dcic-lab/",
     "status": "uploaded",
     "award":"/awards/1U01CA200059-01/",
@@ -463,7 +464,7 @@
     "higlass_uid":"Zbklhay4QDmCrM_BtJxtRg",
     "file_format":"d1312212-218e-4f61-aaf0-91f226248b2c",
     "date_created":"2018-11-29T01:37:58.357095+00:00",
-    "submitted_by":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
+    "submitted_by": "4dndcic@gmail.com",
     "uuid": "c1b89d72-f353-4389-8273-b63ad8f02c4d",
     "dataset_type": "Dataset",
     "file_type": "counts",
@@ -483,5 +484,22 @@
         }
 
     ]
+}
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFIJUMOMQV",
+    "file_classification":"processed file",
+    "higlass_uid":"eF3th2_ZQ3GYus4Ci_AYeg",
+    "file_format":"bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "648cea7a-9751-4c6a-a0ac-23b76beba6d0",
+    "dataset_type": "Dataset",
+    "file_type": "peaks",
+    "assay_info": "Assay",
+    "genome_assembly": "GRCm38",
+    "biosource_name" : "Biosource"
 }
 ]
