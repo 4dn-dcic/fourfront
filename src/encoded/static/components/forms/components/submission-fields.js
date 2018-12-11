@@ -479,7 +479,7 @@ class LinkedObj extends React.PureComponent {
             itemType                    = schema.linkTo,
             prettyTitle                 = schema && ((schema.parentSchema && schema.parentSchema.title) || schema.title),
             dropMessage                 = "Drop " + (itemType || "Item") + " for field '" + (prettyTitle || nestedField) +  "'",
-            searchURL                   = '/search/?type=' + itemType + '#!selection',
+            searchURL                   = '/search/?currentAction=selection&type=' + itemType,
             childWindowAlert            = function(){
                 // We have this inside a function instead of passing JSX element(s) because
                 // as JSX elements they might gain non-serializable properties when being passed down thru props.
@@ -501,7 +501,7 @@ class LinkedObj extends React.PureComponent {
         if (schema.ff_flag && schema.ff_flag.startsWith('filter:')) {
             // the field to facet on could be set dynamically
             if (schema.ff_flag == "filter:valid_item_types"){
-                searchURL = '/search/?type=' + itemType + '&valid_item_types=' + currType + '#!selection';
+                searchURL += '&valid_item_types=' + currType;
             }
         }
 

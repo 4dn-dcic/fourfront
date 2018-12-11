@@ -34,18 +34,6 @@ export function allFilesForWorkflowRunsMappedByUUID(items){
 }
 
 
-export function isGraphSectionOpen(href, hash){
-    if (!href || typeof href !== 'string') return false;
-    if (typeof hash !== 'string' || !hash){
-        var parts = url.parse(href);
-        hash = parts.hash;
-    }
-    
-    if (typeof hash === 'string' && hash && hash.length > 1) return true;
-    return false;
-}
-
-
 export default class WorkflowRunTracingView extends DefaultItemView {
     
     constructor(props){
@@ -171,9 +159,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         var { loadingGraphSteps, steps, mounted, allRuns } = parentState,
             { context } = parentProps,
             iconClass   = "icon icon-fw icon-",
-            tooltip     = null,
-            parts       = url.parse(parentProps.href),
-            hash        = (parts.hash && parts.hash.length > 1 && parts.hash.slice(1)) || null;
+            tooltip     = null;
 
         if (steps === null || loadingGraphSteps){
             iconClass += 'circle-o-notch icon-spin';
@@ -189,14 +175,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
-            'isDefault' : isGraphSectionOpen(parentProps.href, hash),
             'content'   : (
                 <FileViewGraphSection
                     {...parentProps}
                     {..._.pick(parentState, 'steps', 'mounted', 'allRuns')}
                     key={"graph-for-" + context.uuid}
                     onToggleAllRuns={onToggleAllRuns}
-                    loading={loadingGraphSteps} urlHash={hash} />
+                    loading={loadingGraphSteps} />
             )
         };
     }

@@ -121,7 +121,6 @@ export class LinkToSelector extends React.PureComponent {
                 );
                 setTimeout(()=>{
                     this.windowObjectReference.location.assign(searchURL);
-                    this.windowObjectReference.location.hash = '#!selection';
                 }, 100);
             }
 

@@ -590,7 +590,7 @@ def add(context, request):
             'name': 'add',
             'title': 'Add',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=add'.format(item_uri=request.resource_path(context)),
         }
 
 
@@ -602,7 +602,7 @@ def edit(context, request):
             'name': 'edit',
             'title': 'Edit',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=edit'.format(item_uri=request.resource_path(context)),
         }
 
 
@@ -614,5 +614,5 @@ def create(context, request):
             'name': 'create',
             'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=create'.format(item_uri=request.resource_path(context)),
         }

@@ -322,7 +322,10 @@ export default class App extends React.Component {
         var { href, context } = this.props;
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics( analytics.getTrackingId(href), context );
+        analytics.initializeGoogleAnalytics(
+            analytics.getTrackingId(href),
+            context
+        );
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
@@ -486,12 +489,13 @@ export default class App extends React.Component {
      */
     listActionsFor(category) {
         if (category === 'context') {
-            var context = this.props.context;
-            var name = this.currentAction();
-            var context_actions = [];
-            Array.prototype.push.apply(context_actions, context.actions || []);
+            var context         = this.props.context,
+                currentAction   = this.currentAction,
+                contextActions = [];
 
-            if (!name && context.default_page) {
+            Array.prototype.push.apply(contextActions, context.actions || []); // Add any from context itself
+
+            if (!currentAction && context.default_page) {
                 context = context.default_page;
                 var actions = context.actions || [];
                 for (var i = 0; i < actions.length; i++) {
@@ -499,10 +503,10 @@ export default class App extends React.Component {
                     if (action.href[0] == '#') {
                         action.href = context['@id'] + action.href;
                     }
-                    context_actions.push(action);
+                    contextActions.push(action);
                 }
             }
-            return context_actions;
+            return contextActions;
         }
         if (category === 'user_section') {
             return portal.user_section;
@@ -520,16 +524,15 @@ export default class App extends React.Component {
      * Calculates current action, if any, from URL hash.
      *
      * @public
+     * @param {string} [href] - Href to get current action from. Optional.
      * @returns {!string} Current action if any, or null.
      */
-    currentAction() {
-        var href_url = url.parse(this.props.href);
-        var hash = href_url.hash || '';
-        var name;
-        if (hash.slice(0, 2) === '#!') {
-            name = hash.slice(2);
-        }
-        return name || null;
+    currentAction(href) {
+        if (!href) href = this.props.href;
+        var hrefUrl     = url.parse(href, true),
+            hrefQuery   = hrefUrl.query || {};
+
+        return hrefQuery.currentAction || null;
     }
 
     /**
@@ -688,11 +691,17 @@ export default class App extends React.Component {
             ).join('&');
         }
 
+        // If we're submitting search form in selection mode, preserve selection mode at next URL.
+        if (currentAction === 'selection'){
+            if (search){
+                search += '&currentAction=selection';
+            } else {
+                search = 'currentAction=selection';
+            }
+        }
+
         // Append form name:vals as stringified URI params (`search`).
         if (search) href += '?' + search;
-
-        // If we're submitting search form in selection mode, preserve selection mode at next URL.
-        if (currentAction === 'selection') href += '#!' + currentAction;
 
         if (this.historyEnabled) {
             event.preventDefault();
@@ -907,22 +916,21 @@ export default class App extends React.Component {
      * @param {string} [href=null] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
      * @returns {boolean}
      */
-    stayOnSubmissionsPage(href = null) {
+    stayOnSubmissionsPage(nextHref = null) {
         // can override state in options
         // override with replace, which occurs on back button navigation
-        if(this.state.isSubmitting){
-            if (typeof href === 'string'){
-                if (href.indexOf('#!edit') > -1 || href.indexOf('#!create') > -1 || href.indexOf('#!clone') > -1){
-                    // Cancel out if we are "returning" to edit or create (submissions page) href.
-                    return false;
-                }
+        if (this.state.isSubmitting){
+            var nextAction = this.currentAction(nextHref);
+            if (nextAction && ['edit', 'create', 'clone'].indexOf(nextAction) > -1){
+                // Cancel out if we are "returning" to edit or create (submissions page) href.
+                return false;
             }
             var msg = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
-            if(confirm(msg)){
+            if (confirm(msg)){
                 // we are no longer submitting
                 this.setIsSubmitting(false);
                 return false;
-            }else{
+            } else {
                 // stay
                 return true;
             }

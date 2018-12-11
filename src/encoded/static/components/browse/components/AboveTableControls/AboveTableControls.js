@@ -247,7 +247,7 @@ export class AboveTableControls extends React.Component {
             if (addAction && typeof addAction.href === 'string'){ // TODO::: WE NEED TO CHANGE THIS HREF!! to /search/?type= format.
                 addButton = (
                     <div key="add-button" className="pull-left box create-add-button" style={{'paddingRight' : 10}}>
-                        <Button bsStyle="primary" href='#!add'>Create</Button>
+                        <Button bsStyle="primary" href={addAction.href}>Create</Button>
                     </div>
                 );
             }

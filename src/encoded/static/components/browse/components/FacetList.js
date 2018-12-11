@@ -460,9 +460,7 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
 
     var targetSearchHref;
 
-    if (!currentHref) {
-        currentHref = this.props.href;
-    }
+    currentHref = currentHref || this.props.href;
 
     var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters),
         isUnselecting = !!(unselectHrefIfSelected);
@@ -485,13 +483,8 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
         }
     }
 
-    // If we have a '#' in URL, add to target URL as well.
-    var hashFragmentIdx = currentHref.indexOf('#');
-    if (hashFragmentIdx > -1 && targetSearchHref.indexOf('#') === -1){
-        targetSearchHref += currentHref.slice(hashFragmentIdx);
-    }
-
-    // Ensure only 1 type filter is selected at once. Unselect any other type= filters if setting new one.
+    // Ensure only 1 type filter is selected at once.
+    // Unselect any other type= filters if setting new one.
     if (facet.field === 'type'){
         if (!(unselectHrefIfSelected)){
             var parts = url.parse(targetSearchHref, true);
@@ -507,6 +500,12 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
                 }
             }
         }
+    }
+
+    // If we have a '#' in URL, add to target URL as well.
+    var hashFragmentIdx = currentHref.indexOf('#');
+    if (hashFragmentIdx > -1 && targetSearchHref.indexOf('#') === -1){
+        targetSearchHref += currentHref.slice(hashFragmentIdx);
     }
 
     analytics.event('FacetList', (isUnselecting ? 'Unset Filter' : 'Set Filter'), {

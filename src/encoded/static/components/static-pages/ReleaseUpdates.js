@@ -114,16 +114,17 @@ export default class ReleaseUpdates extends React.Component {
     }
 
     render() {
-        var subtitle = null;
-        if (this.state.sectionData){
-            var section = this.state.sectionData;
-            var editLink = null;
-            if(this.state.isAdmin){
-                editLink = <a href={this.state.sectionData['@id'] + '#!edit'}>Edit</a>;
+        var { sectionData, isAdmin } = this.state.sectionData,
+            subtitle = null,
+            editLink = null;
+
+        if (sectionData){
+            if (isAdmin){
+                editLink = <a href={object.itemUtil.atId(sectionData) + '?currentAction=edit'}>Edit</a>;
             }
             subtitle = (
                 <div className="row release-update-static-section">
-                    <BasicStaticSectionBody className="col-sm-11" content={section.content} filetype={section.options && section.options.filetype} />
+                    <BasicStaticSectionBody className="col-sm-11" content={sectionData.content} filetype={sectionData.options && sectionData.options.filetype} />
                     <div className="col-sm-1 text-right">{editLink}</div>
                 </div>
             );
@@ -132,7 +133,7 @@ export default class ReleaseUpdates extends React.Component {
             <StaticPage.Wrapper>
                 {subtitle}
                 <hr className="mt-0" />
-                {this.viewUpdates()}
+                { this.viewUpdates() }
             </StaticPage.Wrapper>
         );
     }
