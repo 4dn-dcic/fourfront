@@ -460,7 +460,7 @@
     "award":"/awards/1U01CA200059-01/",
     "accession":"4DNFIEGXDIZJ",
     "file_classification":"processed file",
-    "higlass_uid":"MRxj47AUSmSzoaiaN6pkKg",
+    "higlass_uid":"Zbklhay4QDmCrM_BtJxtRg",
     "file_format":"d1312212-218e-4f61-aaf0-91f226248b2c",
     "date_created":"2018-11-29T01:37:58.357095+00:00",
     "submitted_by":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
@@ -468,7 +468,7 @@
     "dataset_type": "Dataset",
     "file_type": "counts",
     "assay_info": "Assay",
-    "genome_assembly": "GRCh38",
+    "genome_assembly": "GRCm38",
     "biosource_name" : "Biosource",
     "extra_files" : [
         {

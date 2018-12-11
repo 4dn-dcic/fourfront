@@ -407,7 +407,7 @@ def mcool_file_json(award, experiment, lab, file_formats):
     return item
 
 @pytest.fixture
-def bg_file_json(award, experiment, lab, file_formats):
+def bedGraph_file_json(award, experiment, lab, file_formats):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
