@@ -586,11 +586,12 @@ class SharedItem(Item):
 def add(context, request):
     """smth."""
     if request.has_permission('add', context):
+        type_name = context.type_info.name
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}?currentAction=add'.format(item_uri=request.resource_path(context)),
+            'profile': '/profiles/{name}.json'.format(name=type_name),
+            'href': '/search/?type={name}&currentAction=add'.format(name=type_name),
         }
 
 

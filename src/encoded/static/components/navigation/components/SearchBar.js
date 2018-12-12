@@ -90,23 +90,23 @@ export class SearchBar extends React.Component{
         );
     }
 
-    selectItemTypeDropdown(inProp = false){
-        if (this.props.currentAction === 'selection') return null;
+    selectItemTypeDropdown(visible = false){
+        var { currentAction } = this.props,
+            { searchAllItems } = this.state;
+        if (currentAction === 'selection') return null;
         return (
-            <Fade in={inProp} appear>
+            <Fade in={visible} appear>
                 <DropdownButton
                     id="search-item-type-selector"
                     bsSize="sm"
                     pullRight
-                    onSelect={(eventKey, evt)=>{
-                        this.toggleSearchAllItems(eventKey === 'all' ? true : false);
-                    }}
-                    title={this.state.searchAllItems ? 'All Items' : 'Experiment Sets'}
+                    onSelect={(eventKey, evt)=>{ this.toggleSearchAllItems(eventKey === 'all' ? true : false); }}
+                    title={searchAllItems ? 'All Items' : 'Experiment Sets'}
                 >
-                    <MenuItem eventKey='sets' data-key="sets" active={!this.state.searchAllItems}>
+                    <MenuItem eventKey='sets' data-key="sets" active={!searchAllItems}>
                         Experiment Sets
                     </MenuItem>
-                    <MenuItem eventKey='all' data-key="all" active={this.state.searchAllItems}>
+                    <MenuItem eventKey='all' data-key="all" active={searchAllItems}>
                         All Items (advanced)
                     </MenuItem>
                 </DropdownButton>

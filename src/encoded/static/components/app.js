@@ -490,11 +490,12 @@ export default class App extends React.Component {
     listActionsFor(category) {
         if (category === 'context') {
             var context         = this.props.context,
-                currentAction   = this.currentAction,
+                currentAction   = this.currentAction(),
                 contextActions = [];
 
             Array.prototype.push.apply(contextActions, context.actions || []); // Add any from context itself
 
+            // The below is deprecated ? TODO: Double check & delete.
             if (!currentAction && context.default_page) {
                 context = context.default_page;
                 var actions = context.actions || [];
@@ -530,9 +531,18 @@ export default class App extends React.Component {
     currentAction(href) {
         if (!href) href = this.props.href;
         var hrefUrl     = url.parse(href, true),
-            hrefQuery   = hrefUrl.query || {};
+            hrefQuery   = hrefUrl.query || {},
+            hrefAction  = hrefQuery.currentAction || null;
 
-        return hrefQuery.currentAction || null;
+        // Handle list of values, e.g. if `currentAction=selection&currentAction=selection&currentAction=edit` or something is in URL.
+        // We should __not__ get an array here and is glitch, but if so, lets fallback and choose _1st_ non-null item.
+        if (Array.isArray(hrefAction)){
+            console.error("Received unexpected list for `currentAction` URI param", hrefAction);
+            hrefAction = _.filter(hrefAction);
+            hrefAction = (hrefAction.length > 0 ? hrefAction[0] : null);
+        }
+
+        return hrefAction;
     }
 
     /**
@@ -617,19 +627,21 @@ export default class App extends React.Component {
         if (this.historyEnabled) {
             event.preventDefault();
 
-            var navOpts      = {},
-                hrefParts    = url.parse(href),
+            var hrefParts    = url.parse(href),
                 pHrefParts   = url.parse(this.props.href),
                 hrefHash     = hrefParts.hash,
+                samePath     = pHrefParts.path === hrefParts.path,
+                navOpts      = {
+                    // Same pathname & search but maybe different hash. Don't add history entry etc.
+                    'replace'           : samePath,
+                    'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
+                    'dontScrollToTop'   : samePath
+                },
                 targetOffset = target.getAttribute('data-target-offset'),
                 noCache      = target.getAttribute('data-no-cache');
 
             // Don't cache requests to user profile.
             if (noCache) navOpts.cache = false;
-
-            if ((!hrefParts.path || hrefParts.path === pHrefParts.path) && hrefParts.hash !== pHrefParts.hash){
-                navOpts.skipRequest = navOpts.dontScrollToTop = true;
-            }
 
             navigate(href, navOpts, function(){
 
@@ -676,7 +688,7 @@ export default class App extends React.Component {
             currentAction   = this.currentAction(),
             navOptions      = {
                 'replace'       : actionUrlParts.pathname == hrefParts.pathname,
-                'skipRequest'   : target.getAttribute('data-skiprequest')
+                'skipRequest'   : !!(target.getAttribute('data-skiprequest'))
             };
 
         if (target.getAttribute('data-removeempty')) {
@@ -693,9 +705,9 @@ export default class App extends React.Component {
 
         // If we're submitting search form in selection mode, preserve selection mode at next URL.
         if (currentAction === 'selection'){
-            if (search){
+            if (search && search.indexOf('currentAction=selection') === -1){
                 search += '&currentAction=selection';
-            } else {
+            } else if (!search) {
                 search = 'currentAction=selection';
             }
         }

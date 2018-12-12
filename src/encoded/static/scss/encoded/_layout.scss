@@ -619,6 +619,12 @@ div.dropdown.btn-group {
 	}
 }
 
+/** Utility class to move an icon down 1px. Useful for centering vertically in buttons. */
+.shift-down-1 {
+	position: relative;
+	top: 1px;
+}
+
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
 
 body .__react_component_tooltip {
