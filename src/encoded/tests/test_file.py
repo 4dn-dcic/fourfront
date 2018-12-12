@@ -443,6 +443,25 @@ def bigbed_file_json(award, experiment, lab, file_formats):
     return item
 
 @pytest.fixture
+def bed_beddb_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bed').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bed.gz',
+        'status': 'uploaded',
+        'extra_files' : [
+            {
+                "file_format" : file_formats.get('beddb').get('uuid'),
+                "file_size" :12345678,
+                "md5sum": "00000000000000000000000000000002"
+            },
+        ]
+    }
+    return item
+
+@pytest.fixture
 def mcool_file(testapp, mcool_file_json):
     res = testapp.post_json('/file_processed', mcool_file_json)
     return res.json['@graph'][0]

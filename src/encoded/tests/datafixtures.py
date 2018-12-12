@@ -410,6 +410,11 @@ def file_formats(testapp, lab, award):
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
         'bigbed': {'standard_file_extension': 'bb',
                "valid_item_types": ["FileProcessed", "FileReference"]},
+        'beddb' : {"standard_file_extension": "beddb",
+                "valid_item_types": ["FileProcessed", "FileReference"]},
+        'bed' : {"standard_file_extension": "bed.gz",
+                "extrafile_formats": ['beddb'],
+                "valid_item_types": ["FileProcessed", "FileReference"]},
     }
 
     for eff, info in ef_format_info.items():

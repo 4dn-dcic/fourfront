@@ -1,5 +1,5 @@
 import pytest
-from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json
+from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json
 pytestmark = pytest.mark.working
 
 # Test Higlass display endpoints.
@@ -369,7 +369,6 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
     assert "contents" in new_higlass_view_json["views"][0]["tracks"]["center"][0]
     contents = new_higlass_view_json["views"][0]["tracks"]["center"][0]["contents"]
     assert contents[0]["type"] == "heatmap"
-
 
 def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
@@ -936,4 +935,55 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
     assert found_annotation_track == True
     assert found_chromosome_track == True
+    assert found_data_track == True
+
+def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf, bed_beddb_file_json):
+    """Add a bed file (with a beddb used as a supporting file) to the HiGlass file.
+    """
+
+    # Get a file to add.
+    bed_beddb_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bed_beddb_file_json['md5sum'] = '00000000000000000000000000000001'
+    bed_beddb_file_json['genome_assembly'] = "GRCm38"
+    bed_file = testapp.post_json('/file_processed', bed_beddb_file_json).json['@graph'][0]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the file to the existing viewconf.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=bed_file['uuid'])]
+    })
+
+    # Get the new json.
+    new_higlass_json = response.json["new_viewconfig"]
+
+    # There should be 1 view
+    assert response.json["errors"] == ''
+    assert response.json["success"]
+
+    assert len(new_higlass_json["views"]) == 1
+
+    # The view should have a new top track
+    tracks = new_higlass_json["views"][0]["tracks"]
+    old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
+
+    assert len(tracks["left"]) == len(old_tracks["left"])
+    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+
+    # Central track is unchanged
+    assert len(tracks["center"][0]["contents"]) == 1
+    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+
+    # The top track should be a bed-like track
+    found_data_track = False
+    for track in tracks["top"]:
+        if "tilesetUid" in track and track["tilesetUid"] == bed_beddb_file_json['higlass_uid']:
+            found_data_track = True
+            assert track["type"] == "bedlike"
+
     assert found_data_track == True
