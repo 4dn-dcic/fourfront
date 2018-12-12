@@ -541,7 +541,7 @@ def add_files_to_higlass_viewconf(request):
         "new_genome_assembly" : current_genome_assembly
     }
 
-def add_single_file_to_higlass_viewconf(views, new_file_dict):
+def add_single_file_to_higlass_viewconf2(views, new_file_dict):
     """ Add a single file to the view config.
     """
 
@@ -576,113 +576,25 @@ def add_single_file_to_higlass_viewconf(views, new_file_dict):
     # Success! Return the modified view conf.
     return views, None
 
-def add_1d_file_to_higlass_viewconf(views, new_file):
-    """Add the given 1-D file to the higlass views.
+def add_single_file_to_higlass_viewconf(views, new_file):
+    """ Add a single file to the list of views.
 
     Returns:
-    - a boolean indicating success
-    - a string containing an error message, if any (may be None)
+        views : A list of the modified views. None if there is an error.
+        error : A string explaining the error. This is None if there is no error.
     """
 
-    new_track = {
-        "tilesetUid": new_file["higlass_uid"],
-        "name": new_file["display_title"],
-        "type": "horizontal-divergent-bar",
-        "server": "https://higlass.4dnucleome.org/api/v1",
-        "options": {
-            "name": new_file["display_title"],
-        }
-    }
+    # If there are already 6 views, stop and return an error.
+    if len(views) >= 6:
+        return None, "You cannot have more than 6 views in a single display."
 
-    new_track["options"]["name"] = get_title(new_file)
+    # TODO Get the file format and format of the extra files, if any.
+    file_format = new_file["file_format"]
 
-    if new_file["file_format"] == "/file-formats/bed/":
-        new_track["type"] = "bedlike"
+    # TODO get extra file formats
 
-    if new_file["file_format"] == "/file-formats/bigbed/":
-        new_track["height"] = "100"
-        new_track["type"] = "horizontal-vector-heatmap"
-        new_track["options"]["valueScaling"] = "linear"
-        # Add the color range options. A list of 256 strings, each containing an integer.
-        new_track["options"]["colorRange"] = []
-        for index in range(256):
-            red = int(index * 252 / 255)
-            green = int(index * 253 / 255)
-            blue = int((index * 188 / 255) + 3)
-            new_track["options"]["colorRange"].append(
-                "rgba({r},{g},{b},1)".format(
-                    r=red,
-                    g=green,
-                    b=blue,
-                )
-            )
-
-    new_track["options"]["coordSystem"] = new_file["genome_assembly"]
-
-    # If there are no views, create a default.
-    if not views:
-        new_view = {
-            "initialYDomain": [
-                -10000,
-                10000
-            ],
-            "initialXDomain": [
-                -10000,
-                10000
-            ],
-            "tracks": {
-                "right": [ ],
-                "gallery": [ ],
-                "left": [ ],
-                "whole": [ ],
-                "bottom": [ ],
-                "top": [],
-                "center": [],
-            },
-            "uid": "Not set yet",
-            "layout": {
-                "w": 12,
-                "static": False,
-                "h": 12,
-                "y": 0,
-                "i": "Not set yet",
-                "moved": False,
-                "x": 0
-            }
-        }
-        new_view["uid"] = uuid.uuid4()
-        new_view["layout"]["i"] = new_view["uid"]
-        views = [new_view, ]
-
-    for higlass_view in views:
-        # Add the new top track to the current top facing tracks.
-        higlass_view["tracks"]["top"].append(new_track)
-
-    return True, None
-
-def add_2d_file_to_higlass_viewconf(views, new_file):
-    """Create a new view to contain the 2D file and add it to the list of current views.
-
-    Returns:
-    - a boolean indicating success
-    - a string containing an error message, if any (may be None)
-    """
-
-    # Choose the first available view. If there are no views, make up some defaults.
-    base_view = None
-    add_new_view = True
-
-    if views:
-        base_view = views[0]
-        # If this view does not have a center track, then reuse this view.
-        if not (
-            "center" in base_view["tracks"] \
-            and len(base_view["tracks"]["center"]) > 0 \
-            and "contents" in base_view["tracks"]["center"][0] \
-            and len(base_view["tracks"]["center"][0]["contents"]) > 0
-        ) :
-            add_new_view = False
-    else:
+    # TODO If no views exist, create one now
+    if len(views) == 0:
         base_view = {
             "initialYDomain": [
                 -10000,
@@ -716,39 +628,190 @@ def add_2d_file_to_higlass_viewconf(views, new_file):
                 "x": 0
             }
         }
+        views.append(base_view)
 
-    if add_new_view:
-        new_view = deepcopy(base_view)
-        new_view["uid"] = uuid.uuid4()
+    # Based on the filetype's dimensions, try to add the file to the views
+    if file_format in (
+        "/file-formats/bg/",
+        "/file-formats/bw/",
+        "/file-formats/bed/",
+        "/file-formats/bigbed/"
+    ):
+        # Many file formats we just need a new 1D track added to the top of each view.
+        new_track, error = create_1d_track(new_file, "top")
+        if error:
+            return None, errors
+        add_track_to_views(new_track, views, ["top"])
+    elif file_format in (
+        "/file-formats/mcool/",
+        "/file-formats/hic/"
+    ):
+        # Some formats need a new 2D view added.
+        new_view, error = create_2d_view(new_file)
+        if error:
+            return None, errors
+        add_view_to_views(new_view, views)
     else:
-        new_view = base_view
+        return None, "Unknown file format {file_format}".format(file_format = file_format)
+
+    # Success! Return the modified view conf.
+    return views, None
+
+def create_1d_track(new_file, side="top"):
+    """ Creates a dictionary representing a 1d track of the given file.
+
+        Returns:
+        - a dict containing information for a new track (or None if there is an error)
+        - a string containing an error message, if any (may be None)
+    """
+    # Create default track options.
+    new_track = {
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "options": {}
+    }
+
+    # Based on the file type and the side, override options.
+    if new_file["file_format"] == "/file-formats/bed/":
+        new_track["type"] = "bedlike"
+    elif new_file["file_format"] == "/file-formats/bigbed/":
+        new_track["height"] = "100"
+        new_track["type"] = "horizontal-vector-heatmap"
+        new_track["options"]["valueScaling"] = "linear"
+        # Add the color range options. A list of 256 strings, each containing an integer.
+        new_track["options"]["colorRange"] = []
+        for index in range(256):
+            red = int(index * 252 / 255)
+            green = int(index * 253 / 255)
+            blue = int((index * 188 / 255) + 3)
+            new_track["options"]["colorRange"].append(
+                "rgba({r},{g},{b},1)".format(
+                    r=red,
+                    g=green,
+                    b=blue,
+                )
+            )
+    else:
+        new_track["type"] = "horizontal-divergent-bar"
+
+    # Add specific information for this file.
+    new_track["tilesetUid"] = new_file["higlass_uid"]
+    new_track["name"] = new_file["display_title"]
+    new_track["options"]["name"] = get_title(new_file)
+    new_track["options"]["coordSystem"] = new_file["genome_assembly"]
+
+    return new_track, None
+
+def add_track_to_views(new_track, views, sides=["top"]):
+    """ Add the given new track to all of the sides of all of the views.
+        Modifies views.
+
+        Returns:
+        - a boolean indicating success.
+        - a string containing an error message, if any (may be None)
+    """
+
+    # For each view
+    for view in views:
+        # For each side
+        for side in sides:
+            # Make sure the side exists
+            if not side in view["tracks"]:
+                return False, "View does not contain the side{side}".format(side=side)
+            # Add the new track to the view
+            view["tracks"][side].append(new_track)
+
+def create_2d_view(new_file):
+    """ Creates a dictionary representing a 2d view of the given file.
+
+        Returns:
+        - a dict containing information for a new view (or None if there is an error)
+        - a string containing an error message, if any (may be None)
+    """
+    # Create default view options.
+    new_view = {
+        "initialYDomain": [
+            -10000,
+            10000
+        ],
+        "initialXDomain": [
+            -10000,
+            10000
+        ],
+        "tracks": {
+            "right": [ ],
+            "gallery": [ ],
+            "left": [ ],
+            "whole": [ ],
+            "bottom": [ ],
+            "top": [],
+            "center": [
+                {
+                    "type" : "combined",
+                    "position" : "center",
+                    "contents" : [
+                        {
+                            "options" : {},
+                            "server" : "https://higlass.4dnucleome.org/api/v1",
+                        }
+                    ]
+                }
+            ],
+        },
+        "uid": "Not set yet",
+        "layout": {
+            "w": 12,
+            "static": False,
+            "h": 12,
+            "y": 0,
+            "i": "Not set yet",
+            "moved": False,
+            "x": 0
+        }
+    }
+
+    contents = new_view["tracks"]["center"][0]["contents"][0]
+
+    contents["tilesetUid"] = new_file["higlass_uid"]
+    contents["name"] = new_file["display_title"]
+
+    # Based on the file type, override the options.
+    contents["type"] = "heatmap"
+
+    # Add a uuid for this view.
+    new_view["uid"] = uuid.uuid4()
+    new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
     new_view["layout"]["i"] = new_view["uid"]
 
-    new_content = {}
-    new_content["tilesetUid"] = new_file["higlass_uid"]
-    new_content["name"] = new_file["display_title"]
-    new_content["type"] = "heatmap"
-    new_content["server"] = "https://higlass.4dnucleome.org/api/v1"
-    new_content["options"] = {}
+    # Add specific information for this file.
+    contents["options"]["coordSystem"] = new_file["genome_assembly"]
+    contents["options"]["name"] = get_title(new_file)
+    return new_view, None
 
-    if "genome_assembly" in new_file:
-        new_content["options"]["coordSystem"] = new_file["genome_assembly"]
-    new_content["options"]["name"] = get_title(new_file)
-    if len(new_view["tracks"]["center"]) < 1:
-        new_view["tracks"]["center"] = [
-            {
-                "contents":[]
-            }
-        ]
+def add_view_to_views(new_view, views):
+    """ Add the given new view to the collection of views.
+        Modifies views.
 
-    new_view["tracks"]["center"][0]["type"] = "combined"
-    new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
-    new_view["tracks"]["center"][0]["position"] = "center"
+        Returns:
+        - a boolean indicating success.
+        - a string containing an error message, if any (may be None)
+    """
+    # If the first view is blank, override it with the new view.
+    if not (
+        len(views) > 0 \
+        and "center" in views[0]["tracks"] \
+        and len(views[0]["tracks"]["center"]) > 0 \
+        and "contents" in views[0]["tracks"]["center"][0] \
+        and len(views[0]["tracks"]["center"][0]["contents"]) > 0
+    ) :
+        views[0]["tracks"]["center"] = new_view["tracks"]["center"]
+        return True, None
 
-    new_view["tracks"]["center"][0]["contents"].append(new_content)
+    # If there are 6 views already, stop
+    if len(views) >= 6:
+        return False, "You cannot have more than 6 views in a single display."
 
-    if add_new_view:
-        views.append(new_view)
+    # Append the view to the views.
+    views.append(new_view)
     return True, None
 
 def get_title(file):
@@ -757,7 +820,6 @@ def get_title(file):
     # Use the track title. As a fallback, use the display title.
     title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
     return title
-
 
 def repack_higlass_views(views):
     """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:

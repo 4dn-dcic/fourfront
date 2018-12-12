@@ -370,6 +370,7 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
     contents = new_higlass_view_json["views"][0]["tracks"]["center"][0]["contents"]
     assert contents[0]["type"] == "heatmap"
 
+
 def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
     """
@@ -910,7 +911,7 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
     assert len(tracks["left"]) == len(old_tracks["left"])
     assert len(tracks["top"]) == len(old_tracks["top"]) + 1
 
-    # TODO Get the top track and check the format.
+    # Get the top track and check the format.
     found_annotation_track = False
     found_chromosome_track = False
     found_data_track = False
