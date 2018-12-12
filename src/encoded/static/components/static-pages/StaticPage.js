@@ -219,17 +219,18 @@ export class StaticEntry extends React.PureComponent {
     }
 
     renderEntryContent(baseClassName){
-        var { context, section } = this.props,
+        var { section } = this.props,
             content     = (section && section.content) || null,
             options     = (section && section.options) || {},
-            filetype    = (section && section.filetype) || null, // Only set on StaticSection; not HiglassViewConfig or other Item types.
-            placeholder = false;
+            filetype    = (section && section.filetype) || null; // Only set on StaticSection; not HiglassViewConfig or other Item types.
 
         if (!content) return null;
 
         if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            placeholder = true;
-            content = replacePlaceholderString(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
+            content = replacePlaceholderString(
+                content.slice(12).trim().replace(/\s/g,''), // Remove all whitespace to help reduce any typo errors.
+                _.omit(this.props, 'className', 'section', 'content')
+            );
         }
 
         var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
@@ -311,12 +312,17 @@ export default class StaticPage extends React.PureComponent {
 
     static Wrapper = Wrapper
 
-    static renderSections(renderMethod, parsedContent){
+    static renderSections(renderMethod, parsedContent, props){
         if (!parsedContent || !parsedContent.content || !Array.isArray(parsedContent.content)){
             console.error('No content defined for page', parsedContent);
             return null;
         }
-        return _.map(parsedContent.content, function(section){ return renderMethod(section.id || section.name, section, parsedContent); });
+        return _.map(
+            parsedContent.content,
+            function(section){
+                return renderMethod(section.id || section.name, section, props);
+            }
+        );
     }
 
     static defaultProps = {
@@ -337,8 +343,18 @@ export default class StaticPage extends React.PureComponent {
                 }
             }
         },
-        'entryRenderFxn' : function(sectionName, section, context){
-            return <StaticEntry key={sectionName} sectionName={sectionName} section={section} context={context} />;
+
+        /**
+         * Default function for rendering out parsed section(s) content.
+         *
+         * @param {string} sectionName - Unique identifier of the section. Use to navigate to via '#<sectionName>' in URL.
+         * @param {{ content : string|JSX.Element }} section - Object with parsed content, title, etc.
+         * @param {Object} props - Collection of props passed down from BodyElement.
+         */
+        'entryRenderFxn' : function(sectionName, section, props){
+            return (
+                <StaticEntry {...props} key={sectionName} sectionName={sectionName} section={section} />
+            );
         }
     };
 
@@ -394,7 +410,7 @@ export default class StaticPage extends React.PureComponent {
                 {..._.pick(this.props, 'navigate', 'windowWidth', 'registerWindowOnScrollHandler', 'href')}
                 key="page-wrapper" title={parsedContent.title}
                 tableOfContents={tableOfContents} context={parsedContent}
-                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent)} />
+                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent, this.props)} />
         );
     }
 }
