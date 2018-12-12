@@ -26,6 +26,7 @@ from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
 import uuid
+import time
 
 
 def includeme(config):
@@ -122,11 +123,13 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         search = search.params(preference=search_session_id)
 
     ### Execute the query
+    t0 = time.time()
     if size == 'all':
         es_results = execute_search_for_all_results(search)
     else:
         size_search = search[from_:from_ + size]
         es_results = execute_search(size_search)
+    print('\n\nQUERY: %s\nELAPSED: %s\n\n' % (prepared_terms.get('q'), (time.time() - t0)))
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
@@ -458,10 +461,17 @@ def build_query(search, prepared_terms, source_fields):
             query_info['query'] = value
             query_info['lenient'] = True
             query_info['default_operator'] = 'AND'
-            query_info['default_field'] = '_all'
+            # query_info['default_field'] = '_all'
+
+            # maybe add for query_string?
+            # query_info['allow_leading_wildcard'] = False
+
+            # simple_query_string
+            query_info['fields'] = ['_all']
             break
     if query_info != {}:
-        string_query = {'must': {'query_string': query_info}}
+        string_query = {'must': {'simple_query_string': query_info}}
+        # string_query = {'must': {'query_string': query_info}}
         query_dict = {'query': {'bool': string_query}}
     else:
         query_dict = {'query': {'bool':{}}}
