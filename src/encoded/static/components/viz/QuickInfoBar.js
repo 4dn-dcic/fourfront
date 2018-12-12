@@ -33,6 +33,7 @@ export default class QuickInfoBar extends React.PureComponent {
         // If have href, only show for /browse/, /search/, and / & /home
         var urlParts = url.parse(href);
         if (urlParts.hash && urlParts.hash.indexOf('!impersonate-user') > -1) return true;
+        if (urlParts.search && urlParts.search.indexOf('currentAction=impersonate-user') > -1) return true;
         // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
         var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
         if (pathParts[0] === 'browse') return false;
