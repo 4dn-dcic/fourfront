@@ -373,7 +373,7 @@
                     "title": "User UUID",
                     "type": "string"
                 },
-                "date_started": {
+                "date_initialized": {
                     "title": "Date Initialized",
                     "type": "string",
                     "anyOf": [
