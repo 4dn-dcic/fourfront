@@ -112,10 +112,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
     search = set_facets(search, facets, query_filters, string_query, types, doc_types, custom_aggregations, size, from_)
 
-    ### Add 10 second search timeout, if we are using a query string
-    if prepared_terms.get('q'):
-        search = search.params(request_timeout=10)
-
     ### Add preference from session, if available
     search_session_id = None
     if request.__parent__ is None and not return_generator and size != 'all': # Probably unnecessary, but skip for non-paged, sub-reqs, etc.
@@ -358,26 +354,7 @@ def prepare_search_term(request):
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
-    if 'q' in prepared_terms:
-        prepared_terms['q'] = process_query_string(prepared_terms['q'])
     return prepared_terms
-
-
-def process_query_string(search_query):
-    from antlr4 import IllegalStateException
-    from lucenequery.prefixfields import prefixfields
-    from lucenequery import dialects
-    if search_query == '*':
-        return search_query
-    # avoid interpreting slashes as regular expressions
-    search_query = search_query.replace('/', r'\/')
-    try:
-        query = prefixfields('embedded.', search_query, dialects.elasticsearch)
-    except (IllegalStateException):
-        msg = "Invalid query: {}".format(search_query)
-        raise HTTPBadRequest(explanation=msg)
-    else:
-        return query.getText()
 
 
 def set_doc_types(request, types, search_type):
@@ -461,17 +438,10 @@ def build_query(search, prepared_terms, source_fields):
             query_info['query'] = value
             query_info['lenient'] = True
             query_info['default_operator'] = 'AND'
-            # query_info['default_field'] = '_all'
-
-            # maybe add for query_string?
-            # query_info['allow_leading_wildcard'] = False
-
-            # simple_query_string
             query_info['fields'] = ['_all']
             break
     if query_info != {}:
         string_query = {'must': {'simple_query_string': query_info}}
-        # string_query = {'must': {'query_string': query_info}}
         query_dict = {'query': {'bool': string_query}}
     else:
         query_dict = {'query': {'bool':{}}}
