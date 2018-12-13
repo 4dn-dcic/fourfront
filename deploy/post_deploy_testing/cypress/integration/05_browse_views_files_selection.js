@@ -40,7 +40,8 @@ describe('Browse Views - Files Selection', function () {
             // Open column selector panel
             cy.get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
                 // Check the 'Date Created' checkbox
-                .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]').click().end()
+                .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]')
+                .scrollIntoView().click({ 'force' : true }).end()
                 // Perform check for initial expected condition (sort by date_created -- descending)
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
                 .should('have.class', 'active')
@@ -52,7 +53,7 @@ describe('Browse Views - Files Selection', function () {
         });
 
         it('Can press button at right to scroll to right side of search results table', function(){
-            cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge').trigger('mousedown', { 'button' : 0 })
+            cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button' : 0, 'force' : true })
                 .wait(4000) // Simulate holding down for 4 seconds.
                 .get('#content div.shadow-border-layer div.edge-scroll-button.right-edge').trigger('mouseup', { 'force' : true }) // Might become invisible
                 .end();
@@ -61,7 +62,8 @@ describe('Browse Views - Files Selection', function () {
         it('Can change to sort by date_sorted -- ascending', function(){
             cy.scrollTo(0, 500)
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
-                .click()
+                .scrollIntoView()
+                .click({ 'force' : true })
                 .should('have.class', 'active')
                 .within(()=>{
                     cy.get('i').should('have.class', 'icon-sort-asc');
@@ -69,7 +71,7 @@ describe('Browse Views - Files Selection', function () {
         });
 
         it('Can press button at left to scroll to right side of search results table', function(){
-            cy.get('#content div.shadow-border-layer div.edge-scroll-button.left-edge').trigger('mousedown', { 'button' : 0 })
+            cy.get('#content div.shadow-border-layer div.edge-scroll-button.left-edge:not(.faded-out)').trigger('mousedown', { 'button' : 0, 'force' : true  })
                 .wait(4000) // Simulate holding down for 4 seconds.
                 .get('#content div.shadow-border-layer div.edge-scroll-button.left-edge').trigger('mouseup', { 'force' : true }) // Might become invisible
                 .end();
