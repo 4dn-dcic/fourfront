@@ -29,7 +29,8 @@
             "enum" : [
                 "other",
                 "download_tracking",
-                "google_analytics"
+                "google_analytics",
+                "jupyterhub_session"
             ]
 		},
         "download_tracking": {
@@ -358,6 +359,43 @@
                             }
                         }
 
+                    }
+                }
+            }
+        },
+        "jupyterhub_session": {
+            "title": "JupyterHub Session",
+            "type": "object",
+            "description": "Subobject to track a JupyterHub session. Allows additional properties",
+            "additionalProperties": true,
+            "properties": {
+                "user_uuid": {
+                    "title": "User UUID",
+                    "type": "string"
+                },
+                "date_initialized": {
+                    "title": "Date Initialized",
+                    "type": "string",
+                    "anyOf": [
+                        {"format": "date-time"},
+                        {"format": "date"}
+                    ]
+                },
+                "date_culled": {
+                    "title": "Date Culled",
+                    "type": "string",
+                    "anyOf": [
+                        {"format": "date-time"},
+                        {"format": "date"}
+                    ]
+                },
+                "files_mounted": {
+                    "type" : "array",
+                    "title" : "Files Mounted",
+                    "description": "UUIDs of files mounted during this session.",
+                    "items" : {
+                        "title": "File UUID",
+                        "type":  "string"
                     }
                 }
             }
