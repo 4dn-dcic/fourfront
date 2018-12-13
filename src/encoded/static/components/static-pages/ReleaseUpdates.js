@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import {  Collapse, Table } from 'react-bootstrap';
-import { console, object, ajax, JWT } from'./../util';
+import { console, object, ajax, JWT, analytics, isServerSide } from'./../util';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import { BasicStaticSectionBody } from './components';
@@ -114,7 +114,7 @@ export default class ReleaseUpdates extends React.Component {
     }
 
     render() {
-        var { sectionData, isAdmin } = this.state.sectionData,
+        var { sectionData, isAdmin } = this.state,
             subtitle = null,
             editLink = null;
 
@@ -168,65 +168,87 @@ class SingleUpdate extends React.Component {
     buildItem(item){
         // catch errors where there are no experiments in a set
         // this should not happen, but can occur with test data...
-        if (item.primary_id.experiments_in_set.length == 0){
+        if (!item || !item.primary_id || !Array.isArray(item.primary_id.experiments_in_set) || item.primary_id.experiments_in_set.length === 0){
+            console.error('No experiments in set (?)');
+            if (!isServerSide()){
+                analytics.exception('Release Updates - No experiments in set ' + ((item && item.primary_id && item.primary_id['@id']) || '(unknown)') );
+            }
             return null;
         }
-        return(
+
+        var firstExp    = item.primary_id.experiments_in_set[0],
+            atId        = object.itemUtil.atId(item.primary_id),
+            categorizer = (
+                (
+                    firstExp.experiment_categorizer && firstExp.experiment_categorizer.field && firstExp.experiment_categorizer.value &&
+                    firstExp.experiment_categorizer.field + ': ' + firstExp.experiment_categorizer.value
+                ) || null
+            );
+
+        return (
             <tr key={item.primary_id.uuid} >
-                <td><a href={item.primary_id['@id']}>{item.primary_id.display_title}</a></td>
-                <td>{item.primary_id.experiments_in_set[0].experiment_type}</td>
-                <td>{item.primary_id.experiments_in_set[0].biosample.biosource_summary}</td>
-                <td>
-                    {item.primary_id.experiments_in_set[0].experiment_categorizer.value === null ? null :  item.primary_id.experiments_in_set[0].experiment_categorizer.field + ': ' + item.primary_id.experiments_in_set[0].experiment_categorizer.value}
-                </td>
-                <td>
-                    {this.buildSecondary(item.primary_id['@id'], item.secondary_ids)}
-                </td>
+                <td><a href={atId}>{ item.primary_id.display_title }</a></td>
+                <td>{ firstExp.experiment_type }</td>
+                <td>{ firstExp.biosample.biosource_summary }</td>
+                <td>{ categorizer }</td>
+                <td>{ this.buildSecondary(atId, item.secondary_ids) }</td>
             </tr>
         );
     }
 
+    /**
+     * Create a div that contains a list of additional_info + secondary @ids or
+     * nothing if the only secondary id == set_id (primary).
+     *
+     * @param {string} set_id - @id of Exp Set
+     * @param {Object} secondary_list - ??
+     */
     buildSecondary(set_id, secondary_list){
-        // create a div that contains a list of additional_info + secondary @ids or
-        // nothing if the only secondary id == set_id (primary)
-        if (secondary_list.length === 1 && set_id === secondary_list[0]['secondary_id']['@id']){
+        if (secondary_list.length === 1 && set_id === object.itemUtil.atId(secondary_list[0].secondary_id)){
             return null;
-        }else{
-            return secondary_list.map((item) => <div key={item['secondary_id']['@id']}>
-                {item.additional_info ? <span>{item.additional_info + ' '}</span> : null}
-                <a href={item['secondary_id']['@id']}>{item.secondary_id.display_title}</a>
-            </div>);
+        } else {
+            return _.map(secondary_list, (item) =>
+                <div key={object.itemUtil.atId(item.secondary_id)}>
+                    {item.additional_info ? <span>{item.additional_info + ' '}</span> : null}
+                    <a href={object.itemUtil.atId(item.secondary_id)}>{item.secondary_id.display_title}</a>
+                </div>
+            );
         }
     }
 
     render(){
-        var editLink = null;
-        if(this.props.isAdmin){
-            editLink = <a href={this.props.updateData['@id'] + '#!edit'}>Edit</a>;
+        var { isAdmin, updateData, onStartOpen, onStartClose, onFinishOpen, onFinishClose } = this.props,
+            { open } = this.state,
+            editLink = isAdmin ? <a href={object.itemUtil.atId(updateData) + '?currentAction=edit'}>Edit</a> : null,
+            styleObj = {
+                'borderColor' : 'transparent'
+            };
+
+        switch(updateData.severity){
+            case 1:
+                styleObj.backgroundColor = '#fcf8e3'; // Yellow-ish
+                break;
+            case 2:
+                styleObj.backgroundColor = '#f2dede'; // Pink-ish
+                break;
+            case 3:
+                styleObj.backgroundColor = '#f5a894'; // Orange/red-ish
+                break;
+            default:
+                styleObj.backgroundColor = "#dff0d8"; // Green-ish
         }
-        var styleObj = {
-            'borderColor' : 'transparent'
-        };
-        if (this.props.updateData.severity === 1){
-            styleObj.backgroundColor = '#fcf8e3';
-        } else if (this.props.updateData.severity === 2){
-            styleObj.backgroundColor = '#f2dede';
-        } else if (this.props.updateData.severity === 3){
-            styleObj.backgroundColor = '#f5a894';
-        } else {
-            styleObj.backgroundColor = "#dff0d8";
-        }
+
         return(
-            <div className={"overview-blocks-header with-background mb-1" + (this.state.open ? ' is-open' : ' is-closed')} style={styleObj}>
+            <div className={"overview-blocks-header with-background mb-1" + (open ? ' is-open' : ' is-closed')} style={styleObj}>
                 <h5 className="release-section-title clickable with-accent" onClick={this.toggle}>
-                    <span><i className={"expand-icon icon icon-" + (this.state.open ? 'minus' : 'plus')} data-tip={this.state.open ? 'Collapse' : 'Expand'}/>{ this.props.updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
+                    <span><i className={"expand-icon icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>{ updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
                 </h5>
-                <Collapse in={this.state.open} onEnter={this.props.onStartOpen} onEntered={this.props.onFinishOpen} onExit={this.props.onStartClose} onExited={this.props.onFinishClose}>
+                <Collapse in={open} onEnter={onStartOpen} onEntered={onFinishOpen} onExit={onStartClose} onExited={onFinishClose}>
                     <div className="inner">
                         <hr className="tab-section-title-horiz-divider" style={{ borderColor : 'rgba(0,0,0,0.25)' }}/>
                         <div>
                             <div className="row mt-07 mb-07">
-                                <div className="col-sm-11">{this.props.updateData.comments || "No comments."}</div>
+                                <div className="col-sm-11">{updateData.comments || "No comments."}</div>
                                 <div className="col-sm-1 text-right">{editLink}</div>
                             </div>
                             <Table className="mb-1" striped bordered condensed>
@@ -239,9 +261,7 @@ class SingleUpdate extends React.Component {
                                         <th>Notes</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {this.props.updateData.update_items.map((item) => this.buildItem(item))}
-                                </tbody>
+                                <tbody children={_.map(updateData.update_items, this.buildItem)} />
                             </Table>
                         </div>
                     </div>
