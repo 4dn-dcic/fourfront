@@ -95,6 +95,7 @@ DELETED = [
 # For running pipelines
 ALLOW_LAB_VIEW_ADMIN_EDIT = [
     (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view'),
     (Allow, 'role.lab_submitter', 'view'),
 ] + ONLY_ADMIN_VIEW
 
@@ -595,11 +596,12 @@ class SharedItem(Item):
 def add(context, request):
     """smth."""
     if request.has_permission('add', context):
+        type_name = context.type_info.name
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
+            'profile': '/profiles/{name}.json'.format(name=type_name),
+            'href': '/search/?type={name}&currentAction=add'.format(name=type_name),
         }
 
 
@@ -611,7 +613,7 @@ def edit(context, request):
             'name': 'edit',
             'title': 'Edit',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=edit'.format(item_uri=request.resource_path(context)),
         }
 
 
@@ -623,5 +625,5 @@ def create(context, request):
             'name': 'create',
             'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=create'.format(item_uri=request.resource_path(context)),
         }

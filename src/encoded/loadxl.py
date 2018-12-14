@@ -64,6 +64,7 @@ ORDER = [
     'quality_metric_pairsqc',
     'quality_metric_dedupqc_repliseq',
     'quality_metric_chipseq',
+    'quality_metric_atacseq',
     'microscope_setting_d1',
     'microscope_setting_d2',
     'microscope_setting_a1',

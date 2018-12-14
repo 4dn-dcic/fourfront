@@ -23,8 +23,7 @@
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "file.json#/facets"},
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "file.json#/facets"}
     ],
     "mixinColumns": [
         { "$ref": "file.json#/columns"}

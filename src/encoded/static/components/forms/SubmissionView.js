@@ -4,6 +4,7 @@ import React from 'react';
 import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
+import queryString from 'query-string';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
 import moment from 'moment';
 import { s3UploadFile } from '../util/aws';
@@ -1318,12 +1319,20 @@ export default class SubmissionView extends React.PureComponent{
         });
     }
 
-    /** Navigate to version of same page we're on, minus the '#!<action> hash. */
+    /** Navigate to version of same page we're on, minus the `currentAction` URI parameter. */
     cancelCreatePrimaryObject = (skipAskToLeave = false) => {
         var leaveFunc = () =>{
             // Navigate out.
-            var parts = url.parse(this.props.href);
-            this.props.navigate(parts.path, { skipRequest : true });
+            var parts = url.parse(this.props.href, true),
+                modifiedQuery = _.omit(parts.query, 'currentAction'),
+                modifiedSearch = queryString.stringify(modifiedQuery),
+                nextURI;
+
+            parts.query = modifiedQuery;
+            parts.search = (modifiedSearch.length > 0 ? '?' : '') + modifiedSearch;
+            nextURI = url.format(parts);
+
+            this.props.navigate(nextURI, { skipRequest : true });
         };
 
         if (skipAskToLeave === true){

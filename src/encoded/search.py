@@ -30,6 +30,14 @@ def includeme(config):
 
 sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?]')
 
+
+COMMON_EXCLUDED_URI_PARAMS = [
+    'frame', 'format', 'limit', 'sort', 'from', 'field',
+    'mode', 'redirected_from', 'datastore', 'referrer',
+    'currentAction'
+]
+
+
 @view_config(route_name='search', request_method='GET', permission='search')
 def search(context, request, search_type=None, return_generator=False, forced_type='Search', custom_aggregations=None):
     """
@@ -285,16 +293,27 @@ def normalize_query(request, search_type):
 
 
 def clear_filters_setup(request, doc_types, forced_type):
-    # Clear Filters path -- make a path that clears all non-datatype filters
-    # and leaves in search query, if present
+    '''
+    Clear Filters URI path
+
+    Make a URI path that clears all non-datatype filters
+    and leaves in `q` (search query) params, if present.
+    Also preserves currentAction=selection, if is set.
+
+    Returns:
+        A URL path
+    '''
     seach_query_specs = request.params.getall('q')
     seach_query_url = urlencode([("q", seach_query) for seach_query in seach_query_specs])
     # types_url will always be present (always >=1 doc_type)
     types_url = urlencode([("type", typ) for typ in doc_types])
+    current_action = request.params.get('currentAction')
 
     clear_qs = types_url or ''
     if seach_query_url:
         clear_qs += '&' + seach_query_url
+    if current_action == 'selection':
+        clear_qs += '&currentAction=selection'
     current_search_sort = request.params.getall('sort')
     current_search_sort_url = urlencode([("sort", s) for s in current_search_sort])
     if current_search_sort_url:
@@ -341,7 +360,7 @@ def prepare_search_term(request):
                 prepared_terms['q'] = ' AND '.join(join_list)
             else:
                 prepared_terms['q'] = val
-        elif field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field', 'before', 'after']:
+        elif field not in COMMON_EXCLUDED_URI_PARAMS + ['type']:
             if 'embedded.' + field not in prepared_terms.keys():
                 prepared_terms['embedded.' + field] = []
             prepared_terms['embedded.' + field].append(val)
@@ -594,9 +613,7 @@ def set_filters(request, search, result, principals, doc_types, types):
         exists_field = False # keep track of null values
         range_type = False # If we determine is a range request (field.to, field.from), will be populated with string 'date' or 'numerical'
         range_direction = None
-        if field in ['limit', 'y.limit', 'x.limit', 'mode', 'redirected_from',
-                     'format', 'frame', 'datastore', 'field', 'region', 'genome',
-                     'sort', 'from', 'referrer', 'q']:
+        if field in COMMON_EXCLUDED_URI_PARAMS + ['q']:
             continue
         elif field == 'type' and term != 'Item':
             continue

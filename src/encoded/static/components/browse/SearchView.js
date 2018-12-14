@@ -109,8 +109,8 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, constantHiddenColumns, columnDefinitionOverrideMap } = this.props;
-        var results                     = context['@graph'],
+        var { context, href, hiddenColumns, currentAction, constantHiddenColumns, columnDefinitionOverrideMap } = this.props,
+            results                     = context['@graph'],
             inSelectionMode             = currentAction === 'selection',
             facets                      = this.props.facets || context.facets,
             thisType                    = 'Item',
@@ -143,11 +143,14 @@ class ControlsAndResults extends React.PureComponent {
         }
 
         var columnDefinitionOverrides = (columnDefinitionOverrideMap && _.clone(columnDefinitionOverrideMap)) || {};
-        var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
+
+        // Kept for reference in case we want to re-introduce constrain that for 'select' button(s) to be visible in search result rows, there must be parent window.
+        //var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
         // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
         // Also add the popLink/target=_blank functionality to links
-        if (isThereParentWindow && currentAction === 'selection') {
+        // Remove lab.display_title and type columns on selection
+        if (inSelectionMode) {
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
@@ -171,12 +174,20 @@ class ControlsAndResults extends React.PureComponent {
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
                 }
             };
-            columnDefinitionOverrides['lab.display_title'] = {
-                'render' : function(result, columnDefinition, props, width){
-                    var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
-                    return newRender;
-                }
-            };
+            // remove while @type and lab from File selection columns
+            if (thisType === 'File'){
+                hiddenColumnsFull.push('@type');
+                hiddenColumnsFull.push('lab.display_title');
+                delete columnDefinitionOverrides['lab.display_title'];
+                delete columnDefinitionOverrides['@type'];
+            }else{
+                columnDefinitionOverrides['lab.display_title'] = {
+                    'render' : function(result, columnDefinition, props, width){
+                        var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
+                        return newRender;
+                    }
+                };
+            }
         }
 
         // We're on an abstract type; show detailType in type column.
@@ -197,7 +208,8 @@ class ControlsAndResults extends React.PureComponent {
                 { facets.length ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth')}
+                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth',
+                        'currentAction')}
                             className="with-header-bg" facets={facets} filters={context.filters}
                             onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
                             itemTypeForSchemas={itemTypeForSchemas} hideDataTypeFacet={inSelectionMode}

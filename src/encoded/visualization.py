@@ -12,6 +12,7 @@ from urllib.parse import (
     urlencode,
 )
 from datetime import datetime
+import uuid
 from .search import (
     DEFAULT_BROWSE_PARAM_LISTS,
     make_search_subreq,
@@ -24,14 +25,14 @@ from .types.workflow import (
     WorkflowRunTracingException,
     item_model_to_object
 )
-
+from .types.base import get_item_if_you_can
 
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
     config.add_route('date_histogram_aggregations', '/date_histogram_aggregations/')
+    config.add_route('add_files_to_higlass_viewconf', '/add_files_to_higlass_viewconf/')
     config.scan(__name__)
-
 
 # TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
 @view_config(route_name='trace_workflow_runs', request_method='GET', permission='view', context=Item)
@@ -420,3 +421,417 @@ def date_histogram_aggregations(request):
 
     return search_result
 
+@view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
+def add_files_to_higlass_viewconf(request):
+    """ Add multiple files to the given Higlass view config.
+    Assumes request's request is JSON and contains these keys:
+        higlass_viewconfig       : JSON of the current Higlass views. If None, uses a default view.
+        files                    : A list of file uuids to add.
+        firstViewLocationAndZoom : (Optional) A list of three numbers indicating the location and zoom levels of the first existing view.
+
+    Returns a dict:
+        success             : Boolean indicating success.
+        errors              : A string containing errors. Will be None if this is successful.
+        new_viewconfig      : New dict representing the new viewconfig.
+        new_genome_assembly : A string showing the new genome assembly.
+    """
+
+    # Get the viewconfig and its genome assembly. If none is provided, use the default empty higlass viewconf.
+    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
+    current_genome_assembly = request.json_body.get('genome_assembly', None)
+    if not higlass_viewconfig:
+        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
+        higlass_viewconfig = default_higlass_viewconf["viewconfig"]
+        current_genome_assembly = None
+
+    if not higlass_viewconfig:
+        return {
+            "success" : False,
+            "errors": "No view config found.",
+            "new_viewconfig": None,
+            "new_genome_assembly" : None
+        }
+
+    first_view_location_and_zoom = request.json_body.get('firstViewLocationAndZoom', [None, None, None])
+
+    # Get the file list.
+    files = request.json_body.get('files')
+    if not isinstance(files, list):
+        raise Exception("Expecting list of files.")
+
+    new_file_uuids = files
+    new_views = higlass_viewconfig["views"]
+
+    for file_uuid in new_file_uuids:
+        # Get the new file.
+        new_file_dict = get_item_if_you_can(request, file_uuid)
+
+        if not new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not exist".format(uuid=file_uuid),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
+        if not "higlass_uid" in new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have higlass_uid".format(uuid=file_uuid),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
+        if not "genome_assembly" in new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have genome assembly".format(uuid=file_uuid),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
+
+        # If the display doesn't have a genome_assembly, set it to this one.
+        genome_assembly_mapping = {
+            'GRCm38' : ('GRCm38', 'mm10'),
+            'GRCh38' : ('GRCh38', 'hg38'),
+            'dm6' : ('dm6'),
+            'galGal5' : ('galGal5'),
+        }
+        if not current_genome_assembly in genome_assembly_mapping.keys():
+            for new_assembly in genome_assembly_mapping:
+                aliases = genome_assembly_mapping[new_assembly]
+                if new_file_dict["genome_assembly"] in aliases:
+                    current_genome_assembly = new_assembly
+                    break
+
+        # Make sure the file's genome_assembly matches the viewConfig.
+        expected_genome_assemblies = genome_assembly_mapping[current_genome_assembly]
+        if not new_file_dict["genome_assembly"] in expected_genome_assemblies:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} has the wrong Genome Assembly. Expected {expected}, found {actual} instead".format(
+                    uuid=file_uuid,
+                    expected = current_genome_assembly,
+                    actual = new_file_dict["genome_assembly"]
+                ),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
+
+        # Try to add the new file to the given viewconf.
+        new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict)
+
+        if errors:
+            return {
+                "success" : False,
+                "errors" : "errors found while adding {file_uuid} : {errors}".format(file_uuid=file_uuid, errors=errors),
+                "new_viewconfig": None,
+                "new_genome_assembly" : None
+            }
+
+    # Resize and reposition the Higlass views.
+    repack_higlass_views(new_views)
+
+    # Set up the additional views so they all move and zoom with the first.
+    setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
+
+    higlass_viewconfig["views"] = new_views
+    return {
+        "success" : True,
+        "errors": "",
+        "new_viewconfig" : higlass_viewconfig,
+        "new_genome_assembly" : current_genome_assembly
+    }
+
+def add_single_file_to_higlass_viewconf(views, new_file_dict):
+    """ Add a single file to the view config.
+    """
+
+    # If there are already 6 views, stop and return an error.
+    views_count = len(views)
+    if views_count >= 6:
+        return None, "You cannot have more than 6 views in a single display."
+
+    # Based on the filetype's dimensions, try to add the file to the viewconf
+    file_format = new_file_dict["file_format"]
+    known_1d_formats = ("bg", "bw", "bed", "bigbed")
+    known_2d_formats = ("mcool", "hic")
+    if [x for x in known_2d_formats if x in file_format]:
+        status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
+        if errors and not status:
+            return None, errors
+    elif [x for x in known_1d_formats if x in file_format]:
+        status, errors = add_1d_file_to_higlass_viewconf(views, new_file_dict)
+        if errors and not status:
+            return None, errors
+    else:
+        return None, "Unknown file format {file_format}".format(file_format = new_file_dict['file_format'])
+
+    # Success! Return the modified view conf.
+    return views, None
+
+def add_1d_file_to_higlass_viewconf(views, new_file):
+    """Add the given 1-D file to the higlass views.
+
+    Returns:
+    - a boolean indicating success
+    - a string containing an error message, if any (may be None)
+    """
+
+    new_track = {
+        "tilesetUid": new_file["higlass_uid"],
+        "name": new_file["display_title"],
+        "type": "horizontal-divergent-bar",
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "options": {
+            "name": new_file["display_title"],
+        }
+    }
+
+    new_track["options"]["name"] = get_title(new_file)
+
+    if "bed" in new_file["file_format"]:
+        new_track["type"] = "bedlike"
+
+    if "bigbed" in new_file["file_format"]:
+        new_track["type"] = "horizontal-vector-heatmap"
+        new_track["options"]["valueScaling"] = "linear"
+
+    new_track["options"]["coordSystem"] = new_file["genome_assembly"]
+
+    # If there are no views, create a default.
+    if not views:
+        new_view = {
+            "initialYDomain": [
+                -10000,
+                10000
+            ],
+            "initialXDomain": [
+                -10000,
+                10000
+            ],
+            "tracks": {
+                "right": [ ],
+                "gallery": [ ],
+                "left": [ ],
+                "whole": [ ],
+                "bottom": [ ],
+                "top": [],
+                "center": [],
+            },
+            "uid": "Not set yet",
+            "layout": {
+                "w": 12,
+                "static": False,
+                "h": 12,
+                "y": 0,
+                "i": "Not set yet",
+                "moved": False,
+                "x": 0
+            }
+        }
+        new_view["uid"] = uuid.uuid4()
+        new_view["layout"]["i"] = new_view["uid"]
+        views = [new_view, ]
+
+    for higlass_view in views:
+        # Add the new top track to the current top facing tracks.
+        higlass_view["tracks"]["top"].append(new_track)
+
+    return True, None
+
+def add_2d_file_to_higlass_viewconf(views, new_file):
+    """Create a new view to contain the 2D file and add it to the list of current views.
+
+    Returns:
+    - a boolean indicating success
+    - a string containing an error message, if any (may be None)
+    """
+
+    # Choose the first available view. If there are no views, make up some defaults.
+    base_view = None
+    add_new_view = True
+
+    if views:
+        base_view = views[0]
+        # If this view does not have a center track, then reuse this view.
+        if not (
+            "center" in base_view["tracks"] \
+            and len(base_view["tracks"]["center"]) > 0 \
+            and "contents" in base_view["tracks"]["center"][0] \
+            and len(base_view["tracks"]["center"][0]["contents"]) > 0
+        ) :
+            add_new_view = False
+    else:
+        base_view = {
+            "initialYDomain": [
+                -10000,
+                10000
+            ],
+            "initialXDomain": [
+                -10000,
+                10000
+            ],
+            "tracks": {
+                "right": [ ],
+                "gallery": [ ],
+                "left": [ ],
+                "whole": [ ],
+                "bottom": [ ],
+                "top": [],
+                "center": [
+                    {
+                        "contents" : []
+                    }
+                ],
+            },
+            "uid": "Not set yet",
+            "layout": {
+                "w": 12,
+                "static": False,
+                "h": 12,
+                "y": 0,
+                "i": "Not set yet",
+                "moved": False,
+                "x": 0
+            }
+        }
+
+    if add_new_view:
+        new_view = deepcopy(base_view)
+        new_view["uid"] = uuid.uuid4()
+    else:
+        new_view = base_view
+    new_view["layout"]["i"] = new_view["uid"]
+
+    new_content = {}
+    new_content["tilesetUid"] = new_file["higlass_uid"]
+    new_content["name"] = new_file["display_title"]
+    new_content["type"] = "heatmap"
+    new_content["server"] = "https://higlass.4dnucleome.org/api/v1"
+    new_content["options"] = {}
+
+    if "genome_assembly" in new_file:
+        new_content["options"]["coordSystem"] = new_file["genome_assembly"]
+    new_content["options"]["name"] = get_title(new_file)
+    if len(new_view["tracks"]["center"]) < 1:
+        new_view["tracks"]["center"] = [
+            {
+                "contents":[]
+            }
+        ]
+
+    new_view["tracks"]["center"][0]["type"] = "combined"
+    new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
+    new_view["tracks"]["center"][0]["position"] = "center"
+
+    new_view["tracks"]["center"][0]["contents"].append(new_content)
+
+    if add_new_view:
+        views.append(new_view)
+    return True, None
+
+def get_title(file):
+    """ Returns a string containing the title for the view.
+    """
+    # Use the track title. As a fallback, use the display title.
+    title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
+    return title
+
+
+def repack_higlass_views(views):
+    """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
+    1 2 5
+    3 4 6
+    """
+
+    # Get the number of views. Do nothing if there are more than 6.
+    views_count = len(views)
+    if views_count < 1:
+        return
+    if views_count > 6:
+        return
+
+    # Determine the width and height of each view, evenly dividing a 12 x 12 area.
+    width = 12
+    if views_count >= 5:
+        width = 4
+    elif views_count > 1:
+        width = 6
+
+    height = 12
+    if views_count > 2:
+        height = 6
+
+    # Keep track of the x and y coordinates for each view.
+    x = 0
+    y = 0
+
+    # For each view
+    for higlass_view in views:
+        # Set the x and y coordinate for this view
+        higlass_view["layout"]["x"] = x
+        higlass_view["layout"]["y"] = y
+        higlass_view["layout"]["w"] = width
+        higlass_view["layout"]["h"] = height
+
+        # Increment the x counter
+        x += width
+
+        # Increment the x & y counter if the x counter needs to wrap around
+        if x >= 12:
+            y += height
+            x = 0
+
+def setZoomLocationLocks(views, view_config, scales_and_center_k):
+    """ Set the zoom and location of the views so they match the first one.
+    Then lock them so changing one changes all of them.
+    Modify the view_config.
+    """
+
+    if len(views) == 0:
+        return
+
+    # Get the x, y, zoom of the first view
+    view1_x = scales_and_center_k[0]
+    view1_y = scales_and_center_k[1]
+    view1_zoom = scales_and_center_k[2]
+
+    # Create new uuids to handle the zoom and location locks.
+    locationLockUuid = uuid.uuid4()
+    zoomLockUuid = uuid.uuid4()
+    lockUuids = {
+        "location" : str(locationLockUuid),
+        "zoom" : str(zoomLockUuid),
+    }
+
+    locks = {
+        "location" : {
+            "locksByViewUid": {},
+            "locksDict": {
+                lockUuids["location"] : {}
+            },
+        },
+        "zoom" : {
+            "locksByViewUid": {},
+            "locksDict": {
+                lockUuids["zoom"] : {}
+            },
+        },
+    }
+
+    # For each view,
+    for view in views:
+        uid = str(view["uid"])
+
+        # Add the new lock information.
+        for lockType in lockUuids:
+            lockUuid = lockUuids[lockType]
+            locks[lockType]["locksByViewUid"][uid] = lockUuid
+            locks[lockType]["locksDict"][lockUuid][uid] = [
+                view1_x,
+                view1_y,
+                view1_zoom
+            ]
+
+    # Set the view config.
+    view_config["locationLocks"] = locks["location"]
+    view_config["zoomLocks"] = locks["zoom"]

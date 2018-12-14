@@ -171,12 +171,18 @@ class Publication(Item, ItemWithAttachment):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "exp_sets_prod_in_pub.experimentset_type",
         "exp_sets_prod_in_pub.accession",
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type",
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
     ]
 
     def _update(self, properties, sheets=None):
-        # import pdb; pdb.set_trace()
+        # logic for determing whether to use manually-provided date_published
+        try:
+            prev_date_published = self.properties.get('date_published')
+        except KeyError:  # if new user, previous properties do not exist
+            prev_date_published = None
+        new_date_published = properties.get('date_published')
         self.upgrade_properties()
         title = ''
         abstract = ''
@@ -212,10 +218,13 @@ class Publication(Item, ItemWithAttachment):
             properties['authors'] = authors
         if url:
             properties['url'] = url
-        if date:
-            properties['date_published'] = date
         if journal:
             properties['journal'] = journal
+        # allow override of date_published
+        if new_date_published is not None and prev_date_published != new_date_published:
+            properties['date_published'] = new_date_published
+        elif new_date_published is None and date:
+            properties['date_published'] = date
 
         super(Publication, self)._update(properties, sheets)
         return
@@ -250,3 +259,11 @@ class Publication(Item, ItemWithAttachment):
             return title[0:120]
         return Item.display_title(self)
 
+    @calculated_property(schema={
+        "title": "Number of Experiment Sets",
+        "description": "The number of experiment sets produced by this publication.",
+        "type": "integer"
+    })
+    def number_of_experiment_sets(self, request, exp_sets_prod_in_pub=None):
+        if exp_sets_prod_in_pub:
+            return len(exp_sets_prod_in_pub)

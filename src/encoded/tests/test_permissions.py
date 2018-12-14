@@ -700,7 +700,7 @@ def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testap
 
 
 def test_awardmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab']
+    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab', 'pre-release']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -716,7 +716,7 @@ def test_awardmember_cannot_view_submitter_item_replaced(ind_human_item, submitt
 # Submitter created item and lab member wants to patch
 def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
     statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review by lab',
-                'submission in progress', 'planned', 'archived to project']
+                'submission in progress', 'planned', 'archived to project', 'pre-release']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -734,7 +734,7 @@ def test_viewing_group_member_cannot_view_submitter_item(ind_human_item, submitt
 
 # Submitter created item and project member wants to view
 def test_viewing_group_member_cannot_view_submitter_file(file_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['deleted', 'uploading', 'uploaded', 'upload failed']
+    statuses = ['deleted', 'uploading', 'uploaded', 'upload failed', 'pre-release']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)

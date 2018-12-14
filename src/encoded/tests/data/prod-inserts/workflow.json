@@ -85,7 +85,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -99,7 +99,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -138,7 +138,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -152,7 +152,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -167,7 +167,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -186,7 +186,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "file_format": "bed",
                             "global": true,
                             "type": "data file"
                         },
@@ -200,7 +200,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -215,7 +215,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -242,7 +242,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": true,
                             "type": "data file"
                         },
@@ -256,7 +256,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": true,
                             "type": "data file"
                         },
@@ -270,7 +270,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": false,
                             "type": "data file"
                         },
@@ -285,7 +285,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": false,
                             "type": "data file"
                         },
@@ -300,7 +300,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": false,
                             "type": "data file"
                         },
@@ -332,7 +332,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+                            "file_format": "matrix",
                             "global": true,
                             "type": "parameter"
                         },
@@ -359,7 +359,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": false,
                             "type": "data file"
                         },
@@ -374,7 +374,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": false,
                             "type": "data file"
                         },
@@ -389,7 +389,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce1",
+                            "file_format": "hdf5",
                             "global": false,
                             "type": "data file"
                         },
@@ -416,7 +416,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+                            "file_format": "matrix",
                             "global": true,
                             "type": "data file"
                         },
@@ -430,7 +430,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+                            "file_format": "matrix",
                             "global": true,
                             "type": "data file"
                         },
@@ -444,7 +444,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+                            "file_format": "matrix",
                             "global": true,
                             "type": "data file"
                         },
@@ -458,7 +458,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+                            "file_format": "matrix",
                             "global": true,
                             "type": "data file"
                         },
@@ -472,7 +472,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce2",
+                            "file_format": "matrix",
                             "global": true,
                             "type": "data file"
                         },
@@ -501,7 +501,7 @@
                 "workflow_argument_name": "limits_file"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_fastq"
             },
@@ -557,7 +557,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -609,7 +609,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-44f0-91f226248b2c",
+                            "file_format": "zip",
                             "global": true,
                             "type": "report"
                         },
@@ -634,15 +634,15 @@
         "app_version": "0.2.5",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
@@ -680,7 +680,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -694,7 +694,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -772,15 +772,15 @@
         "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
@@ -822,7 +822,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -836,7 +836,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -923,7 +923,7 @@
         "accession": "4DNWF6DUSPTF",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "The file(s) input into this Workflow.",
                 "workflow_argument_name": "input_file"
@@ -951,7 +951,7 @@
                         "meta": {
                             "cardinality": "single",
                             "description": "The file(s) input into this Workflow.",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "reference file"
                         },
@@ -998,7 +998,7 @@
         "app_version": "0.0.4",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "File on which MD5 calculation is run on.",
                 "workflow_argument_name": "input_file"
@@ -1030,7 +1030,7 @@
                         "meta": {
                             "cardinality": "single",
                             "description": "File on which MD5 calculation is run on.",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -1079,7 +1079,7 @@
         "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "File on which MD5 calculation is run on.",
                 "workflow_argument_name": "input_file"
@@ -1114,7 +1114,7 @@
                         "meta": {
                             "cardinality": "single",
                             "description": "File on which MD5 calculation is run on.",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "reference file"
                         },
@@ -1159,19 +1159,19 @@
         "accession": "4DNWFSOZLMGE",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
@@ -1181,25 +1181,25 @@
                 "workflow_argument_name": "nThreads"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam"
             },
             {
-                "argument_format": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bai",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs_index"
@@ -1220,7 +1220,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -1234,7 +1234,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -1248,7 +1248,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -1286,7 +1286,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1305,7 +1305,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1331,7 +1331,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1346,7 +1346,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bai",
                             "global": true,
                             "type": "data file"
                         },
@@ -1364,7 +1364,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1390,7 +1390,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -1404,7 +1404,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -1427,19 +1427,19 @@
         "accession": "4DNWFSOZLMGT",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
@@ -1449,25 +1449,25 @@
                 "workflow_argument_name": "nThreads"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam"
             },
             {
-                "argument_format": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bai",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_sorted_bam_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "out_pairs_index"
@@ -1488,7 +1488,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -1502,7 +1502,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -1516,7 +1516,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -1554,7 +1554,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1573,7 +1573,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1599,7 +1599,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1614,7 +1614,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bai",
                             "global": true,
                             "type": "data file"
                         },
@@ -1632,7 +1632,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -1658,7 +1658,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -1672,7 +1672,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -1694,17 +1694,17 @@
     {
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs_index"
             },
@@ -1725,27 +1725,27 @@
                 "workflow_argument_name": "normalization_type"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "cool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_cool"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_hic"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_mcool"
             }
@@ -1765,7 +1765,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -1779,7 +1779,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "reference file"
                         },
@@ -1804,7 +1804,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -1822,7 +1822,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -1874,7 +1874,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "reference file"
                         },
@@ -1889,7 +1889,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -1915,7 +1915,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": true,
                             "type": "data file"
                         },
@@ -1933,7 +1933,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -1960,7 +1960,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -1987,7 +1987,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -2047,7 +2047,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -2070,13 +2070,13 @@
         "accession": "4DNWFSOZLJGI",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_pairs_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_pairs"
@@ -2087,13 +2087,13 @@
                 "workflow_argument_name": "outprefix"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_pairs_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_pairs"
@@ -2114,7 +2114,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2128,7 +2128,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -2166,7 +2166,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -2180,7 +2180,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -2203,32 +2203,32 @@
         "accession": "4DNWFSOZLJBM",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "fastq1"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "fastq2"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bwa_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
-                "argument_format": "d13d16cf-218e-4f61-55f0-92f226248b2c",
+                "argument_format": "fasta",
                 "argument_type": "Input file",
                 "workflow_argument_name": "reference_fasta"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
@@ -2237,12 +2237,12 @@
                 "workflow_argument_name": "nsplit"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs_index"
             }
@@ -2262,7 +2262,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -2276,7 +2276,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -2290,7 +2290,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2318,7 +2318,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                            "file_format": "juicer_format_restriction_site_file",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2362,7 +2362,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2414,7 +2414,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -2428,7 +2428,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -2451,32 +2451,32 @@
         "accession": "4DNWFSOBBBBB",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "fastq1"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "fastq2"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bwa_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
-                "argument_format": "d13d16cf-218e-4f61-55f0-92f226248b2c",
+                "argument_format": "fasta",
                 "argument_type": "Input file",
                 "workflow_argument_name": "reference_fasta"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
@@ -2489,12 +2489,12 @@
                 "workflow_argument_name": "ncores"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairs_index"
             }
@@ -2514,7 +2514,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -2528,7 +2528,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -2542,7 +2542,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2570,7 +2570,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                            "file_format": "juicer_format_restriction_site_file",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2627,7 +2627,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2679,7 +2679,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -2693,7 +2693,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -2716,17 +2716,17 @@
         "accession": "4DNWFSOZLMMB",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs_index"
             },
@@ -2743,22 +2743,22 @@
                 "workflow_argument_name": "min_res"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                "argument_format": "pairs_px2",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs_index"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "cool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_cool"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_hic"
             }
@@ -2778,7 +2778,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -2792,7 +2792,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2817,7 +2817,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226348b2c",
+                            "file_format": "pairs_px2",
                             "global": true,
                             "type": "data file"
                         },
@@ -2835,7 +2835,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -2861,7 +2861,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -2888,7 +2888,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -2915,7 +2915,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -2959,7 +2959,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -2974,7 +2974,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "reference file"
                         },
@@ -3000,7 +3000,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3025,12 +3025,12 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chrsizes"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
@@ -3047,20 +3047,20 @@
                 "workflow_argument_name": "min_res"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "output_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "cool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_cool"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_hic"
             }
@@ -3090,7 +3090,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -3115,10 +3115,10 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "secondary_file_formats": [
-                                "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                                "pairs_px2"
                             ],
                             "type": "data file"
                         },
@@ -3144,7 +3144,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -3171,7 +3171,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -3198,7 +3198,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -3242,7 +3242,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -3268,7 +3268,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3291,19 +3291,19 @@
         "accession": "4DNWFG6JYY2P",
         "arguments": [
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_hic"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_mcool"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_mcool"
@@ -3323,7 +3323,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -3337,7 +3337,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3362,7 +3362,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3385,7 +3385,7 @@
         "accession": "4DNWFG6JJBM8",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_mcool"
@@ -3395,7 +3395,7 @@
                 "workflow_argument_name": "nres"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                "argument_format": "normvector_juicerformat",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_normvector"
@@ -3415,7 +3415,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3452,7 +3452,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                            "file_format": "normvector_juicerformat",
                             "global": true,
                             "type": "data file"
                         },
@@ -3475,7 +3475,7 @@
         "accession": "4DNWFG6J82TH",
         "arguments": [
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "input_hic"
@@ -3489,7 +3489,7 @@
                 "workflow_argument_name": "max_mem"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "description": "",
                 "workflow_argument_name": "output_hic"
@@ -3509,7 +3509,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -3560,7 +3560,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -3583,12 +3583,12 @@
         "accession": "4DNWF06BPEF2",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "cool",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_cool"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_hic"
             },
@@ -3597,7 +3597,7 @@
                 "workflow_argument_name": "ncores"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "output_mcool"
             }
@@ -3617,7 +3617,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3657,7 +3657,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -3676,7 +3676,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -3702,7 +3702,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                            "file_format": "normvector_juicerformat",
                             "global": true,
                             "type": "data file"
                         },
@@ -3720,7 +3720,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": true,
                             "type": "data file"
                         },
@@ -3734,7 +3734,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -3760,7 +3760,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -3789,19 +3789,19 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
@@ -3811,7 +3811,7 @@
                 "workflow_argument_name": "nThreads"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_bam"
             }
@@ -3838,7 +3838,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -3852,7 +3852,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -3866,7 +3866,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -3904,7 +3904,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -3931,19 +3931,19 @@
         "version_upgrade_log": "use of official release of bwa",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq1"
             },
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "fastq2"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "description": "",
                 "workflow_argument_name": "bwa_index"
@@ -3953,7 +3953,7 @@
                 "workflow_argument_name": "nThreads"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_bam"
             }
@@ -3980,7 +3980,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -3994,7 +3994,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -4008,7 +4008,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -4046,7 +4046,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4071,12 +4071,12 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bam"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
@@ -4085,7 +4085,7 @@
                 "workflow_argument_name": "nThreads"
             },
             {
-                "argument_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                "argument_format": "pairsam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_pairsam"
             }
@@ -4111,7 +4111,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4125,7 +4125,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -4163,7 +4163,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4188,7 +4188,7 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                "argument_format": "pairsam",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairsams"
             },
@@ -4197,7 +4197,7 @@
                 "workflow_argument_name": "nThreads"
             },
             {
-                "argument_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                "argument_format": "pairsam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "merged_pairsam"
             }
@@ -4223,7 +4223,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4261,7 +4261,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4286,12 +4286,12 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                "argument_format": "pairsam",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairsams"
             },
             {
-                "argument_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                "argument_format": "pairsam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "out_markedpairsam"
             }
@@ -4317,7 +4317,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4342,7 +4342,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4367,25 +4367,25 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                "argument_format": "pairsam",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairsam"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "dedup_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "lossless_bamfile"
             }
@@ -4411,7 +4411,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4425,7 +4425,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -4450,10 +4450,10 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "secondary_file_formats": [
-                                "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                                "pairs_px2"
                             ],
                             "type": "data file"
                         },
@@ -4467,7 +4467,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4492,20 +4492,20 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "out_pairs"
             }
@@ -4531,7 +4531,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -4545,7 +4545,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                            "file_format": "juicer_format_restriction_site_file",
                             "global": true,
                             "type": "reference file"
                         },
@@ -4570,10 +4570,10 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "secondary_file_formats": [
-                                "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                                "pairs_px2"
                             ],
                             "type": "data file"
                         },
@@ -4598,15 +4598,15 @@
         "app_version": "0.2.0",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "out_pairs"
             }
@@ -4632,7 +4632,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -4657,10 +4657,10 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "secondary_file_formats": [
-                                "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                                "pairs_px2"
                             ],
                             "type": "data file"
                         },
@@ -4683,12 +4683,12 @@
         "app_name": "hi-c-processing-bam",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_bams"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
@@ -4701,15 +4701,15 @@
                 "workflow_argument_name": "nthreads_merge"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "annotated_bam"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "filtered_pairs"
             }
@@ -4741,7 +4741,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4755,7 +4755,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -4795,7 +4795,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": false,
                             "type": "data file"
                         },
@@ -4814,7 +4814,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": false,
                             "type": "data file"
                         },
@@ -4854,7 +4854,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": false,
                             "type": "data file"
                         },
@@ -4873,7 +4873,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": false,
                             "type": "data file"
                         },
@@ -4900,7 +4900,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": false,
                             "type": "data file"
                         },
@@ -4919,7 +4919,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
+                            "file_format": "pairsam",
                             "global": false,
                             "type": "data file"
                         },
@@ -4934,7 +4934,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -4961,7 +4961,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -4975,7 +4975,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -4997,17 +4997,17 @@
         "app_name": "repliseq-parta",
         "arguments": [
             {
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "fastq"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                "argument_format": "bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bwaIndex"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
@@ -5024,7 +5024,7 @@
                 "workflow_argument_name": "winsize"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_format": "bam",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "filtered_sorted_deduped_bam"
             },
@@ -5033,11 +5033,11 @@
                 "workflow_argument_name": "dedup_qc_report"
             },
             {
-                "argument_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "bg",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d1311112-218e-4f61-aaf0-91f226248b2c",
-                    "d1311111-218e-4f61-aaf0-91f226248b2c"
+                    "bg_px2",
+                    "bw"
                 ],
                 "workflow_argument_name": "count_bg"
             }
@@ -5067,7 +5067,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -5094,7 +5094,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": false
                         },
                         "name": "out_clipped_fastq",
@@ -5112,7 +5112,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": false
                         },
                         "name": "fastq1",
@@ -5126,7 +5126,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-91f226248b2c",
+                            "file_format": "bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -5166,7 +5166,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false
                         },
                         "name": "out_bam",
@@ -5184,7 +5184,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false
                         },
                         "name": "input_bam",
@@ -5238,7 +5238,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false
                         },
                         "name": "out_filtered_sorted_bam",
@@ -5256,7 +5256,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false
                         },
                         "name": "input_bam",
@@ -5283,7 +5283,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": true,
                             "type": "data file"
                         },
@@ -5318,7 +5318,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "file_format": "bam",
                             "global": false,
                             "type": "data file"
                         },
@@ -5333,7 +5333,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -5376,7 +5376,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "bg",
                             "global": true,
                             "type": "data file"
                         },
@@ -5395,21 +5395,424 @@
         "workflow_type": "Repli-seq data processing"
     },
     {
-        "app_name": "hi-c-processing-pairs",
-        "app_version": "0.2.5",
+        "app_name": "repliseq-parta",
+        "app_version": "v14",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
-                "workflow_argument_name": "input_pairs"
+                "workflow_argument_name": "fastq"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "bwaIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bwaIndex"
+            },
+            {
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                "argument_type": "parameter",
+                "workflow_argument_name": "nthreads"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "memperthread"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "winsize"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "filtered_sorted_deduped_bam"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "dedup_qc_report"
+            },
+            {
+                "argument_format": "bg",
+                "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "bg_px2",
+                    "bw"
+                ],
+                "workflow_argument_name": "count_bg"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "align + filter + count",
+        "cwl_child_filenames": [
+            "clip.cwl",
+            "align.cwl",
+            "filtersort.cwl",
+            "dedup.cwl",
+            "count.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
+        "cwl_main_filename": "repliseq-parta.cwl",
+        "data_types": [
+            "Repli-seq"
+        ],
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "lab": "4dn-dcic-lab",
+        "name": "repliseq-parta",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "input_fastq",
+                        "source": [
+                            {
+                                "name": "fastq"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "adapter removal"
+                    ],
+                    "description": "Adapter removal according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/97ffd707-b673-4184-a0f6-ca1dfc324067/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "clip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false
+                        },
+                        "name": "out_clipped_fastq",
+                        "target": [
+                            {
+                                "name": "fastq1",
+                                "step": "align"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "fastq",
+                            "global": false
+                        },
+                        "name": "fastq1",
+                        "source": [
+                            {
+                                "name": "out_clipped_fastq",
+                                "step": "clip"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bwaIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "bwa_index",
+                        "source": [
+                            {
+                                "name": "bwaIndex"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "nThreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "alignment"
+                    ],
+                    "description": "Alignment according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/5befdeda-66a8-43bc-a469-5a5e7248198e/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "align",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "out_bam",
+                        "target": [
+                            {
+                                "name": "input_bam",
+                                "step": "filtersort"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_bam",
+                                "step": "align"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "nthreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "memperthread",
+                        "source": [
+                            {
+                                "name": "memperthread"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "filtering",
+                        "sorting"
+                    ],
+                    "description": "Filtering and sorting according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "filtersort",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "out_filtered_sorted_bam",
+                        "target": [
+                            {
+                                "name": "input_bam",
+                                "step": "dedup"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_filtered_sorted_bam",
+                                "step": "filtersort"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "duplicate removal"
+                    ],
+                    "description": "PCR Duplicate removal according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                    ]
+                },
+                "name": "dedup",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_deduped_bam",
+                        "target": [
+                            {
+                                "name": "filtered_sorted_deduped_bam"
+                            },
+                            {
+                                "name": "input_bam",
+                                "step": "count"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "out_qc_report",
+                        "target": [
+                            {
+                                "name": "dedup_qc_report"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "out_deduped_bam",
+                                "step": "dedup"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chrsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "winsize",
+                        "source": [
+                            {
+                                "name": "winsize"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "binning",
+                        "aggregation"
+                    ],
+                    "description": "Read aggregation according to the Repli-seq pipeline",
+                    "software_used": [
+                        "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
+                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/",
+                        "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/",
+                        "/software/00eda937-3149-4252-8dc9-c27de59d75ed/"
+                    ]
+                },
+                "name": "count",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bg",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "out_count_bg",
+                        "target": [
+                            {
+                                "name": "count_bg"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
+        "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
+        "workflow_type": "Repli-seq data processing",
+        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
+        "accession": "4DNWFBT37VUW"
+    },
+    {
+        "app_name": "hi-c-processing-pairs",
+        "app_version": "0.2.5",
+        "arguments": [
+            {
+                "argument_format": "pairs",
+                "argument_type": "Input file",
+                "workflow_argument_name": "input_pairs"
+            },
+            {
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chromsizes"
+            },
+            {
+                "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
@@ -5458,25 +5861,25 @@
                 "workflow_argument_name": "nofrag"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "merged_pairs"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "hic"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "mcool"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                "argument_format": "normvector_juicerformat",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "cooler_normvector"
             }
@@ -5511,7 +5914,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -5537,7 +5940,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -5563,7 +5966,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -5578,7 +5981,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                            "file_format": "juicer_format_restriction_site_file",
                             "global": true,
                             "type": "reference file"
                         },
@@ -5617,7 +6020,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -5636,7 +6039,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -5651,7 +6054,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -5716,7 +6119,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -5735,7 +6138,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -5750,7 +6153,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -5861,7 +6264,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -5942,7 +6345,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -5961,7 +6364,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -5976,7 +6379,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": false,
                             "type": "data file"
                         },
@@ -6003,7 +6406,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -6038,7 +6441,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -6052,7 +6455,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -6079,7 +6482,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                            "file_format": "normvector_juicerformat",
                             "global": true,
                             "type": "data file"
                         },
@@ -6101,12 +6504,12 @@
         "app_name": "hi-c-processing-pairs-nore",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
@@ -6151,25 +6554,25 @@
                 "workflow_argument_name": "max_split_cooler"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "merged_pairs"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "hic"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "mcool"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                "argument_format": "normvector_juicerformat",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "cooler_normvector"
             }
@@ -6201,7 +6604,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -6227,7 +6630,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -6253,7 +6656,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -6268,7 +6671,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -6333,7 +6736,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -6352,7 +6755,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -6367,7 +6770,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -6478,7 +6881,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -6559,7 +6962,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -6578,7 +6981,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -6593,7 +6996,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "hic",
                             "global": false,
                             "type": "data file"
                         },
@@ -6620,7 +7023,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -6655,7 +7058,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -6669,7 +7072,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": false,
                             "type": "data file"
                         },
@@ -6696,7 +7099,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226118b2c",
+                            "file_format": "normvector_juicerformat",
                             "global": true,
                             "type": "data file"
                         },
@@ -6718,17 +7121,17 @@
         "app_name": "hi-c-processing-pairs-nonorm",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                "argument_format": "juicer_format_restriction_site_file",
                 "argument_type": "Input file",
                 "workflow_argument_name": "restriction_file"
             },
@@ -6777,20 +7180,20 @@
                 "workflow_argument_name": "no_balance"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "merged_pairs"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "hic"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "mcool"
             }
@@ -6820,7 +7223,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -6846,7 +7249,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -6872,7 +7275,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -6887,7 +7290,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-94f226248b2c",
+                            "file_format": "juicer_format_restriction_site_file",
                             "global": true,
                             "type": "reference file"
                         },
@@ -6913,7 +7316,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -6932,7 +7335,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -6947,7 +7350,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -7012,7 +7415,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -7031,7 +7434,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -7046,7 +7449,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -7165,7 +7568,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -7258,7 +7661,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -7280,12 +7683,12 @@
         "app_name": "hi-c-processing-pairs-nore-nonorm",
         "arguments": [
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
                 "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsizes"
             },
@@ -7334,20 +7737,20 @@
                 "workflow_argument_name": "no_balance"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "pairs",
                 "argument_type": "Output processed file",
                 "secondary_file_formats": [
-                    "d13d06cf-218e-4f61-aaf0-91f226348b2c"
+                    "pairs_px2"
                 ],
                 "workflow_argument_name": "merged_pairs"
             },
             {
-                "argument_format": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
+                "argument_format": "hic",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "hic"
             },
             {
-                "argument_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "mcool"
             }
@@ -7376,7 +7779,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -7402,7 +7805,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
@@ -7428,7 +7831,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -7443,7 +7846,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -7508,7 +7911,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -7527,7 +7930,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "pairs",
                             "global": false,
                             "type": "data file"
                         },
@@ -7542,7 +7945,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -7661,7 +8064,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
+                            "file_format": "cool",
                             "global": false,
                             "type": "data file"
                         },
@@ -7754,7 +8157,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-ccf0-91f226248b2c",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
@@ -7778,17 +8181,17 @@
         "app_version": "dev",
         "arguments": [
             {   
-                "argument_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "bg",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bgfile"
             },
             {   
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
             {   
-                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "bw",
                 "argument_type": "Output to-be-extra-input file",
                 "workflow_argument_name": "bwfile"
             }
@@ -7813,7 +8216,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "bg",
                             "global": true,
                             "type": "data file"
                         },
@@ -7827,7 +8230,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -7852,7 +8255,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "bw",
                             "global": true,
                             "type": "data file"
                         },
@@ -7877,33 +8280,37 @@
         "app_version": "dev",
         "arguments": [
             {   
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.fastqs"
             },
             {   
-                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_fastqs"
             },
             {   
-                "argument_format": "96809e57-4ccd-40b4-9fcb-ce27c4f16df9",
+                "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
             {   
-                "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
             {   
-                "argument_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
             {   
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.peak_caller"
             },
             {   
                 "argument_type": "parameter",
@@ -7930,17 +8337,41 @@
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
             {   
-                "argument_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.fraglen"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bwa.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.filter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.merge_fastq.cpu"
+            },
+            {   
+                "argument_format": "bigbed",
                 "argument_type": "Output processed file",
-                "workflow_argument_name": "chip.peak_calls",
-                "alternative_conditional_argument_names": ["chip.macs2.sig_fc", "chip.macs2_pooled.sig_fc"]
+                "workflow_argument_name": "chip.peak_calls"
+            },
+            {   
+                "argument_format": "bw",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.sig_fc"
             },
             {   
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
             {   
-                "argument_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+                "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -7955,7 +8386,7 @@
             "ChIP-seq"
         ],
         "description": "ChIP-seq data processing pipeline",
-        "docker_image_name": "4dndcic/encode-chipseq:v1",
+        "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq",
@@ -7965,7 +8396,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -7979,7 +8410,7 @@
                     {
                         "meta": {
                             "cardinality": "array",
-                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "fastq",
                             "global": true,
                             "type": "data file"
                         },
@@ -7993,7 +8424,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "96809e57-4ccd-40b4-9fcb-ce27c4f16df9",
+                            "file_format": "uncompressed_bwaIndex",
                             "global": true,
                             "type": "reference file"
                         },
@@ -8007,7 +8438,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "file_format": "bed",
                             "global": true,
                             "type": "reference file"
                         },
@@ -8021,7 +8452,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+                            "file_format": "chromsizes",
                             "global": true,
                             "type": "reference file"
                         },
@@ -8042,6 +8473,19 @@
                         "source": [
                             {
                                 "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.peak_caller",
+                        "source": [
+                            {
+                                "name": "chip.peak_caller"
                             }
                         ]
                     },
@@ -8122,6 +8566,71 @@
                                 "name": "chip.bam2ta.regex_grep_v_ta"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.fraglen",
+                        "source": [
+                            {
+                                "name": "chip.fraglen"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bwa.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bwa.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.filter.cpu",
+                        "source": [
+                            {
+                                "name": "chip.filter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.merge_fastq.cpu",
+                        "source": [
+                            {
+                                "name": "chip.merge_fastq.cpu"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
@@ -8137,7 +8646,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "file_format": "bigbed",
                             "global": true,
                             "type": "data file"
                         },
@@ -8145,6 +8654,20 @@
                         "target": [
                             {
                                 "name": "chip.peak_calls"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.sig_fc",
+                        "target": [
+                            {
+                                "name": "chip.sig_fc"
                             }
                         ]
                     },
@@ -8164,7 +8687,7 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "d13d06cf-218e-4f61-11f0-91f226248b2c",
+                            "file_format": "json",
                             "global": true,
                             "type": "data file"
                         },
@@ -8181,6 +8704,419 @@
         "title": "Chip-seq data processing pipeline",
         "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
         "workflow_diagram": "",
-        "workflow_type": "Other"
+        "workflow_type": "ChIP-seq data processing"
+    },
+    {
+        "accession": "4DNWB42C877",
+        "app_name": "encode-atacseq",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.fastqs"
+            },
+            {   
+                "argument_format": "uncompressed_bowtie2Index",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.bowtie2_idx_tar"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.blacklist"
+            },
+            {   
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "atac.chrsz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.paired_end"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.enable_xcor"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.disable_ataqc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.qc_report.name"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.qc_report.desc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.gensz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bowtie2.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.trim_adapter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.filter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "atac.bam2ta.cpu"
+            },
+            {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.peak_calls"
+            },
+            {   
+                "argument_format": "bw",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.sig_fc"
+            },
+            {   
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "atac.report"
+            },
+            {   
+                "argument_format": "json",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "atac.qc_json"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "Other",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL",
+        "data_types": [
+            "ATAC-seq"
+        ],
+        "description": "ATAC-seq data processing pipeline",
+        "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-atacseq",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.fastqs",
+                        "source": [
+                            {
+                                "name": "atac.fastqs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "uncompressed_bowtie2Index",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "atac.bowtie2_idx_tar",
+                        "source": [
+                            {
+                                "name": "bowtie2_idx_tar"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "atac.blacklist",
+                        "source": [
+                            {
+                                "name": "atac.blacklist"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "atac.chrsz",
+                        "source": [
+                            {
+                                "name": "atac.chrsz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.pipeline_type",
+                        "source": [
+                            {
+                                "name": "atac.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.paired_end",
+                        "source": [
+                            {
+                                "name": "atac.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.disable_ataqc",
+                        "source": [
+                            {
+                                "name": "atac.disable_ataqc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.trim_adapter.auto_detect_adapter",
+                        "source": [
+                            {
+                                "name": "atac.trim_adapter.auto_detect_adapter"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.enable_xcor",
+                        "source": [
+                            {
+                                "name": "atac.enable_xcor"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.qc_report.name",
+                        "source": [
+                            {
+                                "name": "atac.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "atac.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.gensz",
+                        "source": [
+                            {
+                                "name": "atac.gensz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bam2ta.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "atac.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bowtie2.cpu",
+                        "source": [
+                            {
+                                "name": "atac.bowtie2.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.trim_adapter.cpu",
+                        "source": [
+                            {
+                                "name": "atac.trim_adapter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.filter.cpu",
+                        "source": [
+                            {
+                                "name": "atac.filter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "atac.bam2ta.cpu",
+                        "source": [
+                            {
+                                "name": "atac.bam2ta.cpu"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/6f2716b0-3c10-44d5-80ca-3d2e884d53bf"
+                    ]
+                },
+                "name": "atac",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bigbed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.peak_calls",
+                        "target": [
+                            {
+                                "name": "atac.peak_calls"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.sig_fc",
+                        "target": [
+                            {
+                                "name": "atac.sig_fc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "atac.report",
+                        "target": [
+                            {
+                                "name": "atac.report"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "json",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "atac.qc_json",
+                        "target": [
+                            {
+                                "name": "atac.qc_json"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "ATAC-seq data processing pipeline",
+        "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5",
+        "workflow_diagram": "",
+        "workflow_type": "ATAC-seq data processing"
     }
 ]

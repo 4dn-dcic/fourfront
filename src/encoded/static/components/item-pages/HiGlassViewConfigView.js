@@ -8,6 +8,7 @@ import * as globals from './../globals';
 import Alerts from './../alerts';
 import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility, navigate } from './../util';
 import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList, CollapsibleItemViewButtonToolbar } from './components';
+import { LinkToSelector } from './../forms/components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import JSONTree from 'react-json-tree';
 
@@ -60,20 +61,36 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
+        this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
+        /**
+         * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
+         * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
+         * @property {Object} originalViewConfig    Not currently used, but might eventually be used to compare against state.viewConfig to inform whether to enable save btn or not.
+         * @property {boolean} saveLoading          True if AJAX request is en route to save Item.
+         * @property {boolean} cloneLoading         True if AJAX request is en route to clone Item.
+         * @property {boolean} releaseLoading       True if AJAX request is en route to change Item status.
+         * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
+         */
         this.state = {
-            'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
-            'originalViewConfig' : null, //object.deepClone(props.viewConfig)
-            'saveLoading' : false,
-            'cloneLoading' : false,
-            'releaseLoading' : false
+            'viewConfig'            : props.viewConfig,
+            'genome_assembly'       : (props.context && props.context.genome_assembly) || null,
+            'originalViewConfig'    : null, //object.deepClone(props.viewConfig)
+            'saveLoading'           : false,
+            'cloneLoading'          : false,
+            'releaseLoading'        : false,
+            'addFileLoading'        : false
         };
     }
 
     componentWillReceiveProps(nextProps){
+        // TODO: Improve, use var = nextState and conditionally set if have been updated,
+        // then setState(nextState) if keys.length > 0.
         if (nextProps.viewConfig !== this.props.viewConfig){
             this.setState({
-                'originalViewConfig' : null //object.deepClone(nextProps.viewConfig)
+                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig)
+                'viewConfig' : nextProps.viewConfig,
+                'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
         }
     }
@@ -82,42 +99,46 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (this.props.isFullscreen !== pastProps.isFullscreen){
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
-        if (this.state.originalViewConfig === null && pastState.originalViewConfig){
-            var hgc = this.getHiGlassComponent();
-            if (hgc){
-                this.setState({
-                    'originalViewConfigString' : hgc.api.exportAsViewConfString()
-                });
-            }
-        }
+
+        // The following is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
+        //
+        // if (this.state.originalViewConfig === null && pastState.originalViewConfig){
+        //    var hgc = this.getHiGlassComponent();
+        //    if (hgc){
+        //        this.setState({
+        //            'originalViewConfigString' : hgc.api.exportAsViewConfString()
+        //        });
+        //    }
+        // }
     }
 
-    componentDidMount(){
-        // Hacky... we need to wait for HGC to load up and resize itself and such...
-        var initOriginalViewConfState = () => {
-            var hgc = this.getHiGlassComponent();
-            if (hgc){
-                setTimeout(()=>{
-                    this.setState({
-                        'originalViewConfigString' : hgc.api.exportAsViewConfString()
-                    });
-                }, 2000);
-            } else {
-                setTimeout(initOriginalViewConfState, 200);
-            }
-        };
-
-        initOriginalViewConfState();
-    }
+    // This is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
+    // componentDidMount(){
+    //     // Hacky... we need to wait for HGC to load up and resize itself and such...
+    //     var initOriginalViewConfState = () => {
+    //         var hgc = this.getHiGlassComponent();
+    //         if (hgc){
+    //             setTimeout(()=>{
+    //                 this.setState({
+    //                     'originalViewConfigString' : hgc.api.exportAsViewConfString()
+    //                 });
+    //             }, 2000);
+    //         } else {
+    //             setTimeout(initOriginalViewConfState, 200);
+    //         }
+    //     };
+    //
+    //     initOriginalViewConfState();
+    // }
 
     havePermissionToEdit(){
         return !!(this.props.session && _.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
     }
 
     /**
-    * Update the current higlass viewconfig for the user, based on the current data.
-    * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
-    * @returns {void}
+     * Update the current higlass viewconfig for the user, based on the current data.
+     * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
+     * @returns {void}
     */
     handleSave(evt){
         evt.preventDefault();
@@ -135,6 +156,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
+        // We're updating this object's view conf and the genome assembly.
+        var payload = {
+            'viewconfig' : currentViewConf
+        };
+
+        if (this.state.genome_assembly){
+            // If we always include this and its null, then we get validation error because
+            // is not of type string. It must be explictly excluded, not just set to null
+            // or undefined.
+            payload.genome_assembly = this.state.genome_assembly;
+        }
+
         this.setState({ 'saveLoading' : true }, ()=>{
             ajax.load(
                 this.props.href,
@@ -143,7 +176,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     Alerts.queue({
                         'title' : "Saved " + this.props.context.title,
-                        'message' : "This HiGlass Display Item has been updated with the current viewport. This may take some minutes to take effect.",
+                        'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
                     this.setState({ 'saveLoading' : false });
@@ -158,8 +191,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     });
                     this.setState({ 'saveLoading' : false });
                 },
-                // We're only updating this object's view conf.
-                JSON.stringify({ 'viewconfig' : currentViewConf })
+                JSON.stringify(payload)
             );
         });
     }
@@ -229,13 +261,17 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         };
 
         var payload = {
-            'title'         : viewConfTitle,
-            'description'   : viewConfDesc,
-            'viewconfig'    : currentViewConf,
+            'title'          : viewConfTitle,
+            'description'    : viewConfDesc,
+            'viewconfig'     : currentViewConf,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
             // Lab and award do not carry over as current user might be from different lab.
         };
+
+        if (this.state.genome_assembly){
+            payload.genome_assembly = this.state.genome_assembly;
+        }
 
         // Try to POST/PUT a new viewconf.
         this.setState(
@@ -267,6 +303,103 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     }
 
+    /**
+    * Update the current Viewconf to add a new view with the file with the given uuid.
+    * @returns {void}
+    */
+    addFileToHiglass(fileAtID) {
+        var { context }         = this.props,
+            hgc                 = this.getHiGlassComponent(),
+            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        if (!currentViewConf){
+            throw new Error('Could not get current view configuration.');
+        }
+
+        // Read the url of the higlass viewconfig and store the genome assembly.
+        ajax.load(
+            this.props.href,
+            (resp)=>{
+                if(resp.success) {
+                    this.setState({ 'genome_assembly' : resp.genome_assembly });
+                }
+            },
+            'GET'
+        );
+
+        // Get the x and y scales of the first view.
+        let firstViewLocationAndZoom = [null, null, null];
+        if (currentViewConf.views && currentViewConf.views.length > 0)
+        {
+            const firstViewUid = currentViewConf.views[0].uid;
+
+            const xScale = hgc.xScales[firstViewUid];
+            const yScale = hgc.yScales[firstViewUid];
+
+            // Transform the first view's location and zoom levels.
+            const xCenter = xScale.invert((xScale.range()[0] + xScale.range()[1]) / 2);
+            const yCenter = yScale.invert((yScale.range()[0] + yScale.range()[1]) / 2);
+            const k = xScale.invert(1) - xScale.invert(0);
+
+            firstViewLocationAndZoom = [xCenter, yCenter, k];
+        }
+
+        var payload = {
+            'higlass_viewconfig': currentViewConf,
+            'genome_assembly': this.state.genome_assembly,
+            'files' : [fileAtID],
+            'firstViewLocationAndZoom': firstViewLocationAndZoom
+        };
+
+        // If it failed, show the error in the popup window.
+        var fallbackCallback = (errResp, xhr) => {
+            // Error callback
+            Alerts.queue({
+                'title' : "Failed to add file.",
+                'message' : errResp.errors,
+                'style' : 'danger'
+            });
+            this.setState({ 'addFileLoading' : false });
+        };
+
+        // Make an AJAX call to add the file.
+        this.setState(
+            { addFileLoading : true },
+            () => {
+                ajax.load(
+                    "/add_files_to_higlass_viewconf/",
+                    (resp) => {
+                        let stateChange = { 'addFileLoading' : false };
+                        if (resp.success) {
+                            // Update the genome assembly and view config.
+                            if (resp.new_genome_assembly) {
+                                stateChange["genome_assembly"] = resp.new_genome_assembly;
+                            }
+                            stateChange["viewConfig"] = resp.new_viewconfig;
+                        }
+
+                        this.setState(stateChange, ()=>{
+                            // If it failed, return an error message.
+                            if (!resp.success) {
+                                return fallbackCallback(resp);
+                            }
+
+                            // Show alert indicating success
+                            Alerts.queue({
+                                'title'     : "Added file",
+                                'message'   : "Added new file to Higlass display.",
+                                'style'     : 'success'
+                            });
+                        });
+                    },
+                    'POST',
+                    fallbackCallback,
+                    JSON.stringify(payload)
+                );
+            }
+        );
+    }
 
     /**
     * Copies current URL to clipbard.
@@ -394,8 +527,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (!session) return null;
 
         return (
-            <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="saveasbtn" data-tip={tooltip}>
-                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Clone
+            <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="clonebtn" data-tip={tooltip}>
+                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'clone')}/>&nbsp; Clone
             </Button>
         );
     }
@@ -442,12 +575,27 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     render(){
-        var { isFullscreen, windowWidth, windowHeight, width } = this.props;
+        var { isFullscreen, windowWidth, windowHeight, width } = this.props,
+            { addFileLoading, genome_assembly } = this.state;
+
+        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
+
+        // Setting the height of the HiGlass Component follows one of these rules:
+        // - If it's Fullscreen it should almost take up the entire window.
+        // - Set to a fixed height.
+        var hiGlassComponentHeight;
+        if (isFullscreen) {
+            hiGlassComponentHeight = windowHeight -120;
+        }
+        else {
+            hiGlassComponentHeight = 600;
+        }
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
-                    <span>HiGlass Browser</span>
+                    <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
+                        className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>
@@ -455,18 +603,19 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             </span>
                         );
                     }}>
+                        {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
                         { this.statusChangeButton() }
-                        { this.copyURLButton() }
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
-                        <HiGlassPlainContainer {..._.omit(this.props, 'context')}
-                            width={isFullscreen ? windowWidth : width + 20 }
-                            height={isFullscreen ? windowHeight -120 : 500}
+                        <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
+                            width={hiGlassComponentWidth}
+                            height={hiGlassComponentHeight}
+                            viewConfig={this.state.viewConfig}
                             ref="higlass" />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
@@ -476,6 +625,70 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 }
 
+/**
+ * This Component has a button and a text input and a button.
+ * You will type a file uuid into the field and click the button to accept.
+ */
+class AddFileButton extends React.PureComponent {
+
+    static propTypes = {
+        'onClick' : PropTypes.func.isRequired,
+        'loading' : PropTypes.bool.isRequired
+    };
+
+    constructor(props){
+        super(props);
+        this.receiveFile            = this.receiveFile.bind(this);
+        this.setIsSelecting         = _.throttle(this.toggleIsSelecting.bind(this, true), 3000, { 'trailing' : false });
+        this.unsetIsSelecting       = this.toggleIsSelecting.bind(this, false);
+        this.toggleIsSelecting      = this.toggleIsSelecting.bind(this);
+        this.state = {
+            'isSelecting' : false
+        };
+    }
+
+    toggleIsSelecting(isSelecting){
+        this.setState(function(currState){
+            if (typeof isSelecting !== 'boolean') isSelecting = !currState.isSelecting;
+            if (isSelecting === currState.isSelecting) return null;
+            return { isSelecting };
+        });
+    }
+
+    receiveFile(fileAtID, fileContext) {
+
+        // Is it blank? Do nothing.
+        if (!fileAtID) {
+            return;
+        }
+
+        this.setState({ 'isSelecting' : false }, ()=>{
+            // Invoke the object callback function, using the text input.
+            this.props.onClick(fileAtID);
+        });
+    }
+
+    render(){
+        var { loading, genome_assembly } = this.props,
+            { isSelecting } = this.state,
+            tooltip         = "Search for a file and add it to the display.",
+            dropMessage     = "Drop a File here.",
+            searchURL       = (
+                '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value'
+                + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
+            );
+
+        return (
+            <React.Fragment>
+                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}
+                    {..._.pick(this.props, 'className', 'style')}>
+                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add Data
+                </Button>
+                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+            </React.Fragment>
+        );
+    }
+}
 
 class StatusMenuItem extends React.PureComponent {
     render(){

@@ -1,10 +1,78 @@
 [
     {
+        "title" : "Empty Higlass Viewconfig",
+        "description" : "No files in viewconf, ready to clone.",
+        "uuid" : "00000000-1111-0000-1111-000000000000",
+        "name" : "empty-higlass-viewconf",
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "viewconfig" : {
+            "editable": true,
+            "zoomFixed": false,
+            "trackSourceServers": [
+                "//higlass.io/api/v1"
+            ],
+            "exportViewUrl": "/api/v1/viewconfs",
+            "views": [
+                {
+                    "uid": "aa",
+                    "initialXDomain": [
+                        -167962308.59835115,
+                        3260659599.528857
+                    ],
+                    "autocompleteSource": "/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
+                    "genomePositionSearchBox": {
+                        "autocompleteServer": "//higlass.io/api/v1",
+                        "autocompleteId": "OHJakQICQD6gTD7skx4EWA",
+                        "chromInfoServer": "//higlass.io/api/v1",
+                        "chromInfoId": "hg19",
+                        "visible": true
+                    },
+                    "chromInfoPath": "//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
+                    "tracks": {
+                        "top": [],
+                        "left": [],
+                        "center": [],
+                        "right": [],
+                        "bottom": [],
+                        "whole": [],
+                        "gallery": []
+                    },
+                    "layout": {
+                        "w": 12,
+                        "h": 12,
+                        "x": 0,
+                        "y": 0,
+                        "i": "aa",
+                        "moved": false,
+                        "static": false
+                    },
+                    "initialYDomain": [
+                        549528857.4793874,
+                        2550471142.5206127
+                    ]
+                }
+            ],
+            "zoomLocks": {
+                "locksByViewUid": {},
+                "locksDict": {}
+            },
+            "locationLocks": {
+                "locksByViewUid": {},
+                "locksDict": {}
+            },
+            "valueScaleLocks": {
+                "locksByViewUid": {},
+                "locksDict": {}
+            }
+        }
+    },
+    {
         "title" : "Test MCOOL Display",
         "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
         "uuid" : "00000000-1111-0000-1111-000000000002",
         "name" : "higlass-mcool-test-view",
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "genome_assembly" : "GRCm38",
         "viewconfig" : {
             "editable":true,
             "zoomFixed":false,
@@ -731,6 +799,7 @@
         
                 }
             }
-        }
+        },
+        "status" : "released"
     }
 ]

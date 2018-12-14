@@ -394,7 +394,7 @@ def file_formats(testapp, lab, award):
                 'extrafile_formats': ['bai'],
                 "valid_item_types": ["FileProcessed"]},
         'mcool': {'standard_file_extension': 'mcool',
-                  "valid_item_types": ["FileProcessed"]},
+                  "valid_item_types": ["FileProcessed", "FileVistrack"]},
         'tiff': {'standard_file_extension': 'tiff',
                  'other_allowed_extensions': ['tif'],
                  "valid_item_types": ["FileMicroscopy", "FileCalibration"]},
@@ -403,7 +403,11 @@ def file_formats(testapp, lab, award):
         'chromsizes': {'standard_file_extension': 'chrom.sizes',
                        "valid_item_types": ["FileReference"]},
         'other': {'standard_file_extension': '',
-                  "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]}
+                  "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]},
+        'bw': {'standard_file_extension': 'bw',
+               "valid_item_types": ["FileProcessed", "FileVistrack"]},
+        'bg': {'standard_file_extension': 'bedGraph.gz',
+               "valid_item_types": ["FileProcessed", "FileVistrack"]},
     }
 
     for eff, info in ef_format_info.items():

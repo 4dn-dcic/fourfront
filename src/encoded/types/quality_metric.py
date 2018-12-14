@@ -110,3 +110,17 @@ class QualityMetricChipseq(QualityMetric):
     item_type = 'quality_metric_chipseq'
     schema = load_schema('encoded:schemas/quality_metric_chipseq.json')
     embedded_list = QualityMetric.embedded_list
+
+
+@collection(
+    name='quality-metrics-atacseq',
+    properties={
+        'title': 'QC Quality Metrics for ATAC-seq',
+        'description': 'Listing of QC Quality Metrics for ATAC-seq',
+    })
+class QualityMetricAtacseq(QualityMetric):
+    """Subclass of quality matrics for atac-seq"""
+
+    item_type = 'quality_metric_atacseq'
+    schema = load_schema('encoded:schemas/quality_metric_atacseq.json')
+    embedded_list = QualityMetric.embedded_list
