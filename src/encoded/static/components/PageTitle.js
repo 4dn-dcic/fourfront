@@ -146,22 +146,22 @@ export default class PageTitle extends React.PureComponent {
         /**** Pre-mapping overrides ****/
 
         // For Edit, Create, Add titles:
-        if (currentHrefParts.hash && currentHrefParts.hash.length > 1 && (object.isAnItem(context) || currentPathName.indexOf('/search/') > -1)){
-            if (currentHrefParts.hash === '#!edit'){
+        if (currentAction && (object.isAnItem(context) || currentPathName.indexOf('/search/') > -1)){
+            if (currentAction === 'edit'){
                 return {
                     'title' : "Editing",
                     'calloutTitle' : object.itemUtil.getTitleStringFromContext(context) // We can only edit on current context, so this should always be correct/relevant context.
                 };
             }
 
-            if (currentHrefParts.hash === '#!create') {
+            if (currentAction === 'create') {
                 return {
                     'title' : "Creating",
                     'calloutTitle' : Schemas.getItemTypeTitle(context, schemas) // Create is called from current item view.
                 };
             }
 
-            if (currentHrefParts.hash === '#!add') {
+            if (currentAction === 'add') {
                 return {
                     'title' : "Creating",
                     'calloutTitle' : (

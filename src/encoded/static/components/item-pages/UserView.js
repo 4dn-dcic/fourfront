@@ -758,4 +758,4 @@ export class ImpersonateUserForm extends React.Component {
 
 }
 
-content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');
+content_views.register(ImpersonateUserForm, 'User', 'impersonate-user');
