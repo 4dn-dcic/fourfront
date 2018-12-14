@@ -113,15 +113,27 @@ export class LinkToSelector extends React.PureComponent {
                 this.windowObjectReference.fourfront.navigate(searchURL, {}, this.showAlertInChildWindow);
                 this.windowObjectReference.focus();
             } else {
-                // Some browsers (*cough* MS Edge *cough*) are strange and will encode '#' to '%23' initially.
-                this.windowObjectReference = linkedObjChildWindow = window.open(
-                    "about:blank",
-                    "selection-search",
-                    "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1,width=1010,height=600"
-                );
+                var windowFeaturesStr = "menubar=0,toolbar=1,location=0,resizable=1,scrollbars=1,status=1,navigation=1",
+                    desktopScreenWidth  = window && window.screen && (window.screen.availWidth || window.screen.width), // Screen dimensions, not window dimensions.
+                    desktopScreenHeight = window && window.screen && (window.screen.availHeight || window.screen.height),
+                    childWindowHeight   = 600, // Defaults if can't get screen dimensions
+                    childWindowWidth    = 1010;
+
+                if (typeof desktopScreenWidth === 'number' && !isNaN(desktopScreenWidth)){
+                    childWindowWidth = Math.max(Math.min(1200, desktopScreenWidth - 200), 800);
+                    windowFeaturesStr += ',left=' + (desktopScreenWidth - childWindowWidth) / 2;
+                }
+                
+                if (typeof desktopScreenHeight === 'number' && !isNaN(desktopScreenHeight)){
+                    childWindowHeight = Math.max(Math.min(800, desktopScreenHeight - 200), 400);
+                    windowFeaturesStr += ',top=' + (desktopScreenHeight - childWindowHeight) / 2;
+                }
+
+                windowFeaturesStr += ',width=' + childWindowWidth + ',height=' + childWindowHeight;
+
+                this.windowObjectReference = linkedObjChildWindow = window.open("about:blank", "selection-search", windowFeaturesStr);
                 setTimeout(()=>{
                     this.windowObjectReference.location.assign(searchURL);
-                    this.windowObjectReference.location.hash = '#!selection';
                 }, 100);
             }
 
