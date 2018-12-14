@@ -500,8 +500,8 @@
     "assay_info": "Assay",
     "genome_assembly": "GRCm38",
     "biosource_name" : "Biosource"
-}
-,{
+},
+{
     "lab": "/labs/4dn-dcic-lab/",
     "status": "uploaded",
     "award":"/awards/1U01CA200059-01/",
@@ -524,5 +524,22 @@
             "md5sum": "6c2b2059745304918502d4ed2a863f73"
         }
     ]
+}
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFIH4I1MY4",
+    "file_classification":"processed file",
+    "higlass_uid":"LgnwPjYoSQiIjWxJOTr5CA",
+    "file_format":"76dc8c06-67d8-487b-8fc8-d841752a0b60",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "a31800d0-c275-425d-b610-3efd78bdde96",
+    "dataset_type": "Dataset",
+    "file_type": "other",
+    "assay_info": "Assay",
+    "genome_assembly": "GRCm38",
+    "biosource_name" : "Biosource"
 }
 ]

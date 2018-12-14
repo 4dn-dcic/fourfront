@@ -1,5 +1,5 @@
 import pytest
-from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json
+from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json, beddb_file_json
 pytestmark = pytest.mark.working
 
 # Test Higlass display endpoints.
@@ -249,7 +249,7 @@ def higlass_blank_viewconf(testapp):
             "editable": True,
             "zoomFixed": False,
             "trackSourceServers": [
-                "//higlass.io/api/v1"
+                "//higlass.4dnucleome.org/api/v1"
             ],
             "exportViewUrl": "/api/v1/viewconfs",
             "views": [
@@ -259,14 +259,6 @@ def higlass_blank_viewconf(testapp):
                         -167962308.59835115,
                         3260659599.528857
                     ],
-                    "autocompleteSource": "/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
-                    "genomePositionSearchBox": {
-                        "autocompleteServer": "//higlass.io/api/v1",
-                        "autocompleteId": "OHJakQICQD6gTD7skx4EWA",
-                        "chromInfoServer": "//higlass.io/api/v1",
-                        "chromInfoId": "hg19",
-                        "visible": True
-                    },
                     "chromInfoPath": "//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
                     "tracks": {
                     "top": [],
@@ -987,3 +979,76 @@ def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf, bed_beddb_file_json
             assert track["type"] == "bedlike"
 
     assert found_data_track == True
+
+def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
+    """Add a beddb file to the HiGlass file.
+    """
+
+    # Get a file to add.
+    genome_assembly = "GRCm38"
+    beddb_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    beddb_file_json['md5sum'] = '00000000000000000000000000000001'
+    beddb_file_json['genome_assembly'] = genome_assembly
+    bed_file = testapp.post_json('/file_processed', beddb_file_json).json['@graph'][0]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the file to the existing viewconf.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=bed_file['uuid'])]
+    })
+
+    # Get the new json.
+    new_higlass_json = response.json["new_viewconfig"]
+
+    # There should be 1 view
+    assert response.json["errors"] == ''
+    assert response.json["success"]
+
+    assert len(new_higlass_json["views"]) == 1
+
+    # The view should have a new top track and a new left track
+    tracks = new_higlass_json["views"][0]["tracks"]
+    old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
+
+    assert len(tracks["left"]) == len(old_tracks["left"]) + 1
+    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+
+    # Central track is unchanged
+    assert len(tracks["center"][0]["contents"]) == 0
+
+    # The top track should be a bed-like track
+    found_top_data_track = False
+    for track in tracks["top"]:
+        if "tilesetUid" in track and track["tilesetUid"] == beddb_file_json['higlass_uid']:
+            found_top_data_track = True
+            assert track["type"] == "horizontal-gene-annotations"
+
+    assert found_top_data_track == True
+
+    # The left track should be a bed-like track
+    found_left_data_track = False
+    for track in tracks["left"]:
+        if "tilesetUid" in track and track["tilesetUid"] == beddb_file_json['higlass_uid']:
+            found_left_data_track = True
+            assert track["type"] == "vertical-gene-annotations"
+
+    assert found_left_data_track == True
+
+    # The searchbar needs to be updated, too
+    main_view = new_higlass_json["views"][0]
+    assert "genomePositionSearchBox" in main_view
+    assert "chromInfoId" in main_view["genomePositionSearchBox"]
+    assert main_view["genomePositionSearchBox"]["chromInfoId"] == genome_assembly
+    assert "autocompleteId" in main_view["genomePositionSearchBox"]
+    assert main_view["genomePositionSearchBox"]["autocompleteId"] == beddb_file_json['higlass_uid']
+    assert "visible" in main_view["genomePositionSearchBox"]
+    assert main_view["genomePositionSearchBox"]["visible"] == True
+
+    assert "autocompleteSource" in main_view
+    assert beddb_file_json['higlass_uid'] in main_view["autocompleteSource"]

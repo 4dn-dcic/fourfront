@@ -651,6 +651,20 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         if error:
             return None, errors
         add_view_to_views(new_view, views)
+    elif file_format == "/file-formats/beddb/":
+        # Add the 1D track to top, left
+        new_track, error = create_1d_track(new_file, "top")
+        if error:
+            return None, errors
+        add_track_to_views(new_track, views, ["top"])
+
+        new_track, error = create_1d_track(new_file, "left")
+        if error:
+            return None, errors
+        add_track_to_views(new_track, views, ["left"])
+        # Add to the search bar, too.
+        for view in views:
+            update_genome_position_search_box(view, new_file)
     else:
         return None, "Unknown file format {file_format}".format(file_format = file_format)
 
@@ -690,6 +704,11 @@ def create_1d_track(new_file, side="top"):
                     b=blue,
                 )
             )
+    elif new_file["file_format"] == "/file-formats/beddb/":
+        if side == "top":
+            new_track["type"] = "horizontal-gene-annotations"
+        elif side == "left":
+            new_track["type"] = "vertical-gene-annotations"
     else:
         new_track["type"] = "horizontal-divergent-bar"
 
@@ -786,6 +805,27 @@ def create_2d_view(new_file):
     contents["options"]["coordSystem"] = new_file["genome_assembly"]
     contents["options"]["name"] = get_title(new_file)
     return new_view, None
+
+def update_genome_position_search_box(view, new_file):
+    """ Update the genome position search box for this view so it uses the given file
+    """
+
+    view["autocompleteSource"] = "/api/v1/suggest/?d={uuid}&".format(uuid=new_file["higlass_uid"])
+
+    if not "genomePositionSearchBox" in view:
+        view["genomePositionSearchBox"] = {
+            "autocompleteServer" : "https://higlass.4dnucleome.org/api/v1",
+            "chromInfoServer" : "https://higlass.4dnucleome.org/api/v1"
+        }
+
+    view["genomePositionSearchBox"]["autocompleteId"] = new_file["higlass_uid"]
+
+    try:
+        view["genomePositionSearchBox"]["chromInfoId"] = new_file["genome_assembly"]
+    except KeyError:
+        pass
+
+    view["genomePositionSearchBox"]["visible"] = True
 
 def add_view_to_views(new_view, views):
     """ Add the given new view to the collection of views.
