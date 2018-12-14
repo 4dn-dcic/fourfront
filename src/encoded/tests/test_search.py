@@ -202,6 +202,22 @@ def test_search_date_range_find_within(mboI_dts, testapp, workbook):
         assert set(g_uuids).issubset(set(s_uuids))
 
 
+def test_search_with_nested_integer(testapp, workbook):
+    search1 = '/search/?type=Experiment&files.file_size.from=0&files.file_size.to=1500'
+    s1res = testapp.get(search1).json
+    s1_uuids = [item['uuid'] for item in s1res['@graph'] if 'uuid' in item]
+    assert len(s1_uuids) > 0
+
+    search2 = '/search/?type=Experiment&files.file_size.from=1501'
+    s2res = testapp.get(search2).json
+    s2_uuids = [item['uuid'] for item in s2res['@graph'] if 'uuid' in item]
+    assert len(s2_uuids) > 0
+
+    # make sure there is no intersection of the uuids
+    assert not set(s1_uuids) & set(s2_uuids)
+
+
+
 def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
     # the MboI enzyme should be returned with all the provided pairs
     dts = {k: v.replace(':', '%3A') for k, v in mboI_dts.items()}
@@ -370,6 +386,8 @@ def test_search_with_no_value(workbook, testapp):
     assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
+
+
 
 
 #########################################
