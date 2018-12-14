@@ -11,7 +11,10 @@ from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
 from snovault.resource_views import collection_view_listing_db
-from snovault.fourfront_utils import get_jsonld_types_from_collection_type
+from snovault.fourfront_utils import (
+    get_jsonld_types_from_collection_type,
+    crawl_schema
+)
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
 from elasticsearch import (
@@ -125,7 +128,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     else:
         size_search = search[from_:from_ + size]
         es_results = execute_search(size_search)
-    print('\n\nQUERY: %s\nELAPSED: %s\n\n' % (prepared_terms.get('q'), (time.time() - t0)))
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
@@ -829,8 +831,13 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
 def schema_for_field(field, types, doc_types):
     '''Filter down schemas to the one for our field'''
     schema = types[doc_types[0]].schema
-    if schema and schema.get('properties') is not None:
-        return schema['properties'].get(field, None)
+    if schema:
+        try:
+            field_schema = crawl_schema(types, field, schema)
+        except:  # might want to add logging here?
+            return None
+        else:
+            return field_schema
     return None
 
 def is_linkto_or_object_array_root_field(field, types, doc_types):
