@@ -153,7 +153,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
      * @param {boolean} parentState.allRuns - Whether 'all runs' (vs grouped runs) are currently being loaded.
      * @param {boolean} parentState.loadingGraphSteps - Whether steps are currently being loaded.
      * @param {function} onToggleAllRuns - Callback function passed from parent Item view. Called when 'toggle all runs' checkbox is changed.
-     * @returns {{ tab: JSX.Element, key: string, disabled: boolean, isDefault: boolean, content: JSX.Element }} Tab object
+     * @returns {{ tab: JSX.Element, key: string, disabled?: boolean, isDefault?: boolean, content: JSX.Element }} Tab object
      */
     static getTabObject(parentProps, parentState, onToggleAllRuns){
         var { loadingGraphSteps, steps, mounted, allRuns } = parentState,

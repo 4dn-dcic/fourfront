@@ -143,12 +143,14 @@ class ControlsAndResults extends React.PureComponent {
         }
 
         var columnDefinitionOverrides = (columnDefinitionOverrideMap && _.clone(columnDefinitionOverrideMap)) || {};
-        var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
+
+        // Kept for reference in case we want to re-introduce constrain that for 'select' button(s) to be visible in search result rows, there must be parent window.
+        //var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
         // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
         // Also add the popLink/target=_blank functionality to links
         // Remove lab.display_title and type columns on selection
-        if (isThereParentWindow && inSelectionMode) {
+        if (inSelectionMode) {
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {

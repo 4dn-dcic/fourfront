@@ -35,8 +35,6 @@ export class FacetCharts extends React.PureComponent {
     static defaultProps = {
         'href' : '/',
         'show' : function(path, search, hash){
-            if (typeof search === 'string' && search.indexOf('currentAction=impersonate-user') > -1) return false;
-            if (typeof hash === 'string' && hash.indexOf('!impersonate-user') > -1) return false;
             if (path === '/' || path === '/home') return 'large';
             if (path.indexOf('/browse/') > -1) return true;
             return false;

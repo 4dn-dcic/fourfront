@@ -489,25 +489,7 @@ export default class App extends React.Component {
      */
     listActionsFor(category) {
         if (category === 'context') {
-            var context         = this.props.context,
-                currentAction   = this.currentAction(),
-                contextActions = [];
-
-            Array.prototype.push.apply(contextActions, context.actions || []); // Add any from context itself
-
-            // The below is deprecated ? TODO: Double check & delete.
-            if (!currentAction && context.default_page) {
-                context = context.default_page;
-                var actions = context.actions || [];
-                for (var i = 0; i < actions.length; i++) {
-                    var action = actions[i];
-                    if (action.href[0] == '#') {
-                        action.href = context['@id'] + action.href;
-                    }
-                    contextActions.push(action);
-                }
-            }
-            return contextActions;
+            return (this.props.context && this.props.context.actions) || [];
         }
         if (category === 'user_section') {
             return portal.user_section;
@@ -1302,10 +1284,6 @@ export default class App extends React.Component {
             currentAction   = this.currentAction();
 
         var content, title, status; // Rendered values
-
-        if (!currentAction && context.default_page) {
-            context = context.default_page;
-        }
 
         // `canonical` is meant to refer to the definitive URI for current resource.
         // For example, https://data.4dnucleome.org/some-item, http://data.4dnucleome.org/some-item, http://www.data.4dnucleome.org/some-item
