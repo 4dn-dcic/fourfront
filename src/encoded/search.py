@@ -848,8 +848,8 @@ def schema_for_field(field, types, doc_types):
     if schema:
         try:
             field_schema = crawl_schema(types, field, schema)
-        except:  # might want to add logging here?
-            return None
+        except:  # cannot find schema. Return None
+            pass
         else:
             return field_schema
     return None
