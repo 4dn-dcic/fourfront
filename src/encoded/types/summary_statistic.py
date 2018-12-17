@@ -6,8 +6,8 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -22,7 +22,7 @@ class SummaryStatistic(Item):
 
     item_type = 'summary_statistic'
     schema = load_schema('encoded:schemas/summary_statistic.json')
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
 
 @collection(

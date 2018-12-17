@@ -15,7 +15,7 @@ from .base import (
     collection_add,
     get_item_if_you_can,
     item_edit,
-    # paths_filtered_by_status,
+    lab_award_attribution_embed_list
 )
 
 
@@ -32,7 +32,7 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded_list = [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "individual.age",
         "individual.age_units",
         "individual.sex",
@@ -53,8 +53,7 @@ class Biosource(Item):
         'SOP_cell_line.attachment.href',
         'SOP_cell_line.attachment.type',
         'SOP_cell_line.attachment.md5sum',
-        'SOP_cell_line.description',
-        'award.project'
+        'SOP_cell_line.description'
     ]
 
     @calculated_property(schema={

@@ -52,7 +52,7 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded_list = lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",

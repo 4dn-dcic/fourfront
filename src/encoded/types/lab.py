@@ -52,7 +52,7 @@ class Lab(Item):
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
-    embedded_list = [
+    embedded_list = Item.embedded_list + [
         'awards.project',
         'awards.center_title'
     ]
