@@ -29,7 +29,7 @@
         "filename": "test_file2.fastq.gz",
         "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq1"}],
         "paired_end": "2",
-        "file_size": 2000
+        "file_size": 500
     },
     {
         "aliases": ["dcic:testfq3"],
@@ -44,7 +44,7 @@
         "status": "uploaded",
         "filename": "test_file3.fastq.gz",
         "paired_end": "1",
-        "file_size": 1500
+        "file_size": 750
     },
     {
         "aliases": ["dcic:testfq4"],

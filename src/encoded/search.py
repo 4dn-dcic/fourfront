@@ -20,8 +20,7 @@ from elasticsearch_dsl import Search
 from elasticsearch import (
     TransportError,
     RequestError,
-    ConnectionTimeout,
-    ConnectionError
+    ConnectionTimeout
 )
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.security import effective_principals
@@ -1069,8 +1068,6 @@ def execute_search(search):
         except:
             err_detail = str(exc)
         err_exp = 'The search failed due to a request error: ' + err_detail
-    except ConnectionError as exc:
-        err_exp = 'The search failed due to a connection error.'
     except TransportError as exc:
         # most general exception
         exc_status = getattr(exc, 'status_code')

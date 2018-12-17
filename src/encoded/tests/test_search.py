@@ -203,18 +203,23 @@ def test_search_date_range_find_within(mboI_dts, testapp, workbook):
 
 
 def test_search_with_nested_integer(testapp, workbook):
-    search1 = '/search/?type=Experiment&files.file_size.from=0&files.file_size.to=1500'
+    search0 = '/search/?type=ExperimentHiC'
+    s0res = testapp.get(search0).json
+    s0_uuids = [item['uuid'] for item in s0res['@graph'] if 'uuid' in item]
+
+    search1 = '/search/?type=ExperimentHiC&files.file_size.to=1500'
     s1res = testapp.get(search1).json
     s1_uuids = [item['uuid'] for item in s1res['@graph'] if 'uuid' in item]
     assert len(s1_uuids) > 0
 
-    search2 = '/search/?type=Experiment&files.file_size.from=1501'
+    search2 = '/search/?type=ExperimentHiC&files.file_size.from=1501'
     s2res = testapp.get(search2).json
     s2_uuids = [item['uuid'] for item in s2res['@graph'] if 'uuid' in item]
     assert len(s2_uuids) > 0
 
     # make sure there is no intersection of the uuids
     assert not set(s1_uuids) & set(s2_uuids)
+    assert set(s1_uuids) | set(s2_uuids) == set(s0_uuids)
 
 
 
@@ -334,8 +339,6 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]
 
     check_tsv(result_rows, len(res2_post_data['accession_triples']))
-
-
 
 
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
