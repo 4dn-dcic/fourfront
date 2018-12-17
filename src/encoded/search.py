@@ -28,7 +28,6 @@ from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
 import uuid
-import time
 
 
 def includeme(config):
@@ -129,7 +128,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         search = search.params(preference=search_session_id)
 
     ### Execute the query
-    t0 = time.time()
     if size == 'all':
         es_results = execute_search_for_all_results(search)
     else:
