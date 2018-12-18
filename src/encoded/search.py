@@ -808,7 +808,6 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
                 continue  # Cancel if already in facets or is disabled
 
             if title_field == 'from' or title_field == 'to':
-                # Range filters are only supported on root-level schema fields, e.g. ['embedded', >>'date_created'<<, 'from']
                 if len(split_field) == 3:
                     f_field = split_field[-2]
                     field_schema = schema_for_field(f_field, types, doc_types)
@@ -862,6 +861,7 @@ def is_linkto_or_object_array_root_field(field, types, doc_types):
     if fr_schema and fr_schema['type'] == 'array' and (fr_schema['items'].get('linkTo') is not None or fr_schema['items']['type'] == 'object'):
         return True
     return False
+
 
 def generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query):
     '''
@@ -1115,8 +1115,8 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 for k in aggregations[field_agg_name][field_agg_name].keys():
                     result_facet[k] = aggregations[field_agg_name][field_agg_name][k]
             else:
-                # Default - terms, range, or histogram buckets.
-                result_facet['terms'] = aggregations[field_agg_name][field_agg_name]['buckets']
+                # Default - terms, range, or histogram buckets. Buckets may not be present
+                result_facet['terms'] = aggregations[field_agg_name][field_agg_name].get('buckets', [])
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
                     continue
