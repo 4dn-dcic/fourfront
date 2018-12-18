@@ -588,12 +588,10 @@ def add_single_file_to_higlass_viewconf(views, new_file):
     if len(views) >= 6:
         return None, "You cannot have more than 6 views in a single display."
 
-    # TODO Get the file format and format of the extra files, if any.
+    # Get the file format and format of the extra files, if any.
     file_format = new_file["file_format"]
 
-    # TODO get extra file formats
-
-    # TODO If no views exist, create one now
+    # If no views exist, create one now
     if len(views) == 0:
         base_view = {
             "initialYDomain": [
@@ -665,6 +663,23 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         # Add to the search bar, too.
         for view in views:
             update_genome_position_search_box(view, new_file)
+    elif file_format == "/file-formats/chromsizes/":
+        # Add the 1D track to top, left
+        new_track, error = create_1d_track(new_file, "top")
+        if error:
+            return None, errors
+        add_track_to_views(new_track, views, ["top"])
+
+        new_track, error = create_1d_track(new_file, "left")
+        if error:
+            return None, errors
+        add_track_to_views(new_track, views, ["left"])
+
+        # Add a 2D view.
+        new_view, error = create_2d_view(new_file)
+        if error:
+            return None, errors
+        add_view_to_views(new_view, views)
     else:
         return None, "Unknown file format {file_format}".format(file_format = file_format)
 
@@ -709,6 +724,11 @@ def create_1d_track(new_file, side="top"):
             new_track["type"] = "horizontal-gene-annotations"
         elif side == "left":
             new_track["type"] = "vertical-gene-annotations"
+    elif new_file["file_format"] == "/file-formats/chromsizes/":
+        if side == "top":
+            new_track["type"] = "horizontal-chromosome-labels"
+        elif side == "left":
+            new_track["type"] = "vertical-chromosome-labels"
     else:
         new_track["type"] = "horizontal-divergent-bar"
 
@@ -794,7 +814,10 @@ def create_2d_view(new_file):
     contents["name"] = new_file["display_title"]
 
     # Based on the file type, override the options.
-    contents["type"] = "heatmap"
+    if new_file["file_format"] == "/file-formats/chromsizes/":
+        contents["type"] = "2d-chromosome-grid"
+    else:
+        contents["type"] = "heatmap"
 
     # Add a uuid for this view.
     new_view["uid"] = uuid.uuid4()
