@@ -63,6 +63,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
+        // TODO DELETE ME
+        this.addChromsizes = this.addChromsizes.bind(this);
+
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
          * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
@@ -308,6 +311,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     * @returns {void}
     */
     addFileToHiglass(fileAtID) {
+        console.log("B");
         var { context }         = this.props,
             hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
@@ -574,6 +578,17 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
+
+    /*
+    DELETE ME after testing
+    */
+    addChromsizes ( ) {
+        const chromsizes_uuid = "bd0784a5-2a3d-42f0-ba9c-d9b3dc0539c6";
+        console.log("A");
+        return this.addFileToHiglass(chromsizes_uuid);
+    }
+
+
     render(){
         var { isFullscreen, windowWidth, windowHeight, width } = this.props,
             { addFileLoading, genome_assembly } = this.state;
@@ -596,6 +611,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <h3 className="tab-section-title">
                     <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
                         className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
+                    <Button onClick={this.addChromsizes} loading={addFileLoading} data-tip={"DELETE ME"}
+                        disabled={addFileLoading} bsStyle="success" key="addfilebtn2"
+                        className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} >
+                        <i className={"icon icon-fw icon-" + (addFileLoading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add Chromsizes file
+                    </Button>
                     <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>

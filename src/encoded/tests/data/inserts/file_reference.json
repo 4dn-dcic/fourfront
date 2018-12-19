@@ -99,12 +99,7 @@
     "lab": "4dn-dcic-lab",
     "award": "1U01CA200059-01",
     "higlass_uid": "PrCRKXgmTK6VzH6HZpAFVA",
-    "display_title": "4DNFIBP173GC.chrom.sizes",
-    "genome_assembly": "GRCm38",
-    "dataset_type": "Dataset",
-    "file_type": "other",
-    "assay_info": "Assay",
-    "biosource_name" : "Biosource"
+    "genome_assembly": "GRCm38"
  },
  {
      "accession":"4DNFIO67APA1",
