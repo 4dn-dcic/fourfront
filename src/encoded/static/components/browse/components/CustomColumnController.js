@@ -21,33 +21,54 @@ export class CustomColumnController extends React.Component {
         this.addHiddenColumn = this.addHiddenColumn.bind(this);
         this.removeHiddenColumn = this.removeHiddenColumn.bind(this);
         this.state = {
-            'hiddenColumns' : Array.isArray(props.defaultHiddenColumns) ? props.defaultHiddenColumns : []
+            'hiddenColumns' : _.clone(props.defaultHiddenColumns || {})
         };
     }
-    /*
+
     componentWillReceiveProps(nextProps){
         if (nextProps.defaultHiddenColumns !== this.props.defaultHiddenColumns){
-            this.setState({ hiddenColumns : _.uniq(this.state.hiddenColumns.concat(this.props.defaultHiddenColumns)) });
+            this.setState({ 'hiddenColumns' : _.clone(nextProps.defaultHiddenColumns || {}) });
         }
     }
-    */
+
+    /**
+     * @param {{ hiddenColumns?: string[], defaultHiddenColumns }} props - Component props.
+     * @returns {Object.<boolean>} Map of field names to boolean representing hidden or not.
+     */
     getAllHiddenColumns(props = this.props){
-        if (Array.isArray(props.hiddenColumns)) return props.hiddenColumns.concat(this.state.hiddenColumns);
+        if (Array.isArray(props.hiddenColumns)){
+            return _.extend(_.object(_.map(props.hiddenColumns, function(field){
+                return [ field, true ];
+            })), this.state.hiddenColumns);
+        }
         else return this.state.hiddenColumns;
     }
 
-    addHiddenColumn(fieldKey){
-        var hiddenCols = this.state.hiddenColumns.slice(0);
-        hiddenCols.push(fieldKey);
-        this.setState({ 'hiddenColumns' : hiddenCols });
+    addHiddenColumn(field){
+        this.setState(function(currState){
+            if (currState.hiddenColumns[field] === true){
+                return null;
+            }
+            var hiddenColumns = _.clone(currState.hiddenColumns);
+            hiddenColumns[field] = true;
+            return { hiddenColumns };
+        });
     }
 
-    removeHiddenColumn(fieldKey){
-        this.setState({ 'hiddenColumns' : _.without(this.state.hiddenColumns, fieldKey) });
+    removeHiddenColumn(field){
+        this.setState(function(currState){
+            if (currState.hiddenColumns[field] === false){
+                return null;
+            }
+            var hiddenColumns = _.clone(currState.hiddenColumns);
+            hiddenColumns[field] = false;
+            return { hiddenColumns };
+        });
     }
 
     render(){
         if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
+
         var propsToPass = _.extend(_.omit(this.props, 'children'), {
             'hiddenColumns'         : this.getAllHiddenColumns(),
             'addHiddenColumn'       : this.addHiddenColumn,
@@ -62,28 +83,25 @@ export class CustomColumnController extends React.Component {
 export class CustomColumnSelector extends React.Component {
 
     /**
-     * @param {Object[]}    constantColumnDefinitions - Pre-set columns, e.g. 'status', 'display_title'.
-     * @param {Object}      [columnsMap={}] - Mappings of column field name to settings. Use 'context.columns' from back-end response.
-     * @param {Object}      [columnDefinitionOverrideMap={}] - Mappings of column field name to settings to extend columnsMap with.
-     * @param {string[]}    [constantHiddenColumns=[]] - Columns which should always be hidden.
+     * @param {Object[]} constantColumnDefinitions - Pre-set columns, e.g. 'status', 'display_title'.
+     * @param {Object} [columnsMap={}] - Mappings of column field name to settings. Use 'context.columns' from back-end response.
+     * @param {Object} [columnDefinitionOverrideMap={}] - Mappings of column field name to settings to extend columnsMap with.
+     * @param {string[]} [constantHiddenColumns=[]] - Columns which should always be hidden.
      * @returns {Object[]} Column definitions
      */
     static buildColumnDefinitions(constantColumnDefinitions, columnsMap = {}, columnDefinitionOverrideMap = {}, constantHiddenColumns = []){
-        // Prevent Title from being a hideable column.
-        constantHiddenColumns = constantHiddenColumns.slice(0);
-        constantHiddenColumns.push('display_title');
-
+        // TODO: REMOVE FXN & USAGE
         return extendColumnDefinitions(
-            columnsToColumnDefinitions(columnsMap, constantColumnDefinitions).filter(function(c){
-                if (constantHiddenColumns.indexOf(c.field) > -1) return false;
-                return true;
-            }),
+            columnsToColumnDefinitions(
+                columnsMap,
+                constantColumnDefinitions
+            ),
             columnDefinitionOverrideMap
         );
     }
 
     static propTypes = {
-        'hiddenColumns'         : PropTypes.arrayOf(PropTypes.string).isRequired,
+        'hiddenColumns'         : PropTypes.object.isRequired,
         'addHiddenColumn'       : PropTypes.func.isRequired,
         'removeHiddenColumn'    : PropTypes.func.isRequired,
         //'columnDefinitions': PropTypes.
@@ -97,25 +115,24 @@ export class CustomColumnSelector extends React.Component {
     }
 
     columnDefinitionsWithHiddenState(){
-        return _.sortBy(this.props.columnDefinitions, 'order').map((colDef)=>{
-            return _.extend(colDef, {
-                'hiddenState' : this.props.hiddenColumns.indexOf(colDef.field) > -1
-            });
+        var { columnDefinitions, hiddenColumns } = this.props;
+
+        return _.map(_.sortBy(columnDefinitions, 'order'), function(colDef){
+            return _.extend({}, colDef, { 'hiddenState' : hiddenColumns[colDef.field] === true });
         });
     }
 
     handleOptionVisibilityChange(field, evt){
-        setTimeout(()=>{
-            if (this.props.hiddenColumns.indexOf(field) > -1){
-                // If invisible
-                this.props.removeHiddenColumn(field);
-            } else {
-                this.props.addHiddenColumn(field);
-            }
-        });
+        var { hiddenColumns, removeHiddenColumn, addHiddenColumn } = this.props;
+        if (hiddenColumns[field] === true){
+            removeHiddenColumn(field);
+        } else {
+            addHiddenColumn(field);
+        }
     }
 
     renderHiddenColumnOption(colDef){
+        if (colDef.field === 'display_title') return null; // Not an option -- always visible.
         return (
             <div className="col-sm-6 col-lg-3 column-option" key={colDef.field}>
                 <Checkbox checked={!colDef.hiddenState} onChange={this.handleOptionVisibilityChange.bind(this, colDef.field)} value={colDef.field}>{ colDef.title }</Checkbox>
@@ -124,23 +141,8 @@ export class CustomColumnSelector extends React.Component {
     }
 
     render(){
-
-        var innerRowContents = (
-            <div className="row clearfix">
-                { this.columnDefinitionsWithHiddenState().map(this.renderHiddenColumnOption) }
-            </div>
-        );
-
-        if (!this.props.showTitle){
-            return innerRowContents;
-        }
         return (
-            <div className={"visible-columns-selector-panel search-result-config-panel" + (this.props.className ? ' ' + this.props.className : '')}>
-                <div className="inner">
-                    <h5 className="text-400 panel-title">Visible Columns</h5>
-                    { innerRowContents }
-                </div>
-            </div>
+            <div className="row clearfix" children={_.map(this.columnDefinitionsWithHiddenState(), this.renderHiddenColumnOption)}/>
         );
     }
 

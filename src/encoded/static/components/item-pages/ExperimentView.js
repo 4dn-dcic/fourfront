@@ -10,7 +10,6 @@ import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTable
     SimpleFilesTableLoaded, Publications, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { RowSpacingTypeDropdown } from './WorkflowView';

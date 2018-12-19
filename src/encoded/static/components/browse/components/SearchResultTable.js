@@ -1024,7 +1024,7 @@ export class SearchResultTable extends React.PureComponent {
         'columns'           : PropTypes.object,
         'constantColumnDefinitions' : ResultRow.propTypes.columnDefinitions,
         'defaultWidthMap'   : PropTypes.shape({ 'lg' : PropTypes.number.isRequired, 'md' : PropTypes.number.isRequired, 'sm' : PropTypes.number.isRequired }).isRequired,
-        'hiddenColumns'     : PropTypes.arrayOf(PropTypes.string),
+        'hiddenColumns'     : PropTypes.objectOf(PropTypes.bool),
         'renderDetailPane'  : PropTypes.func,
         'columnDefinitionOverrideMap' : PropTypes.object,
         'totalExpected'     : PropTypes.number.isRequired,
@@ -1060,7 +1060,7 @@ export class SearchResultTable extends React.PureComponent {
         this.fullColumnDefinitions = this.fullColumnDefinitions.bind(this);
         this.getDimensionContainer = this.getDimensionContainer.bind(this);
         this.state = {
-            'columnDefinitions' : this.fullColumnDefinitions(props)
+            'columns' : this.fullColumnDefinitions(props)
         };
     }
 
@@ -1070,29 +1070,27 @@ export class SearchResultTable extends React.PureComponent {
 
     componentWillReceiveProps(nextProps){
         if (nextProps.columns !== this.props.columns || nextProps.columnDefinitionOverrideMap !== this.props.columnDefinitionOverrideMap || nextProps.defaultWidthMap !== this.props.defaultWidthMap ||
-            nextProps.hiddenColumns !== this.props.hiddenColumns || nextProps.constantColumnDefinitions !== this.props.constantColumnDefinitions) {
-            this.setState({ 'columnDefinitions' : this.fullColumnDefinitions(nextProps) });
+            nextProps.hiddenColumns !== this.props.hiddenColumns/* || nextProps.constantColumnDefinitions !== this.props.constantColumnDefinitions*/) {
+            this.setState({ 'columns' : this.fullColumnDefinitions(nextProps) });
         }
     }
 
     fullColumnDefinitions(props = this.props){
-        var columnDefinitions = columnsToColumnDefinitions(props.columns, props.constantColumnDefinitions, props.defaultWidthMap);
+        var columns = props.columns,
+            hiddenColumns = props.hiddenColumns;
 
-        _.forEach(columnDefinitions, function(colDef){
-            if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
-                colDef.widthMap.xs = colDef.widthMap.sm;
-            }
-        });
+        if (props.columnDefinitionOverrideMap){
+            columns = columnsToColumnDefinitions(columns, props.columnDefinitionOverrideMap, props.defaultWidthMap);
+        }
 
-        if (Array.isArray(props.hiddenColumns)){ // Remove hidden columns, if any defined
-            columnDefinitions = _.filter(columnDefinitions, function(colDef){
-                if (props.hiddenColumns.indexOf(colDef.field) > -1) return false;
+        if (hiddenColumns){
+            columns = _.filter(columns, function(colDef){
+                if (hiddenColumns[colDef.field] === true) return false;
                 return true;
             });
         }
-
-        if (props.columnDefinitionOverrideMap) columnDefinitions = extendColumnDefinitions(columnDefinitions, props.columnDefinitionOverrideMap);
-        return columnDefinitions;
+    
+        return columns;
     }
 
     /**
@@ -1109,7 +1107,7 @@ export class SearchResultTable extends React.PureComponent {
         return (
             <DimensioningContainer
                 {..._.omit(this.props, 'hiddenColumns', 'columnDefinitionOverrideMap', 'constantColumnDefinitions', 'defaultWidthMap')}
-                columnDefinitions={this.state.columnDefinitions} ref="container" />
+                columnDefinitions={this.state.columns} ref="container" />
         );
     }
 }

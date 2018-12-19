@@ -12,13 +12,13 @@ import ReactTooltip from 'react-tooltip';
 import Draggable from 'react-draggable';
 import { Sticky, StickyContainer } from 'react-sticky';
 import { Detail } from './../../item-pages/components';
-import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax, analytics, typedefs } from './../../util';
+import { isServerSide, Filters, navigate, object, layout, Schemas, DateUtility, ajax, analytics, typedefs, expFxn } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { ColumnSorterIcon } from './LimitAndPageControls';
 
 var { Item, ColumnDefinition } = typedefs;
 
-export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120 };
+export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120, 'xs' : 120 };
 
 /**
  * Default value rendering function.
@@ -228,15 +228,37 @@ export const defaultColumnDefinitionMap = {
     'number_of_experiments' : {
         'title' : '# of Experiments',
         'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
-        //'render' : function(result, columnDefinition, props, width){
-        //    if (!Array.isArray(result.experiments_in_set)) return null;
-        //    return result.experiments_in_set.length;
-        //}
+        'render' : function(expSet, columnDefinition, props, width){
+            var number_of_experiments = parseInt(expSet.number_of_experiments);
+
+            if (isNaN(number_of_experiments) || !number_of_experiments){
+                number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
+            }
+            if (!number_of_experiments){
+                number_of_experiments = 0;
+            }
+
+
+            return <span key="val">{ number_of_experiments }</span>;
+        }
     },
     'number_of_files' : {
         'title' : '# of Files',
+        'noSort' : true,
         'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
-        'noSort' : true
+        'render' : function(expSet, columnDefinition, props, width){
+
+            var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
+
+            if (isNaN(number_of_files) || !number_of_files){
+                number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, false);
+            }
+            if (!number_of_files){
+                number_of_files = 0;
+            }
+
+            return <span key="val">{ number_of_files }</span>;
+        }
 
     },
     'experiments_in_set.experiment_type' : {
@@ -271,27 +293,49 @@ export const defaultColumnDefinitionMap = {
  * Convert a map of field:title to list of column definitions, setting defaults.
  *
  * @param {Object.<string>} columns         Map of field names to field/column titles, as returned from back-end.
+ * @param {Object} columnDefinitionMap      Map of field names to extra column properties such 'render', 'title', 'widthMap', etc.
  * @param {Object[]} constantDefinitions    Preset list of column definitions, each containing at least 'field' and 'title'.
  * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
  * @returns {Object[]}                      List of objects containing keys 'title', 'field', 'widthMap', and 'render'.
  */
-export function columnsToColumnDefinitions(columns, constantDefinitions, defaultWidthMap = DEFAULT_WIDTH_MAP){
-    let newColDefs = _.pairs(columns).map(function(p){
-        return _.extend({ 'field' : p[0] }, p[1]);
-    }).filter(function(ncd){
-        if (_.findWhere(constantDefinitions, { 'field' : ncd.field })) return false;
-        return true;
+export function columnsToColumnDefinitions(columns, columnDefinitionMap, defaultWidthMap = DEFAULT_WIDTH_MAP){
+    var uninishedColumnDefinitions = _.map(
+        _.pairs(columns),
+        function([field, columnProperties]){
+            return _.extend({ field }, columnProperties);
+        }
+    );
+    
+    _.forEach(uninishedColumnDefinitions, function(colDef, i){
+        var colDefOverride = columnDefinitionMap && columnDefinitionMap[colDef.field];
+        if (colDefOverride){
+            _.extend(colDef, colDefOverride);
+        }
+        // Add defaults for any required-for-view but not-present properties.
+        if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
+            colDef.widthMap.xs = colDef.widthMap.sm;
+        }
+        colDef.widthMap = colDef.widthMap || defaultWidthMap;
+        colDef.render   = colDef.render || defaultColumnBlockRenderFxn;
+        colDef.order    = typeof colDef.order === 'number' ? colDef.order : i;
     });
 
-    // Add defaults for any missing properties for all columnDefinitions. Sort by order field.
-    return _.sortBy(constantDefinitions.concat(newColDefs).map(function(cd, cdIndex){
-        if (!cd.widthMap && defaultWidthMap)    cd.widthMap = defaultWidthMap;
-        if (!cd.render)                         cd.render   = defaultColumnBlockRenderFxn;
-        if (typeof cd.order !== 'number')       cd.order    = cdIndex;
-        return cd;
-    }), 'order');
-
+    return _.sortBy(uninishedColumnDefinitions, 'order');
 }
+
+
+export function defaultHiddenColumnMapFromColumns(columns){
+    var hiddenColMap = {};
+    _.forEach(_.pairs(columns), function([ field, columnDefinition ]){
+        if (columnDefinition.default_hidden){
+            hiddenColMap[field] = true;
+        } else {
+            hiddenColMap[field] = false;
+        }
+    });
+    return hiddenColMap;
+}
+
 
 export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
     return _.map(columnDefinitions, function(colDef){

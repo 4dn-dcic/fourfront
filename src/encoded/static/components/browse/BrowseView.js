@@ -13,9 +13,9 @@ import * as store from './../../store';
 import { isServerSide, expFxn, Filters, navigate, object, layout, typedefs } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
-    SearchResultTable, defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
+    SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnDefinitionMap, columnsToColumnDefinitions,
     SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
-    FacetList, onFilterHandlerMixin
+    FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
 
 
@@ -29,16 +29,9 @@ var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
  * @constant
  * @type {ColumnDefinition[]}
  */
-export const browseTableConstantColumnDefinitions = extendColumnDefinitions([
-    { 'field' : 'display_title', },
-    { 'field' : 'experiments_in_set.experiment_type', },
-    { 'field' : 'number_of_experiments', },
-    { 'field' : 'number_of_files', },
-    { 'field' : 'lab.display_title', },
-    { 'field' : 'date_created',  },
-    { 'field' : 'status',  },
-    { 'field' : 'last_modified.date_modified', }
-], defaultColumnDefinitionMap);
+export const browseTableConstantColumnDefinitions = [
+    { 'field' : 'display_title', }
+];
 
 
 /**
@@ -91,7 +84,7 @@ class ResultTableContainer extends React.PureComponent {
         'href'      : '/browse/',
         'debug'     : false,
         'navigate'  : navigate,
-        'columnDefinitionOverrides' : {
+        'columnDefinitionOverrides' : object.extendChildren({}, defaultColumnDefinitionMap, {
             // TODO: Extend defaultColumnDefinitionMap perhaps? Get rid of (most of) browseTableConstantColumnDefinitions and move to schema (?).
             // Also TODO: Add "description" property to be used for tooltips when hover over column title/label (?) (to be set in schemas or overrides).
             'experiments_in_set.biosample.biosource_summary' : {
@@ -101,42 +94,12 @@ class ResultTableContainer extends React.PureComponent {
                 'title' : "Exp Type"
             },
             'number_of_experiments' : {
-                'title' : "Exps",
-                'render' : function(expSet, columnDefinition, props, width){
-                    var number_of_experiments = parseInt(expSet.number_of_experiments);
-
-                    if (isNaN(number_of_experiments) || !number_of_experiments){
-                        number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
-                    }
-                    if (!number_of_experiments){
-                        number_of_experiments = 0;
-                    }
-
-
-                    return <span key="val">{ number_of_experiments }</span>;
-                }
+                'title' : "Exps"
             },
             'number_of_files' : {
-                'title' : "Files",
-                'render' : function(expSet, columnDefinition, props, width){
-
-                    var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
-
-                    if (isNaN(number_of_files) || !number_of_files){
-                        number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, false);
-                    }
-                    if (!number_of_files){
-                        number_of_files = 0;
-                    }
-
-                    return <span key="val">{ number_of_files }</span>;
-                }
-            },
-            'experiments_in_set.experiment_categorizer.combined' : defaultColumnDefinitionMap['experiments_in_set.experiment_categorizer.combined'],
-            'public_release' : defaultColumnDefinitionMap['public_release'],
-            'date_created' : defaultColumnDefinitionMap['date_created']
-        },
-        'constantHiddenColumns' : ['experimentset_type']
+                'title' : "Files"
+            }
+        })
     }
 
     constructor(props){
@@ -145,18 +108,16 @@ class ResultTableContainer extends React.PureComponent {
         this.isTermSelected = this.isTermSelected.bind(this);
         this.onFilter = onFilterHandlerMixin.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
-        this.hiddenColumns = this.hiddenColumns.bind(this);
         this.filterSelectedFilesToOnesInExpSet = this.filterSelectedFilesToOnesInExpSet.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
         this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
 
         // Primarily used here for caching some values re: PureComponents further down rendering tree.
-        this.state = {
-            'hiddenColumns' : this.hiddenColumns(),
-            'columnDefinitions' : this.getColumnDefinitions(),
-            'colDefOverrides' : this.colDefOverrides()
-        };
+        var colDefOverrides   = this.colDefOverrides(props),
+            columnDefinitions = this.getColumnDefinitions(props, colDefOverrides);
+
+        this.state = { colDefOverrides, columnDefinitions };
     }
 
     forceUpdateOnSelf(){
@@ -167,14 +128,11 @@ class ResultTableContainer extends React.PureComponent {
 
     componentWillReceiveProps(nextProps){
         var stateChange = {};
-        if (nextProps.context !== this.props.context || this.props.constantHiddenColumns !== nextProps.constantHiddenColumns){
-            stateChange.columnDefinitions = this.getColumnDefinitions(nextProps);
-        }
-        if (nextProps.constantHiddenColumns !== this.props.constantHiddenColumns || this.props.hiddenColumns !== nextProps.hiddenColumns){
-            stateChange.hiddenColumns = this.hiddenColumns(nextProps);
-        }
         if (nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
             stateChange.colDefOverrides = this.colDefOverrides(nextProps);
+        }
+        if (nextProps.context !== this.props.context/* || this.props.constantHiddenColumns !== nextProps.constantHiddenColumns*/){
+            stateChange.columnDefinitions = this.getColumnDefinitions(nextProps, stateChange.colDefOverrides || this.state.colDefOverrides);
         }
         if (_.keys(stateChange).length > 0){
             this.setState(stateChange);
@@ -199,21 +157,30 @@ class ResultTableContainer extends React.PureComponent {
      * @param {Object} [props=this.props] Current or next props.
      * @returns {ColumnDefinition[]} Final column definitions.
      */
-    getColumnDefinitions(props = this.props){
-        return CustomColumnSelector.buildColumnDefinitions(
-            browseTableConstantColumnDefinitions,
-            props.context.columns || {},
-            {},
-            props.constantHiddenColumns
-        );
+    getColumnDefinitions(props = this.props, colDefOverrides = this.state.colDefOverrides){
+        return columnsToColumnDefinitions(props.context.columns, colDefOverrides);
     }
 
     isTermSelected(term, facet){
         return Filters.determineIfTermFacetSelected(term, facet, this.props);
     }
 
+    /**
+     * Extends or creates `props.columnDefinitionOverrides.display_title` with a larger width as well as
+     * a render method which will render out a checkbox for selecting files of an ExperimentSet,
+     * if `props.selectedFiles` are passed in as well.
+     * If no selected files data structure is being fed through props, this function returns `props.columnDefinitionOverrides`.
+     *
+     * Return value gets cached to state.colDefOverrides.
+     *
+     * @param {{ selectedFiles?: Object, columnDefinitionOverrides : ColumnDefinition }} props - Current component props.
+     * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
+     */
     colDefOverrides(props = this.props){
-        if (!props.selectedFiles) return props.columnDefinitionOverrides || null;
+        if (typeof props.selectedFiles === 'undefined'){
+            // We don't need to add checkbox(es) for file selection.
+            return props.columnDefinitionOverrides || null;
+        }
 
         var _this = this;
 
@@ -222,12 +189,12 @@ class ResultTableContainer extends React.PureComponent {
             'display_title' : _.extend({}, defaultColumnDefinitionMap.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
                 'render' : (expSet, columnDefinition, paneProps, width) => {
-                    var origTitleBlock = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, paneProps, width);
-                    var newChildren = origTitleBlock.props.children.slice(0);
-                    var allFiles = expFxn.allFilesFromExperimentSet(expSet, true);
-                    var allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true);
-
-                    var allFilesKeyedByTriples = _.object(_.zip(allFileAccessionTriples, allFiles));
+                    var origTitleBlock          = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, paneProps, width),
+                        newChildren             = origTitleBlock.props.children.slice(0),
+                        allFiles                = expFxn.allFilesFromExperimentSet(expSet, true),
+                        allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true),
+                        allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
+                    
                     allFileAccessionTriples = allFileAccessionTriples.sort();
 
                     var selectedFilesForSet = _this.filterSelectedFilesToOnesInExpSet(allFileAccessionTriples); //getSelectedFileForSet(allFileIDs);
@@ -264,17 +231,6 @@ class ResultTableContainer extends React.PureComponent {
                 }
             })
         });
-    }
-
-    hiddenColumns(props = this.props){
-        var cols = [];
-        if (Array.isArray(props.constantHiddenColumns)){
-            cols = cols.concat(props.constantHiddenColumns);
-        }
-        if (Array.isArray(props.hiddenColumns)){
-            cols = cols.concat(props.hiddenColumns);
-        }
-        return _.uniq(cols);
     }
 
     handleClearFilters(evt){
@@ -321,14 +277,13 @@ class ResultTableContainer extends React.PureComponent {
                         )}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount />
-                    <SearchResultTable
+                    <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth }}
                         ref="searchResultTable"
-                        registerWindowOnScrollHandler={this.props.registerWindowOnScrollHandler}
-                        results={context['@graph']} columns={context.columns || {}}
+                        results={context['@graph']}
+                        columns={this.state.columnDefinitions}
                         renderDetailPane={this.browseExpSetDetailPane}
-                        constantColumnDefinitions={browseTableConstantColumnDefinitions} hiddenColumns={this.state.hiddenColumns}
-                        columnDefinitionOverrideMap={this.state.colDefOverrides} stickyHeaderTopOffset={-78} />
+                        stickyHeaderTopOffset={-78} />
                 </div>
             </div>
         );
@@ -389,35 +344,6 @@ export default class BrowseView extends React.Component {
     }
 
     /**
-     * Combines props.defaultHiddenColumns with list of facets/columns which have `"default_hidden" : true` in schema.
-     *
-     * @param {{ context: SearchResponse }} props - Current or next props of component with a 'context' field.
-     * @returns {string[]}
-     */
-    static fullDefaultHiddenColumns(props){
-        if (props.context && props.context.columns){
-            return (props.defaultHiddenColumns || []).concat(_.map(
-                _.filter(_.pairs(props.context.columns), function([facet, columnInfo]){ return columnInfo.default_hidden; }),
-                function([facet, columnInfo]){ return facet; }
-            ));
-        } else {
-            return props.defaultHiddenColumns || [];
-        }
-    }
-
-    /**
-     * Default prop values for BrowseView. Namely contains `defaultHiddenColumns`.
-     *
-     * @static
-     * @public
-     * @type {Object}
-     * @property {string[]} defaultHiddenColumns - List of column fields which are hidden by default.
-     */
-    static defaultProps = {
-        'defaultHiddenColumns' : ['lab.display_title', 'date_created', 'last_modified.date_modified', 'status', 'number_of_files']
-    };
-
-    /**
      * PropTypes for component.
      *
      * @static
@@ -452,7 +378,7 @@ export default class BrowseView extends React.Component {
          * @property {string[]} state.defaultHiddenColumns - List of column fields which are hidden by default, until user interaction.
          */
         this.state = {
-            'defaultHiddenColumns' : BrowseView.fullDefaultHiddenColumns(props)
+            'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(props.context.columns)
         };
     }
 
@@ -500,8 +426,10 @@ export default class BrowseView extends React.Component {
      * @returns {void}
      */
     componentWillReceiveProps(nextProps){
-        if (this.props.context !== nextProps.context || this.props.defaultHiddenColumns !== nextProps.defaultHiddenColumns){
-            this.setState({ 'defaultHiddenColumns' : BrowseView.fullDefaultHiddenColumns(nextProps) });
+        if (this.props.context !== nextProps.context){
+            this.setState({
+                'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(nextProps.context.columns)
+            });
         }
     }
 
@@ -639,7 +567,7 @@ export default class BrowseView extends React.Component {
      * @returns {JSX.Element} View for Browse page.
      */
     render() {
-        var { context, href, session, defaultHiddenColumns, browseBaseState, schemas } = this.props,
+        var { context, href, session, browseBaseState, schemas } = this.props,
             results             = context['@graph'],
             hrefParts           = url.parse(href, true),
             countExternalSets   = BrowseView.externalDataSetsCount(context);
@@ -663,14 +591,6 @@ export default class BrowseView extends React.Component {
 
         return (
             <div className="browse-page-container search-page-container" id="browsePageContainer">
-                {/*
-                <ControlsAndResults
-                    {...this.props}
-                    //fileFormats={fileFormats}
-                    href={this.props.href}
-                    schemas={this.props.schemas}
-                />
-                */}
                 <SelectedFilesController href={href}>
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>

@@ -1210,8 +1210,16 @@ def list_visible_columns_for_schemas(request, schemas):
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
+            if 'display_title' not in schema_columns:
+                columns['display_title'] = { 'title' : "Title" }
             for name,obj in schema_columns.items():
                 columns[name] = obj
+            if 'date_created' not in columns:
+                columns['date_created'] = { 'title' : "Date Created", 'colTitle' : "Created", 'default_hidden' : True }
+        else:
+            # Return at least display_title & date_created
+            columns['display_title'] = { 'title' : "Title" }
+            columns['date_created'] = { 'title' : "Date Created", 'colTitle' : "Created" }
     return columns
 
 _ASSEMBLY_MAPPER = {

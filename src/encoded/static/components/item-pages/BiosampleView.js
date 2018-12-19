@@ -9,8 +9,6 @@ import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './compo
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-
 
 
 export default class BiosampleView extends DefaultItemView {
