@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -19,7 +20,7 @@ class ImagingPath(Item):
     """Imaging Path class."""
     item_type = 'imaging_path'
     schema = load_schema('encoded:schemas/imaging_path.json')
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
     @calculated_property(schema={
         "title": "Display Title",
