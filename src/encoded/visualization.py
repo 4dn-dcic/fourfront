@@ -462,9 +462,17 @@ def add_files_to_higlass_viewconf(request):
     new_file_uuids = files
     new_views = higlass_viewconfig["views"]
 
+    # Get all of the file information.
+    files_info = []
     for file_uuid in new_file_uuids:
-        # Get the new file.
-        new_file_dict = get_item_if_you_can(request, file_uuid)
+        files_info.append({
+            "uuid" : file_uuid,
+            "item" : get_item_if_you_can(request, file_uuid),
+        })
+
+    for datum in files_info:
+        file_uuid = datum["uuid"]
+        new_file_dict = datum["item"]
 
         if not new_file_dict:
             return {
@@ -527,8 +535,19 @@ def add_files_to_higlass_viewconf(request):
                 "new_genome_assembly" : None
             }
 
+    # See if 2D chromsize files need to be added.
+    views, errors = add_2d_chromsize(new_views, files_info)
+    if errors:
+        return {
+            "success" : False,
+            "errors" : "errors found while adding chromsizes file : {errors}".format(errors=errors),
+            "new_viewconfig": None,
+            "new_genome_assembly" : None
+        }
+
     # Resize and reposition the Higlass views.
     repack_higlass_views(new_views)
+
 
     # Set up the additional views so they all move and zoom with the first.
     setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
@@ -541,43 +560,10 @@ def add_files_to_higlass_viewconf(request):
         "new_genome_assembly" : current_genome_assembly
     }
 
-def add_single_file_to_higlass_viewconf2(views, new_file_dict):
-    """ Add a single file to the view config.
-    """
-
-    # If there are already 6 views, stop and return an error.
-    views_count = len(views)
-    if views_count >= 6:
-        return None, "You cannot have more than 6 views in a single display."
-
-    # Based on the filetype's dimensions, try to add the file to the viewconf
-    file_format = new_file_dict["file_format"]
-    known_1d_formats = (
-        "/file-formats/bg/",
-        "/file-formats/bw/",
-        "/file-formats/bed/",
-        "/file-formats/bigbed/"
-    )
-    known_2d_formats = (
-        "/file-formats/mcool/",
-        "/file-formats/hic/"
-    )
-    if [x for x in known_2d_formats if x in file_format]:
-        status, errors = add_2d_file_to_higlass_viewconf(views, new_file_dict)
-        if errors and not status:
-            return None, errors
-    elif [x for x in known_1d_formats if x in file_format]:
-        status, errors = add_1d_file_to_higlass_viewconf(views, new_file_dict)
-        if errors and not status:
-            return None, errors
-    else:
-        return None, "Unknown file format {file_format}".format(file_format = new_file_dict['file_format'])
-
-    # Success! Return the modified view conf.
-    return views, None
-
 def add_single_file_to_higlass_viewconf(views, new_file):
     """ Add a single file to the list of views.
+    views: All of the views from the view config.
+    new_file: The file to add.
 
     Returns:
         views : A list of the modified views. None if there is an error.
@@ -675,11 +661,7 @@ def add_single_file_to_higlass_viewconf(views, new_file):
             return None, errors
         add_track_to_views(new_track, views, ["left"])
 
-        # Add a 2D view.
-        new_view, error = create_2d_view(new_file)
-        if error:
-            return None, errors
-        add_view_to_views(new_view, views)
+        # We may have to add a 2D chromosome grid. This is done after the individual files have been added.
     else:
         return None, "Unknown file format {file_format}".format(file_format = file_format)
 
@@ -982,3 +964,36 @@ def setZoomLocationLocks(views, view_config, scales_and_center_k):
     # Set the view config.
     view_config["locationLocks"] = locks["location"]
     view_config["zoomLocks"] = locks["zoom"]
+
+def add_2d_chromsize(new_views, files_info):
+    """ If files_info has a chromsize file and new_views contains a 2D view,
+    all of the views will get a 2D chromsize file.
+    """
+
+    # Look through files_info and see if there is a chromsize file.
+    chromsize_files = [ info["item"] for info in files_info if info["item"]["file_format"] == "/file-formats/chromsizes/" ]
+
+    # No chromsize files, return
+    if len(chromsize_files) == 0:
+        return new_views, None
+
+    # Look through the new_views for any with a central view with contents.
+    views_2d = [ view for view in new_views if len(view["tracks"]["center"][0]["contents"]) > 0 ]
+
+    # No 2D views, return
+    if len(views_2d) == 0:
+        return new_views, None
+
+    # Get the contents for the chromosome grid. We assume there is only 1 chromsize file.
+    chromsize_view, error = create_2d_view(chromsize_files[0])
+    if error:
+        return None, errors
+
+    chromsize_contents = chromsize_view["tracks"]["center"][0]["contents"][0]
+
+    # For each view:
+    for view in views_2d:
+        # Append the chromsize grid on top
+        view["tracks"]["center"][0]["contents"].insert(0, chromsize_contents)
+
+    return new_views, None
