@@ -181,7 +181,14 @@ def validate_item_type_of_linkto_field(context, request):
     pass
 
 
-# Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+## Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+
+static_content_embed_list = [
+    "static_headers.*",            # Type: UserContent, may have differing properties
+    "static_content.content.*",    # Type: UserContent, may have differing properties
+]
 
 lab_award_attribution_embed_list = [
     "award.project",
@@ -313,6 +320,9 @@ class Item(snovault.Item):
         # experiment sets
         'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
+
+    # Default embed list for all 4DN Items
+    embedded_list = static_content_embed_list
 
     def __init__(self, registry, models):
         super().__init__(registry, models)
@@ -586,11 +596,12 @@ class SharedItem(Item):
 def add(context, request):
     """smth."""
     if request.has_permission('add', context):
+        type_name = context.type_info.name
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
+            'profile': '/profiles/{name}.json'.format(name=type_name),
+            'href': '/search/?type={name}&currentAction=add'.format(name=type_name),
         }
 
 
@@ -602,7 +613,7 @@ def edit(context, request):
             'name': 'edit',
             'title': 'Edit',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=edit'.format(item_uri=request.resource_path(context)),
         }
 
 
@@ -614,5 +625,5 @@ def create(context, request):
             'name': 'create',
             'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=create'.format(item_uri=request.resource_path(context)),
         }

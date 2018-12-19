@@ -73,17 +73,7 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
-    embedded_list = lab_award_attribution_embed_list + [
-        #"static_headers.content",
-        #"static_headers.title",
-        #"static_headers.filetype",
-        #"static_headers.section_type",
-        #"static_headers.options.default_open",
-        #"static_headers.options.title_icon",
-
-        "static_headers.*",             # Type: UserContent, may have differing properties
-        "static_content.content.*",    # Type: UserContent, may have differing properties
-
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",

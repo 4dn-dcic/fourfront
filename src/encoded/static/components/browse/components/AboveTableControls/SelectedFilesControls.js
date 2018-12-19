@@ -219,7 +219,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         return (
             <React.Fragment>
                 <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
-                    <i className="icon icon-download icon-fw"/> { innerBtnTitle }
+                    <i className="icon icon-download icon-fw shift-down-1"/> { innerBtnTitle }
                 </Button>
                 { this.renderModal(subSelectedFiles) }
             </React.Fragment>
@@ -428,7 +428,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         if (typeof isAllSelected === 'undefined') isAllSelected = this.isAllSelected();
         return (
             <span>
-                <i className={"icon icon-fw icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'))}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span>
+                <i className={"icon icon-fw shift-down-1 icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'))}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span>
             </span>
         );
     }
@@ -494,19 +494,28 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         return (
             <Button
                 key={'button-to-select-files-for' + fileType} {...SelectedFilesFilterByContent.fileFormatButtonProps}
-                onClick={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}
-            >
-                {button_text_prefix}{ title } files <small>({ files.length })</small>
+                onClick={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}>
+                { button_text_prefix }{ title } files <small>({ files.length })</small>
             </Button>
         );
     }
 
     static renderBucketCheckbox(fileType, title, clickHandler, files, button_text_prefix, fileTypeFilters){
-        var selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
+        var selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1,
+            filesLength = files.length,
+            tip = (
+                (selected ? 'Remove ' : 'Include ')
+                + filesLength + ' ' + title + ' files' +
+                (selected ? ' from ' : ' to ') + 'selection.'
+            );
         return (
-            <Checkbox key={fileType} checked={selected} onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null} className="text-ellipsis-container">
-                { button_text_prefix }{ title } <sub>({ files.length })</sub>
-            </Checkbox>
+            <div className="col-sm-6 col-lg-3 file-type-checkbox" key={fileType} data-tip={tip}>
+                <Checkbox key={fileType} checked={selected}
+                    onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}
+                    className="text-ellipsis-container">
+                    { button_text_prefix }{ title } <sub>({ filesLength })</sub>
+                </Checkbox>
+            </div>
         );
     }
 
@@ -537,13 +546,14 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
     }
 
     renderFileFormatButtonsSelected(){
-        if (!this.props.selectedFiles) return null;
+        var { selectedFiles, currentFileTypeFilters } = this.props;
+        if (!selectedFiles) return null;
         return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(
-            SelectedFilesFilterByContent.filesToFileTypeBuckets(this.props.selectedFiles),
+            SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles),
             '',
             this.onClick,
             SelectedFilesFilterByContent.renderBucketCheckbox,
-            this.props.currentFileTypeFilters
+            currentFileTypeFilters
         );
     }
 
@@ -562,9 +572,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
 
     render(){
         return wrapInAboveTablePanel(
-            <div className="row" children={_.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
-                return <div className="col-sm-6 col-lg-3 file-type-checkbox" key={jsxButton.key || i}>{ jsxButton }</div>;
-            })}/>,
+            <div className="row" children={this.renderFileFormatButtonsSelected()}/>,
             <span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>,
             'file-type-selector-panel',
             this.props.closeButtonClickHandler
@@ -587,16 +595,17 @@ export class SelectedFilesFilterByButton extends React.Component {
         var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel, gridState } = this.props,
             isDisabled              = !selectedFiles || _.keys(selectedFiles).length === 0,
             currentFiltersLength    = currentFileTypeFilters.length,
-            smallerSize             = ['lg', 'md'].indexOf(gridState) > -1;
+            largerSize              = ['lg', 'md'].indexOf(gridState) > -1;
 
         return (
             <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'}>
-                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/> {
-                    currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : (
-                        smallerSize ? 'All ' : null
+                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
+                {
+                    currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
+                        largerSize ? <span>All </span> : null
                     )
                 }
-                { smallerSize ? <span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }&nbsp;&nbsp;</span> : null }
+                { largerSize ? <span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span> : null }
                 <i className="icon icon-angle-down icon-fw"/>
             </Button>
         );

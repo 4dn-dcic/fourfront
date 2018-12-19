@@ -1,11 +1,11 @@
 """Collection for the SopMap object."""
 from snovault import (
     collection,
-    load_schema,
+    load_schema
 )
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -22,7 +22,7 @@ class SopMap(Item):
     item_type = 'sop_map'
     schema = load_schema('encoded:schemas/sop_map.json')
     name_key = 'mapid'
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
     def _update(self, properties, sheets=None):
         delim = '_'

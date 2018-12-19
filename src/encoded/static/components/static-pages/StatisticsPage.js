@@ -1017,7 +1017,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
     static colorScaleForPublicVsInternal(term){
         if (term === 'Internal Release' || term === 'Internally Released'){
             return '#ff7f0e'; // Orange
-        } else if (term === 'Public Release' || term === 'Publically Released'){
+        } else if (term === 'Public Release' || term === 'Publicly Released'){
             return '#1f77b4'; // Blue
         } else {
             throw new Error("Term supplied is not one of 'Internal Release' or 'Public Release': '" + term + "'.");

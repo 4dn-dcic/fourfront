@@ -6,25 +6,6 @@ import url from 'url';
 import _ from 'underscore';
 import { console, isServerSide } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
-import { windowHref } from './../../globals';
-
-
-export function findNodeFromHref(href, nodes){
-    if (typeof href !== 'string' || !Array.isArray(nodes)) return null;
-    var parts = url.parse(href);
-    if (typeof parts.hash !== 'string' || parts.hash.length === 0) return null;
-    var findPart = decodeURIComponent(parts.hash.slice(1));
-    return _.find(nodes, function(node){
-        if (typeof node.id === 'string'){
-            if (node.id === findPart) return true;
-            return false;
-        }
-        if (typeof node.name === 'string'){
-            if (node.name === findPart) return true;
-        }
-        return false;
-    }) || null;
-}
 
 
 export default class StateContainer extends React.Component {

@@ -156,7 +156,6 @@ export class AboveTableControls extends React.Component {
     }
 
     handleOpenToggle(value){
-        console.log('HANDLEOPENTOGGLE', value);
         if (this.timeout){
             clearTimeout(this.timeout);
             delete this.timeout;
@@ -165,6 +164,7 @@ export class AboveTableControls extends React.Component {
         var state = { 'open' : value };
         if (state.open){
             state.reallyOpen = state.open;
+            setTimeout(ReactTooltip.rebuild, 100);
         } else {
             this.timeout = setTimeout(()=>{
                 this.setState({ 'reallyOpen' : false });
@@ -226,7 +226,10 @@ export class AboveTableControls extends React.Component {
 
     leftSection(filteredSelectedFiles){
         var { showSelectedFileCount, selectedFiles, context, currentAction, showTotalResults } = this.props;
-        if (showSelectedFileCount && selectedFiles){ // Case if on BrowseView, but not on SearchView
+
+        // Case if on BrowseView, but not on SearchView
+        // TODO: Modularize?
+        if (showSelectedFileCount && selectedFiles){
             return (
                 <ChartDataController.Provider id="selected_files_section">
                     <SelectedFilesControls
@@ -244,26 +247,35 @@ export class AboveTableControls extends React.Component {
         // don't show during submission search "selecting existing"
         if (context && Array.isArray(context.actions) && !currentAction){
             var addAction = _.findWhere(context.actions, { 'name' : 'add' });
-            if (addAction && typeof addAction.href === 'string'){ // TODO::: WE NEED TO CHANGE THIS HREF!! to /search/?type= format.
+            if (addAction && typeof addAction.href === 'string'){
                 addButton = (
-                    <div key="add-button" className="pull-left box create-add-button" style={{'paddingRight' : 10}}>
-                        <Button bsStyle="primary" href='#!add'>Create</Button>
-                    </div>
+                    <Button bsStyle="primary" href={addAction.href} bsSize="xs" data-skiprequest="true">
+                        <i className="icon icon-fw icon-plus shift-down-1"/>
+                        <span>Create</span>
+                        &nbsp;
+                    </Button>
                 );
             }
         }
 
+        // Case if on SearchView
         var total = null;
         if (showTotalResults) {
             if (typeof showTotalResults === 'number')               total = showTotalResults;
             else if (context && typeof context.total === 'number')  total = context.total;
             total = (
-                <div key="total-count" className="pull-left box results-count">
+                <div style={{ 'verticalAlign' : 'bottom' }} className="inline-block">
                     <span className="text-500">{ total }</span> Results
                 </div>
             );
         }
-        return [addButton, total];
+
+        if (!total && !addButton) return null;
+        return (
+            <div key="total-count" className="pull-left pt-11 box results-count">
+                { total }{ total && addButton ? <React.Fragment>&nbsp;&nbsp;</React.Fragment> : '' }{ addButton }
+            </div>
+        );
     }
 
     rightButtons(){
@@ -277,7 +289,7 @@ export class AboveTableControls extends React.Component {
             ),
             configureColumnsButton = (
                 <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
-                    <i className="icon icon-gear icon-fw"/>{['lg', 'md'].indexOf(gridState) > -1 ? <span>Columns &nbsp;</span> : null }<i className="icon icon-fw icon-angle-down"/>
+                    <i className="icon icon-gear icon-fw"/>{['lg', 'md'].indexOf(gridState) > -1 ? <span>Columns</span> : null }<i className="icon icon-fw icon-angle-down"/>
                 </Button>
             );
 

@@ -221,7 +221,7 @@ def user_add(context, request):
 
 
 @calculated_property(context=User, category='user_action')
-def impersonate(request):
+def impersonate(context, request):
     """smth."""
     # This is assuming the user_action calculated properties
     # will only be fetched from the current_user view,
@@ -230,7 +230,7 @@ def impersonate(request):
         return {
             'id': 'impersonate',
             'title': 'Impersonate User…',
-            'href': '/#!impersonate-user',
+            'href': request.resource_path(context) + '?currentAction=impersonate-user',
         }
 
 
