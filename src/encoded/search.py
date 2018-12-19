@@ -28,6 +28,9 @@ from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
 import uuid
+import structlog
+
+log = structlog.getLogger(__name__)
 
 
 def includeme(config):
@@ -841,17 +844,36 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
     return facets
 
 
-def schema_for_field(field, types, doc_types):
-    '''Filter down schemas to the one for our field'''
+def schema_for_field(field, types, doc_types, should_log=False):
+    '''
+    Find the schema for the given field (in embedded '.' format). Uses
+    ff_utils.crawl_schema from snovault and logs any cases where there is an
+    error finding the field from the schema
+    Args:
+        field: (string) embedded field path, separated by '.'
+        types: result of registry[TYPES]
+        doc_types: (list) @types for the search
+        should_log: (bool) logging will only occur if set to True
+    Returns:
+        Dictionary schema for the field, or None if not found
+    '''
     schema = types[doc_types[0]].schema
-    if schema:
+    # for 'audit.*', schema will never be found and logging isn't helpful
+    if schema and field[:6] != 'audit.':
+        # 'type' field is really '@type' in the schema
+        use_field = '@type' if field == 'type' else field
+        # eliminate '!' from not fields
+        use_field = use_field[:-1] if use_field.endswith('!') else use_field
         try:
-            field_schema = crawl_schema(types, field, schema)
-        except:  # cannot find schema. Return None
-            pass
+            field_schema = crawl_schema(types, use_field, schema)
+        except Exception as exc:  # cannot find schema. Log and Return None
+            if should_log:
+                log.warning('Cannot find schema in search.py. Type: %s. Field: %s'
+                          % (doc_types[0], field), field=field, error=str(exc))
         else:
             return field_schema
     return None
+
 
 def is_linkto_or_object_array_root_field(field, types, doc_types):
     '''Not used currently. May be useful for if we want to enabled "type" : "nested" mappings on lists of dictionaries'''
@@ -947,7 +969,7 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
 
     for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
-        field_schema = schema_for_field(field, types, doc_types)
+        field_schema = schema_for_field(field, types, doc_types, should_log=True)
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
         is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
 
