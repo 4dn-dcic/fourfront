@@ -22,6 +22,75 @@ def file_w_extra_1(award, lab):
         }
 
 
+@pytest.fixture
+def file_wo_underscore_fields():
+    return {
+        "dataset_type": "in situ Hi-C",
+        "assay_info": "Dpn II",
+        "replicate_identifiers": ["Biorep 1, Techrep 1"],
+        "biosource_name": "H1-hESC",
+        "experiment_bucket": "processed files",
+        "project_lab": "Some Lab"
+    }
+
+
+@pytest.fixture
+def file_w_underscore_fields(file_wo_underscore_fields):
+    fieldmap = {
+        "dataset_type": "_experiment_type",
+        "assay_info": "_assay_info",
+        "replicate_identifiers": "_replicate_info",
+        "biosource_name": "_biosource_name",
+        "experiment_bucket": "_experiment_bucket",
+        "project_lab": "_lab_name"
+    }
+    mod = {v: file_wo_underscore_fields.get(f) for f, v in fieldmap.items()}
+    mod['_replicate_info'] = mod['_replicate_info'][0]
+    return mod
+
+
+def test_upgrade_vistrack_meta_one_repid(registry, file_wo_underscore_fields, file_w_underscore_fields):
+    file_wo_underscore_fields['schema_version'] = '1'
+    file_w_underscore_fields['schema_version'] = '2'
+    del file_wo_underscore_fields['experiment_bucket']
+    del file_w_underscore_fields['_experiment_bucket']
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('file_vistrack', file_wo_underscore_fields, registry=registry,
+                             current_version='1', target_version='2')
+    for f, v in file_w_underscore_fields.items():
+        assert f in value
+        assert value.get(f) == v
+
+
+def test_upgrade_vistrack_meta_multi_repids(registry, file_wo_underscore_fields, file_w_underscore_fields):
+    file_wo_underscore_fields['schema_version'] = '1'
+    file_w_underscore_fields['schema_version'] = '2'
+    file_wo_underscore_fields['replicate_identifiers'] = ['Biorep 1, Techrep 1', 'Biorep 2, Techrep 1']
+    file_w_underscore_fields['_replicate_info'] = 'merged replicates'
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('file_vistrack', file_wo_underscore_fields, registry=registry,
+                             current_version='1', target_version='2')
+    for f, v in file_w_underscore_fields.items():
+        assert f in value
+        assert value.get(f) == v
+
+
+def test_upgrade_file_processed_meta_multi_repids(registry, file_wo_underscore_fields, file_w_underscore_fields):
+    file_wo_underscore_fields['schema_version'] = '2'
+    file_w_underscore_fields['schema_version'] = '3'
+    file_wo_underscore_fields['replicate_identifiers'] = ['Biorep 1, Techrep 1', 'Biorep 2, Techrep 1']
+    file_w_underscore_fields['_replicate_info'] = 'merged replicates'
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('file_processed', file_wo_underscore_fields, registry=registry,
+                             current_version='2', target_version='3')
+    for f, v in file_w_underscore_fields.items():
+        assert f in value
+        assert value.get(f) == v
+
+
 def test_upgrade_file_format_known(
         registry, file_1, file_formats):
     type2format = {

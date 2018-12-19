@@ -207,6 +207,42 @@
             "description": "The associated QC reports",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "linkTo": "QualityMetric"
+        },
+        "_lab_name": {
+            "description": "The lab that did the experiment if not the attributed Lab from whence this file",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "_experiment_type": {
+            "description": "The type of experiment to which this file is associated",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "_biosource_name": {
+            "description": "The name of the cell line or tissue sample for this track",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "_assay_info": {
+            "description": "Information that helps distinguish the assay eg. ChIP-seq target or repliseq phase",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "_replicate_info": {
+            "description": "Information on which replicate this file belongs",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },        
+        "_experiment_bucket": {
+            "description": "Where does a file sit in an experiment or set",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
         }
     },
     "facets": {

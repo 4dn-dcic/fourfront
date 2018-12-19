@@ -310,7 +310,7 @@ class File(Item):
 
     def _get_file_experiment_info(self, request):
         """
-        Get info about an experiment that a file belongs value given a File.
+        Get info about an experiment that a file belongs given a File.
         Also retrieve replicate_set info from the set
         Checks the rev_linked experiments and experiment_sets
         """
@@ -361,10 +361,11 @@ class File(Item):
                         experiment_of_file = expts_of_file[0]
 
         if not experiment_of_file:
-            return info
-        exp_info = get_item_if_you_can(request, experiment_of_file)
+            return {}
         if exp_info is None:
-            return info
+            exp_info = get_item_if_you_can(request, experiment_of_file)
+            if exp_info is None:
+                return {}
         info['experiment_type'] = exp_info.get('experiment_type')
         assay_info = exp_info.get('experiment_categorizer')
         if assay_info:
@@ -406,36 +407,25 @@ class File(Item):
     })
     def track_and_facet_info(self, request):
         props = self.properties
-        track_info = {
-            'experiment_type': props.get('dataset_type'),
-            'assay_info': props.get('assay_info'),
-            'lab_name': props.get('project_lab'),
-            'biosource_name': props.get('biosource_name')
-        }
-        if track_info.get('biosource_name') is None:
-            if hasattr(self, 'biosource_name'):
-                bsname = self.biosource_name(request)
-                if bsname:
-                    track_info['biosource_name'] = bsname
+        fields = ['experiment_type', 'assay_info', 'lab_name',
+                  'biosource_name', 'replicate_info', 'experiment_bucket']
+        track_info = {field: props.get('_' + field) for field in fields}
+        track_info = {k: v for k, v in track_info.items() if v is not None}
+        if len(track_info) == 6:
+            track_title = self.generate_track_title(track_info)
+            return track_info
+
+        einfo = self._get_file_experiment_info(request)
+        track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+        if 'experiment_type' not in track_info:
+            return
+
         if track_info.get('lab_name') is None:
             labid = props.get('lab')
             lab = get_item_if_you_can(request, labid)
             if lab is not None:
                 track_info['lab_name'] = lab.get('display_title')
-        repinfo = props.get('replicate_identifiers')
-        if repinfo is not None:
-            if len(repinfo) > 1:
-                track_info['replicate_info'] = 'merged replicates'
-            else:
-                track_info['replicate_info'] = repinfo[0]
-        expt_bucket = props.get('experiment_bucket')
-        if expt_bucket is not None:
-            track_info['experiment_bucket'] = expt_bucket
 
-        track_info = {k: v for k, v in track_info.items() if v is not None}
-        if len(track_info) != 6:
-            einfo = self._get_file_experiment_info(request)
-            track_info.update({k: v for k, v in einfo.items() if k not in track_info})
         track_title = self.generate_track_title(track_info)
         if track_title is not None:
             track_info['track_title'] = track_title
@@ -870,7 +860,7 @@ class FileVistrack(File):
         "title": "Biosource Name",
         "type": "string"
     })
-    def biosource_name(self, request):
+    def _biosource_name(self, request):
         bios = self.properties.get('biosource')
         if bios is not None:
             return request.embed(bios, '@@object').get('biosource_name')

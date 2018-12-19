@@ -43,3 +43,26 @@ def file_1_2(value, system):
                 note = note + ' EXTRA FILE FORMAT: ' + str(i) + '-' + eformat
                 value['notes'] = note
             value['extra_files'][i]['file_format'] = efuuid
+
+
+@upgrade_step('file_processed', '2', '3')
+@upgrade_step('file_vistrack', '1', '2')
+def file_track_data_upgrade(value, system):
+    field_map = {
+        "dataset_type": "_experiment_type",
+        "assay_info": "_assay_info",
+        "replicate_identifiers": "_replicate_info",
+        "biosource_name": "_biosource_name",
+        "experiment_bucket": "_experiment_bucket",
+        "project_lab": "_lab_name"
+    }
+    for oldprop, newprop in field_map.items():
+        oldpropval = value.get(oldprop)
+        if oldpropval:
+            if oldprop == 'replicate_identifiers':
+                if len(oldpropval) > 1:
+                    oldpropval = 'merged replicates'
+                else:
+                    oldpropval = oldpropval[0]
+            value[newprop] = oldpropval
+            del value[oldprop]
