@@ -31,7 +31,7 @@ import { Buffer } from 'buffer';
 
 /** Expected to throw error of some sort if not on search page, or no results. */
 Cypress.Commands.add('searchPageTotalResultCount', (options) => {
-    return cy.get('div.above-results-table-row .box.results-count > span.text-500').invoke('text').then((resultText)=>{
+    return cy.get('div.above-results-table-row .box.results-count > div.inline-block > span.text-500').invoke('text').then((resultText)=>{
         return parseInt(resultText);
     });
 });
@@ -265,4 +265,3 @@ Cypress.Commands.add('clickEvent', { prevSubject : true }, function(subject, opt
 
     return subject;
 });
-
