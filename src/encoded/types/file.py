@@ -381,7 +381,9 @@ class File(Item):
                 info['assay_info'] = assay_info.get('value')
             if 'replicate_info' not in info:
                 repset = exp_info.get('replicate_set')
-                if repset is not None:
+                if repset:
+                    # expt should only ever have 1 repset
+                    respset = repset[0]
                     repstring = 'Biorep ' + str(repset.get('bio_rep_no')) + ', Techrep ' + str(repset.get('tec_rep_no'))
                     info['replicate_info'] = repstring
             if 'biosource_name' not in currinfo:
