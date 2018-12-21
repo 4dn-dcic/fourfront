@@ -331,10 +331,12 @@ def test_higlass_noop(testapp, higlass_mcool_viewconf):
         for key in new_higlass:
             assert old_higlass[key] == new_higlass[key]
 
-def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_json):
+def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
     """ Don't pass in an existing higlass viewconf, but do add a file.
     Expect a new higlass view containing the file.
     """
+
+    genome_assembly = "GRCm38"
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
     mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
@@ -346,21 +348,32 @@ def test_create_new_higlass_view(testapp, higlass_blank_viewconf, mcool_file_jso
         'files': ["{uuid}".format(uuid=mcool_file['uuid'])]
     })
 
-
     new_higlass_view_json = response.json["new_viewconfig"]
 
     assert response.json["new_genome_assembly"] == "GRCm38"
 
     # There should be 1 view.
     assert len(new_higlass_view_json["views"]) == 1
-    assert "layout" in new_higlass_view_json["views"][0]
-    assert "uid" in new_higlass_view_json["views"][0]
-    assert "tracks" in new_higlass_view_json["views"][0]
-    assert "center" in new_higlass_view_json["views"][0]["tracks"]
-    assert new_higlass_view_json["views"][0]["tracks"]["center"][0]["type"] == "combined"
-    assert "contents" in new_higlass_view_json["views"][0]["tracks"]["center"][0]
-    contents = new_higlass_view_json["views"][0]["tracks"]["center"][0]["contents"]
-    assert contents[0]["type"] == "heatmap"
+
+    view = new_higlass_view_json["views"][0]
+
+    assert "layout" in view
+    assert "uid" in view
+    assert "tracks" in view
+    assert "center" in view["tracks"]
+    assert len(view["tracks"]["center"]) == 1
+
+    center_track = view["tracks"]["center"][0]
+    assert center_track["type"] == "combined"
+    assert "contents" in center_track
+
+    # The contents should have the mcool's heatmap.
+    contents = center_track["contents"]
+    assert len(contents) == 1
+
+    # The central contents should have the mcool file.
+    if "tilesetUid" in contents and contents[0]["tilesetUid"] == mcool_file_json['higlass_uid']:
+        assert track["type"] == "heatmap"
 
 def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
@@ -984,7 +997,7 @@ def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
     """Add a beddb file to the HiGlass file.
     """
 
-    # Get a file to add.
+    # Add the beddb file.
     genome_assembly = "GRCm38"
     beddb_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
     beddb_file_json['md5sum'] = '00000000000000000000000000000001'

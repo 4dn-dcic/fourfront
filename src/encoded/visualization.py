@@ -470,59 +470,21 @@ def add_files_to_higlass_viewconf(request):
             "item" : get_item_if_you_can(request, file_uuid),
         })
 
+    # Scan the files to make sure they exist and have the expected fields.
+    validation_check = check_files_for_higlass(files_info, current_genome_assembly)
+    if not validation_check["success"]:
+        return_keys = ("success", "errors")
+        error_response = { key:validation_check[key] for key in return_keys if key in validation_check }
+        error_response["new_viewconfig"] = None
+        error_response["new_genome_assembly"] = None
+        return error_response
+
+    # Extract the current_genome_assembly from the validation check.
+    current_genome_assembly = validation_check["current_genome_assembly"]
+
     for datum in files_info:
         file_uuid = datum["uuid"]
         new_file_dict = datum["item"]
-
-        if not new_file_dict:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} does not exist".format(uuid=file_uuid),
-                "new_viewconfig": None,
-                "new_genome_assembly" : None
-            }
-        if not "higlass_uid" in new_file_dict:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} does not have higlass_uid".format(uuid=file_uuid),
-                "new_viewconfig": None,
-                "new_genome_assembly" : None
-            }
-        if not "genome_assembly" in new_file_dict:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} does not have genome assembly".format(uuid=file_uuid),
-                "new_viewconfig": None,
-                "new_genome_assembly" : None
-            }
-
-        # If the display doesn't have a genome_assembly, set it to this one.
-        genome_assembly_mapping = {
-            'GRCm38' : ('GRCm38', 'mm10'),
-            'GRCh38' : ('GRCh38', 'hg38'),
-            'dm6' : ('dm6'),
-            'galGal5' : ('galGal5'),
-        }
-        if not current_genome_assembly in genome_assembly_mapping.keys():
-            for new_assembly in genome_assembly_mapping:
-                aliases = genome_assembly_mapping[new_assembly]
-                if new_file_dict["genome_assembly"] in aliases:
-                    current_genome_assembly = new_assembly
-                    break
-
-        # Make sure the file's genome_assembly matches the viewConfig.
-        expected_genome_assemblies = genome_assembly_mapping[current_genome_assembly]
-        if not new_file_dict["genome_assembly"] in expected_genome_assemblies:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} has the wrong Genome Assembly. Expected {expected}, found {actual} instead".format(
-                    uuid=file_uuid,
-                    expected = current_genome_assembly,
-                    actual = new_file_dict["genome_assembly"]
-                ),
-                "new_viewconfig": None,
-                "new_genome_assembly" : None
-            }
 
         # Try to add the new file to the given viewconf.
         new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict)
@@ -548,7 +510,6 @@ def add_files_to_higlass_viewconf(request):
     # Resize and reposition the Higlass views.
     repack_higlass_views(new_views)
 
-
     # Set up the additional views so they all move and zoom with the first.
     setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
     higlass_viewconfig["zoomFixed"] = False
@@ -558,6 +519,65 @@ def add_files_to_higlass_viewconf(request):
         "errors": "",
         "new_viewconfig" : higlass_viewconfig,
         "new_genome_assembly" : current_genome_assembly
+    }
+
+def check_files_for_higlass(files_info, current_genome_assembly):
+    """
+    Scan the files to make sure they exist and have the expected fields.
+
+    Returns a dict.
+        success : Boolean.
+        current_genome_assembly: A string.
+        errors : A string (or None if there are no errors)
+    """
+    for datum in files_info:
+        file_uuid = datum["uuid"]
+        new_file_dict = datum["item"]
+
+        if not new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not exist".format(uuid=file_uuid),
+            }
+        if not "higlass_uid" in new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have higlass_uid".format(uuid=file_uuid)
+            }
+        if not "genome_assembly" in new_file_dict:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have genome assembly".format(uuid=file_uuid)
+            }
+
+        # If the display doesn't have a genome_assembly, set it to this one.
+        genome_assembly_mapping = {
+            'GRCm38' : ('GRCm38', 'mm10'),
+            'GRCh38' : ('GRCh38', 'hg38'),
+            'dm6' : ('dm6'),
+            'galGal5' : ('galGal5'),
+        }
+        if not current_genome_assembly in genome_assembly_mapping.keys():
+            for new_assembly in genome_assembly_mapping:
+                aliases = genome_assembly_mapping[new_assembly]
+                if new_file_dict["genome_assembly"] in aliases:
+                    current_genome_assembly = new_assembly
+                    break
+
+        # Make sure the file's genome_assembly matches the viewConfig.
+        expected_genome_assemblies = genome_assembly_mapping[current_genome_assembly]
+        if not new_file_dict["genome_assembly"] in expected_genome_assemblies:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} has the wrong Genome Assembly. Expected {expected}, found {actual} instead".format(
+                    uuid=file_uuid,
+                    expected = current_genome_assembly,
+                    actual = new_file_dict["genome_assembly"]
+                )
+            }
+    return {
+        "success" : True,
+        "current_genome_assembly" : current_genome_assembly,
     }
 
 def add_single_file_to_higlass_viewconf(views, new_file):
