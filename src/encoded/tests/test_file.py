@@ -882,12 +882,13 @@ def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, 
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
-        'dataset_type': 'DNase Hi-C',
-        'lab': lab['@id'],
+        '_experiment_type': 'DNase Hi-C',
+        '_lab_name': 'Test Lab',
         'file_type': 'normalized counts',
-        'assay_info': 'PARK1',
-        'biosource_name': 'GM12878',
-        'replicate_identifiers': ['bio1 tec1'],
+        '_assay_info': 'PARK1',
+        '_biosource_name': 'GM12878',
+        '_replicate_info': 'Biorep 1, Techrep 1',
+        '_experiment_bucket': 'processed file',
         'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
@@ -914,7 +915,7 @@ def test_file_generate_track_title_fp_most_missing(testapp, file_formats, award,
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
         'lab': lab['@id'],
-        'dataset_type': 'DNase Hi-C',
+        '_experiment_type': 'DNase Hi-C',
         'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
@@ -927,13 +928,13 @@ def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM128
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
-        'dataset_type': 'DNase Hi-C',
+        '_experiment_type': 'DNase Hi-C',
         'lab': lab['@id'],
         'file_type': 'fold change over control',
-        'project_lab': 'Some Dude, Somewhere',
-        'assay_info': 'PARK1',
+        '_lab_name': 'Some Dude, Somewhere',
+        '_assay_info': 'PARK1',
         'biosource': GM12878_biosource['@id'],
-        'replicate_identifiers': ['bio1 tec1'],
+        '_replicate_info': 'bio1 tec1',
         'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-vistrack', vistrack_meta)

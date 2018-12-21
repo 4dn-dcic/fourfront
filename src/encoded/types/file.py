@@ -334,7 +334,6 @@ class File(Item):
         # the vast majority of files are linked to either a single experiment or
         # a single replicate set - however, there are some edge cases
         # going to punt for now but consider how to deal
-        import pdb; pdb.set_trace()
         expid = None
         repsetid = None
         rev_exps = self.experiments(request)
@@ -421,26 +420,25 @@ class File(Item):
             }
         }
     })
-    def track_and_facet_info(self, request):
+    def track_and_facet_info(self, request, biosource_name=None):
         props = self.properties
         fields = ['experiment_type', 'assay_info', 'lab_name',
                   'biosource_name', 'replicate_info', 'experiment_bucket']
         track_info = {field: props.get('_' + field) for field in fields}
         track_info = {k: v for k, v in track_info.items() if v is not None}
-        if len(track_info) == 6:
-            track_title = self.generate_track_title(track_info)
-            return track_info
+        if biosource_name is not None and 'biosource_name' not in track_info:
+            track_info['biosource_name'] = biosource_name
+        if len(track_info) != 6:
+            einfo = self._get_file_experiment_info(request, track_info)
+            track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+            if 'experiment_type' not in track_info:
+                return
 
-        einfo = self._get_file_experiment_info(request, track_info)
-        track_info.update({k: v for k, v in einfo.items() if k not in track_info})
-        if 'experiment_type' not in track_info:
-            return
-
-        if track_info.get('lab_name') is None:
-            labid = props.get('lab')
-            lab = get_item_if_you_can(request, labid)
-            if lab is not None:
-                track_info['lab_name'] = lab.get('display_title')
+            if track_info.get('lab_name') is None:
+                labid = props.get('lab')
+                lab = get_item_if_you_can(request, labid)
+                if lab is not None:
+                    track_info['lab_name'] = lab.get('display_title')
 
         track_title = self.generate_track_title(track_info)
         if track_title is not None:
@@ -855,6 +853,37 @@ class FileVistrack(File):
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Track and Facet Info",
+        "description": "Useful faceting and visualization info",
+        "type": "object",
+        "properties": {
+            "experiment_type": {
+                "type": "string"
+            },
+            "assay_info": {
+                "type": "string"
+            },
+            "lab_name": {
+                "type": "string"
+            },
+            "biosource_name": {
+                "type": "string"
+            },
+            "replicate_info": {
+                "type": "string"
+            },
+            "experiment_bucket": {
+                "type": "string"
+            },
+            "track_title": {
+                "type": "string"
+            }
+        }
+    })
+    def track_and_facet_info(self, request):
+        return super().track_and_facet_info(request, biosource_name=self._biosource_name(request))
 
     @calculated_property(schema={
         "title": "Biosource Name",
