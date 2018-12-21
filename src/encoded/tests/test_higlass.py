@@ -340,7 +340,7 @@ def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
     mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
-    mcool_file_json['genome_assembly'] = "GRCm38"
+    mcool_file_json['genome_assembly'] = genome_assembly
     mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
 
     # Try to create a view, adding a file but no base view.
@@ -350,7 +350,7 @@ def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
 
     new_higlass_view_json = response.json["new_viewconfig"]
 
-    assert response.json["new_genome_assembly"] == "GRCm38"
+    assert response.json["new_genome_assembly"] == genome_assembly
 
     # There should be 1 view.
     assert len(new_higlass_view_json["views"]) == 1

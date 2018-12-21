@@ -507,6 +507,7 @@ def add_files_to_higlass_viewconf(request):
             "new_genome_assembly" : None
         }
 
+    new_views = views
     # Resize and reposition the Higlass views.
     repack_higlass_views(new_views)
 
@@ -645,7 +646,7 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         new_track, error = create_1d_track(new_file, "top")
         if error:
             return None, errors
-        add_track_to_views(new_track, views, ["top"])
+        add_track_to_views(new_track, views, "top")
     elif file_format in (
         "/file-formats/mcool/",
         "/file-formats/hic/"
@@ -660,12 +661,12 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         new_track, error = create_1d_track(new_file, "top")
         if error:
             return None, errors
-        add_track_to_views(new_track, views, ["top"])
+        add_track_to_views(new_track, views, "top")
 
         new_track, error = create_1d_track(new_file, "left")
         if error:
             return None, errors
-        add_track_to_views(new_track, views, ["left"])
+        add_track_to_views(new_track, views, "left")
         # Add to the search bar, too.
         for view in views:
             update_genome_position_search_box(view, new_file)
@@ -674,12 +675,12 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         new_track, error = create_1d_track(new_file, "top")
         if error:
             return None, errors
-        add_track_to_views(new_track, views, ["top"])
+        add_track_to_views(new_track, views, "top")
 
         new_track, error = create_1d_track(new_file, "left")
         if error:
             return None, errors
-        add_track_to_views(new_track, views, ["left"])
+        add_track_to_views(new_track, views, "left")
 
         # We may have to add a 2D chromosome grid. This is done after the individual files have been added.
     else:
@@ -742,7 +743,7 @@ def create_1d_track(new_file, side="top"):
 
     return new_track, None
 
-def add_track_to_views(new_track, views, sides=["top"]):
+def add_track_to_views(new_track, views, side="top"):
     """ Add the given new track to all of the sides of all of the views.
         Modifies views.
 
@@ -753,13 +754,11 @@ def add_track_to_views(new_track, views, sides=["top"]):
 
     # For each view
     for view in views:
-        # For each side
-        for side in sides:
-            # Make sure the side exists
-            if not side in view["tracks"]:
-                return False, "View does not contain the side{side}".format(side=side)
-            # Add the new track to the view
-            view["tracks"][side].append(new_track)
+        # Make sure the side exists
+        if not side in view["tracks"]:
+            return False, "View does not contain the side{side}".format(side=side)
+        # Add the new track to the view
+        view["tracks"][side].append(new_track)
 
 def create_2d_view(new_file):
     """ Creates a dictionary representing a 2d view of the given file.
