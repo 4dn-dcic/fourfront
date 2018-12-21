@@ -964,6 +964,5 @@ def test_track_and_file_facet_info(testapp, proc_file_json, rep_set_data, custom
     res3 = testapp.post_json('/experiment_set', custom_experiment_set_data).json['@graph'][0]
     res4 = testapp.get(base_experiment['@id']).json
     new_file = testapp.get(res['@id']).json
-    import pdb; pdb.set_trace()
     print(new_file.get('track_and_facet_info'))
     assert new_file['experiment_sets'][0]['@id'] == res2['@id']
