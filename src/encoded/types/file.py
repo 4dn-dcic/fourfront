@@ -384,8 +384,12 @@ class File(Item):
                 if repset:
                     # expt should only ever have 1 repset
                     repset = repset[0]
-                    repstring = 'Biorep ' + str(repset.get('bio_rep_no')) + ', Techrep ' + str(repset.get('tec_rep_no'))
-                    info['replicate_info'] = repstring
+                    # the problem here is that we have the object frame so no embedded
+                    # info about the rep numbers - can we devise a way so that the calcprop
+                    # contains that info without being to heavy on experiment
+                    # import pdb; pdb.set_trace()
+                    # repstring = 'Biorep ' + str(repset.get('bio_rep_no')) + ', Techrep ' + str(repset.get('tec_rep_no'))
+                    info['replicate_info'] = 'NOT YET'
             if 'biosource_name' not in currinfo:
                 sample_id = exp_info.get('biosample')
                 if sample_id is not None:
