@@ -8784,6 +8784,10 @@
                 "workflow_argument_name": "chip.merge_fastq.cpu"
             },
             {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.align_only"
+            },
+            {   
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta"
@@ -9151,6 +9155,10 @@
             {   
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta_ctl.cpu"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.align_only"
             },
             {   
                 "argument_type": "parameter",
