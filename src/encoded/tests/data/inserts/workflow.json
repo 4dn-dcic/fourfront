@@ -8707,6 +8707,737 @@
         "workflow_type": "ChIP-seq data processing"
     },
     {
+        "accession": "4DNWF25VHY9",
+        "app_name": "encode-chipseq-aln-chip",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.fastqs"
+            },
+            {   
+                "argument_format": "uncompressed_bwaIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.bwa_idx_tar"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.blacklist"
+            },
+            {   
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.chrsz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.peak_caller"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.paired_end"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.name"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.desc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.gensz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.fraglen"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bwa.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.filter.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.merge_fastq.cpu"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.first_ta"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.first_ta_xcor"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "Other",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL",
+        "data_types": [
+            "ChIP-seq"
+        ],
+        "description": "ChIP-seq data processing pipeline, Alignment-only, ChIP",
+        "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-chipseq-aln-chip",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.fastqs",
+                        "source": [
+                            {
+                                "name": "chip.fastqs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "uncompressed_bwaIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.bwa_idx_tar",
+                        "source": [
+                            {
+                                "name": "chip.bwa_idx_tar"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.blacklist",
+                        "source": [
+                            {
+                                "name": "chip.blacklist"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.chrsz",
+                        "source": [
+                            {
+                                "name": "chip.chrsz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.pipeline_type",
+                        "source": [
+                            {
+                                "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.peak_caller",
+                        "source": [
+                            {
+                                "name": "chip.peak_caller"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.paired_end",
+                        "source": [
+                            {
+                                "name": "chip.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.choose_ctl.always_use_pooled_ctl",
+                        "source": [
+                            {
+                                "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.gensz",
+                        "source": [
+                            {
+                                "name": "chip.gensz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.regex_grep_v_ta"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.fraglen",
+                        "source": [
+                            {
+                                "name": "chip.fraglen"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bwa.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bwa.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.filter.cpu",
+                        "source": [
+                            {
+                                "name": "chip.filter.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.merge_fastq.cpu",
+                        "source": [
+                            {
+                                "name": "chip.merge_fastq.cpu"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                    ]
+                },
+                "name": "chip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.first_ta",
+                        "target": [
+                            {
+                                "name": "chip.first_ta"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.first_ta_xcor",
+                        "target": [
+                            {
+                                "name": "chip.first_ta_xcor"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Chip-seq data processing pipeline, Align-only, ChIP",
+        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178",
+        "workflow_diagram": "",
+        "workflow_type": "ChIP-seq data processing"
+    },
+    {
+        "accession": "4DNWF2FBLQA1",
+        "app_name": "encode-chipseq-aln-ctl",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.ctl_fastqs"
+            },
+            {   
+                "argument_format": "uncompressed_bwaIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.bwa_idx_tar"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.blacklist"
+            },
+            {   
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.chrsz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.peak_caller"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.paired_end"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.name"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.desc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.gensz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta_ctl.regex_grep_v_ta"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bwa_ctl.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.filter_ctl.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.bam2ta_ctl.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.merge_fastq_ctl.cpu"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.first_ta_ctl"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "Other",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL",
+        "data_types": [
+            "ChIP-seq"
+        ],
+        "description": "ChIP-seq data processing pipeline, Align-only, Control",
+        "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-chipseq-aln-ctl",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.ctl_fastqs",
+                        "source": [
+                            {
+                                "name": "chip.ctl_fastqs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "uncompressed_bwaIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.bwa_idx_tar",
+                        "source": [
+                            {
+                                "name": "chip.bwa_idx_tar"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.blacklist",
+                        "source": [
+                            {
+                                "name": "chip.blacklist"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.chrsz",
+                        "source": [
+                            {
+                                "name": "chip.chrsz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.pipeline_type",
+                        "source": [
+                            {
+                                "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.peak_caller",
+                        "source": [
+                            {
+                                "name": "chip.peak_caller"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.paired_end",
+                        "source": [
+                            {
+                                "name": "chip.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.choose_ctl.always_use_pooled_ctl",
+                        "source": [
+                            {
+                                "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.gensz",
+                        "source": [
+                            {
+                                "name": "chip.gensz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta_ctl.regex_grep_v_ta",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta_ctl.regex_grep_v_ta"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.fraglen",
+                        "source": [
+                            {
+                                "name": "chip.fraglen"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bwa_ctl.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bwa_ctl.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.filter_ctl.cpu",
+                        "source": [
+                            {
+                                "name": "chip.filter_ctl.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.bam2ta_ctl.cpu",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta_ctl.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.merge_fastq_ctl.cpu",
+                        "source": [
+                            {
+                                "name": "chip.merge_fastq_ctl.cpu"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                    ]
+                },
+                "name": "chip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.first_ta_ctl",
+                        "target": [
+                            {
+                                "name": "chip.first_ta_ctl"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Chip-seq data processing pipeline, Align-only, Control",
+        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179",
+        "workflow_diagram": "",
+        "workflow_type": "ChIP-seq data processing"
+    },
+    {
         "accession": "4DNWB42C877",
         "app_name": "encode-atacseq",
         "app_version": "dev",
