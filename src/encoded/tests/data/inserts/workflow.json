@@ -9039,6 +9039,19 @@
                                 "name": "chip.merge_fastq.cpu"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.align_only",
+                        "source": [
+                            {
+                                "name": "chip.align_only"
+                            }
+                        ]
                     }
                 ],
                 "meta": {
@@ -9409,6 +9422,19 @@
                         "source": [
                             {
                                 "name": "chip.merge_fastq_ctl.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.align_only",
+                        "source": [
+                            {
+                                "name": "chip.align_only"
                             }
                         ]
                     }
