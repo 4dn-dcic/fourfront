@@ -953,17 +953,57 @@ def custom_experiment_set_data(lab, award):
     }
 
 
-def test_track_and_file_facet_info(testapp, proc_file_json, rep_set_data, custom_experiment_set_data, base_experiment):
+def test_track_and_file_facet_info_no_link_to_exp_or_eset(testapp, proc_file_json):
     res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    rep_set_data['replicate_exps'] = [
-        {'replicate_exp': base_experiment['@id'],
-         'bio_rep_no': 1,
-         'tec_rep_no': 1}]
-    rep_set_data['processed_files'] = [res['@id']]
-    res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
-    custom_experiment_set_data['processed_files'] = [res['@id']]
-    res3 = testapp.post_json('/experiment_set', custom_experiment_set_data).json['@graph'][0]
-    res4 = testapp.get(base_experiment['@id']).json
-    new_file = testapp.get(res['@id']).json
-    print(new_file.get('track_and_facet_info'))
-    assert new_file['experiment_sets'][0]['@id'] == res2['@id']
+    assert 'track_and_facet_info' not in res
+
+
+def test_track_and_file_facet_info_file_link_to_multi_expts(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt1 = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    expt2 = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    assert pfile['@id'] in expt1['processed_files']
+    assert pfile['@id'] in expt2['processed_files']
+    res = testapp.get(pfile['@id']).json
+    assert 'track_and_facet_info' not in res
+
+
+def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_bucket'] == 'processed file'
+    assert tf_info['assay_info'] == 'MboI'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_w_rep(
+        testapp, proc_file_json, experiment_data, rep_set_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
+    repset = testapp.post_json('/experiment_set_replicate', rep_set_data, status=201).json['@graph'][0]
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['experiment_type'] = 'RNA-seq'
+    experiment_data['processed_files'] = [pfile['@id']]
+    del experiment_data['digestion_enzyme']
+    expt = testapp.post_json('/experiment_seq', experiment_data, status=201).json['@graph'][0]
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'RNA-seq'
+    assert 'assay_info' not in tf_info
+    assert 'replicate_info' not in tf_info

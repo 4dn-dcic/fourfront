@@ -296,18 +296,6 @@ class File(Item):
             pass
         return outString
 
-    def _get_file_expt_bucket(self, request, item2check):
-        fatid = self.jsonld_id(request)
-        if 'processed_files' in item2check:
-            if fatid in item2check.get('processed_files'):
-                return 'processed_files'
-        of_info = item2check.get('other_processed_files', [])
-        for obucket in of_info:
-            ofiles = obucket.get('files')
-            if [of for of in ofiles if of == fatid]:
-                return obucket.get('title')
-        return None
-
     def generate_track_title(self, track_info):
         props = self.properties
         if not props.get('higlass_uid'):
@@ -324,6 +312,18 @@ class File(Item):
         )
         return title.replace('  ', ' ').rstrip()
 
+    def _get_file_expt_bucket(self, request, item2check):
+        fatid = self.jsonld_id(request)
+        if 'processed_files' in item2check:
+            if fatid in item2check.get('processed_files'):
+                return 'processed file'
+        of_info = item2check.get('other_processed_files', [])
+        for obucket in of_info:
+            ofiles = obucket.get('files')
+            if [of for of in ofiles if of == fatid]:
+                return obucket.get('title')
+        return None
+
     def _get_file_experiment_info(self, request, currinfo):
         """
         Get info about an experiment that a file belongs given a File.
@@ -331,14 +331,13 @@ class File(Item):
         Checks the rev_linked experiments and experiment_sets
         """
         info = {}
-        # the vast majority of files are linked to either a single experiment or
-        # a single replicate set - however, there are some edge cases
-        # going to punt for now but consider how to deal
         expid = None
         repsetid = None
         rev_exps = self.experiments(request)
         if rev_exps:
             if len(rev_exps) != 1:
+                # most files with experiments revlinks linked to only one
+                # edge case eg. sci-Hi-C -- punt and add info 'manually'
                 return info
             expid = rev_exps[0]
         elif hasattr(self, 'experiment_sets'):  # FileProcessed only
@@ -346,6 +345,8 @@ class File(Item):
             if rev_exp_sets:
                 repset = [rs for rs in rev_exp_sets if 'replicate' in rs]
                 if len(repset) != 1:
+                    # some microscopy files linked to multiple repsets
+                    # for these edge cases add info 'manually'
                     return info
                 repsetid = repset[0]
         else:
@@ -366,7 +367,7 @@ class File(Item):
                 info['replicate_info'] = 'merged replicates'
             info['experiment_bucket'] = self._get_file_expt_bucket(request, rep_set_info)
 
-            # get the first experiment of set and set to experiment of file for shared info
+            # get the first experiment of set and set to experiment of file shared info
             expid = expts_in_set[0]
 
         if expid:
@@ -380,16 +381,17 @@ class File(Item):
             if assay_info:
                 info['assay_info'] = assay_info.get('value')
             if 'replicate_info' not in info:
+                # we did not get repinfo from a repset so rep nos for an expt are relevant
                 repset = exp_info.get('replicate_set')
                 if repset:
-                    # expt should only ever have 1 repset
                     repset = repset[0]
-                    # the problem here is that we have the object frame so no embedded
-                    # info about the rep numbers - can we devise a way so that the calcprop
-                    # contains that info without being to heavy on experiment
-                    # import pdb; pdb.set_trace()
-                    # repstring = 'Biorep ' + str(repset.get('bio_rep_no')) + ', Techrep ' + str(repset.get('tec_rep_no'))
-                    info['replicate_info'] = 'NOT YET'
+                    rep_set_info = get_item_if_you_can(request, repset)
+                    if rep_set_info is not None:
+                        rep_exps = rep_set_info.get('replicate_exps', [])
+                        for rep in rep_exps:
+                            if rep.get('replicate_exp') == expid:
+                                repstring = 'Biorep ' + str(rep.get('bio_rep_no')) + ', Techrep ' + str(rep.get('tec_rep_no'))
+                                info['replicate_info'] = repstring
             if 'biosource_name' not in currinfo:
                 sample_id = exp_info.get('biosample')
                 if sample_id is not None:
@@ -430,14 +432,22 @@ class File(Item):
         props = self.properties
         fields = ['experiment_type', 'assay_info', 'lab_name',
                   'biosource_name', 'replicate_info', 'experiment_bucket']
+        # look for existing _props
         track_info = {field: props.get('_' + field) for field in fields}
         track_info = {k: v for k, v in track_info.items() if v is not None}
+
+        # vistrack only pass in biosource_name because _biosource_name is
+        # a calc prop of vistrack - from linked Biosource
         if biosource_name is not None and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
-        if len(track_info) != 6:
-            einfo = self._get_file_experiment_info(request, track_info)
-            track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+
+        if len(track_info) != 6:  # if length==6 we have everything we need
+            if not (len(track_info) == 5 and 'lab_name' not in track_info):
+                # only if everything but lab exists can we avoid getting expt
+                einfo = self._get_file_experiment_info(request, track_info)
+                track_info.update({k: v for k, v in einfo.items() if k not in track_info})
             if 'experiment_type' not in track_info:
+                # avoid more unnecessary work if we don't have key piece
                 return
 
             if track_info.get('lab_name') is None:
