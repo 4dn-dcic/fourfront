@@ -34,27 +34,31 @@ export function generateAddressString(lab){
  * @returns {JSX.Element} A `li` JSX element.
  */
 export function generateContactPersonListItem(contactPerson, idx){
-    var decodedEmail = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
-        decodedEmailParts = decodedEmail && decodedEmail.split('@'),
-        onClick = (decodedEmail && function(e){
+    var decodedEmail        = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
+        decodedEmailParts   = decodedEmail && decodedEmail.split('@'),
+        onClick             = (decodedEmail && function(e){
             if (typeof window.location.assign !== 'function') return false;
             window.location.assign('mailto:' + decodedEmail);
             return false;
         }) || null,
-        dataTip = (decodedEmailParts && (
-            'Click to send e-mail message to <br/>' +
-            '<span class="text-500">' +
-            decodedEmailParts[0] +
-            '</span> <span class="text-300">(at)</span> <span class="text-500">' +
-            decodedEmailParts[1] +
-            '</span>'
+        dataTip             = (decodedEmailParts && (
+            '<span class="text-300">Click to send e-mail message to</span><br/>' +
+            '<div class="text-center">' +
+                '<span class="text-500">' +
+                    decodedEmailParts[0] +
+                '</span> <span class="text-400 small">(at)</span> <span class="text-500">' +
+                    decodedEmailParts[1] +
+                '</span>' +
+            '</div>'
         )) || null;
 
     return (
         <li className="contact-person" key={contactPerson.contact_email || idx}>
-            <i className="icon icon-fw icon-envelope-o clickable" data-html data-tip={dataTip} onClick={onClick} />
-            &nbsp;&nbsp;
-            { contactPerson.display_title }
+            <div className="inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
+                <i className="icon icon-fw icon-envelope-o" />
+                &nbsp;&nbsp;
+                { contactPerson.display_title }
+            </div>
         </li>
     );
 }
@@ -64,7 +68,8 @@ export function generateContactPersonListItem(contactPerson, idx){
 
 export class AttributionTabView extends React.PureComponent {
 
-    static getTabObject(context){
+    static getTabObject(props){
+        var context = props.context;
         return {
             tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
             key : "attribution",
@@ -75,18 +80,18 @@ export class AttributionTabView extends React.PureComponent {
                         <span>Attribution</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider mb-1"/>
-                    <AttributionTabView context={context} />
+                    <AttributionTabView {...props} />
                 </div>
             )
         };
     }
 
-
     render(){
-        var context = this.props.context,
-            { produced_in_pub, publications_of_set, lab, award, submitted_by } = context,
-            awardExists = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
-            submittedByExists = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
+        var { context } = this.props,
+            { produced_in_pub, publications_of_set, lab, award, submitted_by, contributing_labs } = context,
+            labsExist           = lab || (Array.isArray(contributing_labs) && contributing_labs.length > 0),
+            awardExists         = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
+            submittedByExists   = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
 
         return (
             <div className="info-area">
@@ -100,18 +105,19 @@ export class AttributionTabView extends React.PureComponent {
 
                 <div className="row">
 
-                    <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
-                        <LabsSection context={context} />
-                        { awardExists ? FormattedInfoBlock.Award(award) : null }
-                    </div>
+                    { labsExist ?
+                        <div className={"col-xs-12 col-md-" + (submittedByExists ? '7' : '12')}>
+                            <LabsSection context={context} />
+                            { awardExists ? FormattedInfoBlock.Award(award) : null }
+                        </div>
+                    : null }
 
                     { submittedByExists ?
-                        <div className="col-xs-12 col-md-5">
+                        <div className={"col-xs-12 col-md-" + (labsExist ? '5' : '12')}>
                             { FormattedInfoBlock.User(submitted_by) }
                         </div>
                     : null }
 
-                    
                 </div>
 
                 <ItemFooterRow context={context} schemas={this.props.schemas} />
@@ -138,13 +144,14 @@ class LabsSection extends React.PureComponent {
     }
 
     contributingLabRenderFxn(lab, idx, all){
-        var atId = object.itemUtil.atId(lab),
-            contactPersons = Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
+        var isMounted       = this.state.mounted,
+            atId            = object.itemUtil.atId(lab),
+            contactPersons  = isMounted && Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
                 return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
             });
 
         return (
-            <div className="lab" key={atId || idx}>
+            <div className={"lab" + (all.length === 1 && (!contactPersons || contactPersons.length === 0)  ? ' mt-1' : '')} key={atId || idx}>
                 <h5>
                     <a className="text-500" href={atId}>{ lab.display_title }</a>
                 </h5>
@@ -157,13 +164,14 @@ class LabsSection extends React.PureComponent {
 
     render(){
         var { context, className } = this.props,
-            primaryLab = (typeof context.lab !== 'string' && context.lab) || null,
-            contributingLabs = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
+            isMounted           = this.state.mounted,
+            primaryLab          = (typeof context.lab !== 'string' && context.lab) || null,
+            contributingLabs    = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
 
         if (!primaryLab && !contributingLabs) return null;
         return (
             <div className={className}>
-                { primaryLab ? FormattedInfoBlock.Lab(primaryLab) : null }
+                { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, isMounted) : null }
                 { contributingLabs ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
                         iconClass='user-plus' itemRenderFxn={this.contributingLabRenderFxn} />

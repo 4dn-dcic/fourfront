@@ -12,10 +12,10 @@ import { isServerSide, console, navigate, object } from './../../util';
 class TableEntry extends React.Component {
 
     static getChildHeaders(content, maxHeaderDepth, currentDepth){
-        if (!TableOfContents.isContentJSX(content)) return [];
-        return content.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
-        );
+        if (!TableOfContents.isContentJSX(content) || !content.props || !content.props.children) return [];
+        return _.filter(content.props.children, function(child,i,a){
+            return TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && (child.props.type === 'h' + (currentDepth + 1));
+        });
     }
 
     static defaultProps = {
@@ -187,23 +187,9 @@ class TableEntry extends React.Component {
                 { title }
                 <Collapse in={!this.state || this.state.open && mounted}>
                     <div>
-                        <TableEntryChildren
-                            active={active}
-                            content={content}
-                            childHeaders={childHeaders}
-                            depth={depth}
-                            mounted={mounted}
-                            listStyleTypes={listStyleTypes}
-                            pageScrollTop={pageScrollTop}
-                            nextHeader={nextHeader}
-                            children={children}
-                            navigate={this.props.navigate}
-                            link={link}
-                            maxHeaderDepth={maxHeaderDepth}
-                            parentClosed={this.state && !this.state.open}
-                            skipDepth={skipDepth}
-                            recurDepth={recurDepth}
-                        />
+                        <TableEntryChildren {...{ active, content, childHeaders, depth, mounted, listStyleTypes,
+                            pageScrollTop, nextHeader, children, link, maxHeaderDepth, skipDepth, recurDepth }}
+                            navigate={this.props.navigate} parentClosed={this.state && !this.state.open}/>
                     </div>
                 </Collapse>
             </li>
@@ -470,11 +456,7 @@ export class TableOfContents extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.shouldComponentUpdate = this.shouldComponentUpdate.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.onPageScroll = _.throttle(this.onPageScroll.bind(this), 100, { 'leading' : false });
-        this.onResize = _.debounce(this.onResize.bind(this), 300);
+        this.onPageScroll = this.onPageScroll.bind(this);
         this.onToggleWidthBound = this.onToggleWidthBound.bind(this);
         this.state = {
             'scrollTop' : 0,
@@ -487,11 +469,8 @@ export class TableOfContents extends React.Component {
         if (window && !isServerSide()){
             this.setState(
                 { 'mounted' : true, 'scrollTop' : parseInt(getPageVerticalScrollPosition()) },
-                () => {
-                    window.addEventListener('scroll', this.onPageScroll);
-                    window.addEventListener('resize', this.onResize);
-                }
             );
+            this.unsubFromScrollEventsFxn = this.props.registerWindowOnScrollHandler(this.onPageScroll);
         }
     }
 
@@ -500,29 +479,31 @@ export class TableOfContents extends React.Component {
             this.updateQueued = false;
             return true;
         }
+        if (nextProps.windowWidth !== this.props.windowWidth) return true;
         if (nextState.mounted !== this.state.mounted) return true;
         if (nextState.scrollTop !== this.state.scrollTop) return true;
         if (nextState.widthBound !== this.state.widthBound) return true;
         return false;
     }
 
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.windowWidth !== this.props.windowWidth){
+            // Recalculate new position on page etc.
+            this.updateQueued = true;
+            setTimeout(()=>{
+                this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
+            }, 0);
+        }
+    }
+
     componentWillUnmount(){
-        // Cleanup
-        window.removeEventListener('scroll', this.onPageScroll);
-        window.removeEventListener('resize', this.onResize);
+        if (typeof this.unsubFromScrollEventsFxn === 'function'){
+            this.unsubFromScrollEventsFxn();
+        }
     }
 
-    onPageScroll(e){
-        setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
-        }, 0);
-    }
-
-    onResize(e){
-        this.updateQueued = true;
-        setTimeout(()=>{
-            this.setState({ 'scrollTop' : parseInt(getPageVerticalScrollPosition()) });
-        }, 0);
+    onPageScroll(scrollTop, scrollVector, evt){
+        this.setState({ scrollTop });
     }
 
     onToggleWidthBound(){
@@ -535,13 +516,13 @@ export class TableOfContents extends React.Component {
         var context = this.props.context;
         var cols = [];
         cols.push(
-            <div className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1600 ? '9' : '12')}>
+            <div key="parent-link" className={"col-xs-" + (windowInnerWidth && windowInnerWidth >= 1600 ? '9' : '12')}>
                 <a className="text-500" href={context.parent['@id']}>{ context.parent['display_title'] }</a>
             </div>
         );
         if (windowInnerWidth && windowInnerWidth >= 1600){
             cols.push(
-                <div className="col-xs-3 text-right expand-button-container">
+                <div key="expand-btn" className="col-xs-3 text-right expand-button-container">
                     <Button bsSize="xs" onClick={this.onToggleWidthBound}>{ this.state.widthBound ?
                         <span><i className="icon icon-fw icon-angle-left"/></span> :
                         <span><i className="icon icon-fw icon-angle-right"/></span>
@@ -789,9 +770,15 @@ export class MarkdownHeading extends React.PureComponent {
 
 export class HeaderWithLink extends React.PureComponent {
 
-    handleLinkClick(id, e){
+    constructor(props){
+        super(props);
+        this.handleLinkClick = this.handleLinkClick.bind(this);
+    }
+
+    handleLinkClick(e){
         if (!(!isServerSide() && typeof window !== 'undefined' && document)) return null;
-        var itemAtID;
+        var id = this.props.link || this.props.id,
+            itemAtID;
         if (this.props.context) itemAtID = object.itemUtil.atId(this.props.context);
         else itemAtID = window.location.pathname;
 
@@ -807,7 +794,7 @@ export class HeaderWithLink extends React.PureComponent {
         if (!this.props.id && !this.props.link) throw new Error('HeaderWithLink needs a link or ID attribute/prop.');
         return React.createElement(this.props.type || 'h2', _.omit(this.props, 'type', 'children', 'link', 'context'), [
             this.props.children,
-            <i key="icon-link" className="icon icon-fw icon-link" onClick={this.handleLinkClick.bind(this, this.props.link || this.props.id)} title="Copy link to clipboard"/>
+            <i key="icon-link" className="icon icon-fw icon-link" onClick={this.handleLinkClick} title="Copy link to clipboard"/>
         ]);
     }
 }

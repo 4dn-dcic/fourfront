@@ -2,7 +2,8 @@
 
 jest.dontMock('../registry');
 jest.dontMock('underscore');
-var Registry = require('../registry');
+
+import Registry from './../registry';
 
 var test_obj = {'@type': ['Test', 'Item']};
 var specific_obj = {'@type': ['Specific', 'Item']};

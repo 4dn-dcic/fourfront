@@ -15,15 +15,15 @@ import { PopoverViewContainer } from './ViewContainer';
 /** 
  * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
  *
- * @param {Object[]} fields - Array of fields (i.e. from props.fields) which contain counts by term and total added through @see aggregationFxn.genChartData().
- * @param {Object} fields.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiment_sets passed to genChartData.
- * @param {number} fields.total - Count of total experiments for which this field is applicable.
+ * @param {Object} rootField - Top-level field, the aggregations for which represent the X axis.
+ * @param {Object} rootField.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiment_sets passed to genChartData.
+ * @param {number} rootField.total - Count of total experiments for which this field is applicable.
  * @param {number} [availWidth=400] - Available width, in pixels, for chart.
  * @param {number} [availHeight=400] - Available width, in pixels, for chart.
  * @param {Object} [styleOpts=Chart.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
+ * @param {string} [aggregateType="experiment_sets"] - Type of value to count up. Should be one of ["experiment_sets", "files", "experiments"].
  * @param {boolean} [useOnlyPopulatedFields=false] - Determine which fields to show via checking for which fields have multiple terms present.
- * @param {number} [fullHeightCount] - 100% Y-Axis count value. Overrides height of bars.
- * 
+ * @param {?number} [fullHeightCount=null] - 100% Y-Axis count value. Overrides height of bars.
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
 export function genChartBarDims(
@@ -240,18 +240,20 @@ export class Chart extends React.PureComponent {
         this.setState({ 'mounted' : true });
     }
 
+    componentWillUnmount(){
+        this.setState({ 'mounted' : false });
+    }
+
     /**
      * @deprecated
      * @instance
      * @ignore
      */
     componentWillReceiveProps(nextProps){
-        ///*
         if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
-        //*/
     }
 
 
@@ -262,14 +264,13 @@ export class Chart extends React.PureComponent {
 
     componentDidUpdate(pastProps){
 
-        ///*
         if (Chart.shouldPerformManualTransitions(this.props, pastProps)){
             // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
             setTimeout(()=>{
+                if (!this || !this.state || !this.state.mounted) return;
                 this.setState({ transitioning : false });
             }, 750);
         }
-        //*/
 
     }
 

@@ -3,6 +3,9 @@
 /* Written by Carl, used to test the experiment set browsers
 Made for 1st round browse (without file selectors).*/
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
 import createReactClass from 'create-react-class';
 
 /**
@@ -24,13 +27,10 @@ function mapStateToProps(store) {
 }
 
 describe('Testing browse.js for experiment set browser', function() {
-    var React, Browse, testItem, TestUtils, page, store, context, filters, _, Wrapper;
+    var Browse, testItem, page, store, context, filters, Wrapper, searchViewCommonProps;
 
     beforeEach(function() {
-        React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         Browse = require('../browse/BrowseView').default;
         context = require('../testdata/browse/context');
         store = require('../../store');
@@ -44,10 +44,21 @@ describe('Testing browse.js for experiment set browser', function() {
             type: dispatch_vals
         });
 
+        searchViewCommonProps = {
+            // Mocked props that would be sent from app.BodyElement
+            "windowWidth" : 1000,
+            "registerWindowOnScrollHandler" : function(fxn){
+                setTimeout(()=> console.log(fxn(345, 345)), 2000);
+                setTimeout(()=> console.log(fxn(40, -305)), 5000);
+                console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
+                jest.runAllTimers();
+            }
+        };
+
         var UseBrowse = connect(mapStateToProps)(Browse);
         page = TestUtils.renderIntoDocument(
             <Provider store={store}>
-                <UseBrowse />
+                <UseBrowse {...searchViewCommonProps} />
             </Provider>
         );
     });

@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -20,7 +21,7 @@ class Target(Item):
 
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
-    embedded_list = ['award.project','targeted_genome_regions.*']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + ['targeted_genome_regions.*']
 
     @calculated_property(schema={
         "title": "Target summary",
@@ -53,13 +54,16 @@ class Target(Item):
             # since targetted region is a list, go through each item and get summary elements
             for each_target in targeted_genome_regions:
                 genomic_region = request.embed(each_target, '@@object')
-                value = ""
-                value += genomic_region['genome_assembly']
-                if genomic_region.get('chromosome'):
-                    value += ':'
-                    value += genomic_region['chromosome']
-                if genomic_region.get('start_coordinate') and genomic_region.get('end_coordinate'):
-                    value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
+                if genomic_region.get('location_description') and not (genomic_region.get('start_coordinate') or
+                                                                       genomic_region.get('end_coordinate')):
+                    value = genomic_region['location_description']
+                else:
+                    value = genomic_region['genome_assembly']
+                    if genomic_region.get('chromosome'):
+                        value += ':'
+                        value += genomic_region['chromosome']
+                    if genomic_region.get('start_coordinate') and genomic_region.get('end_coordinate'):
+                        value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
                 values.append(value)
             return ",".join(filter(None, values))
         return "no target"

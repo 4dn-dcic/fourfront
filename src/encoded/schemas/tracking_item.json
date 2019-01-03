@@ -29,7 +29,8 @@
             "enum" : [
                 "other",
                 "download_tracking",
-                "google_analytics"
+                "google_analytics",
+                "jupyterhub_session"
             ]
 		},
         "download_tracking": {
@@ -46,20 +47,40 @@
                     "title": "Remote IP",
                     "type": "string"
                 },
-                "user_email" : {
-                    "title": "User Email",
+                "geo_country": {
+                    "title": "Country",
+                    "type": "string"
+                },
+                "geo_city": {
+                    "title": "City",
+                    "type": "string"
+                },
+                "user_uuid": {
+                    "title": "User UUID",
                     "type": "string"
                 },
                 "request_path" : {
-                    "title": "User Agent",
+                    "title": "Request Path",
                     "type": "string"
                 },
                 "filename" : {
                     "title": "Filename",
                     "type": "string"
                 },
+                "file_format" : {
+                    "title": "File Format",
+                    "type": "string"
+                },
+                "experiment_type" : {
+                    "title": "Experiment Type",
+                    "type": "string"
+                },
                 "range_query" : {
                     "title": "Range Query",
+                    "type": "boolean"
+                },
+                "is_visualization": {
+                    "title": "Is Visualization",
                     "type": "boolean"
                 }
             }
@@ -74,6 +95,16 @@
                     "format" : "date",
                     "description": "The date for which analytics are gathered in reports.",
                     "title" : "Analytics Date"
+                },
+                "date_increment" : {
+                    "title" : "Date Increment",
+                    "description": "For which date increment does this Item apply.",
+                    "type" : "string",
+                    "enum" : [
+                        "daily",
+                        "monthly",
+                        "yearly"
+                    ]
                 },
                 "reports" : {
                     "type" : "object",
@@ -114,9 +145,9 @@
                             }
                         },
 
-                        "detail_views_by_experiment_set" : {
+                        "views_by_experiment_set" : {
                             "type" : "array",
-                            "title" : "Experiment Set Detail Views",
+                            "title" : "Experiment Set Views",
                             "items" : {
                                 "type" : "object",
                                 "properties": {
@@ -155,9 +186,9 @@
                             }
                         },
 
-                        "detail_views_by_file" : {
+                        "views_by_file" : {
                             "type" : "array",
-                            "title" : "File Detail Views",
+                            "title" : "File Views",
                             "items" : {
                                 "type" : "object",
                                 "properties": {
@@ -194,8 +225,177 @@
                                     }
                                 }
                             }
+                        },
+
+                        "views_by_other_item" : {
+                            "type" : "array",
+                            "title" : "Item Views",
+                            "description" : "Item views for Item types which are not File or ExperimentSet.",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:productName" : {
+                                        "type" : "string",
+                                        "title" : "Item Title"
+                                    },
+                                    "ga:productSku" : {
+                                        "type" : "string",
+                                        "title" : "Item Accession"
+                                    },
+                                    "ga:productBrand" : {
+                                        "type" : "string",
+                                        "title" : "Lab Name"
+                                    },
+                                    "ga:productCategoryHierarchy" : {
+                                        "type" : "string",
+                                        "title" : "Type of File"
+                                    },
+                                    "ga:productDetailViews" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this File has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this File has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this File has been seen present in a Browse or Search results page."
+                                    }
+                                }
+                            }
+                        },
+
+                        "search_search_queries" : {
+                            "type" : "array",
+                            "title" : "Other Search Queries",
+                            "description" : "Search query counts which occurred on the /search/ page.",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:searchKeyword" : {
+                                        "type" : "string",
+                                        "title" : "Search Query",
+                                        "description" : "Search query which was typed or linked to."
+                                    },
+                                    "ga:users" : {
+                                        "type" : "integer",
+                                        "title" : "Users",
+                                        "description" : "Number of Users who've searched this."
+                                    },
+                                    "ga:sessions" : {
+                                        "type" : "integer",
+                                        "title" : "Sessions",
+                                        "description" : "Number of sessions where this search occurred."
+                                    },
+                                    "ga:pageviews" : {
+                                        "type" : "integer",
+                                        "title" : "Pageviews"
+                                    }
+                                }
+                            }
+                        },
+
+                        "browse_search_queries" : {
+                            "type" : "array",
+                            "title" : "Browse Search Queries",
+                            "description" : "Search query counts which occurred on the /browse/ page.",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:searchKeyword" : {
+                                        "type" : "string",
+                                        "title" : "Search Query",
+                                        "description" : "Search query which was typed or linked to."
+                                    },
+                                    "ga:users" : {
+                                        "type" : "integer",
+                                        "title" : "Users",
+                                        "description" : "Number of Users who've searched this."
+                                    },
+                                    "ga:sessions" : {
+                                        "type" : "integer",
+                                        "title" : "Sessions",
+                                        "description" : "Number of sessions where this search occurred."
+                                    },
+                                    "ga:pageviews" : {
+                                        "type" : "integer",
+                                        "title" : "Pageviews"
+                                    }
+                                }
+                            }
+                        },
+
+                        "fields_faceted" : {
+                            "type" : "array",
+                            "title" : "Facets",
+                            "description" : "Counts for fields and terms selected as filters.",
+                            "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:searchKeyword" : {
+                                        "type" : "string",
+                                        "title" : "Search Query",
+                                        "description" : "Search query which was typed or linked to."
+                                    },
+                                    "ga:users" : {
+                                        "type" : "integer",
+                                        "title" : "Users",
+                                        "description" : "Number of Users who've searched this."
+                                    },
+                                    "ga:sessions" : {
+                                        "type" : "integer",
+                                        "title" : "Sessions",
+                                        "description" : "Number of sessions where this search occurred."
+                                    },
+                                    "ga:pageviews" : {
+                                        "type" : "integer",
+                                        "title" : "Pageviews"
+                                    }
+                                }
+                            }
                         }
-                        
+
+                    }
+                }
+            }
+        },
+        "jupyterhub_session": {
+            "title": "JupyterHub Session",
+            "type": "object",
+            "description": "Subobject to track a JupyterHub session. Allows additional properties",
+            "additionalProperties": true,
+            "properties": {
+                "user_uuid": {
+                    "title": "User UUID",
+                    "type": "string"
+                },
+                "date_initialized": {
+                    "title": "Date Initialized",
+                    "type": "string",
+                    "anyOf": [
+                        {"format": "date-time"},
+                        {"format": "date"}
+                    ]
+                },
+                "date_culled": {
+                    "title": "Date Culled",
+                    "type": "string",
+                    "anyOf": [
+                        {"format": "date-time"},
+                        {"format": "date"}
+                    ]
+                },
+                "files_mounted": {
+                    "type" : "array",
+                    "title" : "Files Mounted",
+                    "description": "UUIDs of files mounted during this session.",
+                    "items" : {
+                        "title": "File UUID",
+                        "type":  "string"
                     }
                 }
             }

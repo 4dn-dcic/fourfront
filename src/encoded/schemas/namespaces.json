@@ -1,5 +1,7 @@
 {
     "UniProtKB": "http://www.uniprot.org/uniprot/{reference_id}",
     "SRA": "https://www.ncbi.nlm.nih.gov/sra/?term=",
-    "GEO": "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc="
+    "GEO": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
+    "BioSample": "https://www.ncbi.nlm.nih.gov/biosample/",
+    "ENC": "https://www.encodeproject.org/"
 }

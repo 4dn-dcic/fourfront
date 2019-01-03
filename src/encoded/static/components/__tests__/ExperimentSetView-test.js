@@ -1,10 +1,16 @@
 'use strict';
 
+import React from 'react';
+import TestUtils from 'react-dom/test-utils';
+import _ from 'underscore';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
 jest.dontMock('react');
 jest.dontMock('underscore');
+
+jest.mock('./../util/navigate');
 
 
 function getActiveTabIndex(tabs){
@@ -15,13 +21,10 @@ function getActiveTabIndex(tabs){
 
 
 describe('Testing ExperimentSetView', function() {
-    var sinon, server, React, TestUtils;
-    var expFuncs, context, schemas, _, ExperimentSetView, testView, RawFilesStackedTable;
+    var sinon, server;
+    var context, schemas, ExperimentSetView, testView, RawFilesStackedTable;
 
     beforeAll(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
@@ -40,9 +43,13 @@ describe('Testing ExperimentSetView', function() {
         RawFilesStackedTable = require('../browse/components').RawFilesStackedTable;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
-        expFuncs = require('../util').expFxn;
 
-        testView = TestUtils.renderIntoDocument(<ExperimentSetView context={context} schemas={schemas} />);
+        testView = TestUtils.renderIntoDocument(
+            <ExperimentSetView
+                context={context} schemas={schemas} windowWidth={1200}
+                href="https://data.4dnucleome.org/experiment-set-replicates/4DNESH4MYRID/"
+            />
+        );
 
 
         //jest.runAllTimers();

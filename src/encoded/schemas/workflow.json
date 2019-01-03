@@ -19,14 +19,14 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
+            "default": "5"
         },
         "accession": {
             "accessionType": "WF"
@@ -70,6 +70,9 @@
                 "Image processing",
                 "Visualization processing",
                 "Repli-seq data processing",
+                "ChIP-seq data processing",
+                "ATAC-seq data processing",
+                "RNA-seq data processing",
                 "Data QC",
                 "Other"
             ]
@@ -135,6 +138,36 @@
                 "type": "string"
             }
         },
+        "wdl_directory_url": {
+            "title": "WDL directory url",
+            "description": "URL of the directory that contains main and other WDL files needed for the workflow",
+            "type": "string"
+        },
+        "wdl_main_filename": {
+            "title": "WDL main file name",
+            "description": "Name of the main WDL file for the workflow",
+            "type": "string"
+        },
+        "wdl_child_filenames": {
+            "title": "WDL child file names",
+            "description": "Names of the other WDL files used by the main WDL file for the workflow",
+            "type": "array",
+            "items": {
+                "title": "WDL child file name",
+                "description": "name of a wdl file",
+                "type": "string"
+            }
+        },
+        "workflow_language": {
+            "title": "Workflow language",
+            "description": "Language used to describe workflow, either CWL or WDL",
+            "type": "string",
+            "enum": [
+                "CWL",
+                "WDL"
+            ],
+            "default": "CWL"
+        },
         "docker_registry_url": {
             "title": "Docker Registry URL",
             "description": "Docker Hub or 7 bridges registry URL.",
@@ -161,6 +194,16 @@
                         "description": "Name of the argument of the workflow.",
                         "type": "string"
                     },
+                    "alternative_conditional_argument_names": {
+                        "title": "Alternative Conditional Argument Names",
+                        "description": "Alternative argument names, in case argument names may vary depending on condition",
+                        "type": "array",
+                        "items": {
+                             "title": "Alternative Conditional Argument Name",
+                             "description": "An alternative argument name, in case argument names may vary depending on condition",
+                             "type": "string"
+                        }
+                    },
                     "secondary_file_formats": {
                         "title": "secondary file formats",
                         "description": "formats for secondary files",
@@ -168,7 +211,8 @@
                         "items": {
                              "title": "secondary_file_format",
                              "description": "formats for secondary file",
-                             "type": "string"
+                             "type": "string",
+                             "linkTo": "FileFormat"
                         }
                     },
                     "is_primaryfile": {
@@ -191,6 +235,7 @@
                             "Output processed file",
                             "Output QC file",
                             "Output report file",
+                            "Output to-be-extra-input file",
                             "parameter",
                             "NA"
                         ]
@@ -199,6 +244,7 @@
                         "title": "Format",
                         "description": "Argument Format",
                         "type": "string",
+                        "linkTo": "FileFormat",
                         "suggested_enum" : [
                             "fastq",
                             "bam",
@@ -222,6 +268,10 @@
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "internal notes",
                         "type": "string"
                     }
                 }
@@ -269,7 +319,8 @@
                                         },
                                         "file_format" : {
                                             "title" : "File Format",
-                                            "type" : "string"
+                                            "type" : "string",
+                                            "linkTo": "FileFormat"
                                         },
                                         "cardinality" : {
                                             "title" : "Cardinality",
@@ -279,6 +330,10 @@
                                         "global" : {
                                             "title" : "Global Argument",
                                             "type" : "boolean"
+                                        },
+                                        "notes": {
+                                            "description": "internal notes",
+                                            "type": "string"
                                         }
                                     }
                                 },

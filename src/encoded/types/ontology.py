@@ -28,7 +28,6 @@ class OntologyTerm(Item):
     def _update(self, properties, sheets=None):
         '''set preferred_name field to term_name if it's not already populated
         '''
-        # import pdb; pdb.set_trace()
         if properties.get('preferred_name', None) is None:
             termname = properties.get('term_name')
             if termname:

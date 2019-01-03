@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -66,6 +66,13 @@
                "Antibody Authentication",
                "Tissue Preparation Methods"
             ]
+        },
+        "url": {
+            "title": "URL",
+            "lookup": 1000,
+            "description": "An external resource with additional information about the protocol.",
+            "type": "string",
+            "format": "uri"
         }
     },
     "facets": {

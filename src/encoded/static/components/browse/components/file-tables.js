@@ -5,7 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { FacetList } from './FacetList';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock, FileEntryBlockPairColumn } from './StackedBlockTable';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas } from './../../util';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
+
+var { Item } = typedefs;
 
 
 /**
@@ -148,10 +150,9 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        var columnHeaders = this.state.columnHeaders;
-
-        var contentsClassName = 'files';
-        var contents = [];
+        var columnHeaders       = this.state.columnHeaders,
+            contentsClassName   = 'files',
+            contents            = [];
 
         if (Array.isArray(exp.file_pairs)){
             contentsClassName = 'file-pairs';
@@ -206,12 +207,11 @@ export class RawFilesStackedTable extends React.PureComponent {
         }
 
         var experimentVisibleName = (
-            exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                exp.experiment_type ? exp.experiment_type : exp.accession
-        );
-
-        var experimentAtId = object.itemUtil.atId(exp);
-        var linkTitle = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
+                exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
+                    exp.experiment_type ? exp.experiment_type : exp.accession
+            ),
+            experimentAtId  = object.itemUtil.atId(exp),
+            linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
@@ -232,36 +232,26 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
-        var biosample = expsWithBiosample[0].biosample;
-
-        var bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
-        var biosampleAtId = object.itemUtil.atId(biosample);
-        var linkTitle = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
+        var biosample       = expsWithBiosample[0].biosample,
+            bioRepTitle     = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary,
+            biosampleAtId   = object.itemUtil.atId(biosample),
+            linkTitle       = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
         return (
-            <StackedBlock
-                columnClass="biosample"
-                hideNameOnHover={false}
-                key={biosampleAtId || biosample.bio_rep_no || i }
-                id={'bio-' + (biosample.bio_rep_no || i + 1)}
+            <StackedBlock columnClass="biosample" hideNameOnHover={false}
+                key={biosampleAtId || biosample.bio_rep_no || i } id={'bio-' + (biosample.bio_rep_no || i + 1)}
                 label={{
                     title : 'Biosample',
                     subtitle : bioRepTitle,
                     subtitleVisible : true,
                     accession : biosample.accession
-                }}
-            >
+                }}>
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ? <a href={biosampleAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList
-                    className="experiments"
-                    title="Experiments"
-                    children={_.map(expsWithBiosample, this.renderExperimentBlock)}
-                    collapseLimit={this.props.collapseLimit || 3}
-                    collapseShow={this.props.collapseShow || 2}
-                    collapseLongLists={this.props.collapseLongLists}
+                <StackedBlockList className="experiments" title="Experiments" children={_.map(expsWithBiosample, this.renderExperimentBlock)}
+                    collapseLimit={this.props.collapseLimit || 3} collapseShow={this.props.collapseShow || 2} collapseLongLists={this.props.collapseLongLists}
                     showMoreExtTitle={
-                        expsWithBiosample.length > 5 ?
+                        expsWithBiosample.length <= 5 ? null :
                             'with ' + (
                                 _.all(expsWithBiosample.slice(3), function(exp){
                                     return exp.file_pairs !== 'undefined';
@@ -272,11 +262,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                                     expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
                                     ' Files'
                             )
-                            :
-                            null
-                    }
-                />
-
+                    }/>
             </StackedBlock>
         );
     }
@@ -405,19 +391,26 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderFileBlocksForExperiment(experimentAccession, filesForExperiment){
-        return _.map(filesForExperiment, (file) => {
+        var fileBlocks = [],
+            filesWithPermissions = _.filter(filesForExperiment, object.itemUtil.atId);
+
+        _.forEach(filesWithPermissions, (file, idx) => {
             this.oddExpRow = !this.oddExpRow;
-            return (
-                <FileEntryBlock
-                    key={object.atIdFromObject(file)}
-                    file={file}
-                    hideNameOnHover={false}
-                    experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
-                    isSingleItem={filesForExperiment.length === 1}
-                    stripe={this.oddExpRow}
-                />
+            fileBlocks.push(
+                <FileEntryBlock key={object.atIdFromObject(file) || idx} file={file}
+                    hideNameOnHover={false} experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
+                    isSingleItem={filesForExperiment.length === 1 && filesWithPermissions.length === 1} stripe={this.oddExpRow} />
             );
         });
+        if (filesWithPermissions.length < filesForExperiment.length){
+            this.oddExpRow = !this.oddExpRow;
+            fileBlocks.push(
+                <FileEntryBlock key="no-view-permission-file-or-files" file={{ 'error' : 'no view permissions' }}
+                    experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
+                    isSingleItem={filesWithPermissions.length === 0} stripe={this.oddExpRow} />
+            );
+        }
+        return fileBlocks;
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal = this.state.filesGroupedByExperimentOrGlobal){
@@ -450,23 +443,17 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                 </StackedBlockName>
             );
             return (
-                <StackedBlock
-                    columnClass="experiment"
-                    hideNameOnHover={experimentAccession === 'global'}
-                    key={experimentAccession}
-                    id={'exp-' + experimentAccession}
-                    label={{
+                <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
+                    key={experimentAccession} id={'exp-' + experimentAccession} label={{
                         'title' : experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment',
                         //'subtitle' : visibleBiosampleTitle,
                         'subtitleVisible' : true,
                         'accession' : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
                     }}>
                     { nameBlock }
-                    <StackedBlockList
-                        className="files" collapseLongLists={this.props.collapseLongLists}
-                        title={this.props.titleForFiles}
-                        children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment) /*expsWithBiosample.map(this.renderExperimentBlock)*/}
-                        showMoreExtTitle={null} />
+                    <StackedBlockList className="files" collapseLongLists={this.props.collapseLongLists}
+                        title={this.props.titleForFiles} showMoreExtTitle={null}
+                        children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment) /*expsWithBiosample.map(this.renderExperimentBlock)*/} />
                 </StackedBlock>
             );
 
@@ -502,10 +489,11 @@ export class RawFilesStackedTableExtendedColumns extends RawFilesStackedTable {
 export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
 
     /**
-     * Filter a list of files down to those with a quality_metric && quality_metric.overall_quality_status;
+     * Filter a list of files down to those with a value for `quality_metric` and `quality_metric.overall_quality_status`.
      *
-     * @param {{ '@id' : string, 'quality_metric' : { "overall_quality_status" : string, '@id' : string } }} files - List of files, potentially with quality_metric.
-     * @param {boolean} [checkAny=false] - Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
+     * @param {Item[]} files                    List of files, potentially with quality_metric.
+     * @param {boolean} [checkAny=false]        Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
+     * @returns {Item[]|true} Filtered list of files or boolean for "any", depending on `checkAny` param.
      */
     static filterFiles(files, checkAny=false){
         var func = checkAny ? _.any : _.filter;
@@ -514,6 +502,15 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
         });
     }
 
+    /**
+     * Converts file + field (param) into a human-readable percentage.
+     *
+     * @param {Item} file - File to get 'percentOfTotalReads' from.
+     * @param {string} field - Property where 'percentOfTotalReads' value can be found.
+     * @param {number} colIndex - Unused.
+     * @param {Object} props - Unused.
+     * @returns {JSX.Element|string} Human-readable value for percent of total reads.
+     */
     static percentOfTotalReads(file, field, colIndex, props){
         var numVal = object.getNestedProperty(file, field);
         if (numVal && typeof numVal === 'number' && file.quality_metric && file.quality_metric['Total reads']){
@@ -541,6 +538,6 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
             { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 80, field : "quality_metric.url" }
         ],
         'titleForFiles' : "Processed File Metrics"
-    }
+    };
 
 }

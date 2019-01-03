@@ -68,7 +68,7 @@ export class HealthView extends React.Component {
     }
 
     render() {
-        var { context, schemas, session } = this.props;
+        var { context, schemas, session, windowWidth } = this.props;
         var { db_es_compare, db_es_total, mounted } = this.state;
         var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
 
@@ -135,11 +135,9 @@ export class HealthView extends React.Component {
                     }
                 }} />
 
-                <layout.WindowResizeUpdateTrigger>
-                    <layout.WidthProvider ref="widthProvider">
-                        <HealthChart db_es_compare={db_es_compare} mounted={mounted} session={session} context={context} height={600} />
-                    </layout.WidthProvider>
-                </layout.WindowResizeUpdateTrigger>
+                <layout.WidthProvider ref="widthProvider" windowWidth={windowWidth}>
+                    <HealthChart {...{ db_es_compare, mounted, session, context }} height={600} />
+                </layout.WidthProvider>
 
             </div>
         );

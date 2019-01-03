@@ -20,22 +20,19 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
         { "$ref": "file.json#/facets"},
         { "$ref": "mixins.json#/facets_common" }
     ],
-    "mixinAggregations": [
-        { "$ref": "file.json#/aggregations"}
-    ],
     "mixinColumns": [
         { "$ref": "file.json#/columns"}
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "description": {
             "type": "string",
@@ -43,20 +40,7 @@
             "title": "Description"
         },
         "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "lookup": 30,
-            "default": "zip",
-            "enum": [
-                "zip",
-                "tiff",
-                "ome.tiff",
-                "flex",
-                "dv",
-                "r3d",
-                "nd2",
-                "other"
-            ]
+            "lookup": 30
         },
         "file_type": {
             "title": "File Type",
@@ -109,16 +93,5 @@
             "title": "Microscopy Files (Zip/TIFF)",
             "description": "Single zipped file with microscopy files, or a single TIFF file"
         }
-    },
-    "file_format_file_extension": {
-        "other": "",
-        "zip": ".zip",
-        "tiff": ".tiff",
-        "ome.tiff": ".ome.tiff",
-        "dv": ".dv",
-        "r3d": ".r3d",
-        "flex": ".flex",
-        "nd2": ".nd2",
-        "other": ""
     }
 }

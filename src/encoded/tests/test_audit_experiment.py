@@ -3,11 +3,11 @@ pytestmark = pytest.mark.working
 
 
 @pytest.fixture
-def file_data(lab, award):
+def file_data(lab, award, file_formats):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('uuid'),
         'status': 'uploaded',
         'file_classification': 'raw file'
     }
@@ -39,9 +39,9 @@ def fastq(testapp, file_data):
 
 
 @pytest.fixture
-def processed(testapp, file_data):
+def processed(testapp, file_data, file_formats):
     file_data['file_classification'] = 'processed file'
-    file_data['file_format'] = 'bam'
+    file_data['file_format'] = file_formats.get('bam').get('@id')
     return testapp.post_json('/file_processed', file_data).json['@graph'][0]
 
 

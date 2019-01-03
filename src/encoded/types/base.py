@@ -66,10 +66,6 @@ ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-#ALLOW_VIEWING_GROUP_VIEW = [
-#    (Allow, 'role.viewing_group_member', 'view'),
-#] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
-
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
 ] + ALLOW_LAB_MEMBER_VIEW
@@ -90,17 +86,30 @@ ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-ALLOW_CURRENT = [
-    (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+ALLOW_CURRENT = ALLOW_EVERYONE_VIEW
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
 ] + ONLY_ADMIN_VIEW
 
-# Collection acls
+# For running pipelines
+ALLOW_LAB_VIEW_ADMIN_EDIT = [
+    (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view'),
+    (Allow, 'role.lab_submitter', 'view'),
+] + ONLY_ADMIN_VIEW
 
+ALLOW_OWNER_EDIT = [
+    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
+]
+
+# Collection acls
 ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
+
+ALLOW_ANY_USER_ADD = [
+    (Allow, Authenticated, 'add'),
+    (Allow, Authenticated, 'create')
+] + ALLOW_EVERYONE_VIEW
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -119,29 +128,35 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 def get_item_if_you_can(request, value, itype=None):
+    """
+    Return the @@object view of an item from a number of different sources
+
+        :param value: String item identifier or a dict containing @id/uuid
+        :param itype: Optional string collection name for the item (e.g. /file-formats/)
+        :returns: the dictionary @@object view of the item
+    """
+    if isinstance(value, dict):
+        if 'uuid' in value:
+            value = value['uuid']
+        elif '@id' in value:
+            value = value['@id']
+    svalue = str(value)
+    if not svalue.startswith('/'):
+        svalue = '/' + svalue
     try:
-        value.get('uuid')
-        return value
-    except AttributeError:
-        svalue = str(value)
-        if not svalue.startswith('/'):
-            svalue = '/' + svalue
+        item = request.embed(svalue, '@@object')
+    except:
+        pass
+    else:
+        if item.get('uuid'):
+            return item
+    if itype is not None:
+        svalue = '/' + itype + svalue + '/?datastore=database'
         try:
-            item = request.embed(svalue, '@@object')
+            return request.embed(svalue, '@@object')
         except:
-            pass
-        else:
-            try:
-                item.get('uuid')
-                return item
-            except AttributeError:
-                pass
-        if itype is not None:
-            svalue = '/' + itype + svalue + '/?datastore=database'
-            try:
-                return request.embed(svalue, '@@object')
-            except:
-                return value
+            # this could lead to unexpected errors
+            return None
 
 
 def set_namekey_from_title(properties):
@@ -155,7 +170,25 @@ def set_namekey_from_title(properties):
     return name
 
 
-# Common lists of embeds to be re-used in certain files (similar to schema mixins)
+def validate_item_type_of_linkto_field(context, request):
+    """We are doing this case by case on item specific types files,
+    but might want to carry it here if filter is used more often.
+    If any of the submitted fields contain an ff_flag property starting with "filter",
+    the field in the filter is used for validating the type of the linked item.
+    Example: file has field file_format which is a linkTo FileFormat.
+    FileFormat items contain a field called "valid_item_types".
+    We have the ff_flag on file_format field called "filter:valid_item_types"."""
+    pass
+
+
+##
+## Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+
+static_content_embed_list = [
+    "static_headers.*",            # Type: UserContent, may have differing properties
+    "static_content.content.*",    # Type: UserContent, may have differing properties
+]
 
 lab_award_attribution_embed_list = [
     "award.project",
@@ -281,10 +314,15 @@ class Item(snovault.Item):
         'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
-
+        'restricted': ALLOW_CURRENT,
         # publication
         'published': ALLOW_CURRENT,
+        # experiment sets
+        'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
+
+    # Default embed list for all 4DN Items
+    embedded_list = static_content_embed_list
 
     def __init__(self, registry, models):
         super().__init__(registry, models)
@@ -354,6 +392,10 @@ class Item(snovault.Item):
                             grps.append(group)
                     for g in grps:
                         del roles[g]
+        # This emulates __ac_local_roles__ of User.py (role.owner)
+        if 'submitted_by' in properties:
+            submitter = 'userid.%s' % properties['submitted_by']
+            roles[submitter] = 'role.owner'
         return roles
 
     def add_accession_to_title(self, title):
@@ -405,13 +447,21 @@ class Item(snovault.Item):
             if last_modified['modified_by'] != NO_DEFAULT:
                 properties['last_modified'] = last_modified
 
-        date2status = {'public_release': ['released', 'current'], 'project_release': ['released to project']}
-        for datefield, status in date2status.items():
+        date2status = [{'public_release': ['released', 'current']}, {'project_release': ['released to project']}]
+        # if an item is directly released without first being released to project
+        # then project_release date is added for same date as public_release
+        for dateinfo in date2status:
+            datefield, statuses = next(iter(dateinfo.items()))
             if datefield not in props:
-                if datefield in self.schema['properties'] and datefield not in properties \
-                   and 'status' in properties and properties['status'] in status:
-                    # check the status and add the date if it's not provided and item has right status
-                    properties[datefield] = date.today().isoformat()
+                if datefield in self.schema['properties'] and datefield not in properties:
+                    if 'status' in properties and properties['status'] in statuses:
+                        # check the status and add the date if it's not provided and item has right status
+                        properties[datefield] = date.today().isoformat()
+                    elif datefield == 'project_release':
+                        # case where public_release is added and want to set project_release = public_release
+                        public_rel = properties.get('public_release')
+                        if public_rel:
+                            properties[datefield] = public_rel
 
         super(Item, self)._update(properties, sheets)
 
@@ -546,11 +596,12 @@ class SharedItem(Item):
 def add(context, request):
     """smth."""
     if request.has_permission('add', context):
+        type_name = context.type_info.name
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
+            'profile': '/profiles/{name}.json'.format(name=type_name),
+            'href': '/search/?type={name}&currentAction=add'.format(name=type_name),
         }
 
 
@@ -562,7 +613,7 @@ def edit(context, request):
             'name': 'edit',
             'title': 'Edit',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=edit'.format(item_uri=request.resource_path(context)),
         }
 
 
@@ -574,5 +625,5 @@ def create(context, request):
             'name': 'create',
             'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=create'.format(item_uri=request.resource_path(context)),
         }

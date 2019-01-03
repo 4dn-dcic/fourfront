@@ -21,7 +21,7 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }

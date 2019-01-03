@@ -166,7 +166,6 @@ class FileSet(Item):
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
-    embedded_list = []
 
 
 @collection(
@@ -182,14 +181,14 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded_list = [
+    embedded_list = Item.embedded_list + [
         'files_in_set.submitted_by.job_title',
         'files_in_set.lab.title',
         'files_in_set.accession',
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
-        'files_in_set.file_format',
+        'files_in_set.file_format.file_format',
         'files_in_set.file_classification'
     ]
 
@@ -207,14 +206,14 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
     item_type = 'file_set_microscope_qc'
     schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
     name_key = 'accession'
-    embedded_list = [
+    embedded_list = Item.embedded_list + [
         'files_in_set.submitted_by.job_title',
         'files_in_set.lab.title',
         'files_in_set.accession',
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
-        'files_in_set.file_format',
+        'files_in_set.file_format.file_format',
         'files_in_set.file_classification'
     ]
 
@@ -232,7 +231,7 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded_list = lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'experiments.display_title',
         'experiments.accession',
         'experiments.experiment_type',
@@ -246,6 +245,7 @@ class File(Item):
         'experiments.biosample.treatments_summary',
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.digestion_enzyme.name',
+        'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession'
     ]
@@ -274,7 +274,11 @@ class File(Item):
     })
     def display_title(self, request, file_format, accession=None, external_accession=None):
         accession = accession or external_accession
-        file_extension = self.schema['file_format_file_extension'][file_format]
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+        try:
+            file_extension = '.' + file_format_item.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
         return '{}{}'.format(accession, file_extension)
 
     @calculated_property(schema={
@@ -284,13 +288,158 @@ class File(Item):
     })
     def file_type_detailed(self, request, file_format, file_type=None):
         outString = (file_type or 'other')
-        if file_format is not None:
-            outString = outString + ' (' + file_format + ')'
-
-        # accession = accession or external_accession
-        # file_extension = self.schema['file_format_file_extension'][file_format]
-        # return '{}{}'.format(accession, file_extension)
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+        try:
+            fformat = file_format_item.get('file_format')
+            outString = outString + ' (' + fformat + ')'
+        except AttributeError:
+            pass
         return outString
+
+    def _get_file_expt_bucket(self, request, item2check):
+        fatid = self.jsonld_id(request)
+        if 'processed_files' in item2check:
+            if fatid in item2check.get('processed_files'):
+                return 'processed_files'
+        of_info = item2check.get('other_processed_files', [])
+        for obucket in of_info:
+            ofiles = obucket.get('files')
+            if [of for of in ofiles if of == fatid]:
+                return obucket.get('title')
+        return None
+
+    def _get_file_experiment_info(self, request):
+        """
+        Get info about an experiment that a file belongs value given a File.
+        Also retrieve replicate_set info from the set
+        Checks the rev_linked experiments and experiment_sets
+        """
+        info = {}
+        experiment_of_file = None
+        exp_info = None
+        repset = None
+        rev_exps = self.experiments(request)
+        if rev_exps:
+            experiment_of_file = rev_exps[0]
+            exp_info = get_item_if_you_can(request, experiment_of_file)
+            if exp_info:
+                repset_info = exp_info.get('experiment_sets')
+                repsetid = [rs for rs in repset_info if 'replicate' in rs]
+                if len(repsetid) == 1:
+                    repset = repsetid[0]
+                # see if we can get experiment_bucket from the experiment
+                ebucket = self._get_file_expt_bucket(request, exp_info)
+                if ebucket is not None:
+                    info['experiment_bucket'] = ebucket
+
+        if hasattr(self, 'experiment_sets') and repset is None:  # FileProcessed only
+            rev_exp_sets = self.experiment_sets(request)
+            if rev_exp_sets:
+                repsetid = [rs for rs in rev_exp_sets if 'replicate' in rs]
+                if len(repsetid) == 1:
+                    repset = repsetid[0]
+
+        # get replicate set info if we need to
+        if repset is not None:
+            if not experiment_of_file:
+                info['replicate_info'] = 'merged replicates'
+
+            rep_set_info = get_item_if_you_can(request, repset)
+            if rep_set_info:
+                # TODO figure out which experment of a repset has the file we are
+                # looking at is part of
+                # this seems very heavy i.e. need to get each expt of a set
+                # and look for the file in it is there another way
+
+                if 'experiment_bucket' not in info:
+                    info['experiment_bucket'] = self._get_file_expt_bucket(request, rep_set_info)
+
+                # get the first experiment of set and set to experiment of file for shared info
+                if not experiment_of_file:
+                    expts_of_file = rep_set_info.get('experiments_in_set', [])
+                    if expts_of_file:
+                        experiment_of_file = expts_of_file[0]
+
+        if not experiment_of_file:
+            return info
+        exp_info = get_item_if_you_can(request, experiment_of_file)
+        if exp_info is None:
+            return info
+        info['experiment_type'] = exp_info.get('experiment_type')
+        assay_info = exp_info.get('experiment_categorizer')
+        if assay_info:
+            info['assay_info'] = assay_info.get('value')
+        sample_id = exp_info.get('biosample')
+        if sample_id is not None:
+            sample = get_item_if_you_can(request, sample_id)
+            if sample is not None:
+                info['biosource_name'] = sample.get('biosource_summary')
+        return {k: v for k, v in info.items() if v is not None}
+
+    @calculated_property(schema={
+        "title": "Track and Facet Info",
+        "description": "Useful faceting and visualization info",
+        "type": "object",
+        "properties": {
+            "experiment_type": {
+                "type": "string"
+            },
+            "assay_info": {
+                "type": "string"
+            },
+            "lab_name": {
+                "type": "string"
+            },
+            "biosource_name": {
+                "type": "string"
+            },
+            "replicate_info": {
+                "type": "string"
+            },
+            "experiment_bucket": {
+                "type": "string"
+            },
+            "track_title": {
+                "type": "string"
+            }
+        }
+    })
+    def track_and_facet_info(self, request):
+        props = self.properties
+        track_info = {
+            'experiment_type': props.get('dataset_type'),
+            'assay_info': props.get('assay_info'),
+            'lab_name': props.get('project_lab'),
+            'biosource_name': props.get('biosource_name')
+        }
+        if track_info.get('biosource_name') is None:
+            if hasattr(self, 'biosource_name'):
+                bsname = self.biosource_name(request)
+                if bsname:
+                    track_info['biosource_name'] = bsname
+        if track_info.get('lab_name') is None:
+            labid = props.get('lab')
+            lab = get_item_if_you_can(request, labid)
+            if lab is not None:
+                track_info['lab_name'] = lab.get('display_title')
+        repinfo = props.get('replicate_identifiers')
+        if repinfo is not None:
+            if len(repinfo) > 1:
+                track_info['replicate_info'] = 'merged replicates'
+            else:
+                track_info['replicate_info'] = repinfo[0]
+        expt_bucket = props.get('experiment_bucket')
+        if expt_bucket is not None:
+            track_info['experiment_bucket'] = expt_bucket
+
+        track_info = {k: v for k, v in track_info.items() if v is not None}
+        if len(track_info) != 6:
+            einfo = self._get_file_experiment_info(request)
+            track_info.update({k: v for k, v in einfo.items() if k not in track_info})
+        track_title = self.generate_track_title(track_info)
+        if track_title is not None:
+            track_info['track_title'] = track_title
+        return track_info
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -307,40 +456,53 @@ class File(Item):
             new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
 
-        file_formats = [properties.get('file_format'), ]
-
         # handle extra files
         updated_extra_files = []
-        try:
-            at_id = resource_path(self)
-        except:
-            at_id = "/" + str(uuid) + "/"
-        # ensure at_id ends with a slash
-        if not at_id.endswith('/'):
-            at_id += '/'
-        for idx, xfile in enumerate(properties.get('extra_files', [])):
-            # ensure a file_format (identifier for extra_file) is given and non-null
-            if not('file_format' in xfile and bool(xfile['file_format'])):
-                continue
-            # todo, make sure file_format is unique
-            if xfile['file_format'] in file_formats:
-                raise Exception("Each file in extra_files must have unique file_format")
-            file_formats.append(xfile['file_format'])
-            xfile['accession'] = properties.get('accession')
-            # just need a filename to trigger creation of credentials
-            xfile['filename'] = xfile['accession']
-            xfile['uuid'] = str(uuid)
-            xfile['status'] = properties.get('status')
-            ext = self.build_external_creds(self.registry, uuid, xfile)
-            # build href
-            file_extension = self.schema['file_format_file_extension'][xfile['file_format']]
-            filename = '{}{}'.format(xfile['accession'], file_extension)
-            xfile['href'] = at_id + '@@download/' + filename
-            xfile['upload_key'] = ext['key']
-            sheets['external' + xfile['file_format']] = ext
-            updated_extra_files.append(xfile)
+        extra_files = properties.get('extra_files', [])
+        if extra_files:
+            # get @id for parent file
+            try:
+                at_id = resource_path(self)
+            except:
+                at_id = "/" + str(uuid) + "/"
+            # ensure at_id ends with a slash
+            if not at_id.endswith('/'):
+                at_id += '/'
 
-        if properties.get('extra_files', False):
+            file_formats = []
+            for xfile in extra_files:
+                # ensure a file_format (identifier for extra_file) is given and non-null
+                if not('file_format' in xfile and bool(xfile['file_format'])):
+                    continue
+                eformat = xfile['file_format']
+                if eformat.startswith('/file-formats/'):
+                    eformat = eformat[len('/file-formats/'):-1]
+                xfile_format = self.registry['collections']['FileFormat'].get(eformat)
+                xff_uuid = str(xfile_format.uuid)
+                if not xff_uuid:
+                    raise Exception("Cannot find format item for the extra file")
+
+                if xff_uuid in file_formats:
+                    raise Exception("Each file in extra_files must have unique file_format")
+                file_formats.append(xff_uuid)
+                xfile['file_format'] = xff_uuid
+
+                xfile['accession'] = properties.get('accession')
+                # just need a filename to trigger creation of credentials
+                xfile['filename'] = xfile['accession']
+                xfile['uuid'] = str(uuid)
+                # if not 'status' in xfile or not bool(xfile['status']):
+                #    xfile['status'] = properties.get('status')
+                ext = self.build_external_creds(self.registry, uuid, xfile)
+                # build href
+                file_extension = xfile_format.properties.get('standard_file_extension')
+                filename = '{}.{}'.format(xfile['accession'], file_extension)
+                xfile['href'] = at_id + '@@download/' + filename
+                xfile['upload_key'] = ext['key']
+                sheets['external' + xfile['file_format']] = ext
+                updated_extra_files.append(xfile)
+
+        if extra_files:
             properties['extra_files'] = updated_extra_files
 
         if old_creds:
@@ -421,8 +583,12 @@ class File(Item):
     })
     def href(self, request):
         file_format = self.properties.get('file_format')
+        fformat = get_item_if_you_can(request, file_format, 'file-formats')
+        try:
+            file_extension = '.' + fformat.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
         accession = self.properties.get('accession', self.properties.get('external_accession'))
-        file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
@@ -458,10 +624,33 @@ class File(Item):
         if external is not None:
             extras = []
             for extra in self.properties.get('extra_files', []):
-                extra_creds = self.propsheets.get('external' + extra['file_format'])
+                eformat = extra.get('file_format')
+                xfile_format = self.registry['collections']['FileFormat'].get(eformat)
+                try:
+                    xff_uuid = str(xfile_format.uuid)
+                except AttributeError:
+                    print("Can't find required format uuid for %s" % eformat)
+                    continue
+                extra_creds = self.propsheets.get('external' + xff_uuid)
                 extra['upload_credentials'] = extra_creds['upload_credentials']
                 extras.append(extra)
             return extras
+
+    def generate_track_title(self, track_info):
+        props = self.properties
+        if not props.get('higlass_uid'):
+            return None
+        exp_type = track_info.get('experiment_type', None)
+        if exp_type is None:
+            return None
+        bname = track_info.get('biosource_name', 'unknown sample')
+        ftype = props.get('file_type', 'unspecified type')
+        assay = track_info.get('assay_info', '')
+
+        title = '{ft} for {bs} {et} {ai}'.format(
+            ft=ftype, ai=assay, et=exp_type, bs=bname
+        )
+        return title.replace('  ', ' ').rstrip()
 
     @classmethod
     def get_bucket(cls, registry):
@@ -470,13 +659,15 @@ class File(Item):
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = cls.get_bucket(registry)
-        mapping = cls.schema['file_format_file_extension']
-        prop_format = properties['file_format']
+        fformat = properties.get('file_format')
+        if fformat.startswith('/file-formats/'):
+            fformat = fformat[len('/file-formats/'):-1]
+        prop_format = registry['collections']['FileFormat'].get(fformat)
         try:
-            file_extension = mapping[prop_format]
+            file_extension = prop_format.properties['standard_file_extension']
         except KeyError:
             raise Exception('File format not in list of supported file types')
-        key = '{uuid}/{accession}{file_extension}'.format(
+        key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
 
@@ -658,6 +849,54 @@ class FileReference(File):
 
 
 @collection(
+    name='files-vistrack',
+    unique_key='accession',
+    properties={
+        'title': 'Visualization Track Files',
+        'description': 'Listing of External Files available as HiGlass visualization tracks',
+    })
+class FileVistrack(File):
+    """Collection for individual visualization track files."""
+    item_type = 'file_vistrack'
+    schema = load_schema('encoded:schemas/file_vistrack.json')
+    embedded_list = File.embedded_list
+    name_key = 'accession'
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['file_wfout_bucket']
+
+    @calculated_property(schema={
+        "title": "Biosource Name",
+        "type": "string"
+    })
+    def biosource_name(self, request):
+        bios = self.properties.get('biosource')
+        if bios is not None:
+            return request.embed(bios, '@@object').get('biosource_name')
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "Name of this File",
+        "type": "string"
+    })
+    def display_title(self, request, file_format, accession=None, external_accession=None):
+        dbxrefs = self.properties.get('dbxrefs')
+        if dbxrefs:
+            acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
+            if acclist:
+                accession = acclist[0]
+        if not accession:
+            accession = accession or external_accession
+        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
+        try:
+            file_extension = '.' + file_format_item.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
+        return '{}{}'.format(accession, file_extension)
+
+
+@collection(
     name='files-calibration',
     unique_key='accession',
     properties={
@@ -725,7 +964,6 @@ def post_upload(context, request):
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
-
     accession_or_external = properties.get('accession')
     external = context.propsheets.get('external', None)
 
@@ -734,10 +972,13 @@ def post_upload(context, request):
         bucket = request.registry.settings['file_upload_bucket']
         # maybe this should be properties.uuid
         uuid = context.uuid
-        mapping = context.schema['file_format_file_extension']
-        file_extension = mapping[properties['file_format']]
+        file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
+        try:
+            file_extension = '.' + file_format.get('standard_file_extension')
+        except AttributeError:
+            file_extension = ''
 
-        key = '{uuid}/{accession}{file_extension}'.format(
+        key = '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid, **properties)
 
     elif external.get('service') == 's3':
@@ -773,12 +1014,16 @@ def post_upload(context, request):
     return result
 
 
-def is_file_to_download(properties, mapping, expected_filename=None):
-    file_extension = mapping[properties['file_format']]
+def is_file_to_download(properties, file_format, expected_filename=None):
+    try:
+        file_extension = '.' + file_format.get('standard_file_extension')
+    except AttributeError:
+        file_extension = ''
     accession_or_external = properties.get('accession') or properties.get('external_accession')
     if not accession_or_external:
         return False
-    filename = accession_or_external + file_extension
+    filename = '{accession}{file_extension}'.format(
+        accession=accession_or_external, file_extension=file_extension)
     if expected_filename is None:
         return filename
     elif expected_filename != filename:
@@ -790,12 +1035,15 @@ def is_file_to_download(properties, mapping, expected_filename=None):
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        raise HTTPForbidden('This is a restricted file not available for download')
     try:
         user_props = session_properties(request)
     except Exception as e:
         user_props = {'error': str(e)}
     tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
-                       'user_email': user_props.get('details', {}).get('email', 'anonymous'),
+                       'user_uuid': user_props.get('details', {}).get('uuid', 'anonymous'),
                        'request_path': request.path_info}
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
@@ -809,25 +1057,29 @@ def download(context, request):
     # or one of the files in extra files, the following logic will
     # search to find the "right" file and redirect to a download link for that one
     properties = context.upgrade_properties()
-    mapping = context.schema['file_format_file_extension']
-
+    file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
     _filename = None
     if request.subpath:
         _filename, = request.subpath
-    filename = is_file_to_download(properties, mapping, _filename)
+    filename = is_file_to_download(properties, file_format, _filename)
     if not filename:
         found = False
-        for extra in properties.get('extra_files'):
-            filename = is_file_to_download(extra, mapping, _filename)
+        for extra in properties.get('extra_files', []):
+            eformat = get_item_if_you_can(request, extra.get('file_format'), 'file-formats')
+            filename = is_file_to_download(extra, eformat, _filename)
             if filename:
                 found = True
                 properties = extra
-                external = context.propsheets.get('external' + extra['file_format'])
+                external = context.propsheets.get('external' + eformat.get('uuid'))
+                if eformat is not None:
+                    tracking_values['file_format'] = eformat.get('file_format')
                 break
         if not found:
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
+        if file_format is not None:
+            tracking_values['file_format'] = file_format.get('file_format')
     tracking_values['filename'] = filename
 
     if not external:
@@ -852,6 +1104,8 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
+    tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
+    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
     tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
                      'status': 'in review by lab', 'tracking_type': 'download_tracking',
@@ -890,45 +1144,119 @@ def download(context, request):
     raise HTTPTemporaryRedirect(location=location)
 
 
+def get_file_experiment_type(request, context, properties):
+    """
+    Get the string experiment_type value given a File context and properties.
+    Checks the source_experiments, rev_linked experiments and experiment_sets
+    """
+    # identify which experiments to use
+    experiments_using_file = []
+    if properties.get('source_experiments'):
+        experiments_using_file = properties['source_experiments']
+    else:
+        rev_exps = context.experiments(request)
+        if rev_exps:
+            experiments_using_file = rev_exps
+        elif hasattr(context, 'experiment_sets'):  # FileProcessed only
+            rev_exp_sets = context.experiment_sets(request)
+            if rev_exp_sets:
+                for exp_set in rev_exp_sets:
+                    exp_set_info = get_item_if_you_can(request, exp_set)
+                    if exp_set_info:
+                        experiments_using_file.extend(exp_set_info.get('experiments_in_set', []))
+    found_experiment_type = 'None'
+    for file_experiment in experiments_using_file:
+        exp_info = get_item_if_you_can(request, file_experiment)
+        if exp_info is None:
+            continue
+        exp_type = exp_info.get('experiment_type')
+        if found_experiment_type == 'None' or found_experiment_type == exp_type:
+            found_experiment_type = exp_type
+        else:  # multiple experiment types
+            found_experiment_type = 'Integrative analysis'
+            break
+    return found_experiment_type
+
+
+def validate_file_format_validity_for_file_type(context, request):
+    """Check if the specified file format (e.g. fastq) is allowed for the file type (e.g. FileFastq).
+    """
+    data = request.json
+    if 'file_format' in data:
+        file_format_item = get_item_if_you_can(request, data['file_format'], 'file-formats')
+        if not file_format_item:
+            # item level validation will take care of generating the error
+            return
+        file_format_name = file_format_item['file_format']
+        allowed_types = file_format_item.get('valid_item_types', [])
+        file_type = context.type_info.name
+        if file_type not in allowed_types:
+            msg = 'File format {} is not allowed for {}'.format(file_format_name, file_type)
+            request.errors.add('body', None, msg)
+        else:
+            request.validated.update({})
+
+
 def validate_file_filename(context, request):
     ''' validator for filename field '''
-
-    data = request.json
-    if 'filename' not in data or 'file_format' not in data:
-        return
-    filename = data['filename']
-    file_format = data['file_format']
-    valid_schema = context.type_info.schema
-    file_extensions = valid_schema['file_format_file_extension'][file_format]
-    if not isinstance(file_extensions, list):
-        file_extensions = [file_extensions]
     found_match = False
-    for extension in file_extensions:
-        if extension == "":
-            found_match = True
-            break
-        elif filename[-len(extension):] == extension:
-            found_match = True
-            break
-    if not found_match:
-        file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
-        file_extensions_msg = ', '.join(file_extensions_msg)
-        request.errors.add('body', None, 'Filename extension does not '
-                           'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+    data = request.json
+    if 'filename' not in data:
+        # see if there is an existing file_name
+        filename = context.properties.get('filename')
+        if not filename:
+            return
     else:
+        filename = data['filename']
+    ff = data.get('file_format')
+    if not ff:
+        ff = context.properties.get('file_format')
+    file_format_item = get_item_if_you_can(request, ff, 'file-formats')
+    if not file_format_item:
+        msg = 'Problem getting file_format for %s' % filename
+        request.errors.add('body', None, msg)
+        return
+    msg = None
+    try:
+        file_extensions = [file_format_item.get('standard_file_extension')]
+        if file_format_item.get('other_allowed_extensions'):
+            file_extensions.extend(file_format_item.get('other_allowed_extensions'))
+            file_extensions = list(set(file_extensions))
+    except (AttributeError, TypeError):
+        msg = 'Problem getting file_format for %s' % filename
+    else:
+        if file_format_item.get('file_format') == 'other':
+            found_match = True
+        elif not file_extensions:  # this shouldn't happen
+            pass
+        for extension in file_extensions:
+            if filename[-(len(extension) + 1):] == '.' + extension:
+                found_match = True
+                break
+    if found_match:
         request.validated.update({})
+    else:
+        if not msg:
+            msg = ["'." + ext + "'" for ext in file_extensions]
+            msg = ', '.join(msg)
+            msg = 'Filename %s extension does not agree with specified file format. Valid extension(s): %s' % (filename, msg)
+        request.errors.add('body', None, msg)
 
 
 def validate_processed_file_unique_md5_with_bypass(context, request):
     '''validator to check md5 on processed files, unless you tell it
        not to'''
+    # skip validator if not file processed
+    if context.type_info.item_type != 'file_processed':
+        return
     data = request.json
-
-    if 'md5sum' not in data or not data['md5sum']: return
-    if context.type_info.item_type != 'file_processed': return
-    if 'force_md5' in request.query_string: return
+    if 'md5sum' not in data or not data['md5sum']:
+        return
+    if 'force_md5' in request.query_string:
+        return
     # we can of course patch / put to ourselves the same md5 we previously had
-    if context.properties.get('md5sum') == data['md5sum']: return
+    if context.properties.get('md5sum') == data['md5sum']:
+        return
 
     if ELASTIC_SEARCH in request.registry:
         search = make_search_subreq(request, '/search/?type=File&md5sum=%s' % data['md5sum'])
@@ -949,7 +1277,11 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
 
 
 def validate_processed_file_produced_from_field(context, request):
-    '''validator to make sure that the values in the produced_from field are valid file identifiers'''
+    '''validator to make sure that the values in the
+    produced_from field are valid file identifiers'''
+    # skip validator if not file processed
+    if context.type_info.item_type != 'file_processed':
+        return
     data = request.json
     if 'produced_from' not in data:
         return
@@ -981,71 +1313,82 @@ def validate_extra_file_format(context, request):
         return
     extras = data['extra_files']
     # post should always have file_format as it is required patch may or may not
-    fformat = data.get('file_format')
-    if not fformat:
-        # must be a patch so get the last part of url
-        # use path_url to exclude query params
-        url = request.path_url
-        if url.endswith('/'):
-            url = url[:-1]
-        fid = url.split('/')[-1]
-        if not fid:
-            return
-        finfo = get_item_if_you_can(request, fid, 'files')
-        try:
-            fformat = finfo.get('file_format')
-        except AttributeError:
-            fformat = None
-        if not fformat:
-            # this in theory should never happen
-            request.errors.add('body', None, "Can't find parent file format for extra_files")
-            return
-    valid_schema = context.type_info.schema
+    ff = data.get('file_format')
+    if not ff:
+        ff = context.properties.get('file_format')
+    file_format_item = get_item_if_you_can(request, ff, 'file-formats')
+    if not file_format_item or 'standard_file_extension' not in file_format_item:
+        request.errors.add('body', None, "Can't find parent file format for extra_files")
+        return
+    parent_format = file_format_item['uuid']
+    schema_eformats = file_format_item.get('extrafile_formats')
+    if not schema_eformats:  # means this parent file shouldn't have any extra files
+        request.errors.add('body', None, "File with format %s should not have extra_files" % file_format_item.get('file_format'))
+        return
+    else:
+        valid_ext_formats = []
+        for ok_format in schema_eformats:
+            ok_format_item = get_item_if_you_can(request, ok_format, 'file-formats')
+            try:
+                off_uuid = ok_format_item.get('uuid')
+            except AttributeError:
+                raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid')
+            valid_ext_formats.append(off_uuid)
     seen_ext_formats = []
+    # formats = request.registry['collections']['FileFormat']
     for i, ef in enumerate(extras):
         eformat = ef.get('file_format')
         if eformat is None:
             return  # will fail the required extra_file.file_format
-        if eformat in seen_ext_formats:
+        eformat_item = get_item_if_you_can(request, eformat, 'file-formats')
+        try:
+            ef_uuid = eformat_item.get('uuid')
+        except AttributeError:
+            request.errors.add('body', ['extra_files', i], "'%s' not a valid or known file format" % eformat)
+            files_ok = False
+            break
+        if ef_uuid in seen_ext_formats:
             request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
             files_ok = False
+            break
         else:
-            seen_ext_formats.append(eformat)
-        if eformat == fformat:
-            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % fformat)
+            seen_ext_formats.append(ef_uuid)
+        if ef_uuid == parent_format:
+            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % file_format_item.get('file_format'))
             files_ok = False
-        if valid_schema.get('file_format_file_extension'):
-            if eformat not in valid_schema['file_format_file_extension']:
-                request.errors.add('body', ['extra_files', i], "'%s' not found in the file_format_file_extension_mapping" % eformat)
-                files_ok = False
+            break
+
+        if ef_uuid not in valid_ext_formats:
+            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, file_format_item.get('file_format')))
+            files_ok = False
     if files_ok:
         request.validated.update({})
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_file_filename,
+             validators=[validate_item_content_post,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field,
-                         validate_extra_file_format])
+                         validate_processed_file_produced_from_field])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
 
-@view_config(context=File, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_file_filename, validate_extra_file_format])
-def file_edit(context, request, render=None):
-    return item_edit(context, request, render)
-
-
-@view_config(context=FileProcessed, permission='edit', request_method='PUT',
+@view_config(context=File, permission='edit', request_method='PUT',
              validators=[validate_item_content_put,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field,
-                         validate_extra_file_format])
-@view_config(context=FileProcessed, permission='edit', request_method='PATCH',
+                         validate_processed_file_produced_from_field])
+@view_config(context=File, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
-                         validate_processed_file_produced_from_field,
-                         validate_extra_file_format])
-def procesed_edit(context, request, render=None):
+                         validate_processed_file_produced_from_field])
+def file_edit(context, request, render=None):
     return item_edit(context, request, render)

@@ -13,9 +13,9 @@ var vizUtil = require('./utilities');
 /** 
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
  * The mechanism for this is roughly diagrammed here:
- * 
+ *
  * .. image:: https://files.slack.com/files-pri/T0723UERE-F4C8KQKMM/chartdatacontroller.png
- * 
+ *
  * @module {Object} viz/chart-data-controller
  */
 
@@ -38,20 +38,20 @@ var refs = {
 /**
  * Contains "state" of ChartDataController. Some of these are deprecated and will be removed.
  * The most important ones are experiment_sets and filtered_experiment_sets.
- * 
- * @type {Object}
+ *
+ * @todo Better property definitions here
  * @private
- * @ignore
+ * @type {Object}
+ * @property {{ field: string, terms: Object }} barplot_data_filtered       Object for root/first-level field with bucketed term counts, recursed with children as set in 'barplot_data_fields'.
+ * @property {{ field: string, terms: Object }} barplot_data_unfiltered     Same as `barplot_data_filtered` but without concern for any expSetFilters aside from those in `browseBaseParams`.
+ * @property {string[]} barplot_data_fields                                 List of fields on which aggregations/bucketing is done for generating `barplot_data_filtered` & `barplot_data_unfiltered`.
+ * @property {booolean} isLoadingChartData                                  Whether we are currently loading.
  */
 var state = {
-    experiment_sets         : null,
-    filtered_experiment_sets : null,
-    fetching                : false,
-
-    barplot_data_filtered   : null,
-    barplot_data_unfiltered : null,
-    barplot_data_fields     : null,
-    isLoadingChartData      : false,
+    'barplot_data_filtered'   : null,
+    'barplot_data_unfiltered' : null,
+    'barplot_data_fields'     : null,
+    'isLoadingChartData'      : false,
 
     chartFieldsHierarchy: [
         //{ 
@@ -132,21 +132,21 @@ var state = {
 
 /** Private state & functions **/
 
-/** 
+/**
  * @private
  * @ignore
  */
 var providerCallbacks = {};
 
-/** 
+/**
  * @private
  * @ignore
  */
 var providerLoadStartCallbacks = {};
 
 /**
- * After load & update, call registered Update callbacks.
- * @private
+ * After load & update, called to start any registered 'on update' callbacks.
+ *
  * @ignore
  */
 function notifyUpdateCallbacks(){
@@ -157,7 +157,8 @@ function notifyUpdateCallbacks(){
 }
 
 /**
- * Before load, call registered Load Start callbacks.
+ * Before load, called to start any registered 'on load start' callbacks.
+ *
  * @private
  * @ignore
  */
@@ -182,15 +183,18 @@ function reFetchContext(){
 
 /**
  * Holds unsubcribe callback to Redux store subscription.
+ *
  * @private
- * @ignore
  * @type {null|function}
  */
 var reduxSubscription = null;
 
 /**
+ * Flag for whether controller has been initialized.
+ * Is set when ChartDataController.initialize() is called.
+ *
+ * @todo Perhaps move initialize() call from facetcharts.js to app.js.
  * @private
- * @ignore
  * @type {boolean}
  */
 var isInitialized = false;
@@ -208,7 +212,7 @@ var lastTimeSyncCalled = 0;
 
 /**
  * Use this React component to wrap individual charts and provide them with source of experiments data via
- * their props.experiment_sets and props.filtered_experiment_sets. Also provides props.expSetFilters from redux store.
+ * their props.filtered_bar_data and props.unfiltered_bar_data. Also provides props.expSetFilters from redux store.
  * 
  * @class Provider
  * @type {Component}
@@ -260,8 +264,8 @@ class Provider extends React.Component {
     }
 
     /**
-     * Sets 'experiment_sets' and 'filtered_experiment_sets' props on props.children.
-     * 
+     * Adds various properties from state, plus callback to update 'barplot_data_fields', to children.
+     *
      * @returns {JSX.Element} Cloned & adjusted props.children.
      * @memberof module:viz/chart-data-controller.Provider
      * @private
@@ -290,18 +294,18 @@ export const ChartDataController = {
 
     Provider : Provider,
 
-    /** 
+    /**
      * This function must be called before this component is used anywhere else.
-     * 
+     *
+     * @todo Perhaps move initialize() call from facetcharts.js to app.js.
+     * @todo Make 'fields' the first param and make it non-optional.
      * @public
-     * @param {function} [callback] - Optional callback for after initializing.
+     * @param {?string} [browseBaseState=null]  Current browse base state when initializing.
+     * @param {?string[]} [fields=null]         Initial fields to aggregate on.
+     * @param {?function} [callback]            Optional callback for after initializing.
      * @returns {void} Undefined
      */
-    initialize : function(
-        browseBaseState = 'only_4dn',
-        fields = null,
-        callback = null
-    ){
+    initialize : function(browseBaseState = null, fields = null, callback = null){
         if (!refs.store) refs.store = require('./../../store');
 
         var initStoreState = refs.store.getState();
@@ -321,22 +325,23 @@ export const ChartDataController = {
 
         // Subscribe to Redux store updates to listen for (changed href + context.filters) || browseBaseState.
         reduxSubscription = refs.store.subscribe(function(){
-            var prevHref = refs.href;
-            var reduxStoreState = refs.store.getState();
-            refs.href = reduxStoreState.href;
-            var prevBrowseBaseState = refs.browseBaseState;
-            refs.browseBaseState = reduxStoreState.browseBaseState;
-            var prevContextFilters = refs.contextFilters || []; // If falsy, we get current ones instead of 'no filters'
-            refs.contextFilters = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
+            var reduxStoreState     = refs.store.getState(),
+                prevHref            = refs.href,
+                prevBrowseBaseState = refs.browseBaseState,
+                prevContextFilters  = refs.contextFilters || []; // If falsy, we get current ones instead of 'no filters'
 
-            var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters, prevBrowseBaseState);
-            var nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState); // We don't need to pass 'current' params, but we do for clarity of differences.
+            refs.href               = reduxStoreState.href;
+            refs.browseBaseState    = reduxStoreState.browseBaseState;
+            refs.contextFilters     = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
 
-            var searchQuery = Filters.searchQueryStringFromHref(refs.href);
+            var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters, prevBrowseBaseState),
+                nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState), // We don't need to pass 'current' params, but we do for clarity of differences.
+                searchQuery = Filters.searchQueryStringFromHref(refs.href),
+                didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery);
 
-            var didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery);
-
-            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState && !didFiltersChange) return; // Nothing relevant has changed. Exit.
+            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState && !didFiltersChange){
+                return; // Nothing relevant has changed. Exit.
+            }
 
             // Hide any pop-overs still persisting with old filters or URL.
             setTimeout(function(){

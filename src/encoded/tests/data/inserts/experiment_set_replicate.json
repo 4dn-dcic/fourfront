@@ -4,6 +4,8 @@
         "submitted_by": "wrangler@wrangler.com",
         "description": "Sample replicate experiment set which is an experiment set of experiments testing user interface and other aspects of the 4DN Portal, including but not limited to a long text description (this) in order to test fit, resizing, and related with a long block of text that would likely vary from very short -- e.g. a few words -- to multiple paragraphs. Figured this description would be more descriptive than Lorem Ipsum text yet still has the potential to be quite long as it keeps rambling on. Normally this would be more of an interesting read.",
         "experimentset_type": "replicate",
+        "dataset_label": "X et al. HiC - ligation volumes",
+        "condition": "Control",
         "notes": "This should be a consistent Hi-C replicate set",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67APU1", "bio_rep_no": 1, "tec_rep_no": 1},
@@ -13,16 +15,23 @@
         "public_release" : "2018-04-04",
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab",
+        "status": "released",
         "accession": "4DNESAAAAAA1",
         "processed_files": ["4DNFIAAAAAA4", "4DNFIAAAAAA5"],
-        "static_headers": ["item-page-headers.ExperimentSet.data-usage-guidelines", "release-updates.TEST1", "help.analysis.file-formats.hic"]
+        "static_headers": [
+            "item-page-headers.ExperimentSet.data-usage-guidelines",
+            "release-updates.TEST1",
+            "help.analysis.file-formats.hic",
+            "00000000-1111-0000-1111-000000000001"
+        ]
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b261",
         "submitted_by": "wrangler@wrangler.com",
         "description": "This is a Hi-C replicate set that should fail some audits",
         "experimentset_type": "replicate",
+        "dataset_label": "X et al. HiC - ligation volumes",
+        "condition": "Lower ligation volume",
         "public_release" : "2017-11-04",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67APY1", "bio_rep_no": 1, "tec_rep_no":1},
@@ -32,13 +41,15 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b222",
         "submitted_by": "someotherguy@somewhere.com",
         "public_release" : "2017-12-04",
         "description": "Test replicate experiment set for Repliseq experiments",
+        "dataset_label": "Z et al. 2-Stage Repliseq",
+        "condition": "Early Stage",
         "experimentset_type": "replicate",
         "replicate_exps": [
            {"replicate_exp": "4DNEXO67AXE1", "bio_rep_no": 1, "tec_rep_no":1},
@@ -47,7 +58,7 @@
         ],
         "lab": "some-other-guys-lab",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461444b",
-        "status": "in review by lab",
+        "status": "released",
         "badges": [
             {
                 "badge": "ddd03a23-49e5-4c33-afab-9ec90d65faf3",
@@ -61,12 +72,14 @@
         "public_release" : "2017-12-27",
         "description": "Test replicate experiment set for Repliseq with only a single experiment no replicates",
         "experimentset_type": "replicate",
+        "dataset_label": "Z et al. 2-Stage Repliseq",
+        "condition": "Late Stage",
         "replicate_exps": [
            {"replicate_exp": "4DNEX42CAX16", "bio_rep_no": 1, "tec_rep_no":1}
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b112",
@@ -81,7 +94,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b113",
@@ -94,7 +107,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b223",
@@ -107,7 +120,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b114",
@@ -121,12 +134,13 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b115",
         "submitted_by": "wrangler@wrangler.com",
         "public_release" : "2018-03-14",
+        "project_release" : "2018-01-14",
         "description": "Test replicate experiment set for CHIA-pet",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -135,12 +149,13 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b116",
         "submitted_by": "wrangler@wrangler.com",
         "public_release" : "2018-02-23",
+        "project_release" : "2017-09-23",
         "description": "Test replicate experiment set for CHIP-seq",
         "experimentset_type": "replicate",
         "replicate_exps": [
@@ -149,11 +164,12 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b121",
         "submitted_by": "wrangler@wrangler.com",
+        "project_release" : "2017-12-24",
         "public_release" : "2018-02-24",
         "description": "Test replicate experiment set for Microscopy",
         "accession": "4DNESMICAAA1",
@@ -163,13 +179,14 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "331106bc-8535-3338-903e-854af460b544",
         "description": "HiC Replicates with OtherProcessedFiles",
         "accession" : "4DNESOPFAAA1",
         "public_release" : "2018-02-25",
+        "project_release" : "2017-11-25",
         "experimentset_type": "replicate",
         "submitted_by": "wrangler@wrangler.com",
         "replicate_exps": [
@@ -204,12 +221,12 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "in review by lab"
+        "status": "released"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b122",
         "submitted_by": "wrangler@wrangler.com",
-        "public_release" : "2018-03-24",
+        "project_release" : "2018-01-24",
         "description": "Expset w. only processed files and no raw files.",
         "accession": "4DNESPROC001",
         "experimentset_type": "replicate",
@@ -218,7 +235,7 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released to project"
     }
 
 ]

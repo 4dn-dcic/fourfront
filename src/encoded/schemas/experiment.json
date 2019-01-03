@@ -30,6 +30,7 @@
                 "in review by lab",
                 "planned",
                 "submission in progress",
+                "pre-release",
                 "released to project",
                 "archived to project"
             ]
@@ -89,7 +90,9 @@
                             "controlled by",
                             "control for",
                             "derived from",
-                            "source for"
+                            "source for",
+                            "input of",
+                            "has input"
                         ]
                     },
                     "experiment": {

@@ -1209,6 +1209,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             background-color: $workflow-node-color-default;
             white-space: nowrap;
 
+            > .innermost > .node-name,
             > .node-name {
                 padding-left: 2px;
                 padding-right: 5px;
@@ -1226,7 +1227,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
         .above-node-title ,
         .below-node-title {
-            pointer-events: none;
+            // pointer-events: none;
             position: absolute;
             left : 0px;
             transform: translate3d(0px,0px,0);
@@ -1300,6 +1301,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 background-color: $workflow-node-color-type-step;
                 border-radius: 2px;
                 border: 1px solid rgba(0,0,0,0.2);
+                > .innermost > .node-name,
                 > .node-name {
                     padding-left: 10px;
                     padding-right: 4px;
@@ -1371,7 +1373,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 background-color: transparent;
                 width: 100%;
                 transition: opacity .5s .25s ease-out;
-                > .node-name {
+                > .node-name,
+                > .innermost > .node-name {
                     padding-left: 7px;
                     &.mono-text {
                         transform: translateY(-1px);
@@ -1662,10 +1665,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
 }
 
 
-.workflow-view-controls-container {
+.tabview-title-controls-container {
     font-size: 1rem;
     margin-bottom: 8px;
-    padding-top: 10px;
     padding-left: 5px;
     float: right;
     padding-top: 17px;
@@ -1675,75 +1677,243 @@ $workflow-node-color-type-global-context: #ffb3b3;
         @include button-no-focus-outline;
     }
 
-    > .inner-panel {
-        float: left;
-        > div.inline-block {
-            vertical-align: middle;
-            line-height: 20px;
-            height: 34px;
-            
-            
-            
-            button#rowspacingtype-select {
-                min-width: 120px;
-            }
+    > .toolbar-wrapper > .btn-toolbar {
+        > .btn-group {
+            float: none;
         }
+    }
 
-        &:not(.constant-panel) {
-            > div.inline-block {
-
-                &.checkbox-container {
-                    padding: 8px 12px 6px 0;
-                    vertical-align: middle;
-                    font-size: 0.9rem;
-                    @include user-select(none);
-                    div.checkbox {
-                        margin: 0;
-                        input[type="checkbox"]{
-                            margin-top: 3px;
-                        }
-                        &.disabled{
-                            color: #999;
-                        }
-                    }
-                }
-
-                @media screen and (max-width: $screen-md-max){
-                    display: block;
-                    &.checkbox-container {
-                        padding-top: 5px;
-                        padding-bottom: 5px;
-                        height: auto;
-                    }
-                }
-            }
+    .checkbox-container {
+        margin-right: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+        display: block;
+        padding-top: 7px;
+        padding-bottom: 5px;
+        font-size: 0.9rem;
+        @include user-select(none);
+        &.disabled{
+            color: #999;
         }
+    }
 
-        &.constant-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
-        }
+    button#rowspacingtype-select {
+        min-width: 120px;
     }
     
     @media screen and (min-width: $screen-lg-min){
-        
-        > .inner-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
+
+        .checkbox-container {
+            float: left;
         }
+
     }
     @media screen and (max-width: $screen-md-max){
-        float: left;
         > .inner-panel:first-child {
-            padding-right: 10px;
+            min-width: 200px;
+            padding-left: 10px;
+            padding-bottom: 12px;
+            > hr {
+                margin-top: 12px;
+                margin-bottom: 0;
+            }
+            > .mobile-size-elem {
+                > .dropdown.btn-group,
+                > .dropdown.btn-group > button.btn,
+                > button.btn {
+                    width: 100%;
+                    text-align: left;
+                }
+            }
         }
     }
 }
 
+
+
+/***** Area Charts *****/
+
+.chart-section-control-wrapper {
+    &.row {
+        > .col-sm-6 {
+            > a.select-section-btn {
+                text-align: center;
+                color: #333;
+                //border: 1px solid #ddd;
+                //border-top: 1px solid #ddd;
+                //border-bottom: 1px solid #ddd;
+                border: 1px solid transparent;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                display: block;
+                transition: border-color .25s ease-in-out, background-color .25s ease-in-out, color .25s ease-in-out;
+                background-color: #22656d;
+                color: #fff;
+                border-radius: 3px;
+                line-height: 1.35rem;
+                font-size: 1.125rem;
+                &.active {
+                    border-color: #888;
+                    color: #333;
+                    background-color: transparent;
+                    pointer-events: none;
+                    cursor: default;
+                    border-left-color: transparent;
+                    border-right-color: transparent;
+                    border-radius: 0px;
+                    font-size: 1.2rem;
+                }
+                &:hover, &:active, &:focus {
+                    text-decoration: none;
+                }
+                &:not(.active):hover {
+                    //color: #000;
+                    background-color: #227b86;
+                    text-shadow: 0 0 0;
+                }
+            }
+        }
+    }
+}
+
+
+.stats-charts-container {
+
+    min-height: 1400px;
+
+    .area-chart-inner-container {
+        position: relative;
+
+        svg {
+            cursor: crosshair;
+            .right-axis-tick-line {
+                pointer-events: none;
+            }
+        }
+
+        > .chart-tooltip {
+            position: absolute;
+            pointer-events: none;
+
+            > .line {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 0px;
+                border-left: 1px dashed #000;
+                pointer-events: none;
+            }
+
+            > .line-notch {
+                position: absolute;
+                pointer-events: none;
+                left: -5px;
+                width: 11px;
+                height: 3px;
+                background-color: #333;
+                border-radius: 2px;
+                margin-top: -1px;
+                > .horiz-line-before,
+                > .horiz-line-after {
+                    position: absolute;
+                    top: 1px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    border-top: 1px dashed #000;
+                }
+                > .horiz-line-after {
+                    left: 11px;
+                }
+                /*
+                &::before {
+                    content: ' ';
+                    display: block;
+                    position: relative;
+                    width: 2000px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    left: -2000px;
+                }
+                */
+            }
+
+            > .label-bg {
+                padding-left: 12px;
+                padding-right: 12px;
+                padding-top: 8px;
+                position: absolute;
+                min-width: 175px;
+                background-color: rgba(255,255,255,0.8);
+                padding-bottom: 9px;
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+
+                > h5 {
+                    white-space: nowrap;
+                }
+                
+                table.current-legend {
+                    font-size: 0.9rem;
+                    width: 100%;
+                    tr {
+                        > td {
+                            padding-top: 0px;
+                            padding-bottom: 1px;
+                            white-space: nowrap;
+                            &.term-name-cell {
+                                padding-left: 1px;
+                                text-align: left;
+                                color: #555;
+                            }
+                            &.term-name-total {
+                                padding-left: 5px;
+                                padding-right: 0;
+                                font-weight: 600;
+                                text-align: right;
+                                width: 7%;
+                            }
+                            &.patch-cell {
+                                padding-left: 0;
+                                text-align: left;
+                                width: 7%;
+                                > .color-patch {
+                                    border-radius: 50%;
+                                }
+                            }
+                        }
+                        &.active {
+                            > td.term-name-cell {
+                                color: #000;
+                                text-shadow: 0 0 0;
+                            }
+                            > td.patch-cell {
+                                .color-patch {
+                                    border: 1px solid rgba(0,0,0,0.3);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &:not(.to-left){
+                    left: 10px;
+                }
+                &.to-left {
+                    right: 9px;
+                    text-align: right;
+                    table {
+                        float: right;
+                    }
+                }
+    
+            }
+
+        }
+    }
+
+}
 
 
 

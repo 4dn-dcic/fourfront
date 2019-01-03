@@ -19,36 +19,22 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "file.json#/facets"},
-        { "$ref": "mixins.json#/facets_common" }
-    ],
-    "mixinAggregations": [
-        { "$ref": "file.json#/aggregations"}
+        { "$ref": "file.json#/facets"}
     ],
     "mixinColumns": [
         { "$ref": "file.json#/columns"}
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
-        "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "enum": [
-                "bwaIndex",
-                "chromsizes",
-                "barcode_file",
-                "compressed_fasta",
-                "fasta",
-                "juicer_format_restriction_site_file",
-                "conc",
-                "other"
-            ]
+        "higlass_uid": {
+            "title": "Higlass UID",
+            "type": "string"
         },
         "file_type": {
             "title": "File Type",
@@ -80,18 +66,10 @@
             "lookup": 30,
             "enum": [
                 "GRCh38",
-                "GRCm38"
+                "GRCm38",
+                "dm6",
+                "galGal5"
             ]
         }
-    },
-    "file_format_file_extension": {
-        "bwaIndex": ".bwaIndex.tgz",
-        "chromsizes": ".chrom.sizes",
-        "barcode_file": ".txt",
-        "compressed_fasta": ".fasta.gz",
-        "fasta": ".fasta",
-        "juicer_format_restriction_site_file": ".txt",
-        "conc": ".fasta.conc",
-        "other": ""
     }
 }
