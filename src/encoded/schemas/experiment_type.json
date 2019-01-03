@@ -139,18 +139,6 @@
             "type": "string",
             "linkTo": "StaticSection"
         },
-        "static_headers": {
-            "title": "Static Headers",
-            "description": "DON'T SUBMIT, auto-generated.",
-            "type": "array",
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "items": {
-                "title": "Static Section",
-                "description": "Static Sections associated with Experiment Type item",
-                "type": "string",
-                "linkTo": "StaticSection"
-            }
-        },
         "sop": {
             "title": "SOP",
             "description": "Approved SOP for the experiment type",
