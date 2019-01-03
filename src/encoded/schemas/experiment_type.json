@@ -143,11 +143,23 @@
             "title": "Static Headers",
             "description": "DON'T SUBMIT, auto-generated.",
             "type": "array",
-            "exclude_from": ["submit4dn", "FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Static Section",
+                "description": "Static Sections associated with Experiment Type item",
+                "type": "string",
+                "linkTo": "StaticSection"
+            }
         },
-        "protocol": {
-            "title": "Protocol",
-            "description": "Protocol(s) that have been approved for the experiment type",
+        "sop": {
+            "title": "SOP",
+            "description": "Approved SOP for the experiment type",
+            "type": "string",
+            "linkTo": "Protocol"
+        },
+        "other_protocols": {
+            "title": "Other Protocols",
+            "description": "Additional protocol(s) associated with the experiment type",
             "type": "array",
             "items": {
                 "title": "Protocol",
