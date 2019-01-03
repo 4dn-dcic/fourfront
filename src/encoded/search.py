@@ -1210,12 +1210,30 @@ def list_visible_columns_for_schemas(request, schemas):
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
+            # Add title column, if not present, at begininning
             if 'display_title' not in schema_columns:
-                columns['display_title'] = { 'title' : "Title" }
+                columns['display_title'] = {
+                    "title" : "Title",
+                    "order" : -100
+                }
+            # Add all columns defined in schema
             for name,obj in schema_columns.items():
                 columns[name] = obj
+            # Add status column, if not present, at end.
+            if 'status' not in columns:
+                columns['status'] = {
+                    "title"             : "Status",
+                    "default_hidden"    : True,
+                    "order"             : 501
+                }
+            # Add date column, if not present, at end.
             if 'date_created' not in columns:
-                columns['date_created'] = { 'title' : "Date Created", 'colTitle' : "Created", 'default_hidden' : True }
+                columns['date_created'] = {
+                    "title"             : "Date Created",
+                    "colTitle"          : "Created",
+                    "default_hidden"    : True,
+                    "order"             : 510
+                }
         else:
             # Return at least display_title & date_created
             columns['display_title'] = { 'title' : "Title" }

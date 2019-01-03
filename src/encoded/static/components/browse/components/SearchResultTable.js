@@ -18,7 +18,7 @@ import * as vizUtil from './../../viz/utilities';
 import { ChartDataController } from './../../viz/chart-data-controller';
 import Alerts from './../../alerts';
 import {
-    defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap,
+    defaultColumnBlockRenderFxn, defaultColumnDefinitionMap,
     columnsToColumnDefinitions, ResultRowColumnBlockValue, DEFAULT_WIDTH_MAP,
     getColumnWidthFromDefinition, HeadersRow
 } from './table-commons';
@@ -251,7 +251,7 @@ class ResultRow extends React.PureComponent {
         var { columnDefinitions, selectedFiles, currentAction } = this.props;
         return _.map(columnDefinitions, (columnDefinition, columnNumber) =>
             <ResultRowColumnBlock {...{ columnDefinition, columnNumber, detailOpen, currentAction }}
-                {..._.pick(this.props, 'result', 'rowNumber', 'href', 'headerColumnWidths', 'mounted', 'windowWidth')}
+                {..._.pick(this.props, 'result', 'rowNumber', 'href', 'headerColumnWidths', 'mounted', 'windowWidth', 'schemas')}
                 key={columnDefinition.field} toggleDetailOpen={this.toggleDetailOpen}
                 selectedFiles={columnNumber === 0 ? selectedFiles : null} // Passed to trigger update/re-render on PureComponent
                 ref={isDraggable && columnNumber === 0 ? "firstColumnBlock" : null} />
@@ -937,17 +937,18 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     renderResults(fullRowWidth, props = this.props){
-        var { results, tableContainerWidth, tableContainerScrollLeft, mounted, widths, openDetailPanes } = this.state;
+        var { results, tableContainerWidth, tableContainerScrollLeft, mounted, widths, openDetailPanes } = this.state,
+            // selectedFiles passed to trigger re-render on PureComponent further down tree (DetailPane).
+            commonPropsToPass = _.extend(
+                _.pick(props, 'columnDefinitions', 'renderDetailPane', 'href', 'currentAction', 'selectedFiles', 'windowWidth', 'schemas'),
+                { openDetailPanes, tableContainerWidth, tableContainerScrollLeft,
+                    'mounted' : mounted || false, 'headerColumnWidths' : widths, 'rowWidth' : fullRowWidth, 'toggleDetailPaneOpen' : this.toggleDetailPaneOpen,
+                    'setDetailHeight' : this.setDetailHeight }
+            );
+
         return _.map(results, (r, idx)=>{
             var key = DimensioningContainer.getKeyForGraphResult(r, idx);
-            return (
-                <ResultRow
-                    {..._.pick(props, 'columnDefinitions', 'renderDetailPane', 'href', 'currentAction', 'selectedFiles', 'windowWidth')} // selectedFiles passed to trigger re-render on PureComponent further down tree (DetailPane).
-                    result={r} rowNumber={idx} data-key={key} key={key} mounted={mounted || false}
-                    rowWidth={fullRowWidth} headerColumnWidths={widths}
-                    toggleDetailPaneOpen={this.toggleDetailPaneOpen} openDetailPanes={openDetailPanes} setDetailHeight={this.setDetailHeight}
-                    tableContainerWidth={tableContainerWidth} tableContainerScrollLeft={tableContainerScrollLeft} />
-            );
+            return <ResultRow {...commonPropsToPass} result={r} rowNumber={idx} data-key={key} key={key} />;
         });
     }
 
@@ -966,7 +967,7 @@ class DimensioningContainer extends React.PureComponent {
                             <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                                 <Sticky windowWidth={windowWidth} topOffset={this.state.stickyHeaderTopOffset} children={this.renderHeadersRow} ref="stickiedHeaders" />
                                 <LoadMoreAsYouScroll
-                                    {..._.pick(this.props, 'href', 'limit', 'rowHeight', 'totalExpected', 'windowWidth')}
+                                    {..._.pick(this.props, 'href', 'limit', 'rowHeight', 'totalExpected', 'windowWidth', 'schemas')}
                                     {..._.pick(this.state, 'results', 'mounted', 'openDetailPanes')}
                                     setResults={this.setResults}
                                     tableContainerWidth={tableContainerWidth}
@@ -998,10 +999,9 @@ class DimensioningContainer extends React.PureComponent {
  * @export
  * @class SearchResultTable
  * @prop {Object[]}         results             Results as returned from back-end, e.g. props.context['@graph'].
- * @prop {Object.<string>}  columns             Object containing field 'key' as key and field 'title' as value.
- * @prop {Object[]}         [constantColumnDefinitions]  - Definitions for constant non-changing columns, such as title.
+ * @prop {Object[]}         columns             List of column definitions.
  * @prop {Object}           [defaultWidthMap]   Default column widths per responsive grid state. Applied to all non-constant columns.
- * @prop {string[]}         [hiddenColumns]     Keys of columns to remove from final columnDefinitions before rendering. Useful for hiding constantColumnDefinitions in response to some state.
+ * @prop {string[]}         [hiddenColumns]     Keys of columns to remove from final columnDefinitions before rendering.
  * @prop {function}         [renderDetailPane]  An instance of a React component which will receive prop 'result'.
  * @prop {Object}           [columnDefinitionOverrideMap]  - Extend constant and default column-derived column definitions, by column definition field key.
  *
@@ -1021,31 +1021,20 @@ export class SearchResultTable extends React.PureComponent {
         'results'           : PropTypes.arrayOf(ResultRow.propTypes.result).isRequired,
         'href'              : PropTypes.string.isRequired,
         'limit'             : PropTypes.number,
-        'columns'           : PropTypes.object,
-        'constantColumnDefinitions' : ResultRow.propTypes.columnDefinitions,
+        'columnDefinitions' : PropTypes.arrayOf(PropTypes.object).isRequired,
         'defaultWidthMap'   : PropTypes.shape({ 'lg' : PropTypes.number.isRequired, 'md' : PropTypes.number.isRequired, 'sm' : PropTypes.number.isRequired }).isRequired,
         'hiddenColumns'     : PropTypes.objectOf(PropTypes.bool),
         'renderDetailPane'  : PropTypes.func,
-        'columnDefinitionOverrideMap' : PropTypes.object,
         'totalExpected'     : PropTypes.number.isRequired,
         'windowWidth'       : PropTypes.number.isRequired,
         'registerWindowOnScrollHandler' : PropTypes.func.isRequired
     }
 
     static defaultProps = {
-        'columns' : {},
+        'columnDefinitions' : columnsToColumnDefinitions({ 'display_title' : { 'title' : 'Title' } }, defaultColumnDefinitionMap),
         'renderDetailPane' : function(result, rowNumber, width){ return <DefaultDetailPane {...{ result, rowNumber, width }} />; },
         'defaultWidthMap' : DEFAULT_WIDTH_MAP,
         'defaultMinColumnWidth' : 55,
-        'constantColumnDefinitions' : extendColumnDefinitions([
-            { 'field' : 'display_title', },
-            { 'field' : '@type', },
-            { 'field' : 'lab.display_title', },
-            { 'field' : 'date_created', },
-            { 'field' : 'status', },
-            { 'field' : 'last_modified.date_modified', }
-        ], defaultColumnDefinitionMap),
-        'columnDefinitionOverrideMap' : null,
         'hiddenColumns' : null,
         'limit' : 25,
         'rowHeight' : 47,
@@ -1057,57 +1046,39 @@ export class SearchResultTable extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.fullColumnDefinitions = this.fullColumnDefinitions.bind(this);
+        this.filterOutHiddenColumns = this.filterOutHiddenColumns.bind(this);
         this.getDimensionContainer = this.getDimensionContainer.bind(this);
-        this.state = {
-            'columns' : this.fullColumnDefinitions(props)
-        };
     }
 
     getDimensionContainer(){
         return this.refs.container;
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.columns !== this.props.columns || nextProps.columnDefinitionOverrideMap !== this.props.columnDefinitionOverrideMap || nextProps.defaultWidthMap !== this.props.defaultWidthMap ||
-            nextProps.hiddenColumns !== this.props.hiddenColumns/* || nextProps.constantColumnDefinitions !== this.props.constantColumnDefinitions*/) {
-            this.setState({ 'columns' : this.fullColumnDefinitions(nextProps) });
-        }
-    }
-
-    fullColumnDefinitions(props = this.props){
-        var columns = props.columns,
-            hiddenColumns = props.hiddenColumns;
-
-        if (props.columnDefinitionOverrideMap){
-            columns = columnsToColumnDefinitions(columns, props.columnDefinitionOverrideMap, props.defaultWidthMap);
-        }
+    /**
+     * Returns the finalized list of columns and their properties in response to
+     * {Object} `hiddenColumns`.
+     *
+     * @param {{ columnDefinitions: Object[], hiddenColumns: Object.<boolean> }} props Component props.
+     */
+    filterOutHiddenColumns(props = this.props){
+        var { columnDefinitions, hiddenColumns } = props;
 
         if (hiddenColumns){
-            columns = _.filter(columns, function(colDef){
+            return _.filter(columnDefinitions, function(colDef){
                 if (hiddenColumns[colDef.field] === true) return false;
                 return true;
             });
         }
     
-        return columns;
-    }
-
-    /**
-     * Grab loaded results.
-     *
-     * @returns {Object[]|null} JSON list of all loaded results.
-     */
-    getLoadedResults(){
-        if (!this.refs || !this.refs.container || !this.refs.container.state || !Array.isArray(this.refs.container.state.results)) return null;
-        return this.refs.container.state.results;
+        return columnDefinitions;
     }
 
     render(){
+        //console.log('TTT', this.filterOutHiddenColumns())
         return (
             <DimensioningContainer
-                {..._.omit(this.props, 'hiddenColumns', 'columnDefinitionOverrideMap', 'constantColumnDefinitions', 'defaultWidthMap')}
-                columnDefinitions={this.state.columns} ref="container" />
+                {..._.omit(this.props, 'hiddenColumns', 'columnDefinitionOverrideMap', 'defaultWidthMap')}
+                columnDefinitions={this.filterOutHiddenColumns()} ref="container" />
         );
     }
 }

@@ -210,14 +210,6 @@
         "last_modified.date_modified": {
             "title" : "Last Modified",
             "default_hidden" : true
-        },
-        "date_created": {
-            "title" : "Date Created",
-            "default_hidden" : true
-        },
-        "status": {
-            "title" : "Status",
-            "default_hidden" : true
         }
     }
 

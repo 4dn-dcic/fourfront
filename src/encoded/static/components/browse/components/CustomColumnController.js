@@ -5,14 +5,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ButtonToolbar, ButtonGroup, DropdownButton, MenuItem, Button, Modal, Checkbox, Collapse } from 'react-bootstrap';
-import { extendColumnDefinitions, columnsToColumnDefinitions } from './table-commons';
+import { columnsToColumnDefinitions } from './table-commons';
+
 
 /**
- * 
- * TODO, IN PROGRESS
- * 
+ * This component stores an object of `hiddenColumns` in state which contains field names as keys and booleans as values.
+ * This, along with functions `addHiddenColumn(field: string)` and `removeHiddenColumn(field: string)`, are passed down to
+ * this component instance's child component instances.
+ *
+ * @prop {Object.<boolean>} [defaultHiddenColumns] - Initial hidden columns state object, if any.
  */
-
 export class CustomColumnController extends React.Component {
 
     constructor(props){
@@ -82,30 +84,11 @@ export class CustomColumnController extends React.Component {
 
 export class CustomColumnSelector extends React.Component {
 
-    /**
-     * @param {Object[]} constantColumnDefinitions - Pre-set columns, e.g. 'status', 'display_title'.
-     * @param {Object} [columnsMap={}] - Mappings of column field name to settings. Use 'context.columns' from back-end response.
-     * @param {Object} [columnDefinitionOverrideMap={}] - Mappings of column field name to settings to extend columnsMap with.
-     * @param {string[]} [constantHiddenColumns=[]] - Columns which should always be hidden.
-     * @returns {Object[]} Column definitions
-     */
-    static buildColumnDefinitions(constantColumnDefinitions, columnsMap = {}, columnDefinitionOverrideMap = {}, constantHiddenColumns = []){
-        // TODO: REMOVE FXN & USAGE
-        return extendColumnDefinitions(
-            columnsToColumnDefinitions(
-                columnsMap,
-                constantColumnDefinitions
-            ),
-            columnDefinitionOverrideMap
-        );
-    }
-
     static propTypes = {
         'hiddenColumns'         : PropTypes.object.isRequired,
         'addHiddenColumn'       : PropTypes.func.isRequired,
-        'removeHiddenColumn'    : PropTypes.func.isRequired,
-        //'columnDefinitions': PropTypes.
-    }
+        'removeHiddenColumn'    : PropTypes.func.isRequired
+    };
 
     constructor(props){
         super(props);

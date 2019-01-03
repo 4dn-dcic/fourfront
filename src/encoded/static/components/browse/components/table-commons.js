@@ -82,19 +82,6 @@ export function sanitizeOutputValue(value){
 }
 
 
-
-export function extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap){
-    if (_.keys(columnDefinitionOverrideMap).length > 0){
-        return columnDefinitions.map(function(colDef){
-            if (columnDefinitionOverrideMap[colDef.field]){
-                return _.extend({}, colDef, columnDefinitionOverrideMap[colDef.field]);
-            } else return colDef;
-        });
-    }
-    return columnDefinitions;
-}
-
-
 export class TableRowToggleOpenButton extends React.PureComponent {
     render(){
         return (
@@ -116,6 +103,7 @@ export const defaultColumnDefinitionMap = {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
+        'order' : -100,
         'render' : function(result, columnDefinition, props, width, popLink = false){
             var title = object.itemUtil.getTitleStringFromContext(result),
                 link = object.itemUtil.atId(result),
@@ -163,9 +151,30 @@ export const defaultColumnDefinitionMap = {
     },
     '@type' : {
         'title' : "Type",
+        'noSort' : true,
+        'order' : -80,
         'render' : function(result, columnDefinition, props, width){
             if (!Array.isArray(result['@type'])) return null;
-            return Schemas.getBaseItemTypeTitle(result);
+            var leafItemType    = Schemas.getItemType(result),
+                itemTypeTitle   = Schemas.getTitleForType(leafItemType, props.schemas || null),
+                onClick         = function(e){
+                    // Preserve search query, if any, but remove filters (which are usually per-type).
+                    if (!props.href || props.href.indexOf('/search/') === -1) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var urlParts = url.parse(props.href, true),
+                        query = { 'type' : leafItemType };
+                    if (urlParts.query.q) query.q = urlParts.query.q;
+                    var nextHref = '/search/?' + queryString.stringify(query); 
+                    (props.navigate || navigate)(nextHref);
+                };
+
+            return (
+                <React.Fragment>
+                    <i className="icon icon-fw icon-filter clickable" onClick={onClick} data-tip="Filter down to this item type only."/>&nbsp;&nbsp;
+                    { itemTypeTitle }
+                </React.Fragment>
+            );
         }
     },
     'lab.display_title' : {
@@ -192,14 +201,27 @@ export const defaultColumnDefinitionMap = {
             );
         }
     },
+    'track_and_facet_info.lab_name' : {
+        'render' : function(result, columnDefinition, props, width, popLink = false){
+            if ( // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
+                result.track_and_facet_info && result.track_and_facet_info.lab_name && result.track_and_facet_info.lab_name
+                && result.lab && result.lab.display_title && result.lab.display_title === result.track_and_facet_info.lab_name
+            ){
+                return defaultColumnDefinitionMap['lab.display_title'].render.apply(null, Array.from(arguments));
+            } else {
+                return (result.track_and_facet_info && result.track_and_facet_info.lab_name) || null;
+            }
+        }
+    },
     'date_created' : {
         'title' : 'Date Created',
+        'colTitle' : 'Created',
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
             if (!result.date_created) return null;
             return <DateUtility.LocalizedTime timestamp={result.date_created} formatType='date-sm' />;
         },
-        'order' : 500
+        'order' : 510
     },
     'last_modified.date_modified' : {
         'title' : 'Date Modified',
@@ -209,24 +231,27 @@ export const defaultColumnDefinitionMap = {
             if (!result.last_modified.date_modified) return null;
             return <DateUtility.LocalizedTime timestamp={result.last_modified.date_modified} formatType='date-sm' />;
         },
-        'order' : 502
-    },
-    'public_release' : {
-        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
-            if (!result.public_release) return null;
-            return <DateUtility.LocalizedTime timestamp={result.public_release} formatType='date-sm' />;
-        }
+        'order' : 515
     },
     'date_published' : {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
             if (!result.date_published) return null;
             return <DateUtility.LocalizedTime timestamp={result.date_published} formatType='date-sm' />;
-        }
+        },
+        'order' : 504
+    },
+    'public_release' : {
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.public_release) return null;
+            return <DateUtility.LocalizedTime timestamp={result.public_release} formatType='date-sm' />;
+        },
+        'order' : 505
     },
     'number_of_experiments' : {
         'title' : '# of Experiments',
+        'colTitle' : 'Exps',
         'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
         'render' : function(expSet, columnDefinition, props, width){
             var number_of_experiments = parseInt(expSet.number_of_experiments);
@@ -244,6 +269,7 @@ export const defaultColumnDefinitionMap = {
     },
     'number_of_files' : {
         'title' : '# of Files',
+        'colTitle' : 'Files',
         'noSort' : true,
         'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
         'render' : function(expSet, columnDefinition, props, width){
@@ -268,7 +294,16 @@ export const defaultColumnDefinitionMap = {
     'status' : {
         'title' : 'Status',
         'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120},
-        'order' : 501
+        'order' : 501,
+        'render' : function(result, columnDefinition, props, width){
+            var statusFormatted = Schemas.Term.toName('status', result.status);
+            return (
+                <React.Fragment>
+                    <i className="item-status-indicator-dot" data-status={result.status}/>
+                    { statusFormatted }
+                </React.Fragment>
+            );
+        }
     },
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
@@ -284,6 +319,17 @@ export const defaultColumnDefinitionMap = {
                     <div className="text-ellipsis-container">{ cat_value }</div>
                 </div>
             );
+        }
+    },
+    'experiments_in_set.biosample.biosource_summary' : {
+        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }
+    },
+    'google_analytics.for_date' : {
+        'title' : 'Analytics Date',
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.google_analytics || !result.google_analytics.for_date) return null;
+            return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
         }
     }
 };
@@ -485,7 +531,7 @@ export class HeadersRow extends React.PureComponent {
                     'width' : (stickyStyle && stickyStyle.width) || null
                 }}>
                 {
-                    columnDefinitions.map((colDef, i)=>{
+                    _.map(columnDefinitions, (colDef, i)=>{
                         var { sortColumn, sortBy, sortReverse } = this.props,
                             w = this.getWidthFor(i),
                             sorterIcon;
@@ -500,7 +546,7 @@ export class HeadersRow extends React.PureComponent {
                                 className={"search-headers-column-block" + (colDef.noSort ? " no-sort" : '')}
                                 style={{ width : w }}>
                                 <div className="inner">
-                                    <span className="column-title">{ colDef.title }</span>
+                                    <span className="column-title">{ colDef.colTitle || colDef.title }</span>
                                     { sorterIcon }
                                 </div>
                                 { Array.isArray(headerColumnWidths) ?

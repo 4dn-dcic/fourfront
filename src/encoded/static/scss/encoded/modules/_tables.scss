@@ -1165,12 +1165,30 @@ $small-label-accession-font-size : 0.75rem;
 	@include search-result-column-and-header-block;
 	&[data-field="display_title"],
 	&[data-field="@type"],
-	&[data-field="lab.display_title"] {
+	&[data-field="lab.display_title"],
+	&[data-field="status"] {
 		> .inner {
 			text-align: left;
 		}
 	}
-	&[data-field="lab.display_title"]{
+	&[data-field="@type"] {
+        i.icon-filter.clickable {
+            opacity: 0.3;
+            &:hover {
+                opacity: 0.7;
+            }
+        }
+	}
+	&[data-field="status"] {
+		> .inner {
+			i.item-status-indicator-dot {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
+		}
+	}
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"]{
 		i.user-icon {
 			cursor: help;
 			margin-right: 5px;

@@ -321,7 +321,7 @@ i.item-status-indicator-dot {
 			display: none;
 		}
 
-		&.expset-status:before {
+		&.item-status:before {
 			content: "";
 			width: 9px;
 			height : 9px;
@@ -331,7 +331,6 @@ i.item-status-indicator-dot {
 			border-radius: 50%;
 		}
 
-		&.expset-status,
 		&.item-status {
 			@include statusColorStyles;
 		}

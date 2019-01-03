@@ -58,6 +58,7 @@ export class ExperimentSetTables extends React.Component {
                         }} />
                     }
                     columns={{
+                        "display_title" : { "title" : "Title" },
                         "number_of_experiments" : { "title" : "Exps" },
                         "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
                         "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },

@@ -27,6 +27,7 @@ export class SimpleFilesTable extends React.Component {
 
     static defaultProps = {
         'columns' : {
+            "display_title"     : { "title" : "Title" },
             "file_format"       : { "title" : "Format" },
             "file_size"         : { "title" : "Size" },
             "file_type"         : { "title" : "File Type" },

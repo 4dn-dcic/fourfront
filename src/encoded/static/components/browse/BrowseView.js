@@ -24,17 +24,6 @@ var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
 
 /**
- * Default column definitions for the browse view.
- *
- * @constant
- * @type {ColumnDefinition[]}
- */
-export const browseTableConstantColumnDefinitions = [
-    { 'field' : 'display_title', }
-];
-
-
-/**
  * Component for checkbox that is shown in display_title column (first), along with the expand/collapse toggle.
  * Handles/sets an 'intermediate' checked state if partial selection of files comprising the ExperimentSet.
  */
@@ -74,32 +63,21 @@ class ResultTableContainer extends React.PureComponent {
 
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
-        href            : PropTypes.string.isRequired,
-        fileFormats     : PropTypes.array,
-        fileStats       : PropTypes.object,
-        targetFiles     : PropTypes.instanceOf(Set)
+        'href'                      : PropTypes.string.isRequired,
+        'columnDefinitionOverrides' : PropTypes.object,
+        'context'                   : PropTypes.shape({
+            'columns' : PropTypes.objectOf(PropTypes.object).isRequired
+        }),
+        'selectFile'                : PropTypes.func,
+        'unselectFile'              : PropTypes.func,
+        'selectedFiles'             : PropTypes.objectOf(PropTypes.string)
     }
 
     static defaultProps = {
         'href'      : '/browse/',
         'debug'     : false,
         'navigate'  : navigate,
-        'columnDefinitionOverrides' : object.extendChildren({}, defaultColumnDefinitionMap, {
-            // TODO: Extend defaultColumnDefinitionMap perhaps? Get rid of (most of) browseTableConstantColumnDefinitions and move to schema (?).
-            // Also TODO: Add "description" property to be used for tooltips when hover over column title/label (?) (to be set in schemas or overrides).
-            'experiments_in_set.biosample.biosource_summary' : {
-                'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }
-            },
-            'experiments_in_set.experiment_type' : {
-                'title' : "Exp Type"
-            },
-            'number_of_experiments' : {
-                'title' : "Exps"
-            },
-            'number_of_files' : {
-                'title' : "Files"
-            }
-        })
+        'columnDefinitionOverrides' : defaultColumnDefinitionMap
     }
 
     constructor(props){
@@ -131,7 +109,7 @@ class ResultTableContainer extends React.PureComponent {
         if (nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
             stateChange.colDefOverrides = this.colDefOverrides(nextProps);
         }
-        if (nextProps.context !== this.props.context/* || this.props.constantHiddenColumns !== nextProps.constantHiddenColumns*/){
+        if (nextProps.context !== this.props.context){
             stateChange.columnDefinitions = this.getColumnDefinitions(nextProps, stateChange.colDefOverrides || this.state.colDefOverrides);
         }
         if (_.keys(stateChange).length > 0){
@@ -272,7 +250,7 @@ class ResultTableContainer extends React.PureComponent {
                 <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
                     <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',
-                            'columns', 'selectedFiles', 'constantHiddenColumns', 'selectFile', 'unselectFile', 'resetSelectedFiles',
+                            'columns', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles',
                             'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen'
                         )}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
@@ -281,7 +259,7 @@ class ResultTableContainer extends React.PureComponent {
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth }}
                         ref="searchResultTable"
                         results={context['@graph']}
-                        columns={this.state.columnDefinitions}
+                        columnDefinitions={this.state.columnDefinitions}
                         renderDetailPane={this.browseExpSetDetailPane}
                         stickyHeaderTopOffset={-78} />
                 </div>
@@ -607,4 +585,3 @@ export default class BrowseView extends React.Component {
 }
 
 globals.content_views.register(BrowseView, 'Browse');
-globals.content_views.register(BrowseView, 'Browse', 'selection'); // Not yet fully supported but might be eventually.
