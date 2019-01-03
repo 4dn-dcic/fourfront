@@ -84,6 +84,7 @@
                 "replaced",
                 "in review by lab",
                 "submission in progress",
+                "pre-release",
                 "released to project",
                 "archived to project"
             ]
@@ -175,6 +176,7 @@
             "title": "Reference publications",
             "description": "The publications that provide more information about the object.",
             "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "lookup": 1000,
             "uniqueItems": true,
             "items": {
@@ -417,6 +419,13 @@
         }
     },
     "spikein_info": {
+        "spikin_description": {
+            "title": "Spike in Description",
+            "description": "A description of the type/purpose of the spike-in",
+            "type": "string",
+            "lookup": 197,
+            "comment": "In some cases a spike in with heterologous non-specific DNA is used and this field can be used to indicate the source organism and concentration"
+        },
         "spikein_sequences": {
             "title": "Spike In Sequences",
             "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
@@ -550,17 +559,52 @@
             }
         }
     },
-    "static_headers": {
+    "static_embeds": {
         "static_headers": {
             "title": "Static Headers",
             "description": "Array of linkTos for static sections to be displayed at the top of an item page",
             "type": "array",
             "uniqueItems": true,
+            "permission": "import_items",
+            "exclude_from" : ["submit4dn"],
             "items": {
                 "title": "Static Header",
                 "description": "Static section displayed at the top of an item page",
                 "type": "string",
-                "linkTo": "StaticSection"
+                "linkTo": "UserContent"
+            }
+        },
+        "static_content": {
+            "title": "Static Content",
+            "description": "Array of objects containing linkTo UserContent and 'position' to be placed on Item view(s).",
+            "type": "array",
+            "uniqueItems": true,
+            "permission": "import_items",
+            "exclude_from" : ["submit4dn"],
+            "items": {
+                "title" : "Static Content Definition",
+                "description" : "Link to UserContent Item plus location.",
+                "type" : "object",
+                "required" : ["location", "content"],
+                "properties" : {
+                    "content" : {
+                        "type" : "string",
+                        "linkTo": "UserContent",
+                        "title" : "Link to Content",
+                        "description" : "A UserContent Item."
+                    },
+                    "location" : {
+                        "type" : "string",
+                        "title" : "Location of Content",
+                        "description" : "Where this content should be displayed. Item schemas could potentially define an enum to contrain values.",
+                        "default" : "header"
+                    },
+                    "description" : {
+                        "type" : "string",
+                        "title" : "Description",
+                        "description" : "Description or note about this content. Might be displayed as a footnote or caption, if applicable for view."
+                    }
+                }
             }
         }
     },

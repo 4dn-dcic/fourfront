@@ -28,7 +28,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
             cy.visit('/');
             cy.visit('/browse/', { "failOnStatusCode" : false });
-
+            // Wait for redirects: we should be taken from /browse/ to /browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate
             cy.location('search').should('include', 'award.project=4DN');
 
         });
@@ -55,7 +55,7 @@ describe('Browse Views - Redirection & Visualization', function () {
     context('BarPlotChart & QuickInfoBar - filtering using visualization elements', function(){
 
         before(()=>{
-            cy.visit('/browse/', { "failOnStatusCode" : false }) // Wait for redirects
+            cy.visit('/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate')
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
         });
 
@@ -74,8 +74,10 @@ describe('Browse Views - Redirection & Visualization', function () {
                         .get('.cursor-component-root .details-title').should('contain', 'Human').end()
                         .get('.cursor-component-root .detail-crumbs .crumb').should('contain', 'Repli-seq').end()
                         .get('.cursor-component-root .details-title .primary-count').should('contain', expectedFilteredResults).end().getQuickInfoBarCounts().then((origCount)=>{
-                            return cy.wrap($barPart).scrollToCenterElement().wait(200).trigger('mouseover').trigger('mousemove').wait(300).click({ force : true }).wait(200).end()
-                                .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click().end()
+                            // `{ force: true }` is used a bunch here to prevent Cypress from attempting to scroll browser up/down during the test -- which may interfere w. mouse hover events.
+                            // See https://github.com/cypress-io/cypress/issues/2353#issuecomment-413347535
+                            return cy.window().then((w)=>{ w.scrollTo(0,0); }).end().wrap($barPart, { force: true }).scrollToCenterElement().wait(200).trigger('mouseover', { force: true }).trigger('mousemove', { force: true }).wait(300).click({ force : true }).wait(200).end()
+                                .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click({ force: true }).end() // Browser will scroll after click itself (e.g. triggered by app)
                                 .location('search').should('include', 'experiments_in_set.experiment_type=Repli-seq').should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=human').wait(300).end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                                 .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()

@@ -29,6 +29,13 @@
               "RNAi",
               "Other"
             ]
+        },
+        "url": {
+            "title": "URL",
+            "description": "An external resource with additional information about the construct.",
+            "type": "string",
+            "lookup": 1000,
+            "format": "uri"
         }
     },
     "facets": {

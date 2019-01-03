@@ -31,7 +31,7 @@ class Award(Item):
     item_type = 'award'
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
-    embedded_list = ['pi.*']
+    embedded_list = Item.embedded_list + ['pi.*']
 
     # define some customs acls; awards can only be created/edited by admin
     ONLY_ADMIN_VIEW = [

@@ -1,5 +1,10 @@
 'use strict';
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 /* Basing off of browse.js to test user.js */
 
 jest.autoMockOff();
@@ -15,12 +20,9 @@ function mapStateToProps(store) {
 }
 
 describe('Testing user.js', function() {
-    var React, User, user, testItem, TestUtils, page, store, context, filters, _, Wrapper, sinon, getNestedProperty, props;
+    var  User, user, testItem, page, store, context, filters, Wrapper, sinon, getNestedProperty, props;
     beforeAll(function() {
-        React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         User = require('./../item-pages/UserView').default;
         context = require('../testdata/submitter');
         store = require('../../store');

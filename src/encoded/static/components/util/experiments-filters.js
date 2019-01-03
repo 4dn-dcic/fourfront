@@ -6,6 +6,7 @@ var store = null;
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
+import moment from 'moment';
 import * as ajax from './ajax';
 import * as object from './object';
 import * as Schemas from './Schemas';
@@ -36,17 +37,92 @@ export const currentExpSetFilters = contextFiltersToExpSetFilters;
  * @param {boolean} [includePathName] - If true, will return the pathname in addition to the URI search query.
  * @returns {!string} URL to remove active filter, or null if filter not currently active for provided field:term pair.
  */
-export function getUnselectHrefIfSelectedFromResponseFilters(term, field, filters, includePathName = false) {
-    for (var filter in filters) {
-        if (filters[filter]['field'] == field && filters[filter]['term'] == term) {
-            var parts = url.parse(filters[filter]['remove']);
-            var retHref = '';
+export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filters, includePathName = false) {
+    var field   = facet.field,
+        isRange = facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1,
+        i, filter, parts, retHref = '';
+
+    // THE CONTENTS UNDER THIS IF CONDITION WILL CHANGE ONCE WE CREATE NEW 'RANGE' FACET COMPONENT
+    if (facet.aggregation_type && ['range', 'date_histogram', 'histogram'].indexOf(facet.aggregation_type) > -1) {
+        var toFilter, fromFilter;
+
+        if (facet.aggregation_type === 'range'){
+            toFilter    = _.findWhere(filters, { 'field' : field + '.to',   'term' : term.to }),
+            fromFilter  = _.findWhere(filters, { 'field' : field + '.from', 'term' : term.from });
+        } else if (facet.aggregation_type === 'date_histogram'){
+            var interval = getDateHistogramIntervalFromFacet(facet) || 'month',
+                toDate = moment.utc(term.key);
+            toDate.add(1, interval + 's');
+            toFilter    = _.findWhere(filters, { 'field' : field + '.to',   'term' : toDate.format().slice(0,10) }),
+            fromFilter  = _.findWhere(filters, { 'field' : field + '.from', 'term' : term.key });
+        } else {
+            throw new Error('Histogram not currently supported.');
+            // Todo: var interval = ....
+        }
+
+        if (toFilter && !fromFilter){
+            parts = url.parse(toFilter['remove']);
             if (includePathName) {
                 retHref += parts.pathname;
             }
             retHref += parts.search;
             return retHref;
+        } else if (!toFilter && fromFilter){
+            parts = url.parse(fromFilter['remove']);
+            if (includePathName) {
+                retHref += parts.pathname;
+            }
+            retHref += parts.search;
+            return retHref;
+        } else if (toFilter && fromFilter){
+            var partsFrom   = url.parse(fromFilter['remove'], true),
+                partsTo     = url.parse(toFilter['remove'], true),
+                partsFromQ  = partsFrom.query,
+                partsToQ    = partsTo.query,
+                commonQs    = {};
+
+            _.forEach(_.keys(partsFromQ), function(qk){
+                if (typeof partsToQ[qk] !== 'undefined'){
+                    if (Array.isArray(partsToQ[qk]) || Array.isArray(partsFromQ[qk])){
+                        var a1, a2;
+                        if (Array.isArray(partsToQ[qk])) {
+                            a1 = partsToQ[qk];
+                        } else {
+                            a1 = [partsToQ[qk]];
+                        }
+                        if (Array.isArray(partsFromQ[qk])) {
+                            a2 = partsFromQ[qk];
+                        } else {
+                            a2 = [partsFromQ[qk]];
+                        }
+                        commonQs[qk] = _.intersection(a1, a2);
+                    } else {
+                        commonQs[qk] = partsToQ[qk];
+                    }
+                }
+            });
+            
+            retHref = '?' + queryString.stringify(commonQs);
+            if (includePathName) {
+                retHref += partsFrom.pathname;
+            }
+            return retHref;
         }
+
+    } else {
+        // Terms
+        for (i = 0; i < filters.length; i++) {
+            filter  = filters[i];
+            if (filter.field == field && filter.term == term.key) {
+                parts = url.parse(filter.remove);
+                if (includePathName) {
+                    retHref += parts.pathname;
+                }
+                retHref += parts.search;
+                return retHref;
+            }
+        }
+
     }
     return null;
 }
@@ -86,12 +162,13 @@ export function buildSearchHref(field, term, searchBase){
 /**
  * Given a field/term, add or remove filter from expSetFilters (in redux store) within context of current state of filters.
  *
- * @param {string}  field               Field, in object dot notation.
- * @param {string}  term                Term to add/remove from active filters.
- * @param {Object}  [expSetFilters]     The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
- * @param {function}[callback]          Callback function to call after updating redux store.
- * @param {boolean} [returnInsteadOfSave=false]  - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
- * @param {string}  [href]              Current or base href to use for AJAX request if using AJAX to update.
+ * @param {string} field                        Field, in object dot notation.
+ * @param {string} term                         Term to add/remove from active filters.
+ * @param {?Object} [expSetFilters=null]        The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
+ * @param {?function} [callback=null]           Callback function to call after updating redux store.
+ * @param {boolean} [returnInsteadOfSave=false] Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
+ * @param {?string} [href=null]                 Current or base href to use for AJAX request if using AJAX to update.
+ * @returns {?Object} Next expSetFilters object representation, or void if returnInsteadOfSave is false.
  */
 export function changeFilter(
     field,
@@ -142,12 +219,12 @@ export function changeFilter(
  * Update expSetFilters by generating new href from supplied expSetFilters and fetching/navigating to copy of current href/URL with updated query.
  * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
  *
- * @param {Object}  expSetFilters   A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
- * @param {boolean} [useAjax=true]  Whether to use AJAX and update context & href in Redux store as well.
- * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
- * @param {function}[callback]      Callback function.
+ * @param {Object} newExpSetFilters    A new or cloned expSetFilters object to save. Can be empty (to clear all filters).
+ * @param {?string} [href=null]        Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
+ * @param {?function} [callback=null]  Callback function.
+ * @returns {void}
  */
-export function saveChangedFilters(newExpSetFilters, href=null, callback = null){
+export function saveChangedFilters(newExpSetFilters, href=null, callback=null){
     if (!store)   store = require('./../../store');
     if (!Alerts) Alerts = require('../alerts').default;
 
@@ -181,6 +258,82 @@ export function saveChangedFilters(newExpSetFilters, href=null, callback = null)
 }
 
 
+export function getDateHistogramIntervalFromFacet(facet){
+    return (facet && facet.aggregation_definition
+        && facet.aggregation_definition.date_histogram
+        && facet.aggregation_definition.date_histogram.interval
+    );
+}
+
+
+/**
+ * Determine if term and facet objects are 'selected'.
+ * The range check is likely to change or be completely removed
+ * in response to needing different component to facet ranges.
+ *
+ * @param {{ key: string }} term - Object for term option
+ * @param {{ field: string }} facet - Object for facet, containing field
+ * @param {Object} props - Props from FacetList. Should have context.filters.
+ * @returns {boolean}
+ */
+export function determineIfTermFacetSelected(term, facet, props){
+    return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, props.context.filters));
+
+    // The below might be re-introduced ... but more likely to be removed since we'll have different 'range' Facet component.
+
+    /*
+    var field = facet.field || null,
+        fromFilter, fromFilterTerm, toFilter, toFilterTerm;
+    
+    if (facet.aggregation_type === 'date_histogram'){
+        // Instead of checking presense of filters here, we find earliest from and latest to and see if are within range.
+
+        fromFilter = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.from' }), 'term');
+        fromFilterTerm = fromFilter.length && fromFilter[0].term;
+
+        toFilter = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.to' }), 'term').reverse();
+        toFilterTerm = toFilter.length && toFilter[0].term;
+
+        var toDate = fromFilter && moment.utc(term.key);
+        toDate && toDate.add(1, 'months');
+        var toDateTerm = toDate.format().slice(0,10);
+
+        if (fromFilterTerm && term.key >= fromFilterTerm && !toFilterTerm) return true;
+        if (!fromFilterTerm && toFilterTerm && toDateTerm <= toFilterTerm) return true;
+        if (fromFilterTerm && toFilterTerm && toDateTerm <= toFilterTerm && term.key >= fromFilterTerm) return true;
+        return false;
+
+        // Check both from and to
+        //field       = facet.field || null;
+        //fromFilter  = _.findWhere(props.context.filters, { 'field' : field + '.from', 'term' : term.key });
+        //toDate      = fromFilter && moment.utc(term.key);
+
+        //toDate && toDate.add(1, 'months');
+        //toFilter = toDate && _.findWhere(props.context.filters, { 'field' : field + '.to', 'term' : toDate.format().slice(0,10) });
+
+        //return !!(toFilter);
+
+    } else if (facet.aggregation_type === 'range'){
+        fromFilter  = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.from' }), 'term');
+        fromFilterTerm = fromFilter.length && fromFilter[0].term;
+        toFilter    = _.sortBy(_.filter(props.context.filters, { 'field' : field + '.to' }), 'term').reverse();
+        toFilterTerm = toFilter.length && toFilter[0].term;
+
+        if (fromFilterTerm && term.from + '' >= fromFilterTerm && !toFilterTerm) return true;
+        if (!fromFilterTerm && toFilterTerm && term.to + '' <= toFilterTerm) return true;
+        if (fromFilterTerm && toFilterTerm && term.to + '' <= toFilterTerm && term.from + '' >= fromFilterTerm) return true;
+        return false;
+
+        //fromFilter  = _.findWhere(props.context.filters, { 'field' : field + '.from', 'term' : term.from + '' });
+        //toFilter    = fromFilter && _.findWhere(props.context.filters, { 'field' : field + '.to', 'term' : term.to + '' });
+        //return !!(toFilter);
+    } else {
+        return !!(getUnselectHrefIfSelectedFromResponseFilters(term, facet, props.context.filters));
+    }
+    */
+}
+
+/** @deprecated */
 export function isTermSelectedAccordingToExpSetFilters(term, field, expSetFilters = null){
     if (!expSetFilters) expSetFilters = currentExpSetFilters(); // If no expSetFilters are supplied, get them from Redux store.
     if (typeof expSetFilters[field] !== 'undefined' && typeof expSetFilters[field].has === 'function' && expSetFilters[field].has(term)) return true;
@@ -229,24 +382,23 @@ export function transformExpSetFiltersToFileFilters(expSetFilters){
  * Convert expSetFilters to a URL, given a current URL whose path is used to append arguments
  * to (e.g. http://hostname.com/browse/  or http://hostname.com/search/).
  *
- * @param {Object}  expSetFilters    Filters as stored in Redux, keyed by facet field containing Set of term keys.
- * @param {string}  currentHref      String with at least current host & path which to use as base for resulting URL, e.g. http://localhost:8000/browse/[?type=ExperimentSetReplicate&experimentset_type=...].
- * @param {number}  [page=1]         Current page if using pagification.
- * @param {string}  [hrefPath]       Override the /path/ in URL returned, e.g. to /browse/.
+ * @param {Object} expSetFilters        Filters as stored in Redux, keyed by facet field containing Set of term keys.
+ * @param {string} currentHref          String with at least current host & path which to use as base for resulting URL, e.g. http://localhost:8000/browse/[?type=ExperimentSetReplicate&experimentset_type=...].
+ * @param {?string} [sortColumn=null]   Column being sorted on.
+ * @param {boolean} [sortReverse=false] If sort is reverse, e.g. incremental instead of decremental.
+ * @param {string} [hrefPath]           Override the /path/ in URL returned, e.g. to /browse/.
  * @returns {string} URL which can be used to request filtered results from back-end, e.g. http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&from=0&limit=50&field.name=term1&field2.something=term2[...]
  */
 export function filtersToHref(expSetFilters, currentHref, sortColumn = null, sortReverse = false, hrefPath = null){
     var baseHref = getBaseHref(currentHref, hrefPath);
 
     // Include a '?' or '&' if needed.
-    var sep = navigate.determineSeparatorChar(baseHref);
-
-    var filterQuery = expSetFiltersToURLQuery(expSetFilters);
-
-    var urlString = (
-        baseHref +
-        (filterQuery.length > 0 ? sep + filterQuery : '')
-    );
+    var sep = navigate.determineSeparatorChar(baseHref),
+        filterQuery = expSetFiltersToURLQuery(expSetFilters),
+        urlString = (
+            baseHref +
+            (filterQuery.length > 0 ? sep + filterQuery : '')
+        );
 
     if (!sortColumn){
         var parts = url.parse(currentHref, true);

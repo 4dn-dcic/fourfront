@@ -10,7 +10,6 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     paths_filtered_by_status,
-    get_item_if_you_can,
     ALLOW_SUBMITTER_ADD,
     lab_award_attribution_embed_list
 )
@@ -53,7 +52,7 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
     }
-    embedded_list = lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
@@ -171,7 +170,9 @@ class Experiment(Item):
             "controlled by": "control for",
             "derived from": "source for",
             "control for": "controlled by",
-            "source for": "derived from"
+            "source for": "derived from",
+            "input of": "has input",
+            "has input": "input of"
         }
         acc = str(self.uuid)
         if 'experiment_relation' in properties.keys():

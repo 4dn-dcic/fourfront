@@ -9,19 +9,21 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
+
 import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
 
 
 
 
 describe('Testing viz/QuickInfoBar.js', function() {
-    var TestUtils, page, context, Filters, _, Wrapper, QuickInfoBar, href, expSetFilters, contextFilters, barplot_data_unfiltered, barplot_data_filtered;
+    var page, context, Filters, Wrapper, QuickInfoBar, href, expSetFilters, contextFilters, barplot_data_unfiltered, barplot_data_filtered;
 
     beforeEach(function() {
         var { Provider, connect } = require('react-redux');
         Filters = require('./../util/experiments-filters');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
         context = require('../testdata/browse/context');
         QuickInfoBar = require('./../viz/QuickInfoBar').default;
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line";

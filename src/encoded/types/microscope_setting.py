@@ -8,7 +8,8 @@ from snovault import (
 # from pyramid.security import Authenticated
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD
+    ALLOW_SUBMITTER_ADD,
+    lab_award_attribution_embed_list
 )
 
 
@@ -23,7 +24,7 @@ class MicroscopeSetting(Item):
     """the base class for microscope settings collection."""
     base_types = ['MicroscopeSetting'] + Item.base_types
     schema = load_schema('encoded:schemas/microscope_setting.json')
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
 
 @collection(

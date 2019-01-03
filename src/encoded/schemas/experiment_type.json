@@ -51,6 +51,12 @@
             "uniqueKey": true,
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "controlled_term": {
+            "title": "Ontology Term",
+            "description": "EFO ontology term that matches this experiment type",
+            "type": "string",
+            "linkTo": "OntologyTerm"
+        },
         "experiment_category": {
             "title": "Experiment Category",
             "description": "General category of the experiment type",
@@ -113,7 +119,8 @@
         "processed_files": {
             "title": "Processed Files",
             "description": "The type of processed files typically associated with the experiment type in the portal",
-            "type": "string"
+            "type": "string",
+            "linkTo": "StaticSection"
         },
         "data_analysis": {
             "title": "Data Analysis",
@@ -126,11 +133,17 @@
                 "linkTo": "StaticSection"
             }
         },
-        "static_header": {
-            "title": "Static Header",
-            "description": "Static section to be included on experiments of this type",
+        "assay_description": {
+            "title": "Assay Description",
+            "description": "Static section to be included on experiments of this type, detailing purpose/summary",
             "type": "string",
             "linkTo": "StaticSection"
+        },
+        "static_headers": {
+            "title": "Static Headers",
+            "description": "DON'T SUBMIT, auto-generated.",
+            "type": "array",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "protocol": {
             "title": "Protocol",

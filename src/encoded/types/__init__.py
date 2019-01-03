@@ -33,7 +33,7 @@ class AnalysisStep(Item):
 
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded_list = ['software_used.*', 'qa_stats_generated.*']
+    embedded_list = Item.embedded_list + ['software_used.*', 'qa_stats_generated.*']
 
 
 @collection(
@@ -81,7 +81,6 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
-    embedded_list = []
 
 
 @collection(
@@ -95,7 +94,6 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
-    embedded_list = []
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -117,7 +115,7 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded_list = ['enzyme_source.title']
+    embedded_list = Item.embedded_list + ['enzyme_source.title']
 
 
 @collection(
@@ -134,9 +132,24 @@ class ExperimentType(Item):
     schema = load_schema('encoded:schemas/experiment_type.json')
     name_key = 'experiment_name'
 
+    embedded_list = [
+        "static_headers.content",
+        "static_headers.title",
+        "static_headers.filetype",
+        "static_headers.section_type",
+        "static_headers.options.default_open",
+        "static_headers.options.title_icon"
+        ]
+
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
         properties['experiment_name'] = set_namekey_from_title(properties)
+
+        static_keys = ['processed_files', 'assay_description', 'data_analysis']
+        if len([properties[key] for key in static_keys if properties.get(key)]) > 0:
+            headers = [properties.get('assay_description'), properties.get('processed_files')]
+            headers += properties.get('data_analysis', [])
+            properties['static_headers'] = [header for header in headers if header]
 
         super(ExperimentType, self)._update(properties, sheets)
 
@@ -144,6 +157,7 @@ class ExperimentType(Item):
 @collection(
     name='file-formats',
     unique_key='file_format:file_format',
+    lookup_key='file_format',
     properties={
         'title': 'File Formats',
         'description': 'Listing of file formats used by 4DN'
@@ -153,7 +167,6 @@ class FileFormat(Item, ItemWithAttachment):
     """The class to store information about 4DN file formats"""
     item_type = 'file_format'
     schema = load_schema('encoded:schemas/file_format.json')
-    embedded_list = []
     name_key = 'file_format'
 
     def display_title(self):
@@ -171,7 +184,6 @@ class GenomicRegion(Item):
 
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
-    embedded_list = []
 
 
 @collection(
@@ -187,7 +199,6 @@ class Organism(Item):
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
-    embedded_list = []
 
     def display_title(self):
         if self.properties.get('scientific_name'):  # Defaults to "" so check if falsy not if is None
@@ -209,7 +220,7 @@ class Protocol(Item, ItemWithAttachment):
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
-    embedded_list = ["award.project", "lab.title"]
+    embedded_list = Item.embedded_list + ["award.project", "lab.title"]
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -277,6 +288,24 @@ class TrackingItem(Item):
         del request.response.headers['Location']
         return res
 
+    def display_title(self):
+        date_created = self.properties.get('date_created', '')[:10]
+        if self.properties.get('tracking_type') == 'google_analytics':
+            for_date = self.properties.get('google_analytics', {}).get('for_date', None)
+            if for_date:
+                return 'Google Analytics for ' + for_date
+            return 'Google Analytics Item'
+        elif self.properties.get('tracking_type') == 'download_tracking':
+            title = 'Download Tracking Item'
+            if date_created:
+                title = title + ' from ' + date_created
+            return title
+        else:
+            title = 'Tracking Item'
+            if date_created:
+                title = title + ' from ' + date_created
+            return title
+
 
 @collection(
     name='vendors',
@@ -291,7 +320,7 @@ class Vendor(Item):
     item_type = 'vendor'
     schema = load_schema('encoded:schemas/vendor.json')
     name_key = 'name'
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + ['award.project']
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title

@@ -1,7 +1,7 @@
 
 // make footer look good on larger screens
 // and activate sticky footer
-@media (min-width: $screen-sm-min) {
+@media (min-width: $screen-md-min) {
     .footer-row { margin-left: 0; margin-right: 0; }
 
     #page-footer {

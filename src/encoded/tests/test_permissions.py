@@ -181,10 +181,10 @@ def other_lab(testapp):
 
 
 @pytest.fixture
-def simple_file(testapp, lab, award):
+def simple_file(testapp, lab, award, file_formats):
     item = {
         'uuid': '3413218c-3d86-498b-a0a2-9a406638e777',
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'paired_end': '1',
         'lab': lab['@id'],
         'award': award['@id'],
@@ -456,11 +456,11 @@ def ind_human_item(human, award, lab):
 
 
 @pytest.fixture
-def file_item(award, lab):
+def file_item(award, lab, file_formats):
     return {
         'award': award['@id'],
         'lab': lab['@id'],
-        'file_format': 'fastq',
+        'file_format': file_formats.get('fastq').get('@id'),
         'paired_end': '1'
     }
 
@@ -700,7 +700,7 @@ def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testap
 
 
 def test_awardmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab']
+    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab', 'pre-release']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -716,7 +716,7 @@ def test_awardmember_cannot_view_submitter_item_replaced(ind_human_item, submitt
 # Submitter created item and lab member wants to patch
 def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
     statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review by lab',
-                'submission in progress', 'planned', 'archived to project']
+                'submission in progress', 'planned', 'archived to project', 'pre-release']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -734,7 +734,7 @@ def test_viewing_group_member_cannot_view_submitter_item(ind_human_item, submitt
 
 # Submitter created item and project member wants to view
 def test_viewing_group_member_cannot_view_submitter_file(file_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['deleted', 'uploading', 'uploaded', 'upload failed']
+    statuses = ['deleted', 'uploading', 'uploaded', 'upload failed', 'pre-release']
     res = submitter_testapp.post_json('/file_fastq', file_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -937,7 +937,6 @@ def planned_experiment_set_data(lab, award):
 def status2date():
     return {
         'released': 'public_release',
-        'current': 'public_release',
         'released to project': 'project_release'
     }
 
@@ -971,7 +970,7 @@ def test_planned_item_status_is_changed_on_submitter_patch(
     assert res2['status'] == 'submission in progress'
 
 
-## these tests are for the item _update function as above so sticking them here
+# these tests are for the item _update function as above so sticking them here
 def test_unreleased_item_does_not_get_release_date(
         wrangler_testapp, planned_experiment_set_data, status2date):
     res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
@@ -988,6 +987,8 @@ def test_insert_of_released_item_does_get_release_date(
         res = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
         assert res['status'] == status
         assert res[datefield] == date.today().isoformat()
+        if status in ['released', 'current']:
+            assert res['project_release'] == res['public_release']
 
 
 def test_update_of_item_to_released_status_adds_release_date(
@@ -999,6 +1000,10 @@ def test_update_of_item_to_released_status_adds_release_date(
         res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
         assert res2['status'] == status
         assert res2[datefield] == date.today().isoformat()
+        if status == 'released to project':
+            assert 'public_release' not in res2
+        if status in ['released', 'current']:
+            assert res2['project_release'] == res2['public_release']
 
 
 def test_update_of_item_to_non_released_status_does_not_add_release_date(
@@ -1035,7 +1040,7 @@ def test_update_of_item_without_release_dates_mixin(wrangler_testapp, award):
         assert field not in award
 
 
-### tests for bogus nofic specific __ac_local_roles__
+# tests for bogus nofic specific __ac_local_roles__
 def test_4dn_can_view_nofic_released_to_project(
         planned_experiment_set_data, wrangler_testapp, viewing_group_member_testapp,
         nofic_award):
@@ -1069,3 +1074,55 @@ def test_4dn_can_view_nofic_joint_analysis_planned_and_in_progress(
         eset_item['status'] = status
         res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
         viewing_group_member_testapp.get(res1['@id'], status=200)
+
+
+@pytest.fixture
+def replicate_experiment_set_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test replicate experiment set',
+        'experimentset_type': 'replicate',
+    }
+
+
+def test_ready_to_process_set_status_admin_can_edit(
+        submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
+    assert res2['status'] == 'pre-release'
+    # admin can Edit
+    res3 = wrangler_testapp.patch_json(res1['@id'], {'description': 'admin edit'}, status=200).json['@graph'][0]
+    assert res3['description'] == 'admin edit'
+
+
+def test_ready_to_process_set_status_submitter_can_view(
+        submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
+    assert res2['status'] == 'pre-release'
+    # submitter can view
+    res3 = submitter_testapp.get(res1['@id'], status=200).json
+    assert res3['description'] == 'test replicate experiment set'
+
+
+def test_ready_to_process_set_status_submitter_can_not_edit(
+        submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
+    assert res2['status'] == 'pre-release'
+    # submitter can not edit
+    submitter_testapp.patch_json(res1['@id'], {'description': 'submitter edit'}, status=403)
+
+
+def test_ready_to_process_set_status_others_can_not_view(
+        submitter_testapp, wrangler_testapp, viewing_group_member_testapp, replicate_experiment_set_data):
+    res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+    assert res1['status'] == 'in review by lab'
+    res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
+    assert res2['status'] == 'pre-release'
+    # others can not view
+    viewing_group_member_testapp.get(res1['@id'], status=403)

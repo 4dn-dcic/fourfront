@@ -1,7 +1,6 @@
-"""The type file for the collection Pages.  Which is used for static pages on the portal
 """
-import os
-import requests
+The type file for the collection Pages.  Which is used for static pages on the portal
+"""
 from urllib.parse import (
     urlparse,
     urlencode
@@ -13,7 +12,6 @@ from pyramid.httpexceptions import ( # 301-307 redirect code response
     HTTPTemporaryRedirect
 )
 from snovault import (
-    calculated_property,
     collection,
     load_schema,
     COLLECTIONS,
@@ -23,8 +21,10 @@ from encoded.search import get_iterable_search_results
 from .base import (
     Item,
     item_edit,
-    get_item_if_you_can,
     ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
+)
+from .user_content import (
+    StaticSection
 )
 from snovault.resource_views import item_view_page
 
@@ -158,92 +158,6 @@ def includeme(config):
     config.add_view(static_page, route_name='staticpage')
 
 
-def listFilesInInDirectory(dirLocation):
-    return [fn for fn in os.listdir(dirLocation) if os.path.isfile(dirLocation + '/' + fn)]
-
-
-def get_local_file_contents(filename, contentFilesLocation=None):
-    if contentFilesLocation is None:
-        full_file_path = filename
-    else:
-        full_file_path = contentFilesLocation + '/' + filename
-    if not os.path.isfile(full_file_path):
-        return None
-    file = open(full_file_path, encoding="utf-8")
-    output = file.read()
-    file.close()
-    return output
-
-
-def get_remote_file_contents(uri):
-    resp = requests.get(uri)
-    return resp.text
-
-
-@collection(
-    name='static-sections',
-    unique_key='static_section:name',
-    properties={
-        'title': 'Static Sections',
-        'description': 'Static Sections for the Portal',
-    })
-class StaticSection(Item):
-    """The Software class that contains the software... used."""
-    item_type = 'static_section'
-    schema = load_schema('encoded:schemas/static_section.json')
-    embedded_list = ["submitted_by.display_title"]
-
-    STATUS_ACL = {
-        'released': ALLOW_CURRENT,
-        'archived': ALLOW_CURRENT,
-        'deleted': DELETED,
-        'draft': ONLY_ADMIN_VIEW,
-        'released to project': ALLOW_VIEWING_GROUP_VIEW,
-        'archived to project': ALLOW_VIEWING_GROUP_VIEW
-    }
-
-    @calculated_property(schema={
-        "title": "Content",
-        "description": "Content for the page",
-        "type": "string"
-    })
-    def content(self, request, body=None, file=None):
-
-        if isinstance(body, str) or isinstance(body, dict) or isinstance(body, list):
-            # Don't need to load in anything. We don't currently support dict/json body (via schema) but could in future.
-            return body
-
-        if isinstance(file, str):
-            if file[0:4] == 'http' and '://' in file[4:8]:  # Remote File
-                return get_remote_file_contents(file)
-            else:                                           # Local File
-                file_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../../.." + file)   # Go to top of repo, append file
-                return get_local_file_contents(file_path)
-
-        return None
-
-    @calculated_property(schema={
-        "title": "File Type",
-        "description": "Type of file used for content",
-        "type": "string"
-    })
-    def filetype(self, request, body=None, file=None, options=None):
-        if options and options.get('filetype') is not None:
-            return options['filetype']
-        if isinstance(body, str):
-            return 'txt'
-        if isinstance(body, dict) or isinstance(body, list):
-            return 'json'
-        if isinstance(file, str):
-            filename_parts = file.split('.')
-            if len(filename_parts) > 1:
-                return filename_parts[len(filename_parts) - 1]
-            else:
-                return 'txt' # Default if no file extension.
-        return None
-
-
-
 
 @collection(
     name='pages',
@@ -264,6 +178,9 @@ class Page(Item):
 
 for field in ['display_title', 'name', 'description', 'content.name']:
     Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
+
+
+
 
 
 

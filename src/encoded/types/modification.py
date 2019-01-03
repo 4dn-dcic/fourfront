@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -20,12 +21,13 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded_list = ['award.project',
-                     'constructs.construct_type',
-                     'constructs.tags',
-                     'constructs.designed_to_target',
-                     'modified_regions.aliases',
-                     'target_of_mod.target_summary']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        'constructs.construct_type',
+        'constructs.tags',
+        'constructs.designed_to_target',
+        'modified_regions.aliases',
+        'target_of_mod.target_summary'
+    ]
 
     @calculated_property(schema={
         "title": "Modification name",
@@ -52,15 +54,19 @@ class Modification(Item):
     })
     def modification_name_short(self, request, modification_type=None,
                                 genomic_change=None, target_of_mod=None):
-        if not modification_type:
-            return "None"
-
-        mod_name = modification_type
-        if genomic_change:
-            mod_name = mod_name + " " + genomic_change
+        mod_name = genomic_change if genomic_change else modification_type
         if target_of_mod:
             target = request.embed(target_of_mod, '@@object')
-            mod_name = mod_name + " for " + target['target_summary']
+            mod_name = target['target_summary'].replace('Gene:', '') + ' ' + mod_name
+        # if not modification_type:
+        #     return "None"
+        #
+        # mod_name = modification_type
+        # if genomic_change:
+        #     mod_name = mod_name + " " + genomic_change
+        # if target_of_mod:
+        #     target = request.embed(target_of_mod, '@@object')
+        #     mod_name = mod_name + " for " + target['target_summary']
         return mod_name
 
     @calculated_property(schema={
@@ -70,4 +76,4 @@ class Modification(Item):
     })
     def display_title(self, request, modification_type=None, genomic_change=None, target_of_mod=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.modification_name_short(request, modification_type, genomic_change, target_of_mod)
+        return self.modification_name(request, modification_type, genomic_change, target_of_mod)
