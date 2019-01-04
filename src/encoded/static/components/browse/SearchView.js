@@ -306,7 +306,7 @@ class ControlsAndResults extends React.PureComponent {
                         </div>
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
+                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'isFullscreen',
                         'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
                         {...{ hiddenColumns, columnDefinitions }} showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf} />
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',

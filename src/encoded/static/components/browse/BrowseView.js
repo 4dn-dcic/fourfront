@@ -251,7 +251,7 @@ class ResultTableContainer extends React.PureComponent {
                     <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles',
-                            'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen'
+                            'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen', 'isFullscreen'
                         )}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
                         showSelectedFileCount />
@@ -376,6 +376,7 @@ export default class BrowseView extends React.Component {
         if (this.props.href !== nextProps.href) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
         if (this.props.windowWidth !== nextProps.windowWidth) return true;
+        if (this.props.isFullscreen !== nextProps.isFullscreen) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
@@ -555,7 +556,9 @@ export default class BrowseView extends React.Component {
             countExternalSets   = BrowseView.externalDataSetsCount(context);
 
         // No results found!
-        if(context.total === 0 && context.notification) return this.renderNoResultsView(hrefParts, countExternalSets);
+        if (context.total === 0 && context.notification){
+            return this.renderNoResultsView(hrefParts, countExternalSets);
+        }
 
         // Browse is only for experiment sets w. award.project=4DN and experimentset_type=replicates
         if (!navigate.isValidBrowseQuery(hrefParts.query)){
@@ -577,7 +580,7 @@ export default class BrowseView extends React.Component {
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
                             <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets }}
-                                {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen')}
+                                {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen', 'isFullscreen')}
                                 totalExpected={context && context.total} />
                         </SortController>
                     </CustomColumnController>

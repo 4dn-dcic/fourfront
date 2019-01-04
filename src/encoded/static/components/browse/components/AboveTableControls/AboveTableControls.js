@@ -104,51 +104,12 @@ export class AboveTableControls extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState){
-        if (this.state.open || prevState.open !== this.state.open) ReactTooltip.rebuild();
-        if (
-            (this.state.layout === 'wide' && prevState.layout !== 'wide') ||
-            (this.state.layout === 'wide' && (prevProps.windowWidth !== this.props.windowWidth))
-        ){
-            this.setWideLayout();
-        } else if (this.state.layout !== 'wide' && prevState.layout === 'wide'){
-            this.unsetWideLayout();
+        if (this.state.open || prevState.open !== this.state.open){
+            ReactTooltip.rebuild();
         }
-    }
-
-    /**
-     * @todo Refactor, move to BodyElement
-     */
-    setWideLayout(){
-        var { windowWidth, toggleFullScreen, parentForceUpdate } = this.props;
-
-        if (isServerSide() || typeof windowWidth !== 'number' || typeof toggleFullScreen !== 'function'){
-            console.error("Make sure toggleFullScreen and windowWidth are being passed down to AboveTableControls.");
-            return null;
+        if (prevProps.isFullscreen !== this.props.isFullscreen && typeof this.props.parentForceUpdate === 'function'){
+            setTimeout(this.props.parentForceUpdate, 100);
         }
-
-        vizUtil.requestAnimationFrame(()=>{
-            var browsePageContainer = document.getElementsByClassName('search-page-container')[0];
-            if (windowWidth < 1200) {
-                this.handleLayoutToggle(); // Cancel
-                throw new Error('Not large enough window width to expand. Aborting.');
-            }
-            var extraWidth = windowWidth - 1180;
-            browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = -(extraWidth / 2) + 'px';
-            this.lastBodyWidth = windowWidth;
-            setTimeout(parentForceUpdate, 100);
-        });
-    }
-
-    unsetWideLayout(){
-        var { windowWidth, toggleFullScreen, parentForceUpdate } = this.props;
-
-        if (isServerSide() || !document || !document.getElementsByClassName) return null;
-
-        vizUtil.requestAnimationFrame(()=>{
-            var browsePageContainer = document.getElementsByClassName('search-page-container')[0];
-            browsePageContainer.style.marginLeft = browsePageContainer.style.marginRight = '';
-            setTimeout(parentForceUpdate, 100);
-        });
     }
 
     setFileTypeFilters(filters){
@@ -174,14 +135,13 @@ export class AboveTableControls extends React.Component {
     }
 
     handleLayoutToggle(){
-        if (!SearchResultTable.isDesktopClientside(this.props.windowWidth)) return null;
-        var state = { };
-        if (this.state.layout === 'normal'){
-            state.layout = 'wide';
-        } else {
-            state.layout = 'normal';
+        var { windowWidth, isFullscreen, toggleFullScreen } = this.props;
+        if (!SearchResultTable.isDesktopClientside(windowWidth)) return null;
+        if (typeof toggleFullScreen !== 'function'){
+            console.error('No toggleFullscreen function passed in.');
+            return null;
         }
-        this.setState(state);
+        setTimeout(toggleFullScreen, 0, !isFullscreen);
     }
 
     filteredSelectedFiles(){
@@ -279,22 +239,20 @@ export class AboveTableControls extends React.Component {
     }
 
     rightButtons(){
-        var { open, layout, gridState } = this.state;
+        var { open, gridState } = this.state,
+            { isFullscreen } = this.props; 
 
-        var expandLayoutButton = (
-                <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (layout === 'normal' ? '' : ' expanded')}
-                    onClick={this.handleLayoutToggle} data-tip={(layout === 'normal' ? 'Expand' : 'Collapse') + " table width"}>
-                    <i className={"icon icon-fw icon-" + (layout === 'normal' ? 'expand' : 'compress')}></i>
-                </Button>
-            ),
-            configureColumnsButton = (
+        return (
+            <div className="pull-right right-buttons">
                 <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
                     <i className="icon icon-gear icon-fw"/>{['lg', 'md'].indexOf(gridState) > -1 ? <span>Columns</span> : null }<i className="icon icon-fw icon-angle-down"/>
                 </Button>
-            );
-
-        return <div className="pull-right right-buttons" children={[configureColumnsButton, expandLayoutButton]}/>;
-
+                <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (!isFullscreen ? '' : ' expanded')}
+                    onClick={this.handleLayoutToggle} data-tip={(!isFullscreen ? 'Expand' : 'Collapse') + " table width"}>
+                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}></i>
+                </Button>
+            </div>
+        );
     }
 
 

@@ -179,7 +179,7 @@ export const defaultColumnDefinitionMap = {
     },
     'lab.display_title' : {
         'title' : "Lab",
-        'widthMap' : {'lg' : 220, 'md' : 200, 'sm' : 180},
+        'widthMap' : {'lg' : 200, 'md' : 180, 'sm' : 160},
         'render' : function(result, columnDefinition, props, width, popLink = false){
             var labItem = result.lab;
             if (!labItem) return null;

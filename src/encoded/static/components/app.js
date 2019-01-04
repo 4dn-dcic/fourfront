@@ -1489,6 +1489,17 @@ class BodyElement extends React.PureComponent {
         this.resizeHandlers = [];
     }
 
+    componentWillReceiveProps(nextProps){
+        // Unset full screen if moving away to different pathname.
+        if (this.state.isFullscreen && this.props.href !== nextProps.href){
+            var currParts = url.parse(this.props.href),
+                nextParts = url.parse(nextProps.href);
+            if (currParts.pathname !== nextParts.pathname){
+                this.setState({ 'isFullscreen' : false });
+            }
+        }
+    }
+
     /**
      * Initializes scroll event handler & loading of help menu tree.
      *
@@ -1854,9 +1865,9 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight }} ref="navigation"
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }} ref="navigation"
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo', 'listActionsFor')}/>
+                                    'context', 'updateUserInfo', 'listActionsFor')} />
 
                             <div id="pre-content-placeholder"/>
 

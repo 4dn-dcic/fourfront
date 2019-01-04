@@ -1165,7 +1165,7 @@ $small-label-accession-font-size : 0.75rem;
 	@include search-result-column-and-header-block;
 	&[data-field="display_title"],
 	&[data-field="@type"],
-	&[data-field="lab.display_title"]
+	&[data-field="lab.display_title"],
 	&[data-field="track_and_facet_info.lab_name"],
 	&[data-field="status"] {
 		> .inner {
@@ -1784,7 +1784,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	margin-top: 7px;
 
 	.search-result-config-panel {
-		margin-top: 7px;
+		padding-top: 7px;
 		> .inner {
 			padding: 0 0;
 			border-top: 1px solid #ddd;
