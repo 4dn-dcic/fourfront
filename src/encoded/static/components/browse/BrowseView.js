@@ -229,12 +229,12 @@ class ResultTableContainer extends React.PureComponent {
 
     render() {
         var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas,
-            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth } = this.props;
+            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen } = this.props;
 
         return (
             <div className="row">
                 { context.facets.length > 0 ?
-                    <div className="col-sm-5 col-md-4 col-lg-3">
+                    <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
                         <ExternaDataExpSetsCount countExternalSets={countExternalSets} browseBaseState={browseBaseState} href={href} />
                         <FacetList {...{ session, browseBaseState, schemas, windowWidth }}
                             orientation="vertical" className="with-header-bg"
@@ -247,7 +247,7 @@ class ResultTableContainer extends React.PureComponent {
                     :
                     null
                 }
-                <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9')}>
                     <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles',

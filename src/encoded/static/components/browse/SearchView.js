@@ -280,17 +280,16 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, columnDefinitionOverrideMap } = this.props,
+        var { context, href, hiddenColumns, currentAction, columnDefinitionOverrideMap, isFullscreen } = this.props,
             { columnDefinitions, abstractType, specificType } = this.state,
             results                     = context['@graph'],
             inSelectionMode             = currentAction === 'selection',
-            facets                      = this.props.facets || context.facets,
-            urlParts                    = url.parse(href, true);
+            facets                      = this.props.facets || context.facets;
 
         return (
             <div className="row">
                 { facets.length ?
-                    <div className="col-sm-5 col-md-4 col-lg-3">
+                    <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth',
                         'currentAction')}
@@ -298,14 +297,18 @@ class ControlsAndResults extends React.PureComponent {
                             onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
                             itemTypeForSchemas={specificType} hideDataTypeFacet={inSelectionMode}
                             showClearFiltersButton={(()=>{
-                                var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-                                var urlPartQueryCorrectedForType = _.clone(urlParts.query);
-                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === '') urlPartQueryCorrectedForType.type = 'Item';
+                                var urlParts                        = url.parse(href, true),
+                                    clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
+                                    urlPartQueryCorrectedForType    = _.clone(urlParts.query);
+
+                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === ''){
+                                    urlPartQueryCorrectedForType.type = 'Item';
+                                }
                                 return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
                             })()} />
                         </div>
                 : null }
-                <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
+                <div className={!facets.length ? "col-sm-12 expset-result-table-fix" : ("expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9'))}>
                     <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'isFullscreen',
                         'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
                         {...{ hiddenColumns, columnDefinitions }} showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf} />

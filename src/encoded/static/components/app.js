@@ -1875,7 +1875,7 @@ class BodyElement extends React.PureComponent {
                                 windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
                             <div className="container" id="content">
