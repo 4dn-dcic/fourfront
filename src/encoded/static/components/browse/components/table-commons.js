@@ -150,7 +150,6 @@ export const defaultColumnDefinitionMap = {
         }
     },
     '@type' : {
-        'title' : "Type",
         'noSort' : true,
         'order' : -80,
         'render' : function(result, columnDefinition, props, width){

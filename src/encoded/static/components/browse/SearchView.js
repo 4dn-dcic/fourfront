@@ -99,12 +99,11 @@ class ControlsAndResults extends React.PureComponent {
         this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
         this.colDefOverrides = this.colDefOverrides.bind(this);
-        this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
 
         var itemTypes                   = this.searchItemTypes(props),
             columnDefinitionOverrides   = this.colDefOverrides(props, itemTypes),
-            columnDefinitions           = this.getColumnDefinitions(props, columnDefinitionOverrides, itemTypes);
+            columnDefinitions           = columnsToColumnDefinitions(props.context.columns || {}, columnDefinitionOverrides);
 
         this.state = { columnDefinitionOverrides, columnDefinitions };
     }
@@ -122,10 +121,14 @@ class ControlsAndResults extends React.PureComponent {
             );
         }
         if (nextProps.context !== this.props.context || this.props.href !== nextProps.href){
+            stateChange.columnDefinitions = columnsToColumnDefinitions(
+                nextProps.context.columns || {},
+                stateChange.colDefOverrides || this.state.colDefOverrides
+            );
+
             stateChange.columnDefinitions = this.getColumnDefinitions(
                 nextProps,
-                stateChange.colDefOverrides || this.state.colDefOverrides,
-                stateChange.specificType ? stateChange : this.state
+                stateChange.colDefOverrides || this.state.colDefOverrides
             );
         }
         if (_.keys(stateChange).length > 0){
@@ -214,40 +217,8 @@ class ControlsAndResults extends React.PureComponent {
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
                 }
             });
-            // remove while @type and lab from File selection columns
-            //if (specificType === 'File'){
-            //    hiddenColumnsFull.push('@type');
-            //    hiddenColumnsFull.push('lab.display_title');
-            //    delete columnDefinitionOverrides['lab.display_title'];
-            //    delete columnDefinitionOverrides['@type'];
-            //} else {
-            //    columnDefinitionOverrides['lab.display_title'] = {
-            //        'render' : function(result, columnDefinition, props, width){
-            //            var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
-            //            return newRender;
-            //        }
-            //    };
-            //}
         }
         return columnDefinitionOverrides;
-    }
-
-    /**
-     * Builds near-final form of column definitions to be rendered by table.
-     *
-     * @private
-     * @param {Object} [props=this.props] Current or next props.
-     * @returns {ColumnDefinition[]} Final column definitions.
-     */
-    getColumnDefinitions(props = this.props, colDefOverrides = this.state.colDefOverrides, { specificType, abstractType }){
-        var columns = (props.context && props.context.columns) || {};
-        // Ensure the type column is present for when are on an abstract item type search.
-        if (((abstractType && abstractType === specificType) || specificType === 'Item') && typeof columns['@type'] === 'undefined'){
-            columns = _.extend({}, columns, {
-                '@type' : {} // Will inherit all values from colDefOverrides / defaultColumnDefinitionMap.
-            });
-        }
-        return columnsToColumnDefinitions(columns, colDefOverrides);
     }
 
     forceUpdateOnSelf(){
@@ -348,15 +319,15 @@ export default class SearchView extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.filterFacets = this.filterFacets.bind(this);
+        this.transformedFacets = this.transformedFacets.bind(this);
         this.state = {
-            'filteredFacets' : this.filterFacets(props)
+            'transformedFacets' : this.transformedFacets(props)
         };
     }
 
     componentWillReceiveProps(nextProps){
         if (this.props.context !== nextProps.context){
-            this.setState({ 'filteredFacets' : this.filterFacets(nextProps) });
+            this.setState({ 'transformedFacets' : this.transformedFacets(nextProps) });
         }
     }
 
@@ -369,48 +340,46 @@ export default class SearchView extends React.PureComponent {
      *
      * @param {Object} props Component props.
      */
-    filterFacets(props = this.props){
-        var href = props.href;
+    transformedFacets(props = this.props){
+        var { href, context } = props,
+            facets,
+            typeFacetIndex,
+            hrefQuery,
+            itemTypesInSearch;
 
-        // TODO: Change from a map to a _.findWhere/find ?
-        return _.map(props.context.facets, (facet)=>{
+        // Find facet for '@type'
+        typeFacetIndex = _.findIndex(context.facets, { 'field' : 'type' });
 
-            // For search page, filter out Item types which are subtypes of an abstract type. Unless are on an abstract type.
-            if (facet.field === 'type'){
-                facet = _.clone(facet);
-                var queryParts = url.parse(href, true).query;
-                if (typeof queryParts.type === 'string') queryParts.type = [queryParts.type];
-                queryParts.type = _.without(queryParts.type, 'Item');
+        if (typeFacetIndex === -1) {
+            return context.facets; // Facet not present, return.
+        }
 
-                var isParentTypeSet = queryParts.type.filter(function(t){
-                    var pt = Schemas.getAbstractTypeForType(t);
-                    if (pt){
-                        return true;
-                    }
-                    return false;
-                }).length > 0;
+        hrefQuery = url.parse(href, true).query;
+        if (typeof hrefQuery.type === 'string') hrefQuery.type = [hrefQuery.type];
+        itemTypesInSearch = _.without(hrefQuery.type, 'Item');
 
-                if (!isParentTypeSet){
-                    facet.terms = facet.terms.filter(function(itemType){
-                        var parentType = Schemas.getAbstractTypeForType(itemType.key);
-                        if (parentType && itemType.key !== parentType){
-                            return false;
-                        }
-                        return true;
-                    });
-                }
+        if (itemTypesInSearch.length > 0){
+            return context.facets; // Keep all terms/leaf-types - backend should already filter down to only valid sub-types.
+        }
 
-            }
+        // Avoid modifying in place.
+        facets = context.facets.slice(0);
+        facets[typeFacetIndex] = _.clone(facets[typeFacetIndex]);
 
-            return facet;
+        // Show only base types for when itemTypesInSearch.length === 0 (aka 'type=Item').
+        facets[typeFacetIndex].terms = _.filter(facets[typeFacetIndex].terms, function(itemType){
+            var parentType = Schemas.getAbstractTypeForType(itemType.key);
+            return !parentType || parentType === itemType.key;
         });
+
+        return facets;
     }
 
     render() {
         return (
             <div className="search-page-container" ref="container">
                 <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
-                <SearchControllersContainer {...this.props} facets={this.state.filteredFacets} navigate={this.props.navigate || navigate} />
+                <SearchControllersContainer {...this.props} facets={this.state.transformedFacets} navigate={this.props.navigate || navigate} />
             </div>
         );
     }
