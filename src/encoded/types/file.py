@@ -314,6 +314,9 @@ class File(Item):
 
     def _get_file_expt_bucket(self, request, item2check):
         fatid = self.jsonld_id(request)
+        if 'files' in item2check:
+            if fatid in item2check.get('files'):
+                return 'raw file'
         if 'processed_files' in item2check:
             if fatid in item2check.get('processed_files'):
                 return 'processed file'
@@ -814,7 +817,7 @@ class FileProcessed(File):
         }
     })
     def experiment_sets(self, request):
-        return self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")
+        return list(set(self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")))
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -827,7 +830,7 @@ class FileProcessed(File):
         }
     })
     def experiments(self, request):
-        return self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")
+        return list(set(self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")))
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
