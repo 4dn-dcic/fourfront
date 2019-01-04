@@ -397,19 +397,23 @@ export default class BrowseView extends React.Component {
         this.checkResyncChartData(hrefParts, context);
     }
 
-    /**
-     * Updates internal state if initial search response (`props.context`) or `props.defaultHiddenColumns` have changed.
-     *
-     * @private
-     * @returns {void}
-     */
-    componentWillReceiveProps(nextProps){
-        if (this.props.context !== nextProps.context){
-            this.setState({
-                'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(nextProps.context.columns)
-            });
-        }
-    }
+    // /**
+    //  * This is left here explicitly to show absence of function, as compared to SearchView.
+    //  *
+    //  * SearchView updates/resets hidden columns on CustomColumnController (React.PureComponent) by
+    //  * updating state.defaultHiddenColumns if the type has changed. For BrowseView, we have only one
+    //  * possible type (ExperimentSetReplicate), so we may skip this step/check for slight performance gain.
+    //  *
+    //  * @private
+    //  * @returns {void}
+    //  */
+    // componentWillReceiveProps(nextProps){
+    //     if (SearchControllersContainer.haveContextColumnsChanged(this.props.context, nextProps.context)){
+    //         this.setState({
+    //             'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(nextProps.context.columns)
+    //         });
+    //     }
+    // }
 
     /**
      * Same functionality as componentDidMount if `props.href` has changed.

@@ -18,11 +18,40 @@ var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
 /**
  * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
- * 'searchBase' or 'href' prop (treated the same) and the 'navigate' callback prop (usually utils/navigate.js).
+ * `href` prop and the `navigate` callback prop or fxn (usually utils/navigate.js).
+ *
+ * Manages and updates `state.defaultHiddenColumns`, which in turn resets CustomColumnController state with new columns,
+ * if search type has changed.
  *
  * Passes other props down to ControlsAndResults.
  */
-class ResultTableHandlersContainer extends React.PureComponent {
+export class SearchControllersContainer extends React.PureComponent {
+
+    /**
+     * Should handle and fail cases where context and columns object reference values
+     * have changed, but not contents. User-selected columns should be preserved upon faceting
+     * or similar filtering, but be updated when search type changes.
+     *
+     * @param {{ columns: Object.<Object> }} pastContext Previous context, to be passed in from a lifecycle method.
+     * @param {{ columns: Object.<Object> }} nextContext Next context, to be passed in from a lifecycle method.
+     *
+     * @returns {boolean} If context columns have changed, which should be about same as if type has changed.
+     */
+    static haveContextColumnsChanged(pastContext, nextContext){
+        if (pastContext === nextContext) return false;
+        if (pastContext.columns && !nextContext.columns) return true;
+        if (!pastContext.columns && nextContext.columns) return true;
+        var pKeys       = _.keys(pastContext.columns),
+            pKeysLen    = pKeys.length,
+            nKeys       = _.keys(nextContext.columns),
+            i;
+
+        if (pKeysLen !== nKeys.length) return true;
+        for (i = 0; i < pKeysLen; i++){
+            if (pKeys[i] !== nKeys[i]) return true;
+        }
+        return false;
+    }
 
     static defaultProps = {
         'navigate' : navigate
@@ -39,7 +68,7 @@ class ResultTableHandlersContainer extends React.PureComponent {
     }
 
     componentWillReceiveProps(nextProps){
-        if (this.props.context !== nextProps.context){
+        if (SearchControllersContainer.haveContextColumnsChanged(this.props.context, nextProps.context)) {
             this.setState({ 'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(nextProps.context.columns) });
         }
     }
@@ -258,8 +287,6 @@ class ControlsAndResults extends React.PureComponent {
             facets                      = this.props.facets || context.facets,
             urlParts                    = url.parse(href, true);
 
-        console.log('Defs', this.props.schemas, columnDefinitions);
-
         return (
             <div className="row">
                 { facets.length ?
@@ -380,7 +407,7 @@ export default class SearchView extends React.PureComponent {
         return (
             <div className="search-page-container" ref="container">
                 <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
-                <ResultTableHandlersContainer {...this.props} facets={this.state.filteredFacets} navigate={this.props.navigate || navigate} />
+                <SearchControllersContainer {...this.props} facets={this.state.filteredFacets} navigate={this.props.navigate || navigate} />
             </div>
         );
     }

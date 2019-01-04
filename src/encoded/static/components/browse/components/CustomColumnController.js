@@ -82,7 +82,7 @@ export class CustomColumnController extends React.Component {
 }
 
 
-export class CustomColumnSelector extends React.Component {
+export class CustomColumnSelector extends React.PureComponent {
 
     static propTypes = {
         'hiddenColumns'         : PropTypes.object.isRequired,
@@ -115,10 +115,14 @@ export class CustomColumnSelector extends React.Component {
     }
 
     renderHiddenColumnOption(colDef){
-        if (colDef.field === 'display_title') return null; // Not an option -- always visible.
+        // Not an option -- always visible.
+        if (colDef.field === 'display_title') return null;
+        var isChecked = !colDef.hiddenState;
         return (
             <div className="col-sm-6 col-lg-3 column-option" key={colDef.field}>
-                <Checkbox checked={!colDef.hiddenState} onChange={this.handleOptionVisibilityChange.bind(this, colDef.field)} value={colDef.field}>{ colDef.title }</Checkbox>
+                <Checkbox checked={isChecked} onChange={this.handleOptionVisibilityChange.bind(this, colDef.field)} value={colDef.field} className={isChecked ? 'is-active' : null}>
+                    { colDef.title }
+                </Checkbox>
             </div>
         );
     }
