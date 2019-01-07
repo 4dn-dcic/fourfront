@@ -100,7 +100,6 @@ var DateUtility = module.exports = (function(){
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
-
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
         return DateUtility.display(moment.utc(timestamp), formatType, dateTimeSeparator, localize, customOutputFormat);
     };
@@ -167,6 +166,33 @@ var DateUtility = module.exports = (function(){
     }
 
     DateUtility.LocalizedTime = LocalizedTime;
+
+    /**
+     * This function is meant to accept a UTC/GMT date string
+     * and return a formatted version of it _without_ performing
+     * any timezone conversion. Only returns year and (optionally)
+     * month.
+     *
+     * @param {string} utcDate - UTC/system-formatted date string.
+     * @param {boolean} [includeMonth] - If false, only year will be returned.
+     * @return {string} Formatted year and possibly month.
+     */
+    DateUtility.formatPublicationDate = function(utcDate, includeMonth = true){
+        var yearString, monthString, monthIndex;
+        if (typeof utcDate !== 'string' || utcDate.length < 4){
+            throw new Error('Expected a date string.');
+        }
+        yearString = utcDate.slice(0,4);
+        if (utcDate.length >= 7){
+            monthString = utcDate.slice(5,7);
+        }
+        if (monthString){
+            monthIndex = parseInt(monthString) - 1; // 0-based.
+            monthString = moment.months()[monthIndex];
+            return monthString + ' ' + yearString;
+        }
+        return yearString;
+    };
 
     return DateUtility;
 })();
