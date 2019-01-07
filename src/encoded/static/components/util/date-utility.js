@@ -177,16 +177,24 @@ var DateUtility = module.exports = (function(){
      * @param {boolean} [includeMonth] - If false, only year will be returned.
      * @return {string} Formatted year and possibly month.
      */
-    DateUtility.formatPublicationDate = function(utcDate, includeMonth = true){
-        var yearString, monthString, monthIndex;
+    DateUtility.formatPublicationDate = function(utcDate, includeMonth = true, includeDay = true){
+        var yearString, monthString, monthIndex, dayString, dayInteger;
         if (typeof utcDate !== 'string' || utcDate.length < 4){
             throw new Error('Expected a date string.');
         }
         yearString = utcDate.slice(0,4);
-        if (utcDate.length >= 7){
+        if (includeMonth && utcDate.length >= 7){
             monthString = utcDate.slice(5,7);
             monthIndex = parseInt(monthString) - 1; // 0-based.
+            // @see https://momentjs.com/docs/#/i18n/listing-months-weekdays/
             monthString = moment.months()[monthIndex];
+            if (includeDay && utcDate.length >= 10){
+                dayString = utcDate.slice(8, 10);
+                dayInteger = parseInt(dayString);
+                // @see https://momentjs.com/docs/#/i18n/locale-data/
+                dayString = moment.localeData().ordinal(dayInteger);
+                return monthString + ' ' + dayString + ', ' + yearString;
+            }
             return monthString + ' ' + yearString;
         }
         return yearString;
