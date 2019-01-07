@@ -621,6 +621,7 @@ def set_filters(request, search, result, principals, doc_types, types):
             else:
                 f_field = field[:-5]
                 range_direction = "gte"
+
             # The field schema below will only be found for top-level fields.
             # If schema for field is not found (and range_type thus not set), then treated as ordinary term filter (likely will get 0 results)
             field_schema = schema_for_field(f_field, types, doc_types)
@@ -800,16 +801,20 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
     used_facets = [ facet[0] for facet in facets + append_facets ]
     for field in prepared_terms:
         if field.startswith('embedded'):
-            split_field = field.strip().split('.') # e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
+            split_field = field.strip().split('.') # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
             use_field = '.'.join(split_field[1:])
-            aggregation_type = 'terms' # default for all non-schema facets
 
-            # use the last part of the split field to get the title
+            # 'terms' is the default per-term bucket aggregation for all non-schema facets
+            aggregation_type = 'terms'
+
+            # Use the last part of the split field to get the field title
             title_field = split_field[-1]
 
             if title_field in used_facets or title_field in disabled_facets:
-                continue  # Cancel if already in facets or is disabled
+                # Cancel if already in facets or is disabled
+                continue
 
+            # If we have a range filter in the URL, 
             if title_field == 'from' or title_field == 'to':
                 if len(split_field) == 3:
                     f_field = split_field[-2]
@@ -826,8 +831,12 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
 
             facet_tuple = (use_field, {'title': title_field, 'aggregation_type' : aggregation_type})
 
-            if aggregation_type != 'terms': # Temporary until we handle these better on front-end
-                facet_tuple[1]['hide_from_view'] = True
+            # At moment is equivalent to `if aggregation_type == 'stats'`` until/unless more agg types are added for _facets_.
+            if aggregation_type != 'terms':
+                facet_tuple[1]['hide_from_view'] = True # Temporary until we handle these better on front-end.
+                # Facet would be otherwise added twice if both `.from` and `.to` are requested.
+                if facet_tuple in facets:
+                    continue
 
             facets.append(facet_tuple)
 
@@ -993,9 +1002,9 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
             elif is_numerical_field:
                 facet['field_type'] = 'number'
 
-            aggs[agg_name] = {
+            aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
-                    agg_name : {
+                    "primary_agg" : {
                         'stats' : {
                             'field' : query_field
                         }
@@ -1016,9 +1025,9 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
                 }
             }
 
-            aggs[agg_name] = {
+            aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
-                    agg_name : term_aggregation
+                    "primary_agg" : term_aggregation
                 },
                 'filter': {'bool': facet_filters},
             }
@@ -1119,6 +1128,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
 
     aggregations = es_results['aggregations']['all_items']
     used_facets = set()
+
     for field, facet in facets:
         result_facet = {
             'field' : field,
@@ -1126,25 +1136,27 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
             'total' : 0
             # To be added depending on facet['aggregation_type']: 'terms', 'min', 'max', 'min_as_string', 'max_as_string', ...
         }
+
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
         field_agg_name = field.replace('.', '-')
+        full_agg_name = facet['aggregation_type'] + ':' + field_agg_name
 
-        if field_agg_name in aggregations:
-            result_facet['total'] = aggregations[field_agg_name]['doc_count']
+        if full_agg_name in aggregations:
             if facet['aggregation_type'] == 'stats':
+                result_facet['total'] = aggregations[full_agg_name]['doc_count']
                 # Used for fields on which can do range filter on, to provide min + max bounds
-                for k in aggregations[field_agg_name][field_agg_name].keys():
-                    result_facet[k] = aggregations[field_agg_name][field_agg_name][k]
-            else:
+                for k in aggregations[full_agg_name]["primary_agg"].keys():
+                    result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
+            else: # 'terms' assumed.
                 # Default - terms, range, or histogram buckets. Buckets may not be present
-                result_facet['terms'] = aggregations[field_agg_name][field_agg_name].get('buckets', [])
+                result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
                     continue
 
-            if len(aggregations[field_agg_name].keys()) > 2:
-                result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', field_agg_name) }
+            if len(aggregations[full_agg_name].keys()) > 2:
+                result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
 
         result.append(result_facet)
 
