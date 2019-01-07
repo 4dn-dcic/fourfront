@@ -185,8 +185,6 @@ var DateUtility = module.exports = (function(){
         yearString = utcDate.slice(0,4);
         if (utcDate.length >= 7){
             monthString = utcDate.slice(5,7);
-        }
-        if (monthString){
             monthIndex = parseInt(monthString) - 1; // 0-based.
             monthString = moment.months()[monthIndex];
             return monthString + ' ' + yearString;
