@@ -1419,15 +1419,13 @@ class ContentRenderer extends React.PureComponent {
 
 
         // Object of common props passed to all content_views.
-        var commonContentViewProps = _.extend(
-            _.pick(this.props,
-                // Props from App:
-                'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
-                'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
-                // Props from BodyElement:
-                'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
-                'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen'),
-            { key, listActionsFor }
+        var commonContentViewProps = _.pick(this.props,
+            // Props from App:
+            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'listActionsFor',
+            'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
+            // Props from BodyElement:
+            'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
+            'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen'
         );
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1450,7 +1448,7 @@ class ContentRenderer extends React.PureComponent {
             }
 
             if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
-                content = <ContentView {...commonContentViewProps} />;
+                content = <ContentView key={key} {...commonContentViewProps} />;
             }
         } else {
             throw new Error('No context is available. Some error somewhere.');
@@ -1858,9 +1856,8 @@ class BodyElement extends React.PureComponent {
      */
     render(){
         var {
-                onBodyClick, onBodySubmit, context, alerts,
-                currentAction, hrefParts, isLoading, slowLoad,
-                children
+                onBodyClick, onBodySubmit, context, alerts, canonical,
+                currentAction, hrefParts, isLoading, slowLoad
             } = this.props,
             { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
@@ -1911,7 +1908,7 @@ class BodyElement extends React.PureComponent {
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <ContentErrorBoundary canonical={this.props.canonical}>
+                            <ContentErrorBoundary canonical={canonical}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                     registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
                             </ContentErrorBoundary>

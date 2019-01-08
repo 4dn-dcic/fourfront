@@ -1072,7 +1072,6 @@ export class SearchResultTable extends React.PureComponent {
     }
 
     render(){
-        //console.log('TTT', this.filterOutHiddenColumns())
         return (
             <DimensioningContainer
                 {..._.omit(this.props, 'hiddenColumns', 'columnDefinitionOverrideMap', 'defaultWidthMap')}
