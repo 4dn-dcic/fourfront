@@ -57,25 +57,15 @@ export class SimpleFilesTable extends React.Component {
 
 
 export class SimpleFilesTableLoaded extends React.Component {
-    
-    static propTypes = {
-        'files' : SimpleFilesTable.propTypes.files,
-        'sortFxn' : PropTypes.func
-    }
 
-    static isFileCompleteEnough(expSet){
-        // TODO
-        return false;
-    }
+    static propTypes = {
+        'fileUrls' : PropTypes.arrayOf(PropTypes.string).isRequired
+    };
 
     render(){
-        var filesObj = _.object(_.zip(
-            _.map(this.props.files, object.atIdFromObject),
-            this.props.files
-        ));
         return (
-            <ItemPageTableLoader itemsObject={filesObj} isItemCompleteEnough={SimpleFilesTableLoaded.isFileCompleteEnough}>
-                <SimpleFilesTable {..._.pick(this.props, 'sortFxn', 'width', 'defaultOpenIndices',
+            <ItemPageTableLoader itemUrls={this.props.fileUrls}>
+                <SimpleFilesTable {..._.pick(this.props, 'width', 'defaultOpenIndices',
                     'defaultOpenIds', 'columns', 'columnExtensionMap')} />
             </ItemPageTableLoader>
         );

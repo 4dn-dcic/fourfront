@@ -64,17 +64,12 @@ class FileMicroscopyViewOverview extends React.Component {
     render(){
         var { context, schemas, width, windowWidth } = this.props;
 
-        var setsByKey;
-        var table = null;
+        var setsByKey = expFxn.experimentSetsFromFile(context),
+            setUrls = setsByKey && _.keys(setsByKey),
+            table;
 
-        if (context && (
-            (Array.isArray(context.experiments) && context.experiments.length > 0) || (Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0)
-        )){
-            setsByKey = expFxn.experimentSetsFromFile(context);
-        }
-
-        if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
+        if (setUrls && setUrls.length > 0){
+            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
