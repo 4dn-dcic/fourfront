@@ -1108,3 +1108,57 @@ def test_track_and_file_facet_info_file_link_to_repset_w_multi_expt_and_opf(
     tf_info = res.get('track_and_facet_info')
     assert tf_info['experiment_bucket'] == 'some other files'
     assert tf_info['replicate_info'] == 'merged replicates'
+
+
+def test_track_and_file_facet_info_file_w_all_underscore_fields(
+        testapp, proc_file_json, experiment_data):
+    underscores = {
+        '_lab_name': 'awesome lab',
+        '_experiment_type': 'TRIP',
+        '_biosource_name': 'some cell',
+        '_assay_info': 'cold',
+        '_replicate_info': 'replicated lots',
+        '_experiment_bucket': 'important files'
+    }
+    proc_file_json.update(underscores)
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    tf_info = pfile.get('track_and_facet_info')
+    for k, v in underscores.items():
+        tf = k.replace('_', '', 1)
+        assert tf_info[tf] == v
+    # make sure it doesn't change
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    res = testapp.get(pfile['@id']).json
+    tf_info2 = res.get('track_and_facet_info')
+    for k, v in underscores.items():
+        tf = k.replace('_', '', 1)
+        assert tf_info2[tf] == v
+
+
+def test_track_and_file_facet_info_file_w_some_underscore_fields(
+        testapp, proc_file_json, experiment_data):
+    underscores = {
+        '_experiment_type': 'TRIP',
+        '_biosource_name': 'some cell',
+        '_assay_info': 'cold',
+        '_replicate_info': 'replicated lots',
+    }
+    proc_file_json.update(underscores)
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    tf_info = pfile.get('track_and_facet_info')
+    assert len(tf_info) == 5  # lab will get calculated since expt_type exists
+    for k, v in underscores.items():
+        tf = k.replace('_', '', 1)
+        assert tf_info[tf] == v
+    # make sure it doesn't change
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    res = testapp.get(pfile['@id']).json
+    tf_info2 = res.get('track_and_facet_info')
+    for k, v in underscores.items():
+        tf = k.replace('_', '', 1)
+        assert tf_info2[tf] == v
+    assert tf_info2['experiment_type'] == 'TRIP'
+    assert tf_info2['lab_name'] == 'ENCODE lab'
+    assert tf_info2['experiment_bucket'] == 'processed file'
