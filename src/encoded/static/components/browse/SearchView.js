@@ -125,11 +125,6 @@ class ControlsAndResults extends React.PureComponent {
                 nextProps.context.columns || {},
                 stateChange.colDefOverrides || this.state.colDefOverrides
             );
-
-            stateChange.columnDefinitions = this.getColumnDefinitions(
-                nextProps,
-                stateChange.colDefOverrides || this.state.colDefOverrides
-            );
         }
         if (_.keys(stateChange).length > 0){
             this.setState(stateChange);
