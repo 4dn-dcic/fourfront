@@ -240,7 +240,7 @@ export class AboveTableControls extends React.Component {
 
     rightButtons(){
         var { open, gridState } = this.state,
-            { isFullscreen } = this.props; 
+            { isFullscreen } = this.props;
 
         return (
             <div className="pull-right right-buttons">

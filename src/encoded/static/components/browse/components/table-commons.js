@@ -164,7 +164,7 @@ export const defaultColumnExtensionMap = {
                     var urlParts = url.parse(props.href, true),
                         query = { 'type' : leafItemType };
                     if (urlParts.query.q) query.q = urlParts.query.q;
-                    var nextHref = '/search/?' + queryString.stringify(query); 
+                    var nextHref = '/search/?' + queryString.stringify(query);
                     (props.navigate || navigate)(nextHref);
                 };
 
@@ -350,7 +350,7 @@ export function columnsToColumnDefinitions(columns, columnDefinitionMap, default
             return _.extend({ field }, columnProperties);
         }
     );
-    
+
     _.forEach(uninishedColumnDefinitions, function(colDef, i){
         var colDefOverride = columnDefinitionMap && columnDefinitionMap[colDef.field];
         if (colDefOverride){

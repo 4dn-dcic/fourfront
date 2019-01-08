@@ -172,7 +172,7 @@ class ResultTableContainer extends React.PureComponent {
                         allFiles                = expFxn.allFilesFromExperimentSet(expSet, true),
                         allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true),
                         allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
-                    
+
                     allFileAccessionTriples = allFileAccessionTriples.sort();
 
                     var selectedFilesForSet = _this.filterSelectedFilesToOnesInExpSet(allFileAccessionTriples); //getSelectedFileForSet(allFileIDs);

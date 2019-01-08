@@ -125,11 +125,6 @@ class ControlsAndResults extends React.PureComponent {
                 nextProps.context.columns || {},
                 stateChange.colDefOverrides || this.state.colDefOverrides
             );
-
-            stateChange.columnDefinitions = this.getColumnDefinitions(
-                nextProps,
-                stateChange.colDefOverrides || this.state.colDefOverrides
-            );
         }
         if (_.keys(stateChange).length > 0){
             this.setState(stateChange);
@@ -192,7 +187,7 @@ class ControlsAndResults extends React.PureComponent {
                                 var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
 
                                 // Standard - postMessage
-                                try { 
+                                try {
                                     window.opener.postMessage(eventJSON, '*');
                                 } catch (err){
                                     // Check for presence of parent window and alert if non-existent.

@@ -1067,7 +1067,7 @@ export class SearchResultTable extends React.PureComponent {
                 return true;
             });
         }
-    
+
         return columnDefinitions;
     }
 
