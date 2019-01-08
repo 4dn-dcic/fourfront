@@ -79,7 +79,7 @@ export class ItemPageTable extends React.Component {
             "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
             "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-            "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
+            "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
         }
     }
 

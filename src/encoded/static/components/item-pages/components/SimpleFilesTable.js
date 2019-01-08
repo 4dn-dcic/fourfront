@@ -23,7 +23,7 @@ export class SimpleFilesTable extends React.Component {
                 'link_id'               : PropTypes.string.isRequired
             })
         }))
-    }
+    };
 
     static defaultProps = {
         'columns' : {
@@ -36,7 +36,7 @@ export class SimpleFilesTable extends React.Component {
             },
             "file_type"         : { "title" : "File Type" },
         }
-    }
+    };
 
     render(){
         var reducedFiles = expFxn.reduceProcessedFilesWithExperimentsAndSets(this.props.results);
