@@ -187,7 +187,7 @@ class ControlsAndResults extends React.PureComponent {
                                 var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
 
                                 // Standard - postMessage
-                                try { 
+                                try {
                                     window.opener.postMessage(eventJSON, '*');
                                 } catch (err){
                                     // Check for presence of parent window and alert if non-existent.
