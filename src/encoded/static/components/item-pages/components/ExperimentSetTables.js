@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ExperimentSetDetailPane, ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, defaultColumnExtensionMap } from './../../browse/components';
+import { ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, } from './ItemPageTable';
+import { ExperimentSetDetailPane, defaultColumnExtensionMap } from './../../browse/components';
 import { ajax, console, layout, expFxn } from './../../util';
 
 

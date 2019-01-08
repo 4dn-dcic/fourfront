@@ -8,7 +8,7 @@ import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownloadButtonColumn, QualityControlResults } from './FileView';
 

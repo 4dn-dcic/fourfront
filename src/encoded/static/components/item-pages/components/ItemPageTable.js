@@ -8,12 +8,12 @@ import url from 'url';
 import queryString from 'querystring';
 import * as globals from './../../globals';
 import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import { RawFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable } from './../../browse/components/file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
     defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './table-commons';
-import { SearchResultDetailPane } from './SearchResultDetailPane';
+    HeadersRow, TableRowToggleOpenButton } from './../../browse/components/table-commons';
+import { SearchResultDetailPane } from './../../browse/components/SearchResultDetailPane';
 
 
 

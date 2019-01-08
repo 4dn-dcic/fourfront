@@ -11,7 +11,7 @@ import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide 
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';

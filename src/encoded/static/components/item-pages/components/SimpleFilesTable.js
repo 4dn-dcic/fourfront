@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ItemPageTable, ItemPageTableLoader } from './../../browse/components/ItemPageTable';
+import { ItemPageTable, ItemPageTableLoader } from './ItemPageTable';
 import { ajax, console, layout, expFxn, object } from './../../util';
 
 
