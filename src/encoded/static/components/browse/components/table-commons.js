@@ -98,7 +98,7 @@ export class TableRowToggleOpenButton extends React.PureComponent {
 
 
 
-export const defaultColumnDefinitionMap = {
+export const defaultColumnExtensionMap = {
     'display_title' : {
         'title' : "Title",
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
@@ -206,7 +206,7 @@ export const defaultColumnDefinitionMap = {
                 result.track_and_facet_info && result.track_and_facet_info.lab_name && result.track_and_facet_info.lab_name
                 && result.lab && result.lab.display_title && result.lab.display_title === result.track_and_facet_info.lab_name
             ){
-                return defaultColumnDefinitionMap['lab.display_title'].render.apply(null, Array.from(arguments));
+                return defaultColumnExtensionMap['lab.display_title'].render.apply(null, Array.from(arguments));
             } else {
                 return (result.track_and_facet_info && result.track_and_facet_info.lab_name) || null;
             }
@@ -286,9 +286,13 @@ export const defaultColumnDefinitionMap = {
         }
 
     },
-    'experiments_in_set.experiment_type' : {
-        'title' : 'Experiment Type',
-        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
+    'google_analytics.for_date' : {
+        'title' : 'Analytics Date',
+        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.google_analytics || !result.google_analytics.for_date) return null;
+            return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
+        }
     },
     'status' : {
         'title' : 'Status',
@@ -303,6 +307,10 @@ export const defaultColumnDefinitionMap = {
                 </React.Fragment>
             );
         }
+    },
+    'experiments_in_set.experiment_type' : {
+        'title' : 'Experiment Type',
+        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
     },
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
@@ -322,14 +330,6 @@ export const defaultColumnDefinitionMap = {
     },
     'experiments_in_set.biosample.biosource_summary' : {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }
-    },
-    'google_analytics.for_date' : {
-        'title' : 'Analytics Date',
-        'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
-            if (!result.google_analytics || !result.google_analytics.for_date) return null;
-            return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
-        }
     }
 };
 

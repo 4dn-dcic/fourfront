@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ExperimentSetDetailPane, ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, defaultColumnDefinitionMap } from './../../browse/components';
+import { ExperimentSetDetailPane, ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, defaultColumnExtensionMap } from './../../browse/components';
 import { ajax, console, layout, expFxn } from './../../util';
 
 
@@ -63,7 +63,7 @@ export class ExperimentSetTables extends React.Component {
                         "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
                         "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
                         "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-                        "experiments_in_set.experiment_categorizer.combined" : defaultColumnDefinitionMap["experiments_in_set.experiment_categorizer.combined"]
+                        "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
                     }}
                     {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')}
                 />

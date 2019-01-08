@@ -13,7 +13,7 @@ import * as store from './../../store';
 import { isServerSide, expFxn, Filters, navigate, object, layout, typedefs } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
-    SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnDefinitionMap, columnsToColumnDefinitions,
+    SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
     SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
     FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
@@ -64,7 +64,7 @@ class ResultTableContainer extends React.PureComponent {
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
         'href'                      : PropTypes.string.isRequired,
-        'columnDefinitionOverrides' : PropTypes.object,
+        'columnExtensionMap' : PropTypes.object,
         'context'                   : PropTypes.shape({
             'columns' : PropTypes.objectOf(PropTypes.object).isRequired
         }),
@@ -77,7 +77,7 @@ class ResultTableContainer extends React.PureComponent {
         'href'      : '/browse/',
         'debug'     : false,
         'navigate'  : navigate,
-        'columnDefinitionOverrides' : defaultColumnDefinitionMap
+        'columnExtensionMap' : defaultColumnExtensionMap
     }
 
     constructor(props){
@@ -106,7 +106,7 @@ class ResultTableContainer extends React.PureComponent {
 
     componentWillReceiveProps(nextProps){
         var stateChange = {};
-        if (nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
+        if (nextProps.columnExtensionMap !== this.props.columnExtensionMap || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
             stateChange.colDefOverrides = this.colDefOverrides(nextProps);
         }
         if (nextProps.context !== this.props.context){
@@ -144,30 +144,30 @@ class ResultTableContainer extends React.PureComponent {
     }
 
     /**
-     * Extends or creates `props.columnDefinitionOverrides.display_title` with a larger width as well as
+     * Extends or creates `props.columnExtensionMap.display_title` with a larger width as well as
      * a render method which will render out a checkbox for selecting files of an ExperimentSet,
      * if `props.selectedFiles` are passed in as well.
-     * If no selected files data structure is being fed through props, this function returns `props.columnDefinitionOverrides`.
+     * If no selected files data structure is being fed through props, this function returns `props.columnExtensionMap`.
      *
      * Return value gets cached to state.colDefOverrides.
      *
-     * @param {{ selectedFiles?: Object, columnDefinitionOverrides : ColumnDefinition }} props - Current component props.
+     * @param {{ selectedFiles?: Object, columnExtensionMap : ColumnDefinition }} props - Current component props.
      * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
      */
     colDefOverrides(props = this.props){
         if (typeof props.selectedFiles === 'undefined'){
             // We don't need to add checkbox(es) for file selection.
-            return props.columnDefinitionOverrides || null;
+            return props.columnExtensionMap || null;
         }
 
         var _this = this;
 
         // Add Checkboxes
-        return _.extend({}, props.columnDefinitionOverrides, {
-            'display_title' : _.extend({}, defaultColumnDefinitionMap.display_title, {
+        return _.extend({}, props.columnExtensionMap, {
+            'display_title' : _.extend({}, defaultColumnExtensionMap.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
                 'render' : (expSet, columnDefinition, paneProps, width) => {
-                    var origTitleBlock          = defaultColumnDefinitionMap.display_title.render(expSet, columnDefinition, paneProps, width),
+                    var origTitleBlock          = defaultColumnExtensionMap.display_title.render(expSet, columnDefinition, paneProps, width),
                         newChildren             = origTitleBlock.props.children.slice(0),
                         allFiles                = expFxn.allFilesFromExperimentSet(expSet, true),
                         allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true),

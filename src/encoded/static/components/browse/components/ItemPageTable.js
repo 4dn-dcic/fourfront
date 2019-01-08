@@ -11,7 +11,7 @@ import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../uti
 import { RawFilesStackedTable } from './file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
-    defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
+    defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
     HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { SearchResultDetailPane } from './SearchResultDetailPane';
 
@@ -36,15 +36,17 @@ export class ItemPageTable extends React.Component {
             return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} />;
         },
         'constantColumnDefinitions' : null,
-        'columnDefinitionOverrideMap' : {
+        'columnExtensionMap' : {
             'display_title' : {
                 'render' : function(result, columnDefinition, props, width){
-                    var title = object.itemUtil.getTitleStringFromContext(result);
-                    var link = object.itemUtil.atId(result);
-                    var tooltip;
+                    var title           = object.itemUtil.getTitleStringFromContext(result),
+                        link            = object.itemUtil.atId(result),
+                        isAnAccession   = false,
+                        tooltip;
+    
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
-                    var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
-                    if (link){
+
+                    if (link){ // Link instead of plaintext
                         title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
                     }
 
@@ -73,12 +75,11 @@ export class ItemPageTable extends React.Component {
         },
         'columns' : {
             "display_title" : { "title" : "Title" },
+            "number_of_experiments" : { "title" : "Exps" },
             "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
             "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-            "experiments_in_set.digestion_enzyme.name": { "title" : "Enzyme" },
-            "experiments_in_set.biosample.modifications_summary": { "title" : "Modifications" },
-            "experiments_in_set.biosample.treatments_summary": { "title" : "Treatments" }
+            "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
         }
     }
 
@@ -92,7 +93,7 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var { results, loading, columnDefinitionOverrideMap, columns, width, windowWidth, defaultOpenIndices, renderDetailPane } = this.props;
+        var { results, loading, columnExtensionMap, columns, width, windowWidth, defaultOpenIndices, renderDetailPane } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -103,7 +104,7 @@ export class ItemPageTable extends React.Component {
         }
 
 
-        var columnDefinitions   = columnsToColumnDefinitions(columns, columnDefinitionOverrideMap),
+        var columnDefinitions   = columnsToColumnDefinitions(columns, columnExtensionMap),
             responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
 
         width = width || layout.gridContainerWidth(windowWidth);

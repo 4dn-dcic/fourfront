@@ -1,7 +1,7 @@
 'use strict';
 
 export { 
-    defaultColumnBlockRenderFxn, defaultColumnDefinitionMap, columnsToColumnDefinitions,
+    defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
     ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton,
     defaultHiddenColumnMapFromColumns
 } from './table-commons';

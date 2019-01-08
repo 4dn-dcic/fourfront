@@ -18,7 +18,7 @@ import * as vizUtil from './../../viz/utilities';
 import { ChartDataController } from './../../viz/chart-data-controller';
 import Alerts from './../../alerts';
 import {
-    defaultColumnBlockRenderFxn, defaultColumnDefinitionMap,
+    defaultColumnBlockRenderFxn, defaultColumnExtensionMap,
     columnsToColumnDefinitions, ResultRowColumnBlockValue, DEFAULT_WIDTH_MAP,
     getColumnWidthFromDefinition, HeadersRow
 } from './table-commons';
@@ -1003,15 +1003,13 @@ class DimensioningContainer extends React.PureComponent {
  * @prop {Object}           [defaultWidthMap]   Default column widths per responsive grid state. Applied to all non-constant columns.
  * @prop {string[]}         [hiddenColumns]     Keys of columns to remove from final columnDefinitions before rendering.
  * @prop {function}         [renderDetailPane]  An instance of a React component which will receive prop 'result'.
- * @prop {Object}           [columnDefinitionOverrideMap]  - Extend constant and default column-derived column definitions, by column definition field key.
- *
  * @prop {string}           sortColumn          Current sort column, as fed by SortController.
  * @prop {boolean}          sortReverse         Whether current sort column is reversed, as fed by SortController.
  * @prop {function}         sortBy              Callback function for performing a sort, acceping 'sortColumn' and 'sortReverse' as params. As fed by SortController.
  */
 export class SearchResultTable extends React.PureComponent {
 
-    static defaultColumnDefinitionMap = defaultColumnDefinitionMap
+    static defaultColumnExtensionMap = defaultColumnExtensionMap
 
     static isDesktopClientside(windowWidth){
         return !isServerSide() && layout.responsiveGridState(windowWidth) !== 'xs';
@@ -1031,7 +1029,7 @@ export class SearchResultTable extends React.PureComponent {
     }
 
     static defaultProps = {
-        'columnDefinitions' : columnsToColumnDefinitions({ 'display_title' : { 'title' : 'Title' } }, defaultColumnDefinitionMap),
+        'columnDefinitions' : columnsToColumnDefinitions({ 'display_title' : { 'title' : 'Title' } }, defaultColumnExtensionMap),
         'renderDetailPane' : function(result, rowNumber, width){ return <DefaultDetailPane {...{ result, rowNumber, width }} />; },
         'defaultWidthMap' : DEFAULT_WIDTH_MAP,
         'defaultMinColumnWidth' : 55,

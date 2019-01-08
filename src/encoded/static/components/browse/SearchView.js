@@ -12,7 +12,7 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel, defaultColumnDefinitionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components';
+    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
@@ -102,10 +102,10 @@ class ControlsAndResults extends React.PureComponent {
         this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
 
         var itemTypes                   = this.searchItemTypes(props),
-            columnDefinitionOverrides   = this.colDefOverrides(props, itemTypes),
-            columnDefinitions           = columnsToColumnDefinitions(props.context.columns || {}, columnDefinitionOverrides);
+            columnExtensionMap          = this.colDefOverrides(props, itemTypes),
+            columnDefinitions           = columnsToColumnDefinitions(props.context.columns || {}, columnExtensionMap);
 
-        this.state = { columnDefinitionOverrides, columnDefinitions };
+        this.state = { columnExtensionMap, columnDefinitions };
     }
 
     componentWillReceiveProps(nextProps){
@@ -114,7 +114,7 @@ class ControlsAndResults extends React.PureComponent {
             // URL and likely filters, maybe @type, etc. have changed.
             _.extend(stateChange, this.searchItemTypes(nextProps));
         }
-        if ((nextProps.columnDefinitionOverrides !== this.props.columnDefinitionOverrides) || (this.props.currentAction !== nextProps.currentAction) || stateChange.specificType){
+        if ((nextProps.columnExtensionMap !== this.props.columnExtensionMap) || (this.props.currentAction !== nextProps.currentAction) || stateChange.specificType){
             stateChange.colDefOverrides = this.colDefOverrides(
                 nextProps,
                 stateChange.specificType ? stateChange : this.state
@@ -163,14 +163,14 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     colDefOverrides(props = this.props, { specificType, abstractType }){
-        var { currentAction, columnDefinitionOverrideMap } = props,
+        var { currentAction, columnExtensionMap } = props,
             inSelectionMode = currentAction === 'selection';
 
         if (!inSelectionMode && (!abstractType || abstractType !== specificType)){
-            return columnDefinitionOverrideMap;
+            return columnExtensionMap;
         }
 
-        var columnDefinitionOverrides = _.clone(columnDefinitionOverrideMap);
+        var columnDefinitionOverrides = _.clone(columnExtensionMap);
 
         // Kept for reference in case we want to re-introduce constrain that for 'select' button(s) to be visible in search result rows, there must be parent window.
         //var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
@@ -182,7 +182,7 @@ class ControlsAndResults extends React.PureComponent {
             columnDefinitionOverrides['display_title'] = _.extend({}, columnDefinitionOverrides['display_title'], {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = SearchResultTable.defaultColumnDefinitionMap.display_title.render(
+                    var currentTitleBlock = SearchResultTable.defaultColumnExtensionMap.display_title.render(
                         result, columnDefinition, _.extend({}, props, { currentAction }), width, true
                     );
                     var newChildren = currentTitleBlock.props.children.slice(0);
@@ -251,7 +251,7 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, columnDefinitionOverrideMap, isFullscreen } = this.props,
+        var { context, href, hiddenColumns, currentAction, isFullscreen } = this.props,
             { columnDefinitions, abstractType, specificType } = this.state,
             results                     = context['@graph'],
             inSelectionMode             = currentAction === 'selection',
@@ -309,12 +309,12 @@ export default class SearchView extends React.PureComponent {
      * @type {Object}
      * @property {string} href - Current URI.
      * @property {string} [currentAction=null] - Current action, if any.
-     * @property {Object.<ColumnDefinition>} columnDefinitionOverrideMap - Object keyed by field name with overrides for column definition.
+     * @property {Object.<ColumnDefinition>} columnExtensionMap - Object keyed by field name with overrides for column definition.
      */
     static defaultProps = {
         'href'          : null,
         'currentAction' : null,
-        'columnDefinitionOverrideMap' : defaultColumnDefinitionMap
+        'columnExtensionMap' : defaultColumnExtensionMap
     };
 
     constructor(props){
