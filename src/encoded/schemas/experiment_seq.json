@@ -87,11 +87,11 @@
             "lookup": 115,
             "use_for": ["CUT&RUN"]
         },
-        "reporter": {
+        "reporter_construct": {
             "title": "TRIP reporter",
             "description": "The reporter including promoter and other sequence that is integrated for TRIP",
             "type": "string",
-            "linkTo": "Contruct",
+            "linkTo": "Construct",
             "lookup": 95,
             "use_for": ["TRIP"]
         }
