@@ -122,7 +122,7 @@ class PublicationSummary extends React.PureComponent {
         var { context }     = this.props,
             journal         = context.journal,
             categories      = Array.isArray(context.categories) && context.categories.length > 0 && context.categories,
-            datePublished   = context.date_published && moment(context.date_published),
+            datePublished   = context.date_published && DateUtility.formatPublicationDate(context.date_published),
             id              = context.ID,
             retArr          = [];
 
@@ -145,7 +145,7 @@ class PublicationSummary extends React.PureComponent {
                                 <h5 className="mt-2 mb-02 text-500">
                                     Published
                                 </h5>
-                                <p>{ datePublished.format('dddd, MMMM Do YYYY') }</p>
+                                <p>{ datePublished }</p>
                             </React.Fragment>
                         : null }
                     </div>

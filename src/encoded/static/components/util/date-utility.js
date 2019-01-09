@@ -100,7 +100,6 @@ var DateUtility = module.exports = (function(){
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
-
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
         return DateUtility.display(moment.utc(timestamp), formatType, dateTimeSeparator, localize, customOutputFormat);
     };
@@ -167,6 +166,39 @@ var DateUtility = module.exports = (function(){
     }
 
     DateUtility.LocalizedTime = LocalizedTime;
+
+    /**
+     * This function is meant to accept a UTC/GMT date string
+     * and return a formatted version of it _without_ performing
+     * any timezone conversion. Only returns year and (optionally)
+     * month.
+     *
+     * @param {string} utcDate - UTC/system-formatted date string.
+     * @param {boolean} [includeMonth] - If false, only year will be returned.
+     * @return {string} Formatted year and possibly month.
+     */
+    DateUtility.formatPublicationDate = function(utcDate, includeMonth = true, includeDay = true){
+        var yearString, monthString, monthIndex, dayString, dayInteger;
+        if (typeof utcDate !== 'string' || utcDate.length < 4){
+            throw new Error('Expected a date string.');
+        }
+        yearString = utcDate.slice(0,4);
+        if (includeMonth && utcDate.length >= 7){
+            monthString = utcDate.slice(5,7);
+            monthIndex = parseInt(monthString) - 1; // 0-based.
+            // @see https://momentjs.com/docs/#/i18n/listing-months-weekdays/
+            monthString = moment.months()[monthIndex];
+            if (includeDay && utcDate.length >= 10){
+                dayString = utcDate.slice(8, 10);
+                dayInteger = parseInt(dayString);
+                // @see https://momentjs.com/docs/#/i18n/locale-data/
+                dayString = moment.localeData().ordinal(dayInteger);
+                return monthString + ' ' + dayString + ', ' + yearString;
+            }
+            return monthString + ' ' + yearString;
+        }
+        return yearString;
+    };
 
     return DateUtility;
 })();
