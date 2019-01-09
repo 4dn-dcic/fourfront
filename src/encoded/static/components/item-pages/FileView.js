@@ -396,18 +396,23 @@ export class FileOverViewBody extends React.Component {
             fileFormat              = fileUtil.getFileFormatStr(file),
             fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
             fileIsHic               = (fileFormat === 'hic'),
-            externalLinkButton      = null,
             genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
             fileHref                = file.href,
             pageHref                = this.props.href || (store && store.getState().href),
             hrefParts               = url.parse(pageHref),
-            host                    = hrefParts.protocol + '//' + hrefParts.host;
+            host                    = hrefParts.protocol + '//' + hrefParts.host,
+            juiceBoxBtn             = this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
+            epigenomeBtn            = this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly);
+
+        if (!juiceBoxBtn && !epigenomeBtn){
+            return null;
+        }
 
         return (
-            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
+            <OverViewBodyItem wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <React.Fragment>
-                    {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
-                    {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                    { juiceBoxBtn }
+                    { epigenomeBtn }
                 </React.Fragment>
             } />
         );
