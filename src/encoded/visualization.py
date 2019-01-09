@@ -984,16 +984,63 @@ def setZoomLocationLocks(views, view_config, scales_and_center_k):
     view_config["locationLocks"] = locks["location"]
     view_config["zoomLocks"] = locks["zoom"]
 
+def get_chromsize_grid_from_view(view):
+    """ Look through the given view to find a 2d chromsize grid.
+
+    Return the grid information, or return None if it doesn't exist.
+    """
+
+    # Skip if the view lacks a central track.
+    if "center" not in view["tracks"]:
+        return None
+
+    for track in view["tracks"]["center"]:
+        # Skip if the track's center has no contents.
+        if 'contents' not in track:
+            return None
+        if len(track['contents']) == 0:
+            return None
+        # See if any of the contents have the 2d chromosome grid type.
+        chromsize_contents = [ cont for cont in track['contents'] if  cont["type"] == "2d-chromosome-grid"]
+        if len(chromsize_contents) > 0:
+            return chromsize_contents[0]
+    return None
+
+def get_chromsize_grid_from_viewconf(views, files_info):
+    """ Look through the files_info and the views to find the 2d chromsize grid.
+
+    Return the grid information, or return None if it doesn't exist.
+    """
+    # Check all of the views' central tracks and see if any of them are 2d grids.
+
+    for view in views:
+        chromsize_grid = get_chromsize_grid_from_view(view)
+        if chromsize_grid:
+            return chromsize_grid
+
+    # Look through files_info and see if there is a chromsize file.
+    chromsize_files = [ info["item"] for info in files_info if info["item"]["file_format"] == "/file-formats/chromsizes/" ]
+
+    if len(chromsize_files) > 0:
+        # Get the contents for the chromosome grid. We assume there is only 1 chromsize file.
+        chromsize_view, error = create_2d_view(chromsize_files[0])
+        if error:
+            return None
+
+        chromsize_contents = chromsize_view["tracks"]["center"][0]["contents"][0]
+        return chromsize_contents
+
+    return None
+
 def add_2d_chromsize(new_views, files_info):
     """ If files_info has a chromsize file and new_views contains a 2D view,
     all of the views will get a 2D chromsize file.
     """
 
-    # Look through files_info and see if there is a chromsize file.
-    chromsize_files = [ info["item"] for info in files_info if info["item"]["file_format"] == "/file-formats/chromsizes/" ]
+    chromsize_contents = get_chromsize_grid_from_viewconf(new_views, files_info)
 
-    # No chromsize files, return
-    if len(chromsize_files) == 0:
+    # If there are no chromsize contents, return
+    if not chromsize_contents:
         return new_views, None
 
     # Look through the new_views for any with a central view with contents.
@@ -1003,15 +1050,12 @@ def add_2d_chromsize(new_views, files_info):
     if len(views_2d) == 0:
         return new_views, None
 
-    # Get the contents for the chromosome grid. We assume there is only 1 chromsize file.
-    chromsize_view, error = create_2d_view(chromsize_files[0])
-    if error:
-        return None, errors
-
-    chromsize_contents = chromsize_view["tracks"]["center"][0]["contents"][0]
-
     # For each view:
     for view in views_2d:
+        # If it already has a chromsize grid, skip to the next one.
+        if get_chromsize_grid_from_view(view):
+            continue
+
         # Append the chromsize grid on top
         view["tracks"]["center"][0]["contents"].insert(0, chromsize_contents)
 

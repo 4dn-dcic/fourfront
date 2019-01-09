@@ -1200,3 +1200,25 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
         if "tilesetUid" in track and track["tilesetUid"] == mcool_file_json['higlass_uid']:
             assert track["type"] == "heatmap"
     assert found_central_data_track == True
+
+    # Add another 2D view to this existing view
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig' : new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': [
+            "{uuid}".format(uuid=mcool_file['uuid']),
+        ]
+    })
+
+    two_view_higlass_json = response.json["new_viewconfig"]
+    assert response.json["errors"] == ''
+    assert response.json["success"]
+
+    # Assert there are 2 views
+    assert len(two_view_higlass_json["views"]) == 2
+
+    # Assert there is only 1 grid in each view
+    for view in two_view_higlass_json["views"]:
+        center_track_contents = view["tracks"]["center"][0]["contents"]
+        chromosome_grid_contents = [cont for cont in center_track_contents if cont["type"] == "2d-chromosome-grid" ]
+        assert(len(chromosome_grid_contents) == 1)
