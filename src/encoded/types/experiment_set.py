@@ -79,10 +79,12 @@ class ExperimentSet(Item):
         "produced_in_pub.journal",
         "produced_in_pub.authors",
         "produced_in_pub.short_attribution",
+        "produced_in_pub.date_published",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",
         "publications_of_set.authors",
+        "publications_of_set.date_published",
 
         "experiments_in_set.experiment_type",
         "experiments_in_set.accession",
