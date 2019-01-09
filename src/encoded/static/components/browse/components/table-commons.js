@@ -222,16 +222,12 @@ export const defaultColumnDefinitionMap = {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
             if (!result.date_published) return null;
-            return <DateUtility.LocalizedTime timestamp={result.date_published} formatType='date-sm' />;
+            return DateUtility.formatPublicationDate(result.date_published);
         }
     },
     'number_of_experiments' : {
         'title' : '# of Experiments',
-        'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
-        //'render' : function(result, columnDefinition, props, width){
-        //    if (!Array.isArray(result.experiments_in_set)) return null;
-        //    return result.experiments_in_set.length;
-        //}
+        'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50}
     },
     'number_of_files' : {
         'title' : '# of Files',
