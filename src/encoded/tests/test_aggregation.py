@@ -1,5 +1,5 @@
 from .features.conftest import app_settings, workbook
-
+pytestmark = pytest.mark.working
 
 def test_aggregation_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
