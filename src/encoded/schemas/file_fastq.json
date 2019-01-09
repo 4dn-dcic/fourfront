@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
@@ -34,20 +34,16 @@
         "schema_version": {
             "default": "2"
         },
-        "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "linkTo": "FileFormat",
-            "ff_flag": "filter:valid_item_types"
-        },
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "type": "string",
             "default": "reads",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
-                "reads"
+                "reads",
+                "genomic reads",
+                "iPCR reads",
+                "cDNA reads"
             ]
         },
         "file_classification": {
@@ -142,8 +138,5 @@
                 }
             }
         }
-    },
-    "file_format_file_extension": {
-        "fastq": ".fastq.gz"
     }
 }

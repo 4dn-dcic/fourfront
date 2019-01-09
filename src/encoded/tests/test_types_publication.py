@@ -60,6 +60,16 @@ def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
     assert publication_doi_biorxiv['journal'] == 'bioRxiv'
 
 
+def test_update_publication_date_published(testapp, publication_doi_biorxiv):
+    assert publication_doi_biorxiv['date_published'] == '2013-11-07'
+    # make sure we can overwrite date_published
+    res = testapp.patch_json(publication_doi_biorxiv['@id'], {'date_published': '01-01-1990'})
+    assert res.json['@graph'][0]['date_published'] == '01-01-1990'
+    # now make sure it reverts when we delete it
+    res2 = testapp.patch_json(publication_doi_biorxiv['@id'] + '?delete_fields=date_published', {})
+    assert res2.json['@graph'][0]['date_published'] == '2013-11-07'
+
+
 def test_publication_diplay_title(testapp, publication_PMID):
     print(publication_PMID)
     assert publication_PMID['display_title'].startswith('Kirli K et al. (2015) A deep proteomics')

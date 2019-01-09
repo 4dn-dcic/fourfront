@@ -9,11 +9,12 @@ import _ from 'underscore';
 import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
-import { panel_views, content_views } from './../globals';
-var store = require('./../../store');
+import { content_views } from './../globals';
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
-import { EditableField, FieldSet } from './../forms';
+import { EditableField, FieldSet } from './../forms/components';
+
+import { Item } from './../util/typedefs';
 
 
 /**
@@ -27,7 +28,7 @@ import { EditableField, FieldSet } from './../forms';
 /**
  * Extends ItemStore to help manage collection of Access Keys from back-end.
  *
- * @memberof module:item-pages/user
+ * @todo Remove/refactor this and the ItemStore dependency in favor of using a React Component to wrap and provide state to some child view in UserView.
  * @extends module:lib/store.ItemStore
  * @private
  */
@@ -262,11 +263,11 @@ class AccessKeyTable extends React.Component {
 
     }
 
-    wrapInContainer(){
+    wrapInContainer(children){
         return (
             <div className="access-keys-container">
                 <h3 className="text-300">Access Keys</h3>
-                <div className="access-keys-table-container clearfix" children={[...arguments]}/>
+                <div className="access-keys-table-container clearfix" children={children}/>
             </div>
         );
     }
@@ -301,9 +302,11 @@ class AccessKeyTable extends React.Component {
         }
 
         return this.wrapInContainer(
-            this.renderTable(),
-            <a href="#add-access-key" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</a>,
-            modal
+            <React.Fragment>
+                { this.renderTable() }
+                <a href="#add-access-key" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</a>
+                { modal }
+            </React.Fragment>
         );
     }
 
@@ -405,7 +408,7 @@ export default class UserView extends React.Component {
                                                     schemas={this.props.schemas}
                                                     disabled={!mayEdit}
                                                     href={this.props.href}
-                                                >
+                                                    windowWidth={this.props.windowWidth}>
                                                     <EditableField
                                                         labelID="first_name"
                                                         fallbackText="No first name set"
@@ -461,15 +464,10 @@ class ProfileContactFields extends React.Component {
         var user = this.props.user;
 
         return (
-            <FieldSet
-                context={user}
-                parent={this.props.parent}
-                className="profile-contact-fields"
-                disabled={!this.props.mayEdit}
-                objectType="User"
-                schemas={this.props.schemas}
-                href={this.props.href}
-            >
+            <FieldSet context={user}
+                parent={this.props.parent} className="profile-contact-fields"
+                disabled={!this.props.mayEdit} objectType="User" windowWidth={this.props.windowWidth}
+                schemas={this.props.schemas} href={this.props.href}>
 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { ProfileContactFields.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
@@ -504,6 +502,35 @@ class ProfileContactFields extends React.Component {
 
 class ProfileWorkFields extends React.Component {
 
+    /**
+    * Get list of all awards (unique) from list of labs.
+    * ToDo : Migrate somewhere more static-cy.
+    *
+    * @param {Item[]} labDetails - Array of lab objects with embedded award details.
+    * @return {Item[]} List of all unique awards in labs.
+    */
+    static getAwardsList(labDetails){
+
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return [];
+        }
+
+        // Awards are embedded within labs, so we get full details.
+        var awardsList = [];
+
+        function addAwardToList(award){
+            if (!award || typeof award['@id'] !== 'string' || _.pluck(awardsList, '@id').indexOf(award['@id']) > -1) return;
+            awardsList.push(award);
+        }
+
+        _.forEach(labDetails, function(lab){
+            if (!lab || !lab.awards || !Array.isArray(lab.awards) || lab.awards.length === 0) return;
+            _.forEach(lab.awards, addAwardToList);
+        });
+
+        return awardsList;
+    }
+
 
     static defaultProps = {
         containerClassName : 'panel user-work-info shadow-border'
@@ -511,94 +538,59 @@ class ProfileWorkFields extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.getAwardsList = this.getAwardsList.bind(this);
         this.updateAwardsList = this.updateAwardsList.bind(this);
         this.render = this.render.bind(this);
         this.state = {
-            details_lab : null,        // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
-            awards_list : null
+            'awards_list' : []
         };
-    }
 
-    /**
-     * If Lab details are not embedded, fetch them.
-     */
-    componentDidMount(){
-
-        if (!this.state.details_lab){
-            this.isLabFetched = FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.user.lab, (detail) => this.updateAwardsList([detail]) );
-            if (!this.isLabFetched){
-                this.updateAwardsList([this.props.user.lab]);
-            }
+        if (props.user && props.user.lab && props.user.lab.awards){
+            this.state.awards_list = props.user.lab.awards.slice(0);
         }
-
-        if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
-            // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-
-            //FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
-        }
-    }
-
-    componentWillUnmount(){ delete this.isLabFetched; }
-
-    /**
-     * Get list of all awards (unique) from list of labs.
-     * ToDo : Migrate somewhere more static-cy.
-     * 
-     * @param {Object[]} labDetails - Array of lab objects with embedded award details.
-     * @return {Object[]} List of all unique awards in labs.
-     */
-    getAwardsList(labDetails){
-        // Awards are embedded within labs, so we get full details.
-        var awardsList = [];
-
-        function addAwardToList(award){
-            if (_.pluck(awardsList, 'uuid').indexOf(labDetails[i].awards[j].uuid) === -1){
-                awardsList.push(labDetails[i].awards[j]);
-            }
-        }
-
-        for (var i = 0; i < labDetails.length; i++){
-            if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
-                for (var j = 0; j < labDetails[i].awards.length; j++){
-                    addAwardToList(labDetails[i].awards[j]);
-                }
-            }
-        }
-
-        return awardsList;
     }
 
     /**
      * Update state.awards_list with award details from list of lab details.
      *
-     * @param {Object[]} labDetails - Array of lab objects with embedded award details.
-     * @returns {undefined} Nothing.
+     * @param {Item[]} labDetails - Array of lab objects with embedded award details.
+     * @returns {void} Nothing.
      */
     updateAwardsList(labDetails){
-        var currentAwardsList = (this.state.awards_list || []).slice(0);
-        var currentAwardsListIDs = currentAwardsList.map((awd) => {
-            if (typeof awd === 'string') return awd;
-            return object.atIdFromObject(awd);
-        });
-        var newAwards = this.getAwardsList(labDetails);
-        for (var i = 0; i < newAwards.length; i++){
-            if (currentAwardsListIDs.indexOf(object.atIdFromObject(newAwards[i])) === -1){
-                currentAwardsList.push(newAwards[i]);
+
+        if (!labDetails || !Array.isArray(labDetails) || labDetails.length === 0){
+            return;
+        }
+
+        this.setState(function(currState){
+            // As of React 16 we can return null in setState func to cancel out of state update.
+            var currAwardsList      = (currState.awards_list && currState.awards_list.slice(0)) || [],
+                currAwardsListIDs   = new Set(currAwardsList.map(object.atIdFromObject)),
+                newAwards           = ProfileWorkFields.getAwardsList(labDetails);
+
+            for (var i = 0; i < newAwards.length; i++){
+                var award   = newAwards[i],
+                    awardID = award && object.atIdFromObject(award);
+                if (!awardID) continue; // Error ?
+                if (!currAwardsListIDs.has(awardID)) currAwardsList.push(award);
             }
-        }
-        if (!Array.isArray(this.state.awards_list )|| !_.isEqual(this.state.awards_list, currentAwardsList)){
-            this.setState({'awards_list' : currentAwardsList});
-        }
+
+            if (currAwardsList.length > (currState.awards_list || []).length){
+                return { 'awards_list' : currAwardsList };
+            } else {
+                return null;
+            }
+
+        });
     }
 
 
     render(){
-        var user = this.props.user;
+        var user        = this.props.user,
+            awards      = this.state.awards_list,
+            submits_for = null;
+
         if (user.submits_for && user.submits_for.length > 0){
-            var submits_for = user.submits_for;
+            submits_for = user.submits_for;
         }
 
         // THESE FIELDS ARE NOT EDITABLE.
@@ -613,11 +605,7 @@ class ProfileWorkFields extends React.Component {
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
                     <div id="lab" className="col-sm-9 value text-500">
-                        { typeof user.lab !== 'undefined' ?
-                            (object.linkFromItem(this.isLabFetched ? this.state.details_lab : user.lab))
-                            :
-                            <span className="not-set">No Labs</span>
-                        }
+                        { user.lab ? object.itemUtil.generateLink(user.lab) : <span className="not-set">No Labs</span> }
                     </div>
                 </div>
                 <div className="row field-entry job_title">
@@ -634,12 +622,8 @@ class ProfileWorkFields extends React.Component {
                     </div>
                     <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
-                            renderItem={object.linkFromItem}
-                            endpoints={(user && user.submits_for && user.submits_for.map(function(o){
-                                if (typeof o === 'string') return o;
-                                if (typeof o.link_id === 'string') return o.link_id.replace(/~/g,'/');
-                                if (typeof o['@id'] === 'string') return o['@id'];
-                            })) || []}
+                            renderItem={object.itemUtil.generateLink}
+                            endpoints={(submits_for && _.filter(_.map(submits_for, object.itemUtil.atId))) || []}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
                             ajaxCallback={this.updateAwardsList}
@@ -652,13 +636,11 @@ class ProfileWorkFields extends React.Component {
                     </div>
                     <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
-                            details={this.state.awards_list}
+                            details={awards}
                             renderItem={object.linkFromItem}
                             propertyName="awards"
                             fallbackMsg="No awards"
-                            loading={this.state.awards_list === null && (
-                                user.lab || (user.submits_for && user.submits_for > 0)
-                            ) ? true : false}
+                            loading={false}
                         />
                     </div>
                 </div>
@@ -722,6 +704,11 @@ export class ImpersonateUserForm extends React.Component {
         'updateUserInfo': PropTypes.func.isRequired
     }
 
+    constructor(props){
+        super(props);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
     /**
      * Handler for Impersonate User submit button/action.
      * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
@@ -731,20 +718,20 @@ export class ImpersonateUserForm extends React.Component {
      * @param {Object} data - User ID or email address.
      */
     handleSubmit(data) {
-        var url = "/impersonate-user";
-        var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function(payload) {
-            alert('Success! ' + data + ' is being impersonated.');
-            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            //    localStorage.setItem("user_info", JSON.stringify(payload));
-            //}
-            JWT.saveUserInfo(payload);
-            this.props.updateUserInfo();
-            navigate('/');
-        }.bind(this);
-        var fallbackFxn = function() {
-            alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-        };
+        var url = "/impersonate-user",
+            postData = { 'userid' : data },
+            callbackFxn = (resp) => {
+                //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                //    localStorage.setItem("user_info", JSON.stringify(payload));
+                //}
+                JWT.saveUserInfo(resp);
+                this.props.updateUserInfo();
+                navigate('/', { 'inPlace' : true });
+                alert('Success! ' + data + ' is being impersonated.');
+            },
+            fallbackFxn = function() {
+                alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+            };
 
         //var userInfo = localStorage.getItem('user_info') || null;
         //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
@@ -752,7 +739,7 @@ export class ImpersonateUserForm extends React.Component {
         //if(userInfo){
         //    reqHeaders['Authorization'] = 'Bearer '+idToken;
         //}
-        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, JSON.stringify(postData));
     }
 
     render() {
@@ -771,4 +758,4 @@ export class ImpersonateUserForm extends React.Component {
 
 }
 
-content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');
+content_views.register(ImpersonateUserForm, 'User', 'impersonate-user');

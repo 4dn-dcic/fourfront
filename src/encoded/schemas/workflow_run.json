@@ -18,7 +18,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes"},
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
@@ -75,6 +75,12 @@
                         "description": "Ordinal of the file in the argument",
                         "type": "number",
                         "default": 1
+                    },
+                    "dimension": {
+                        "title": "Dimension",
+                        "description": "Dimension of the file in the argument, in format of e.g. \"0\" (singlet or 1D array), \"1-2\" (2D array), or \"2-0-1\" (3D array)",
+                        "type": "string",
+                        "default": "0"
                     },
                     "format_if_extra": {
                         "title": "Format of extra file",
@@ -171,6 +177,12 @@
                         "description": "Ordinal of the parameter in the argument",
                         "type": "number",
                         "default": 1
+                    },
+                    "dimension": {
+                        "title": "Dimension",
+                        "description": "Dimension of the parameter in the argument, in format of e.g. \"0\" (singlet or 1D array), \"1-2\" (2D array), or \"2-0-1\" (3D array)",
+                        "type": "string",
+                        "default": "0"
                     }
                 }
             }

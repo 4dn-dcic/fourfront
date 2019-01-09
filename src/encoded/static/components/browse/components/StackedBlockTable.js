@@ -4,22 +4,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Checkbox, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil } from './../../util';
-import { requestAnimationFrame } from './../../viz/utilities';
 import url from 'url';
+import { FacetList } from './FacetList';
+import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil, typedefs } from './../../util';
+import { requestAnimationFrame } from './../../viz/utilities';
 import * as store from './../../../store';
+
+var { Item } = typedefs;
+
 
 /**
  * Label to show at top left of Name block.
  */
 export class StackedBlockNameLabel extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
+    /**
+     * @ignore
+     */
     render(){
 
         var { title, subtitle, accession, inline, className } = this.props;
@@ -86,7 +87,6 @@ export class StackedBlockName extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
@@ -253,29 +253,36 @@ export class StackedBlockListViewMoreButton extends React.Component {
  */
 export class StackedBlockList extends React.Component {
 
-    static ViewMoreButton = StackedBlockListViewMoreButton
+    static ViewMoreButton = StackedBlockListViewMoreButton;
 
     static propTypes = {
-        title : PropTypes.string,
-        showMoreExtTitle : PropTypes.string,
-        collapseLimit : PropTypes.number,
-        collapseShow : PropTypes.number,
-        expTable : PropTypes.any,
-        collapseLongLists : PropTypes.bool.isRequired
-    }
+        title               : PropTypes.string,
+        showMoreExtTitle    : PropTypes.string,
+        collapseLimit       : PropTypes.number,
+        collapseShow        : PropTypes.number,
+        expTable            : PropTypes.any,
+        collapseLongLists   : PropTypes.bool.isRequired
+    };
 
     static defaultProps = {
-        collapseLimit : 4,
-        collapseShow : 3
-    }
+        'collapseLimit'     : 4,
+        'collapseShow'      : 3,
+        'collapseLongLists' : true
+    };
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
+        this.finishTransition = this.finishTransition.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         if (props.collapseLongLists && Array.isArray(props.children) && props.children.length > props.collapseLimit){
             this.state = { 'collapsed' : true };
+        }
+    }
+
+    finishTransition(){
+        if (this.props.expTable && this.props.expTable.state){
+            this.props.expTable.setState({ 'collapsing' : false });
         }
     }
 
@@ -341,16 +348,17 @@ export class StackedBlockList extends React.Component {
     }
 
     render(){
-        var children = this.adjustedChildren();
+        var { collapseLongLists, stackDepth, collapseLimit, collapseShow } = this.props,
+            children = this.adjustedChildren(),
+            className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + stackDepth),
+            timeout = 350; // Default
 
-        var className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + this.props.stackDepth);
-        var timeout = 350; // Default
-        if (!this.props.collapseLongLists || !Array.isArray(children) || children.length <= this.props.collapseLimit) {
+        if (collapseLongLists === false || !Array.isArray(children) || children.length <= collapseLimit) {
             // Don't have enough items for collapsible element, return plain list.
             return <div className={className}>{ children }</div>;
         }
 
-        var collapsibleChildren = children.slice(this.props.collapseShow);
+        var collapsibleChildren = children.slice(collapseShow);
         if (collapsibleChildren.length > 18) {
             className += ' transition-slow';
             timeout = 1000;
@@ -359,24 +367,14 @@ export class StackedBlockList extends React.Component {
             timeout = 500;
         }
 
-        var transitionFinish = function(){
-            if (this.props.expTable && this.props.expTable.state){
-                this.props.expTable.setState({ 'collapsing' : false });
-            }
-        }.bind(this);
-
         return (
             <div className={className} data-count-collapsed={collapsibleChildren.length}>
                 { children.slice(0, this.props.collapseShow) }
-                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
+                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={this.finishTransition} onEntered={this.finishTransition}>
                     <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
                 </Collapse>
-                <StackedBlockListViewMoreButton
-                    collapsibleChildren={collapsibleChildren}
-                    collapsed={this.state.collapsed}
-                    handleCollapseToggle={this.handleCollapseToggle}
-                    {...this.props}
-                />
+                <StackedBlockListViewMoreButton {...this.props} collapsibleChildren={collapsibleChildren}
+                    collapsed={this.state.collapsed} handleCollapseToggle={this.handleCollapseToggle} />
             </div>
         );
     }
@@ -613,9 +611,10 @@ const fileEntryBlockMixins = {
     },
 
     hasCheckbox : function(){
-        if (!this.props.file) return false; // No file to select.
-        if (this.props.pairParent) return false; // Part of pair -- FilePairBlock has own checkbox.
-        if (this.props.excludeCheckbox) return false;
+        var { file, pairParent, excludeCheckbox } = this.props;
+        if (!file) return false; // No file to select.
+        if (pairParent) return false; // Part of pair -- FilePairBlock has own checkbox.
+        if (excludeCheckbox) return false;
         var checked = this.isChecked();
         if (checked === null) return false; // No checked state.
         return true;
@@ -623,22 +622,15 @@ const fileEntryBlockMixins = {
 
     renderCheckBox : function(){
         if (!this.hasCheckbox()) return null;
-        var isChecked = !!this.isChecked();
-        var accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
+        var { handleFileCheckboxChange, file } = this.props,
+            isChecked       = !!this.isChecked(),
+            accessionTriple = FileEntryBlock.accessionTripleFromProps(this.props);
         return (
-            <Checkbox
-                validationState='warning'
-                checked={isChecked}
-                name="file-checkbox"
-                id={'checkbox-for-' + accessionTriple}
-                className='file-entry-table-checkbox'
-                data-select-files={[accessionTriple]}
-                onChange={this.props.handleFileCheckboxChange.bind(
-                    this.props.handleFileCheckboxChange,
-                    accessionTriple,
-                    this.props.file
-                )}
-            />
+            <Checkbox key={this.props['data-key'] || 'file-entry-checkbox'}
+                validationState='warning' checked={isChecked}
+                name="file-checkbox" id={'checkbox-for-' + accessionTriple}
+                className='file-entry-table-checkbox' data-select-files={[accessionTriple]}
+                onChange={handleFileCheckboxChange.bind(handleFileCheckboxChange, accessionTriple, file)} />
         );
     }
 
@@ -667,7 +659,7 @@ export class FileEntryBlockPairColumn extends React.Component {
 
 }
 
-export class FileEntryBlock extends React.Component {
+export class FileEntryBlock extends React.PureComponent {
 
     static accessionTripleFromProps(props){
         var accessionTriple;
@@ -702,7 +694,6 @@ export class FileEntryBlock extends React.Component {
         this.renderCheckBox = fileEntryBlockMixins.renderCheckBox.bind(this);
         this.filledFileRow = this.filledFileRow.bind(this);
         this.renderName = this.renderName.bind(this);
-        this.render = this.render.bind(this);
     }
 
     fileTypeSummary(file = this.props.file){
@@ -740,7 +731,7 @@ export class FileEntryBlock extends React.Component {
                 baseStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (typeof col.render === 'function'){
-                row.push(<div key={col.field} className={colClassName} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
+                row.push(<div key={col.field || i} className={colClassName} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
                 continue;
             }
 
@@ -755,7 +746,7 @@ export class FileEntryBlock extends React.Component {
             }
 
             if (typeof col.field === 'string'){
-                let val = object.getNestedProperty(file, col.field);
+                let val = object.getNestedProperty(file, col.field, true);
                 val = (val && Schemas.Term.toName(col.field, val, true)) || '-';
                 if (col.field === 'quality_metric.overall_quality_status'){
                     var linkToReport = (file.quality_metric && file.quality_metric.url) || null;
@@ -803,7 +794,7 @@ export class FileEntryBlock extends React.Component {
             fileTitleString;
 
         if (fileError) {
-            return <div className="name-title"><em>{ fileError }</em></div>;
+            return <div key="name-title" className="name-title"><em>{ fileError }</em></div>;
         }
 
         if (!file)                              fileTitleString = 'No Files';
@@ -817,12 +808,12 @@ export class FileEntryBlock extends React.Component {
         if (!fileTitleString)                   fileTitleString = file.uuid || fileAtId || 'N/A';
         if (typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, this.props, { fileAtId, fileTitleString });
-            if (renderedName) return <div className="name-title" children={renderedName} />;
+            if (renderedName) return <div key="name-title" className="name-title" children={renderedName} />;
         }
         if (!fileAtId) {
-            return <div className="name-title" children={fileTitleString}/>;
+            return <div key="name-title" className="name-title" children={fileTitleString}/>;
         }
-        return <a className="name-title mono-text" href={fileAtId} children={fileTitleString}/>;
+        return <a key="name-title" className="name-title mono-text" href={fileAtId} children={fileTitleString}/>;
     }
 
     renderLabel(){
@@ -831,6 +822,7 @@ export class FileEntryBlock extends React.Component {
         if (!file) return null;
 
         var commonProperties = {
+            'key'       : "name-block-label",
             'title'     : label && label.title,
             'inline'    : false,
             'className' : 'col-file',
@@ -862,48 +854,33 @@ export class FileEntryBlock extends React.Component {
     }
 
     /**
-    * Add a link to an external site for some file types.
-    * @param file - Describes the file object that will be displayed.
+    * Add a link to an external JuiceBox site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+    * @param {string} host              - The host part of the current url
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderExternalLink(){
-        var { file } = this.props;
-
-        // Find out if the file format is hic.
-        // - It needs an external href link
-        //   - Either it needs a file format of 'hic'
-        //   - OR it has a detailed file type that contains 'hic'
-        var fileFormat = fileUtil.getFileFormatStr(file);
-        var fileIsHic = (
-            file
-            && (
-                (fileFormat && fileFormat === 'hic')
-                || (
-                    file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )
-            && file.href
-        );
-
-        var externalLinkButton;
-        if (fileIsHic) {
+    renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host){
+        var externalLinkButton = null;
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
             // Make an external juicebox link.
             var onClick = function(evt){
+
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                // Get the protocol and host from storage before adding the juicebox link.
-                var currentPageUrlBase = store && store.getState().href,
-                    hrefParts = url.parse(currentPageUrlBase),
-                    host = hrefParts.protocol + '//' + hrefParts.host,
-                    targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
-
+                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
                 var win = window.open(targetLocation, '_blank');
                 win.focus();
             };
 
             // Build the juicebox button
             externalLinkButton = (
-                <Button bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                    <i className="icon icon-fw icon-external-link text-smaller"/>
+                <Button key="juicebox-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                    J<i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
         }
@@ -912,18 +889,88 @@ export class FileEntryBlock extends React.Component {
         return externalLinkButton;
     }
 
+    /**
+    * Add a link to WashU Epigenome site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+    * @param {string} host              - The host part of the current url
+    * @param {string} genome_assembly   - The file's genome assembly
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+        var externalLinkButton = null;
+
+        // We may need to map the genome assembly to Epigenome's assemblies.
+        const assemblyMap = {
+            'GRCh38' : 'hg38',
+            'GRCm38' : 'mm10'
+        };
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+            return null;
+        }
+
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                const epiGenomeMapping = assemblyMap[genome_assembly];
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
+
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the Epigenome button
+            externalLinkButton = (
+                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick}>
+                    E<i className="icon icon-fw icon-external-link text-smaller"/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    renderExternalButtons(){
+        if (!this.props.file) return;
+        var { file } = this.props,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
+                (fileFormat && fileFormat === 'hic')
+                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+            )),
+            externalLinkButton      = null,
+            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+            fileIsPublic = (file.status === 'archived' || file.status === 'released'),
+            fileHref = file.href,
+            currentPageUrlBase = store && store.getState().href,
+            hrefParts = url.parse(currentPageUrlBase),
+            host = hrefParts.protocol + '//' + hrefParts.host;
+
+        return (
+            <React.Fragment>
+                {this.renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host)}
+                {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+            </React.Fragment>
+        );
+    }
+
     renderName(){
         var { file, colWidthStyles } = this.props;
-        return <div
-            className={
-                "name col-file" + (
-                    file && file.accession ? ' mono-text' : ''
-                )}
-            style={colWidthStyles ? colWidthStyles.file : null}
-            children={[
-                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
-            ]}
-        />;
+        return <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
+            style={colWidthStyles ? colWidthStyles.file : null} children={[
+                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(),
+                this.renderExternalButtons(),
+            ]} />;
     }
 
     render(){
@@ -936,7 +983,7 @@ export class FileEntryBlock extends React.Component {
         if (typeof stripe !== 'undefined' && stripe !== null){
             sBlockClassName += (stripe === true || stripe === 'even') ? ' even' : ' odd';
         }
-        return <div className={sBlockClassName} children={[this.renderName(), this.filledFileRow()]}/>;
+        return <div key="file-s-block" className={sBlockClassName} children={[this.renderName(), this.filledFileRow()]}/>;
     }
 }
 
@@ -1084,8 +1131,8 @@ export class StackedBlockTable extends React.Component {
     /**
      * If we have a SelectedFilesController up the parent/ancestor chain that feeds us selectFile, selectedFiles, and unselectFile, this is the handler to use for checkbox stacked blocks.
      *
-     * @param {string|string[]} uuid - String or list of strings (File Item UUID)
-     * @param {Object|Object[]} fileObj - File Item JSON
+     * @param {string|string[]} accessionTripleString - String or list of strings which represented 3 accessions (ExpSet, Exp, File) delimited by a tilde (~).
+     * @param {Item|Item[]} fileObj - File Item JSON
      * @returns {void} - Nothing.
      */
     handleFileCheckboxChange(accessionTripleString, fileObj){
@@ -1149,9 +1196,10 @@ export class StackedBlockTable extends React.Component {
     }
 
     render(){
+        var { width , fadeIn, columnHeaders, className, children } = this.props;
 
         // Cache for each render.
-        var minTotalWidth = Math.max(this.props.width || 0, this.totalColumnsWidth(this.getOriginalColumnWidths()));
+        var minTotalWidth = Math.max(width || 0, this.totalColumnsWidth(this.getOriginalColumnWidths()));
         this.lastColumnWidths = this.getColumnWidths();
 
         var renderHeaderItem = function(h, i, arr){
@@ -1163,7 +1211,8 @@ export class StackedBlockTable extends React.Component {
                 style = { 'width' : this.lastColumnWidths[i] || h.initialWidth };
             }
             return (
-                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')} key={'header-' + i} style={style} data-column-class={h.columnClass}>
+                <div className={"heading-block col-" + h.columnClass + (h.className ? ' ' + h.className : '')}
+                    key={'header-' + i} style={style} data-column-class={h.columnClass}>
                     { visibleTitle }
                 </div>
             );
@@ -1171,30 +1220,16 @@ export class StackedBlockTable extends React.Component {
 
         return (
             <div
-                className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (this.props.fadeIn ? ' fade-in' : '') + (typeof this.props.className === 'string' ? ' ' + this.props.className : '')}
-                style={{ minWidth : minTotalWidth }}
-            >
+                className={"stacked-block-table" + (this.state.mounted ? ' mounted' : '') + (fadeIn ? ' fade-in' : '') + (typeof className === 'string' ? ' ' + className : '')}
+                style={{ minWidth : minTotalWidth }}>
                 {
-                    !this.props.children ?
+                    !children ?
                     <h6 className="text-center text-400"><em>No Results</em></h6>
                     :
-                    <div className="headers expset-headers" ref="header">
-                        { this.props.columnHeaders.map(renderHeaderItem) }
-                    </div>
+                    <div className="headers expset-headers" ref="header" children={columnHeaders.map(renderHeaderItem)}/>
                 }
-
-                {
-                    this.props.children ?
-                    <div className="body clearfix">
-                        { this.adjustedChildren() }
-                    </div> : null
-                }
-
+                { children ? <div className="body clearfix" children={this.adjustedChildren()} /> : null }
             </div>
         );
     }
-
-
-
-
 }

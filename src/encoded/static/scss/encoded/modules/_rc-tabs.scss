@@ -538,7 +538,7 @@ h4.tab-section-title {
 }
 
 .tab-section-title-horiz-divider {
-    /* Use classes 'mb-0', 'mb-1', etc. to set margins */ 
+    /* Use classes 'mb-0', 'mb-1', etc. to set margins */
     margin-top: 0;
     margin-bottom: 0;
     border-top-color: #ccc;
@@ -644,11 +644,10 @@ h4.tab-section-title {
       &.icon-leaf {
         position: relative;
         top: 1px;
-        top: 0.5px;
       }
     }
 
-    span.active > i.icon { 
+    span.active > i.icon {
       opacity : 1;
 
       &.icon-warning {
@@ -656,8 +655,8 @@ h4.tab-section-title {
       }
 
       &.icon-ban, &.icon-exclamation-circle {
-          //color : $audit-color-error;
-          color: #ff5757;
+          color : $audit-color-warning;
+          //color: #ff5757;
       }
 
     }
@@ -699,5 +698,3 @@ h4.tab-section-title {
   border-right: none;
   background-color: #fff;
 }
-
-

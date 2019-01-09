@@ -88,8 +88,8 @@ class ShortAttribution extends React.PureComponent {
 
         var yearPublished = null;
         try {
-            if (typeof pub.date_published === 'string'){
-                yearPublished = (new Date(pub.date_published)).getFullYear();
+            if (pub.date_published && typeof pub.date_published === 'string'){
+                yearPublished = DateUtility.formatPublicationDate(pub.date_published, false);
             }
             if (journalString && yearPublished){
                 yearPublished = ' ' + yearPublished;
@@ -196,13 +196,6 @@ export class Publications extends React.PureComponent {
 
         var details = [];
 
-        if (publication && typeof publication.date_published === 'string'){
-            details.push({
-                'label' : 'Published',
-                'content' : DateUtility.format(publication.date_published)
-            });
-        }
-
         if (typeof publication.authors === 'string'){
             details.push({
                 'label' : 'Authors',
@@ -225,6 +218,13 @@ export class Publications extends React.PureComponent {
             details.push({
                 label : <span>{ this.toggleAbstractIcon() } Abstract</span>,
                 content : this.shortAbstract()
+            });
+        }
+
+        if (publication && typeof publication.date_published === 'string'){
+            details.push({
+                'label' : 'Published',
+                'content' : DateUtility.formatPublicationDate(publication.date_published)
             });
         }
 

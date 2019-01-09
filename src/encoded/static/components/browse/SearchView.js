@@ -7,42 +7,21 @@ import url from 'url';
 import _ from 'underscore';
 import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate } from './../util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, typedefs } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane, AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin, AboveSearchTablePanel } from './components';
+import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
+    AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
+    AboveSearchTablePanel, defaultColumnDefinitionMap} from './components';
 
-
-
-export function getSearchType(facets){
-    var specificSearchType;
-    // Check to see if we are searching among multiple data types
-    // If only one type, use that as the search title
-    for (var i = 0; i < facets.length; i++){
-        if (facets[i]['field'] && facets[i]['field'] == 'type'){
-            if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
-                && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
-                // it's a single data type, so grab it
-                specificSearchType = facets[i]['terms'][0]['key'];
-            }else{
-                specificSearchType = 'Multiple type';
-            }
-        }
-        return specificSearchType;
-    }
-}
-
+var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
 /**
  * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
  * 'searchBase' or 'href' prop (treated the same) and the 'navigate' callback prop (usually utils/navigate.js).
  *
  * Passes other props down to ControlsAndResults.
- *
- * @export
- * @class ResultTableHandlersContainer
- * @extends {React.Component}
  */
-export class ResultTableHandlersContainer extends React.PureComponent {
+class ResultTableHandlersContainer extends React.PureComponent {
 
     static defaultProps = {
         'restrictions'  : {},
@@ -75,9 +54,7 @@ export class ResultTableHandlersContainer extends React.PureComponent {
         return ['status'].concat(defaultHiddenColumnsFromSchemas);
     }
 
-    isTermSelected(term, facet){
-        return !!(Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters));
-    }
+    isTermSelected(term, facet){ return Filters.determineIfTermFacetSelected(term, facet, this.props); }
 
     render(){
         return (
@@ -102,8 +79,14 @@ class ControlsAndResults extends React.PureComponent {
     constructor(props){
         super(props);
         this.render = this.render.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdate.bind(this);
+        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
+    }
+
+    forceUpdateOnSelf(){
+        var searchResultTable   = this.refs.searchResultTable,
+            dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
+        return dimContainer && dimContainer.resetWidths();
     }
 
     handleClearFilters(evt){
@@ -126,18 +109,18 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, constantHiddenColumns, columnDefinitionOverrideMap } = this.props;
-        var results = context['@graph'],
-            inSelectionMode = currentAction === 'selection',
-            facets = this.props.facets || context.facets,
-            thisType = 'Item',
-            thisTypeTitle = Schemas.getTitleForType(thisType),
+        var { context, href, hiddenColumns, currentAction, constantHiddenColumns, columnDefinitionOverrideMap } = this.props,
+            results                     = context['@graph'],
+            inSelectionMode             = currentAction === 'selection',
+            facets                      = this.props.facets || context.facets,
+            thisType                    = 'Item',
+            thisTypeTitle               = Schemas.getTitleForType(thisType),
             itemTypeForSchemas,
             schemaForType,
             abstractType,
-            urlParts = url.parse(href, true),
-            hiddenColumnsFull = (hiddenColumns || []).slice(0),
-            constantHiddenColumnsFull = ['@type'].concat((constantHiddenColumns || []).slice(0));
+            urlParts                    = url.parse(href, true),
+            hiddenColumnsFull           = (hiddenColumns || []).slice(0),
+            constantHiddenColumnsFull   = ['@type'].concat((constantHiddenColumns || []).slice(0));
 
         // get type of this object for getSchemaProperty (if type="Item", no tooltips)
 
@@ -160,11 +143,14 @@ class ControlsAndResults extends React.PureComponent {
         }
 
         var columnDefinitionOverrides = (columnDefinitionOverrideMap && _.clone(columnDefinitionOverrideMap)) || {};
-        var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
+
+        // Kept for reference in case we want to re-introduce constrain that for 'select' button(s) to be visible in search result rows, there must be parent window.
+        //var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
 
         // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
         // Also add the popLink/target=_blank functionality to links
-        if (isThereParentWindow && currentAction === 'selection') {
+        // Remove lab.display_title and type columns on selection
+        if (inSelectionMode) {
             columnDefinitionOverrides['display_title'] = {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
@@ -175,9 +161,10 @@ class ControlsAndResults extends React.PureComponent {
                     newChildren.unshift(
                         <div className="select-button-container">
                             <button className="select-button" onClick={(e)=>{
-                                //e.preventDefault();
+                                // Standard - postMessage
                                 var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
                                 window.opener.postMessage(eventJSON, '*');
+                                // Nonstandard - in case browser doesn't support postMessage but does support other cross-window events (unlikely).
                                 window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
                             }}>
                                 <i className="icon icon-fw icon-check"/>
@@ -187,12 +174,20 @@ class ControlsAndResults extends React.PureComponent {
                     return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
                 }
             };
-            columnDefinitionOverrides['lab.display_title'] = {
-                'render' : function(result, columnDefinition, props, width){
-                    var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
-                    return newRender;
-                }
-            };
+            // remove while @type and lab from File selection columns
+            if (thisType === 'File'){
+                hiddenColumnsFull.push('@type');
+                hiddenColumnsFull.push('lab.display_title');
+                delete columnDefinitionOverrides['lab.display_title'];
+                delete columnDefinitionOverrides['@type'];
+            }else{
+                columnDefinitionOverrides['lab.display_title'] = {
+                    'render' : function(result, columnDefinition, props, width){
+                        var newRender = SearchResultTable.defaultColumnDefinitionMap['lab.display_title'].render(result, columnDefinition, props, width, true);
+                        return newRender;
+                    }
+                };
+            }
         }
 
         // We're on an abstract type; show detailType in type column.
@@ -213,7 +208,8 @@ class ControlsAndResults extends React.PureComponent {
                 { facets.length ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter')}
+                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth',
+                        'currentAction')}
                             className="with-header-bg" facets={facets} filters={context.filters}
                             onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
                             itemTypeForSchemas={itemTypeForSchemas} hideDataTypeFacet={inSelectionMode}
@@ -226,7 +222,8 @@ class ControlsAndResults extends React.PureComponent {
                         </div>
                 : null }
                 <div className={facets.length ? "col-sm-7 col-md-8 col-lg-9 expset-result-table-fix" : "col-sm-12 expset-result-table-fix"}>
-                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'context', 'columns', 'selectedFiles', 'currentAction')}
+                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn',
+                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
                         hiddenColumns={hiddenColumnsFull} showTotalResults={context.total}
                         parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={CustomColumnSelector.buildColumnDefinitions(
                             SearchResultTable.defaultProps.constantColumnDefinitions,
@@ -234,10 +231,14 @@ class ControlsAndResults extends React.PureComponent {
                             columnDefinitionOverrides,
                             constantHiddenColumnsFull
                         )} />
-                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse', 'currentAction')}
+                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
+                        'currentAction', 'windowWidth', 'registerWindowOnScrollHandler')}
+                        ref="searchResultTable"
                         results={results} totalExpected={context.total} columns={context.columns || {}}
                         hiddenColumns={hiddenColumnsFull} columnDefinitionOverrideMap={columnDefinitionOverrides}
-                        renderDetailPane={(result, rowNumber, containerWidth) => <SearchResultDetailPane result={result} /> } />
+                        renderDetailPane={(result, rowNumber, containerWidth) =>
+                            <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />
+                        } />
                 </div>
             </div>
         );
@@ -247,26 +248,36 @@ class ControlsAndResults extends React.PureComponent {
 
 export default class SearchView extends React.PureComponent {
 
+    /**
+     * @ignore
+     */
     static propTypes = {
         'context' : PropTypes.object.isRequired,
         'currentAction' : PropTypes.string
-    }
+    };
 
+    /**
+     * @public
+     * @type {Object}
+     * @property {string} href - Current URI.
+     * @property {string} [currentAction=null] - Current action, if any.
+     * @property {Object.<ColumnDefinition>} columnDefinitionOverrideMap - Object keyed by field name with overrides for column definition.
+     */
     static defaultProps = {
         'href'          : null,
         'currentAction' : null,
-        'columnDefinitionOverrideMap' : {
+        'columnDefinitionOverrideMap' : _.extend({}, defaultColumnDefinitionMap, {
             'google_analytics.for_date' : {
                 'title' : 'Analytics Date',
                 'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
                 'render' : function(result, columnDefinition, props, width){
                     if (!result.google_analytics || !result.google_analytics.for_date) return null;
-                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' />;
+                    return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
                 }
             }
-        },
+        }),
         'restrictions'  : {} // ???? what/how is this to be used? remove? use context.restrictions (if any)?
-    }
+    };
 
     constructor(props){
         super(props);

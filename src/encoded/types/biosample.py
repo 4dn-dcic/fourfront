@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
     # paths_filtered_by_status,
 )
 
@@ -30,7 +31,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     aggregated_items = {
         "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
     }
-    embedded_list = [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'badges.badge.*',
         'biosource.biosource_type',
         'biosource.individual.sex',
@@ -59,8 +60,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
-        'biosample_protocols.description',
-        'award.project'
+        'biosample_protocols.description'
     ]
     name_key = 'accession'
 

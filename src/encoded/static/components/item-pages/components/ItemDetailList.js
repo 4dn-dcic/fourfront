@@ -5,12 +5,13 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse, Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import { console, object, Schemas } from './../../util';
+import { console, object, Schemas, typedefs } from './../../util';
 import * as vizUtil from './../../viz/utilities';
 import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
 import JSONTree from 'react-json-tree';
 
+var { Item } = typedefs;
 
 /**
  * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
@@ -594,9 +595,9 @@ class DetailRow extends React.PureComponent {
      * Handler for rendered title element. Toggles visiblity of Subview.
      *
      * @param {React.SyntheticEvent} e - Mouse click event. Its preventDefault() method is called.
-     * @returns {Object} 'isOpen' : false
+     * @returns {void}
      */
-    handleToggle (e, id = null) {
+    handleToggle(e){
         e.preventDefault();
         this.setState({
             isOpen: !this.state.isOpen,
@@ -662,15 +663,13 @@ export class Detail extends React.PureComponent {
     /**
      * Formats the correct display for each metadata field.
      *
-     * @memberof module:item-pages/components.ItemDetailList.Detail
-     * @static
      * @param {Object} tips - Mapping of field property names (1 level deep) to schema properties.
-     * @param {Object} key - Key to use to get 'description' for tooltip from the 'tips' param.
+     * @param {string} key - Key to use to get 'description' for tooltip from the 'tips' param.
+     * @param {boolean} [includeTooltip=false] - If false, skips adding tooltip to output JSX.
      * @returns {JSX.Element} <div> element with a tooltip and info-circle icon.
      */
     static formKey(tips, key, includeTooltip = true){
-        var tooltip = null;
-        var title = null;
+        var tooltip = null, title = null;
         if (tips[key]){
             var info = tips[key];
             if (info.title)         title = info.title;
@@ -685,10 +684,13 @@ export class Detail extends React.PureComponent {
     * Recursively render keys/values included in a provided item.
     * Wraps URLs/paths in link elements. Sub-panels for objects.
     *
-    * @memberof module:item-pages/components.ItemDetailList.Detail
-    * @static
-    * @param {Object} schemas - Object containing schemas for server's JSONized object output.
-    * @param {Object|Array|string} item - Item(s) to render recursively.
+    * @param {Item} item - JSON of an Item.
+    * @param {boolean} [popLink=false] - Whether to open child links in new window.
+    * @param {string} keyPrefix - Not sure. Key to use to get value with?
+    * @param {string} atType - Current type of Item.
+    * @param {ColumnDefinition[]} columnDefinitions - List of column definitions to use for SubItemTable.
+    * @param {number} depth - Current recursive depth.
+    * @returns {JSX.Element}
     */
     static formValue(item, popLink = false, keyPrefix = '', atType = 'ExperimentSet', columnDefinitions, depth = 0) {
         var schemas = Schemas.get();
@@ -942,7 +944,7 @@ export class ItemDetailList extends React.Component {
 
     static Detail = Detail
 
-    static getTabObject(context, schemas = null){
+    static getTabObject(props){
         return {
             tab : <span><i className="icon icon-list icon-fw"/> Details</span>,
             key : 'details',
@@ -952,7 +954,7 @@ export class ItemDetailList extends React.Component {
                         <span>Details</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider mb-05"/>
-                    <ItemDetailList context={context} schemas={schemas} />
+                    <ItemDetailList {...props} />
                 </div>
             )
         };

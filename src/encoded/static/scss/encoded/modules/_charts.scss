@@ -1665,10 +1665,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
 }
 
 
-.workflow-view-controls-container {
+.tabview-title-controls-container {
     font-size: 1rem;
     margin-bottom: 8px;
-    padding-top: 10px;
     padding-left: 5px;
     float: right;
     padding-top: 17px;
@@ -1678,71 +1677,55 @@ $workflow-node-color-type-global-context: #ffb3b3;
         @include button-no-focus-outline;
     }
 
-    > .inner-panel {
-        float: left;
-        > div.inline-block {
-            vertical-align: middle;
-            line-height: 20px;
-            height: 34px;
-            
-            
-            
-            button#rowspacingtype-select {
-                min-width: 120px;
-            }
+    > .toolbar-wrapper > .btn-toolbar {
+        > .btn-group {
+            float: none;
         }
+    }
 
-        &:not(.constant-panel) {
-            > div.inline-block {
-
-                &.checkbox-container {
-                    padding: 8px 12px 6px 0;
-                    vertical-align: middle;
-                    font-size: 0.9rem;
-                    @include user-select(none);
-                    div.checkbox {
-                        margin: 0;
-                        input[type="checkbox"]{
-                            margin-top: 3px;
-                        }
-                        &.disabled{
-                            color: #999;
-                        }
-                    }
-                }
-
-                @media screen and (max-width: $screen-md-max){
-                    display: block;
-                    &.checkbox-container {
-                        padding-top: 5px;
-                        padding-bottom: 5px;
-                        height: auto;
-                    }
-                }
-            }
+    .checkbox-container {
+        margin-right: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+        display: block;
+        padding-top: 7px;
+        padding-bottom: 5px;
+        font-size: 0.9rem;
+        @include user-select(none);
+        &.disabled{
+            color: #999;
         }
+    }
 
-        &.constant-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
-        }
+    button#rowspacingtype-select {
+        min-width: 120px;
     }
     
     @media screen and (min-width: $screen-lg-min){
-        
-        > .inner-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
+
+        .checkbox-container {
+            float: left;
         }
+
     }
     @media screen and (max-width: $screen-md-max){
-        float: left;
         > .inner-panel:first-child {
-            padding-right: 10px;
+            min-width: 200px;
+            padding-left: 10px;
+            padding-bottom: 12px;
+            > hr {
+                margin-top: 12px;
+                margin-bottom: 0;
+            }
+            > .mobile-size-elem {
+                > .dropdown.btn-group,
+                > .dropdown.btn-group > button.btn,
+                > button.btn {
+                    width: 100%;
+                    text-align: left;
+                }
+            }
         }
     }
 }
@@ -1751,14 +1734,59 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 /***** Area Charts *****/
 
+.chart-section-control-wrapper {
+    &.row {
+        > .col-sm-6 {
+            > a.select-section-btn {
+                text-align: center;
+                color: #333;
+                //border: 1px solid #ddd;
+                //border-top: 1px solid #ddd;
+                //border-bottom: 1px solid #ddd;
+                border: 1px solid transparent;
+                padding-top: 15px;
+                padding-bottom: 15px;
+                display: block;
+                transition: border-color .25s ease-in-out, background-color .25s ease-in-out, color .25s ease-in-out;
+                background-color: #22656d;
+                color: #fff;
+                border-radius: 3px;
+                line-height: 1.35rem;
+                font-size: 1.125rem;
+                &.active {
+                    border-color: #888;
+                    color: #333;
+                    background-color: transparent;
+                    pointer-events: none;
+                    cursor: default;
+                    border-left-color: transparent;
+                    border-right-color: transparent;
+                    border-radius: 0px;
+                    font-size: 1.2rem;
+                }
+                &:hover, &:active, &:focus {
+                    text-decoration: none;
+                }
+                &:not(.active):hover {
+                    //color: #000;
+                    background-color: #227b86;
+                    text-shadow: 0 0 0;
+                }
+            }
+        }
+    }
+}
+
 
 .stats-charts-container {
 
+    min-height: 1400px;
 
     .area-chart-inner-container {
         position: relative;
 
         svg {
+            cursor: crosshair;
             .right-axis-tick-line {
                 pointer-events: none;
             }
@@ -1774,8 +1802,41 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 bottom: 0;
                 left: 0;
                 width: 0px;
-                border-left: 1px solid #000;
+                border-left: 1px dashed #000;
                 pointer-events: none;
+            }
+
+            > .line-notch {
+                position: absolute;
+                pointer-events: none;
+                left: -5px;
+                width: 11px;
+                height: 3px;
+                background-color: #333;
+                border-radius: 2px;
+                margin-top: -1px;
+                > .horiz-line-before,
+                > .horiz-line-after {
+                    position: absolute;
+                    top: 1px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    border-top: 1px dashed #000;
+                }
+                > .horiz-line-after {
+                    left: 11px;
+                }
+                /*
+                &::before {
+                    content: ' ';
+                    display: block;
+                    position: relative;
+                    width: 2000px;
+                    height: 0;
+                    border-top: 1px solid rgba(0,0,0,0.2);
+                    left: -2000px;
+                }
+                */
             }
 
             > .label-bg {
@@ -1783,7 +1844,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-right: 12px;
                 padding-top: 8px;
                 position: absolute;
-                min-width: 135px;
+                min-width: 175px;
                 background-color: rgba(255,255,255,0.8);
                 padding-bottom: 9px;
                 border-bottom-left-radius: 5px;

@@ -144,13 +144,13 @@ export default class CursorComponent extends React.Component {
             }
             document.body.appendChild(this.portalElement);
         }
-        document.addEventListener('mousemove', this._onMouseMove);
+        window.addEventListener('mousemove', this._onMouseMove);
         this.setState({ 'mounted' : true });
     }
 
     componentWillUnmount() {
         if (this.props.debug) console.log('Will unmount CursorComponent');
-        document.removeEventListener('mousemove', this._onMouseMove);
+        window.removeEventListener('mousemove', this._onMouseMove);
 
         vizUtil.requestAnimationFrame(()=>{
             document.body.removeChild(this.portalElement);

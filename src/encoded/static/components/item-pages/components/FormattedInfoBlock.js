@@ -95,7 +95,7 @@ export class WrappedCollapsibleList extends React.Component {
     renderItems(){
         var { itemClassName, persistentCount, items, itemRenderFxn, wrapperElement } = this.props;
 
-        var itemsToElements = ((pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback));
+        var itemsToElements = (pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback);
 
         if (items.length <= persistentCount){
             return React.createElement(wrapperElement || 'ul', {}, itemsToElements(items));
@@ -160,25 +160,27 @@ class FormattedInfoBlockList extends React.Component {
         if (!Array.isArray(endpoints) || endpoints.length === 0) return false;
 
         var results = [];
-        endpoints.forEach(function(endpoint, i){
+
+        _.forEach(endpoints, (endpoint, i) => {
 
             console.log('Obtaining ' + propertyName + '[' + i + '] via AJAX from ' + endpoint);
-            ajax.load(endpoint + '?format=json&frame=embedded', function(result){
-                results[i] = result;
-                console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
-                if (results.length === endpoints.length){
-                    // All loaded
+
+            ajax.load(endpoint + '?format=json&frame=embedded', (result) => {
+                results.push(result);
+                this.setState((currState)=>{
                     var newState = {};
                     newState['details_' + propertyName] = results;
-                    this.setState(newState, ()=>{
-                        if (typeof callback === 'function'){
-                            callback(results);
-                        }
-                    });
-                    console.log('Obtained details_'+ propertyName +' (' + results.length + ') via AJAX: ', results);
-                }
-            }.bind(this), 'GET');
-        }.bind(this));
+                    return newState;
+                }, ()=>{
+                    if (typeof callback === 'function'){
+                        callback(results);
+                    }
+                });
+                console.log('Obtained details_'+ propertyName +' (' + results.length + ') via AJAX: ', results);
+            }, 'GET', (res)=>{
+                console.error('Failed to get ' + propertyName + ': ' + endpoint);
+            });
+        });
     }
 
     static propTypes = {
@@ -198,7 +200,7 @@ class FormattedInfoBlockList extends React.Component {
     }
 
     static propEndpointsValid(props){
-        return props.endpoints && Array.isArray(props.endpoints) && props.endpoints.length > 0;
+        return props.endpoints && Array.isArray(props.endpoints) && props.endpoints.length > 0 && _.every(props.endpoints, function(ep){ return typeof ep === 'string' && ep.length > 0; });
     }
 
     static propDetailsValid(props){
@@ -220,9 +222,6 @@ class FormattedInfoBlockList extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.render = this.render.bind(this);
         this.state = _.extend(FormattedInfoBlockList.getInitialDetailsState(props), {
             'loading' : props.loading || (!FormattedInfoBlockList.propDetailsValid(props) && FormattedInfoBlockList.propEndpointsValid(props) ? true : null),
             'mounted' : false
@@ -230,10 +229,15 @@ class FormattedInfoBlockList extends React.Component {
     }
 
     componentDidMount(){
-        if (!this.state['details_' + this.props.propertyName] && FormattedInfoBlockList.propEndpointsValid(this.props)){
-            FormattedInfoBlockList.ajaxPropertyDetails.call(this, this.props.endpoints, this.props.propertyName, (results) => {
-                this.setState({ loading : false });
-                if (typeof this.props.ajaxCallback === 'function') this.props.ajaxCallback(results);
+        var { propertyName, endpoints, ajaxCallback } = this.props;
+        if (!this.state['details_' + propertyName] && FormattedInfoBlockList.propEndpointsValid(this.props)){
+            FormattedInfoBlockList.ajaxPropertyDetails.call(this, endpoints, propertyName, (results) => {
+                if (results.length === endpoints.length){
+                    this.setState({ 'loading' : false });
+                }
+                if (typeof ajaxCallback === 'function'){
+                    ajaxCallback(results);
+                }
             });
         }
         this.setState({ mounted : true });
@@ -250,21 +254,12 @@ class FormattedInfoBlockList extends React.Component {
         this.setState(stateChange);
     }
 
-    componentDidUpdate(prevProps, prevState){
-        if (prevState.loading === true && this.state.loading === false && !this.state.transitionDelayElapsed){
-            if (this.props.debug) console.info('FormattedInfoBlock.List > updated this.props.loading');
-            if (this.state.mounted && !isServerSide()){
-                setTimeout(()=>{
-                    if (this.props.debug) console.info('FormattedInfoBlock.List > setting state.transitionDelayElapsed');
-                    this.setState({ transitionDelayElapsed : true });
-                }, 100);
-            }
-        }
-    }
-
     render(){
 
-        if (!FormattedInfoBlockList.propDetailsValid(this.props) && !FormattedInfoBlockList.propEndpointsValid(this.props) && !this.state.loading){
+        var { fallbackMsg, renderItem, propertyName, endpoints, details } = this.props,
+            { loading, transitionDelayElapsed } = this.state;
+
+        if (!FormattedInfoBlockList.propDetailsValid(this.props) && !FormattedInfoBlockList.propEndpointsValid(this.props) && !loading){
             return (
                 <span className="not-set">{ this.props.fallbackMsg }</span>
             );
@@ -272,17 +267,22 @@ class FormattedInfoBlockList extends React.Component {
 
         var blocks;
 
-        if (this.state.loading) {
-            blocks = ()=> ( this.props.endpoints || this.props.details || [null] ).map((item,i)=>
-                <li key={this.props.propertyName + '-' + i} className={this.props.propertyName + "-item"}>
-                    <i className="icon icon-spin icon-circle-o-notch"></i>
-                </li>
-            );
-        } else if (this.state && this.state['details_' + this.props.propertyName]){
-            blocks = ()=> this.state['details_' + this.props.propertyName].map((item,i) => {
+        if (this.state && Array.isArray(this.state['details_' + propertyName])){
+            blocks = _.map(this.state['details_' + propertyName], (item,i) => {
+                if (this.state.loading && !item){
+                    return (
+                        <li key={propertyName + '-' + i} className={propertyName + "-item"}>
+                            <i className="icon icon-spin icon-circle-o-notch"></i>
+                        </li>
+                    );
+                }
+                return <li key={propertyName + '-' + i} className={propertyName + "-item"}>{ renderItem(item) }</li>;
+            });
+        } else if (this.state.loading){
+            blocks = _.map(endpoints || [null], function(item,i){
                 return (
-                    <li key={this.props.propertyName + '-' + i} className={this.props.propertyName + "-item"}>
-                        { this.props.renderItem(item) }
+                    <li key={propertyName + '-' + i} className={propertyName + "-item"}>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
                     </li>
                 );
             });
@@ -292,11 +292,10 @@ class FormattedInfoBlockList extends React.Component {
             <ul
                 className={
                     "formatted-info-panel-list" +
-                    (this.state.loading ? ' loading' : (this.state.loading === false ? ' loaded' : '')) +
-                    (this.state.transitionDelayElapsed ? ' transitioned' : '')
+                    (this.state.loading ? ' loading' : (this.state.loading === false ? ' loaded' : ''))
                 }
                 id={this.props.propertyName}
-            >{ blocks() }</ul>
+            >{ blocks }</ul>
         );
     }
 
@@ -392,10 +391,12 @@ export class FormattedInfoBlock extends React.Component {
      * @see FormattedInfoBlock.generate
      *
      * @param {Object} details_lab - Object containing Lab Details.
-     * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
-     * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
-     * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
+     * @param {boolean|string} [includeIcon=true] - Include icon or not. Supply string to override default lab icon. Defaults to true.
+     * @param {boolean} [includeLabel=true] - Include 'Lab >' label in top left corner, or not. Defaults to true.
+     * @param {boolean} [includeDetail=true] - Include description/details or not. Defaults to true.
+     * @param {boolean} [isMounted=false] - Whether parent component is mounted and we can access e.g. browser window API.
      * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
+     * @returns {JSX.Element} FormattedBlock instance.
      */
     static Lab(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, isMounted = false, key = null){
 

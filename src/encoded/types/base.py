@@ -66,10 +66,6 @@ ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-#ALLOW_VIEWING_GROUP_VIEW = [
-#    (Allow, 'role.viewing_group_member', 'view'),
-#] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
-
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
 ] + ALLOW_LAB_MEMBER_VIEW
@@ -90,17 +86,30 @@ ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-ALLOW_CURRENT = [
-    (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+ALLOW_CURRENT = ALLOW_EVERYONE_VIEW
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
 ] + ONLY_ADMIN_VIEW
 
-# Collection acls
+# For running pipelines
+ALLOW_LAB_VIEW_ADMIN_EDIT = [
+    (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view'),
+    (Allow, 'role.lab_submitter', 'view'),
+] + ONLY_ADMIN_VIEW
 
+ALLOW_OWNER_EDIT = [
+    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
+]
+
+# Collection acls
 ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
+
+ALLOW_ANY_USER_ADD = [
+    (Allow, Authenticated, 'add'),
+    (Allow, Authenticated, 'create')
+] + ALLOW_EVERYONE_VIEW
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -147,7 +156,7 @@ def get_item_if_you_can(request, value, itype=None):
             return request.embed(svalue, '@@object')
         except:
             # this could lead to unexpected errors
-            return value
+            return None
 
 
 def set_namekey_from_title(properties):
@@ -172,7 +181,14 @@ def validate_item_type_of_linkto_field(context, request):
     pass
 
 
-# Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+## Common lists of embeds to be re-used in certain files (similar to schema mixins)
+##
+
+static_content_embed_list = [
+    "static_headers.*",            # Type: UserContent, may have differing properties
+    "static_content.content.*",    # Type: UserContent, may have differing properties
+]
 
 lab_award_attribution_embed_list = [
     "award.project",
@@ -298,10 +314,15 @@ class Item(snovault.Item):
         'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
         'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
         'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
-
+        'restricted': ALLOW_CURRENT,
         # publication
         'published': ALLOW_CURRENT,
+        # experiment sets
+        'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
+
+    # Default embed list for all 4DN Items
+    embedded_list = static_content_embed_list
 
     def __init__(self, registry, models):
         super().__init__(registry, models)
@@ -371,6 +392,10 @@ class Item(snovault.Item):
                             grps.append(group)
                     for g in grps:
                         del roles[g]
+        # This emulates __ac_local_roles__ of User.py (role.owner)
+        if 'submitted_by' in properties:
+            submitter = 'userid.%s' % properties['submitted_by']
+            roles[submitter] = 'role.owner'
         return roles
 
     def add_accession_to_title(self, title):
@@ -571,11 +596,12 @@ class SharedItem(Item):
 def add(context, request):
     """smth."""
     if request.has_permission('add', context):
+        type_name = context.type_info.name
         return {
             'name': 'add',
             'title': 'Add',
-            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!add'.format(item_uri=request.resource_path(context)),
+            'profile': '/profiles/{name}.json'.format(name=type_name),
+            'href': '/search/?type={name}&currentAction=add'.format(name=type_name),
         }
 
 
@@ -587,7 +613,7 @@ def edit(context, request):
             'name': 'edit',
             'title': 'Edit',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=edit'.format(item_uri=request.resource_path(context)),
         }
 
 
@@ -599,5 +625,5 @@ def create(context, request):
             'name': 'create',
             'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}?currentAction=create'.format(item_uri=request.resource_path(context)),
         }

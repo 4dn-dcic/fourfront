@@ -4,19 +4,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Checkbox, Button } from 'react-bootstrap';
+import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
 import * as globals from './../globals';
 import * as store from './../../store';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, HiGlassTabView, HiGlassContainer, HiGlassConfigurator } from './components';
-import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
+    HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING
@@ -40,8 +41,10 @@ export default class FileView extends WorkflowRunTracingView {
         if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
         var fileFormat  = fileUtil.getFileFormatStr(context),
             isMcoolFile = fileFormat === 'mcool',
-            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg');
-        return isMcoolFile || isBWFile;
+            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg'),
+            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed'),
+            isBIGBEDFile = fileFormat === 'bigbed';
+        return isMcoolFile || isBWFile || isBEDDBFile || isBIGBEDFile;
     }
 
     constructor(props){
@@ -87,21 +90,23 @@ export default class FileView extends WorkflowRunTracingView {
             width = this.getTabViewWidth(),
             steps = this.state.steps;
 
-        initTabs.push(FileViewOverview.getTabObject(context, this.props.schemas, width));
+        initTabs.push(FileViewOverview.getTabObject(this.props, width));
 
         if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
         }
 
         if (FileView.shouldHiGlassViewExist(context)){
-            initTabs.push(HiGlassTabView.getTabObject(context, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
+            initTabs.push(HiGlassFileTabView.getTabObject(this.props, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
         }
 
-        return initTabs.concat(this.getCommonTabs(context));
+        return initTabs.concat(this.getCommonTabs(this.props));
     }
 
     itemMidSection(){
-        return <layout.WindowResizeUpdateTrigger><FileOverviewHeading context={this.props.context} tips={this.state.tips} /></layout.WindowResizeUpdateTrigger>;
+        return (
+            <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+        );
     }
 
 }
@@ -113,7 +118,7 @@ globals.content_views.register(FileView, 'File');
 
 class FileViewOverview extends React.Component {
 
-    static getTabObject(context, tips, width){
+    static getTabObject({context, schemas, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'file-overview',
@@ -124,7 +129,7 @@ class FileViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview context={context} tips={tips} width={width} />
+                    <FileViewOverview {...{ context, width, windowWidth }} tips={schemas} />
                 </div>
             )
         };
@@ -146,7 +151,7 @@ class FileViewOverview extends React.Component {
     }
 
     render(){
-        var { context } = this.props;
+        var { context, windowWidth, width, tips } = this.props;
 
         var setsByKey;
         var table = null;
@@ -158,12 +163,12 @@ class FileViewOverview extends React.Component {
         }
 
         if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={this.props.width} defaultOpenIndices={[0]} />;
+            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
             <div>
-                <FileOverViewBody result={context} tips={this.props.tips} />
+                <FileOverViewBody result={context} tips={tips} windowWidth={windowWidth} />
                 { table }
             </div>
         );
@@ -184,7 +189,7 @@ class FileViewOverview extends React.Component {
                     <hr className="tab-section-title-horiz-divider"/>
                     <FileOverViewBody result={context} schemas={this.props.schemas} />
                 </div>
-                
+
                 <div className="col-md-12">
                     { table }
                 </div>
@@ -233,7 +238,7 @@ export class FileOverviewHeading extends React.Component {
     }
 
     render(){
-        var responsiveSize = layout.responsiveGridState();
+        var responsiveSize = layout.responsiveGridState(this.props.windowWidth);
         var isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
         return (
             <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
@@ -272,6 +277,7 @@ export class FileOverViewBody extends React.Component {
     constructor(props){
         super(props);
         this.handleJuiceBoxVizClick = this.handleJuiceBoxVizClick.bind(this);
+        this.handleEpigenomeClick = this.handleEpigenomeClick.bind(this);
     }
 
     handleJuiceBoxVizClick(evt){
@@ -286,17 +292,129 @@ export class FileOverViewBody extends React.Component {
         win.focus();
     }
 
-    visualizeExternallyButton(){
-        var file        = this.props.result,
-            tips        = this.props.tips,
-            fileFormat  = fileUtil.getFileFormatStr(file);
+    handleEpigenomeClick(evt){
+        var file            = this.props.result,
+            pageHref        = this.props.href || (store && store.getState().href),
+            hrefParts       = url.parse(pageHref),
+            host            = hrefParts.protocol + '//' + hrefParts.host,
+            genome_assembly = ("genome_assembly" in file) ? file.genome_assembly : null,
+            targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
 
-        if (fileFormat !== 'hic') return null;
-        return (
-            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
-                <Button bsStyle="primary" onClick={this.handleJuiceBoxVizClick}>
+        if (!genome_assembly) return null;
+        if (isServerSide()) return null;
+        var win = window.open(targetLocation, '_blank');
+        win.focus();
+    }
+
+    /**
+    * Add a link to an external JuiceBox site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+    * @param {string} host              - The host part of the current url
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
+        var externalLinkButton = null;
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the juicebox button
+            externalLinkButton = (
+                <Button bsStyle="primary" onClick={onClick} className="mr-05">
                     <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
                 </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    /**
+    * Add a link to an external Epigenome site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+    * @param {string} host              - The host part of the current url
+    * @param {string} genome_assembly   - The file's genome assembly
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+        var externalLinkButton = null;
+
+        // We may need to map the genome assembly to Epigenome's assemblies.
+        const assemblyMap = {
+            'GRCh38' : 'hg38',
+            'GRCm38' : 'mm10'
+        };
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+            return null;
+        }
+
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                const epiGenomeMapping = assemblyMap[genome_assembly];
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
+
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the Epigenome button
+            externalLinkButton = (
+                <Button bsStyle="primary" onClick={onClick}>
+                    <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    /**
+    * Generate the HTML markup for external visualization links.
+    **/
+    visualizeExternallyButton(){
+        var file                    = this.props.result,
+            tips                    = this.props.tips,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
+            fileIsHic               = (fileFormat === 'hic'),
+            externalLinkButton      = null,
+            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+            fileHref                = file.href,
+            pageHref                = this.props.href || (store && store.getState().href),
+            hrefParts               = url.parse(pageHref),
+            host                    = hrefParts.protocol + '//' + hrefParts.host;
+
+        return (
+            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
+                <React.Fragment>
+                    {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
+                    {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                </React.Fragment>
             } />
         );
     }
@@ -449,4 +567,3 @@ export class RelatedFilesOverViewBlock extends React.Component {
 
     }
 }
-

@@ -2,19 +2,24 @@
 
 import _ from 'underscore';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+import parseDOM from 'html-dom-parser/lib/html-to-dom-server';
+import domToReact from 'html-react-parser/lib/dom-to-react';
+import patchedConsoleInstance from './patched-console';
 import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
 import { isServerSide } from './misc';
 import url from 'url';
 
+var console = patchedConsoleInstance;
 
 /**
  * Convert a link_id, if one exists on param 'object', to an '@id' link.
  * If an '@id' exists already, gets that.
- * 
- * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
+ *
+ * @param {Object} o - Must have a 'link_id' or '@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */
 export function atIdFromObject(o){
@@ -98,10 +103,11 @@ export function listFromTips(tips){
  * Find property within an object using a propertyName in object dot notation.
  * Recursively travels down object tree following dot-delimited property names.
  * If any node is an array, will return array of results.
- * 
+ *
  * @param {Object} object - Item to traverse or find propertyName in.
  * @param {string|string[]} propertyName - (Nested) property in object to retrieve, in dot notation or ordered array.
- * @return {*} - Value corresponding to propertyName.
+ * @param {boolean} [suppressNotFoundError=false] - If true, will not print a console warning message if no value found.
+ * @return {?any} Value corresponding to propertyName.
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
     var errorMsg;
@@ -146,8 +152,13 @@ export function getNestedProperty(object, propertyName, suppressNotFoundError = 
 
 }
 
-
-
+/**
+ * Check if parameter is a valid JSON object or array.
+ *
+ * @param {Object|Array} content - Parameter to test for JSON validity.
+ * @returns {boolean} Whether passed in param is JSON.
+ * @todo Research if a more performant option might exist for this.
+ */
 export function isValidJSON(content) {
     var isJson = true;
     try{
@@ -160,11 +171,129 @@ export function isValidJSON(content) {
 
 
 /**
+ * Sets value to be deeply nested within an otherwise empty object, given a field with dot notation.
+ * Use for creating objects for PATCH requests. Does not currently support arrays.
+ * If want to update a full object rather than create an empty one, use @see deepExtendObject with output.
+ *
+ * @param {string|string[]} field   Property name of object of where to nest value, in dot-notation or pre-split into array.
+ * @param {*} value                 Any value to nest.
+ * @returns {Object} - Object with deepy-nested value.
+ * @example
+ *   generateSparseNestedProperty('human.body.leftArm.indexFinger', 'Orange') returns
+ *   { human : { body : { leftArm : { indexFinger : 'Orange' } } } }
+ */
+export function generateSparseNestedProperty(field, value){
+    if (typeof field === 'string') field = field.split('.');
+    if (!Array.isArray(field)) throw new Error("Could not create nested field in object. Check field name.");
+
+    var currObj = {};
+    currObj[field.pop()] = value;
+
+    if (field.length === 0) return currObj;
+    return generateSparseNestedProperty(field, currObj);
+}
+
+
+/**
+ * Performs an IN-PLACE 'deep merge' of a small object (one property per level, max) into a host object.
+ *
+ * @param {Object} hostObj           Object to merge/insert into.
+ * @param {Object} nestedObj         Object whose value to insert into hostObj.
+ * @param {number} [maxDepth=10]     Max number of recursions or object depth.
+ * @param {number} [currentDepth=0]  Current recursion depth.
+ * @returns {boolean} False if failed.
+ */
+export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
+    var nKey = Object.keys(nestedObj)[0]; // Should only be 1.
+    if (currentDepth > maxDepth){
+        // Doubt we'd go this deep... so cancel out
+        return false;
+    }
+    if (typeof hostObj[nKey] !== 'undefined'){
+        if (typeof nestedObj[nKey] === 'object' && !Array.isArray(hostObj[nKey]) ){
+            return deepExtend(hostObj[nKey], nestedObj[nKey], currentDepth + 1);
+        } else {
+            // No more nested objects, insert here.
+            hostObj[nKey] = nestedObj[nKey];
+            return true;
+        }
+    } else if (typeof nestedObj[nKey] !== 'undefined') {
+        // Field doesn't exist on hostObj, but does on nestedObj, == new field.
+        hostObj[nKey] = nestedObj[nKey];
+        return true;
+    } else {
+        // Whoops, doesn't seem like fields match.
+        return false;
+    }
+}
+
+
+/**
  * Deep-clone a given object using JSON stringify/parse.
+ * Does not handle or clone references or non-serializable types.
+ *
+ * @param {Object|Array} obj - JSON to deep-clone.
+ * @returns {Object|Array} Cloned JSON.
  */
 export function deepClone(obj){
     return JSON.parse(JSON.stringify(obj));
 }
+
+
+
+export function htmlToJSX(htmlString){
+    var nodes, result,
+        // Theoretically, esp in modern browsers, almost any tag/element name can be used to create a <div>.
+        // So we allow them in our HTML, but exclude elements/tags with numbers, special characters, etc.
+        // Except for hardcoded exceptions defined here in someTags.
+        someTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+
+    try {
+        nodes = parseDOM(htmlString, { decodeEntities: true, lowerCaseAttributeNames: false });
+    } catch (e) {
+        console.error('HTML parsing error', e);
+        return <div className="error">Parsing Error. Check your markup.</div>;
+    }
+
+    /**
+     * Filters out nodes and node children recursively if detect an invalid tag name.
+     * Also removes any <script> tags.
+     */
+    function filterNodes(nodeList){
+        return _.filter(
+            _.map(nodeList, function(n){
+                if (n.type === 'tag'){
+                    if (someTags.has(n.name)) return n;
+
+                    // Exclude scripts due to security vulnerability potential.
+                    if (n.name === 'script') return null;
+
+                    // Filter out nonsensical tags which will likely break React, e.g. <hr?>
+                    var match = n.name.match(/[\W\s\d]/);
+                    if (match && (match.length > 1 || match[0] !== '/')){
+                        return null;
+                    }
+
+                    // Recurse on children
+                    if (Array.isArray(n.children)) {
+                        n = _.extend({}, n, { 'children' : filterNodes(n.children) });
+                    }
+                }
+                return n;
+            })
+        );
+    }
+
+    try {
+        result = domToReact(filterNodes(nodes));
+    } catch (e) {
+        console.error('HTML parsing error', e);
+        return <div className="error">Parsing Error. Check your markup.</div>;
+    }
+
+    return result;
+}
+
 
 
 /**
@@ -340,7 +469,10 @@ export class CopyWrapper extends React.Component {
         'wrapperElement' : 'div',
         'className' : null,
         'flash' : true,
-        'iconProps' : {}
+        'iconProps' : {},
+        'includeIcon' : true,
+        'flashActiveTransform' : 'scale3d(1.2, 1.2, 1.2) translate3d(0, 0, 0)',
+        'flashInactiveTransform' : 'translate3d(0, 0, 0)'
     }
 
     static copyToClipboard(value, successCallback = null, failCallback = null){
@@ -393,10 +525,19 @@ export class CopyWrapper extends React.Component {
     }
 
     flashEffect(){
-        if (!this.props.flash || !this.refs || !this.refs.wrapper) return null;
-        this.refs.wrapper.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
+        var wrapper = this.refs.wrapper;
+        if (!this.props.flash || !this.refs || !wrapper) return null;
+
+        if (typeof this.props.wrapperElement === 'function'){
+            // Means we have a React component vs a React/JSX element.
+            wrapper = ReactDOM.findDOMNode(wrapper);
+        }
+
+        if (!wrapper) return null;
+
+        wrapper.style.transform = this.props.flashActiveTransform;
         setTimeout(()=>{
-            this.refs.wrapper.style.transform = 'translate3d(0, 0, 0)';
+            wrapper.style.transform = this.props.flashInactiveTransform;
         }, 100);
     }
 
@@ -406,33 +547,38 @@ export class CopyWrapper extends React.Component {
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps } = this.props;
+        var { value, children, mounted, wrapperElement, iconProps, includeIcon } = this.props;
         if (!value) return null;
         var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
-        function copy(){
-            return CopyWrapper.copyToClipboard(value, function(v){
+        var copy = (e) => {
+            return CopyWrapper.copyToClipboard(value, (v)=>{
                 this.onCopy();
                 analytics.event('CopyWrapper', 'Copy', {
                     'eventLabel' : 'Value',
                     'name' : v
                 });
-            }, function(v){
+            }, (v)=>{
                 analytics.event('CopyWrapper', 'ERROR', {
                     'eventLabel' : 'Unable to copy value',
                     'name' : v
                 });
             });
-        }
+        };
 
         var elemsToWrap = [];
-        if (children)               elemsToWrap.push(children);
-        if (children && isMounted)  elemsToWrap.push(' ');
-        if (isMounted)              elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
+        if (children)                   elemsToWrap.push(children);
+        if (children && isMounted)      elemsToWrap.push(' ');
+        if (isMounted && includeIcon)   elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy" title="Copy to clipboard" />);
 
         var wrapperProps = _.extend(
-            { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },
-            _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted', 'iconProps')
+            {
+                'ref'       : 'wrapper',
+                'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
+                'className' : 'clickable copy-wrapper ' + this.props.className || '',
+                'onClick'   : copy
+            },
+            _.omit(this.props, 'children', 'style', 'value', 'onCopy', 'mounted', ..._.keys(CopyWrapper.defaultProps))
         );
 
         return React.createElement(wrapperElement, wrapperProps, elemsToWrap);
@@ -449,9 +595,9 @@ export const itemUtil = {
 
     // Aliases
 
-    isAnItem : isAnItem,
-    generateLink : linkFromItem,
-    atId : atIdFromObject,
+    isAnItem        : isAnItem,
+    generateLink    : linkFromItem,
+    atId            : atIdFromObject,
 
 
 
@@ -524,6 +670,16 @@ export const itemUtil = {
     },
 
 
+    /**
+     * Performs a `_.uniq` on list of Items by their @id.
+     *
+     * @param {Item[]} items - List of Items to unique.
+     * @returns {Item[]} Uniqued list.
+     */
+    uniq : function(items){
+        return _.uniq(items, false, function(o){ return atIdFromObject(o);  } );
+    },
+
 
     // Secondary Dictionaries -- functions by Item type.
 
@@ -557,6 +713,31 @@ export const itemUtil = {
          */
         gravatar(email, size=null, props={}, defaultImg='retro'){
             return <img title="Obtained via Gravatar" {...props} src={itemUtil.User.buildGravatarURL(email, size, defaultImg)} className={'gravatar' + (props.className ? ' ' + props.className : '')} />;
+        },
+
+
+        /**
+         * Definitions for regex validators.
+         *
+         * @public
+         * @constant
+         */
+        localRegexValidation : {
+            /**
+             * http://www.regular-expressions.info/email.html -> changed capital A to lowercase
+             *
+             * @public
+             * @constant
+             */
+            email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
+            /**
+             * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and
+             * optional leading plus sign (for international).
+             *
+             * @public
+             * @constant
+             */
+            phone : '[+]?[\\d]{10,36}((\\sx|\\sext|\\sextension)(\\s)?[\\d]{1,7})?$'
         }
 
     }

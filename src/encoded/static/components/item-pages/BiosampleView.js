@@ -17,13 +17,15 @@ export default class BiosampleView extends DefaultItemView {
 
     getTabViewContents(){
 
-        var initTabs = [];
-        var context = this.props.context;
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+        var initTabs = [],
+            context = this.props.context,
+            windowWidth = this.props.windowWidth,
+            width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
+
         if (width) width -= 20;
 
-        initTabs.push(BiosampleViewOverview.getTabObject(context, this.props.schemas, width));
-        initTabs.push(ExpSetsUsedIn.getTabObject(context, this.props.schemas, width));
+        initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
+        initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
 
         return initTabs.concat(this.getCommonTabs());
     }
@@ -64,7 +66,7 @@ export class BiosourcesTable extends React.PureComponent {
 
 class BiosampleViewOverview extends React.Component {
 
-    static getTabObject(context, schemas, width){
+    static getTabObject({context, schemas, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'biosample-info',
@@ -75,7 +77,7 @@ class BiosampleViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <BiosampleViewOverview context={context} schemas={schemas} width={width} />
+                    <BiosampleViewOverview {...{ context, schemas, width, windowWidth }} />
                 </div>
             )
         };
@@ -91,7 +93,7 @@ class BiosampleViewOverview extends React.Component {
     }
 
     render(){
-        var { context, width } = this.props;
+        var { context, width, windowWidth, schemas } = this.props;
 
         var biosources = null;
 
@@ -102,19 +104,19 @@ class BiosampleViewOverview extends React.Component {
                         <h3 className="tab-section-title">
                             <span>Biosources</span>
                         </h3>
-                        <BiosourcesTable biosources={context.biosource} width={this.state.mounted? width : 1140} />
+                        <BiosourcesTable biosources={context.biosource} width={this.state.mounted? width : 1140} windowWidth={windowWidth} />
                     </div>
                 );
             } else {
-                biosources = <BiosourceInfoBody result={context} biosource={context.biosource[0]} />;
+                biosources = <BiosourceInfoBody result={context} biosource={context.biosource[0]} windowWidth={windowWidth} />;
             }
         }
 
         return (
             <div>
-                <OverViewBody result={context} schemas={this.props.schemas} />
+                <OverViewBody result={context} schemas={schemas} windowWidth={windowWidth} />
                 { biosources }
-                <CellCultureInfoBody result={context} schemas={this.props.schemas} />
+                <CellCultureInfoBody result={context} schemas={schemas} windowWidth={windowWidth} />
             </div>
         );
 
@@ -243,14 +245,15 @@ class BiosourceInfoBody extends React.Component {
 
 class ExpSetsUsedIn extends React.Component {
 
-    static getTabObject(context, schemas, width){
+    static getTabObject({ context, schemas, windowWidth }, width){
         return {
             tab : <span><i className="icon icon-users icon-fw"/> Experiment Sets</span>,
             key : "experiment-sets",
             //disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (
                 <div className="overflow-hidden">
-                    <ExperimentSetTablesLoadedFromSearch width={width} requestHref={"/search/?type=ExperimentSetReplicate&experiments_in_set.biosample.uuid=" + encodeURIComponent(context.uuid)} schemas={schemas} />
+                    <ExperimentSetTablesLoadedFromSearch {...{ width, schemas, windowWidth }}
+                        requestHref={"/search/?type=ExperimentSetReplicate&experiments_in_set.biosample.uuid=" + encodeURIComponent(context.uuid)} />
                 </div>
             )
         };

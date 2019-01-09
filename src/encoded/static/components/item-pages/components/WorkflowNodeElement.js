@@ -8,7 +8,7 @@ import { requestAnimationFrame } from './../../viz/utilities';
 
 
 
-export class WorkflowNodeElement extends React.Component {
+export class WorkflowNodeElement extends React.PureComponent {
 
     static propTypes = {
         'node' : PropTypes.object.isRequired,
@@ -168,27 +168,28 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     containerStyle(){
-        if (this.props.node.nodeType === 'input' || this.props.node.nodeType === 'output'){
+        var { node, columnWidth } = this.props;
+        if (node.nodeType === 'input' || node.nodeType === 'output'){
             return {
-                width : (this.props.columnWidth || 100),
-                opacity : 0 // We change this to one post-mount.
+                'width'   : columnWidth || 100,
+                'opacity' : 0 // We change this to `1` after mount.
             };
         }
     }
 
     aboveNodeTitle(){
 
-        var node                = this.props.node,
+        var { node, title, columnWidth } = this.props,
             fileFormat          = node.meta && node.meta.file_format, // Is a linkTo FileFormat Item (if not null)
-            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title);
-
-        var elemProps = {
-            'style' : { 'maxWidth' : this.props.columnWidth },
-            'className' : "text-ellipsis-container above-node-title"
-        };
+            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title),
+            elemProps = {
+                'style'         : { 'maxWidth' : columnWidth },
+                'className'     : "text-ellipsis-container above-node-title",
+                'key'           : 'above-node-title'
+            };
 
         if (node.nodeType === 'input-group'){
-            return <div {...elemProps}>{ this.props.title }</div>;
+            return <div {...elemProps}>{ title }</div>;
         }
 
         // If WorkflowRun & Workflow w/ steps w/ name
@@ -217,7 +218,7 @@ export class WorkflowNodeElement extends React.Component {
             //}
             if (fileFormat) return <div {...elemProps}>{ fileFormatAsString }</div>;
             elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ this.props.title }</div>;
+            return <div {...elemProps}>{ title }</div>;
         }
 
         if ( // If Analysis Step
@@ -243,12 +244,12 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     belowNodeTitle(){
-        var elemProps = {
-            'style'     : { 'maxWidth' : this.props.columnWidth },
-            'className' : "text-ellipsis-container below-node-title"
-        };
-
-        var node = this.props.node;
+        var { node, columnWidth } = this.props,
+            elemProps = {
+                'style'     : { 'maxWidth' : columnWidth },
+                'className' : "text-ellipsis-container below-node-title",
+                'key'       : 'below-node-title'
+            };
 
         /*
         if (node.meta && typeof node.meta.argument_type === 'string') {
@@ -264,9 +265,19 @@ export class WorkflowNodeElement extends React.Component {
         // STEPS -  SOFTWARE USED
         function softwareTitle(s, i){
             if (typeof s.name === 'string' && typeof s.version === 'string'){
-                return [ i > 0 ? ', ' : null , s.name, ' ', <span className="lighter">v{ s.version }</span>];
+                return (
+                    <React.Fragment key={object.itemUtil.atId(s) || i}>
+                        { i > 0 ? ', ' : null }
+                        { s.name } <span className="lighter">v{ s.version }</span>
+                    </React.Fragment>
+                );
             }
-            return [i > 0 ? ', ' : null, s.title || s.display_title];
+            return (
+                <React.Fragment key={object.itemUtil.atId(s) || i}>
+                    { i > 0 ? ', ' : null }
+                    { s.title || s.display_title }
+                </React.Fragment>
+            );
         }
 
         if (node.nodeType === 'step' && node.meta && Array.isArray(node.meta.software_used) && node.meta.software_used.length > 0 && node.meta.software_used[0].title){
@@ -296,10 +307,12 @@ export class WorkflowNodeElement extends React.Component {
             var files = node.meta.run_data.file;
             if (Array.isArray(files)){
                 var len = files.length - 1;
-                return <span className="node-name">
-                    { this.icon() }
-                    <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
-                </span>;
+                return (
+                    <span className="node-name">
+                        { this.icon() }
+                        <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
+                    </span>
+                );
             }
         }
 
@@ -324,8 +337,6 @@ export class WorkflowNodeElement extends React.Component {
     }
     
     render(){
-        var nodeTitle = <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html>{ this.nodeTitle() }</div>;
-
         return (
             <div className="node-visible-element" style={this.containerStyle()} ref={(r)=>{
                 if (r){
@@ -333,8 +344,10 @@ export class WorkflowNodeElement extends React.Component {
                         r.style.opacity = "1";
                     });
                 }
-            }}>
-                { nodeTitle }
+            }} key="outer">
+                <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html key="node-title">
+                    { this.nodeTitle() }
+                </div>
                 { this.belowNodeTitle() }
                 { this.aboveNodeTitle() }
             </div>

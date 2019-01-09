@@ -94,6 +94,20 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
+def test_restricted_no_download(testapp, fastq_json):
+    # check that initial download works
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    download_link = resobj['href']
+    testapp.get(download_link, status=307)
+    # fail download of restricted file (although with a 200 status?)
+    testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
+    testapp.get(download_link, status=403)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+
+
 def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
@@ -108,11 +122,10 @@ def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
-    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
 
 
 def test_patch_extra_files(testapp, proc_file_json):
-    extra_files = [{'file_format': 'pairs_px2'}]
+    extra_files = [{'file_format': 'pairs_px2', 'status': 'to be uploaded by workflow'}]
     proc_file_json['extra_files'] = extra_files
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
@@ -133,13 +146,12 @@ def test_patch_extra_files(testapp, proc_file_json):
     assert resobj['extra_files_creds'][0]['upload_key'] == expected_key
     assert resobj['extra_files_creds'][0]['upload_credentials']
     assert 'test-wfout-bucket' in resobj['upload_credentials']['upload_url']
-    assert resobj['extra_files'][0]['status'] == proc_file_json['status']
+    assert resobj['extra_files'][0]['status'] == 'to be uploaded by workflow'
 
 
 def test_extra_files_download(testapp, registry, proc_file_json):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
-
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     s3 = boto3.client('s3')
@@ -185,6 +197,70 @@ def test_range_download(testapp, registry, proc_file_json):
     assert resp.status_code == 206
     assert resp.headers['Content-Length'] == '4'
     assert resp.headers['Content-Range'] == 'bytes 2-5/12'
+
+
+def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, experiment_data, file_formats):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    experiment_data['processed_files'] = [resobj['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
+                  Body=str.encode('12346789abcd'))
+    download_filename = resobj['upload_key'].split('/')[1]
+    download_link = resobj['href']
+    resp = testapp.get(download_link)
+
+    # ensure that the download tracking item was created
+    ti_coll = registry['collections']['TrackingItem']
+    tracking_items = [ti_coll.get(id) for id in ti_coll]
+    tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
+                            if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
+    assert len(tracked_exp_file_dls) > 0
+    for dl_tracking in tracked_exp_file_dls:
+        assert dl_tracking['experiment_type'] == experiment_data['experiment_type']
+        assert 'file_format' in dl_tracking
+        # this needs to be updated if the proc_file_json fixture is
+        assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
+        assert dl_tracking['range_query'] is False
+        assert dl_tracking['is_visualization'] is False
+        assert dl_tracking['user_uuid'] == 'anonymous'
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+
+
+def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
+                                             two_experiment_replicate_set, file_formats):
+    """
+    Use exp_set.other_processed_files field to really test this
+    """
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    testapp.patch_json(two_experiment_replicate_set['@id'],
+                       {'other_processed_files': [{'title': 'Test', 'files': [resobj['@id']]}]})
+    # hard-coded for convenience; should match experiment_data in datafixtures
+    expected_exp_type = 'micro-C'
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
+                  Body=str.encode('12346789abcd'))
+    download_filename = resobj['upload_key'].split('/')[1]
+    download_link = resobj['href']
+    resp = testapp.get(download_link)
+
+    # ensure that the download tracking item was created
+    ti_coll = registry['collections']['TrackingItem']
+    tracking_items = [ti_coll.get(id) for id in ti_coll]
+    tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
+                            if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
+    assert len(tracked_exp_file_dls) > 0
+    for dl_tracking in tracked_exp_file_dls:
+        assert dl_tracking['experiment_type'] == expected_exp_type
+        assert 'file_format' in dl_tracking
+        # this needs to be updated if the proc_file_json fixture is
+        assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
+        assert dl_tracking['range_query'] is False
+        assert dl_tracking['is_visualization'] is False
+        assert dl_tracking['user_uuid'] == 'anonymous'
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 def test_extra_files_get_upload(testapp, proc_file_json):
@@ -330,6 +406,17 @@ def mcool_file_json(award, experiment, lab, file_formats):
     }
     return item
 
+@pytest.fixture
+def bg_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bg').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bedGraph.gz',
+        'status': 'uploaded',
+    }
+    return item
 
 @pytest.fixture
 def mcool_file(testapp, mcool_file_json):
@@ -742,3 +829,140 @@ def test_file_format_does_not_exist(testapp, file_formats, award, lab):
     errors = res1.json['errors']
     descriptions = ''.join([e['description'] for e in errors])
     assert "'waldo' not found" in descriptions
+
+
+def test_filename_patch_fails_wrong_format(testapp, file_formats, award, lab):
+    my_fastq_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'filename': 'test.fastq.gz'
+    }
+    res1 = testapp.post_json('/files-fastq', my_fastq_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('pairs').get('uuid')}
+    res2 = testapp.patch_json('/files-fastq/' + resobj['uuid'], patch_data, status=422)
+    errors = res2.json['errors']
+    error1 = "Filename test.fastq.gz extension does not agree with specified file format. Valid extension(s): '.pairs.gz'"
+    error2 = "File format pairs is not allowed for FileFastq"
+    descriptions = ''.join([e['description'] for e in errors])
+    assert error1 in descriptions
+    assert error2 in descriptions
+
+
+def test_filename_patch_works_with_different_format(testapp, file_formats, award, lab):
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+        'filename': 'test.pairs.gz'
+    }
+    res1 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('bam').get('uuid'), 'filename': 'test.bam'}
+    res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
+    assert not res2.json.get('errors')
+
+
+def test_file_format_patch_works_if_no_filename(testapp, file_formats, award, lab):
+    my_proc_file = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid')
+    }
+    res1 = testapp.post_json('/files-processed', my_proc_file, status=201)
+    resobj = res1.json['@graph'][0]
+    patch_data = {"file_format": file_formats.get('bam').get('uuid')}
+    res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
+    assert not res2.json.get('errors')
+
+
+def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+        'file_type': 'normalized counts',
+        'assay_info': 'PARK1',
+        'biosource_name': 'GM12878',
+        'replicate_identifiers': ['bio1 tec1'],
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
+
+
+def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['@id'],
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') is None
+
+
+def test_file_generate_track_title_fp_most_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['@id'],
+        'dataset_type': 'DNase Hi-C',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'unspecified type for unknown sample DNase Hi-C'
+
+
+def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM12878_biosource):
+    vistrack_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'dataset_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+        'file_type': 'fold change over control',
+        'project_lab': 'Some Dude, Somewhere',
+        'assay_info': 'PARK1',
+        'biosource': GM12878_biosource['@id'],
+        'replicate_identifiers': ['bio1 tec1'],
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-vistrack', vistrack_meta)
+    vt = res1.json.get('@graph')[0]
+    assert vt.get('track_and_facet_info', {}).get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
+
+
+# @pytest.fixture
+# def custom_experiment_set_data(lab, award):
+#     return {
+#         'lab': lab['@id'],
+#         'award': award['@id'],
+#         'description': 'test experiment set',
+#         'experimentset_type': 'custom',
+#         'status': 'in review by lab'
+#     }
+#
+#
+# def test_file_experiment_type(testapp, proc_file_json, rep_set_data, custom_experiment_set_data, base_experiment):
+#     res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+#     rep_set_data['replicate_exps'] = [
+#         {'replicate_exp': base_experiment['@id'],
+#          'bio_rep_no': 1,
+#          'tec_rep_no': 1}]
+#     rep_set_data['processed_files'] = [res['@id']]
+#     res2 = testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+#     custom_experiment_set_data['processed_files'] = [res['@id']]
+#     res3 = testapp.post_json('/experiment_set', custom_experiment_set_data).json['@graph'][0]
+#     new_file = testapp.get(res['@id']).json
+#     import pdb; pdb.set_trace()
+#     print(new_file.get('track_and_facet_info'))
+#     assert new_file['experiment_sets'][0]['@id'] == res2['@id']

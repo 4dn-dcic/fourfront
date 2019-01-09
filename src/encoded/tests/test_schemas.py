@@ -1,6 +1,7 @@
 import pytest
 from pkg_resources import resource_listdir
 from snovault.schema_utils import load_schema
+from snovault.fourfront_utils import crawl_schema
 import re
 
 pytestmark = [pytest.mark.working, pytest.mark.schema]
@@ -72,7 +73,8 @@ def test_load_schema(schema, master_mixins, registry):
         'individual.json',
         'quality_metric.json',
         'treatment.json',
-        'workflow_run.json'
+        'workflow_run.json',
+        'user_content.json'
     ]
 
     loaded_schema = load_schema('encoded:schemas/%s' % schema)
@@ -123,7 +125,8 @@ def test_load_schema(schema, master_mixins, registry):
             no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json',
                                        'ontology.json', 'ontology_term.json', 'sysinfo.json',
                                        'page.json', 'static_section.json', 'badge.json',
-                                       'tracking_item.json', 'file_format.json']
+                                       'tracking_item.json', 'file_format.json',
+                                       'higlass_view_config.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties
@@ -185,3 +188,13 @@ def test_changelogs(testapp, registry):
             res = testapp.get(changelog)
             assert res.status_int == 200, changelog
             assert res.content_type == 'text/markdown'
+
+
+def test_fourfront_crawl_schemas(testapp, registry):
+    from snovault import TYPES
+    from snovault.schema_utils import load_schema
+    schema = load_schema('encoded:schemas/experiment_hi_c.json')
+    field_path = 'files.extra_files.file_size'
+    field_schema = crawl_schema(registry[TYPES], field_path, schema)
+    assert isinstance(field_schema, dict)
+    assert field_schema['title'] == 'File Size'

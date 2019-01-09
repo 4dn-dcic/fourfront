@@ -8,7 +8,7 @@ import queryString from 'query-string';
 import * as d3 from 'd3';
 import * as vizUtil from './utilities';
 import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
-import { Toggle } from '../inputs';
+import { Toggle } from './../forms/components';
 import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 import { ChartDataController } from './chart-data-controller';
@@ -32,11 +32,14 @@ export default class QuickInfoBar extends React.PureComponent {
     static isInvisibleForHref(href){
         // If have href, only show for /browse/, /search/, and / & /home
         var urlParts = url.parse(href);
-        if (urlParts.hash && urlParts.hash.indexOf('!impersonate-user') > -1) return true;
         // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
         var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
         if (pathParts[0] === 'browse') return false;
-        if (pathParts.length === 1 && pathParts[0] === 'statistics') return false;
+        if (pathParts.length === 1 && pathParts[0] === 'statistics') {
+            if (!urlParts.hash || urlParts.hash === '#submissions'){
+                return false;
+            }
+        }
         if (pathParts[0] === 'search') return true;
         if (pathParts[0] === 'home') return false;
         if (pathParts.length === 1 && pathParts[0] === "") return false;

@@ -76,24 +76,20 @@ class ExperimentSet(Item):
     aggregated_items = {
         "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
     }
-    embedded_list = lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.*",
-        "static_headers.content",
-        "static_headers.title",
-        "static_headers.filetype",
-        "static_headers.section_type",
-        "static_headers.options.default_open",
-        "static_headers.options.title_icon",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
         "produced_in_pub.short_attribution",
+        "produced_in_pub.date_published",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",
         "publications_of_set.authors",
+        "publications_of_set.date_published",
 
         "experiments_in_set.experiment_type",
         "experiments_in_set.accession",

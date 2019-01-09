@@ -3,6 +3,11 @@
 /* Written by Carl, test for search.js (used for objs such as expts and
 biosources). Test data captured from Nov. 2016 metadata.*/
 
+import React from 'react';
+import _ from 'underscore';
+import TestUtils from 'react-dom/test-utils';
+import createReactClass from 'create-react-class';
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
@@ -22,13 +27,10 @@ function filterRowsToResults(rows){
 
 describe('Testing search.js', function() {
     var sinon, server;
-    var React, Search, testSearch, TestUtils, context, schemas, _;
+    var SearchView, searchViewCommonProps, testSearch, context, schemas;
 
     beforeEach(function() {
-        React = require('react');
-        TestUtils = require('react-dom/lib/ReactTestUtils');
-        _ = require('underscore');
-        Search = require('./../browse/SearchView').default;
+        SearchView = require('./../browse/SearchView').default;
         context = require('../testdata/expt_search');
 
         sinon = require('sinon');
@@ -44,19 +46,33 @@ describe('Testing search.js', function() {
             ]
         );
 
+        searchViewCommonProps = {
+            "href" : "/search/?type=ExperimentHiC",
+
+            // Mocked props that would be sent from app.BodyElement
+            "windowWidth" : 1000,
+            "registerWindowOnScrollHandler" : function(fxn){
+                setTimeout(()=> console.log(fxn(345, 345)), 2000);
+                setTimeout(()=> console.log(fxn(40, -305)), 5000);
+                console.log("Will call `fxn(scrollTop, scrollTopVector)` which was registered to registerWindowOnScrollHandler in 2 & 5 seconds and print its return val. Fine if 'undefined'.");
+                jest.runAllTimers();
+            }
+        };
+
         testSearch = TestUtils.renderIntoDocument(
-            <Search context={context} href="/search/?type=ExperimentHiC" />
+            <SearchView {...searchViewCommonProps} context={context} />
         );
 
     });
 
     it('has the correct number of facets and experiment accessions listed', function() {
-        var facets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet');
-        var rows = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
-        var results = filterRowsToResults(rows);
+        var facets      = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'facet'),
+            rows        = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row'),
+            results     = filterRowsToResults(rows),
+            facetFields = facets.map(function(f){ return f.getAttribute('data-field'); });
 
-        var facetFields = facets.map(function(f){ return f.getAttribute('data-field'); });
-        console.log("Facets shown for:", facetFields.join(', '));
+        console.log("Facets are visible for:", facetFields.join(', '));
+
         expect(facets.length).toBeGreaterThan(7);
         expect(results.length).toEqual(5);
     });
@@ -64,11 +80,12 @@ describe('Testing search.js', function() {
     it('facets properly (digestion_enzyme=hindIII)', function() {
         context = require('../testdata/expt_search_hindIII');
         testSearch = TestUtils.renderIntoDocument(
-            <Search context={context} href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII' />
+            <SearchView {...searchViewCommonProps} context={context} href='/search/?type=ExperimentHiC&digestion_enzyme.name=HindIII' />
         );
-        var rows = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row');
-        var results = filterRowsToResults(rows);
-        var selectedFacets = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
+        var rows            = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'search-result-row'),
+            results         = filterRowsToResults(rows),
+            selectedFacets  = TestUtils.scryRenderedDOMComponentsWithClass(testSearch, 'selected');
+
         expect(results.length).toEqual(2);
         expect(selectedFacets.length).toEqual(2);
     });

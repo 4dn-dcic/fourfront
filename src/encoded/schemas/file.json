@@ -7,16 +7,14 @@
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
-    "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
-    ],
+    "mixinFacets" : [],
     "properties": {
         "accession": {
             "accessionType": "FI"
         },
         "description": {
             "title": "Description",
-            "description": "A plain text description of the task.",
+            "description": "A plain text description of the file.",
             "type": "string",
             "lookup": 10,
             "formInput": "textarea"
@@ -54,7 +52,8 @@
                 "raw file",
                 "processed file",
                 "ancillary file",
-                "other file"
+                "other file",
+                "visualization"
             ]
         },
         "md5sum": {
@@ -118,6 +117,25 @@
                         "description": "Size of file of the extra file.",
                         "comment": "File size is specified in bytes",
                         "type": "integer"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "string",
+                        "exclude_from": ["submit4dn"],
+                        "enum" : [
+                            "uploading",
+                            "uploaded",
+                            "upload failed",
+                            "deleted",
+                            "replaced",
+                            "revoked",
+                            "archived",
+                            "pre-release",
+                            "released",
+                            "released to project",
+                            "archived to project",
+                            "to be uploaded by workflow"
+                        ]
                     }
                 }
             }
@@ -175,10 +193,12 @@
                 "replaced",
                 "revoked",
                 "archived",
+                "pre-release",
                 "released",
                 "released to project",
                 "archived to project",
-                "to be uploaded by workflow"
+                "to be uploaded by workflow",
+                "restricted"
             ]
         },
         "quality_metric": {
@@ -189,9 +209,22 @@
             "linkTo": "QualityMetric"
         }
     },
-    "file_format_file_extension": {
-    },
     "facets": {
+        "lab.display_title": {
+            "title": "Lab",
+            "disabled" : true
+        },
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
+        "track_and_facet_info.assay_info" : {
+            "title" : "Assay Details",
+            "description" : "Details of the experiment to which this file belongs"
+        },
+        "track_and_facet_info.biosource_name" : {
+            "title" : "Biosource"
+        },
         "file_type" : {
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
@@ -200,24 +233,8 @@
             "title" : "File Format",
             "description" : "Format of the file, i.e. the file extension."
         },
-        "experiments.experiment_type" : {
-            "title" : "Experiment Type",
-            "description" : "Type of experiment to which this file belongs"
-        },
-        "experiments.biosample.biosource.individual.organism.name" : {
-            "title" : "Organism"
-        },
-        "experiments.biosample.biosource.biosource_type" : {
-            "title" : "Biosource Type"
-        },
-        "experiments.biosample.biosource_summary" : {
-            "title" : "Biosource"
-        },
-        "experiments.digestion_enzyme.name" : {
-            "title" : "Enzyme"
-        },
-        "lab.display_title": {
-            "title": "Lab"
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
         },
         "file_size" : {
             "title" : "File Size",
@@ -246,20 +263,41 @@
         }
     },
     "columns": {
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
+        "track_and_facet_info.assay_info" : {
+            "title" : "Assay Details",
+            "description" : "Details of the experiment to which this file belongs"
+        },
+        "track_and_facet_info.biosource_name" : {
+            "title" : "Biosource"
+        },
         "file_type" : {
             "title" : "File Type"
         },
-        "file_format": {
+        "file_format.file_format": {
             "title" : "File Format"
         },
-        "experiments.display_title": {
-            "title": "Experiments"
+        "track_and_facet_info.experiment_bucket": {
+            "title": "In experiment as"
         },
-        "experiments.biosample.biosource.display_title": {
-            "title": "Biosource"
+        "track_and_facet_info.replicate_info": {
+            "title": "Replicate info"
+        },
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
         },
         "file_size" : {
-            "title" : "File Size"
+            "title" : "File Size",
+            "default_hiddent": true
+        },
+        "date_created": {
+            "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "default_hidden" : true
         }
     }
 }

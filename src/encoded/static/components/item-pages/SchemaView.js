@@ -49,11 +49,10 @@ export default class SchemaView extends React.Component {
     }
 
     render() {
-        var context = this.props.context;
-        var itemClass = globals.itemClass(context);
-        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
+        var context = this.props.context,
+            title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
         return (
-            <div className={"view-item " + itemClass}>
+            <div className="view-item type-JSONSchema">
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
                 <ItemDetailList
                     context={context}

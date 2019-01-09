@@ -10,7 +10,6 @@ from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     paths_filtered_by_status,
-    get_item_if_you_can,
     ALLOW_SUBMITTER_ADD,
     lab_award_attribution_embed_list
 )
@@ -56,7 +55,7 @@ class Experiment(Item):
     aggregated_items = {
         "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
     }
-    embedded_list = lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
