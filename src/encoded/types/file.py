@@ -901,7 +901,7 @@ class FileVistrack(File):
             }
         }
     })
-    def track_and_facet_info(self, request, None):
+    def track_and_facet_info(self, request, biosource_name=None):
         return super().track_and_facet_info(request, biosource_name=self._biosource_name(request))
 
     @calculated_property(schema={
