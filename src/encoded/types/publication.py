@@ -89,7 +89,6 @@ def fetch_pubmed(PMID):
     if pub_data['date_published']:  # there is some date data
         pub_data['date_published'] = find_best_date(pub_data['date_published'])
     return {k: v for k, v in pub_data.items() if v is not None}
-    return pub_data
 
 
 class BioRxivExtractor(HTMLParser):
