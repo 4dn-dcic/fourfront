@@ -8749,14 +8749,6 @@
             },
             {   
                 "argument_type": "parameter",
-                "workflow_argument_name": "chip.qc_report.name"
-            },
-            {   
-                "argument_type": "parameter",
-                "workflow_argument_name": "chip.qc_report.desc"
-            },
-            {   
-                "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
             {   
@@ -8920,32 +8912,6 @@
                         "source": [
                             {
                                 "name": "chip.choose_ctl.always_use_pooled_ctl"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
-                        "name": "chip.qc_report.name",
-                        "source": [
-                            {
-                                "name": "chip.qc_report.name"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
-                        "name": "chip.qc_report.desc",
-                        "source": [
-                            {
-                                "name": "chip.qc_report.desc"
                             }
                         ]
                     },
@@ -9143,14 +9109,6 @@
             },
             {   
                 "argument_type": "parameter",
-                "workflow_argument_name": "chip.qc_report.name"
-            },
-            {   
-                "argument_type": "parameter",
-                "workflow_argument_name": "chip.qc_report.desc"
-            },
-            {   
-                "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
             {   
@@ -9314,32 +9272,6 @@
                             "global": true,
                             "type": "parameter"
                         },
-                        "name": "chip.qc_report.name",
-                        "source": [
-                            {
-                                "name": "chip.qc_report.name"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
-                        "name": "chip.qc_report.desc",
-                        "source": [
-                            {
-                                "name": "chip.qc_report.desc"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
                         "name": "chip.gensz",
                         "source": [
                             {
@@ -9468,6 +9400,406 @@
         ],
         "title": "Chip-seq data processing pipeline, Align-only, Control",
         "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179",
+        "workflow_diagram": "",
+        "workflow_type": "ChIP-seq data processing"
+    },
+    {
+        "accession": "4DNWF3BT781",
+        "app_name": "encode-chipseq-postaln",
+        "app_version": "dev",
+        "arguments": [
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.tas"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.ctl_tas"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.bam2ta_no_filt_R1.ta"
+            },
+            {   
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.blacklist"
+            },
+            {   
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "chip.chrsz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.pipeline_type"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.peak_caller"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.paired_end"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.name"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.desc"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.gensz"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.fraglen"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.xcor.cpu"
+            },
+            {   
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.spp_cpu"
+            },
+            {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.optimal_peak"
+            },
+            {   
+                "argument_format": "bigbed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.conservative_peak"
+            },
+            {   
+                "argument_format": "bw",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.sig_fc"
+            },
+            {   
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "chip.report"
+            },
+            {   
+                "argument_format": "json",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "chip.qc_json"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": "Other",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL",
+        "data_types": [
+            "ChIP-seq"
+        ],
+        "description": "ChIP-seq data processing pipeline",
+        "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-chipseq-postaln",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.tas",
+                        "source": [
+                            {
+                                "name": "chip.tas"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.ctl_tas",
+                        "source": [
+                            {
+                                "name": "chip.ctl_tas"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.bam2ta.no_filt_R1.ta",
+                        "source": [
+                            {
+                                "name": "chip.bam2ta.no_filt_R1.ta"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.blacklist",
+                        "source": [
+                            {
+                                "name": "chip.blacklist"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chip.chrsz",
+                        "source": [
+                            {
+                                "name": "chip.chrsz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.pipeline_type",
+                        "source": [
+                            {
+                                "name": "chip.pipeline_type"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.peak_caller",
+                        "source": [
+                            {
+                                "name": "chip.peak_caller"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.paired_end",
+                        "source": [
+                            {
+                                "name": "chip.paired_end"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.choose_ctl.always_use_pooled_ctl",
+                        "source": [
+                            {
+                                "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.gensz",
+                        "source": [
+                            {
+                                "name": "chip.gensz"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.fraglen",
+                        "source": [
+                            {
+                                "name": "chip.fraglen"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.xcor.cpu",
+                        "source": [
+                            {
+                                "name": "chip.xcor.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.spp_cpu",
+                        "source": [
+                            {
+                                "name": "chip.spp_cpu"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                    ]
+                },
+                "name": "chip",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bigbed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.optimal_peaks",
+                        "target": [
+                            {
+                                "name": "chip.optimal_peaks"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bigbed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.conservative_peaks",
+                        "target": [
+                            {
+                                "name": "chip.conservative_peaks"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.sig_fc",
+                        "target": [
+                            {
+                                "name": "chip.sig_fc"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "chip.report",
+                        "target": [
+                            {
+                                "name": "chip.report"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "json",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "chip.qc_json",
+                        "target": [
+                            {
+                                "name": "chip.qc_json"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Chip-seq data processing pipeline, post-alignment",
+        "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513",
         "workflow_diagram": "",
         "workflow_type": "ChIP-seq data processing"
     },
