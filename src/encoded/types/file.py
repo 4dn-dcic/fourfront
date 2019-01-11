@@ -385,7 +385,9 @@ class File(Item):
                 info['assay_info'] = assay_info.get('value')
             if 'replicate_info' not in info:
                 # we did not get repinfo from a repset so rep nos for an expt are relevant
-                repset = exp_info.get('replicate_set')
+                possible_repsets = exp_info.get('experiment_sets', [])
+                # only check experiment-set-replicate items for replicate_exps
+                repset = [rs for rs in possible_repsets if 'replicate' in rs]
                 if repset:
                     repset = repset[0]
                     rep_set_info = get_item_if_you_can(request, repset)

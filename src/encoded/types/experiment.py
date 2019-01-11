@@ -50,14 +50,12 @@ class Experiment(Item):
     schema = load_schema('encoded:schemas/experiment.json')
     name_key = 'accession'
     rev = {
-        'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
-        'replicate_set': ('ExperimentSetReplicate', 'replicate_exps.replicate_exp')
+        'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
-        "replicate_set.replicate_exps.*",
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
@@ -212,16 +210,6 @@ class Experiment(Item):
     })
     def experiment_sets(self, request):
         return self.rev_link_atids(request, "experiment_sets")
-
-    @calculated_property(schema={
-        "title": "Replicate Set",
-        "description": "Replicate Set to which this experiment belongs.",
-        "type": ["string", "object"],
-        "exclude_from": ["submit4dn", "FFedit-create"],
-        "linkTo": "ExperimentSetReplicate"
-    })
-    def replicate_set(self, request):
-        return self.rev_link_atids(request, "replicate_set")
 
     @calculated_property(schema={
         "title": "Produced in Publication",
