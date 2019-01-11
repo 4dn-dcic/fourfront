@@ -1024,7 +1024,7 @@ def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
     experiment_data['experiment_type'] = 'RNA-seq'
     experiment_data['processed_files'] = [pfile['@id']]
     del experiment_data['digestion_enzyme']
-    testapp.post_json('/experiment_seq', experiment_data, status=201).json['@graph'][0]
+    testapp.post_json('/experiment_seq', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
     assert tf_info['experiment_type'] == 'RNA-seq'
@@ -1082,7 +1082,7 @@ def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
     expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
     rep_set_data['processed_files'] = [pfile['@id']]
     rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
-    repset = testapp.post_json('/experiment_set_replicate', rep_set_data, status=201).json['@graph'][0]
+    repset = testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
     assert tf_info['experiment_type'] == 'micro-C'
@@ -1103,7 +1103,7 @@ def test_track_and_file_facet_info_file_link_to_repset_w_multi_expt_and_opf(
     rep_set_data['other_processed_files'] = [{'title': 'some other files', 'type': 'supplementary', 'files': [opf['@id'], pfile['@id']]}]
     rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt1['@id']},
                                       {'bio_rep_no': 1, 'tec_rep_no': 2, 'replicate_exp': expt2['@id']}]
-    testapp.post_json('/experiment_set_replicate', rep_set_data, status=201).json['@graph'][0]
+    testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
     assert tf_info['experiment_bucket'] == 'some other files'
@@ -1128,7 +1128,7 @@ def test_track_and_file_facet_info_file_w_all_underscore_fields(
         assert tf_info[tf] == v
     # make sure it doesn't change
     experiment_data['processed_files'] = [pfile['@id']]
-    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info2 = res.get('track_and_facet_info')
     for k, v in underscores.items():
@@ -1153,7 +1153,7 @@ def test_track_and_file_facet_info_file_w_some_underscore_fields(
         assert tf_info[tf] == v
     # make sure it doesn't change
     experiment_data['processed_files'] = [pfile['@id']]
-    testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info2 = res.get('track_and_facet_info')
     for k, v in underscores.items():
