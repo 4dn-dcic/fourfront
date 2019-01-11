@@ -776,10 +776,10 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
         # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
     audit_facets = [
-        ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
-        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT'}),
-        ('audit.WARNING.category', {'title': 'Audit category: WARNING'}),
-        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION'})
+        ('audit.ERROR.category', {'title': 'Audit category: ERROR', 'weight': 999}),
+        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT', 'weight': 999}),
+        ('audit.WARNING.category', {'title': 'Audit category: WARNING', 'weight': 999}),
+        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION', 'weight': 999})
     ]
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
@@ -866,8 +866,8 @@ def schema_for_field(field, types, doc_types, should_log=False):
         Dictionary schema for the field, or None if not found
     '''
     schema = types[doc_types[0]].schema
-    # for 'audit.*', schema will never be found and logging isn't helpful
-    if schema and field[:6] != 'audit.':
+    # for 'audit.*' and 'aggregated_items.*', schema will never be found and logging isn't helpful
+    if schema and not field.startswith('audit.') and not field.startswith('aggregated_items.'):
         # 'type' field is really '@type' in the schema
         use_field = '@type' if field == 'type' else field
         # eliminate '!' from not fields
@@ -1112,7 +1112,8 @@ def execute_search(search):
 
 def format_facets(es_results, facets, total, search_frame='embedded'):
     """
-    Format the facets for the final results based on the es results
+    Format the facets for the final results based on the es results.
+    Sort based off of the 'weight' of the facets
     These are stored within 'aggregations' of the result.
 
     If the frame for the search != embedded, return no facets
@@ -1128,7 +1129,12 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     aggregations = es_results['aggregations']['all_items']
     used_facets = set()
 
-    for field, facet in facets:
+    # sort the facets by weight. Lowest weight goes at top
+    # if no weight is provided, assume 0
+    # this will keep current order of non-weighted facets
+    sort_facets = sorted(facets, key=lambda fct: fct[1].get('weight', 0))
+
+    for field, facet in sort_facets:
         result_facet = {
             'field' : field,
             'title' : facet.get('title', field),

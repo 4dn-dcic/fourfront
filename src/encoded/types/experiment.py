@@ -56,6 +56,7 @@ class Experiment(Item):
         "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        "badges.badge.*",
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
