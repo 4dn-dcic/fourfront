@@ -186,8 +186,6 @@ def test_calculated_experiment_sets_for_custom_experiment_set(testapp, experimen
     res = testapp.patch_json(custom_experiment_set['@id'], {'experiments_in_set': [experiment['@id']]}, status=200)
     expt_res = testapp.get(experiment['@id'])
     assert custom_experiment_set['uuid'] == expt_res.json['experiment_sets'][0]['uuid']
-    # also testing that replicate_set calc property not added
-    assert not expt_res.json['replicate_set']
 
 
 def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experiment, replicate_experiment_set):
@@ -199,8 +197,6 @@ def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experi
         status=200)
     expt_res = testapp.get(experiment['@id'])
     assert replicate_experiment_set['uuid'] == expt_res.json['experiment_sets'][0]['uuid']
-    # also test the replicate_set calc prop
-    assert replicate_experiment_set['uuid'] == expt_res.json['replicate_set'][0]['uuid']
 
 
 @pytest.fixture
