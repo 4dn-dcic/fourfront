@@ -438,7 +438,7 @@ class File(Item):
         fields = ['experiment_type', 'assay_info', 'lab_name',
                   'biosource_name', 'replicate_info', 'experiment_bucket']
         # look for existing _props
-        track_info = {field: props.get('_' + field) for field in fields}
+        track_info = {field: props.get('override_' + field) for field in fields}
         track_info = {k: v for k, v in track_info.items() if v is not None}
 
         # vistrack only pass in biosource_name because _biosource_name is
@@ -904,13 +904,13 @@ class FileVistrack(File):
         }
     })
     def track_and_facet_info(self, request, biosource_name=None):
-        return super().track_and_facet_info(request, biosource_name=self._biosource_name(request))
+        return super().track_and_facet_info(request, biosource_name=self.override_biosource_name(request))
 
     @calculated_property(schema={
         "title": "Biosource Name",
         "type": "string"
     })
-    def _biosource_name(self, request):
+    def override_biosource_name(self, request):
         bios = self.properties.get('biosource')
         if bios is not None:
             return request.embed(bios, '@@object').get('biosource_name')

@@ -882,13 +882,13 @@ def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, 
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
-        '_experiment_type': 'DNase Hi-C',
-        '_lab_name': 'Test Lab',
+        'override_experiment_type': 'DNase Hi-C',
+        'override_lab_name': 'Test Lab',
         'file_type': 'normalized counts',
-        '_assay_info': 'PARK1',
-        '_biosource_name': 'GM12878',
-        '_replicate_info': 'Biorep 1, Techrep 1',
-        '_experiment_bucket': 'processed file',
+        'override_assay_info': 'PARK1',
+        'override_biosource_name': 'GM12878',
+        'override_replicate_info': 'Biorep 1, Techrep 1',
+        'override_experiment_bucket': 'processed file',
         'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
@@ -915,7 +915,7 @@ def test_file_generate_track_title_fp_most_missing(testapp, file_formats, award,
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
         'lab': lab['@id'],
-        '_experiment_type': 'DNase Hi-C',
+        'override_experiment_type': 'DNase Hi-C',
         'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
@@ -928,13 +928,13 @@ def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM128
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('mcool').get('uuid'),
-        '_experiment_type': 'DNase Hi-C',
+        'override_experiment_type': 'DNase Hi-C',
         'lab': lab['@id'],
         'file_type': 'fold change over control',
-        '_lab_name': 'Some Dude, Somewhere',
-        '_assay_info': 'PARK1',
+        'override_lab_name': 'Some Dude, Somewhere',
+        'override_assay_info': 'PARK1',
         'biosource': GM12878_biosource['@id'],
-        '_replicate_info': 'bio1 tec1',
+        'override_replicate_info': 'bio1 tec1',
         'higlass_uid': 'test_hg_uid'
     }
     res1 = testapp.post_json('/files-vistrack', vistrack_meta)
@@ -1125,81 +1125,73 @@ def test_track_and_file_facet_info_file_link_to_repset_w_multi_expt_and_opf(
     assert tf_info['replicate_info'] == 'merged replicates'
 
 
-def test_track_and_file_facet_info_file_w_all_underscore_fields(
+def test_track_and_file_facet_info_file_w_all_override_fields(
         testapp, proc_file_json, experiment_data):
-    underscores = {
-        '_lab_name': 'awesome lab',
-        '_experiment_type': 'TRIP',
-        '_biosource_name': 'some cell',
-        '_assay_info': 'cold',
-        '_replicate_info': 'replicated lots',
-        '_experiment_bucket': 'important files'
+    overrides = {
+        'override_lab_name': 'awesome lab',
+        'override_experiment_type': 'TRIP',
+        'override_biosource_name': 'some cell',
+        'override_assay_info': 'cold',
+        'override_replicate_info': 'replicated lots',
+        'override_experiment_bucket': 'important files'
     }
-    proc_file_json.update(underscores)
+    proc_file_json.update(overrides)
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
     tf_info = pfile.get('track_and_facet_info')
-    for k, v in underscores.items():
-        tf = k.replace('_', '', 1)
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
         assert tf_info[tf] == v
     # make sure it doesn't change
     experiment_data['processed_files'] = [pfile['@id']]
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info2 = res.get('track_and_facet_info')
-    for k, v in underscores.items():
-        tf = k.replace('_', '', 1)
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
         assert tf_info2[tf] == v
 
 
-def test_track_and_file_facet_info_file_vistrack_w_all_underscore_fields(
+def test_track_and_file_facet_info_file_vistrack_w_all_override_fields(
         testapp, proc_file_json, experiment_data, file_formats):
-    underscores = {
-        '_lab_name': 'awesome lab',
-        '_experiment_type': 'TRIP',
-        '_assay_info': 'cold',
-        '_replicate_info': 'replicated lots',
-        '_experiment_bucket': 'important files'
+    overrides = {
+        'override_lab_name': 'awesome lab',
+        'override_experiment_type': 'TRIP',
+        'override_assay_info': 'cold',
+        'override_replicate_info': 'replicated lots',
+        'override_experiment_bucket': 'important files'
     }
-    proc_file_json.update(underscores)
+    proc_file_json.update(overrides)
     proc_file_json['file_format'] = file_formats.get('bw').get('uuid')
     proc_file_json['filename'] = 'test.bw'
     pfile = testapp.post_json('/file_vistrack', proc_file_json, status=201).json['@graph'][0]
     tf_info = pfile.get('track_and_facet_info')
-    for k, v in underscores.items():
-        tf = k.replace('_', '', 1)
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
         assert tf_info[tf] == v
-    # make sure it doesn't change
-    experiment_data['processed_files'] = [pfile['@id']]
-    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
-    res = testapp.get(pfile['@id']).json
-    tf_info2 = res.get('track_and_facet_info')
-    for k, v in underscores.items():
-        tf = k.replace('_', '', 1)
-        assert tf_info2[tf] == v
 
 
-def test_track_and_file_facet_info_file_w_some_underscore_fields(
+def test_track_and_file_facet_info_file_w_some_override_fields(
         testapp, proc_file_json, experiment_data):
-    underscores = {
-        '_experiment_type': 'TRIP',
-        '_biosource_name': 'some cell',
-        '_assay_info': 'cold',
-        '_replicate_info': 'replicated lots',
+    overrides = {
+        'override_experiment_type': 'TRIP',
+        'override_biosource_name': 'some cell',
+        'override_assay_info': 'cold',
+        'override_replicate_info': 'replicated lots',
     }
-    proc_file_json.update(underscores)
+    proc_file_json.update(overrides)
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
     tf_info = pfile.get('track_and_facet_info')
     assert len(tf_info) == 5  # lab will get calculated since expt_type exists
-    for k, v in underscores.items():
-        tf = k.replace('_', '', 1)
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
         assert tf_info[tf] == v
     # make sure it doesn't change
     experiment_data['processed_files'] = [pfile['@id']]
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info2 = res.get('track_and_facet_info')
-    for k, v in underscores.items():
-        tf = k.replace('_', '', 1)
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
         assert tf_info2[tf] == v
     assert tf_info2['experiment_type'] == 'TRIP'
     assert tf_info2['lab_name'] == 'ENCODE lab'
