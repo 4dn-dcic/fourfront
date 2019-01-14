@@ -1151,6 +1151,33 @@ def test_track_and_file_facet_info_file_w_all_underscore_fields(
         assert tf_info2[tf] == v
 
 
+def test_track_and_file_facet_info_file_vistrack_w_all_underscore_fields(
+        testapp, proc_file_json, experiment_data, file_formats):
+    underscores = {
+        '_lab_name': 'awesome lab',
+        '_experiment_type': 'TRIP',
+        '_assay_info': 'cold',
+        '_replicate_info': 'replicated lots',
+        '_experiment_bucket': 'important files'
+    }
+    proc_file_json.update(underscores)
+    proc_file_json['file_format'] = file_formats.get('bw').get('uuid')
+    proc_file_json['filename'] = 'test.bw'
+    pfile = testapp.post_json('/file_vistrack', proc_file_json, status=201).json['@graph'][0]
+    tf_info = pfile.get('track_and_facet_info')
+    for k, v in underscores.items():
+        tf = k.replace('_', '', 1)
+        assert tf_info[tf] == v
+    # make sure it doesn't change
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info2 = res.get('track_and_facet_info')
+    for k, v in underscores.items():
+        tf = k.replace('_', '', 1)
+        assert tf_info2[tf] == v
+
+
 def test_track_and_file_facet_info_file_w_some_underscore_fields(
         testapp, proc_file_json, experiment_data):
     underscores = {
