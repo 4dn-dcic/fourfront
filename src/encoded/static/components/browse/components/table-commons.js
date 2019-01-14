@@ -236,7 +236,7 @@ export const defaultColumnExtensionMap = {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
         'render' : function(result, columnDefinition, props, width){
             if (!result.date_published) return null;
-            return <DateUtility.LocalizedTime timestamp={result.date_published} formatType='date-sm' />;
+            return DateUtility.formatPublicationDate(result.date_published);
         },
         'order' : 504
     },
