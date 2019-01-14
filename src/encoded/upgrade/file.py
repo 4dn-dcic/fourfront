@@ -49,12 +49,12 @@ def file_1_2(value, system):
 @upgrade_step('file_vistrack', '1', '2')
 def file_track_data_upgrade(value, system):
     field_map = {
-        "dataset_type": "_experiment_type",
-        "assay_info": "_assay_info",
-        "replicate_identifiers": "_replicate_info",
-        "biosource_name": "_biosource_name",
-        "experiment_bucket": "_experiment_bucket",
-        "project_lab": "_lab_name"
+        "dataset_type": "override_experiment_type",
+        "assay_info": "override_assay_info",
+        "replicate_identifiers": "override_replicate_info",
+        "biosource_name": "override_biosource_name",
+        "experiment_bucket": "override_experiment_bucket",
+        "project_lab": "override_lab_name"
     }
     for oldprop, newprop in field_map.items():
         oldpropval = value.get(oldprop)

@@ -1,5 +1,5 @@
 import pytest
-# pytestmark = pytest.mark.working
+pytestmark = pytest.mark.working
 
 
 @pytest.fixture
@@ -37,15 +37,15 @@ def file_wo_underscore_fields():
 @pytest.fixture
 def file_w_underscore_fields(file_wo_underscore_fields):
     fieldmap = {
-        "dataset_type": "_experiment_type",
-        "assay_info": "_assay_info",
-        "replicate_identifiers": "_replicate_info",
-        "biosource_name": "_biosource_name",
-        "experiment_bucket": "_experiment_bucket",
-        "project_lab": "_lab_name"
+        "dataset_type": "override_experiment_type",
+        "assay_info": "override_assay_info",
+        "replicate_identifiers": "override_replicate_info",
+        "biosource_name": "override_biosource_name",
+        "experiment_bucket": "override_experiment_bucket",
+        "project_lab": "override_lab_name"
     }
     mod = {v: file_wo_underscore_fields.get(f) for f, v in fieldmap.items()}
-    mod['_replicate_info'] = mod['_replicate_info'][0]
+    mod['override_replicate_info'] = mod['override_replicate_info'][0]
     return mod
 
 
@@ -53,7 +53,7 @@ def test_upgrade_vistrack_meta_one_repid(registry, file_wo_underscore_fields, fi
     file_wo_underscore_fields['schema_version'] = '1'
     file_w_underscore_fields['schema_version'] = '2'
     del file_wo_underscore_fields['experiment_bucket']
-    del file_w_underscore_fields['_experiment_bucket']
+    del file_w_underscore_fields['override_experiment_bucket']
     from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_vistrack', file_wo_underscore_fields, registry=registry,
@@ -67,7 +67,7 @@ def test_upgrade_vistrack_meta_multi_repids(registry, file_wo_underscore_fields,
     file_wo_underscore_fields['schema_version'] = '1'
     file_w_underscore_fields['schema_version'] = '2'
     file_wo_underscore_fields['replicate_identifiers'] = ['Biorep 1, Techrep 1', 'Biorep 2, Techrep 1']
-    file_w_underscore_fields['_replicate_info'] = 'merged replicates'
+    file_w_underscore_fields['override_replicate_info'] = 'merged replicates'
     from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_vistrack', file_wo_underscore_fields, registry=registry,
@@ -81,7 +81,7 @@ def test_upgrade_file_processed_meta_multi_repids(registry, file_wo_underscore_f
     file_wo_underscore_fields['schema_version'] = '2'
     file_w_underscore_fields['schema_version'] = '3'
     file_wo_underscore_fields['replicate_identifiers'] = ['Biorep 1, Techrep 1', 'Biorep 2, Techrep 1']
-    file_w_underscore_fields['_replicate_info'] = 'merged replicates'
+    file_w_underscore_fields['override_replicate_info'] = 'merged replicates'
     from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_processed', file_wo_underscore_fields, registry=registry,
@@ -114,12 +114,12 @@ def test_upgrade_file_format_w_unknown_format(
         registry, file_1, file_formats):
     from snovault import UPGRADER
     upgrader = registry[UPGRADER]
-    file_1['file_format'] = 'bg'
+    file_1['file_format'] = 'hic'
     value = upgrader.upgrade('file_processed', file_1, registry=registry,
                              current_version='1', target_version='2')
     assert value['schema_version'] == '2'
     assert value['file_format'] == file_formats['other'].get('uuid')
-    assert ' FILE FORMAT: bg' in value['notes']
+    assert ' FILE FORMAT: hic' in value['notes']
 
 
 def test_upgrade_extrafile_formats_good_formats(
@@ -136,9 +136,9 @@ def test_upgrade_extrafile_format_w_unknown_format(
         registry, file_w_extra_1, file_formats):
     from snovault import UPGRADER
     upgrader = registry[UPGRADER]
-    file_w_extra_1['extra_files'] = [{'file_format': 'bg'}]
+    file_w_extra_1['extra_files'] = [{'file_format': 'hic'}]
     value = upgrader.upgrade('file_processed', file_w_extra_1, registry=registry,
                              current_version='1', target_version='2')
     assert value['schema_version'] == '2'
     assert value['extra_files'][0]['file_format'] == file_formats['other'].get('uuid')
-    assert ' EXTRA FILE FORMAT: 0-bg' in value['notes']
+    assert ' EXTRA FILE FORMAT: 0-hic' in value['notes']
