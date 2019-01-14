@@ -9028,7 +9028,7 @@
                         "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
                     ]
                 },
-                "name": "chip",
+                "name": "chip-aln-chip",
                 "outputs": [
                     {
                         "meta": {
@@ -9379,7 +9379,7 @@
                         "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
                     ]
                 },
-                "name": "chip",
+                "name": "chip-aln-ctl",
                 "outputs": [
                     {
                         "meta": {
@@ -9724,7 +9724,7 @@
                         "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
                     ]
                 },
-                "name": "chip",
+                "name": "chip-postaln",
                 "outputs": [
                     {
                         "meta": {
