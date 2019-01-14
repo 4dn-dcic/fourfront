@@ -619,11 +619,11 @@
     "facets_aggregated_badges" : {
         "aggregated_items.badges.item.badge.positive_badge": {
             "title": "Positive Badges",
-            "weight": 997
+            "order": 997
         },
         "aggregated_items.badges.item.badge.warning_badge": {
             "title": "Warning Badges",
-            "weight": 998
+            "order": 998
         }
     }
 

@@ -776,10 +776,10 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
         # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
     audit_facets = [
-        ('audit.ERROR.category', {'title': 'Audit category: ERROR', 'weight': 999}),
-        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT', 'weight': 999}),
-        ('audit.WARNING.category', {'title': 'Audit category: WARNING', 'weight': 999}),
-        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION', 'weight': 999})
+        ('audit.ERROR.category', {'title': 'Audit category: ERROR', 'order': 999}),
+        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT', 'order': 999}),
+        ('audit.WARNING.category', {'title': 'Audit category: WARNING', 'order': 999}),
+        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION', 'order': 999})
     ]
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
@@ -1113,7 +1113,7 @@ def execute_search(search):
 def format_facets(es_results, facets, total, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
-    Sort based off of the 'weight' of the facets
+    Sort based off of the 'order' of the facets
     These are stored within 'aggregations' of the result.
 
     If the frame for the search != embedded, return no facets
@@ -1129,10 +1129,10 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     aggregations = es_results['aggregations']['all_items']
     used_facets = set()
 
-    # sort the facets by weight. Lowest weight goes at top
-    # if no weight is provided, assume 0
-    # this will keep current order of non-weighted facets
-    sort_facets = sorted(facets, key=lambda fct: fct[1].get('weight', 0))
+    # sort the facets by order. Lowest order goes at top
+    # if no order is provided, assume 0
+    # this will keep current order of non-explicitly ordered facets
+    sort_facets = sorted(facets, key=lambda fct: fct[1].get('order', 0))
 
     for field, facet in sort_facets:
         result_facet = {
