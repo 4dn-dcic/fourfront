@@ -11,11 +11,11 @@ from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
 from snovault.resource_views import collection_view_listing_db
-from snovault.typeinfo import AbstractTypeInfo
 from snovault.fourfront_utils import (
     get_jsonld_types_from_collection_type,
     crawl_schema
 )
+from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
 from elasticsearch import (
