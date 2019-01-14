@@ -6,6 +6,14 @@ pytestmark = pytest.mark.working
 
 @pytest.fixture
 def higlass_mcool_viewconf(testapp):
+    """ Creates a fixture for an mcool Higlass view config.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+
+    Returns:
+        Dictionary representing the JSON response after posting the view config.
+    """
     viewconf = {
         "title" : "Test MCOOL Display",
         "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
@@ -239,6 +247,14 @@ def higlass_mcool_viewconf(testapp):
 
 @pytest.fixture
 def higlass_blank_viewconf(testapp):
+    """ Creates a fixture for a blank Higlass view config (lacks any files or genome assembly).
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+
+    Returns:
+        Dictionary representing the JSON response after posting the blank view config.
+    """
     viewconf = {
         "title" : "Empty Higlass Viewconfig",
         "description" : "No files in viewconf, ready to clone.",
@@ -304,9 +320,34 @@ def higlass_blank_viewconf(testapp):
     }
     return testapp.post_json('/higlass-view-configs/', viewconf).json
 
+def assert_true(bool, comment=""):
+    """ Raises AssertionError if bool is not true.
+    Args:
+        bool(boolean): Value to be asserted.
+        comment(str, optional): String to help explain the error.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError: if bool does not evaluate to True.
+    """
+    if not bool:
+        raise AssertionError(comment)
+
 def test_higlass_noop(testapp, higlass_mcool_viewconf):
     """ Test the python endpoint exists.
     Given a viewconf and no experiments, the viewconf should remain unchanged.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Get the Higlass Viewconf that will be edited.
@@ -323,17 +364,28 @@ def test_higlass_noop(testapp, higlass_mcool_viewconf):
     new_higlass_json = response.json["new_viewconfig"]
 
     # The new viewconf should be a subset of the old one.
-    assert len(higlass_json["viewconfig"]["views"]) == len(new_higlass_json["views"])
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(higlass_json["viewconfig"]["views"]) == len(new_higlass_json["views"]))
+    assert_true(len(new_higlass_json["views"]) == 1)
     for index in range(len(new_higlass_json["views"])):
         new_higlass = new_higlass_json["views"][index]
         old_higlass = higlass_json["viewconfig"]["views"][index]
         for key in new_higlass:
-            assert old_higlass[key] == new_higlass[key]
+            assert_true(old_higlass[key] == new_higlass[key])
 
 def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
     """ Don't pass in an existing higlass viewconf, but do add a file.
     Expect a new higlass view containing the file.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_blank_viewconf(obj): Empty Higlass view configuration with no file or genome assembly.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     genome_assembly = "GRCm38"
@@ -350,33 +402,44 @@ def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
 
     new_higlass_view_json = response.json["new_viewconfig"]
 
-    assert response.json["new_genome_assembly"] == genome_assembly
+    assert_true(response.json["new_genome_assembly"] == genome_assembly)
 
     # There should be 1 view.
-    assert len(new_higlass_view_json["views"]) == 1
+    assert_true(len(new_higlass_view_json["views"]) == 1)
 
     view = new_higlass_view_json["views"][0]
 
-    assert "layout" in view
-    assert "uid" in view
-    assert "tracks" in view
-    assert "center" in view["tracks"]
-    assert len(view["tracks"]["center"]) == 1
+    assert_true("layout" in view)
+    assert_true("uid" in view)
+    assert_true("tracks" in view)
+    assert_true("center" in view["tracks"])
+    assert_true(len(view["tracks"]["center"]) == 1)
 
     center_track = view["tracks"]["center"][0]
-    assert center_track["type"] == "combined"
-    assert "contents" in center_track
+    assert_true(center_track["type"] == "combined")
+    assert_true("contents" in center_track)
 
     # The contents should have the mcool's heatmap.
     contents = center_track["contents"]
-    assert len(contents) == 1
+    assert_true(len(contents) == 1)
 
     # The central contents should have the mcool file.
     if "tilesetUid" in contents and contents[0]["tilesetUid"] == mcool_file_json['higlass_uid']:
-        assert track["type"] == "heatmap"
+        assert_true(track["type"] == "heatmap")
 
 def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bedGraph_file_json(dict): Fixture refers to a bedgraph file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Get a bedGraph file to add.
@@ -401,21 +464,32 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_jso
     new_higlass_json = response.json["new_viewconfig"]
 
     # Make sure the bedGraph has been added above the mcool file.
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    # Assert there is still 1 central view
-    assert len(tracks["center"][0]["contents"]) == 1
-    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+    # Assert_true(there is still 1 central view)
+    assert_true(len(tracks["center"][0]["contents"]) == 1)
+    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
 
     # Only one new top track should have appeared.
-    assert len(tracks["left"]) == len(old_tracks["left"])
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]))
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
 def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file_json):
-    """ Given a viewconf with a bedGraph file, the viewconf should add a bedGraph on top.
+    """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_blank_viewconf(obj): Empty Higlass view configuration with no file or genome assembly.
+        bedGraph_file_json(dict): Fixture refers to a bedgraph file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Add the bedGraph file with a higlass uid and a genome asssembly.
@@ -436,10 +510,10 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
+    assert_true(response.json["success"] == True)
 
-    assert len(new_higlass_json["views"]) == 1
-    assert len(new_higlass_json["views"][0]["tracks"]["top"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
+    assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 1)
 
     # Add another bedGraph file. Make sure the bedGraphs are stacked atop each other.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -448,13 +522,24 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
+    assert_true(response.json["success"] == True)
 
-    assert len(new_higlass_json["views"]) == 1
-    assert len(new_higlass_json["views"][0]["tracks"]["top"]) == 2
+    assert_true(len(new_higlass_json["views"]) == 1)
+    assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 2)
 
 def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
@@ -480,8 +565,8 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
         'files': ["{uuid}".format(uuid=mcool_file_with_different_genome_assembly['uuid'])]
     })
 
-    assert response.json["success"] == False
-    assert "has the wrong Genome Assembly" in response.json["errors"]
+    assert_true(response.json["success"] == False)
+    assert_true("has the wrong Genome Assembly" in response.json["errors"])
 
     # Try to add an mcool with the same genome assembly.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -490,47 +575,79 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
         'files': ["{uuid}".format(uuid=mcool_file['uuid'])]
     })
 
-    assert response.json["success"] == True
+    assert_true(response.json["success"] == True)
 
     # Make sure the mcool displays are next to each other.
     new_higlass_json = response.json["new_viewconfig"]
 
-    assert len(new_higlass_json["views"]) == 2
+    assert_true(len(new_higlass_json["views"]) == 2)
 
     layout0 = new_higlass_json["views"][0]["layout"]
-    assert layout0["i"] == new_higlass_json["views"][0]["uid"]
-    assert layout0["x"] == 0
-    assert layout0["y"] == 0
-    assert layout0["w"] == 6
-    assert layout0["h"] == 12
+    assert_true(layout0["i"] == new_higlass_json["views"][0]["uid"])
+    assert_true(layout0["x"] == 0)
+    assert_true(layout0["y"] == 0)
+    assert_true(layout0["w"] == 6)
+    assert_true(layout0["h"] == 12)
 
     layout1 = new_higlass_json["views"][1]["layout"]
-    assert layout1["i"] == new_higlass_json["views"][1]["uid"]
-    assert layout1["x"] == 6
-    assert layout1["y"] == 0
-    assert layout1["w"] == 6
-    assert layout1["h"] == 12
+    assert_true(layout1["i"] == new_higlass_json["views"][1]["uid"])
+    assert_true(layout1["x"] == 6)
+    assert_true(layout1["y"] == 0)
+    assert_true(layout1["w"] == 6)
+    assert_true(layout1["h"] == 12)
 
 def assert_expected_viewconf_dimensions(viewconf, expected_dimensions):
-    """ Given a viewconf and a list of expected dimensions, assert each view has the correct dimensions in each.
+    """ Given a viewconf and a list of expected dimensions, assert_true(each view has the correct dimensions in each.)
+
+    Args:
+        viewconf(obj): A nested dictionary containing a Higlass viewconfig.
+        expected_dimensions(list): A list of dictionaries, in the order of Higlass Viewconfig views.
+            Each dictionary should have the "x", "w", "w", "h" keys to represent the position and size of each view.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if a dimension is the wrong size.
     """
+
+    # The correct number of views exist.
+    assert_true(
+        len(viewconf["views"]) == len(expected_dimensions),
+        "Expected {num_expected} views, but there were {num_actual} views instead.".format(
+            num_expected = len(expected_dimensions),
+            num_actual = len(viewconf["views"]),
+        )
+    )
+
     for index, expected_layout in enumerate(expected_dimensions):
         layout = viewconf["views"][index]["layout"]
 
         # Make sure the uid matches the layout's index.
-        assert layout["i"] == viewconf["views"][index]["uid"]
+        assert_true(layout["i"] == viewconf["views"][index]["uid"])
 
         # Make sure each dimension matches.
         for dimension in ("x", "y", "w", "h"):
-            assert layout[dimension] == expected_layout[dimension], "While looking at {num_expected} expected dimensions, index: {index}, dimension: {dim} mismatched.".format(
+            assert_true(layout[dimension] == expected_layout[dimension], "While looking at {num_expected} expected dimensions, index: {index}, dimension: {dim} mismatched.".format(
                 num_expected = len(expected_dimensions),
                 index = index,
                 dim = dimension
-            )
+            ))
 
 def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool_file_json):
     """ Make sure you can add multiple mcool displays together, up to six.
     Eventually we'll see a 3 x 2 grid.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
@@ -551,7 +668,7 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
+    assert_true(response.json["success"] == True)
 
     # Add the third mcool file. It should be to the right of the first.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -561,8 +678,8 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 3
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 3)
     expected_dimensions = (
         {"x":0, "y":0, "w":6, "h":6},
         {"x":6, "y":0, "w":6, "h":6},
@@ -578,8 +695,8 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 4
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 4)
     expected_dimensions = (
         {"x":0, "y":0, "w":6, "h":6},
         {"x":6, "y":0, "w":6, "h":6},
@@ -596,8 +713,8 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 5
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 5)
     expected_dimensions = (
         {"x":0, "y":0, "w":4, "h":6},
         {"x":4, "y":0, "w":4, "h":6},
@@ -615,8 +732,8 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 6
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 6)
     expected_dimensions = (
         {"x":0, "y":0, "w":4, "h":6},
         {"x":4, "y":0, "w":4, "h":6},
@@ -632,12 +749,23 @@ def test_add_multiple_mcool_one_at_a_time(testapp, higlass_mcool_viewconf, mcool
         'higlass_viewconfig': new_higlass_json,
         'files': ["{uuid}".format(uuid=mcool_file['uuid'])]
     })
-    assert response.json["success"] == False
-    assert "You cannot have more than 6 views in a single display." in response.json["errors"]
+    assert_true(response.json["success"] == False)
+    assert_true("You cannot have more than 6 views in a single display." in response.json["errors"])
 
 def test_add_multiple_mcool_at_once(testapp, higlass_mcool_viewconf, mcool_file_json):
     """ Make sure you can add multiple mcool displays together, up to six.
     Eventually we'll see a 3 x 2 grid.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
@@ -658,8 +786,8 @@ def test_add_multiple_mcool_at_once(testapp, higlass_mcool_viewconf, mcool_file_
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 3
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 3)
 
     # Try to add 4 files. This should fail because you tried to have more than 6 views.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -667,12 +795,24 @@ def test_add_multiple_mcool_at_once(testapp, higlass_mcool_viewconf, mcool_file_
         'genome_assembly' : higlass_json["genome_assembly"],
         'files': [mcool_file['uuid'],mcool_file['uuid'],mcool_file['uuid'],mcool_file['uuid']]
     })
-    assert response.json["success"] == False
-    assert "You cannot have more than 6 views in a single display." in response.json["errors"]
+    assert_true(response.json["success"] == False)
+    assert_true("You cannot have more than 6 views in a single display." in response.json["errors"])
 
 def test_add_bedGraph_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_viewconf, bedGraph_file_json):
     """ With at least 2 mcool displays, try to add a bedGraph.
     The bedGraph should be atop the mcool displays.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bedGraph_file_json(dict): Fixture refers to a bedgraph file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Post an mcool file and retrieve its uuid. Add a higlass_uid.
@@ -699,8 +839,8 @@ def test_add_bedGraph_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_
     })
 
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 2
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 2)
 
     old_top_track_count = {}
     for index, view in enumerate(new_higlass_json["views"]):
@@ -715,20 +855,30 @@ def test_add_bedGraph_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_
 
     # The bedGraph file should be above the mcool displays.
     new_higlass_json = response.json["new_viewconfig"]
-    assert response.json["success"] == True
-    assert len(new_higlass_json["views"]) == 2
+    assert_true(response.json["success"] == True)
+    assert_true(len(new_higlass_json["views"]) == 2)
 
     top_track_count = {}
     for index, view in enumerate(new_higlass_json["views"]):
         top_track_count[index] = len(view["tracks"]["top"])
 
     # It should be on top of every view, and it did not create a new view.
-    assert len(top_track_count.keys()) == len(old_top_track_count.keys())
+    assert_true(len(top_track_count.keys()) == len(old_top_track_count.keys()))
     for index in range(len(top_track_count.keys())):
-        assert top_track_count[index] - old_top_track_count[index] == 1
+        assert_true(top_track_count[index] - old_top_track_count[index] == 1)
 
 def test_bogus_fileuuid(testapp, higlass_mcool_viewconf):
     """ Function should fail gracefully if there is no file with the given uuid.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Get the json for a viewconfig with a mcool file.
@@ -744,24 +894,36 @@ def test_bogus_fileuuid(testapp, higlass_mcool_viewconf):
     })
 
     # Expect failure.
-    assert response.json["success"] == False
-    assert "does not exist" in response.json["errors"]
+    assert_true(response.json["success"] == False)
+    assert_true("does not exist" in response.json["errors"])
 
 def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf, bedGraph_file_json):
     """ Add files by the accession instead of the uuid.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+        higlass_blank_viewconf(obj): Empty Higlass view configuration with no file or genome assembly.
+        bedGraph_file_json(dict): Fixture refers to a bedgraph file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
     # Add an mcool file. Add a higlass_uid.
     mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
     mcool_file_json['genome_assembly'] = "GRCm38"
     mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
-    assert mcool_file["accession"]
+    assert_true(mcool_file["accession"])
 
     # Add a bg file.
     bedGraph_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
     bedGraph_file_json['genome_assembly'] = "GRCm38"
     bedGraph_file_json['md5sum'] = '00000000000000000000000000000001'
     bg_file = testapp.post_json('/file_processed', bedGraph_file_json).json['@graph'][0]
-    assert bg_file["accession"]
+    assert_true(bg_file["accession"])
 
     # Get the Higlass Viewconf that will be edited.
     higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
@@ -775,26 +937,37 @@ def test_add_files_by_accession(testapp, mcool_file_json, higlass_blank_viewconf
         'files': [mcool_file["accession"], bg_file["accession"]]
     })
 
-    assert response.json["success"] == True
+    assert_true(response.json["success"] == True)
 
     # Get the new json.
     new_higlass_json = response.json["new_viewconfig"]
 
     # There should be 1 view.
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
     tracks = new_higlass_json["views"][0]["tracks"]
 
     # 1 central track should be in the new view.
-    assert len(tracks["center"][0]["contents"]) == 1
-    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+    assert_true(len(tracks["center"][0]["contents"]) == 1)
+    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
 
     # 1 more track should be on top.
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
 def test_add_bedGraph_to_mcool(testapp, higlass_mcool_viewconf, bedGraph_file_json):
     """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bedGraph_file_json(dict): Fixture refers to a bedgraph file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Add the bedGraph file with a higlass uid and a genome asssembly.
@@ -820,8 +993,8 @@ def test_add_bedGraph_to_mcool(testapp, higlass_mcool_viewconf, bedGraph_file_js
         'files': ["{uuid}".format(uuid=bg_file_with_different_genome_assembly['uuid'])]
     })
 
-    assert response.json["success"] == False
-    assert "has the wrong Genome Assembly" in response.json["errors"]
+    assert_true(response.json["success"] == False)
+    assert_true("has the wrong Genome Assembly" in response.json["errors"])
 
     # Try to add an mcool with the same genome assembly.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -830,15 +1003,26 @@ def test_add_bedGraph_to_mcool(testapp, higlass_mcool_viewconf, bedGraph_file_js
         'files': ["{uuid}".format(uuid=bg_file['uuid'])]
     })
 
-    assert response.json["success"] == True
+    assert_true(response.json["success"] == True)
 
     # Make sure the mcool displays are next to each other.
     new_higlass_json = response.json["new_viewconfig"]
 
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
 def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bigwig_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bigwig on top.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bigwig_file_json(dict): Fixture refers to a bigwig file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Get a bedGraph file to add.
@@ -863,21 +1047,32 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bigwig_file_json):
     new_higlass_json = response.json["new_viewconfig"]
 
     # Make sure the bedGraph has been added above the mcool file.
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    # Assert there is still 1 central view
-    assert len(tracks["center"][0]["contents"]) == 1
-    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+    # Assert_true(there is still 1 central view)
+    assert_true(len(tracks["center"][0]["contents"]) == 1)
+    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
 
     # Only one new top track should have appeared.
-    assert len(tracks["left"]) == len(old_tracks["left"])
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]))
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
 def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bigbed on top.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bigbed_file_json(dict): Fixture refers to a bigbed file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Get a bigbed file to add.
@@ -902,18 +1097,18 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
     new_higlass_json = response.json["new_viewconfig"]
 
     # Make sure the bigbed has been added above the mcool file.
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    # Assert there is still 1 central view
-    assert len(tracks["center"][0]["contents"]) == 1
-    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+    # Assert_true(there is still 1 central view)
+    assert_true(len(tracks["center"][0]["contents"]) == 1)
+    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
 
     # Only one new top track should have appeared.
-    assert len(tracks["left"]) == len(old_tracks["left"])
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]))
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
     # Get the top track and check the format.
     found_annotation_track = False
@@ -928,22 +1123,33 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
         if not found_data_track and "tilesetUid" in track and track["tilesetUid"] == bigbed_file_json['higlass_uid']:
             found_data_track = True
 
-            assert track["type"] == "horizontal-vector-heatmap"
+            assert_true(track["type"] == "horizontal-vector-heatmap")
 
-            assert "options" in track
+            assert_true("options" in track)
             options = track["options"]
-            assert "valueScaling" in options
-            assert options["valueScaling"] == "linear"
+            assert_true("valueScaling" in options)
+            assert_true(options["valueScaling"] == "linear")
 
-            assert "colorRange" in options
-            assert len(options["colorRange"]) == 256
+            assert_true("colorRange" in options)
+            assert_true(len(options["colorRange"]) == 256)
 
-    assert found_annotation_track == True
-    assert found_chromosome_track == True
-    assert found_data_track == True
+    assert_true(found_annotation_track == True)
+    assert_true(found_chromosome_track == True)
+    assert_true(found_data_track == True)
 
 def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf, bed_beddb_file_json):
-    """Add a bed file (with a beddb used as a supporting file) to the HiGlass file.
+    """ Add a bed file (with a beddb used as a supporting file) to the HiGlass file.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bed_beddb_file_json(dict): Fixture refers to a bed file with a supporting beddb file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Get a file to add.
@@ -968,33 +1174,44 @@ def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf, bed_beddb_file_json
     new_higlass_json = response.json["new_viewconfig"]
 
     # There should be 1 view
-    assert response.json["errors"] == ''
-    assert response.json["success"]
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
 
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     # The view should have a new top track
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    assert len(tracks["left"]) == len(old_tracks["left"])
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]))
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
     # Central track is unchanged
-    assert len(tracks["center"][0]["contents"]) == 1
-    assert "mcool" in tracks["center"][0]["contents"][0]["name"]
+    assert_true(len(tracks["center"][0]["contents"]) == 1)
+    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
 
     # The top track should be a bed-like track
     found_data_track = False
     for track in tracks["top"]:
         if "tilesetUid" in track and track["tilesetUid"] == bed_beddb_file_json['higlass_uid']:
             found_data_track = True
-            assert track["type"] == "bedlike"
+            assert_true(track["type"] == "bedlike")
 
-    assert found_data_track == True
+    assert_true(found_data_track == True)
 
 def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
-    """Add a beddb file to the HiGlass file.
+    """ Add a beddb file to the HiGlass file.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_blank_viewconf(obj): Empty Higlass view configuration with no file or genome assembly.
+        beddb_file_json(dict): Fixture refers to a beddb file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
 
     # Add the beddb file.
@@ -1020,54 +1237,65 @@ def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
     new_higlass_json = response.json["new_viewconfig"]
 
     # There should be 1 view
-    assert response.json["errors"] == ''
-    assert response.json["success"]
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
 
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     # The view should have a new top track and a new left track
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    assert len(tracks["left"]) == len(old_tracks["left"]) + 1
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]) + 1)
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
     # Central track is unchanged
-    assert len(tracks["center"][0]["contents"]) == 0
+    assert_true(len(tracks["center"][0]["contents"]) == 0)
 
     # The top track should be a bed-like track
     found_top_data_track = False
     for track in tracks["top"]:
         if "tilesetUid" in track and track["tilesetUid"] == beddb_file_json['higlass_uid']:
             found_top_data_track = True
-            assert track["type"] == "horizontal-gene-annotations"
+            assert_true(track["type"] == "horizontal-gene-annotations")
 
-    assert found_top_data_track == True
+    assert_true(found_top_data_track == True)
 
     # The left track should be a bed-like track
     found_left_data_track = False
     for track in tracks["left"]:
         if "tilesetUid" in track and track["tilesetUid"] == beddb_file_json['higlass_uid']:
             found_left_data_track = True
-            assert track["type"] == "vertical-gene-annotations"
+            assert_true(track["type"] == "vertical-gene-annotations")
 
-    assert found_left_data_track == True
+    assert_true(found_left_data_track == True)
 
     # The searchbar needs to be updated, too
     main_view = new_higlass_json["views"][0]
-    assert "genomePositionSearchBox" in main_view
-    assert "chromInfoId" in main_view["genomePositionSearchBox"]
-    assert main_view["genomePositionSearchBox"]["chromInfoId"] == genome_assembly
-    assert "autocompleteId" in main_view["genomePositionSearchBox"]
-    assert main_view["genomePositionSearchBox"]["autocompleteId"] == beddb_file_json['higlass_uid']
-    assert "visible" in main_view["genomePositionSearchBox"]
-    assert main_view["genomePositionSearchBox"]["visible"] == True
+    assert_true("genomePositionSearchBox" in main_view)
+    assert_true("chromInfoId" in main_view["genomePositionSearchBox"])
+    assert_true(main_view["genomePositionSearchBox"]["chromInfoId"] == genome_assembly)
+    assert_true("autocompleteId" in main_view["genomePositionSearchBox"])
+    assert_true(main_view["genomePositionSearchBox"]["autocompleteId"] == beddb_file_json['higlass_uid'])
+    assert_true("visible" in main_view["genomePositionSearchBox"])
+    assert_true(main_view["genomePositionSearchBox"]["visible"] == True)
 
-    assert "autocompleteSource" in main_view
-    assert beddb_file_json['higlass_uid'] in main_view["autocompleteSource"]
+    assert_true("autocompleteSource" in main_view)
+    assert_true(beddb_file_json['higlass_uid'] in main_view["autocompleteSource"])
 
 def test_add_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json):
-    """Add a chromsizes file and add a top, left and center tracks to the view.
+    """ Add a chromsizes file and add a top, left and center tracks to the view.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_blank_viewconf(obj): Empty Higlass view configuration with no file or genome assembly.
+        chromsizes_file_json(dict): Fixture refers to a chromsizes file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
     # Get a file to add.
     genome_assembly = "GRCm38"
@@ -1091,41 +1319,53 @@ def test_add_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json):
     new_higlass_json = response.json["new_viewconfig"]
 
     # There should be 1 view
-    assert response.json["errors"] == ''
-    assert response.json["success"]
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
 
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     # The view should have a new top track and a new left track
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    assert len(tracks["left"]) == len(old_tracks["left"]) + 1
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]) + 1)
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
     # There are no other 2D views, so we should not have a center track.
-    assert len(tracks["center"][0]["contents"]) == 0
+    assert_true(len(tracks["center"][0]["contents"]) == 0)
 
     # The top track should have chromosome labels
     found_top_data_track = False
     for track in tracks["top"]:
         if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
             found_top_data_track = True
-            assert track["type"] == "horizontal-chromosome-labels"
+            assert_true(track["type"] == "horizontal-chromosome-labels")
 
-    assert found_top_data_track == True
+    assert_true(found_top_data_track == True)
 
     # The left track should have chromosome labels
     found_left_data_track = False
     for track in tracks["left"]:
         if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
             found_left_data_track = True
-            assert track["type"] == "vertical-chromosome-labels"
+            assert_true(track["type"] == "vertical-chromosome-labels")
 
-    assert found_left_data_track == True
+    assert_true(found_left_data_track == True)
 
 def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json, mcool_file_json):
-    """Add a chromsizes file and add a top, left and center tracks to the view.
+    """ Add a chromsizes file and add a top, left and center tracks to the view.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_blank_viewconf(obj): Empty Higlass view configuration with no file or genome assembly.
+        chromsizes_file_json(dict): Fixture refers to a chromsizes file.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
     """
     # Get a file to add.
     genome_assembly = "GRCm38"
@@ -1157,38 +1397,38 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
     new_higlass_json = response.json["new_viewconfig"]
 
     # There should be 1 view
-    assert response.json["errors"] == ''
-    assert response.json["success"]
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
 
-    assert len(new_higlass_json["views"]) == 1
+    assert_true(len(new_higlass_json["views"]) == 1)
 
     # The view should have a new top track and a new left track
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    assert len(tracks["left"]) == len(old_tracks["left"]) + 1
-    assert len(tracks["top"]) == len(old_tracks["top"]) + 1
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]) + 1)
+    assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
     # The top track should have chromosome labels
     found_top_data_track = False
     for track in tracks["top"]:
         if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
             found_top_data_track = True
-            assert track["type"] == "horizontal-chromosome-labels"
+            assert_true(track["type"] == "horizontal-chromosome-labels")
 
-    assert found_top_data_track == True
+    assert_true(found_top_data_track == True)
 
     # The left track should have chromosome labels
     found_left_data_track = False
     for track in tracks["left"]:
         if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
             found_left_data_track = True
-            assert track["type"] == "vertical-chromosome-labels"
+            assert_true(track["type"] == "vertical-chromosome-labels")
 
-    assert found_left_data_track == True
+    assert_true(found_left_data_track == True)
 
     # The view should also have a new center track with 2 views inside
-    assert len(tracks["center"][0]["contents"]) == 2
+    assert_true(len(tracks["center"][0]["contents"]) == 2)
 
     # The central contents should have a chromosome grid and the mcool file.
     found_central_data_track = False
@@ -1196,10 +1436,10 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
     for track in tracks["center"][0]["contents"]:
         found_central_data_track = True
         if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
-            assert track["type"] == "2d-chromosome-grid"
+            assert_true(track["type"] == "2d-chromosome-grid")
         if "tilesetUid" in track and track["tilesetUid"] == mcool_file_json['higlass_uid']:
-            assert track["type"] == "heatmap"
-    assert found_central_data_track == True
+            assert_true(track["type"] == "heatmap")
+    assert_true(found_central_data_track == True)
 
     # Add another 2D view to this existing view
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -1211,14 +1451,14 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
     })
 
     two_view_higlass_json = response.json["new_viewconfig"]
-    assert response.json["errors"] == ''
-    assert response.json["success"]
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
 
-    # Assert there are 2 views
-    assert len(two_view_higlass_json["views"]) == 2
+    # Assert_true(there are 2 views)
+    assert_true(len(two_view_higlass_json["views"]) == 2)
 
-    # Assert there is only 1 grid in each view
+    # Assert_true(there is only 1 grid in each view)
     for view in two_view_higlass_json["views"]:
         center_track_contents = view["tracks"]["center"][0]["contents"]
         chromosome_grid_contents = [cont for cont in center_track_contents if cont["type"] == "2d-chromosome-grid" ]
-        assert(len(chromosome_grid_contents) == 1)
+        assert_true(len(chromosome_grid_contents) == 1)

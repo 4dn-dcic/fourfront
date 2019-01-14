@@ -424,16 +424,20 @@ def date_histogram_aggregations(request):
 @view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
 def add_files_to_higlass_viewconf(request):
     """ Add multiple files to the given Higlass view config.
-    Assumes request's request is JSON and contains these keys:
-        higlass_viewconfig       : JSON of the current Higlass views. If None, uses a default view.
-        files                    : A list of file uuids to add.
-        firstViewLocationAndZoom : (Optional) A list of three numbers indicating the location and zoom levels of the first existing view.
 
-    Returns a dict:
-        success             : Boolean indicating success.
-        errors              : A string containing errors. Will be None if this is successful.
-        new_viewconfig      : New dict representing the new viewconfig.
-        new_genome_assembly : A string showing the new genome assembly.
+    Args:
+        request(obj): Http request object. Assumes request's request is JSON and contains these keys:
+            higlass_viewconfig(obj)                     : JSON of the current Higlass views. If None, uses a default view.
+            files(array)                                : A list of file uuids to add.
+            firstViewLocationAndZoom(array, optional)   : A list of three numbers indicating the location and zoom levels of the first existing view.
+
+    Returns:
+        {
+            success(bool)           : Boolean indicating success.
+            errors(str)             : A string containing errors. Will be None if this is successful.
+            new_viewconfig(dict)    : New dict representing the new viewconfig.
+            new_genome_assembly(str): A string showing the new genome assembly.
+        }
     """
 
     # Get the viewconfig and its genome assembly. If none is provided, use the default empty higlass viewconf.
@@ -523,13 +527,19 @@ def add_files_to_higlass_viewconf(request):
     }
 
 def check_files_for_higlass(files_info, current_genome_assembly):
-    """
-    Scan the files to make sure they exist and have the expected fields.
+    """ Scan the files to make sure they exist and have the expected fields.
+    Args:
+        files_info(list): A list of dictionaries describing each file with a Higlass view. Each dict contains:
+            uuid(str): Unique identifier
+            item(dict): File metadata
+        current_genome_assembly(str): If not None, all of the files with genome assemblies must match this.
 
-    Returns a dict.
-        success : Boolean.
-        current_genome_assembly: A string.
-        errors : A string (or None if there are no errors)
+    Returns:
+        {
+            success(bool)               : True if there were no errors.
+            current_genome_assembly(str): A string indicating the genome assembly of the files.
+            errors(str)                 : A string (or None if there are no errors)
+        }
     """
     for datum in files_info:
         file_uuid = datum["uuid"]
@@ -583,12 +593,13 @@ def check_files_for_higlass(files_info, current_genome_assembly):
 
 def add_single_file_to_higlass_viewconf(views, new_file):
     """ Add a single file to the list of views.
-    views: All of the views from the view config.
-    new_file: The file to add.
+    Args:
+        views(list)     : All of the views from the view config.
+        new_file(dict)  : The file to add.
 
     Returns:
-        views : A list of the modified views. None if there is an error.
-        error : A string explaining the error. This is None if there is no error.
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
     """
 
     # If there are already 6 views, stop and return an error.
@@ -692,9 +703,14 @@ def add_single_file_to_higlass_viewconf(views, new_file):
 def create_1d_track(new_file, side="top"):
     """ Creates a dictionary representing a 1d track of the given file.
 
-        Returns:
-        - a dict containing information for a new track (or None if there is an error)
-        - a string containing an error message, if any (may be None)
+    Args:
+        new_file(dict)          : Describes the source file.
+        side(str, optional): Specifies the side of the view to add to. Determines the track type.
+            Defaults to "top".
+
+    Returns:
+        a dict containing information for a new track (or None if there is an error)
+        a string containing an error message, if any (may be None)
     """
     # Create default track options.
     new_track = {
@@ -745,11 +761,16 @@ def create_1d_track(new_file, side="top"):
 
 def add_track_to_views(new_track, views, side="top"):
     """ Add the given new track to all of the sides of all of the views.
-        Modifies views.
 
-        Returns:
-        - a boolean indicating success.
-        - a string containing an error message, if any (may be None)
+    Args:
+        new_track(dict): The new track to add.
+        views(list): Modifies views by adding the new_track to the views.
+        side(str, optional): Specifies the side of the view to add to. Determines the track type.
+            Defaults to "top".
+
+    Returns:
+        a boolean indicating success.
+        a string containing an error message, if any (may be None)
     """
 
     # For each view
@@ -762,10 +783,12 @@ def add_track_to_views(new_track, views, side="top"):
 
 def create_2d_view(new_file):
     """ Creates a dictionary representing a 2d view of the given file.
+    Args:
+        new_file(dict)          : Describes the source file.
 
-        Returns:
-        - a dict containing information for a new view (or None if there is an error)
-        - a string containing an error message, if any (may be None)
+    Returns:
+        a dict containing information for a new view (or None if there is an error)
+        a string containing an error message, if any (may be None)
     """
     # Create default view options.
     new_view = {
@@ -831,9 +854,15 @@ def create_2d_view(new_file):
     return new_view, None
 
 def update_genome_position_search_box(view, new_file):
-    """ Update the genome position search box for this view so it uses the given file
-    """
+    """ Update the genome position search box for this view so it uses the given file.
 
+    Args:
+        view(dict): Modifies the view containing the search box.
+        new_file(dict): Description of the source file.
+
+    Returns:
+        None
+    """
     view["autocompleteSource"] = "/api/v1/suggest/?d={uuid}&".format(uuid=new_file["higlass_uid"])
 
     if not "genomePositionSearchBox" in view:
@@ -853,11 +882,14 @@ def update_genome_position_search_box(view, new_file):
 
 def add_view_to_views(new_view, views):
     """ Add the given new view to the collection of views.
-        Modifies views.
 
-        Returns:
-        - a boolean indicating success.
-        - a string containing an error message, if any (may be None)
+    Args:
+        new_view(dict)  : Describes the new view.
+        views(list)     : Modifies views by adding new_view to this list.
+
+    Returns:
+        a boolean indicating success.
+        a string containing an error message, if any (may be None)
     """
     # If the first view is blank, override it with the new view.
     if not (
@@ -879,7 +911,13 @@ def add_view_to_views(new_view, views):
     return True, None
 
 def get_title(file):
-    """ Returns a string containing the title for the view.
+    """ Returns a string containing the title for the given file.
+
+    Args:
+        file(dict): Describes the file.
+
+    Returns:
+        String representing the title.
     """
     # Use the track title. As a fallback, use the display title.
     title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
@@ -889,6 +927,12 @@ def repack_higlass_views(views):
     """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
     1 2 5
     3 4 6
+
+    Args:
+        views(list): Modifies the views and changes their position and size.
+
+    Returns:
+        None
     """
 
     # Get the number of views. Do nothing if there are more than 6.
@@ -932,7 +976,14 @@ def repack_higlass_views(views):
 def setZoomLocationLocks(views, view_config, scales_and_center_k):
     """ Set the zoom and location of the views so they match the first one.
     Then lock them so changing one changes all of them.
-    Modify the view_config.
+
+    Args:
+        views(list): All of the views that will be locked.
+        view_config(dict): Modify this view_config by adding the locks.
+        scales_and_center_k(list): Notes the "camera" position of the first view which other views will be locked to.
+
+    Returns:
+        None
     """
 
     if len(views) == 0:
@@ -986,8 +1037,11 @@ def setZoomLocationLocks(views, view_config, scales_and_center_k):
 
 def get_chromsize_grid_from_view(view):
     """ Look through the given view to find a 2d chromsize grid.
+    Args:
+        view(dict): Describes the given view.
 
-    Return the grid information, or return None if it doesn't exist.
+    Returns:
+        The grid information, or return None if it doesn't exist.
     """
 
     # Skip if the view lacks a central track.
@@ -1008,8 +1062,12 @@ def get_chromsize_grid_from_view(view):
 
 def get_chromsize_grid_from_viewconf(views, files_info):
     """ Look through the files_info and the views to find the 2d chromsize grid.
+    Args:
+        views(list)     : A list of dictionaries containing all of the views.
+        files_info(list): A list of dictionaries containing the files used to make this view config.
 
-    Return the grid information, or return None if it doesn't exist.
+    Returns:
+        The grid information, or return None if it doesn't exist.
     """
     # Check all of the views' central tracks and see if any of them are 2d grids.
 
@@ -1035,6 +1093,14 @@ def get_chromsize_grid_from_viewconf(views, files_info):
 def add_2d_chromsize(new_views, files_info):
     """ If files_info has a chromsize file and new_views contains a 2D view,
     all of the views will get a 2D chromsize file.
+
+    Args:
+        new_views(list)     : This list of dictionaries containing all of the views will be modified.
+        files_info(list)    : A list of dictionaries containing the files used to make this view config.
+
+    Returns:
+        new_views (This function modifies new_views in place)
+        A string explaining the error (or None if there is no error)
     """
 
     chromsize_contents = get_chromsize_grid_from_viewconf(new_views, files_info)
@@ -1044,7 +1110,7 @@ def add_2d_chromsize(new_views, files_info):
         return new_views, None
 
     # Look through the new_views for any with a central view with contents.
-    views_2d = [ view for view in new_views if len(view["tracks"]["center"][0]["contents"]) > 0 ]
+    views_2d = [ view for view in new_views if  view["tracks"]["center"] and len(view["tracks"]["center"][0]["contents"]) > 0 ]
 
     # No 2D views, return
     if len(views_2d) == 0:
