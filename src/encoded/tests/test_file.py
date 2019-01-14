@@ -1196,3 +1196,18 @@ def test_track_and_file_facet_info_file_w_some_override_fields(
     assert tf_info2['experiment_type'] == 'TRIP'
     assert tf_info2['lab_name'] == 'ENCODE lab'
     assert tf_info2['experiment_bucket'] == 'processed file'
+
+
+def test_track_and_file_facet_info_file_patch_override_fields(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    # make sure it does change
+    testapp.patch_json(pfile['@id'], {'override_experiment_type': 'new type'}, status=200)
+    res2 = testapp.get(pfile['@id']).json
+    tf_info = res2.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'new type'
