@@ -97,6 +97,12 @@ export class CustomColumnSelector extends React.PureComponent {
         this.renderHiddenColumnOption = this.renderHiddenColumnOption.bind(this);
     }
 
+    /**
+     * Extends `props.columnDefinitions` (Object[]) with property `hiddenState` (boolean)
+     * according to internal state of `hiddenColumns` (Object.<boolean>)
+     *
+     * @returns {Object[]} Copy of columnDefintions with `hiddenState` added.
+     */
     columnDefinitionsWithHiddenState(){
         var { columnDefinitions, hiddenColumns } = this.props;
 
