@@ -40,7 +40,6 @@ describe('Browse Views - Redirection & Visualization', function () {
         it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 35 < x < 50 results.', function(){
             cy.visit('/browse/?public_release.to=2017-10-31').end()
                 .location('search').should('include', 'award.project=4DN').should('include', 'public_release.to=2017-10-31').end()
-                .get('input[name="q"]').should('have.value', 'public_release:[* TO 2017-10-31]')
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 35).should('be.lessThan', 50);
         });
