@@ -11,7 +11,7 @@ import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../uti
 import { RawFilesStackedTable } from './file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
-    defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
+    defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
     HeadersRow, TableRowToggleOpenButton } from './table-commons';
 import { SearchResultDetailPane } from './SearchResultDetailPane';
 
@@ -32,17 +32,21 @@ export class ItemPageTable extends React.Component {
     }
 
     static defaultProps = {
-        'renderDetailPane' : function(result, rowNumber, width){ return <SearchResultDetailPane result={result} />; },
+        'renderDetailPane' : function(result, rowNumber, containerWidth){
+            return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} />;
+        },
         'constantColumnDefinitions' : null,
-        'columnDefinitionOverrideMap' : {
+        'columnExtensionMap' : {
             'display_title' : {
                 'render' : function(result, columnDefinition, props, width){
-                    var title = object.itemUtil.getTitleStringFromContext(result);
-                    var link = object.itemUtil.atId(result);
-                    var tooltip;
+                    var title           = object.itemUtil.getTitleStringFromContext(result),
+                        link            = object.itemUtil.atId(result),
+                        isAnAccession   = false,
+                        tooltip;
+    
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
-                    var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
-                    if (link){
+
+                    if (link){ // Link instead of plaintext
                         title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
                     }
 
@@ -70,12 +74,12 @@ export class ItemPageTable extends React.Component {
             }
         },
         'columns' : {
-            "experiments_in_set.experiment_type": "Experiment Type",
-            "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
-            "experiments_in_set.biosample.biosource_summary": "Biosource Summary",
-            "experiments_in_set.digestion_enzyme.name": "Enzyme",
-            "experiments_in_set.biosample.modifications_summary": "Modifications",
-            "experiments_in_set.biosample.treatments_summary": "Treatments"
+            "display_title" : { "title" : "Title" },
+            "number_of_experiments" : { "title" : "Exps" },
+            "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
+            "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
+            "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
+            "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
         }
     }
 
@@ -89,14 +93,7 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var { results, loading, constantColumnDefinitions, columnDefinitionOverrideMap, columns, width, windowWidth } = this.props,
-            columnDefinitions;
-
-        if (!constantColumnDefinitions){
-            constantColumnDefinitions = extendColumnDefinitions([
-                { 'field' : 'display_title' }
-            ], defaultColumnDefinitionMap);
-        }
+        var { results, loading, columnExtensionMap, columns, width, windowWidth, defaultOpenIndices, renderDetailPane } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -107,43 +104,30 @@ export class ItemPageTable extends React.Component {
         }
 
 
-        columnDefinitions = columnsToColumnDefinitions(columns, constantColumnDefinitions);
-        if (columnDefinitionOverrideMap){
-            columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
-        }
+        var columnDefinitions   = columnsToColumnDefinitions(columns, columnExtensionMap),
+            responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
 
-        if (!width && this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
-            width = this.refs.tableContainer.offsetWidth;
-        }
+        width = width || layout.gridContainerWidth(windowWidth);
 
         if (width){
             columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
         }
 
-        var responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
-        
+        var commonRowProps = { width, columnDefinitions, responsiveGridState, renderDetailPane };
+
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
                 { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
-                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={this.props.renderDetailPane} />
+                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
                 : null }
-                { results.map((result, rowIndex)=>{
+                { _.map(results, (result, rowIndex)=>{
                     var atId = object.atIdFromObject(result);
                     return (
-                        <ItemPageTableRow
-                            {...this.props}
-                            key={atId || rowIndex}
-                            result={result}
-                            width={width}
-                            columnDefinitions={columnDefinitions}
-                            renderDetailPane={this.props.renderDetailPane}
-                            rowNumber={rowIndex}
-                            responsiveGridState={responsiveGridState}
-                            defaultOpen={
+                        <ItemPageTableRow {...this.props} {...commonRowProps}
+                            key={atId || rowIndex} result={result} rowNumber={rowIndex} defaultOpen={
                                 (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
                                 || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
-                            }
-                        />
+                            } />
                     );     
                 }) }
             </div>

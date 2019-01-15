@@ -61,6 +61,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
+        this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
         /**
@@ -548,11 +549,21 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
+    /**
+     * Is used to call {function} `props.toggleFullScreen` which is passed down from app.js BodyElement.
+     * Calls it in a setTimeout because HiGlassComponent may hang JS/UI thread as it refits/calculates itself
+     * in response to new `width` and `height` props passed to it.
+     */
+    handleFullscreenToggle(){
+        var { isFullscreen, toggleFullScreen } = this.props;
+        setTimeout(toggleFullScreen, 0, !isFullscreen);
+    }
+
     fullscreenButton(){
         var { isFullscreen, toggleFullScreen } = this.props;
-        if( typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
+        if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
-                <Button onClick={toggleFullScreen} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
+                <Button onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </Button>
             );

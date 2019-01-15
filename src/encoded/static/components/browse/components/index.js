@@ -1,8 +1,9 @@
 'use strict';
 
 export { 
-    defaultColumnBlockRenderFxn, extendColumnDefinitions, defaultColumnDefinitionMap, columnsToColumnDefinitions,
-    ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton
+    defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
+    ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton,
+    defaultHiddenColumnMapFromColumns
 } from './table-commons';
 export { LimitAndPageControls, ColumnSorterIcon } from './LimitAndPageControls';
 export { SortController } from './SortController';

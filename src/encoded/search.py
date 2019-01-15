@@ -15,6 +15,7 @@ from snovault.fourfront_utils import (
     get_jsonld_types_from_collection_type,
     crawl_schema
 )
+from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
 from elasticsearch import (
@@ -164,7 +165,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         result['@graph'] = []
         return result if not return_generator else []
 
-    columns = list_visible_columns_for_schemas(request, schemas)
+    columns = list_visible_columns_for_schemas(request, schemas, doc_types)
     if columns:
         result['columns'] = columns
 
@@ -1258,13 +1259,55 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
 def iter_search_results(context, request, **kwargs):
     return search(context, request, return_generator=True, **kwargs)
 
-def list_visible_columns_for_schemas(request, schemas):
+def list_visible_columns_for_schemas(request, schemas, doc_types):
+
+    type_infos = [ request.registry[TYPES][type] for type in doc_types if type != 'Item' ]
+    all_abstract_types = len(type_infos) == 0
+    if not all_abstract_types:
+        for ti in type_infos:
+            # We use `type` instead of `isinstance` since we don't want to catch subclasses.
+            if type(ti) != AbstractTypeInfo:
+                break
+        else:
+            all_abstract_types = True
+
     columns = OrderedDict()
+
+    # Add title column, at beginning always
+    columns['display_title'] = {
+        "title" : "Title",
+        "order" : -100
+    }
+
+    # If on abstract type(s), or 'Item', then show type column.
+    if all_abstract_types:
+        columns['@type'] = {
+            "title" : "Item Type",
+            "colTitle" : "Type",
+            "order" : -80
+        }
+
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
+            # Add all columns defined in schema
             for name,obj in schema_columns.items():
                 columns[name] = obj
+    # Add status column, if not present, at end.
+    if 'status' not in columns:
+        columns['status'] = {
+            "title"             : "Status",
+            "default_hidden"    : True,
+            "order"             : 501
+        }
+    # Add date column, if not present, at end.
+    if 'date_created' not in columns:
+        columns['date_created'] = {
+            "title"             : "Date Created",
+            "colTitle"          : "Created",
+            "default_hidden"    : True,
+            "order"             : 510
+        }
     return columns
 
 _ASSEMBLY_MAPPER = {
