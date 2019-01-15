@@ -1,7 +1,6 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
-import random
 from encoded.commands.upgrade_test_inserts import get_inserts
 import json
 import time
@@ -129,7 +128,6 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
-@pytest.mark.xfail
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     # TODO: Adjust ordering of mixed-in facets, perhaps sort by lookup or something, in order to un-xfail.
     from snovault import TYPES
@@ -138,12 +136,17 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     schema = type_info.schema
     schema_facets = [('type', {'title': 'Data Type'})]
     schema_facets.extend(schema['facets'].items())
-    schema_columns = [(name, obj.get('title')) for name,obj in schema['columns'].items()]
+    # the following facets are added after schema facets
+    schema_facets.append(('status', {'title': 'Status'}))
+    # remove any disabled facets
+    schema_facets = [fct for fct in schema_facets if not fct[1].get('disabled', False)]
+    sort_facets = sorted(schema_facets, key=lambda fct: fct[1].get('order', 0))
     res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
-    for i,val in enumerate(schema_facets):
+    for i,val in enumerate(sort_facets):
         assert res['facets'][i]['field'] == val[0]
-    for i,val in enumerate(schema_columns):
-        assert res['columns'][val[0]]['title'] == val[1]
+    # assert order of columns when we officially upgrade to python 3.6 (ordered dicts)
+    for key,val in schema.get('columns', {}).items():
+        assert res['columns'][key]['title'] == val['title']
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):

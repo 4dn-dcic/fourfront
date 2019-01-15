@@ -52,7 +52,11 @@ class Experiment(Item):
     rev = {
         'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
+    aggregated_items = {
+        "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
+    }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        "badges.badge.*",
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
@@ -79,7 +83,8 @@ class Experiment(Item):
         'biosample.modifications.display_title',
         'biosample.treatments.treatment_type',
         'biosample.treatments.display_title',
-        'biosample.badges.*',
+        "biosample.badges.badge.*",
+        "biosample.badges.message",
 
         "files.href",
         "files.accession",
@@ -89,7 +94,8 @@ class Experiment(Item):
         "files.file_format",
         "files.file_classification",
         "files.paired_end",
-        'files.badges.*',
+        'files.badges.badge.*',
+        'files.badges.message',
 
         "processed_files.href",
         "processed_files.accession",
