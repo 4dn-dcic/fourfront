@@ -30,7 +30,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "higlass_uid": {
             "title": "Higlass UID",
@@ -39,7 +39,7 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "enum": [
+            "suggested_enum": [
                 "intensity values",
                 "peaks",
                 "fold change over control"
@@ -74,30 +74,6 @@
             "description": "A description of the Experiment or Dataset from whence this file.",
             "type": "string",
             "formInput": "textarea"
-        },
-        "dataset_type": {
-            "title": "Dataset Type",
-            "description": "The type of dataset to which this file is associated",
-            "type": "string"
-        },
-        "assay_info": {
-            "title": "Assay details",
-            "description": "Information that helps distinguish the assay eg. ChIP-seq target or repliseq phase",
-            "type": "string"
-        },
-        "replicate_identifiers": {
-            "title": "Replicates",
-            "type": "array",
-            "items": {
-                "title": "Replicate Info",
-                "description": "Replicate identifiers that this file is associated with",
-                "type": "string"
-            }
-        },
-        "project_lab": {
-            "title": "Generating Lab",
-            "description": "The lab that did the experiment from whence this file",
-            "type": "string"
         },
         "project_release_date": {
             "title": "Project Dataset Release Date",

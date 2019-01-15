@@ -166,6 +166,20 @@
         "experimentset_type": {
             "title": "Set Type"
         },
+        "number_of_experiments" : {
+            "title" : "# of Experiments",
+            "default_hidden" : true
+        },
+        "number_of_files" : {
+            "title" : "# of Files",
+            "default_hidden" : true
+        },
+        "experiments_in_set.experiment_type" : {
+            "title" : "Experiment Type"
+        },
+        "lab.display_title" : {
+            "title" : "Lab"
+        },
         "dataset_label": {
             "title": "Dataset"
         },
@@ -191,6 +205,10 @@
         },
         "public_release": {
             "title" : "Public Release",
+            "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "title" : "Last Modified",
             "default_hidden" : true
         }
     }

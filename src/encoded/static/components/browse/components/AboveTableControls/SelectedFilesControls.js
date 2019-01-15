@@ -512,7 +512,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
             <div className="col-sm-6 col-lg-3 file-type-checkbox" key={fileType} data-tip={tip}>
                 <Checkbox key={fileType} checked={selected}
                     onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}
-                    className="text-ellipsis-container">
+                    className={"text-ellipsis-container" + (selected ? ' is-active' : '')}>
                     { button_text_prefix }{ title } <sub>({ filesLength })</sub>
                 </Checkbox>
             </div>

@@ -11,6 +11,7 @@
         "status": "released",
         "filename": "test_file1.fastq.gz",
         "paired_end": "1",
+        "file_size": 1000,
         "content_md5sum": "4012ee7a157cd60a9969dcf68d4a5732",
         "md5sum": "bc80aabb3ad8264da7307185dfe9fab1",
         "quality_metric": "4c9dabc6-61d6-4054-a951-c4fdd0023800"
@@ -27,7 +28,8 @@
         "status": "released",
         "filename": "test_file2.fastq.gz",
         "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq1"}],
-        "paired_end": "2"
+        "paired_end": "2",
+        "file_size": 500
     },
     {
         "aliases": ["dcic:testfq3"],
@@ -41,7 +43,8 @@
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa2",
         "status": "uploaded",
         "filename": "test_file3.fastq.gz",
-        "paired_end": "1"
+        "paired_end": "1",
+        "file_size": 750
     },
     {
         "aliases": ["dcic:testfq4"],
@@ -56,7 +59,8 @@
         "status": "uploaded",
         "filename": "test_file4.fastq.gz",
         "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq3"}],
-        "paired_end": "2"
+        "paired_end": "2",
+        "file_size": 500
     },
     {
         "aliases": ["dcic:testfq5"],
@@ -70,7 +74,8 @@
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa4",
         "status": "uploaded",
         "filename": "test_file5.fastq.gz",
-        "paired_end": "1"
+        "paired_end": "1",
+        "file_size": 2500
     },
     {
         "aliases": ["dcic:testfq6"],
@@ -85,6 +90,7 @@
         "status": "uploaded",
         "filename": "test_file6.fastq.gz",
         "related_files": [{"relationship_type": "paired with", "file": "dcic:testfq5"}],
-        "paired_end": "2"
+        "paired_end": "2",
+        "file_size": 3000
     }
 ]
