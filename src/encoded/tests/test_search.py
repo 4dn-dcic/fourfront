@@ -141,7 +141,6 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     # remove any disabled facets
     schema_facets = [fct for fct in schema_facets if not fct[1].get('disabled', False)]
     sort_facets = sorted(schema_facets, key=lambda fct: fct[1].get('order', 0))
-    schema_columns = [(schema_facets, obj.get('title')) for name,obj in schema['columns'].items()]
     res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
     for i,val in enumerate(sort_facets):
         assert res['facets'][i]['field'] == val[0]
