@@ -276,7 +276,9 @@ export class FileViewGraphSection extends WorkflowGraphSection {
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }} children={graphProps ? <Graph { ...graphProps } /> : null} />
+                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>
+                    { graphProps ? <Graph { ...graphProps } /> : null }
+                </div>
             </div>
         );
 

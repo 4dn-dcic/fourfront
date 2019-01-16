@@ -66,6 +66,8 @@ export function commonGraphPropsFromProps(props){
 
     if (props.isFullscreen) {
         graphProps.width = props.windowWidth;
+    } else if (props.width){
+        graphProps.width = props.width;
     }
 
     return graphProps;
@@ -103,11 +105,12 @@ export default class WorkflowView extends DefaultItemView {
     getTabViewContents(){
 
         var { context, windowHeight } = this.props,
+            width   = this.getTabViewWidth(),
             tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
                 {
                     tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
                     key : 'graph',
-                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
+                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} width={width} />
                 }
             ];
 
@@ -129,13 +132,11 @@ export default class WorkflowView extends DefaultItemView {
 }
 
 
-export class WorkflowGraphSection extends React.Component {
+export class WorkflowGraphSection extends React.PureComponent {
 
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.basicGraph = this.basicGraph.bind(this);
-        this.detailGraph = this.detailGraph.bind(this);
         this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
         this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
@@ -171,53 +172,52 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     commonGraphProps(){
-        var graphData = this.parseAnalysisSteps();
+        var { showParameters, showReferenceFiles, rowSpacingType } = this.state,
+            graphData = this.parseAnalysisSteps();
         
         // Filter out legend items which aren't relevant for this context.
         var keepItems = ['Input File', 'Output File', 'Input Reference File'];
-        if (this.state.showParameters){
+        if (showParameters){
             keepItems.push('Input Parameter');
         }
-        if (this.state.showReferenceFiles){
+        if (showReferenceFiles){
             keepItems.push('Input Reference File');
         }
         keepItems.push('Intermediate File');
-        var legendItems = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems);
-        var commonGraphProps = commonGraphPropsFromProps(_.extend({ 'legendItems' : legendItems }, this.props));
 
-        return _.extend(commonGraphProps, this.parseAnalysisSteps(), {'rowSpacingType' : this.state.rowSpacingType });
-    }
+        var legendItems         = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems),
+            commonGraphProps    = commonGraphPropsFromProps(_.extend({ legendItems }, this.props));
 
-    basicGraph(){
-        if (!Array.isArray(this.props.context.steps)) return null;
-        return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={this.props.mounted && this.refs.container ? (this.refs.container.offsetWidth - 180) / 3 : 180} />;
+        return _.extend(commonGraphProps, this.parseAnalysisSteps(), { rowSpacingType });
     }
-
-    detailGraph(){
-        if (!Array.isArray(this.props.context.steps)) return null;
-        return <Graph { ...this.commonGraphProps() } />;
-    }
-    
 
     onToggleShowParameters(){
-        this.setState({ 'showParameters' : !this.state.showParameters });
+        this.setState(function({ showParameters }){
+            return { 'showParameters' : !showParameters };
+        });
     }
 
     onToggleReferenceFiles(){
-        this.setState({ 'showReferenceFiles' : !this.state.showReferenceFiles });
+        this.setState(function({ showReferenceFiles }){
+            return { 'showReferenceFiles' : !showReferenceFiles };
+        });
     }
 
     onChangeRowSpacingType(eventKey, evt){
         requestAnimationFrame(()=>{
-            if (eventKey === this.state.rowSpacingType) return;
-            this.setState({ 'rowSpacingType' : eventKey });
+            this.setState(function({ rowSpacingType }){
+                if (eventKey === rowSpacingType) return null;
+                return { 'rowSpacingType' : eventKey };
+            });
         });
     }
 
     onChangeShowChartType(eventKey, evt){
         requestAnimationFrame(()=>{
-            if (eventKey === this.state.showChart) return;
-            this.setState({ 'showChart' : eventKey });
+            this.setState(function({ showChart }){
+                if (eventKey === showChart) return null;
+                return { 'showChart' : eventKey };
+            });
         });
     }
 
@@ -226,10 +226,21 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     body(){
-        /* if (this.state.showChart === 'cwl') return this.cwlGraph(); */
-        if (this.state.showChart === 'detail') return this.detailGraph();
-        if (this.state.showChart === 'basic') return this.basicGraph();
-        return null;
+        var { context, mounted } = this.props,
+            { showChart } = this.state;
+
+        if (!Array.isArray(context.steps)) return null;
+
+        if (showChart === 'basic') {
+            return (
+                <Graph { ...this.commonGraphProps() } edgeStyle="curve"
+                columnWidth={mounted && this.refs.container ? (this.refs.container.offsetWidth - 180) / 3 : 180} />
+            );
+        } else if (showChart === 'detail') {
+            return <Graph { ...this.commonGraphProps() } />;
+        } else {
+            throw new Error('No valid chart type set to be displayed.');
+        }
     }
 
     render(){
