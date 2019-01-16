@@ -314,6 +314,7 @@ export default class SearchView extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.filterFacet = this.filterFacet.bind(this);
         this.transformedFacets = this.transformedFacets.bind(this);
         this.state = {
             'transformedFacets' : this.transformedFacets(props)
@@ -383,13 +384,13 @@ export default class SearchView extends React.PureComponent {
         // Clone/filter list of facets.
         // We may filter out type facet completely at this step,
         // in which case we can return out of func early.
-        facets = _.filter(facets, this.filterFacet);
+        facets = _.filter(context.facets, this.filterFacet);
 
         // Find facet for '@type'
-        typeFacetIndex = _.findIndex(context.facets, { 'field' : 'type' });
+        typeFacetIndex = _.findIndex(facets, { 'field' : 'type' });
 
         if (typeFacetIndex === -1) {
-            return context.facets; // Facet not present, return.
+            return facets; // Facet not present, return.
         }
 
         hrefQuery = url.parse(href, true).query;
@@ -399,7 +400,7 @@ export default class SearchView extends React.PureComponent {
         if (itemTypesInSearch.length > 0){
             // Keep all terms/leaf-types - backend should already filter down to only valid sub-types through
             // nature of search itself.
-            return context.facets;
+            return facets;
         }
 
         // Avoid modifying in place.
