@@ -12,11 +12,8 @@ import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTable
     HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
-import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING

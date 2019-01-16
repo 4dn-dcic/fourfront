@@ -25,6 +25,7 @@ export { AttributionTabView } from './AttributionTabView';
 export { HiGlassFileTabView, HiGlassViewConfigTabView, HiGlassContainer, HiGlassPlainContainer, HiGlassConfigurator } from './HiGlass';
 export { WorkflowDetailPane } from './WorkflowDetailPane';
 export { WorkflowNodeElement } from './WorkflowNodeElement';
+export { WorkflowGraphSectionControls } from './WorkflowGraphSectionControls';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';
 export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
 export { AdjustableDividerRow, DraggableVerticalBorder } from './AdjustableDividerRow';
