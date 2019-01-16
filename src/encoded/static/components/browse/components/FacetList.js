@@ -224,35 +224,36 @@ class FacetTermsList extends React.Component {
 
 
     renderTerms(terms){
-        var { facet, persistentCount, onTermClick } = this.props;
+        var { facet, persistentCount, onTermClick } = this.props,
+            { expanded } = this.state,
+            makeTermComponent = (term) => <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />;
 
-        var makeTermComponent = (term) => <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />;
+        if (terms.length > persistentCount){
+            var persistentTerms     = terms.slice(0, persistentCount),
+                collapsibleTerms    = terms.slice(persistentCount),
+                remainingTermsCount = !expanded ? _.reduce(collapsibleTerms, function(m, term){
+                    return m + (term.doc_count || 0);
+                }, 0) : null,
+                expandButtonTitle;
 
-        if (terms.length > this.props.persistentCount){
-            var persistentTerms = terms.slice(0, persistentCount);
-            var collapsibleTerms = terms.slice(persistentCount);
-
-            var remainingTermsCount = !this.state.expanded ? _.reduce(collapsibleTerms, function(m, term){
-                return m + (term.doc_count || 0);
-            }, 0) : null;
-
-            var expandButtonTitle = (
-                this.state.expanded ?
+            if (expanded){
+                expandButtonTitle = (
                     <span>
                         <i className="icon icon-fw icon-minus"/> Collapse
                     </span>
-                    :
+                );
+            } else {
+                expandButtonTitle = (
                     <span>
                         <i className="icon icon-fw icon-plus"/> View {terms.length - persistentCount} More
                         <span className="pull-right">{ remainingTermsCount }</span>
                     </span>
-            );
+                );
+            }
 
             return (
                 <div className="facet-list nav">
-                    <PartialList open={this.state.expanded}
-                        persistent={ _.map(persistentTerms,  makeTermComponent)}
-                        collapsible={_.map(collapsibleTerms, makeTermComponent)} />
+                    <PartialList open={expanded} persistent={ _.map(persistentTerms,  makeTermComponent)} collapsible={_.map(collapsibleTerms, makeTermComponent)} />
                     <div className="view-more-button" onClick={this.handleExpandListToggleClick} children={expandButtonTitle} />
                 </div>
             );
