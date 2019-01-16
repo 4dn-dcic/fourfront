@@ -32,7 +32,7 @@ export default class ReleaseUpdates extends React.Component {
         var thisUrl = url.parse(this.props.href, true);
         var updateTag = thisUrl.query['update_tag'] || null;
         var updateParam = thisUrl.query['parameters'] || null;
-        var isAdmin = _.contains(JWT.getUserGroups(), 'admin');
+        var isAdmin = JWT.isLoggedInAsAdmin();
         this.setState({
             'mounted' : true,
             'updateTag': updateTag,

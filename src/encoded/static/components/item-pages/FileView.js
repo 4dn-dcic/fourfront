@@ -152,8 +152,7 @@ class FileViewOverview extends React.Component {
     render(){
         var { context, windowWidth, width, tips } = this.props;
 
-        var setsByKey = expFxn.experimentSetsFromFile(context),
-            setUrls = setsByKey && _.keys(setsByKey),
+        var setUrls = expFxn.experimentSetsFromFile(context, 'ids'),
             table;
 
         if (setUrls && setUrls.length > 0){

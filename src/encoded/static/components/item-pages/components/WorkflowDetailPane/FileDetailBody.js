@@ -265,8 +265,7 @@ export class FileDetailBody extends React.Component {
             var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
             if ( this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets)) ){
-                var setsByKey = expFxn.experimentSetsFromFile(this.state.file),
-                    setUrls = setsByKey && _.keys(setsByKey);
+                var setUrls = expFxn.experimentSetsFromFile(this.state.file, 'ids');
                 if (setUrls && setUrls.length > 0){
                     table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} windowWidth={windowWidth} />;
                 }
