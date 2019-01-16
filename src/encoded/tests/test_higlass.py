@@ -320,7 +320,7 @@ def higlass_blank_viewconf(testapp):
     }
     return testapp.post_json('/higlass-view-configs/', viewconf).json
 
-def assert_true(bool, comment=""):
+def assert_true(bool_to_test, comment=""):
     """ Raises AssertionError if bool is not true.
     Args:
         bool(boolean): Value to be asserted.
@@ -332,7 +332,7 @@ def assert_true(bool, comment=""):
     Raises:
         AssertionError: if bool does not evaluate to True.
     """
-    if not bool:
+    if not bool_to_test:
         raise AssertionError(comment)
 
 def test_higlass_noop(testapp, higlass_mcool_viewconf):
