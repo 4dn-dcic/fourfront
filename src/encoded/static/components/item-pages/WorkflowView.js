@@ -240,9 +240,9 @@ export class WorkflowGraphSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls
-                        {..._.pick(this.props, 'context', 'href', 'windowWidth')}
+                        {..._.pick(this.props, 'context', 'href', 'windowWidth', 'isFullscreen')}
                         showChartType={showChart} rowSpacingType={rowSpacingType} showParameters={showParameters}
-                        showReferenceFiles={showReferenceFiles} fullscreenViewEnabled={isFullscreen}
+                        showReferenceFiles={showReferenceFiles}
                         onChangeShowChartType={this.onChangeShowChartType}
                         onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleShowParameters={this.onToggleShowParameters}

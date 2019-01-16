@@ -268,9 +268,9 @@ export class FileViewGraphSection extends WorkflowGraphSection {
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls
-                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'windowWidth')}
+                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'windowWidth', 'isFullscreen')}
                         enabledControls={['referenceFilesCheckbox', 'indirectFilesCheckbox', 'allRunsCheckbox', 'rowSpacingTypeDropdown']}
-                        loading={loadingGraphSteps} fullscreenViewEnabled={isFullscreen}
+                        loading={loadingGraphSteps}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType} onToggleFullScreenView={this.onToggleFullScreenView} onToggleShowParameters={this.onToggleShowParameters}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />

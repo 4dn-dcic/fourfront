@@ -6,7 +6,8 @@ import _ from 'underscore';
 import { DropdownButton, MenuItem, Checkbox, Button } from 'react-bootstrap';
 import { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 
-export class WorkflowGraphSectionControls extends React.Component {
+
+export class WorkflowGraphSectionControls extends React.PureComponent {
 
     static analysisStepsSet(context){
         if (!Array.isArray(context.steps)) return false;
@@ -25,35 +26,14 @@ export class WorkflowGraphSectionControls extends React.Component {
 
     /*** Controls for all Workflow graphs ***/
 
-    static keyTitleMap = {
-        'detail'    : 'Analysis Steps',
-        'basic'     : 'Basic Inputs & Outputs',
-        'cwl'       : 'CWL Graph'
-    };
-
-    chartTypeDropdown(){
-        var detail = WorkflowGraphSectionControls.analysisStepsSet(this.props.context) ? (
-            <MenuItem eventKey='detail' active={this.props.showChartType === 'detail'}>
-                Analysis Steps
-            </MenuItem>
-        ) : null;
-    
-        var basic = (
-            <MenuItem eventKey='basic' active={this.props.showChartType === 'basic'}>
-                Basic Inputs & Outputs
-            </MenuItem>
-        );
-
-        return (
-            <DropdownButton id="detail-granularity-selector" key="chart-type"
-                className="for-state-showChart" pullRight
-                onSelect={this.props.onChangeShowChartType}
-                title={WorkflowGraphSectionControls.keyTitleMap[this.props.showChartType]}>
-                { basic }{ detail }
-            </DropdownButton>
-        );
-    }
-
+    /**
+     * Meant for all Workflow views.
+     * Required props below --
+     *
+     * @prop {Object} context - JSON of Item containing workflow steps.
+     * @prop {string} showChartType - Type of chart shown. 'Detail' and 'basic' supported.
+     * @prop {function} onChangeShowChartType - Callback accepting key of new chart type.
+     */
     rowSpacingTypeDropdown(){
         if (typeof this.props.rowSpacingType !== 'string' || typeof this.props.onChangeRowSpacingType !== 'function') {
             return null;
@@ -63,24 +43,40 @@ export class WorkflowGraphSectionControls extends React.Component {
         );
     }
 
+    /**
+     * Renders full screen toggle button.
+     * Is present on all controls by default unless `props.isFullscreen` is false.
+     * Required props below -
+     *
+     * @prop {boolean} isFullscreen - Whether we're full screen. Should be passed down from BodyElement.
+     * @prop {function} onToggleFullScreenView - Callback to toggle full screen state. Should be passed from BodyElement.
+     */
     fullScreenButton(){
-        var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
-        if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
+        var { isFullscreen, onToggleFullScreenView } = this.props;
+        if (typeof isFullscreen === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
                 <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled"
-                    data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null} key="full-screen-btn">
-                    <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'expand' : 'compress')}/>
+                    data-tip={!isFullscreen ? 'Expand to full screen' : null} key="full-screen-btn">
+                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </Button>
             );
         }
         return null;
     }
 
+    /**
+     * Required props below -
+     *
+     * @prop {boolean} showReferenceFiles - Whether we're showing reference files.
+     * @prop {function} onToggleReferenceFiles - Callback to toggle visibility of reference files state.
+     * @prop {boolean} isReferenceFilesCheckboxDisabled - Optional flag to show checkbox as disabled (e.g. no reference files present).
+     */
     referenceFilesCheckbox(){
-        if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
+        var { showReferenceFiles, onToggleReferenceFiles, isReferenceFilesCheckboxDisabled } = this.props;
+        if (typeof showReferenceFiles !== 'boolean' || typeof onToggleReferenceFiles !== 'function') return null;
         return (
-            <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles} key="ref-files-checkbox"
-                disabled={this.props.isReferenceFilesCheckboxDisabled} className="checkbox-container for-state-showReferenceFiles">
+            <Checkbox checked={showReferenceFiles} onChange={onToggleReferenceFiles} key="ref-files-checkbox"
+                disabled={isReferenceFilesCheckboxDisabled} className="checkbox-container for-state-showReferenceFiles">
                 Show Reference Files
             </Checkbox>
         );
@@ -88,25 +84,71 @@ export class WorkflowGraphSectionControls extends React.Component {
 
     /*** Control for Workflow or WorkflowRun View only ***/
 
+    /**
+     * Required props below -
+     *
+     * @prop {boolean} showParameters - Whether we're showing Workflow parameter arguments.
+     * @prop {function} onToggleShowParameters - Callback to toggle visibility of parameters.
+     */
     parametersCheckbox(){
-        if (typeof this.props.showParameters !== 'boolean' || typeof this.props.onToggleShowParameters !== 'function'){
+        var { showParameters, onToggleShowParameters } = this.props;
+        if (typeof showParameters !== 'boolean' || typeof onToggleShowParameters !== 'function'){
             return null;
         }
         return (
-            <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}
+            <Checkbox checked={showParameters} onChange={onToggleShowParameters}
                 className="checkbox-container for-state-showParameters" key="params-checkbox">
                 Show Parameters
             </Checkbox>
         );
     }
 
+    static keyTitleMap = {
+        'detail'    : 'Analysis Steps',
+        'basic'     : 'Basic Inputs & Outputs',
+        'cwl'       : 'CWL Graph'
+    };
+
+    /**
+     * Meant for Workflow and WorkflowRunView only, not Provenance Graphs.
+     * Required props below --
+     *
+     * @prop {Object} context - JSON of Item containing workflow steps.
+     * @prop {string} showChartType - Type of chart shown. 'Detail' and 'basic' supported.
+     * @prop {function} onChangeShowChartType - Callback accepting key of new chart type.
+     */
+    chartTypeDropdown(){
+        var { context, showChartType, onChangeShowChartType } = this.props;
+        var detail = WorkflowGraphSectionControls.analysisStepsSet(context) ? (
+            <MenuItem eventKey='detail' active={showChartType === 'detail'}>
+                Analysis Steps
+            </MenuItem>
+        ) : null;
+    
+        var basic = (
+            <MenuItem eventKey='basic' active={showChartType === 'basic'}>
+                Basic Inputs & Outputs
+            </MenuItem>
+        );
+
+        return (
+            <DropdownButton id="detail-granularity-selector" key="chart-type"
+                className="for-state-showChart" pullRight
+                onSelect={onChangeShowChartType}
+                title={WorkflowGraphSectionControls.keyTitleMap[showChartType]}>
+                { basic }{ detail }
+            </DropdownButton>
+        );
+    }
+
     /*** Controls for Provenance Graphs ***/
 
     indirectFilesCheckbox(){
-        if (typeof this.props.showIndirectFiles !== 'boolean' || typeof this.props.onToggleIndirectFiles !== 'function') return null;
+        var { showIndirectFiles, onToggleIndirectFiles, isShowMoreContextCheckboxDisabled } = this.props; 
+        if (typeof showIndirectFiles !== 'boolean' || typeof onToggleIndirectFiles !== 'function') return null;
         return (
-            <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles}
-                disabled={this.props.isShowMoreContextCheckboxDisabled} className="checkbox-container"
+            <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}
+                disabled={isShowMoreContextCheckboxDisabled} className="checkbox-container"
                 key="show-indirect-files-checkbox">
                 Show More Context
             </Checkbox>
@@ -114,11 +156,12 @@ export class WorkflowGraphSectionControls extends React.Component {
     }
 
     allRunsCheckbox(){
-        if (typeof this.props.allRuns !== 'boolean' || typeof this.props.onToggleAllRuns !== 'function') return null;
+        var { allRuns, onToggleAllRuns, loading, isAllRunsCheckboxDisabled } = this.props;
+        if (typeof allRuns !== 'boolean' || typeof onToggleAllRuns !== 'function') return null;
         return (
-            <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns}
-                disabled={this.props.isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
-                { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+            <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns}
+                disabled={isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
+                { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
             </Checkbox>
         );
     }
@@ -143,7 +186,7 @@ export class WorkflowGraphSectionControls extends React.Component {
 }
 
 
-export class RowSpacingTypeDropdown extends React.Component {
+class RowSpacingTypeDropdown extends React.Component {
     
     static propTypes = {
         'onSelect' : PropTypes.func.isRequired,
