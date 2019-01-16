@@ -40,10 +40,11 @@
             "type": "string",
             "lookup": 20,
             "enum" : [
-            "Chemical",
-            "Heat Shock",
-            "Cold Shock",
-            "Other"
+                "Biological",
+                "Chemical",
+                "Heat Shock",
+                "Cold Shock",
+                "Other"
             ]
         },
         "chemical": {
@@ -51,6 +52,12 @@
             "type": "string",
             "lookup": 25,
             "internal_comment": "restricted to chEBI terms - validate against IDs?"
+        },
+        "biological_agent": {
+            "title": "Biological Agent",
+            "description": "Biological agent the sample is being treated with",
+            "type": "string",
+            "lookup": 26
         },
         "concentration": {
             "title": "Concentration",
@@ -72,7 +79,8 @@
                 "M",
                 "percent",
                 "units",
-                "U/mL"
+                "U/mL",
+                "MOI"
               ]
         },
         "duration": {
