@@ -37,6 +37,7 @@
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
         "award": "Test-4DN",
+        "badges": [{"badge": "e39777c6-8fe4-4424-bac1-40406342e026"}],
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
         "status": "in review by lab",

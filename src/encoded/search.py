@@ -15,6 +15,7 @@ from snovault.fourfront_utils import (
     get_jsonld_types_from_collection_type,
     crawl_schema
 )
+from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
 from elasticsearch import (
@@ -69,7 +70,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'sort': {}
     }
     principals = effective_principals(request)
-
     es = request.registry[ELASTIC_SEARCH]
     search_audit = request.has_permission('search_audit')
 
@@ -164,7 +164,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         result['@graph'] = []
         return result if not return_generator else []
 
-    columns = list_visible_columns_for_schemas(request, schemas)
+    columns = list_visible_columns_for_schemas(request, schemas, doc_types)
     if columns:
         result['columns'] = columns
 
@@ -361,7 +361,7 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field.startswith('audit'):
+        if field.startswith('audit') or field.startswith('aggregated_items'):
             continue
         elif field == 'q': # searched string has field 'q'
             # people shouldn't provide multiple queries, but if they do,
@@ -659,7 +659,7 @@ def set_filters(request, search, result, principals, doc_types, types):
         # Add filter to query
         if range_type and f_field and range_type in ('date', 'numerical'):
             query_field = 'embedded.' + f_field
-        elif field.startswith('audit'):
+        elif field.startswith('audit') or field.startswith('aggregated_items'):
             query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
@@ -777,10 +777,10 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
         # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
     audit_facets = [
-        ('audit.ERROR.category', {'title': 'Audit category: ERROR'}),
-        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT'}),
-        ('audit.WARNING.category', {'title': 'Audit category: WARNING'}),
-        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION'})
+        ('audit.ERROR.category', {'title': 'Audit category: ERROR', 'order': 999}),
+        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT', 'order': 999}),
+        ('audit.WARNING.category', {'title': 'Audit category: WARNING', 'order': 999}),
+        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION', 'order': 999})
     ]
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
@@ -814,7 +814,7 @@ def initialize_facets(types, doc_types, prepared_terms, schemas):
                 # Cancel if already in facets or is disabled
                 continue
 
-            # If we have a range filter in the URL, 
+            # If we have a range filter in the URL,
             if title_field == 'from' or title_field == 'to':
                 if len(split_field) == 3:
                     f_field = split_field[-2]
@@ -867,8 +867,8 @@ def schema_for_field(field, types, doc_types, should_log=False):
         Dictionary schema for the field, or None if not found
     '''
     schema = types[doc_types[0]].schema
-    # for 'audit.*', schema will never be found and logging isn't helpful
-    if schema and field[:6] != 'audit.':
+    # for 'audit.*' and 'aggregated_items.*', schema will never be found and logging isn't helpful
+    if schema and not field.startswith('audit.') and not field.startswith('aggregated_items.'):
         # 'type' field is really '@type' in the schema
         use_field = '@type' if field == 'type' else field
         # eliminate '!' from not fields
@@ -984,7 +984,7 @@ def set_facets(search, facets, search_filters, string_query, types, doc_types, c
 
         if field == 'type':
             query_field = 'embedded.@type.raw'
-        elif field.startswith('audit'):
+        elif field.startswith('audit') or field.startswith('aggregated_items'):
             query_field = field + '.raw'
         elif facet.get('aggregation_type') in ('stats', 'date_histogram', 'histogram', 'range'):
             query_field = 'embedded.' + field
@@ -1113,7 +1113,8 @@ def execute_search(search):
 
 def format_facets(es_results, facets, total, search_frame='embedded'):
     """
-    Format the facets for the final results based on the es results
+    Format the facets for the final results based on the es results.
+    Sort based off of the 'order' of the facets
     These are stored within 'aggregations' of the result.
 
     If the frame for the search != embedded, return no facets
@@ -1129,7 +1130,12 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     aggregations = es_results['aggregations']['all_items']
     used_facets = set()
 
-    for field, facet in facets:
+    # sort the facets by order. Lowest order goes at top
+    # if no order is provided, assume 0
+    # this will keep current order of non-explicitly ordered facets
+    sort_facets = sorted(facets, key=lambda fct: fct[1].get('order', 0))
+
+    for field, facet in sort_facets:
         result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
@@ -1171,7 +1177,8 @@ def format_extra_aggregations(es_results):
 def format_results(request, hits, search_frame):
     """
     Loads results to pass onto UI
-    For now, add audits to the results so we can facet/not facet on audits
+    Will retrieve the desired frame from the search hits and automatically
+    add 'audit' and 'aggregated_items' frames if they are present
     """
     fields_requested = request.params.getall('field')
     if fields_requested:
@@ -1189,6 +1196,8 @@ def format_results(request, hits, search_frame):
             frame_result = hit['_source'][frame]
             if 'audit' in hit['_source'] and 'audit' not in frame_result:
                 frame_result['audit'] = hit['_source']['audit']
+            if 'aggregated_items' in hit['_source'] and 'aggregated_items' not in frame_result:
+                frame_result['aggregated_items'] = hit['_source']['aggregated_items']
             yield frame_result
         return
 
@@ -1258,13 +1267,55 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
 def iter_search_results(context, request, **kwargs):
     return search(context, request, return_generator=True, **kwargs)
 
-def list_visible_columns_for_schemas(request, schemas):
+def list_visible_columns_for_schemas(request, schemas, doc_types):
+
+    type_infos = [ request.registry[TYPES][type] for type in doc_types if type != 'Item' ]
+    all_abstract_types = len(type_infos) == 0
+    if not all_abstract_types:
+        for ti in type_infos:
+            # We use `type` instead of `isinstance` since we don't want to catch subclasses.
+            if type(ti) != AbstractTypeInfo:
+                break
+        else:
+            all_abstract_types = True
+
     columns = OrderedDict()
+
+    # Add title column, at beginning always
+    columns['display_title'] = {
+        "title" : "Title",
+        "order" : -100
+    }
+
+    # If on abstract type(s), or 'Item', then show type column.
+    if all_abstract_types:
+        columns['@type'] = {
+            "title" : "Item Type",
+            "colTitle" : "Type",
+            "order" : -80
+        }
+
     for schema in schemas:
         if 'columns' in schema:
             schema_columns = OrderedDict(schema['columns'])
+            # Add all columns defined in schema
             for name,obj in schema_columns.items():
                 columns[name] = obj
+    # Add status column, if not present, at end.
+    if 'status' not in columns:
+        columns['status'] = {
+            "title"             : "Status",
+            "default_hidden"    : True,
+            "order"             : 501
+        }
+    # Add date column, if not present, at end.
+    if 'date_created' not in columns:
+        columns['date_created'] = {
+            "title"             : "Date Created",
+            "colTitle"          : "Created",
+            "default_hidden"    : True,
+            "order"             : 510
+        }
     return columns
 
 _ASSEMBLY_MAPPER = {

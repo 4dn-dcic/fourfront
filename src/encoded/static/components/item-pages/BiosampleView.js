@@ -9,8 +9,6 @@ import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './compo
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-
 
 
 export default class BiosampleView extends DefaultItemView {
@@ -40,23 +38,22 @@ export class BiosourcesTable extends React.PureComponent {
 
     static defaultProps = {
         'columns' : {
-            "biosource_type"       : "Type",
-            "biosource_vendor"         : "Vendor",
-            "cell_line" : "Cell Line",
-            "individual" : "Individual",
-        },
-        'columnDefinitionOverrideMap' : _.extend({
+            "display_title" : { "title" : "Title" },
+            "biosource_type" : { "title" : "Type" },
+            "biosource_vendor" : { "title" : "Vendor" },
+            "cell_line" : { "title" : "Cell Line" },
             "individual" : {
+                "title" : "Individual",
                 "render" : function(result, columnDefinition, props, width){
                     if (!result || !result.individual || !object.atIdFromObject(result.individual)) return '-';
                     return <IndividualItemTitle context={result.individual} />;
                 }
             }
-        }, ItemPageTable.defaultProps.columnDefinitionOverrideMap)
+        }
     }
 
     render(){
-        return <ItemPageTable {..._.pick(this.props, 'schemas', 'columns', 'columnDefinitionOverrideMap', 'width')} results={this.props.biosources} renderDetailPane={null} />;
+        return <ItemPageTable {..._.pick(this.props, 'schemas', 'columns', 'width')} results={this.props.biosources} renderDetailPane={null} />;
     }
 
 }

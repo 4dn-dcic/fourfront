@@ -228,7 +228,7 @@ export class FileDetailBody extends React.Component {
             // Case: Group of Files
             var columns = _.clone(SimpleFilesTable.defaultProps.columns);
             delete columns.file_type;
-            columns.status = 'Status';
+            columns.status = { 'title' : 'Status' };
             body = <SimpleFilesTable results={this.props.file} columns={columns} hideTypeTitle />;
         } else if (typeof file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
             // Case: Loading or Forbidden
