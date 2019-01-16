@@ -18,9 +18,7 @@ export default class BiosampleView extends DefaultItemView {
         var initTabs = [],
             context = this.props.context,
             windowWidth = this.props.windowWidth,
-            width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-
-        if (width) width -= 20;
+            width = this.getTabViewWidth();
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
         initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
