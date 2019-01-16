@@ -42,8 +42,8 @@
         "uuid": "6c2b7409-4478-4e15-aabc-1a0df6b883e9"
     },
     {
-        "title": "no_raw_files",
-        "badge_name": "norawfiles",
+        "title": "No Raw Files",
+        "badge_name": "no-raw-files",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "schema_version": "1",
         "foursight_checks": [
@@ -56,8 +56,8 @@
         "uuid": "f5c8c24e-1e9f-4cb5-92f3-ea7b840d8305"
     },
     {
-        "title": "tier1_metadata_missing",
-        "badge_name": "tier1metadatamissing",
+        "title": "Tier1 Metadata Missing",
+        "badge_name": "tier1-metadata-missing",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "schema_version": "1",
         "foursight_checks": [
@@ -70,8 +70,8 @@
         "uuid": "e39777c6-8fe4-4424-bac1-40406342e026"
     },
     {
-        "title": "replicate_numbers",
-        "badge_name": "replicatenumbers",
+        "title": "Replicate Numbers",
+        "badge_name": "replicate-numbers",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "schema_version": "1",
         "foursight_checks": [
@@ -84,8 +84,8 @@
         "uuid": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"
     },
     {
-        "title": "paired_ends_consistent",
-        "badge_name": "pairedendsconsistent",
+        "title": "Paired Ends Inconsistent",
+        "badge_name": "paired-ends-inconsistent",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "schema_version": "1",
         "foursight_checks": [
