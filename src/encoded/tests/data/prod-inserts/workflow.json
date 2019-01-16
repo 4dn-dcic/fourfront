@@ -8747,6 +8747,14 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.name"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.desc"
+            },
             {   
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
@@ -8788,6 +8796,15 @@
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta_xcor"
+            },
+            {  
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "chip.report"
+            },
+            {  
+                "argument_format": "json",
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "chip.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
@@ -8912,6 +8929,32 @@
                         "source": [
                             {
                                 "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {   
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {   
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
                             }
                         ]
                     },
@@ -9057,6 +9100,33 @@
                                 "name": "chip.first_ta_xcor"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "chip.report",
+                        "target": [
+                            {
+                                "name": "chip.report"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "json",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "chip.qc_json",
+                        "target": [
+                            {
+                                "name": "chip.qc_json"
+                            }
+                        ]
                     }
                 ]
             }
@@ -9107,6 +9177,14 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.name"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chip.qc_report.desc"
+            },
             {   
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
@@ -9139,6 +9217,15 @@
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta_ctl"
+            },
+            {  
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "chip.report"
+            },
+            {  
+                "argument_format": "json",
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "chip.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
@@ -9263,6 +9350,32 @@
                         "source": [
                             {
                                 "name": "chip.choose_ctl.always_use_pooled_ctl"
+                            }
+                        ]
+                    },
+                    {   
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.name",
+                        "source": [
+                            {   
+                                "name": "chip.qc_report.name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chip.qc_report.desc",
+                        "source": [
+                            {
+                                "name": "chip.qc_report.desc"
                             }
                         ]
                     },
@@ -9394,6 +9507,33 @@
                                 "name": "chip.first_ta_ctl"
                             }
                         ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "chip.report",
+                        "target": [
+                            {
+                                "name": "chip.report"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "json",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "chip.qc_json",
+                        "target": [
+                            {
+                                "name": "chip.qc_json"
+                            }
+                        ]
                     }
                 ]
             }
@@ -9494,7 +9634,7 @@
             },
             {   
                 "argument_format": "json",
-                "argument_type": "Output processed file",
+                "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
         ],
@@ -9786,7 +9926,7 @@
                             "cardinality": "single",
                             "file_format": "json",
                             "global": true,
-                            "type": "data file"
+                            "type": "QC"
                         },
                         "name": "chip.qc_json",
                         "target": [
