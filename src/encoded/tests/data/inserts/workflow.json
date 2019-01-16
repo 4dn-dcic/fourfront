@@ -9733,10 +9733,10 @@
                             "global": true,
                             "type": "data file"
                         },
-                        "name": "chip.optimal_peaks",
+                        "name": "chip.optimal_peak",
                         "target": [
                             {
-                                "name": "chip.optimal_peaks"
+                                "name": "chip.optimal_peak"
                             }
                         ]
                     },
@@ -9747,10 +9747,10 @@
                             "global": true,
                             "type": "data file"
                         },
-                        "name": "chip.conservative_peaks",
+                        "name": "chip.conservative_peak",
                         "target": [
                             {
-                                "name": "chip.conservative_peaks"
+                                "name": "chip.conservative_peak"
                             }
                         ]
                     },
