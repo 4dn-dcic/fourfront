@@ -50,7 +50,7 @@ class Experiment(Item):
     schema = load_schema('encoded:schemas/experiment.json')
     name_key = 'accession'
     rev = {
-        'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
+        'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "experiment_sets.experimentset_type",

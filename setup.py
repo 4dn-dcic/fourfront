@@ -21,7 +21,6 @@ requires = [
     'boto3',
     'elasticsearch>=5.0.0,<6.0.0',
     'elasticsearch_dsl>=5.0.0,<6.0.0',
-    'lucenequery',
     'future',
     'humanfriendly',
     'jsonschema_serialize_fork',

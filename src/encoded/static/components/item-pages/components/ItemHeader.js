@@ -79,12 +79,9 @@ export class TopRow extends React.Component {
 
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
-            <div
-                className="indicator-item expset-status"
+            <div className="indicator-item item-status"
                 data-status={ this.props.context.status.toLowerCase() }
-                data-tip="Current Status"
-                children={this.props.context.status}
-            />
+                data-tip="Current Status" children={this.props.context.status} />
         );
     }
     /**

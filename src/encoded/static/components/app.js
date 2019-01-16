@@ -75,23 +75,6 @@ const portal = {
 };
 
 
-// See https://github.com/facebook/react/issues/2323
-class Title extends React.Component {
-
-    componentDidMount() {
-        var node = document.querySelector('title');
-        if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
-            node.setAttribute('data-reactid', this._rootNodeID);
-        }
-    }
-
-    render() {
-        return <title {...this.props}>{this.props.children}</title>;
-    }
-
-}
-
-
 /**
  * Creates a promise which completes after a delay, performing no network request.
  * Used to perform a promise.race to see if this timeout or a network requests completes first, which
@@ -1280,10 +1263,8 @@ export default class App extends React.Component {
             href_url        = url.parse(canonical),
             routeList       = href_url.pathname.split("/"),
             routeLeaf       = routeList[routeList.length - 1],
-            key             = context && context['@id'] && context['@id'].split('?')[0], // Switching between collections may leave component in place
-            currentAction   = this.currentAction();
-
-        var content, title, status; // Rendered values
+            currentAction   = this.currentAction(),
+            status;
 
         // `canonical` is meant to refer to the definitive URI for current resource.
         // For example, https://data.4dnucleome.org/some-item, http://data.4dnucleome.org/some-item, http://www.data.4dnucleome.org/some-item
@@ -1302,6 +1283,7 @@ export default class App extends React.Component {
         // check error status
 
         var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
+
         if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
             if (isPlannedSubmissionsPage){
                 status = 'forbidden';
@@ -1319,60 +1301,7 @@ export default class App extends React.Component {
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
-        // Object of common props passed to all content_views.
-        var commonContentViewProps = {
-            'context'           : context,
-            'schemas'           : this.state.schemas,
-            'session'           : this.state.session,
-            'href'              : this.props.href,
-            'navigate'          : this.navigate,
-            'key'               : key,
-            'uploads'           : this.state.uploads,
-            'updateUploads'     : this.updateUploads,
-            'listActionsFor'    : this.listActionsFor,
-            'updateUserInfo'    : this.updateUserInfo,
-            'browseBaseState'   : this.props.browseBaseState,
-            'currentAction'     : currentAction,
-            'setIsSubmitting'   : this.setIsSubmitting
-        };
 
-        if (canonical === "about:blank"){   // first case is fallback
-            title = portal.portal_title;
-            content = null;
-        } else if (status) {                // error catching
-            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
-            title = 'Error';
-        } else if (context) {               // What should occur (success)
-
-            var ContentView = globals.content_views.lookup(context, currentAction);
-
-            // Set browser window title.
-            title = object.itemUtil.getTitleStringFromContext(context);
-            if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
-            } else {
-                title = portal.portal_title;
-            }
-
-            if (!ContentView){ // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
-                title = 'Error';
-            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-
-                var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
-                // see if desired actions is not allowed for current user
-                if (!_.contains(contextActionNames, currentAction)){
-                    content = <ErrorPage status="forbidden" />;
-                    title = 'Action not permitted';
-                }
-            }
-
-            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
-                content = <ContentView {...commonContentViewProps} />;
-            }
-        } else {
-            throw new Error('No context is available. Some error somewhere.');
-        }
         // Google does not update the content of 301 redirected pages
         // We technically should never hit this condition as we redirect http to https, however leaving in
         // as not 100% certain.
@@ -1384,14 +1313,20 @@ export default class App extends React.Component {
 
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
             baseDomain = (href_url.protocol || '') + '//' + href_url.host,
-            bodyElementProps = _.extend({}, this.state, this.props, {
-                baseDomain, isLoading, currentAction,
+            bodyElementProps = _.extend({}, this.state, this.props, { // Complete set of own props, own state, + extras.
+                canonical,
+                baseDomain,
+                isLoading,
+                currentAction,
+                status,
+                routeLeaf,
+                'updateUploads'  : this.updateUploads,
                 'updateUserInfo' : this.updateUserInfo,
                 'listActionsFor' : this.listActionsFor,
+                'setIsSubmitting': this.setIsSubmitting,
                 'onBodyClick'    : this.handleClick,
                 'onBodySubmit'   : this.handleSubmit,
-                'hrefParts'      : href_url,
-                'children'       : content
+                'hrefParts'      : href_url
             });
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
@@ -1404,7 +1339,7 @@ export default class App extends React.Component {
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
-                    <Title>{title}</Title>
+                    <HTMLTitle {...{ context, currentAction, canonical, status }} listActionsFor={this.listActionsFor} />
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
@@ -1424,7 +1359,103 @@ export default class App extends React.Component {
             </html>
         );
     }
+}
 
+// See https://github.com/facebook/react/issues/2323
+class HTMLTitle extends React.PureComponent {
+
+    componentDidMount() {
+        var node = document.querySelector('title');
+        if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
+            node.setAttribute('data-reactid', this._rootNodeID);
+        }
+    }
+
+    render() {
+        var { canonical, currentAction, context, listActionsFor, status } = this.props,
+            title;
+
+        if (canonical === "about:blank"){   // first case is fallback
+            title = portal.portal_title;
+        } else if (status) {                // error catching
+            title = 'Error';
+        } else if (context) {               // What should occur (success)
+
+            var ContentView = globals.content_views.lookup(context, currentAction);
+
+            // Set browser window title.
+            title = object.itemUtil.getTitleStringFromContext(context);
+            if (title && title != 'Home') {
+                title = title + ' – ' + portal.portal_title;
+            } else {
+                title = portal.portal_title;
+            }
+
+            if (!ContentView){ // Handle the case where context is not loaded correctly
+                title = 'Error';
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
+
+                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    title = 'Action not permitted';
+                }
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
+        }
+
+        return <title>{ title }</title>;
+    }
+
+}
+
+class ContentRenderer extends React.PureComponent {
+    render(){
+        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf } = this.props,
+            contextAtID     = object.itemUtil.atId(context),
+            key             = contextAtID && contextAtID.split('?')[0], // Switching between collections may leave component in place
+            content; // Output
+
+
+        // Object of common props passed to all content_views.
+        var commonContentViewProps = _.pick(this.props,
+            // Props from App:
+            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'listActionsFor',
+            'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
+            // Props from BodyElement:
+            'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
+            'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen'
+        );
+
+        if (canonical === "about:blank"){   // first case is fallback
+            content = null;
+        } else if (status) {                // error catching
+            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
+        } else if (context) {               // What should occur (success)
+
+            var ContentView = globals.content_views.lookup(context, currentAction);
+
+            if (!ContentView){ // Handle the case where context is not loaded correctly
+                content = <ErrorPage status={null}/>;
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
+
+                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    content = <ErrorPage status="forbidden" />;
+                }
+            }
+
+            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
+                content = <ContentView key={key} {...commonContentViewProps} />;
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
+        }
+
+        return content;
+    }
 }
 
 /**
@@ -1487,6 +1518,17 @@ class BodyElement extends React.PureComponent {
          * @private
          */
         this.resizeHandlers = [];
+    }
+
+    componentWillReceiveProps(nextProps){
+        // Unset full screen if moving away to different pathname.
+        if (this.state.isFullscreen && this.props.href !== nextProps.href){
+            var currParts = url.parse(this.props.href),
+                nextParts = url.parse(nextProps.href);
+            if (currParts.pathname !== nextParts.pathname){
+                this.setState({ 'isFullscreen' : false });
+            }
+        }
     }
 
     /**
@@ -1814,9 +1856,8 @@ class BodyElement extends React.PureComponent {
      */
     render(){
         var {
-                onBodyClick, onBodySubmit, context, alerts,
-                currentAction, hrefParts, isLoading, slowLoad,
-                children
+                onBodyClick, onBodySubmit, context, alerts, canonical,
+                currentAction, hrefParts, isLoading, slowLoad
             } = this.props,
             { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
@@ -1854,9 +1895,9 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight }} ref="navigation"
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }} ref="navigation"
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo', 'listActionsFor')}/>
+                                    'context', 'updateUserInfo', 'listActionsFor')} />
 
                             <div id="pre-content-placeholder"/>
 
@@ -1864,15 +1905,13 @@ class BodyElement extends React.PureComponent {
                                 windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <div className="container" id="content">
-                                { React.cloneElement(children, {
-                                    windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
-                                    addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen
-                                }) }
-                            </div>
+                            <ContentErrorBoundary canonical={canonical}>
+                                <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
+                            </ContentErrorBoundary>
 
                             <div id="layout-footer"/>
                         </div>
@@ -1892,6 +1931,12 @@ class BodyElement extends React.PureComponent {
     }
 
 }
+
+
+
+
+
+
 
 class ContentErrorBoundary extends React.Component {
 
@@ -1921,7 +1966,7 @@ class ContentErrorBoundary extends React.Component {
      * Unsets the error state if we navigate to a different view/href .. which normally should be different ContentView.
      */
     componentWillReceiveProps(nextProps){
-        if (nextProps.href !== this.props.href){
+        if (nextProps.canonical !== this.props.canonical){
             this.setState(function(currState){
                 if (currState.hasError) {
                     return {

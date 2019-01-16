@@ -1165,12 +1165,31 @@ $small-label-accession-font-size : 0.75rem;
 	@include search-result-column-and-header-block;
 	&[data-field="display_title"],
 	&[data-field="@type"],
-	&[data-field="lab.display_title"] {
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"],
+	&[data-field="status"] {
 		> .inner {
 			text-align: left;
 		}
 	}
-	&[data-field="lab.display_title"]{
+	&[data-field="@type"] {
+        i.icon-filter.clickable {
+            opacity: 0.3;
+            &:hover {
+                opacity: 0.7;
+            }
+        }
+	}
+	&[data-field="status"] {
+		> .inner {
+			i.item-status-indicator-dot {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
+		}
+	}
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"]{
 		i.user-icon {
 			cursor: help;
 			margin-right: 5px;
@@ -1765,7 +1784,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	margin-top: 7px;
 
 	.search-result-config-panel {
-		margin-top: 7px;
+		padding-top: 7px;
 		> .inner {
 			padding: 0 0;
 			border-top: 1px solid #ddd;
@@ -1778,6 +1797,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				padding-bottom: 5px;
 				//padding-left: 10px;
 				//padding-right: 10px;
+
 				> div > .checkbox {
 					margin: 0;
 					margin-bottom: 10px;
@@ -1788,6 +1808,8 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					padding-left: 32px;
 					background: #f9f9f9;
 					border-radius: 2px;
+					border: 1px solid transparent;
+					user-select: none;
 					label {
 						display: inline-block;
 						margin: 0;
@@ -1798,7 +1820,12 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					&:hover {
 						background-color: #f5f5f5;
 					}
+					&.is-active {
+						background-color: #eef4f5;
+						border-color: #22656d;
+					}
 				}
+
 			}
 			.panel-title {
 				padding-bottom: 13px;
