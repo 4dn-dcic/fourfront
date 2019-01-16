@@ -202,7 +202,7 @@ class RowSpacingTypeDropdown extends React.Component {
     render(){
         var currentKey = this.props.currentKey,
             menuItems = _.map(_.keys(RowSpacingTypeDropdown.titleMap), function(k){
-                return  <MenuItem eventKey={k} active={currentKey === k} children={RowSpacingTypeDropdown.titleMap[k]} />;
+                return  <MenuItem key={k} eventKey={k} active={currentKey === k} children={RowSpacingTypeDropdown.titleMap[k]} />;
             });
 
         return (
