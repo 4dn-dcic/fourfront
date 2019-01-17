@@ -26,7 +26,7 @@ class Badge(Item):
     name_key = 'badge_name'
 
     @calculated_property(schema={
-        "title": "Positive Badges",
+        "title": "Commendation",
         "description": "Filled with title only if badge is positive.",
         "type": "string",
     })
@@ -36,7 +36,7 @@ class Badge(Item):
         return
 
     @calculated_property(schema={
-        "title": "Warning Badges",
+        "title": "Warning",
         "description": "Filled with title only if badge is negative.",
         "type": "string",
     })

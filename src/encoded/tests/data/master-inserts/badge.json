@@ -1,5 +1,47 @@
 [
     {
+        "title": "Bronze Experiment",
+        "badge_name": "bronze-experiment",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "schema_version": "1",
+        "foursight_checks": [
+            "good_experiments"
+        ],
+        "badge_classification": "KUDOS",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "description": "Bronze experiment",
+        "status": "released",
+        "uuid": "fd8befb3-c633-4f33-bd31-a2b291b64a19"
+    },
+    {
+        "title": "Silver Experiment",
+        "badge_name": "silver-experiment",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "schema_version": "1",
+        "foursight_checks": [
+            "good_experiments"
+        ],
+        "badge_classification": "KUDOS",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "description": "Silver experiment",
+        "status": "released",
+        "uuid": "b62ef24e-7d35-4bc3-abe9-276442cbbc58"
+    },
+    {
+        "title": "Gold Experiment",
+        "badge_name": "gold-experiment",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "schema_version": "1",
+        "foursight_checks": [
+            "good_experiments"
+        ],
+        "badge_classification": "KUDOS",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "description": "Gold experiment",
+        "status": "released",
+        "uuid": "6c2b7409-4478-4e15-aabc-1a0df9b883e9"
+    },
+    {
         "title": "Bronze Biosample",
         "badge_name": "bronze-biosample",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
