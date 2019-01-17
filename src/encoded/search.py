@@ -866,32 +866,40 @@ def schema_for_field(field, request, doc_types, should_log=False):
         Dictionary schema for the field, or None if not found
     '''
     types = request.registry[TYPES]
-    schema = types[doc_types[0]].schema
+    schemas = [ types[dt].schema for dt in doc_types ]
+
     # We cannot hash dict by list (of doc_types) so we convert to unique ordered string
-    doc_type_string = ','.join(list( sorted(set(doc_types)) ))
+    doc_type_string = ','.join(doc_types)
 
     cache = getattr(request, '_field_schema_cache', {})
     if (field, doc_type_string) in cache:
         return cache[(field, doc_type_string)]
 
+    field_schema = None
+
     # for 'audit.*' and 'aggregated_items.*', schema will never be found and logging isn't helpful
-    if schema and not field.startswith('audit.') and not field.startswith('aggregated_items.'):
+    if schemas and not field.startswith('audit.') and not field.startswith('aggregated_items.'):
         # 'type' field is really '@type' in the schema
         use_field = '@type' if field == 'type' else field
         # eliminate '!' from not fields
         use_field = use_field[:-1] if use_field.endswith('!') else use_field
-        try:
-            field_schema = crawl_schema(types, use_field, schema)
-        except Exception as exc:  # cannot find schema. Log and Return None
-            if should_log:
-                log.warning('Cannot find schema in search.py. Type: %s. Field: %s'
-                          % (doc_types[0], field), field=field, error=str(exc))
-        else:
-            cache[(field, doc_type_string)] = field_schema
-            if not hasattr(request, '_field_schema_cache'):
-                setattr(request, '_field_schema_cache', cache)
-            return field_schema
-    return None
+        for schema in schemas:
+            try:
+                field_schema = crawl_schema(types, use_field, schema)
+            except Exception as exc:  # cannot find schema. Log and Return None
+                if should_log:
+                    log.warning('Cannot find schema in search.py. Type: %s. Field: %s'
+                            % (doc_types[0], field), field=field, error=str(exc))
+            else:
+                if field_schema is not None:
+                    break
+
+    # Cache result, even if not found, for this request.
+    cache[(field, doc_type_string)] = field_schema
+    if not hasattr(request, '_field_schema_cache'):
+        setattr(request, '_field_schema_cache', cache)
+
+    return field_schema
 
 
 def is_linkto_or_object_array_root_field(field, types, doc_types):
