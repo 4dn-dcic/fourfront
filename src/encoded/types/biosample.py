@@ -29,7 +29,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     schema = load_schema('encoded:schemas/biosample.json')
     # name_key = 'accession'
     aggregated_items = {
-        "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
+        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'badges.badge.*',
