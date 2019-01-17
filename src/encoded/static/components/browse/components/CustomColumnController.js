@@ -125,8 +125,9 @@ export class CustomColumnSelector extends React.PureComponent {
         if (colDef.field === 'display_title') return null;
         var isChecked = !colDef.hiddenState;
         return (
-            <div className="col-sm-6 col-lg-3 column-option" key={colDef.field}>
-                <Checkbox checked={isChecked} onChange={this.handleOptionVisibilityChange.bind(this, colDef.field)} value={colDef.field} className={isChecked ? 'is-active' : null}>
+            <div className="col-sm-6 col-lg-3 column-option" key={colDef.field} data-tip={colDef.description}>
+                <Checkbox checked={isChecked} onChange={this.handleOptionVisibilityChange.bind(this, colDef.field)}
+                    value={colDef.field} className={isChecked ? 'is-active' : null}>
                     { colDef.title }
                 </Checkbox>
             </div>
