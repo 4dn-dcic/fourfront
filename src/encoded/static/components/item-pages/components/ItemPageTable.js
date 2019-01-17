@@ -278,7 +278,7 @@ export class ItemPageTableLoader extends React.PureComponent {
 
     componentWillReceiveProps(nextProps){
         if (!_.isEqual(nextProps.itemUrls, this.props.itemUrls)){
-            this.setState(ItemPageTableLoader.getInitialState(nextProps), this.componentDidMount); 
+            this.setState(ItemPageTableLoader.getInitialState(nextProps), this.componentDidMount);
         }
     }
 

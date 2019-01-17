@@ -131,7 +131,7 @@ export class CustomColumnSelector extends React.PureComponent {
         return (
             <div className="row clearfix" children={_.map(this.columnDefinitionsWithHiddenState(), this.renderHiddenColumnOption)}>
                 { _.map(this.columnDefinitionsWithHiddenState(), (colDef, idx, all) =>
-                    <ColumnOption {...colDef} key={colDef.field || idx} allColumns={all} index={idx} handleOptionVisibilityChange={this.handleOptionVisibilityChange} /> 
+                    <ColumnOption {...colDef} key={colDef.field || idx} allColumns={all} index={idx} handleOptionVisibilityChange={this.handleOptionVisibilityChange} />
                 ) }
             </div>
         );

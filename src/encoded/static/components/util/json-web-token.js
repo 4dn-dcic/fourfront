@@ -259,7 +259,7 @@ export function addToHeaders(headers = {}){
 /**
  * Helper function to determine if current user is an admin according
  * to the user info in localStorage.
- * 
+ *
  * Does not provide any real security but can be helpful for showing/hiding certain
  * actions or buttons which would otherwise not be permitted by back-end.
  *

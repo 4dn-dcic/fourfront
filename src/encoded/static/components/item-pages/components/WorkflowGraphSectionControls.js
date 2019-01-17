@@ -144,7 +144,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
     /*** Controls for Provenance Graphs ***/
 
     indirectFilesCheckbox(){
-        var { showIndirectFiles, onToggleIndirectFiles, isShowMoreContextCheckboxDisabled } = this.props; 
+        var { showIndirectFiles, onToggleIndirectFiles, isShowMoreContextCheckboxDisabled } = this.props;
         if (typeof showIndirectFiles !== 'boolean' || typeof onToggleIndirectFiles !== 'function') return null;
         return (
             <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}
@@ -187,7 +187,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
 
 
 class RowSpacingTypeDropdown extends React.Component {
-    
+
     static propTypes = {
         'onSelect' : PropTypes.func.isRequired,
         'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])

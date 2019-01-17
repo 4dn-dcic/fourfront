@@ -267,7 +267,7 @@ class FacetTermsList extends React.Component {
             terms = _.filter(facet.terms, function(term){ return term.doc_count > 0; });
 
         // Filter out type=Item for now (hardcode)
-        if (facet.field === 'type'){ 
+        if (facet.field === 'type'){
             terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
         }
 
