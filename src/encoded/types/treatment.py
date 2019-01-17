@@ -100,7 +100,7 @@ class TreatmentAgent(Treatment):
         if chemical:
             dis_tit = chemical + " treatment" + conditions
         elif biological_agent:
-            dis_tit = biological_agent + " infection" + conditions
+            dis_tit = biological_agent + " treatment" + conditions
         elif treatment_type == 'Other':
             dis_tit = "Other treatment" + conditions
         else:

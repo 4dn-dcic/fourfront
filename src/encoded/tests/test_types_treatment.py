@@ -59,12 +59,12 @@ def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
 
 
 def test_calculated_biological_treatment_display_title(testapp, viral_treatment):
-    assert viral_treatment['display_title'] == 'Virus infection'
+    assert viral_treatment['display_title'] == 'Virus treatment'
     res = testapp.patch_json(viral_treatment['@id'], {
         'duration': 3.5, 'duration_units': 'hour',
         'concentration': 2, 'concentration_units': 'MOI'
     })
-    assert res.json['@graph'][0]['display_title'] == 'Virus infection (2 MOI, 3.5h)'
+    assert res.json['@graph'][0]['display_title'] == 'Virus treatment (2 MOI, 3.5h)'
 
 
 def test_calculated_rnai_treatment_display_title(testapp, rnai, target_w_genes):
