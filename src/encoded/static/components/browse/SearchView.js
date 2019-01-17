@@ -241,12 +241,21 @@ class ControlsAndResults extends React.PureComponent {
         this.props.navigate(clearFiltersURL, {});
     }
 
+    isClearFiltersBtnVisible(){
+        var { href, context } = this.props,
+            urlPartsQuery                   = url.parse(href, true).query,
+            clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
+            clearFiltersURLQuery            = clearFiltersURL && url.parse(clearFiltersURL, true).query;
+
+        return !!(clearFiltersURLQuery && !_.isEqual(clearFiltersURLQuery, urlPartsQuery));
+    }
+
     renderSearchDetailPane(result, rowNumber, containerWidth){
         return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />;
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, isFullscreen } = this.props,
+        var { context, hiddenColumns, currentAction, isFullscreen } = this.props,
             { columnDefinitions, abstractType, specificType } = this.state,
             results                     = context['@graph'],
             inSelectionMode             = currentAction === 'selection',
@@ -262,16 +271,7 @@ class ControlsAndResults extends React.PureComponent {
                         'currentAction', 'windowHeight')}
                             className="with-header-bg" facets={facets} filters={context.filters}
                             onClearFilters={this.handleClearFilters} itemTypeForSchemas={specificType}
-                            showClearFiltersButton={(()=>{
-                                var urlParts                        = url.parse(href, true),
-                                    clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
-                                    urlPartQueryCorrectedForType    = _.clone(urlParts.query);
-
-                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === ''){
-                                    urlPartQueryCorrectedForType.type = 'Item';
-                                }
-                                return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
-                            })()} />
+                            showClearFiltersButton={this.isClearFiltersBtnVisible()} />
                         </div>
                 : null }
                 <div className={!facets.length ? "col-sm-12 expset-result-table-fix" : ("expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9'))}>
