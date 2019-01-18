@@ -10482,7 +10482,7 @@
                         "name": "atac.bowtie2_idx_tar",
                         "source": [
                             {
-                                "name": "bowtie2_idx_tar"
+                                "name": "atac.bowtie2_idx_tar"
                             }
                         ]
                     },
