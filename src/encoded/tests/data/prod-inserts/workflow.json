@@ -8802,7 +8802,6 @@
                 "workflow_argument_name": "chip.report"
             },
             {  
-                "argument_format": "json",
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -9117,7 +9116,6 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "json",
                             "global": true,
                             "type": "QC"
                         },
@@ -9223,7 +9221,6 @@
                 "workflow_argument_name": "chip.report"
             },
             {  
-                "argument_format": "json",
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -9524,7 +9521,6 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "json",
                             "global": true,
                             "type": "QC"
                         },
@@ -9633,7 +9629,6 @@
                 "workflow_argument_name": "chip.report"
             },
             {   
-                "argument_format": "json",
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -9924,7 +9919,6 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "json",
                             "global": true,
                             "type": "QC"
                         },
@@ -10337,8 +10331,8 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "json",
                             "global": true,
+                            "file_format": "bw",
                             "type": "data file"
                         },
                         "name": "atac.qc_json",
@@ -10443,8 +10437,7 @@
                 "workflow_argument_name": "atac.report"
             },
             {   
-                "argument_format": "json",
-                "argument_type": "Output processed file",
+                "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.qc_json"
             }
         ],
@@ -10731,9 +10724,8 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "json",
                             "global": true,
-                            "type": "data file"
+                            "type": "QC"
                         },
                         "name": "atac.qc_json",
                         "target": [
@@ -10826,8 +10818,7 @@
                 "workflow_argument_name": "atac.report"
             },
             {   
-                "argument_format": "json",
-                "argument_type": "Output processed file",
+                "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.qc_json"
             }
         ],
@@ -11076,9 +11067,8 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "json",
                             "global": true,
-                            "type": "data file"
+                            "type": "QC"
                         },
                         "name": "atac.qc_json",
                         "target": [
