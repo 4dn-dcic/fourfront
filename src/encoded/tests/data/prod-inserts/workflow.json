@@ -10450,7 +10450,7 @@
         "data_types": [
             "ATAC-seq"
         ],
-        "description": "ATAC-seq data processing pipeline",
+        "description": "ATAC-seq data processing pipeline, Align-only",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
@@ -10737,7 +10737,7 @@
                 ]
             }
         ],
-        "title": "ATAC-seq data processing pipeline",
+        "title": "ATAC-seq data processing pipeline, Align-only",
         "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa",
         "workflow_diagram": "",
         "workflow_type": "ATAC-seq data processing"
@@ -10831,7 +10831,7 @@
         "data_types": [
             "ATAC-seq"
         ],
-        "description": "ATAC-seq data processing pipeline",
+        "description": "ATAC-seq data processing pipeline, post-alignment",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
@@ -11080,7 +11080,7 @@
                 ]
             }
         ],
-        "title": "ATAC-seq data processing pipeline",
+        "title": "ATAC-seq data processing pipeline, post-alignment",
         "uuid": "510d321f-8a79-479d-95eb-c8fd703972a7",
         "workflow_diagram": "",
         "workflow_type": "ATAC-seq data processing"
