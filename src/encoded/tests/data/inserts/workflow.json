@@ -1075,6 +1075,7 @@
         "accession": "4DNWF2HFF82B",
         "app_name": "md5",
         "app_version": "0.2.6",
+        "aliases": ["4dn-dcic-lab:wf-md5-0.2.6"],
         "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
         "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "arguments": [
