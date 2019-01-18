@@ -34,6 +34,17 @@
         "definition_terms": ["111116bc-8535-4448-903e-854af460a233"]
     },
     {
+        "uuid": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "ontology_name": "Sequence Ontology",
+        "ontology_url": "http://www.sequenceontology.org/",
+        "download_url": "https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/so.owl",
+        "namespace_url": "http://purl.obolibrary.org/obo/",
+        "ontology_prefix": "SO",
+        "description": "The Sequence Ontology is a set of terms and relationships used to describe the features and attributes of biological sequence. ",
+        "synonym_terms": ["111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233", "111114bc-8535-4448-903e-854af460a233"],
+        "definition_terms": ["111116bc-8535-4448-903e-854af460a233"]
+    },
+    {
         "uuid": "540026bc-8535-4448-903e-854af460b254",
         "ontology_name": "4DN Controlled Vocabulary",
         "ontology_prefix": "4DN",

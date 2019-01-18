@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import argparse
+import logging
 from encoded.loadxl import load_ontology_terms
 from dateutil.relativedelta import relativedelta
 import datetime
@@ -18,7 +19,8 @@ from encoded.commands.owltools import (
     subClassOf,
     SomeValuesFrom,
     IntersectionOf,
-    OnProperty
+    OnProperty,
+    Deprecated
 )
 from dcicutils.ff_utils import (
     get_authentication_with_server,
@@ -409,7 +411,7 @@ def get_ontologies(connection, ont_list):
     return ontologies
 
 
-def connect2server(env=None, key=None, app=None):
+def connect2server(env=None, key=None):
     '''Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
        reached with that key.
@@ -622,6 +624,12 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
     return terms
 
 
+def _is_deprecated(class_, data):
+    if list(data.rdfGraph.objects(class_, Deprecated)):
+        return True
+    return False
+
+
 def download_and_process_owl(ontology, connection, terms):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
@@ -629,20 +637,20 @@ def download_and_process_owl(ontology, connection, terms):
     if not terms:
         terms = {}
     for class_ in data.allclasses:
-        if isBlankNode(class_):
-            terms = process_blank_node(class_, data, terms)
-        else:
-            termid = get_termid_from_uri(class_)
-            if terms.get(termid) is None:
-                terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
+        if not _is_deprecated(class_, data):
+            if isBlankNode(class_):
+                terms = process_blank_node(class_, data, terms)
             else:
-                if 'term_name' not in terms[termid]:
-                    terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                if 'source_ontology' not in terms[termid]:
-                    terms[termid]['source_ontology'] = ontology['uuid']
-            # deal with parents
-            # terms = process_parents(class_, termid, data, terms)
-            terms = process_parents(class_, data, terms)
+                termid = get_termid_from_uri(class_)
+                if terms.get(termid) is None:
+                    terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
+                else:
+                    if 'term_name' not in terms[termid]:
+                        terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
+                    if 'source_ontology' not in terms[termid]:
+                        terms[termid]['source_ontology'] = ontology['uuid']
+                # deal with parents
+                terms = process_parents(class_, data, terms)
     # add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
     return terms
@@ -695,10 +703,6 @@ def parse_args(args):
                         default=False,
                         action='store_true',
                         help="also load the ontology stuff into the database")
-    parser.add_argument('--force',
-                        default=False,
-                        action='store_true',
-                        help="force overwritting of existing file in s3.")
     parser.add_argument('--pretty',
                         default=False,
                         action='store_true',
@@ -715,7 +719,7 @@ def parse_args(args):
                         default=None,
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
+    parser.add_argument('--app_name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
 
     return parser.parse_args(args)
@@ -747,7 +751,6 @@ def main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
     '''
-
     args = parse_args(sys.argv[1:])  # to facilitate testing
     s3_postfile = 'ontology_post.json'
     s3_patchfile = 'ontology_patch.json'
@@ -757,18 +760,8 @@ def main():
     postfile = outdir + s3_postfile
     patchfile = outdir + s3_patchfile
 
-    # pyramids app
-    app = get_app(args.config_uri, args.app_name)
-
-    if args.s3upload and not args.force:
-        # first check and see if we are more than 3 months past date
-        adjust = relativedelta(months=3)
-        if last_ontology_load(app) + adjust > datetime.datetime.now():
-            print("it hasn't been three months skipping for now")
-            return
-
     # fourfront connection
-    connection = connect2server(args.env, args.key, app)
+    connection = connect2server(args.env, args.key)
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN'):
@@ -802,12 +795,18 @@ def main():
         write_outfile(terms2write[1], patchfile, pretty)
 
         if args.load:  # load em into the database
+            # pyramids app
+            try:
+                app = get_app(args.config_uri, args.app_name)
+            except Exception as e:
+                raise("Can't get the fourfront app - check config_uri and app_name")
+
             load_ontology_terms(app,
                                 args.outdir + s3_postfile,
                                 args.outdir + s3_patchfile)
 
         if args.s3upload:  # upload file to s3
-            s3 = s3Utils(env = args.env)
+            s3 = s3Utils(env=args.env)
             s3.outfile_bucket = s3.system_bucket
             with open(postfile, 'rb') as postedfile:
                 s3.s3_put(obj=postedfile, key=s3_postfile)
