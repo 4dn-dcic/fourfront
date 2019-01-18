@@ -8821,6 +8821,7 @@
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-aln-chip",
+        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-aln-chip"],
         "steps": [
             {
                 "inputs": [
@@ -9240,6 +9241,7 @@
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-aln-ctl",
+        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-aln-ctl"],
         "steps": [
             {
                 "inputs": [
@@ -9648,6 +9650,7 @@
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-postaln",
+        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-postaln"],
         "steps": [
             {
                 "inputs": [
@@ -10456,6 +10459,7 @@
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq-aln",
+        "aliases": ["4dn-dcic-lab:wf-encode-atacseq-aln"],
         "steps": [
             {
                 "inputs": [
