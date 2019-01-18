@@ -10772,10 +10772,6 @@
             },
             {   
                 "argument_type": "parameter",
-                "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
-            },
-            {   
-                "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
             {   
@@ -10793,10 +10789,6 @@
             {   
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
-            },
-            {   
-                "argument_type": "parameter",
-                "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
             {   
                 "argument_format": "bigbed",
@@ -10926,19 +10918,6 @@
                             "global": true,
                             "type": "parameter"
                         },
-                        "name": "atac.trim_adapter.auto_detect_adapter",
-                        "source": [
-                            {
-                                "name": "atac.trim_adapter.auto_detect_adapter"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
                         "name": "atac.enable_xcor",
                         "source": [
                             {
@@ -10982,19 +10961,6 @@
                         "source": [
                             {
                                 "name": "atac.gensz"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
-                        "name": "atac.bam2ta.regex_grep_v_ta",
-                        "source": [
-                            {
-                                "name": "atac.bam2ta.regex_grep_v_ta"
                             }
                         ]
                     }
@@ -11083,6 +11049,7 @@
         "title": "ATAC-seq data processing pipeline, post-alignment",
         "uuid": "510d321f-8a79-479d-95eb-c8fd703972a7",
         "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing"
+        "workflow_type": "ATAC-seq data processing",
+        "aliases": ["4dn-dcic-lab:wf-encode-atacseq-postaln"]
     }
 ]
