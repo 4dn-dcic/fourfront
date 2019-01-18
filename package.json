@@ -87,7 +87,7 @@
   },
   "dependencies": {
     "auth0-lock": "^10.24.3",
-    "aws-sdk": "^2.315.0",
+    "aws-sdk": "^2.391.0",
     "babel-polyfill": "^6.26.0",
     "classnames": "^2.2.5",
     "color": "^0.10.1",
