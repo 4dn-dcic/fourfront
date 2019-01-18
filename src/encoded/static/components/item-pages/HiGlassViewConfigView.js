@@ -18,7 +18,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
         var initTabs    = [],
             windowWidth = this.props.windowWidth,
-            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth));
+            width       = this.getTabViewWidth();
 
 
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));

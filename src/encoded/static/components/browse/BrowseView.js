@@ -10,7 +10,7 @@ import ReactTooltip from 'react-tooltip';
 import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
 import * as store from './../../store';
-import { isServerSide, expFxn, Filters, navigate, object, layout, typedefs } from './../util';
+import { isServerSide, expFxn, Filters, navigate, object, layout, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
@@ -228,20 +228,19 @@ class ResultTableContainer extends React.PureComponent {
     }
 
     render() {
-        var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas,
-            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen } = this.props;
+        var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas, windowHeight,
+            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets } = this.props,
+            showClearFiltersButton  = _.keys(Filters.currentExpSetFilters() || {}).length > 0;
 
         return (
             <div className="row">
-                { context.facets.length > 0 ?
+                { facets && facets.length > 0 ?
                     <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
-                        <ExternaDataExpSetsCount countExternalSets={countExternalSets} browseBaseState={browseBaseState} href={href} />
-                        <FacetList {...{ session, browseBaseState, schemas, windowWidth }}
-                            orientation="vertical" className="with-header-bg"
-                            facets={context.facets} filters={context.filters}
+                        <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />
+                        <FacetList {...{ session, browseBaseState, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
+                            orientation="vertical" className="with-header-bg" filters={context.filters}
                             isTermSelected={this.isTermSelected} onFilter={this.onFilter}
                             itemTypeForSchemas="ExperimentSetReplicate" href={href || searchBase}
-                            showClearFiltersButton={_.keys(Filters.currentExpSetFilters() || {}).length > 0}
                             onClearFilters={this.handleClearFilters} />
                     </div>
                     :
@@ -345,6 +344,8 @@ export default class BrowseView extends React.Component {
      */
     constructor(props){
         super(props);
+        this.filterFacet = this.filterFacet.bind(this);
+        this.transformedFacets = this.transformedFacets.bind(this);
 
         /**
          * Internal state for root-level BrowseView component.
@@ -543,6 +544,42 @@ export default class BrowseView extends React.Component {
     }
 
     /**
+     * Function which is passed into a `.filter()` call to
+     * filter context.facets down in response to frontend-state.
+     *
+     * Currently is meant to filter out Award and Project facets if
+     * we're _not_ showing any external data, as determined via the
+     * prop `browseBaseState` (string).
+     *
+     * @param {{ field: string }} facet - Object representing a facet.
+     * @param {number} facetIdx - Index of current facet being iterated on.
+     * @param {Object[]} all - All facets.
+     * @returns {boolean} Whether to keep or discard facet.
+     */
+    filterFacet(facet, facetIdx, all){
+        if (facet.hide_from_view) return false;
+
+        var { browseBaseState, session } = this.props;
+
+        // Exclude facets which are part of browse base state filters.
+        if (browseBaseState){
+            var browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
+        }
+
+        if (facet.field.substring(0, 6) === 'audit.'){
+            if (session && JWT.isLoggedInAsAdmin()) return true;
+            return false; // Exclude audit facets temporarily, if not logged in as admin.
+        }
+
+        return true;
+    }
+
+    transformedFacets(){
+        return _.filter(this.props.context.facets || [], this.filterFacet);
+    }
+
+    /**
      * Renders out components for managing state and view of Browse table in the following order:
      * `SelectedFilesController` -> `CustomColumnController` -> `SortController` -> `ResultTableContainer`.
      *
@@ -553,7 +590,8 @@ export default class BrowseView extends React.Component {
         var { context, href, session, browseBaseState, schemas } = this.props,
             results             = context['@graph'],
             hrefParts           = url.parse(href, true),
-            countExternalSets   = BrowseView.externalDataSetsCount(context);
+            countExternalSets   = BrowseView.externalDataSetsCount(context),
+            facets              = this.transformedFacets();
 
         // No results found!
         if (context.total === 0 && context.notification){
@@ -579,7 +617,7 @@ export default class BrowseView extends React.Component {
                 <SelectedFilesController href={href}>
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets }}
+                            <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets, facets }}
                                 {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen', 'isFullscreen')}
                                 totalExpected={context && context.total} />
                         </SortController>

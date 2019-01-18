@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ExperimentSetDetailPane, ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, defaultColumnExtensionMap } from './../../browse/components';
+import { ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, } from './ItemPageTable';
+import { ExperimentSetDetailPane, defaultColumnExtensionMap } from './../../browse/components';
 import { ajax, console, layout, expFxn } from './../../util';
 
 
@@ -11,22 +12,15 @@ export class ExperimentSetTables extends React.Component {
 
     static propTypes = {
         'loading' : PropTypes.bool,
-        'sortFxn' : PropTypes.func,
         'windowWidth' : PropTypes.number.isRequired
     }
     
     static defaultProps = {
-        'sortFxn' : function(expSetA, expSetB){
-            if (!Array.isArray(expSetA['@type']) || !Array.isArray(expSetB['@type'])) return 0;
-            if (expSetA['@type'].indexOf('ExperimentSetReplicate') > -1) return -1;
-            if (expSetB['@type'].indexOf('ExperimentSetReplicate') > -1) return 1;
-            return 0;
-        },
         'title' : <span>In Experiment Sets</span>
     }
 
     render(){
-        var { loading, sortFxn, title, windowWidth } = this.props,
+        var { loading, title, windowWidth } = this.props,
             experiment_sets = this.props.experiment_sets || this.props.results;
 
         if (loading || !Array.isArray(experiment_sets)){
@@ -41,10 +35,6 @@ export class ExperimentSetTables extends React.Component {
                     Not used in any Experiment Sets
                 </div>
             );
-        }
-
-        if (typeof sortFxn === 'function'){
-            experiment_sets = experiment_sets.sort(sortFxn);
         }
         
         return (
@@ -72,37 +62,28 @@ export class ExperimentSetTables extends React.Component {
     }
 }
 
-export class ExperimentSetTablesLoaded extends React.Component {
+export class ExperimentSetTablesLoaded extends React.PureComponent {
 
     static propTypes = {
-        'experimentSetObject' : PropTypes.object.isRequired,
-        'sortFxn' : PropTypes.func
-    }
-
-    static isExperimentSetCompleteEnough(expSet){
-        // TODO
-        return false;
-    }
-
-    innerTable(){
-        return (
-            <ExperimentSetTables {..._.pick(this.props, 'sortFxn', 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad')} />
-        );
-    }
+        'experimentSetUrls' : PropTypes.arrayOf(PropTypes.string).isRequired
+    };
 
     render(){
         return (
-            <ItemPageTableLoader itemsObject={this.props.experimentSetObject}
-                isItemCompleteEnough={ExperimentSetTablesLoaded.isExperimentSetCompleteEnough} children={this.innerTable()} />
+            <ItemPageTableLoader itemUrls={this.props.experimentSetUrls}>
+                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad')} />
+            </ItemPageTableLoader>
         );
     }
 }
 
 
-export class ExperimentSetTablesLoadedFromSearch extends ExperimentSetTablesLoaded {
+export class ExperimentSetTablesLoadedFromSearch extends React.PureComponent {
     render(){
         return (
-            <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth', 'title', 'onLoad')} children={this.innerTable()} />
+            <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
+                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad')} />
+            </ItemPageTableSearchLoaderPageController>
         );
     }
 }

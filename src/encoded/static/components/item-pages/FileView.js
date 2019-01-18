@@ -11,12 +11,9 @@ import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide 
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
-import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING
@@ -152,17 +149,11 @@ class FileViewOverview extends React.Component {
     render(){
         var { context, windowWidth, width, tips } = this.props;
 
-        var setsByKey;
-        var table = null;
+        var setUrls = expFxn.experimentSetsFromFile(context, 'ids'),
+            table;
 
-        if (context && (
-            (Array.isArray(context.experiments) && context.experiments.length > 0) || (Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0)
-        )){
-            setsByKey = expFxn.experimentSetsFromFile(context);
-        }
-
-        if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
+        if (setUrls && setUrls.length > 0){
+            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
@@ -401,18 +392,23 @@ export class FileOverViewBody extends React.Component {
             fileFormat              = fileUtil.getFileFormatStr(file),
             fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
             fileIsHic               = (fileFormat === 'hic'),
-            externalLinkButton      = null,
             genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
             fileHref                = file.href,
             pageHref                = this.props.href || (store && store.getState().href),
             hrefParts               = url.parse(pageHref),
-            host                    = hrefParts.protocol + '//' + hrefParts.host;
+            host                    = hrefParts.protocol + '//' + hrefParts.host,
+            juiceBoxBtn             = this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
+            epigenomeBtn            = this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly);
+
+        if (!juiceBoxBtn && !epigenomeBtn){
+            return null;
+        }
 
         return (
-            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
+            <OverViewBodyItem wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <React.Fragment>
-                    {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
-                    {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                    { juiceBoxBtn }
+                    { epigenomeBtn }
                 </React.Fragment>
             } />
         );
