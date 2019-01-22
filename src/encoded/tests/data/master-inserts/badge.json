@@ -7,7 +7,7 @@
         "foursight_checks": [
             "good_experiments"
         ],
-        "badge_classification": "KUDOS",
+        "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Bronze experiment",
         "badge_item_type": "Experiment",
@@ -22,7 +22,7 @@
         "foursight_checks": [
             "good_experiments"
         ],
-        "badge_classification": "KUDOS",
+        "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Silver experiment",
         "badge_item_type": "Experiment",
@@ -37,7 +37,7 @@
         "foursight_checks": [
             "good_experiments"
         ],
-        "badge_classification": "KUDOS",
+        "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Gold experiment",
         "badge_item_type": "Experiment",
@@ -52,7 +52,7 @@
         "foursight_checks": [
             "good_biosamples"
         ],
-        "badge_classification": "KUDOS",
+        "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Bronze biosample",
         "badge_item_type": "Biosample",
@@ -67,7 +67,7 @@
         "foursight_checks": [
             "good_biosamples"
         ],
-        "badge_classification": "KUDOS",
+        "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Silver biosample",
         "badge_item_type": "Biosample",
@@ -82,7 +82,7 @@
         "foursight_checks": [
             "good_biosamples"
         ],
-        "badge_classification": "KUDOS",
+        "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Gold biosample",
         "badge_item_type": "Biosample",
@@ -97,7 +97,7 @@
         "foursight_checks": [
             "exp_has_raw_files"
         ],
-        "badge_classification": "WARNING",
+        "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Sequencing experiment missing raw files",
         "badge_item_type": "Experiment",
@@ -112,7 +112,7 @@
         "foursight_checks": [
             "tier1_metadata_present"
         ],
-        "badge_classification": "WARNING",
+        "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Tier 1 biosample missing required metadata",
         "badge_item_type": "Biosample",
@@ -127,7 +127,7 @@
         "foursight_checks": [
             "repsets_have_bio_reps"
         ],
-        "badge_classification": "WARNING",
+        "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Issues with replicate numbers",
         "badge_item_type": "Experiment Set - Replicate",
@@ -142,7 +142,7 @@
         "foursight_checks": [
             "paired_end_info_consistent"
         ],
-        "badge_classification": "WARNING",
+        "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Inconsistency in FileFastq paired end information",
         "badge_item_type": "File Fastq",

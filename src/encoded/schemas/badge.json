@@ -54,9 +54,9 @@
             "description": "The classification of a badge",
             "type": "string",
             "enum": [
-                "WARNING",
-                "KUDOS",
-                "INTERNAL"
+                "Warning",
+                "Commendation",
+                "Internal"
             ]
         },
         "badge_icon": {
@@ -88,11 +88,17 @@
     "facets": {
         "badge_item_type": {
             "title": "Badge Item Type"
+        },
+        "badge_classification": {
+            "title": "Badge Classification"
         }
     },
     "columns": {
         "badge_item_type": {
             "title": "Badge Item Type"
+        },
+        "badge_classification": {
+            "title": "Badge Classification"
         }
     }
 }
