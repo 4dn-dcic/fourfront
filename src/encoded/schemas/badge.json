@@ -69,6 +69,11 @@
             "type": "string",
             "formInput": "textarea"
         },
+        "badge_item_type": {
+            "title": "Badge Item Type",
+            "type": "string",
+            "description": "The item type this badge is associated with"
+        },
         "foursight_checks": {
             "title": "Foursight Checks",
             "description": "The foursight checks associated with this badge",
@@ -78,6 +83,16 @@
                 "description": "Name of a foursight check.",
                 "type":  "string"
             }
+        }
+    },
+    "facets": {
+        "badge_item_type": {
+            "title": "Badge Item Type"
+        }
+    },
+    "columns": {
+        "badge_item_type": {
+            "title": "Badge Item Type"
         }
     }
 }
