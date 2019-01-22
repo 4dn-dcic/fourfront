@@ -39,7 +39,6 @@
             "description": "A plain text description of the biosample. Do not include experiment details, constructs or treatments.",
             "type": "string",
             "lookup": 20,
-            "default": "",
             "formInput": "textarea"
         },
         "biosource": {

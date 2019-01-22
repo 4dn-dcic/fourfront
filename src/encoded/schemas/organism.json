@@ -50,8 +50,7 @@
             "title": "Binomial name",
             "description": "The genus species for the organism (e.g. 'Mus musculus').",
             "type": "string",
-            "lookup": 30,
-            "default": ""
+            "lookup": 30
         },
         "taxon_id": {
             "title": "Taxon ID",

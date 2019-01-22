@@ -92,7 +92,6 @@
             "description": "A description of why experiments are part of the set.",
             "type": "string",
             "lookup": 20,
-            "default": "",
             "formInput": "textarea"
         },
         "processed_files": {
