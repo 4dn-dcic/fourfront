@@ -113,12 +113,21 @@ body[data-pathname="/browse/"]{
 /*************** BODY STYLES RE: FULL-SCREEN THINGS ***************/
 
 body.is-full-screen {
-	overflow: hidden;
-	&::-webkit-scrollbar { 
-		display: none; 
+
+	/** Make body non-scrollable for pages which aren't search. **/
+	&:not([data-pathname="/browse/"]):not([data-pathname="/search/"]){
+		overflow: hidden;
+		&::-webkit-scrollbar { 
+			display: none; 
+		}
 	}
-	#top-nav > .test-warning {
-		display: none;
+
+	@media screen and (min-width: $screen-lg-min){
+		.container {
+			width: auto;
+			margin-left: 20px;
+			margin-right: 20px;
+		}
 	}
 }
 

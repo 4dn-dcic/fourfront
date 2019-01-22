@@ -38,9 +38,8 @@ describe('Testing RawFilesStackedTable', function() {
             //"210a7047-37cc-406d-8246-62fbe3400fc3" : true
         };
 
-        RawFilesStackedTableWrapper = createReactClass({
-
-            render: function() {
+        class RawFilesStackedTableWrapper extends React.Component {
+            render() {
                 return (
                     <div>
                         <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref="controller">
@@ -55,7 +54,7 @@ describe('Testing RawFilesStackedTable', function() {
                     </div>
                 );
             }
-        });
+        }
 
         testRawFilesStackedTable = TestUtils.renderIntoDocument(<RawFilesStackedTableWrapper/>);
 

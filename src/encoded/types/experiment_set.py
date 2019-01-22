@@ -73,16 +73,23 @@ class ExperimentSet(Item):
         'publications_using': ('Publication', 'exp_sets_used_in_pub'),
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
+    aggregated_items = {
+        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+    }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        "badges.badge.*",
+
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
         "produced_in_pub.short_attribution",
+        "produced_in_pub.date_published",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",
         "publications_of_set.authors",
+        "publications_of_set.date_published",
 
         "experiments_in_set.experiment_type",
         "experiments_in_set.accession",
@@ -90,7 +97,8 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
-        "experiments_in_set.badges.*",
+        "experiments_in_set.badges.badge.*",
+        "experiments_in_set.badges.message",
 
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
@@ -107,7 +115,8 @@ class ExperimentSet(Item):
         'experiments_in_set.biosample.treatments.treatment_type',
         'experiments_in_set.biosample.treatments.display_title',
         'experiments_in_set.biosample.treatments_summary',
-        "experiments_in_set.biosample.badges.*",
+        "experiments_in_set.biosample.badges.badge.*",
+        "experiments_in_set.biosample.badges.message",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
@@ -136,7 +145,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        "experiments_in_set.files.badges.*",
+        "experiments_in_set.files.badges.badge.*",
+        "experiments_in_set.files.badges.message",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",

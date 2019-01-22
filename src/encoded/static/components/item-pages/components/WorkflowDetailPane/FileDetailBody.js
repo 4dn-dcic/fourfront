@@ -228,7 +228,7 @@ export class FileDetailBody extends React.Component {
             // Case: Group of Files
             var columns = _.clone(SimpleFilesTable.defaultProps.columns);
             delete columns.file_type;
-            columns.status = 'Status';
+            columns.status = { 'title' : 'Status' };
             body = <SimpleFilesTable results={this.props.file} columns={columns} hideTypeTitle />;
         } else if (typeof file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
             // Case: Loading or Forbidden
@@ -265,9 +265,9 @@ export class FileDetailBody extends React.Component {
             var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
             if ( this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets)) ){
-                var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
-                if (setsByKey && _.keys(setsByKey).length > 0){
-                    table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} windowWidth={windowWidth} />;
+                var setUrls = expFxn.experimentSetsFromFile(this.state.file, 'ids');
+                if (setUrls && setUrls.length > 0){
+                    table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} windowWidth={windowWidth} />;
                 }
             }
             body = (

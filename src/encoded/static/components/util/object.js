@@ -227,6 +227,41 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
     }
 }
 
+/**
+ * Extends _child properties_ of first argument object with properties from subsequent objects.
+ * All arguments MUST be objects with objects as children.
+ */
+export function extendChildren(){
+    var args    = Array.from(arguments),
+        argsLen = args.length;
+
+    if (args.length < 2) return args[0];
+
+    var hostObj = args[0] || {}, // Allow null to be first arg, because why not.
+        allKeys = Array.from(
+            _.reduce(args.slice(1), function(m, obj){
+                _.forEach(_.keys(obj), function(k){
+                    m.add(k);
+                });
+                return m;
+            }, new Set())
+        );
+
+    _.forEach(allKeys, function(childProperty){
+        for (var objIndex = 0; objIndex < argsLen; objIndex++){
+            var currObjToCopyFrom = args[objIndex];
+            if (typeof currObjToCopyFrom[childProperty] !== 'undefined'){
+                if (typeof hostObj[childProperty] === 'undefined'){
+                    hostObj[childProperty] = {};
+                }
+                _.extend(hostObj[childProperty], currObjToCopyFrom[childProperty]);
+            }
+        }
+    });
+
+    return hostObj;
+}
+
 
 /**
  * Deep-clone a given object using JSON stringify/parse.
@@ -336,22 +371,6 @@ let randomIdIncrement = 0;
 
 export function randomId() {
     return 'random-id-' + ++randomIdIncrement;
-}
-
-
-export function isEqual(obj1, obj2){
-    var ob1Keys = _.keys(obj1).sort();
-    var obj2Keys = _.keys(obj2).sort();
-    if (ob1Keys.length !== obj2Keys.length) return false;
-    var len = ob1Keys.length;
-    var i;
-    for (i = 0; i < len; i++){
-        if (ob1Keys[i] !== obj2Keys[i]) return false;
-    }
-    for (i = 0; i < len; i++){
-        if (obj1[ob1Keys[i]] !== obj2[ob1Keys[i]]) return false;
-    }
-    return true;
 }
 
 /**

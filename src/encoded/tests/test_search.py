@@ -1,7 +1,6 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
-import random
 from encoded.commands.upgrade_test_inserts import get_inserts
 import json
 import time
@@ -129,7 +128,6 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
-@pytest.mark.xfail
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     # TODO: Adjust ordering of mixed-in facets, perhaps sort by lookup or something, in order to un-xfail.
     from snovault import TYPES
@@ -138,12 +136,17 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     schema = type_info.schema
     schema_facets = [('type', {'title': 'Data Type'})]
     schema_facets.extend(schema['facets'].items())
-    schema_columns = [(name, obj.get('title')) for name,obj in schema['columns'].items()]
+    # the following facets are added after schema facets
+    schema_facets.append(('status', {'title': 'Status'}))
+    # remove any disabled facets
+    schema_facets = [fct for fct in schema_facets if not fct[1].get('disabled', False)]
+    sort_facets = sorted(schema_facets, key=lambda fct: fct[1].get('order', 0))
     res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
-    for i,val in enumerate(schema_facets):
+    for i,val in enumerate(sort_facets):
         assert res['facets'][i]['field'] == val[0]
-    for i,val in enumerate(schema_columns):
-        assert res['columns'][val[0]]['title'] == val[1]
+    # assert order of columns when we officially upgrade to python 3.6 (ordered dicts)
+    for key,val in schema.get('columns', {}).items():
+        assert res['columns'][key]['title'] == val['title']
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):
@@ -202,6 +205,27 @@ def test_search_date_range_find_within(mboI_dts, testapp, workbook):
         assert set(g_uuids).issubset(set(s_uuids))
 
 
+def test_search_with_nested_integer(testapp, workbook):
+    search0 = '/search/?type=ExperimentHiC'
+    s0res = testapp.get(search0).json
+    s0_uuids = [item['uuid'] for item in s0res['@graph'] if 'uuid' in item]
+
+    search1 = '/search/?type=ExperimentHiC&files.file_size.to=1500'
+    s1res = testapp.get(search1).json
+    s1_uuids = [item['uuid'] for item in s1res['@graph'] if 'uuid' in item]
+    assert len(s1_uuids) > 0
+
+    search2 = '/search/?type=ExperimentHiC&files.file_size.from=1501'
+    s2res = testapp.get(search2).json
+    s2_uuids = [item['uuid'] for item in s2res['@graph'] if 'uuid' in item]
+    assert len(s2_uuids) > 0
+
+    # make sure there is no intersection of the uuids
+    assert not set(s1_uuids) & set(s2_uuids)
+    assert set(s1_uuids) | set(s2_uuids) == set(s0_uuids)
+
+
+
 def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
     # the MboI enzyme should be returned with all the provided pairs
     dts = {k: v.replace(':', '%3A') for k, v in mboI_dts.items()}
@@ -217,7 +241,7 @@ def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
 
 def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     # if you use + and - with same field you should get no result
-    search = '/search/?q=cell+AND+NOT+cell&type=Biosource'
+    search = '/search/?q=cell+-cell&type=Biosource'
     assert testapp.get(search, status=404)
 
 
@@ -234,12 +258,23 @@ def test_search_query_string_with_booleans(workbook, testapp):
     swag_bios = '331111bc-8535-4448-903e-854af460b888'
     assert swag_bios in bios_uuids
     # assert induced_stem_uuid not in not_induced_uuids
-    # now search for stem AND induced
-    search = '/search/?type=Biosource&q=swag+AND+GM12878'
-    res_both = testapp.get(search).json
+    # now search for stem +induced (AND is now "+")
+    search_and = '/search/?type=Biosource&q=swag+%2BGM12878'
+    res_both = testapp.get(search_and).json
     both_uuids = [r['uuid'] for r in res_both['@graph'] if 'uuid' in r]
     assert len(both_uuids) == 1
     assert swag_bios in both_uuids
+    # search with OR ("|")
+    search_or = '/search/?type=Biosource&q=swag+%7CGM12878'
+    res_or = testapp.get(search_or).json
+    or_uuids = [r['uuid'] for r in res_or['@graph'] if 'uuid' in r]
+    assert len(or_uuids) > 1
+    assert swag_bios in or_uuids
+    # search with NOT ("-")
+    search_not = '/search/?type=Biosource&q=GM12878+-swag'
+    res_not = testapp.get(search_not).json
+    not_uuids = [r['uuid'] for r in res_not['@graph'] if 'uuid' in r]
+    assert swag_bios not in not_uuids
 
 
 def test_metadata_tsv_view(workbook, htmltestapp):
@@ -309,8 +344,6 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     check_tsv(result_rows, len(res2_post_data['accession_triples']))
 
 
-
-
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
     from snovault.fourfront_utils import add_default_embeds
@@ -332,26 +365,16 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     assert 'biosource.biosource_type' in facet_fields
 
 
-def test_search_query_string_with_fields(workbook, testapp):
-    search = '/search/?q=age%3A53+OR+name%3Ahuman&type=Item'
-    res_age_name = testapp.get(search).json
-    age_name_ids = [r['uuid'] for r in res_age_name['@graph'] if 'uuid' in r]
-    assert len(age_name_ids) == 2
-    search = '/search/?q=age%3A53&type=Item'
-    res_age = testapp.get(search).json
-    age_ids = [r['uuid'] for r in res_age['@graph'] if 'uuid' in r]
-    assert len(age_ids) == 1
-    search = '/search/?q=name%3Ahuman&type=Item'
-    res_name = testapp.get(search).json
-    name_ids = [r['uuid'] for r in res_name['@graph'] if 'uuid' in r]
-    assert len(name_ids) == 1
-    assert name_ids[0] in age_name_ids
-    assert age_ids[0] in age_name_ids
-    search = '/search/?q=age%3A53+AND+organism.name%3Ahuman&type=Item'
-    res_idv = testapp.get(search).json
-    idv_ids = [r['uuid'] for r in res_idv['@graph'] if 'uuid' in r]
-    assert len(idv_ids) == 1
-    assert idv_ids[0] == age_ids[0]
+def test_search_query_string_no_longer_functional(workbook, testapp):
+    # since we now use simple_query_string, cannot use field:value or range
+    # expect 404s, since simple_query_string doesn't return exceptions
+    search_field = '/search/?q=name%3Ahuman&type=Item'
+    res_field = testapp.get(search_field, status=404)
+    assert len(res_field.json['@graph']) == 0
+
+    search_range = '/search/?q=date_created%3A>2018-01-01&type=Item'
+    res_search = testapp.get(search_range, status=404)
+    assert len(res_search.json['@graph']) == 0
 
 
 def test_search_with_no_value(workbook, testapp):
@@ -369,6 +392,8 @@ def test_search_with_no_value(workbook, testapp):
     assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
+
+
 
 
 #########################################

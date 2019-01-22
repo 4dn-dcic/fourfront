@@ -28,7 +28,11 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
     # name_key = 'accession'
+    aggregated_items = {
+        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+    }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        'badges.badge.*',
         'biosource.biosource_type',
         'biosource.individual.sex',
         'biosource.individual.organism.name',

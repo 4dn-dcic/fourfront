@@ -15,10 +15,10 @@
     "genome_assembly": "GRCh38",
     "dbxrefs": ["ENC:ENCFF798HCY", "ENC:ENCSR301HRV"],
     "dataset_description": "Reference Epigenome: ChIP-Seq Analysis of H3K79me2 in hESC Cells",
-    "dataset_type": "ChIP-seq",
-    "project_lab": "Bing Ren, UCSD",
+    "override_experiment_type": "ChIP-seq",
+    "override_lab_name": "Bing Ren, UCSD",
     "project_release_date": "2013-07-31",
-    "replicate_identifiers": ["biorep 1 tecrep 1", "biorep 2 tecrep 1"],
-    "assay_info": "H3K79me2"
+    "override_replicate_info": "merged_replicates",
+    "override_assay_info": "H3K79me2"
  }
 ]

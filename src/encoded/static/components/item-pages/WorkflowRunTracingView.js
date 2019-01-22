@@ -5,11 +5,11 @@ import url from 'url';
 import { Checkbox, Button } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout } from './../util';
-import { WorkflowNodeElement, TabbedView, WorkflowDetailPane } from './components';
+import { WorkflowNodeElement, TabbedView, WorkflowDetailPane, WorkflowGraphSectionControls } from './components';
 import DefaultItemView from './DefaultItemView';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, RowSpacingTypeDropdown, WorkflowGraphSectionControls, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
+import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
@@ -115,30 +115,6 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     }
 }
 
-export class TracedGraphSectionControls extends WorkflowGraphSectionControls {
-    indirectFilesCheckbox(){
-        if (typeof this.props.showIndirectFiles !== 'boolean' || typeof this.props.onToggleIndirectFiles !== 'function') return null;
-        return (
-            <Checkbox checked={this.props.showIndirectFiles} onChange={this.props.onToggleIndirectFiles}
-                disabled={this.props.isShowMoreContextCheckboxDisabled} className="checkbox-container"
-                key="show-indirect-files-checkbox">
-                Show More Context
-            </Checkbox>
-        );
-    }
-    allRunsCheckbox(){
-        if (typeof this.props.allRuns !== 'boolean' || typeof this.props.onToggleAllRuns !== 'function') return null;
-        return (
-            <Checkbox checked={!this.props.allRuns && !this.props.isAllRunsCheckboxDisabled} onChange={this.props.onToggleAllRuns}
-                disabled={this.props.isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
-                { this.props.loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
-            </Checkbox>
-        );
-    }
-    render(){
-        return this.wrapper(this.referenceFilesCheckbox(), this.indirectFilesCheckbox(), /*this.parametersCheckbox(),*/ this.allRunsCheckbox(), this.rowSpacingTypeDropdown());
-    }
-}
 
 export class FileViewGraphSection extends WorkflowGraphSection {
 
@@ -291,14 +267,18 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
-                    <TracedGraphSectionControls
-                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'windowWidth')} loading={loadingGraphSteps} fullscreenViewEnabled={isFullscreen}
+                    <WorkflowGraphSectionControls
+                        {...this.state} {..._.pick(this.props, 'allRuns', 'onToggleAllRuns', 'windowWidth', 'isFullscreen')}
+                        enabledControls={['referenceFilesCheckbox', 'indirectFilesCheckbox', 'allRunsCheckbox', 'rowSpacingTypeDropdown']}
+                        loading={loadingGraphSteps}
                         onToggleReferenceFiles={this.onToggleReferenceFiles} onToggleIndirectFiles={this.onToggleIndirectFiles}
                         onChangeRowSpacingType={this.onChangeRowSpacingType} onToggleFullScreenView={this.onToggleFullScreenView} onToggleShowParameters={this.onToggleShowParameters}
                         isAllRunsCheckboxDisabled={isAllRunsCheckboxDisabled} isShowMoreContextCheckboxDisabled={isShowMoreContextCheckboxDisabled} isReferenceFilesCheckboxDisabled={isReferenceFilesCheckboxDisabled} />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }} children={graphProps ? <Graph { ...graphProps } /> : null} />
+                <div className="graph-wrapper" style={{ opacity : this.props.loading ? 0.33 : 1 }}>
+                    { graphProps ? <Graph { ...graphProps } /> : null }
+                </div>
             </div>
         );
 

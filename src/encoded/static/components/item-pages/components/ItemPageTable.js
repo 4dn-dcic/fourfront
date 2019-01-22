@@ -8,12 +8,12 @@ import url from 'url';
 import queryString from 'querystring';
 import * as globals from './../../globals';
 import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import { RawFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable } from './../../browse/components/file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
-    defaultColumnDefinitionMap, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './table-commons';
-import { SearchResultDetailPane } from './SearchResultDetailPane';
+    defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
+    HeadersRow, TableRowToggleOpenButton } from './../../browse/components/table-commons';
+import { SearchResultDetailPane } from './../../browse/components/SearchResultDetailPane';
 
 
 
@@ -29,20 +29,24 @@ export class ItemPageTable extends React.Component {
         'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
         'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string),
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     static defaultProps = {
-        'renderDetailPane' : function(result, rowNumber, width){ return <SearchResultDetailPane result={result} />; },
+        'renderDetailPane' : function(result, rowNumber, containerWidth){
+            return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} />;
+        },
         'constantColumnDefinitions' : null,
-        'columnDefinitionOverrideMap' : {
+        'columnExtensionMap' : {
             'display_title' : {
                 'render' : function(result, columnDefinition, props, width){
-                    var title = object.itemUtil.getTitleStringFromContext(result);
-                    var link = object.itemUtil.atId(result);
-                    var tooltip;
+                    var title           = object.itemUtil.getTitleStringFromContext(result),
+                        link            = object.itemUtil.atId(result),
+                        isAnAccession   = false,
+                        tooltip;
+    
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
-                    var isAnAccession = false;// isDisplayTitleAccession(result, title, false);
-                    if (link){
+
+                    if (link){ // Link instead of plaintext
                         title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
                     }
 
@@ -70,14 +74,14 @@ export class ItemPageTable extends React.Component {
             }
         },
         'columns' : {
-            "experiments_in_set.experiment_type": "Experiment Type",
-            "experiments_in_set.biosample.biosource.individual.organism.name": "Organism",
-            "experiments_in_set.biosample.biosource_summary": "Biosource Summary",
-            "experiments_in_set.digestion_enzyme.name": "Enzyme",
-            "experiments_in_set.biosample.modifications_summary": "Modifications",
-            "experiments_in_set.biosample.treatments_summary": "Treatments"
+            "display_title" : { "title" : "Title" },
+            "number_of_experiments" : { "title" : "Exps" },
+            "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
+            "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
+            "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
+            "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
         }
-    }
+    };
 
     constructor(props){
         super(props);
@@ -89,14 +93,8 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var { results, loading, constantColumnDefinitions, columnDefinitionOverrideMap, columns, width, windowWidth } = this.props,
-            columnDefinitions;
-
-        if (!constantColumnDefinitions){
-            constantColumnDefinitions = extendColumnDefinitions([
-                { 'field' : 'display_title' }
-            ], defaultColumnDefinitionMap);
-        }
+        var { results, loading, columnExtensionMap, columns, width, windowWidth,
+            defaultOpenIndices, renderDetailPane } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -106,44 +104,30 @@ export class ItemPageTable extends React.Component {
             );
         }
 
+        var columnDefinitions   = columnsToColumnDefinitions(columns, columnExtensionMap),
+            responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
 
-        columnDefinitions = columnsToColumnDefinitions(columns, constantColumnDefinitions);
-        if (columnDefinitionOverrideMap){
-            columnDefinitions = extendColumnDefinitions(columnDefinitions, columnDefinitionOverrideMap);
-        }
-
-        if (!width && this.refs && this.refs.tableContainer && this.refs.tableContainer.offsetWidth){
-            width = this.refs.tableContainer.offsetWidth;
-        }
+        width = width || layout.gridContainerWidth(windowWidth);
 
         if (width){
             columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
         }
 
-        var responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
-        
+        var commonRowProps = { width, columnDefinitions, responsiveGridState, renderDetailPane };
+
         return (
             <div className="item-page-table-container clearfix" ref="tableContainer">
                 { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
-                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={this.props.renderDetailPane} />
+                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
                 : null }
-                { results.map((result, rowIndex)=>{
+                { _.map(results, (result, rowIndex)=>{
                     var atId = object.atIdFromObject(result);
                     return (
-                        <ItemPageTableRow
-                            {...this.props}
-                            key={atId || rowIndex}
-                            result={result}
-                            width={width}
-                            columnDefinitions={columnDefinitions}
-                            renderDetailPane={this.props.renderDetailPane}
-                            rowNumber={rowIndex}
-                            responsiveGridState={responsiveGridState}
-                            defaultOpen={
+                        <ItemPageTableRow {...this.props} {...commonRowProps}
+                            key={atId || rowIndex} result={result} rowNumber={rowIndex} defaultOpen={
                                 (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
                                 || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
-                            }
-                        />
+                            } />
                     );     
                 }) }
             </div>
@@ -271,71 +255,55 @@ class ItemPageTableRow extends React.Component {
 
 
 
-export class ItemPageTableLoader extends React.Component {
+export class ItemPageTableLoader extends React.PureComponent {
 
     static propTypes = {
         'children' : PropTypes.element.isRequired,
-        'itemsObject' : PropTypes.object.isRequired,
-        'sortFxn' : PropTypes.func,
-        'isItemCompleteEnough' : PropTypes.func.isRequired,
+        'itemUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
         'windowWidth': PropTypes.number.isRequired
-    }
+    };
 
-    static defaultProps = {
-        'isItemCompleteEnough' : function(item){
-            return false;
-        }
+    static getInitialState(props){
+        return {
+            'items' : null,
+            'loading' : true,
+            'itemIndexMapping' : _.object(_.map(props.itemUrls, function(url, i){ return [url, i]; }))
+        };
     }
 
     constructor(props){
         super(props);
+        this.state = ItemPageTableLoader.getInitialState(props);
+    }
 
-        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        var items_obj = props.itemsObject,
-            items = _.values(items_obj),
-            items_for_state = null;
-
-        if (Array.isArray(items) && items.length > 0 && props.isItemCompleteEnough(items[0])){
-            items_for_state = items;
-        } else {
-            this.item_uris = _.keys(items_obj);
+    componentWillReceiveProps(nextProps){
+        if (!_.isEqual(nextProps.itemUrls, this.props.itemUrls)){
+            this.setState(ItemPageTableLoader.getInitialState(nextProps), this.componentDidMount);
         }
-
-        this.state = {
-            'items' : items_for_state,
-            'current_item_index' : false
-        };
     }
 
     componentDidMount(){
-        var newState = {};
-
-        var onFinishLoad = null;
-
-        if (Array.isArray(this.item_uris) && this.item_uris.length > 0){
-
-            onFinishLoad = _.after(this.item_uris.length, function(){
+        var itemUrls = this.props.itemUrls,
+            onFinishLoad = _.after(itemUrls.length, ()=>{
                 this.setState({ 'loading' : false });
-            }.bind(this));
+            });
 
-            newState.loading = true;
-            _.forEach(this.item_uris, (uri)=>{
+        if (Array.isArray(itemUrls) && itemUrls.length > 0){
+            _.forEach(itemUrls, (uri)=>{
                 ajax.load(uri, (r)=>{
-                    var currentItems = (this.state.items || []).slice(0);
-                    currentItems.push(r);
-                    this.setState({ items : currentItems });
-                    onFinishLoad();
+                    this.setState(function({ items, itemIndexMapping }){
+                        items = (items || []).slice(0);
+                        items.push(r);
+                        items.sort(function(a, b){
+                            var aIdx = itemIndexMapping[object.itemUtil.atId(a)] || -1,
+                                bIdx = itemIndexMapping[object.itemUtil.atId(b)] || -1;
+                            return bIdx - aIdx;
+                        });
+                        return { items };
+                    }, onFinishLoad);
                 }, 'GET', onFinishLoad);
             });
         }
-        
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    componentWillUnmount(){
-        delete this.item_uris;
     }
 
     render(){

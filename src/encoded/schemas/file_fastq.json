@@ -25,7 +25,8 @@
     ],
     "mixinFacets": [
         { "$ref": "file.json#/facets"},
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "mixinColumns": [
         { "$ref": "file.json#/columns"}
@@ -40,7 +41,10 @@
             "default": "reads",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
-                "reads"
+                "reads",
+                "genomic reads",
+                "iPCR reads",
+                "cDNA reads"
             ]
         },
         "file_classification": {

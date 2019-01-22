@@ -10,6 +10,36 @@ import { navigate } from './../../util';
 import { BasicUserContentBody, UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
 
 
+
+export function getIconForCustomTab(tabName){
+    switch(tabName){
+        case 'summary':
+        case 'overview':
+        case 'experiment-summaries':
+            return 'file-text';
+        case 'higlass':
+        case 'higlass_displays':
+            return 'television';
+        default:
+            return null;
+    }
+}
+
+export function getTitleForCustomTab(tabName){
+    switch(tabName){
+        case 'experiment-summaries':
+            return 'Experiment Summaries';
+        case 'higlass':
+            return 'HiGlass';
+        case 'higlass_displays':
+            return 'HiGlass Displays';
+        default:
+            return null; // Fallback: Will convert tabKey _ to " " and capitalize words.
+    }
+}
+
+
+
 /**
  * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
  */
@@ -166,16 +196,21 @@ export class TabbedView extends React.Component {
 
         _.forEach(_.pairs(groupedContent), function([ tabKey, contentForTab ]){
 
-            var splitTabKey = tabKey.split(':'), // This could have more ':'s in it, theoretically. Use only first part, and assume 2nd part is icon.
-                xformedKeyAsTitle = _.map(
-                    splitTabKey[0].split('_'),
+            var tabTitle, icon;
+
+            tabTitle = contentForTab.title || getTitleForCustomTab(tabKey);
+            if (!tabTitle){ // Auto-generate one from key
+                tabTitle = _.map(
+                    tabKey.split('_'),
                     function(str){
                         return str.charAt(0).toUpperCase() + str.slice(1);
                     }
-                ).join(' '),
-                icon = splitTabKey.length > 1 ? splitTabKey[1] : null;
+                ).join(' ');
+            }
 
-            resultArr.push(TabbedView.createTabObject(tabKey, xformedKeyAsTitle, icon, contentForTab));
+            icon = contentForTab.icon || getIconForCustomTab(tabKey);
+
+            resultArr.push(TabbedView.createTabObject(tabKey, tabTitle, icon, contentForTab));
         });
 
         //

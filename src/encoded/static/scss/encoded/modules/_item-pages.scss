@@ -205,7 +205,8 @@ h3.submission-subtitle {
 @mixin statusColorStyles {
 	&[data-status="released"]:before,
 	&[data-status="current"]:before,
-	&[data-status="uploaded"]:before {
+	&[data-status="uploaded"]:before,
+	&[data-status="published"]:before {
 		color: #fff;
 		background-color: #308756;
 	}
@@ -321,7 +322,7 @@ i.item-status-indicator-dot {
 			display: none;
 		}
 
-		&.expset-status:before {
+		&.item-status:before {
 			content: "";
 			width: 9px;
 			height : 9px;
@@ -331,7 +332,6 @@ i.item-status-indicator-dot {
 			border-radius: 50%;
 		}
 
-		&.expset-status,
 		&.item-status {
 			@include statusColorStyles;
 		}
@@ -1546,18 +1546,20 @@ $download-button-width : 100px;
 		> .tab-section-title,
 		.detail-pane {
 			margin: 0 auto;
-			padding-left: 20px;
-			padding-right: 20px;
-			@media (min-width: $screen-sm-min) {
-				max-width: $container-sm;
-			}
-			@media (min-width: $screen-md-min) {
-				max-width: $container-md;
-				padding-left: 0;
-				padding-right: 0;
-			}
-			@media (min-width: $screen-lg-min) {
-				max-width: $container-lg;
+			padding-left: 16px;
+			padding-right: 16px;
+			body:not(.is-full-screen) & {
+				@media (min-width: $screen-sm-min) {
+					max-width: $container-sm;
+				}
+				@media (min-width: $screen-md-min) {
+					max-width: $container-md;
+					padding-left: 0;
+					padding-right: 0;
+				}
+				@media (min-width: $screen-lg-min) {
+					max-width: $container-lg;
+				}
 			}
 		}
 	}

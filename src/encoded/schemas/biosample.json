@@ -25,7 +25,8 @@
         { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "properties": {
         "schema_version": {

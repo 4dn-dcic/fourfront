@@ -164,11 +164,12 @@ export class NavigationBar extends React.PureComponent {
 
     render() {
         var { testWarning, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state,
-            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight } = this.props,
+            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight, isFullscreen } = this.props,
+            testWarningVisible = testWarning & !isFullscreen, // Hidden on full screen mode.
             navClassName        = (
                 "navbar-container" +
-                (testWarning ?      ' test-warning-visible' : '') +
-                (openDropdown ?     ' big-menu-open' : '')
+                (testWarningVisible ? ' test-warning-visible' : '') +
+                (openDropdown ? ' big-menu-open' : '')
             ),
             primaryActions      = listActionsFor('global_sections'),
             browseMenuItemOpts  = _.findWhere(primaryActions, { 'id' : 'browse-menu-item' }),
@@ -178,7 +179,7 @@ export class NavigationBar extends React.PureComponent {
             <div className={navClassName}>
                 { inclBigMenu ? <div className="big-dropdown-menu-background" onClick={this.resetOpenDropdownID} /> : null }
                 <div id="top-nav" className="navbar-fixed-top">
-                    <TestWarning visible={testWarning} setHidden={this.hideTestWarning} href={href} />
+                    <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
                         this.setState({ 'mobileDropdownOpen' : open });
                     }} expanded={mobileDropdownOpen}>

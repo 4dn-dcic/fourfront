@@ -141,15 +141,14 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * Returns a list of common tab definitions - `AttributionTabView`, `ItemDetailList`, & `AuditTabView`.
-     * DO NOT EXTEND
+     * Calculated width of tabview pane.
+     * Alias of `layout.gridContainerWidth(this.props.windowWidth)`.
      *
-     * @protected
      * @returns {void}
      */
     getTabViewWidth(){
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (typeof width === 'number' && width) width -= 20;
+        var windowWidth = this.props.windowWidth,
+            width = layout.gridContainerWidth(windowWidth);
         return width;
     }
 
