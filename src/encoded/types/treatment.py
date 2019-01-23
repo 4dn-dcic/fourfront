@@ -82,8 +82,8 @@ class TreatmentAgent(Treatment):
         "type": "string"
     })
     def display_title(self, request, treatment_type=None, chemical=None,
-                      duration=None, duration_units=None, concentration=None,
-                      concentration_units=None, temperature=None):
+                      biological_agent=None, duration=None, duration_units=None,
+                      concentration=None, concentration_units=None, temperature=None):
         d_t = []
         conditions = ""
         if concentration and concentration_units:
@@ -99,6 +99,8 @@ class TreatmentAgent(Treatment):
 
         if chemical:
             dis_tit = chemical + " treatment" + conditions
+        elif biological_agent:
+            dis_tit = biological_agent + " treatment" + conditions
         elif treatment_type == 'Other':
             dis_tit = "Other treatment" + conditions
         else:

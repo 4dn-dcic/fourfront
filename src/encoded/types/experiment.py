@@ -53,7 +53,7 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
     aggregated_items = {
-        "badges": ["message", "badge.positive_badge", "badge.warning_badge", "badge.uuid"]
+        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.*",

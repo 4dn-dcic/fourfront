@@ -447,11 +447,100 @@
     "higlass_uid":"MRxj47AUSmSzoaiaN6pkKg",
     "file_format":"bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
     "date_created":"2018-11-29T01:37:58.357095+00:00",
-    "submitted_by":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/",
+    "submitted_by": "4dndcic@gmail.com",
     "uuid":"94827a84-2b65-45f4-ad4d-fc2219c52e7b",
+    "dataset_type": "Dataset",
+    "genome_assembly": "GRCm38",
     "override_experiment_type": "Dataset",
     "file_type": "File",
     "override_assay_info": "Assay",
     "override_biosource_name" : "Biosource"
+}
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFIEGXDIZJ",
+    "file_classification":"processed file",
+    "higlass_uid":"Zbklhay4QDmCrM_BtJxtRg",
+    "file_format":"d1312212-218e-4f61-aaf0-91f226248b2c",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "c1b89d72-f353-4389-8273-b63ad8f02c4d",
+    "dataset_type": "Dataset",
+    "file_type": "counts",
+    "assay_info": "Assay",
+    "genome_assembly": "GRCm38",
+    "biosource_name" : "Biosource",
+    "extra_files" : [
+        {
+            "file_format" : "bg_px2",
+            "file_size" :12345678,
+            "md5sum": "6c2b2059745304918502d4ed2a863f59"
+        },
+        {
+            "file_format" : "bw",
+            "file_size" :12345678,
+            "md5sum": "6c2b2059745304918502d4ed2a863f60"
+        }
+    ]
+}
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFIJUMOMQV",
+    "file_classification":"processed file",
+    "higlass_uid":"eF3th2_ZQ3GYus4Ci_AYeg",
+    "file_format":"bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "648cea7a-9751-4c6a-a0ac-23b76beba6d0",
+    "dataset_type": "Dataset",
+    "file_type": "peaks",
+    "assay_info": "Assay",
+    "genome_assembly": "GRCm38",
+    "biosource_name" : "Biosource"
+},
+{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFITFOH1LU",
+    "file_classification":"processed file",
+    "higlass_uid":"FaEnMk6uRrK5lks8AjQCzA",
+    "file_format":"69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "04b2c874-95df-48e9-a072-cf383cd4e0a5",
+    "dataset_type": "Dataset",
+    "file_type": "LADs",
+    "assay_info": "Assay",
+    "genome_assembly": "GRCm38",
+    "biosource_name" : "Biosource",
+    "extra_files" : [
+        {
+            "file_format" : "beddb",
+            "file_size" :12345678,
+            "md5sum": "6c2b2059745304918502d4ed2a863f73"
+        }
+    ]
+}
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "accession":"4DNFIH4I1MY4",
+    "file_classification":"processed file",
+    "higlass_uid":"LgnwPjYoSQiIjWxJOTr5CA",
+    "file_format":"76dc8c06-67d8-487b-8fc8-d841752a0b60",
+    "date_created":"2018-11-29T01:37:58.357095+00:00",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "a31800d0-c275-425d-b610-3efd78bdde96",
+    "dataset_type": "Dataset",
+    "file_type": "other",
+    "assay_info": "Assay",
+    "genome_assembly": "GRCm38",
+    "biosource_name" : "Biosource"
 }
 ]

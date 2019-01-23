@@ -8,7 +8,7 @@ import _ from 'underscore';
 import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, typedefs } from './../util';
+import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, JWT, typedefs } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
@@ -241,15 +241,25 @@ class ControlsAndResults extends React.PureComponent {
         this.props.navigate(clearFiltersURL, {});
     }
 
+    isClearFiltersBtnVisible(){
+        var { href, context } = this.props,
+            urlPartsQuery                   = url.parse(href, true).query,
+            clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
+            clearFiltersURLQuery            = clearFiltersURL && url.parse(clearFiltersURL, true).query;
+
+        return !!(clearFiltersURLQuery && !_.isEqual(clearFiltersURLQuery, urlPartsQuery));
+    }
+
     renderSearchDetailPane(result, rowNumber, containerWidth){
         return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />;
     }
 
     render() {
-        var { context, href, hiddenColumns, currentAction, isFullscreen } = this.props,
+        var { context, hiddenColumns, currentAction, isFullscreen } = this.props,
             { columnDefinitions, abstractType, specificType } = this.state,
             results                     = context['@graph'],
             inSelectionMode             = currentAction === 'selection',
+            // Facets are transformed by the SearchView component to make adjustments to the @type facet re: currentAction.
             facets                      = this.props.facets || context.facets;
 
         return (
@@ -258,20 +268,10 @@ class ControlsAndResults extends React.PureComponent {
                     <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
                         <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth',
-                        'currentAction')}
+                        'currentAction', 'windowHeight')}
                             className="with-header-bg" facets={facets} filters={context.filters}
-                            onClearFilters={this.handleClearFilters} filterFacetsFxn={FacetList.filterFacetsForSearch}
-                            itemTypeForSchemas={specificType} hideDataTypeFacet={inSelectionMode}
-                            showClearFiltersButton={(()=>{
-                                var urlParts                        = url.parse(href, true),
-                                    clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
-                                    urlPartQueryCorrectedForType    = _.clone(urlParts.query);
-
-                                if (!urlPartQueryCorrectedForType.type || urlPartQueryCorrectedForType.type === ''){
-                                    urlPartQueryCorrectedForType.type = 'Item';
-                                }
-                                return !object.isEqual(url.parse(clearFiltersURL, true).query, urlPartQueryCorrectedForType);
-                            })()} />
+                            onClearFilters={this.handleClearFilters} itemTypeForSchemas={specificType}
+                            showClearFiltersButton={this.isClearFiltersBtnVisible()} />
                         </div>
                 : null }
                 <div className={!facets.length ? "col-sm-12 expset-result-table-fix" : ("expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9'))}>
@@ -314,6 +314,7 @@ export default class SearchView extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.filterFacet = this.filterFacet.bind(this);
         this.transformedFacets = this.transformedFacets.bind(this);
         this.state = {
             'transformedFacets' : this.transformedFacets(props)
@@ -331,6 +332,44 @@ export default class SearchView extends React.PureComponent {
     }
 
     /**
+     * Function which is passed into a `.filter()` call to
+     * filter context.facets down, usually in response to frontend-state.
+     *
+     * Currently is meant to filter out type facet if we're in selection mode,
+     * as well as some fields from embedded 'experiment_set' which might
+     * give unexpected results.
+     *
+     * @todo Potentially get rid of this and do on backend.
+     *
+     * @param {{ field: string }} facet - Object representing a facet.
+     * @param {number} facetIdx - Index of current facet being iterated on.
+     * @param {Object[]} all - All facets.
+     * @returns {boolean} Whether to keep or discard facet.
+     */
+    filterFacet(facet, facetIdx, all){
+        var { currentAction, session } = this.props;
+
+        // Set in backend or schema for facets which are under development or similar.
+        if (facet.hide_from_view) return false;
+
+        // Hide audit facets unless are admin.
+        if (facet.field.substring(0, 6) === 'audit.'){
+            if (session && JWT.isLoggedInAsAdmin()) return true;
+            return false;
+        }
+
+        // Remove the @type facet while in selection mode.
+        if (facet.field === 'type' && currentAction === 'selection') return false;
+
+        // Most of these would only appear if manually entered into browser URL.
+        if (facet.field.indexOf('experiments.experiment_sets.') > -1) return false;
+        if (facet.field === 'experiment_sets.@type') return false;
+        if (facet.field === 'experiment_sets.experimentset_type') return false;
+
+        return true;
+    }
+
+    /**
      * Filter the `@type` facet options down to abstract types only (if none selected) for Search.
      *
      * @param {Object} props Component props.
@@ -342,11 +381,16 @@ export default class SearchView extends React.PureComponent {
             hrefQuery,
             itemTypesInSearch;
 
+        // Clone/filter list of facets.
+        // We may filter out type facet completely at this step,
+        // in which case we can return out of func early.
+        facets = _.filter(context.facets, this.filterFacet);
+
         // Find facet for '@type'
-        typeFacetIndex = _.findIndex(context.facets, { 'field' : 'type' });
+        typeFacetIndex = _.findIndex(facets, { 'field' : 'type' });
 
         if (typeFacetIndex === -1) {
-            return context.facets; // Facet not present, return.
+            return facets; // Facet not present, return.
         }
 
         hrefQuery = url.parse(href, true).query;
@@ -354,11 +398,12 @@ export default class SearchView extends React.PureComponent {
         itemTypesInSearch = _.without(hrefQuery.type, 'Item');
 
         if (itemTypesInSearch.length > 0){
-            return context.facets; // Keep all terms/leaf-types - backend should already filter down to only valid sub-types.
+            // Keep all terms/leaf-types - backend should already filter down to only valid sub-types through
+            // nature of search itself.
+            return facets;
         }
 
         // Avoid modifying in place.
-        facets = context.facets.slice(0);
         facets[typeFacetIndex] = _.clone(facets[typeFacetIndex]);
 
         // Show only base types for when itemTypesInSearch.length === 0 (aka 'type=Item').

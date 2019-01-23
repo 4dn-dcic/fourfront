@@ -123,6 +123,8 @@ export class LoginMenuItem extends React.Component {
             var profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
             var isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
             if (profileURL && !isAdmin){
+                // Register an analytics event for UI login.
+                // This is used to segment public vs internal audience in Analytics dashboards.
                 ajax.load(profileURL, (profile)=>{
                     analytics.event('Authentication', 'UILogin', {
                         'eventLabel' : (profile.lab && object.itemUtil.atId(profile.lab)) || 'No Lab'

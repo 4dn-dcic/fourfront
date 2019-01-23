@@ -97,7 +97,9 @@
     "notes": "reference genome chrom.sizes for mm10, autosomes and sex chromosomes only",
     "filename": "mm10.mainonly.chrom.sizes",
     "lab": "4dn-dcic-lab",
-    "award": "1U01CA200059-01"
+    "award": "1U01CA200059-01",
+    "higlass_uid": "PrCRKXgmTK6VzH6HZpAFVA",
+    "genome_assembly": "GRCm38"
  },
  {
      "accession":"4DNFIO67APA1",

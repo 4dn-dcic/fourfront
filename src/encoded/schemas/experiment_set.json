@@ -169,14 +169,22 @@
         },
         "number_of_experiments" : {
             "title" : "# of Experiments",
+            "colTitle" : "Exps",
             "default_hidden" : true
         },
         "number_of_files" : {
             "title" : "# of Files",
+            "colTitle" : "Files",
+            "description" : "Total number of files contained in an Experiment Set.",
             "default_hidden" : true
         },
         "experiments_in_set.experiment_type" : {
-            "title" : "Experiment Type"
+            "title" : "Experiment Type",
+            "widthMap" : {
+                "lg" : 140,
+                "md" : 140,
+                "sm" : 120
+            }
         },
         "lab.display_title" : {
             "title" : "Lab"
@@ -191,7 +199,12 @@
             "title" : "Organism"
         },
         "experiments_in_set.biosample.biosource_summary": {
-            "title": "Sample"
+            "title" : "Biosample",
+            "widthMap" : {
+                "lg" : 140,
+                "md" : 140,
+                "sm" : 120
+            }
         },
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"

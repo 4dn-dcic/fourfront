@@ -205,7 +205,8 @@ h3.submission-subtitle {
 @mixin statusColorStyles {
 	&[data-status="released"]:before,
 	&[data-status="current"]:before,
-	&[data-status="uploaded"]:before {
+	&[data-status="uploaded"]:before,
+	&[data-status="published"]:before {
 		color: #fff;
 		background-color: #308756;
 	}
