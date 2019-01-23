@@ -370,7 +370,7 @@ export class WidthProvider extends React.Component {
 
     static propTypes = {
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     constructor(props){
         super(props);
