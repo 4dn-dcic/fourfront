@@ -70,6 +70,9 @@ def fetch_pubmed(PMID):
         resp = requests.get(www)
         if resp.status_code == 200:
             break
+        if resp.status_code == 429:
+            time.sleep(5)
+            continue
         if count == 4:
             return {}
     # parse the text to get the fields
