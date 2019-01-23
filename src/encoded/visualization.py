@@ -516,7 +516,11 @@ def add_files_to_higlass_viewconf(request):
     repack_higlass_views(new_views)
 
     # Set up the additional views so they all move and zoom with the first.
-    setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
+    #setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
+
+    for view in new_views:
+        add_zoom_lock_if_needed(higlass_viewconfig, view, first_view_location_and_zoom)
+
     higlass_viewconfig["zoomFixed"] = False
     higlass_viewconfig["views"] = new_views
     return {
@@ -974,68 +978,6 @@ def repack_higlass_views(views):
             y += height
             x = 0
 
-def setZoomLocationLocks(views, view_config, scales_and_center_k):
-    """ Set the zoom and location of the views so they match the first one.
-    Then lock them so changing one changes all of them.
-
-    Args:
-        views(list): All of the views that will be locked.
-        view_config(dict): Modify this view_config by adding the locks.
-        scales_and_center_k(list): Notes the "camera" position of the first view which other views will be locked to.
-
-    Returns:
-        None
-    """
-
-    if len(views) == 0:
-        return
-
-    # Get the x, y, zoom of the first view
-    view1_x = scales_and_center_k[0]
-    view1_y = scales_and_center_k[1]
-    view1_zoom = scales_and_center_k[2]
-
-    # Create new uuids to handle the zoom and location locks.
-    locationLockUuid = uuid.uuid4()
-    zoomLockUuid = uuid.uuid4()
-    lockUuids = {
-        "location" : str(locationLockUuid),
-        "zoom" : str(zoomLockUuid),
-    }
-
-    locks = {
-        "location" : {
-            "locksByViewUid": {},
-            "locksDict": {
-                lockUuids["location"] : {}
-            },
-        },
-        "zoom" : {
-            "locksByViewUid": {},
-            "locksDict": {
-                lockUuids["zoom"] : {}
-            },
-        },
-    }
-
-    # For each view,
-    for view in views:
-        uid = str(view["uid"])
-
-        # Add the new lock information.
-        for lockType in lockUuids:
-            lockUuid = lockUuids[lockType]
-            locks[lockType]["locksByViewUid"][uid] = lockUuid
-            locks[lockType]["locksDict"][lockUuid][uid] = [
-                view1_x,
-                view1_y,
-                view1_zoom
-            ]
-
-    # Set the view config.
-    view_config["locationLocks"] = locks["location"]
-    view_config["zoomLocks"] = locks["zoom"]
-
 def get_chromsize_grid_from_view(view):
     """ Look through the given view to find a 2d chromsize grid.
     Args:
@@ -1156,3 +1098,49 @@ def copy_1d_tracks_into_2d_view(views, new_view):
             new_view["tracks"][side].append(track)
 
     return True
+
+def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
+    # Get the uid for this view
+    view_uid = str(view["uid"])
+
+    # If the view already exists in the viewconf, no work is needed.
+    if view_uid in view_config["locationLocks"]["locksByViewUid"]:
+        return
+
+    # Find the lock the first view is in.
+    base_uid = str(view_config["views"][0]["uid"])
+    base_view_x = scales_and_center_k[0]
+    base_view_y = scales_and_center_k[1]
+    base_view_zoom = scales_and_center_k[2]
+
+    base_initial_x_domain = view_config["views"][0]["initialXDomain"]
+    base_initial_y_domain = view_config["views"][0]["initialYDomain"]
+
+    # Set the location and zoom locks.
+    for lock_name in ("locationLocks", "zoomLocks"):
+        # Refer to the same lock the base view uses.
+        lockUuid = view_config[lock_name]["locksByViewUid"].get(base_uid, None)
+        if not lockUuid:
+            # The base view doesn't have a lock, so create a new one and add the base view to it.
+            lockUuid = str(uuid.uuid4())
+            view_config[lock_name]["locksByViewUid"][base_uid] = lockUuid
+            view_config[lock_name]["locksDict"][lockUuid] = {}
+            view_config[lock_name]["locksDict"][lockUuid][base_uid] = [
+                base_view_x,
+                base_view_y,
+                base_view_zoom
+            ]
+        else:
+            base_view_zoom = view_config[lock_name]["locksDict"][lockUuid][base_uid][2]
+
+        # Lock the new view with the base view.
+        view_config[lock_name]["locksByViewUid"][view_uid] = lockUuid
+        view_config[lock_name]["locksDict"][lockUuid][view_uid] = [
+            base_view_x,
+            base_view_y,
+            base_view_zoom
+        ]
+
+        # Copy the initialXDomain and initialYDomain
+        view["initialXDomain"] = view_config["views"][0]["initialXDomain"]
+        view["initialYDomain"] = view_config["views"][0]["initialYDomain"]
