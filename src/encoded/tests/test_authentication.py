@@ -1,5 +1,5 @@
 import unittest
-from pyramid.tests.test_authentication import DummyRequest
+from pyramid.testing import DummyRequest
 import pytest
 pytestmark = pytest.mark.working
 
