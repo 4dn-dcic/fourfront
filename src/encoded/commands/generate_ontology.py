@@ -2,7 +2,6 @@ import os
 import json
 import sys
 import argparse
-import logging
 from encoded.loadxl import load_ontology_terms
 from dateutil.relativedelta import relativedelta
 import datetime
@@ -719,7 +718,7 @@ def parse_args(args):
                         default=None,
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
-    parser.add_argument('--app_name', help="Pyramid app name in configfile")
+    parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
 
     return parser.parse_args(args)

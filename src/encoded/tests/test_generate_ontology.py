@@ -6,7 +6,7 @@ pytestmark = pytest.mark.working
 
 
 def test_parse_args_defaults():
-    args = ['development.ini', '--app_name', 'app']
+    args = ['development.ini', '--app-name', 'app']
     args = go.parse_args(args)
     assert args.ontologies == 'all'
     assert args.key is None
