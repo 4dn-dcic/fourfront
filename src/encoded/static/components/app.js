@@ -619,10 +619,6 @@ export default class App extends React.Component {
                 }
             });
 
-            if (this.refs && this.refs.navigation){
-                this.refs.navigation.closeMobileMenu();
-            }
-
             if (target && target.blur) target.blur();
         }
     }
@@ -803,7 +799,8 @@ export default class App extends React.Component {
         // get user actions (a function of log in) from local storage
         var userActions = [],
             session     = false,
-            userInfo    = JWT.getUserInfo();
+            userInfo    = JWT.getUserInfo(),
+            stateChange = {};
 
         if (userInfo){
             userActions = userInfo.user_actions;
@@ -814,9 +811,12 @@ export default class App extends React.Component {
             }
         }
 
-        var stateChange = {};
-        if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
-        if (session !== this.state.session) stateChange.session = session;
+        if (!_.isEqual(userActions, this.state.user_actions)) {
+            stateChange.user_actions = userActions;
+        }
+        if (session !== this.state.session) {
+            stateChange.session = session;
+        }
 
         if (Object.keys(stateChange).length > 0){
             this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
@@ -1355,16 +1355,22 @@ export default class App extends React.Component {
                     <script async type="application/javascript" src="//www.google-analytics.com/analytics.js" />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
-                <BodyElement {...bodyElementProps} />
+                <React.StrictMode>
+                    <BodyElement {...bodyElementProps} />
+                </React.StrictMode>
             </html>
         );
     }
 }
 
-// See https://github.com/facebook/react/issues/2323
+/**
+ * Renders out the <title> element in the <head> area of the
+ * HTML document.
+ */
 class HTMLTitle extends React.PureComponent {
 
     componentDidMount() {
+        // See https://github.com/facebook/react/issues/2323
         var node = document.querySelector('title');
         if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
             node.setAttribute('data-reactid', this._rootNodeID);
@@ -1385,6 +1391,7 @@ class HTMLTitle extends React.PureComponent {
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
+
             if (title && title != 'Home') {
                 title = title + ' – ' + portal.portal_title;
             } else {
@@ -1477,7 +1484,6 @@ class BodyElement extends React.PureComponent {
     constructor(props){
         super(props);
         this.onResize = _.debounce(this.onResize.bind(this), 300);
-        this.onTooltipAfterHide = this.onTooltipAfterHide.bind(this);
         this.setupScrollHandler = this.setupScrollHandler.bind(this);
 
         this.registerWindowOnResizeHandler = this.registerWindowOnResizeHandler.bind(this);
@@ -1518,6 +1524,12 @@ class BodyElement extends React.PureComponent {
          * @private
          */
         this.resizeHandlers = [];
+
+        /**
+         * Reference to ReactTooltip component instance.
+         * Used to unset the `top` and `left` positions after hover out.
+         */
+        this.tooltipRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
@@ -1546,21 +1558,8 @@ class BodyElement extends React.PureComponent {
 
     componentDidUpdate(pastProps){
         if (pastProps.href !== this.props.href){
-
             // Remove tooltip if still lingering from previous page
-            var _tooltip    = this.refs && this.refs.tooltipComponent,
-                domElem     = ReactDOM.findDOMNode(_tooltip);
-
-            if (!domElem) return;
-
-            var className = domElem.className || '',
-                classList = className.split(' '),
-                isShowing = classList.indexOf('show') > -1;
-
-            if (isShowing){
-                domElem.className = _.without(classList, 'show').join(' ');
-            }
-
+            this.tooltipRef && this.tooltipRef.current && this.tooltipRef.current.hideTooltip();
         }
     }
 
@@ -1803,26 +1802,6 @@ class BodyElement extends React.PureComponent {
         setTimeout(this.throttledScrollHandler, 100, null);
     }
 
-    /**
-     * Is executed after ReactTooltip is hidden e.g. via moving cursor away from an element.
-     * Used to unset lingering style.left and style.top property values which may interfere with placement
-     * of the next visible tooltip.
-     *
-     * @private
-     * @returns {void}
-     */
-    onTooltipAfterHide(){
-        var _tooltip    = this.refs && this.refs.tooltipComponent,
-            domElem     = ReactDOM.findDOMNode(_tooltip);
-
-        if (!domElem) {
-            console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
-            return;
-        }
-        // Grab tip & unset style.left and style.top using same method tooltip does internally.
-        domElem.style.left = domElem.style.top = null;
-    }
-
     toggleFullScreen(isFullscreen, callback){
         if (typeof isFullscreen === 'boolean'){
             this.setState({ isFullscreen }, callback);
@@ -1895,7 +1874,7 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }} ref="navigation"
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
                                     'context', 'updateUserInfo', 'listActionsFor')} />
 
@@ -1919,7 +1898,7 @@ class BodyElement extends React.PureComponent {
                     </div>
                 </div>
 
-                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" key="tooltip" />
+                <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 
                 <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
                     verticalAlign="center" /* cursor position relative to popover */

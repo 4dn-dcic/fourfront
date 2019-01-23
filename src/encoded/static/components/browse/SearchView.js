@@ -65,6 +65,8 @@ export class SearchControllersContainer extends React.PureComponent {
         this.state = {
             'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(props.context.columns)
         };
+
+        this.searchResultTableRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
@@ -217,7 +219,7 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     forceUpdateOnSelf(){
-        var searchResultTable   = this.refs.searchResultTable,
+        var searchResultTable   = this.searchResultTableRef.current,
             dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
         return dimContainer && dimContainer.resetWidths();
     }
@@ -281,7 +283,7 @@ class ControlsAndResults extends React.PureComponent {
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                         'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
                         {...{ hiddenColumns, results, columnDefinitions }}
-                        ref="searchResultTable" renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total} />
+                        ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total} />
                 </div>
             </div>
         );
@@ -417,7 +419,7 @@ export default class SearchView extends React.PureComponent {
 
     render() {
         return (
-            <div className="search-page-container" ref="container">
+            <div className="search-page-container">
                 <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
                 <SearchControllersContainer {...this.props} facets={this.state.transformedFacets} navigate={this.props.navigate || navigate} />
             </div>

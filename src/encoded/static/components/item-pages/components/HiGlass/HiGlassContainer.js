@@ -839,7 +839,7 @@ export class HiGlassContainer extends React.PureComponent {
         'extraViewProps' : PropTypes.arrayOf(PropTypes.object),
         'viewConfigBase' : PropTypes.object.isRequired,
         'contentTrackOptions' : PropTypes.object
-    }
+    };
 
     static defaultProps = {
         'options' : { 'bounded' : true },
@@ -854,7 +854,7 @@ export class HiGlassContainer extends React.PureComponent {
             "editable"  : true,
             "zoomFixed" : false
         }
-    }
+    };
 
     constructor(props){
         super(props);
@@ -865,6 +865,7 @@ export class HiGlassContainer extends React.PureComponent {
         this.state = {
             'viewConfig' : HiGlassContainer.whichGenerateViewConfigFxnToUse(props)(props.files, HiGlassContainer.propsToViewConfigGeneratorOptions(props))
         };
+        this.containerRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
@@ -917,6 +918,8 @@ export class HiGlassContainer extends React.PureComponent {
      *
      * - this.updateCurrentDomainsInStorage is bound to 'location' change event.
      * - TODO: onDrag/Drop stuff.
+     *
+     * @deprecated
      */
     bindHiGlassEventHandlers(){
         var viewConfig          = this.state.viewConfig,
@@ -934,12 +937,12 @@ export class HiGlassContainer extends React.PureComponent {
     }
 
     getHiGlassComponent(){
-        return this && this.refs && this.refs.plainContainer && this.refs.plainContainer.getHiGlassComponent();
+        return (this.containerRef && this.containerRef.current && this.containerRef.current.getHiGlassComponent()) || null;
     }
 
     render(){
         var props = _.extend({}, _.omit(this.props, 'files', 'extraViewProps'), this.state);
-        return <HiGlassPlainContainer {...props} ref="plainContainer" />;
+        return <HiGlassPlainContainer {...props} ref={this.containerRef} />;
     }
 
 }

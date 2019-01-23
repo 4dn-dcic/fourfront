@@ -226,16 +226,13 @@ export class WorkflowGraphSection extends React.PureComponent {
     }
 
     body(){
-        var { context, mounted } = this.props,
+        var { context, mounted, width } = this.props,
             { showChart } = this.state;
 
         if (!Array.isArray(context.steps)) return null;
 
         if (showChart === 'basic') {
-            return (
-                <Graph { ...this.commonGraphProps() } edgeStyle="curve"
-                columnWidth={mounted && this.refs.container ? (this.refs.container.offsetWidth - 180) / 3 : 180} />
-            );
+            return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 180) / 3 : 180} />;
         } else if (showChart === 'detail') {
             return <Graph { ...this.commonGraphProps() } />;
         } else {
@@ -247,7 +244,7 @@ export class WorkflowGraphSection extends React.PureComponent {
         var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
             { isFullscreen } = this.props;
         return (
-            <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls

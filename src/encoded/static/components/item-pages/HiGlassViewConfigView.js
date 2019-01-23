@@ -82,6 +82,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false
         };
+
+        this.higlassRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
@@ -463,7 +465,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     getHiGlassComponent(){
-        return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
+        return (this.higlassRef && this.higlassRef.current && this.higlassRef.current.getHiGlassComponent()) || null;
     }
 
     statusChangeButton(){
@@ -624,10 +626,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth}
-                            height={hiGlassComponentHeight}
-                            viewConfig={this.state.viewConfig}
-                            ref="higlass" />
+                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={this.state.viewConfig}
+                            ref={this.higlassRef} />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>

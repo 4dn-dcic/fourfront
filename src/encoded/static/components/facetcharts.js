@@ -172,7 +172,7 @@ export class FacetCharts extends React.PureComponent {
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
                     <BarPlot.UIControlsWrapper legend chartHeight={height} {...{ href, windowWidth }} expSetFilters={Filters.currentExpSetFilters()}>
-                        <BarPlot.Chart {...{ width, height, schemas, windowWidth }} ref="barplotChart" />
+                        <BarPlot.Chart {...{ width, height, schemas, windowWidth }} />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
             </div>

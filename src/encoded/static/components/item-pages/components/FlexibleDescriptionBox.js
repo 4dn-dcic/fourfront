@@ -188,9 +188,9 @@ export class FlexibleDescriptionBox extends React.Component {
             vizUtil.requestAnimationFrame(()=>{
                 var willDescriptionFitAtCurrentSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
                 this.setState({
-                    descriptionWillFitOneLine : willDescriptionFitAtCurrentSize,
-                    mounted : true,
-                    shortContent : this.props.linesOfText > 1 ? this.makeShortContent() : null
+                    'descriptionWillFitOneLine' : willDescriptionFitAtCurrentSize,
+                    'mounted' : true,
+                    'shortContent' : this.props.linesOfText > 1 ? this.makeShortContent() : null
                 });
             });
         }
@@ -214,20 +214,19 @@ export class FlexibleDescriptionBox extends React.Component {
     }
 
     checkWillDescriptionFitOneLineAndUpdateHeight(){
-
-        var { description, textElement, textClassName, textStyle, windowWidth, linesOfText, lineHeight } = this.props;
+        var { description, textElement, textClassName, textStyle, windowWidth, linesOfText, lineHeight, fitTo } = this.props;
 
         if (isServerSide()) return true;
 
         var dims = this.dimensions(),
             containerWidth;
 
-        if (this.props.fitTo === 'grid'){
+        if (fitTo === 'grid'){
             containerWidth = layout.gridContainerWidth(windowWidth || null);
-        } else if (this.props.fitTo === 'parent'){
-            containerWidth = this.refs.box.parentElement.offsetWidth;
-        } else if (this.props.fitTo === 'self'){
-            containerWidth = (this.refs.box && this.refs.box.offsetWidth) || 1000;
+        } else if (fitTo === 'parent'){
+            containerWidth = this.boxRef.current.parentElement.offsetWidth;
+        } else if (fitTo === 'self'){
+            containerWidth = this.boxRef.current.offsetWidth || 1000;
         }
 
         containerWidth -= dims.paddingWidth; // Account for inner padding & border.
@@ -278,12 +277,13 @@ export class FlexibleDescriptionBox extends React.Component {
     }
 
     render(){
-        var { debug, showOnMount, lineHeight, linesOfText, collapsedHeight } = this.props;
+        var { debug, showOnMount, lineHeight, linesOfText, collapsedHeight, className, textElement, textClassName, textStyle, description, fitTo } = this.props,
+            { descriptionWillFitOneLine, descriptionExpanded, mounted, shortContent, descriptionWhiteSpace } = this.state;
         if (debug) console.log('render FlexibleDescriptionBox');
         var expandButton;
-        var expanded = (this.state.descriptionExpanded || this.props.expanded);
+        var expanded = descriptionExpanded || this.props.expanded;
 
-        if (!this.state.descriptionWillFitOneLine && typeof this.props.expanded !== 'boolean'){
+        if (!descriptionWillFitOneLine && typeof this.props.expanded !== 'boolean'){
             expandButton = (
                 <button type="button" className="description-expand-button right" onClick={this.throttledToggleDescriptionExpand}>
                     <i className={"icon icon-" + (expanded ? 'minus' : 'plus' )} />
@@ -301,28 +301,26 @@ export class FlexibleDescriptionBox extends React.Component {
                     this.dimensions().initialHeight,
                     lineHeight * (linesOfText || 1)
                 ),
-                (this.state.mounted && this.descriptionHeight) || 1000
+                (mounted && this.descriptionHeight) || 1000
             )
         );
 
+        // Add boxRef to our instance only if we need to.
+        // Moved from componentWillReceiveProps as this lifecycle method is being deprecated.
+        if (!this.boxRef && (fitTo === 'self' || fitTo === 'parent')){
+            this.boxRef = React.createRef();
+        }
+
         return (
-            <div
-                ref={this.props.fitTo === 'grid' ? null : "box"}
-                className={"flexible-description-box " + (this.props.className ? this.props.className : '') + (expandButton ? (expanded ? ' expanded' : ' collapsed') : ' not-expandable') }
+            <div ref={this.boxRef || null}
+                className={"flexible-description-box " + (className ? className : '') + (expandButton ? (expanded ? ' expanded' : ' collapsed') : ' not-expandable') }
                 style={{
                     'height'        : containerHeightSet,
-                    'whiteSpace'    : expanded ? 'normal' : this.state.descriptionWhiteSpace,
-                    'visibility'    : !this.state.mounted && this.props.showOnMount ? 'hidden' : null
-                }}
-            >
+                    'whiteSpace'    : expanded ? 'normal' : descriptionWhiteSpace,
+                    'visibility'    : !mounted && showOnMount ? 'hidden' : null
+                }}>
                 { expandButton }
-                {
-                    React.createElement(
-                        this.props.textElement,
-                        { 'className' : this.props.textClassName, 'style' : this.props.textStyle },
-                        expanded ? this.props.description : this.state.shortContent || this.props.description
-                    )
-                }
+                { React.createElement(textElement, { 'className' : textClassName, 'style' : textStyle }, expanded ? description : shortContent || description) }
             </div>
         );
     }

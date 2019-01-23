@@ -210,18 +210,30 @@ export class EditableField extends React.Component {
             'leanTo'            : null,                 // Re: inline style
             'leanOffset'        : 0                     // Re: inline style
         };
+
+        this.fieldRef = React.createRef();
     }
 
     onResizeStateChange(){
-        if (this.refs.field && this.refs.field.offsetParent){
-            var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
-            //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
-            this.setState({
-                'leanTo' :
-                    this.refs.field.offsetLeft > offsetRight ? 'left' : 'right',
-                'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
-            });
+        var fieldElem = this.fieldRef.current;
+        if (!fieldElem || !fieldElem.offsetParent){
+            return;
         }
+
+        this.setState(function(currState){
+            var parentWidth = fieldElem.offsetParent.offsetWidth,
+                selfWidth   = fieldElem.offsetWidth,
+                offsetLeft  = fieldElem.offsetLeft,
+                offsetRight = (parentWidth - offsetLeft) - selfWidth,
+                leanTo      = offsetLeft > offsetRight ? 'left' : 'right',
+                leanOffset  = 280 - (parentWidth - Math.min(offsetLeft, offsetRight));
+
+            if (currState.leanTo === leanTo && currState.leanOffset === leanOffset){
+                return null;
+            }
+
+            return { leanTo, leanOffset };
+        });
     }
 
     componentWillReceiveProps(newProps, newContext){
@@ -685,16 +697,17 @@ export class EditableField extends React.Component {
 
     /** Render 'in edit state' view */
     renderEditing(){
+        var { inputSize, style, labelID, label, absoluteBox } = this.props,
+            { leanTo, leanOffset } = this.state,
+            outerBaseClass = "editable-field-entry editing has-feedback" +
+                (!this.isValid(true) ? ' has-error ' : ' has-success ') +
+                ('input-size-' + inputSize + ' ');
 
-        var outerBaseClass = "editable-field-entry editing has-feedback" +
-            (!this.isValid(true) ? ' has-error ' : ' has-success ') +
-            ('input-size-' + this.props.inputSize + ' ');
-
-        if (this.props.style == 'row') {
+        if (style == 'row') {
             return (
-                <div className={outerBaseClass + this.props.labelID + ' row'}>
+                <div className={outerBaseClass + labelID + ' row'}>
                     <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
+                        <label htmlFor={labelID }>{ label }</label>
                     </div>
                     <div className="col-sm-9 value editing">
                         { this.renderActionIcon('cancel') }
@@ -705,9 +718,9 @@ export class EditableField extends React.Component {
             );
         }
 
-        if (this.props.style == 'minimal') {
+        if (style == 'minimal') {
             return (
-                <div className={ outerBaseClass + this.props.labelID }>
+                <div className={ outerBaseClass + labelID }>
                     <div className="value editing">
                         { this.renderActionIcon('cancel') }
                         { this.renderActionIcon('save') }
@@ -717,18 +730,18 @@ export class EditableField extends React.Component {
             );
         }
 
-        if (this.props.style == 'inline') {
+        if (style == 'inline') {
             var valStyle = {};
-            if (this.props.absoluteBox){
-                if (this.state.leanTo === null){
+            if (absoluteBox){
+                if (leanTo === null){
                     valStyle.display = 'none';
                 } else {
-                    valStyle[this.state.leanTo === 'left' ? 'right' : 'left'] = (this.state.leanOffset > 0 ? (0-this.state.leanOffset) : 0) + 'px';
+                    valStyle[leanTo === 'left' ? 'right' : 'left'] = (leanOffset > 0 ? (0 - leanOffset) : 0) + 'px';
                 }
             }
             return (
-                <span ref={this.props.absoluteBox ? "field" : null} className={ outerBaseClass + this.props.labelID + ' inline' + (this.props.absoluteBox ? ' block-style' : '') }>
-                    { this.props.absoluteBox ? this.renderSavedValue() : null }
+                <span ref={absoluteBox ? this.fieldRef : null} className={ outerBaseClass + labelID + ' inline' + (absoluteBox ? ' block-style' : '') }>
+                    { absoluteBox ? this.renderSavedValue() : null }
                     <span className="value editing clearfix" style={valStyle}>
                         { this.inputField() }
                         { this.renderActionIcon('cancel') }
