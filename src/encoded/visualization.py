@@ -516,8 +516,6 @@ def add_files_to_higlass_viewconf(request):
     repack_higlass_views(new_views)
 
     # Set up the additional views so they all move and zoom with the first.
-    #setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
-
     for view in new_views:
         add_zoom_lock_if_needed(higlass_viewconfig, view, first_view_location_and_zoom)
 
