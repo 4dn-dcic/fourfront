@@ -407,13 +407,80 @@ def mcool_file_json(award, experiment, lab, file_formats):
     return item
 
 @pytest.fixture
-def bg_file_json(award, experiment, lab, file_formats):
+def bedGraph_file_json(award, experiment, lab, file_formats):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('bg').get('uuid'),
         'md5sum': '00000000000000000000000000000000',
         'filename': 'my.bedGraph.gz',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def bigwig_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bw').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bw',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def bigbed_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bigbed').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bb',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def bed_beddb_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bed').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bed.gz',
+        'status': 'uploaded',
+        'extra_files' : [
+            {
+                "file_format" : file_formats.get('beddb').get('uuid'),
+                "file_size" :12345678,
+                "md5sum": "00000000000000000000000000000002"
+            },
+        ]
+    }
+    return item
+
+@pytest.fixture
+def beddb_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('beddb').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.beddb',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def chromsizes_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('chromsizes').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.chrom.sizes',
         'status': 'uploaded',
     }
     return item

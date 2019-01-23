@@ -26,21 +26,21 @@ class Badge(Item):
     name_key = 'badge_name'
 
     @calculated_property(schema={
-        "title": "Positive Badges",
+        "title": "Commendation",
         "description": "Filled with title only if badge is positive.",
         "type": "string",
     })
-    def positive_badge(self):
+    def commendation(self):
         if self.properties.get('badge_classification') == 'KUDOS':
             return self.properties.get('title')
         return
 
     @calculated_property(schema={
-        "title": "Warning Badges",
+        "title": "Warning",
         "description": "Filled with title only if badge is negative.",
         "type": "string",
     })
-    def warning_badge(self):
+    def warning(self):
         if self.properties.get('badge_classification') == 'WARNING':
             return self.properties.get('title')
         return
