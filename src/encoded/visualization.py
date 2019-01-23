@@ -666,6 +666,7 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         new_view, error = create_2d_view(new_file)
         if error:
             return None, errors
+        copy_1d_tracks_into_2d_view(views, new_view)
         add_view_to_views(new_view, views)
     elif file_format == "/file-formats/beddb/":
         # Add the 1D track to top, left
@@ -1126,3 +1127,32 @@ def add_2d_chromsize(new_views, files_info):
         view["tracks"]["center"][0]["contents"].insert(0, chromsize_contents)
 
     return new_views, None
+
+def copy_1d_tracks_into_2d_view(views, new_view):
+    """
+    Args:
+        views: A list of views for this view config.
+        new_view: A view that needs to copy tracks from. Will be modified.
+
+    Returns:
+        Boolean indicating success.
+    """
+
+    # Get the first view, this should have all of the changes.
+    if len(views) < 1:
+        return False
+    base_view = views[0]
+
+    # Copy the genome assembly search box as well.
+    for field in ("genomePositionSearchBox", "autocompleteSource"):
+        if field in base_view:
+            new_view[field] = base_view[field]
+
+    # For each side (except center)
+    for side in ("top", "left"):
+        # If there are any tracks here
+        for track in base_view["tracks"][side]:
+            # Copy them into the new_view's side
+            new_view["tracks"][side].append(track)
+
+    return True
