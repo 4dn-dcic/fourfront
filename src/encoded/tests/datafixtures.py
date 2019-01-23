@@ -381,7 +381,9 @@ def file_formats(testapp, lab, award):
         'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2',
                         "valid_item_types": ["FileProcessed"]},
         'bai': {'standard_file_extension': 'bam.bai',
-                "valid_item_types": ["FileProcessed"]}
+                "valid_item_types": ["FileProcessed"]},
+        'beddb' : {"standard_file_extension": "beddb",
+                "valid_item_types": ["FileProcessed", "FileReference"]},
     }
     format_info = {
         'fastq': {'standard_file_extension': 'fastq.gz',
@@ -408,6 +410,11 @@ def file_formats(testapp, lab, award):
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
         'bg': {'standard_file_extension': 'bedGraph.gz',
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
+        'bigbed': {'standard_file_extension': 'bb',
+               "valid_item_types": ["FileProcessed", "FileReference"]},
+        'bed' : {"standard_file_extension": "bed.gz",
+                "extrafile_formats": ['beddb'],
+                "valid_item_types": ["FileProcessed", "FileReference"]}
     }
 
     for eff, info in ef_format_info.items():

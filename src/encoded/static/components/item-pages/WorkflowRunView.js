@@ -109,11 +109,12 @@ export default class WorkflowRunView extends DefaultItemView {
     getTabViewContents(){
 
         var { context, windowHeight } = this.props,
+            width   = this.getTabViewWidth(),
             tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
                 {
                     tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
                     key : 'graph',
-                    content : <GraphSection {...this.props} mounted={this.state.mounted} />
+                    content : <GraphSection {...this.props} mounted={this.state.mounted} width={width} />
                 }
             ];
 

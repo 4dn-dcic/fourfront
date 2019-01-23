@@ -259,11 +259,12 @@ export function convertToObjectKeyedByAccession(experiments, keepExpObject = tru
 
 /**
  * @param {File} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
+ * @param {string} returnFormat - One of 'list', 'object', or 'ids'. Format which to return.
  * @returns {Object.<ExperimentSet>} Object with ExperimentSet @ids as keys and their JSON as values.
  */
-export function experimentSetsFromFile(file){
+export function experimentSetsFromFile(file, returnFormat = 'list'){
 
-    return _.extend(
+    var setsByKey = _.extend(
 
         _.reduce(file.experiment_sets || [], function(m, expSet){ // ExpSets by @id, no 'experiments_in_set' added.
             var id = atIdFromObject(expSet);
@@ -301,6 +302,15 @@ export function experimentSetsFromFile(file){
     
         }, {})
     );
+
+    if (returnFormat === 'list'){
+        return _.values(setsByKey);
+    } else if (returnFormat === 'object'){
+        return setsByKey;
+    } else if (returnFormat === 'ids') {
+        return _.keys(setsByKey);
+    }
+
 }
 
 
