@@ -10,7 +10,7 @@
         "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Bronze experiment",
-        "badge_item_type": "Experiment",
+        "badge_category": "Experiment",
         "status": "released",
         "uuid": "fd8befb3-c633-4f33-bd31-a2b291b64a19"
     },
@@ -25,7 +25,7 @@
         "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Silver experiment",
-        "badge_item_type": "Experiment",
+        "badge_category": "Experiment",
         "status": "released",
         "uuid": "b62ef24e-7d35-4bc3-abe9-276442cbbc58"
     },
@@ -40,7 +40,7 @@
         "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Gold experiment",
-        "badge_item_type": "Experiment",
+        "badge_category": "Experiment",
         "status": "released",
         "uuid": "6c2b7409-4478-4e15-aabc-1a0df9b883e9"
     },
@@ -55,7 +55,7 @@
         "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Bronze biosample",
-        "badge_item_type": "Biosample",
+        "badge_category": "Biosample",
         "status": "released",
         "uuid": "fd8befb3-c633-4f33-bd31-a2b291b64a10"
     },
@@ -70,7 +70,7 @@
         "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Silver biosample",
-        "badge_item_type": "Biosample",
+        "badge_category": "Biosample",
         "status": "released",
         "uuid": "b62ef24e-7d35-4bc3-abe2-276442cbbc58"
     },
@@ -85,7 +85,7 @@
         "badge_classification": "Commendation",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Gold biosample",
-        "badge_item_type": "Biosample",
+        "badge_category": "Biosample",
         "status": "released",
         "uuid": "6c2b7409-4478-4e15-aabc-1a0df6b883e9"
     },
@@ -100,7 +100,7 @@
         "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Sequencing experiment missing raw files",
-        "badge_item_type": "Experiment",
+        "badge_category": "Experiment",
         "status": "released",
         "uuid": "f5c8c24e-1e9f-4cb5-92f3-ea7b840d8305"
     },
@@ -115,7 +115,7 @@
         "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Tier 1 biosample missing required metadata",
-        "badge_item_type": "Biosample",
+        "badge_category": "Biosample",
         "status": "released",
         "uuid": "e39777c6-8fe4-4424-bac1-40406342e026"
     },
@@ -130,7 +130,7 @@
         "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Issues with replicate numbers",
-        "badge_item_type": "Experiment Set - Replicate",
+        "badge_category": "Experiment Set - Replicate",
         "status": "released",
         "uuid": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"
     },
@@ -145,7 +145,7 @@
         "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Inconsistency in FileFastq paired end information",
-        "badge_item_type": "File Fastq",
+        "badge_category": "File",
         "status": "released",
         "uuid": "95088391-4332-46d2-ac3e-1fa2e7230092"
     }
