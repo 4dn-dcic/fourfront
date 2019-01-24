@@ -5,10 +5,10 @@ pytestmark = pytest.mark.working
 def test_aggregation_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
     badge_facets = [facet for facet in res['facets'] if facet['title'] in
-                   ['Positive Badges', 'Warning Badges']]
+                   ['Commendations', 'Warnings']]
     assert badge_facets
     titles = [facet['title'] for facet in badge_facets]
-    assert 'Positive Badges' in titles and 'Warning Badges' in titles
+    assert 'Commendations' in titles and 'Warnings' in titles
     terms = [term['key'] for i in range(2) for term in badge_facets[i]['terms']]
     assert len([t for t in terms if t != 'No value']) == 3
 

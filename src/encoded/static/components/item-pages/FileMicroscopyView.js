@@ -8,7 +8,7 @@ import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownloadButtonColumn, QualityControlResults } from './FileView';
 
@@ -64,17 +64,11 @@ class FileMicroscopyViewOverview extends React.Component {
     render(){
         var { context, schemas, width, windowWidth } = this.props;
 
-        var setsByKey;
-        var table = null;
+        var setUrls = expFxn.experimentSetsFromFile(context, 'ids'),
+            table;
 
-        if (context && (
-            (Array.isArray(context.experiments) && context.experiments.length > 0) || (Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0)
-        )){
-            setsByKey = expFxn.experimentSetsFromFile(context);
-        }
-
-        if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
+        if (setUrls && setUrls.length > 0){
+            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (

@@ -8,12 +8,12 @@ import url from 'url';
 import queryString from 'querystring';
 import * as globals from './../../globals';
 import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import { RawFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable } from './../../browse/components/file-tables';
 import {
     ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
     defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './table-commons';
-import { SearchResultDetailPane } from './SearchResultDetailPane';
+    HeadersRow, TableRowToggleOpenButton } from './../../browse/components/table-commons';
+import { SearchResultDetailPane } from './../../browse/components/SearchResultDetailPane';
 
 
 
@@ -29,7 +29,7 @@ export class ItemPageTable extends React.Component {
         'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
         'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string),
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     static defaultProps = {
         'renderDetailPane' : function(result, rowNumber, containerWidth){
@@ -81,7 +81,7 @@ export class ItemPageTable extends React.Component {
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
             "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
         }
-    }
+    };
 
     constructor(props){
         super(props);
@@ -93,7 +93,8 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var { results, loading, columnExtensionMap, columns, width, windowWidth, defaultOpenIndices, renderDetailPane } = this.props;
+        var { results, loading, columnExtensionMap, columns, width, windowWidth,
+            defaultOpenIndices, renderDetailPane } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -102,7 +103,6 @@ export class ItemPageTable extends React.Component {
                 </div>
             );
         }
-
 
         var columnDefinitions   = columnsToColumnDefinitions(columns, columnExtensionMap),
             responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
@@ -255,71 +255,55 @@ class ItemPageTableRow extends React.Component {
 
 
 
-export class ItemPageTableLoader extends React.Component {
+export class ItemPageTableLoader extends React.PureComponent {
 
     static propTypes = {
         'children' : PropTypes.element.isRequired,
-        'itemsObject' : PropTypes.object.isRequired,
-        'sortFxn' : PropTypes.func,
-        'isItemCompleteEnough' : PropTypes.func.isRequired,
+        'itemUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
         'windowWidth': PropTypes.number.isRequired
-    }
+    };
 
-    static defaultProps = {
-        'isItemCompleteEnough' : function(item){
-            return false;
-        }
+    static getInitialState(props){
+        return {
+            'items' : null,
+            'loading' : true,
+            'itemIndexMapping' : _.object(_.map(props.itemUrls, function(url, i){ return [url, i]; }))
+        };
     }
 
     constructor(props){
         super(props);
+        this.state = ItemPageTableLoader.getInitialState(props);
+    }
 
-        // Get ExpSets from this file, check if are complete (have bio_rep_no, etc.), and use if so; otherwise, save 'this.experiment_set_uris' to be picked up by componentDidMount and fetched.
-        var items_obj = props.itemsObject,
-            items = _.values(items_obj),
-            items_for_state = null;
-
-        if (Array.isArray(items) && items.length > 0 && props.isItemCompleteEnough(items[0])){
-            items_for_state = items;
-        } else {
-            this.item_uris = _.keys(items_obj);
+    componentWillReceiveProps(nextProps){
+        if (!_.isEqual(nextProps.itemUrls, this.props.itemUrls)){
+            this.setState(ItemPageTableLoader.getInitialState(nextProps), this.componentDidMount);
         }
-
-        this.state = {
-            'items' : items_for_state,
-            'current_item_index' : false
-        };
     }
 
     componentDidMount(){
-        var newState = {};
-
-        var onFinishLoad = null;
-
-        if (Array.isArray(this.item_uris) && this.item_uris.length > 0){
-
-            onFinishLoad = _.after(this.item_uris.length, function(){
+        var itemUrls = this.props.itemUrls,
+            onFinishLoad = _.after(itemUrls.length, ()=>{
                 this.setState({ 'loading' : false });
-            }.bind(this));
+            });
 
-            newState.loading = true;
-            _.forEach(this.item_uris, (uri)=>{
+        if (Array.isArray(itemUrls) && itemUrls.length > 0){
+            _.forEach(itemUrls, (uri)=>{
                 ajax.load(uri, (r)=>{
-                    var currentItems = (this.state.items || []).slice(0);
-                    currentItems.push(r);
-                    this.setState({ items : currentItems });
-                    onFinishLoad();
+                    this.setState(function({ items, itemIndexMapping }){
+                        items = (items || []).slice(0);
+                        items.push(r);
+                        items.sort(function(a, b){
+                            var aIdx = itemIndexMapping[object.itemUtil.atId(a)] || -1,
+                                bIdx = itemIndexMapping[object.itemUtil.atId(b)] || -1;
+                            return bIdx - aIdx;
+                        });
+                        return { items };
+                    }, onFinishLoad);
                 }, 'GET', onFinishLoad);
             });
         }
-        
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-    }
-
-    componentWillUnmount(){
-        delete this.item_uris;
     }
 
     render(){

@@ -617,12 +617,12 @@
         }
     },
     "facets_aggregated_badges" : {
-        "aggregated_items.badges.item.badge.positive_badge": {
-            "title": "Positive Badges",
+        "aggregated_items.badges.item.badge.commendation": {
+            "title": "Commendations",
             "order": 997
         },
-        "aggregated_items.badges.item.badge.warning_badge": {
-            "title": "Warning Badges",
+        "aggregated_items.badges.item.badge.warning": {
+            "title": "Warnings",
             "order": 998
         }
     }

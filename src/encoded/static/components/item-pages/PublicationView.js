@@ -18,7 +18,7 @@ export default class PublicationView extends DefaultItemView {
 
         var initTabs    = [],
             windowWidth = this.props.windowWidth,
-            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth)),
+            width       = this.getTabViewWidth(),
             context     = this.props.context;
 
         initTabs.push(PublicationSummary.getTabObject(this.props, width));

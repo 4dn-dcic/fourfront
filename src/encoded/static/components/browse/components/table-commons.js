@@ -250,7 +250,6 @@ export const defaultColumnExtensionMap = {
     },
     'number_of_experiments' : {
         'title' : '# of Experiments',
-        'colTitle' : 'Exps',
         'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
         'render' : function(expSet, columnDefinition, props, width){
             var number_of_experiments = parseInt(expSet.number_of_experiments);
@@ -262,13 +261,11 @@ export const defaultColumnExtensionMap = {
                 number_of_experiments = 0;
             }
 
-
             return <span key="val">{ number_of_experiments }</span>;
         }
     },
     'number_of_files' : {
         'title' : '# of Files',
-        'colTitle' : 'Files',
         'noSort' : true,
         'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
         'render' : function(expSet, columnDefinition, props, width){
@@ -308,10 +305,6 @@ export const defaultColumnExtensionMap = {
             );
         }
     },
-    'experiments_in_set.experiment_type' : {
-        'title' : 'Experiment Type',
-        'widthMap' : {'lg' : 140, 'md' : 140, 'sm' : 120}
-    },
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
         'render' : function(result, columnDefinition, props, width){
@@ -327,9 +320,6 @@ export const defaultColumnExtensionMap = {
                 </div>
             );
         }
-    },
-    'experiments_in_set.biosample.biosource_summary' : {
-        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }
     }
 };
 
@@ -354,7 +344,7 @@ export function columnsToColumnDefinitions(columns, columnDefinitionMap, default
     _.forEach(uninishedColumnDefinitions, function(colDef, i){
         var colDefOverride = columnDefinitionMap && columnDefinitionMap[colDef.field];
         if (colDefOverride){
-            _.extend(colDef, colDefOverride);
+            _.extend(colDef, colDefOverride, colDef);
         }
         // Add defaults for any required-for-view but not-present properties.
         if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){

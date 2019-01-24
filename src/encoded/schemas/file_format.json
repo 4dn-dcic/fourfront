@@ -35,7 +35,8 @@
             "title": "File Format",
             "type": "string",
             "permission": "import_items",
-            "uniqueKey": true
+            "uniqueKey": true,
+            "description": "Format or extension of this File."
         },
         "standard_file_extension": {
             "title": "Standard File Extension",
