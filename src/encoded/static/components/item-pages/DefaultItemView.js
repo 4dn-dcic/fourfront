@@ -246,8 +246,8 @@ export default class DefaultItemView extends React.PureComponent {
      */
     tabbedView(){
         return (
-            <TabbedView contents={this.getTabViewContents} ref={this.tabbedViewRef} key="tabbedView"
-                {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')} />
+            <TabbedView {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
+                contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView" />
         );
     }
 

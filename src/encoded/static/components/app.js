@@ -1347,8 +1347,7 @@ export default class App extends React.Component {
                     }}/>
                     <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
-                    <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
-                    <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
+                    <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />

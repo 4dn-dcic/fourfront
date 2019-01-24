@@ -884,7 +884,11 @@ export class HiGlassContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-        this.bindHiGlassEventHandlers();
+        this.setState({ 'mounted' : true }, this.bindHiGlassEventHandlers);
+    }
+
+    componentWillUnmount(){
+        this.setState({ 'mounted' : false });
     }
 
     initializeStorage(props = this.props){
@@ -921,7 +925,10 @@ export class HiGlassContainer extends React.PureComponent {
      *
      * @deprecated
      */
-    bindHiGlassEventHandlers(){
+    bindHiGlassEventHandlers(attemptCount = 0){
+
+        if (attemptCount > 10 || !this.state.mounted) return;
+
         var viewConfig          = this.state.viewConfig,
             hiGlassComponent    = this.getHiGlassComponent(),
             viewID              = HiGlassPlainContainer.getPrimaryViewID(viewConfig);
@@ -929,9 +936,9 @@ export class HiGlassContainer extends React.PureComponent {
         if (viewConfig && hiGlassComponent){
             hiGlassComponent.api.on('location', this.updateCurrentDomainsInStorage, viewID);
         } else if (!hiGlassComponent) {
-            console.warn('No HiGlass instance available. Retrying...');
+            console.warn('No HiGlass instance available. Retrying... x' + (attemptCount + 1));
             setTimeout(()=>{
-                this.bindHiGlassEventHandlers();
+                this.bindHiGlassEventHandlers(attemptCount + 1);
             }, 500);
         }
     }
