@@ -220,7 +220,7 @@ def test_post_object_with_child(testapp):
 def test_retry(testapp):
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     url = res.location
-    res = testapp.get(url + '/@@testing-retry?datstore=database')
+    res = testapp.get(url + '/@@testing-retry?datastore=database')
     assert res.json['attempt'] == 2
     assert not res.json['detached']
 
