@@ -36,6 +36,11 @@
             "lookup": 10,
             "formInput": "textarea"
         },
+        "preferred_label": {
+            "title": "Preferred label",
+            "description": "A provided label that can override the automatically calculated display_title - only submit if the calculated title does not work",
+            "type": "string"
+        },
         "feature_type": {
             "title": "Feature Type",
             "description": "A sequence ontology term indicating the type of feature",
@@ -46,6 +51,7 @@
         "genome_location": {
             "title": "Genomic Location",
             "description": "The location(s) of the feature on the genome",
+            "comment": "A BioFeature can be a simple location and if so must have this field and appropriate type from SO",
             "type": "array",
             "lookup": 10,
             "items": {
@@ -55,49 +61,31 @@
                 "linkTo": "GenomicRegion"
             }
         },
-        "gene_id": {
-            "title": "NCBI gene id",
+        "relevant_gene": {
+            "title": "Gene",
             "description": "Gene ID if the feature is or can be associated with a gene (eg. protein produced by a gene)",
             "type": "string",
+            "linkTo": "Gene",
             "lookup": 10,
         },
-        "gene_info": {
-            "title": "Gene Info",
-            "description": "Information retrieved from NCBI on the gene_id if provided",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "preferred_symbol": {
-                    "title": "Preferred Symbol",
-                    "type": "string"
-                },
-                "official_symbol": {
-                    "title": "Official Symbol",
-                    "type": "string"
-                },
-                "synonyms": {
-                    "title": "Synonyms",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "organism": {
-                    "title": "Organism",
-                    "type": "string",
-                    "linkTo": "Organism"
-                }
-            }
+        "cellular_structure": {
+            "title": "Cellular Structure",
+            "description": "If the feature is a cellular structure such as a chromosome use this field and set type to 'cellular_component'",
+            "type": "string",
+            "lookup": 10,
+            "enum": [
+                "Cell membrane",
+                "Nucleolus",
+                "Nuclear pore complex",
+                "Microtubules",
+                "Endoplasmic reticulum",
+                "Chromosomes"
+            ]
         }
+    },
     },
     "facets": {
-        "target_type": {
-            "title": "Target type"
-        }
     },
     "columns": {
-        "target_type": {
-          "title": "Target type"
-        }
     }
 }
