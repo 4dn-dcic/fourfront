@@ -465,7 +465,7 @@ export class QualityControlResults extends React.PureComponent {
         }
 
         var itemsToReturn = [
-            renderMetric("Total reads", "Total Reads"),
+            renderMetric("Total reads", "Total Reads in File"),
             //renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
             //renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
             renderMetric("Total Sequences", "Total Sequences"),
