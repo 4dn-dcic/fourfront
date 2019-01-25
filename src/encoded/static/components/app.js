@@ -1476,6 +1476,19 @@ class ContentRenderer extends React.PureComponent {
  */
 class BodyElement extends React.PureComponent {
 
+    static getDerivedStateFromProps(props, state){
+        var stateChange = { 'lastHref' : props.href };
+        if (state.isFullscreen && stateChange.lastHref !== state.lastHref){
+            var currParts = url.parse(state.lastHref),
+                nextParts = url.parse(stateChange.lastHref);
+
+            if (currParts.pathname !== nextParts.pathname){
+                stateChange.isFullscreen = false;
+            }
+        }
+        return stateChange;
+    }
+
     /**
      * Instantiates the BodyElement component, binds functions.
      */
@@ -1509,7 +1522,11 @@ class BodyElement extends React.PureComponent {
             'classList'             : [],
             'hasError'              : false,
             'errorInfo'             : null,
-            'isFullscreen'          : false
+            'isFullscreen'          : false,
+            // Because componentWillReceiveProps is deprecated in favor of (static) getDerivedStateFromProps,
+            // we ironically must now clone href in state to be able to do comparisons...
+            // See: https://stackoverflow.com/questions/49723019/compare-with-previous-props-in-getderivedstatefromprops
+            'lastHref'              : props.href
         };
 
         /**
@@ -1528,17 +1545,6 @@ class BodyElement extends React.PureComponent {
          * Used to unset the `top` and `left` positions after hover out.
          */
         this.tooltipRef = React.createRef();
-    }
-
-    componentWillReceiveProps(nextProps){
-        // Unset full screen if moving away to different pathname.
-        if (this.state.isFullscreen && this.props.href !== nextProps.href){
-            var currParts = url.parse(this.props.href),
-                nextParts = url.parse(nextProps.href);
-            if (currParts.pathname !== nextParts.pathname){
-                this.setState({ 'isFullscreen' : false });
-            }
-        }
     }
 
     /**
@@ -1927,7 +1933,10 @@ class ContentErrorBoundary extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { 'hasError' : false, 'errorInfo' : null };
+        this.state = {
+            'hasError' : false,
+            'errorInfo' : null
+        };
     }
 
     componentDidCatch(err, info){
@@ -1939,7 +1948,7 @@ class ContentErrorBoundary extends React.Component {
     /**
      * Unsets the error state if we navigate to a different view/href .. which normally should be different ContentView.
      */
-    componentWillReceiveProps(nextProps){
+    componentDidUpdate(nextProps){
         if (nextProps.canonical !== this.props.canonical){
             this.setState(function(currState){
                 if (currState.hasError) {

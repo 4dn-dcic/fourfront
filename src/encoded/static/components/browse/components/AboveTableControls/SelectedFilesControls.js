@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import { Modal, ButtonGroup, Checkbox, Button } from 'react-bootstrap';
-import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
+import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs, layout } from './../../../util';
 import { windowHref } from './../../../globals';
 import * as vizUtil from './../../../viz/utilities';
 import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
@@ -35,20 +36,11 @@ export class SelectedFilesOverview extends React.Component {
 export class SelectedFilesDownloadButton extends React.PureComponent {
 
     /**
-     * @type {Object}
-     * @constant
-     * @property {string} [gridState="lg"] - This should be passed in from parent `AboveTableControls` after mount. Default is set for server-side render + initial hydration.
-     */
-    static defaultProps = {
-        'gridState' : 'lg'
-    };
-
-    /**
      * @constant
      * @ignore
      */
     static propTypes = {
-        'gridState' : PropTypes.string.isRequired
+        'windowWidth' : PropTypes.number.isRequired
     };
 
     constructor(props){
@@ -191,7 +183,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles, gridState } = this.props,
+        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles, windowWidth } = this.props,
+            gridState                               = layout.responsiveGridState(windowWidth),
             selectedFilesCountIncludingDuplicates   = _.keys(selectedFiles).length,
             subSelectedFilesCount                   = _.keys(subSelectedFiles).length,
             disabled                                = selectedFilesUniqueCount === 0,
@@ -592,9 +585,10 @@ export class SelectedFilesFilterByButton extends React.Component {
     }
 
     render(){
-        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel, gridState } = this.props,
+        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel, windowWidth } = this.props,
             isDisabled              = !selectedFiles || _.keys(selectedFiles).length === 0,
             currentFiltersLength    = currentFileTypeFilters.length,
+            gridState               = layout.responsiveGridState(windowWidth),
             largerSize              = ['lg', 'md'].indexOf(gridState) > -1;
 
         return (
@@ -614,7 +608,7 @@ export class SelectedFilesFilterByButton extends React.Component {
 
 export class SelectedFilesControls extends React.PureComponent {
 
-    static filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters){
+    static filterSelectedFilesByFileTypeFilters = memoize(function(selectedFiles, fileTypeFilters){
         if (Array.isArray(fileTypeFilters) && fileTypeFilters.length === 0) return selectedFiles;
         return _.object(
             _.filter(
@@ -625,7 +619,7 @@ export class SelectedFilesControls extends React.PureComponent {
                 }
             )
         );
-    }
+    });
 
     render(){
         var barPlotData = (this.props.barplot_data_filtered || this.props.barplot_data_unfiltered),
@@ -637,12 +631,12 @@ export class SelectedFilesControls extends React.PureComponent {
         return (
             <div>
                 <SelectAllFilesButton {..._.pick(this.props, 'href', 'selectedFilesUniqueCount', 'selectedFiles', 'selectFile',
-                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles', 'gridState')} totalFilesCount={totalFilesCount} />
+                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles', 'windowWidth')} totalFilesCount={totalFilesCount} />
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
                         <SelectedFilesFilterByButton {..._.pick(this.props, 'setFileTypeFilters', 'currentFileTypeFilters',
                             'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
-                            'currentOpenPanel', 'gridState' )} totalFilesCount={totalFilesCount} />
+                            'currentOpenPanel', 'windowWidth' )} totalFilesCount={totalFilesCount} />
                         <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                     </ButtonGroup>
                 </div>

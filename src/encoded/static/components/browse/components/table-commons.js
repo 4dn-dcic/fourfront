@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -333,7 +334,7 @@ export const defaultColumnExtensionMap = {
  * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
  * @returns {Object[]}                      List of objects containing keys 'title', 'field', 'widthMap', and 'render'.
  */
-export function columnsToColumnDefinitions(columns, columnDefinitionMap, defaultWidthMap = DEFAULT_WIDTH_MAP){
+export const columnsToColumnDefinitions = memoize(function(columns, columnDefinitionMap, defaultWidthMap = DEFAULT_WIDTH_MAP){
     var uninishedColumnDefinitions = _.map(
         _.pairs(columns),
         function([field, columnProperties]){
@@ -356,10 +357,10 @@ export function columnsToColumnDefinitions(columns, columnDefinitionMap, default
     });
 
     return _.sortBy(uninishedColumnDefinitions, 'order');
-}
+});
 
 
-export function defaultHiddenColumnMapFromColumns(columns){
+export const defaultHiddenColumnMapFromColumns = memoize(function(columns){
     var hiddenColMap = {};
     _.forEach(_.pairs(columns), function([ field, columnDefinition ]){
         if (columnDefinition.default_hidden){
@@ -369,7 +370,7 @@ export function defaultHiddenColumnMapFromColumns(columns){
         }
     });
     return hiddenColMap;
-}
+});
 
 
 export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){

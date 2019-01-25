@@ -71,14 +71,14 @@ class ResultTableContainer extends React.PureComponent {
         'selectFile'                : PropTypes.func,
         'unselectFile'              : PropTypes.func,
         'selectedFiles'             : PropTypes.objectOf(PropTypes.string)
-    }
+    };
 
     static defaultProps = {
         'href'      : '/browse/',
         'debug'     : false,
         'navigate'  : navigate,
         'columnExtensionMap' : defaultColumnExtensionMap
-    }
+    };
 
     constructor(props){
         super(props);
