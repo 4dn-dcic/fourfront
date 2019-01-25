@@ -259,7 +259,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                                     _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
                                     ' File Pairs'
                                     :
-                                    expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
+                                    expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) +
                                     ' Files'
                             )
                     }/>
@@ -529,7 +529,7 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
             { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
-            { columnClass: 'file-detail', title: 'Total Reads', initialWidth: 80, field : "quality_metric.Total reads" },
+            { columnClass: 'file-detail', title: 'Filtered Reads', initialWidth: 80, field : "quality_metric.Total reads" },
             //{ columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
             //{ columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
             { columnClass: 'file-detail', title: 'Cis reads (>20kb)',   initialWidth: 80, field : "quality_metric.Cis reads (>20kb)", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
