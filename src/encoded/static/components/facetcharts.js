@@ -5,6 +5,7 @@ import _ from 'underscore';
 import url from 'url';
 import { expFxn, Filters, ajax, console, layout, isServerSide, navigate } from './util';
 import * as vizUtil from './viz/utilities';
+import ChartDetailCursor from './viz/ChartDetailCursor';
 import { ChartDataController } from './viz/chart-data-controller';
 import * as BarPlot from './viz/BarPlot';
 
@@ -175,6 +176,10 @@ export class FacetCharts extends React.PureComponent {
                         <BarPlot.Chart {...{ width, height, schemas, windowWidth }} />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
+                <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas', 'windowWidth', 'windowHeight')}
+                    verticalAlign="center" /* cursor position relative to popover */
+                    //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
+                />
             </div>
         );
     }

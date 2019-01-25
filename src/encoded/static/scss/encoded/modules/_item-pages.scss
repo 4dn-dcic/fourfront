@@ -1896,6 +1896,9 @@ $download-button-width : 100px;
 
 	.file-download-container {
 		transition: transform .4s;
+		display: flex;
+		align-items: center;
+		height: 100%;
 
 		> a.btn-block.btn-lg {
 			font-weight: 400;

@@ -160,7 +160,7 @@ export const textWidth = memoize(function(
 });
 
 
-export function textHeight(
+export const textHeight = memoize(function(
     textContent = "Some String",
     width = 200,
     containerClassName = null,
@@ -190,7 +190,7 @@ export function textHeight(
         document.body.removeChild(contElem);
     }
     return height;
-}
+});
 
 
 /**
@@ -364,6 +364,10 @@ export function toggleBodyClass(className, toggleTo = null, bodyElement = null){
 
 /**
  * Pass 'windowWidth' through props down from BodyElement for this element to update.
+ *
+ * @deprecated
+ * We should know what our width is; try to set/determine it off of `windowWidth` and `responsiveGridState(windowWidth)`
+ * where/when possible to avoid needing to query the DOM for width.
  */
 export class WidthProvider extends React.Component {
 
@@ -400,58 +404,6 @@ export class WidthProvider extends React.Component {
         return <div ref="wrapper" children={React.cloneElement(this.props.children, passProps)} />;
     }
 }
-
-export class VerticallyCenteredChild extends React.Component {
-
-    static defaultProps = {
-        'calculate' : function(heightParent, heightChild){
-            return Math.floor((heightParent - heightChild) / 2);
-        }
-    }
-
-    constructor(props){
-        super(props);
-        this.state = { 'mounted' : false };
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
-    }
-
-    render(){
-
-        var childClassName = this.props.children.props.className;
-        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
-
-        if (this.props.disabled) return React.cloneElement(this.props.children, { ref : 'childElement', 'className' : className } );
-
-        var style = null;
-        //var domParentBlock = (this.state.mounted && this.refs && this.refs.parentBlock) || null;
-        var domChildBlock = (this.state.mounted && this.refs && this.refs.childElement) || null;
-        if (domChildBlock){
-            var domParentBlock = domChildBlock.parentElement;
-
-            var heightParent = domParentBlock.offsetHeight;
-            if (typeof this.props.verticalPaddingOffset === 'number'){
-                heightParent -= this.props.verticalPaddingOffset;
-            }
-            var heightChild = domChildBlock.offsetHeight;
-            if (heightParent && heightChild && heightChild < heightParent){
-                style = {
-                    'transform' : 'translateY(' + this.props.calculate(heightParent, heightChild) + 'px)'
-                };
-            }
-
-        }
-        if (style){
-            var origStyle = this.props.children.props.style || {};
-            style = _.extend(style, origStyle);
-        }
-
-        return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
-    }
-}
-
 
 
 /**

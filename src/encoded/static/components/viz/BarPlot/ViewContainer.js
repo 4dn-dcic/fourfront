@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
-import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
+import { CursorViewBounds } from './../ChartDetailCursor';
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
 
 // Used for transitioning
@@ -147,25 +147,16 @@ class Bar extends React.PureComponent {
         //    isNew = true;
         //}
 
-        var key = d.term || d.name || i,
-            isHoveredOver = CursorViewBounds.isSelected(d, this.props.hoverTerm, this.props.hoverParentTerm),
-            isSelected = CursorViewBounds.isSelected(d, this.props.selectedTerm, this.props.selectedParentTerm);
+        var { hoverTerm, hoverParentTerm, selectedTerm, selectedParentTerm, onBarPartClick,
+                onBarPartMouseEnter, onBarPartMouseOver, onBarPartMouseLeave,
+                aggregateType, transitioning, canBeHighlighted } = this.props,
+            key = d.term || d.name || i,
+            isHoveredOver   = CursorViewBounds.isSelected(d, hoverTerm, hoverParentTerm),
+            isSelected      = CursorViewBounds.isSelected(d, selectedTerm, selectedParentTerm);
 
         return (
-            <BarSection
-                key={key}
-                data-key={key}
-                node={d}
-                onClick={this.props.onBarPartClick}
-                onMouseEnter={this.props.onBarPartMouseEnter}
-                onMouseLeave={this.props.onBarPartMouseLeave}
-                aggregateType={this.props.aggregateType}
-                //isNew={isNew}
-                {...{ isHoveredOver, isSelected }}
-                isRemoving={d.removing}
-                transitioning={this.props.transitioning}
-                canBeHighlighted={this.props.canBeHighlighted}
-            />
+            <BarSection {...{ isHoveredOver, isSelected, key, aggregateType, transitioning, canBeHighlighted }} data-key={key} node={d}
+                onClick={onBarPartClick} onMouseEnter={onBarPartMouseEnter} onMouseLeave={onBarPartMouseLeave} isRemoving={d.removing} />
         );
     }
 

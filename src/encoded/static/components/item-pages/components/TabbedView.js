@@ -93,94 +93,6 @@ export class TabbedView extends React.PureComponent {
         };
     }
 
-    static propTypes = {
-        'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
-            'tab'       : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
-            'content'   : PropTypes.element.isRequired,
-            'key'       : PropTypes.string.isRequired,
-            'disabled'  : PropTypes.bool
-        }))  ]).isRequired,
-        'href' : PropTypes.string.isRequired
-    };
-
-    static defaultProps = {
-        'contents' : [
-            { tab : "Tab 1", content : <span>Test1</span>, key : 'tab-id-1' },
-            { tab : "Tab 2", content : <span>Test2</span>, key : 'tab-id-2' }
-        ],
-        'animated' : false,
-        'destroyInactiveTabPane' : false // Maybe make true? Need to profile performance
-    };
-
-    constructor(props){
-        super(props);
-        this.setActiveKey = this.setActiveKey.bind(this);
-        this.maybeSwitchTabAccordingToHref = this.maybeSwitchTabAccordingToHref.bind(this);
-        this.onTabClick = this.onTabClick.bind(this);
-
-        this.tabsRef = React.createRef();
-    }
-
-    componentDidMount(){
-        this.maybeSwitchTabAccordingToHref();
-    }
-
-    componentDidUpdate(pastProps, pastState){
-        if (pastProps.href !== this.props.href){
-            this.maybeSwitchTabAccordingToHref();
-        }
-        var key;
-        for (key in this.props) {
-            if (this.props[key] !== pastProps[key]) {
-                console.log('changed props: %s', key, this.props[key], pastProps[key]);
-            }
-        }
-        for (key in this.state) {
-            if (this.state[key] !== pastState[key]) {
-                console.log('changed state: %s', key);
-            }
-        }
-    }
-
-    maybeSwitchTabAccordingToHref(props = this.props){
-        var { contents, href } = props,
-            hrefParts       = url.parse(href),
-            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
-            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
-            tabsInstance    = this.tabsRef.current,
-            currKey         = foundContent && tabsInstance && tabsInstance.state.activeKey;
-
-        if (!foundContent || currKey === hash) return false;
-    
-        this.setActiveKey(foundContent.key); // Same as `hash`
-        return true;
-    }
-
-    setActiveKey(nextKey){
-        var tabsInstance = this.tabsRef.current;
-        if (typeof tabsInstance.setActiveKey === 'function'){
-            return tabsInstance.setActiveKey(nextKey);
-        } else {
-            console.error('Manually setting active tab key not currently supported...');
-            return false;
-        }
-    }
-
-    onTabClick(tabKey, evt){
-        var { onTabClick } = this.props;
-
-        // We add 'replace: true' to replace current Browser History entry with new entry.
-        // Entry will refer to same pathname but different hash.
-        // This is so people don't need to click 'back' button 10 times to get to previous /search/ or /browse/ page for example,
-        // since they might browse around tabs for some time.
-        navigate('#' + tabKey, { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true });
-
-        if (typeof onTabClick === 'function'){
-            return onTabClick(tabKey, evt);
-        }
-    }
-
     static calculateAdditionalTabs = memoize(function(staticContentList, contents){
         var resultArr = [];
         //
@@ -248,18 +160,6 @@ export class TabbedView extends React.PureComponent {
         return resultArr;
     });
 
-    additionalTabs(){
-        var { context, contents } = this.props,
-            resultArr = [],
-            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
-
-        if (staticContentList.length === 0) return []; // No content defined for Item.
-
-        if (typeof contents === 'function') contents = contents();
-
-        return TabbedView.calculateAdditionalTabs(staticContentList, contents);
-    }
-
     static combineSystemAndCustomTabs = memoize(function(additionalTabs, contents){
         var allTabs;
         if (additionalTabs.length === 0){
@@ -277,6 +177,98 @@ export class TabbedView extends React.PureComponent {
         }
         return allTabs;
     });
+
+    static propTypes = {
+        'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
+            'tab'       : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
+            'content'   : PropTypes.element.isRequired,
+            'key'       : PropTypes.string.isRequired,
+            'disabled'  : PropTypes.bool
+        }))  ]).isRequired,
+        'href' : PropTypes.string.isRequired
+    };
+
+    static defaultProps = {
+        'contents' : [
+            { tab : "Tab 1", content : <span>Test1</span>, key : 'tab-id-1' },
+            { tab : "Tab 2", content : <span>Test2</span>, key : 'tab-id-2' }
+        ],
+        'animated' : false,
+        'destroyInactiveTabPane' : false // Maybe make true? Need to profile performance
+    };
+
+    constructor(props){
+        super(props);
+        this.setActiveKey = this.setActiveKey.bind(this);
+        this.maybeSwitchTabAccordingToHref = this.maybeSwitchTabAccordingToHref.bind(this);
+        this.onTabClick = this.onTabClick.bind(this);
+
+        this.tabsRef = React.createRef();
+    }
+
+    componentDidMount(){
+        this.maybeSwitchTabAccordingToHref();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.href !== this.props.href){
+            this.maybeSwitchTabAccordingToHref();
+        }
+    }
+
+    maybeSwitchTabAccordingToHref(props = this.props){
+        var { contents, href } = props,
+            hrefParts       = url.parse(href),
+            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
+            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
+            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
+            tabsInstance    = this.tabsRef.current,
+            currKey         = foundContent && tabsInstance && tabsInstance.state.activeKey;
+
+        if (!foundContent || currKey === hash){
+            console.log('Already on tab', hash);
+            return false;
+        }
+    
+        this.setActiveKey(foundContent.key); // Same as `hash`
+        return true;
+    }
+
+    setActiveKey(nextKey){
+        var tabsInstance = this.tabsRef.current;
+        if (typeof tabsInstance.setActiveKey === 'function'){
+            return tabsInstance.setActiveKey(nextKey);
+        } else {
+            console.error('Manually setting active tab key not currently supported...');
+            return false;
+        }
+    }
+
+    onTabClick(tabKey, evt){
+        var { onTabClick } = this.props;
+
+        // We add 'replace: true' to replace current Browser History entry with new entry.
+        // Entry will refer to same pathname but different hash.
+        // This is so people don't need to click 'back' button 10 times to get to previous /search/ or /browse/ page for example,
+        // since they might browse around tabs for some time.
+        navigate('#' + tabKey, { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true });
+
+        if (typeof onTabClick === 'function'){
+            return onTabClick(tabKey, evt);
+        }
+    }
+
+    additionalTabs(){
+        var { context, contents } = this.props,
+            resultArr = [],
+            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
+
+        if (staticContentList.length === 0) return []; // No content defined for Item.
+
+        if (typeof contents === 'function') contents = contents();
+
+        return TabbedView.calculateAdditionalTabs(staticContentList, contents);
+    }
 
     render(){
         var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;

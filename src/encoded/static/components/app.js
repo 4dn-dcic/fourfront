@@ -21,7 +21,6 @@ import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
-import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
 
 var { NavigateOpts } = typedefs;
@@ -1899,10 +1898,7 @@ class BodyElement extends React.PureComponent {
 
                 <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 
-                <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
-                    verticalAlign="center" /* cursor position relative to popover */
-                    //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
-                />
+                <div id="overlays-root"/>
 
             </body>
         );

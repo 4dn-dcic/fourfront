@@ -250,16 +250,16 @@ const initialDetailCursorState = {
 };
 
 
-export default class ChartDetailCursor extends React.Component {
+export default class ChartDetailCursor extends React.PureComponent {
 
-    static Body = Body
+    static Body = Body;
 
     static getCounts(d){
         return {
-            experiments : d.experiments || 0,
-            experiments_active : d.active || 0,
-            experiment_sets : d.experiment_sets || 0,
-            files : d.activeFiles || d.files || 0
+            'experiments'         : d.experiments || 0,
+            'experiments_active'  : d.active || 0,
+            'experiment_sets'     : d.experiment_sets || 0,
+            'files'               : d.activeFiles || d.files || 0
         };
     }
 
@@ -446,14 +446,16 @@ export default class ChartDetailCursor extends React.Component {
     }
 
     render(){
-        var containDims = {};
-        if (!this.props.containingElement){
-            if (this.props.hideWhenNoContainingElement) return null;
-            containDims = this.props.cursorContainmentDimensions;
+        var { containingElement, hideWhenNoContainingElement, cursorContainmentDimensions, windowWidth, windowHeight } = this.props,
+            containDims = {};
+
+        if (!containingElement){
+            if (hideWhenNoContainingElement) return null;
+            containDims = cursorContainmentDimensions;
             if (this.state.mounted && !isServerSide()){
                 containDims = {
-                    'containingWidth'   : window.innerWidth,
-                    'containingHeight'  : window.innerHeight,
+                    'containingWidth'   : windowWidth,
+                    'containingHeight'  : windowHeight,
                     'offsetTop'         : 80,
                     'offsetLeft'        : 0
                 };
@@ -466,12 +468,10 @@ export default class ChartDetailCursor extends React.Component {
         return (
             <CursorComponent
                 {...containDims}
+                {..._.pick(this.props, 'width', 'height', 'horizontalAlign', 'debugStyle', 'id')}
                 containingElement={this.props.containingElement}
-                width={this.props.width}
-                height={this.props.height}
                 cursorOffset={this.getCursorOffset()}
                 xCoordOverride={this.state.xCoordOverride}
-                horizontalAlign={this.props.horizontalAlign}
                 className="mosaic-detail-cursor"
                 isVisible={isVisible}
                 visibilityMargin={this.props.visibilityMargin || {
@@ -480,7 +480,6 @@ export default class ChartDetailCursor extends React.Component {
                     bottom: -50,
                     top: -10
                 }}
-                debugStyle={this.props.debugStyle}
                 ref="cursorComponent"
                 sticky={this.state.sticky}
                 children={React.createElement(

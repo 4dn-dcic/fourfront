@@ -57,7 +57,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         'renderRightPanel'              : PropTypes.func.isRequired,
         'renderLeftPanelPlaceHolder'    : PropTypes.func,
         'height'                        : PropTypes.number.isRequired, // Pre-define this.
-        'width'                         : PropTypes.number, // Wrap in a WidthProvider if don't have
+        'width'                         : PropTypes.number,
         'windowWidth'                   : PropTypes.number.isRequired
     };
 
