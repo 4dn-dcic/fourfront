@@ -716,7 +716,12 @@ class FileFastq(File):
         "quality_metric.Total Sequences",
         "quality_metric.Sequence length",
         "quality_metric.url",
-        "badges.badge.*"
+        "badges.badge.title",
+        "badges.badge.commendation",
+        "badges.badge.warning",
+        "badges.badge.badge_classification",
+        "badges.badge.description",
+        "badges.message"
     ]
     aggregated_items = {
         "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
