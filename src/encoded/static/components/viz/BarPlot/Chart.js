@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
+import memoize from 'memoize-one';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
@@ -26,7 +27,7 @@ import { PopoverViewContainer } from './ViewContainer';
  * @param {?number} [fullHeightCount=null] - 100% Y-Axis count value. Overrides height of bars.
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
-export function genChartBarDims(
+export const genChartBarDims = memoize(function(
     rootField,
     availWidth              = 400,
     availHeight             = 400,
@@ -134,7 +135,7 @@ export function genChartBarDims(
 
 
     return barData;
-}
+});
 
 
 /**
@@ -208,7 +209,7 @@ export class Chart extends React.PureComponent {
         'useOnlyPopulatedFields' : PropTypes.bool,
         'showType'      : PropTypes.oneOf(['all', 'filtered', 'both']),
         'aggregateType' : PropTypes.oneOf(['experiment_sets', 'experiments', 'files']),
-    }
+    };
 
     static defaultProps = {
         'experiments' : [],
@@ -217,13 +218,18 @@ export class Chart extends React.PureComponent {
         'showType' : 'both',
         'aggregateType' : 'experiments',
         'styleOptions' : null, // Can use to override default margins/style stuff.
+    };
+    /*
+    static getDerivedStateFromProps(nextProps, ){
+        if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
+            console.log('WILL DO SLOW TRANSITION');
+            this.setState({ transitioning : true });
+        }
     }
+    */
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.styleOptions = this.styleOptions.bind(this);
         this.width = this.width.bind(this);
         this.height = this.height.bind(this);
@@ -231,7 +237,6 @@ export class Chart extends React.PureComponent {
         this.getTopLevelField = this.getTopLevelField.bind(this);
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
         this.renderParts.leftAxis = this.renderParts.leftAxis.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'mounted' : false };
     }
 
@@ -244,34 +249,9 @@ export class Chart extends React.PureComponent {
         this.setState({ 'mounted' : false });
     }
 
-    /**
-     * @deprecated
-     * @instance
-     * @ignore
-     */
-    componentWillReceiveProps(nextProps){
-        if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
-            console.log('WILL DO SLOW TRANSITION');
-            this.setState({ transitioning : true });
-        }
-    }
-
-
     componentWillUpdate(){
         // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
         barplot_color_cycler.resetCache();
-    }
-
-    componentDidUpdate(pastProps){
-
-        if (Chart.shouldPerformManualTransitions(this.props, pastProps)){
-            // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
-            setTimeout(()=>{
-                if (!this || !this.state || !this.state.mounted) return;
-                this.setState({ transitioning : false });
-            }, 750);
-        }
-
     }
 
     /** 
@@ -349,7 +329,7 @@ export class Chart extends React.PureComponent {
                     'name'      : b.name || b.term,
                     'term'      : b.term,
                     'x'         : b.attr.x,
-                    'opacity'   : 1 //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                    'opacity'   : 1
                 }; 
             }).sort(function(a,b){
                 return a.term < b.term ? -1 : 1;
@@ -452,7 +432,7 @@ export class Chart extends React.PureComponent {
                 showType={this.props.showType}
                 aggregateType={this.props.aggregateType}
                 bars={barData.bars}
-                transitioning={this.state.transitioning}
+                //transitioning={this.state.transitioning}
             />
         );
 

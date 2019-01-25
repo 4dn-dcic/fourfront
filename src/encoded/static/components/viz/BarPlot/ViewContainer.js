@@ -3,18 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
 import { CursorViewBounds } from './../ChartDetailCursor';
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
-
-// Used for transitioning
-var cachedBars = {},
-    cachedPastBars = {},
-    cachedBarSections = {},
-    cachedPastBarSections = {};
 
 
 /**
@@ -87,7 +82,10 @@ class Bar extends React.PureComponent {
         this.verifyCounts = this.verifyCounts.bind(this);
         this.barStyle = this.barStyle.bind(this);
         this.renderBarSection = this.renderBarSection.bind(this);
-        this.render = this.render.bind(this);
+        this.state = {
+            'mounted' : false
+        };
+        this.barElemRef = React.createRef();
     }
 
     componentDidMount(){
@@ -123,14 +121,12 @@ class Bar extends React.PureComponent {
     }
 
     barStyle(){
-        var style = {};
-        var d = this.props.node;
-        var styleOpts = this.props.styleOptions;
+        var style       = {},
+            d           = this.props.node,
+            styleOpts   = this.props.styleOptions;
 
         // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
         style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
-        if ((d.removing || d.new) && this.props.transitioning) style.opacity = 0; // Fade it out from current (opacity=1) via CSS3.
-        else style.opacity = 1; // 'Default' (no transitioning) style
         style.left = styleOpts.offset.left;
         style.bottom = styleOpts.offset.bottom;
         style.width = d.attr.width;
@@ -140,13 +136,6 @@ class Bar extends React.PureComponent {
     }
 
     renderBarSection(d, i, all){
-        //var parentBarTerm = (d.parent || d).term;
-        //cachedBarSections[parentBarTerm][d.term] = d;
-        //var isNew = false;
-        //if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
-        //    isNew = true;
-        //}
-
         var { hoverTerm, hoverParentTerm, selectedTerm, selectedParentTerm, onBarPartClick,
                 onBarPartMouseEnter, onBarPartMouseOver, onBarPartMouseLeave,
                 aggregateType, transitioning, canBeHighlighted } = this.props,
@@ -162,11 +151,7 @@ class Bar extends React.PureComponent {
 
     render(){
         var { transitioning, canBeHighlighted, showBarCount } = this.props,
-            d = this.props.node,
-            prevBarData = null;
-
-        if (d.existing && transitioning && cachedPastBars)  prevBarData = cachedPastBars[d.term].__data__;
-        if (!cachedBarSections[d.term])                     cachedBarSections[d.term] = {};
+            d = this.props.node;
 
         var hasSubSections = Array.isArray(d.bars),
             barSections = (hasSubSections ?
@@ -176,46 +161,8 @@ class Bar extends React.PureComponent {
             className = "chart-bar",
             topLabel = showBarCount ? <span className="bar-top-label" key="text-label" children={d.count} /> : null;
 
-        // If transitioning, add existing bar sections to fade out.
-        /* Removed for now as we don't transition barSections currently
-        if (transitioning && cachedPastBarSections[d.term]){
-            barSections = barSections.concat(
-                _.map(
-                    _.filter(
-                        _.pairs(cachedPastBarSections[d.term]), // [ barNode.term, { <barSectionNode.term> : { ...barSectionNode } } ][]
-                        function(pastNodePair){
-                            if (
-                                _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
-                                    //if (typeof barNode.pastWidth !== 'number'){
-                                    //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
-                                    //}
-                                    if (barNode.term === pastNodePair[0]){
-                                        barNode.existing = true;
-                                        return true;
-                                    }
-                                    return false;
-                                }).length === 0) return true;
-                            return false;
-                        }
-                    ),
-                    function(pastNodePair){
-                        var pastNode = pastNodePair[1];
-                        pastNode.removing = true;
-                        //pastNode.attr.width = d.attr.width;
-                        //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
-                        return pastNode;
-                    }
-                )
-            );
-        }
-        */
-
         if (!canBeHighlighted)  className += ' no-highlight';
         else                    className += ' no-highlight-color';
-
-        if (transitioning)      className += ' transitioning';
-        if (d.new)              className += ' new-bar';
-        else if (d.existing)    className += ' existing-bar';
 
         return (
             <div
@@ -229,16 +176,10 @@ class Bar extends React.PureComponent {
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                 key={"bar-" + d.term}
                 style={this.barStyle()}
-                ref={(r) => {
-                    if (typeof cachedBars !== 'undefined' && r !== null){
-                        // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                        d3.select(r).datum(d);
-                        if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
-                        if (d.new && transitioning) r.style.opacity = 1;
-                    }
-                }}
-                children={[ topLabel, _.map(barSections, this.renderBarSection) ]}
-            />
+                ref={this.barElemRef}>
+                { topLabel }
+                { _.map(barSections, this.renderBarSection) }
+            </div>
         );
     }
 }
@@ -263,7 +204,6 @@ export class ViewContainer extends React.Component {
         super(props);
         this.verifyCounts = this.verifyCounts.bind(this);
         this.renderBars = this.renderBars.bind(this);
-        this.render = this.render.bind(this);
     }
 
     componentDidMount(){
@@ -312,38 +252,16 @@ export class ViewContainer extends React.Component {
         var { bars, transitioning, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props,
             barsToRender, currentBars;
 
-        // Global/Module-level Variables
-        cachedPastBars = _.clone(cachedBars);
-        cachedBars = {};
-        cachedPastBarSections = _.clone(cachedBarSections);
-        cachedBarSections = {};
-
-        // Current Bars only (unless transitioning).
-        barsToRender = currentBars = _.map(bars, (d)=>{
-            // Determine whether bar existed before.
-            var isExisting = typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null;
-            return _.extend(d, { 
-                'existing' : isExisting,
-                'new' : !isExisting
-            });
-        });
-
-        // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
-        if (transitioning){
-            var barsToRemove = _.map(_.difference(_.keys(cachedPastBars), _.pluck(bars, 'term')), function(barTerm){
-                return _.extend(cachedPastBars[barTerm].__data__, { 'removing' : true });
-            });
-            barsToRender = barsToRemove.concat(currentBars);
-        }
-
-        return _.map(barsToRender.sort(function(a,b){ // key will be term or name, if available
+        return _.map(bars.sort(function(a,b){ // key will be term or name, if available
             return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }), (d,i,a) =>
-            <Bar key={d.term || d.name || i} node={d}
-                showBarCount={true /*!allExpsBarDataContainer */}
-                {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
-                    'transitioning', 'aggregateType', 'showType', 'canBeHighlighted')}
-                onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
+                <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i}>
+                    <Bar key={d.term || d.name || i} node={d}
+                        showBarCount={true /*!allExpsBarDataContainer */}
+                        {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
+                            'transitioning', 'aggregateType', 'showType', 'canBeHighlighted')}
+                        onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
+                </CSSTransition>
         );
     }
 
@@ -380,7 +298,7 @@ export class ViewContainer extends React.Component {
                 : null }
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
-                { this.renderBars() }
+                <TransitionGroup>{ this.renderBars() }</TransitionGroup>
                 { this.props.bottomAxis }
             </div>
         );
@@ -470,7 +388,7 @@ export function boundActions(to, showType = null){
  * Wraps ViewContainer with PopoverViewBounds, which feeds it
  * props.onNodeMouseEnter(node, evt), props.onNodeMouseLeave(node, evt), props.onNodeClick(node, evt),
  * props.selectedTerm, props.selectedParentTerm, props.hoverTerm, and props.hoverParentTerm.
- * 
+ *
  * @export
  * @class PopoverViewContainer
  * @extends {React.Component}
@@ -485,12 +403,12 @@ export class PopoverViewContainer extends React.Component {
             'function' : PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
             'disabled' : PropTypes.oneOfType([PropTypes.bool, PropTypes.func]).isRequired,
         }))
-    }
+    };
 
     static defaultProps = {
         'cursorDetailActions' : [],
         'cursorContainerMargin' : 100
-    }
+    };
 
     cursorDetailActions(){
         return this.props.cursorDetailActions.concat(boundActions(this));
