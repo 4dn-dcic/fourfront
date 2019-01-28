@@ -1,6 +1,8 @@
 Care and Feeding of rev links
 ============================
 
+UPDATE THIS FOR SID CODE
+
 Rev links are actually a pretty cool think.  Any time you have one object link-to another object, through a calculated or schema based property, a rev link allows you to easily create the reverse direction link on the object that was being linkedto.  Here is a simple example.
 
 if ExperiementSet has property 'experimenets_in_set' which is a list of linkTos that link to an Experiement object.  Then the Experiment Object can have a rev link defined as such:
@@ -101,4 +103,3 @@ with a coresponding calculated property that looks like:
 ```
 
 Note self.rev_link_atids which is a function defined in the Item class that will automatically get the atids of all rev links filtered by status.  This is helpful for accessing rev_links when you are not useing the 'linkFrom' schema option.
-

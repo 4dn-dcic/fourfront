@@ -9,7 +9,6 @@ from snovault import (
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    paths_filtered_by_status,
     ALLOW_SUBMITTER_ADD,
     lab_award_attribution_embed_list
 )
