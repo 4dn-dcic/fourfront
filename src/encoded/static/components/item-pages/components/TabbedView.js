@@ -199,6 +199,7 @@ export class TabbedView extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.getActiveKey = this.getActiveKey.bind(this);
         this.setActiveKey = this.setActiveKey.bind(this);
         this.maybeSwitchTabAccordingToHref = this.maybeSwitchTabAccordingToHref.bind(this);
         this.onTabClick = this.onTabClick.bind(this);
@@ -216,22 +217,11 @@ export class TabbedView extends React.PureComponent {
         }
     }
 
-    maybeSwitchTabAccordingToHref(props = this.props){
-        var { contents, href } = props,
-            hrefParts       = url.parse(href),
-            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
-            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
-            tabsInstance    = this.tabsRef.current,
-            currKey         = foundContent && tabsInstance && tabsInstance.state.activeKey;
+    getActiveKey(){
+        var tabsInstance = this.tabsRef.current,
+            currKey = tabsInstance && tabsInstance.state.activeKey;
 
-        if (!foundContent || currKey === hash){
-            console.log('Already on tab', hash);
-            return false;
-        }
-    
-        this.setActiveKey(foundContent.key); // Same as `hash`
-        return true;
+        return currKey;
     }
 
     setActiveKey(nextKey){
@@ -242,6 +232,23 @@ export class TabbedView extends React.PureComponent {
             console.error('Manually setting active tab key not currently supported...');
             return false;
         }
+    }
+
+    maybeSwitchTabAccordingToHref(props = this.props){
+        var { contents, href } = props,
+            hrefParts       = url.parse(href),
+            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
+            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
+            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
+            currKey         = foundContent && this.getActiveKey();
+
+        if (!foundContent || currKey === hash){
+            console.log('Already on tab', hash);
+            return false;
+        }
+    
+        this.setActiveKey(foundContent.key); // Same as `hash`
+        return true;
     }
 
     onTabClick(tabKey, evt){
@@ -274,8 +281,6 @@ export class TabbedView extends React.PureComponent {
         var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
         if (typeof contents === 'function') contents = contents();
         if (!Array.isArray(contents)) return null;
-
-        console.log('TABVEIW RENDER', windowWidth);
 
         var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
             tabsProps = {

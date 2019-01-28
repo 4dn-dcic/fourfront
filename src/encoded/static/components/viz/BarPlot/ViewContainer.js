@@ -20,10 +20,21 @@ import { console, object, isServerSide, expFxn, Filters, layout, navigate, analy
  */
 class BarSection extends React.PureComponent {
 
+    constructor(props){
+        super(props);
+        this.barSectionElemRef = React.createRef();
+    }
+
+    /**
+     * Call the `onMouseLeave` prop callback fxn in preparation
+     * to dismount in order to clean up if necessary.
+     *
+     * @todo Maybe check for `props.isHoveredOver` first?
+     */
     componentWillUnmount(){
         var { isSelected, isHoveredOver, onMouseLeave, node } = this.props;
-        if (this.refs.element && (isSelected || isHoveredOver)){
-            onMouseLeave(node, { 'relatedTarget' : this.refs.element });
+        if (this.barSectionElemRef.current && (isSelected || isHoveredOver)){
+            onMouseLeave(node, { 'relatedTarget' : this.barSectionElemRef.current });
         }
     }
 
@@ -52,7 +63,7 @@ class BarSection extends React.PureComponent {
         }
 
         return (
-            <div className={className} ref="element"
+            <div className={className} ref={this.barSectionElemRef}
                 style={{
                     height, 'backgroundColor' : color
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
@@ -197,8 +208,8 @@ export class ViewContainer extends React.Component {
     static BarSection = BarSection
 
     static defaultProps = {
-        canBeHighlighted : true
-    }
+        'canBeHighlighted' : true
+    };
 
     constructor(props){
         super(props);
@@ -272,7 +283,7 @@ export class ViewContainer extends React.Component {
             });
         return (
             <div className="bar-plot-chart chart-container no-highlight"
-                data-field={topLevelField.field} style={{ height, width }} ref="container"
+                data-field={topLevelField.field} style={{ height, width }}
                 /*
                 onMouseLeave={(evt)=>{
                     if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
