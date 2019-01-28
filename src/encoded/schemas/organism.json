@@ -43,8 +43,7 @@
             "description": "A short unique name for the organism (e.g. 'mouse' or 'human').",
             "type": "string",
             "lookup": 20,
-            "pattern": "^[a-z0-9\\-]+$",
-            "uniqueKey": true
+            "pattern": "^[a-z0-9\\-]+$"
         },
         "scientific_name": {
             "title": "Binomial name",
@@ -58,11 +57,8 @@
             "description": "The NCBI taxon ID for the organism (e.g. 10090).",
             "type": "string",
             "lookup": 40,
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9]+$",
+            "uniqueKey": true
         }
-    },
-    "boost_values": {
-        "name": 1.0,
-        "scientific_name": 1.0
     }
 }

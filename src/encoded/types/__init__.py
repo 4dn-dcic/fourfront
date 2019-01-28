@@ -131,7 +131,8 @@ class GenomicRegion(Item):
 
 @collection(
     name='organisms',
-    unique_key='organism:name',
+    unique_key='organism:taxon_id',
+    lookup_key='name',
     properties={
         'title': 'Organisms',
         'description': 'Listing of all registered organisms',
@@ -141,7 +142,7 @@ class Organism(Item):
 
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
-    name_key = 'name'
+    name_key = 'taxon_id'
 
     def display_title(self):
         if self.properties.get('scientific_name'):  # Defaults to "" so check if falsy not if is None

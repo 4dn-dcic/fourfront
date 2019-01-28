@@ -4,13 +4,12 @@
     "id": "/profiles/gene.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["geneid", "official_symbol", "organism"],
+    "required": ["geneid"],
     "identifyingProperties": ["uuid", "geneid", "preferred_symbol"],
     "additionalProperties": false,
     "mixinProperties": [
       { "$ref": "mixins.json#/schema_version" },
       { "$ref": "mixins.json#/uuid" },
-      { "$ref": "mixins.json#/references" },
       { "$ref": "mixins.json#/submitted" },
       { "$ref": "mixins.json#/modified" },
       { "$ref": "mixins.json#/status" },
@@ -51,7 +50,7 @@
             "description": "Preferred gene symbol commonly used by the community.",
             "type": "string"
         },
-        "name": {
+        "fullname": {
             "title": "Gene name",
             "description": "The full gene name preferably approved by the official nomenclature.",
             "type": "string",
@@ -82,6 +81,12 @@
             "description": "Location of the gene on it's genome",
             "type": "string",
             "linkTo": "GenomicRegion"
+        },
+        "url": {
+            "title": "NCBI link",
+            "description": "Link to the gene record in NCBI",
+            "type": "string",
+            "permission": "import_items"
         }
     },
     "columns": {
