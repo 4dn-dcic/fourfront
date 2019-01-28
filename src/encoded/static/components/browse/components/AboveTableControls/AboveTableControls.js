@@ -176,7 +176,7 @@ export class AboveTableControls extends React.Component {
                 <ChartDataController.Provider id="selected_files_section">
                     <SelectedFilesControls
                         {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount', 'resetSelectedFiles',
-                            'includeFileSets', 'includeProcessedFiles', 'windowWidth')}
+                            'includeFileSets', 'includeProcessedFiles')}
                         subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')} currentFileTypeFilters={this.state.fileTypeFilters}
                         setFileTypeFilters={this.setFileTypeFilters} currentOpenPanel={this.state.open} />
                 </ChartDataController.Provider>
@@ -222,13 +222,14 @@ export class AboveTableControls extends React.Component {
 
     rightButtons(){
         var { open } = this.state,
-            { isFullscreen, windowWidth } = this.props,
-            gridState = layout.responsiveGridState(windowWidth);
+            { isFullscreen } = this.props;
 
         return (
             <div className="pull-right right-buttons">
                 <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
-                    <i className="icon icon-gear icon-fw"/>{['lg', 'md'].indexOf(gridState) > -1 ? <span>Columns</span> : null }<i className="icon icon-fw icon-angle-down"/>
+                    <i className="icon icon-gear icon-fw"/>
+                    <span className="hidden-xs hidden-sm">Columns</span>
+                    <i className="icon icon-fw icon-angle-down"/>
                 </Button>
                 <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (!isFullscreen ? '' : ' expanded')}
                     onClick={this.handleLayoutToggle} data-tip={(!isFullscreen ? 'Expand' : 'Collapse') + " table width"}>

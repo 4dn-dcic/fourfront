@@ -183,8 +183,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles, windowWidth } = this.props,
-            gridState                               = layout.responsiveGridState(windowWidth),
+        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props,
             selectedFilesCountIncludingDuplicates   = _.keys(selectedFiles).length,
             subSelectedFilesCount                   = _.keys(subSelectedFiles).length,
             disabled                                = selectedFilesUniqueCount === 0,
@@ -201,12 +200,12 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
             tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
         }
 
-        var innerBtnTitle  = (
-            ['lg', 'md'].indexOf(gridState) > -1 ? (
-                <span>Download { countToShow }<span className="text-400"> Selected Files</span></span>
-            ) : (
-                <span>{ countToShow }</span>
-            )
+        var innerBtnTitle = (
+            <span>
+                <span className="hidden-xs hidden-sm">Download </span>
+                { countToShow }
+                <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
+            </span>
         );
 
         return (
@@ -585,21 +584,19 @@ export class SelectedFilesFilterByButton extends React.Component {
     }
 
     render(){
-        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel, windowWidth } = this.props,
+        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel } = this.props,
             isDisabled              = !selectedFiles || _.keys(selectedFiles).length === 0,
-            currentFiltersLength    = currentFileTypeFilters.length,
-            gridState               = layout.responsiveGridState(windowWidth),
-            largerSize              = ['lg', 'md'].indexOf(gridState) > -1;
+            currentFiltersLength    = currentFileTypeFilters.length;
 
         return (
             <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'}>
                 <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
                 {
                     currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
-                        largerSize ? <span>All </span> : null
+                        <span className="hidden-xs hidden-sm">All </span>
                     )
                 }
-                { largerSize ? <span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }</span> : null }
+                <span className="text-400 hidden-xs hidden-sm">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>
                 <i className="icon icon-angle-down icon-fw"/>
             </Button>
         );
@@ -631,12 +628,12 @@ export class SelectedFilesControls extends React.PureComponent {
         return (
             <div>
                 <SelectAllFilesButton {..._.pick(this.props, 'href', 'selectedFilesUniqueCount', 'selectedFiles', 'selectFile',
-                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles', 'windowWidth')} totalFilesCount={totalFilesCount} />
+                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles')} totalFilesCount={totalFilesCount} />
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
                         <SelectedFilesFilterByButton {..._.pick(this.props, 'setFileTypeFilters', 'currentFileTypeFilters',
                             'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
-                            'currentOpenPanel', 'windowWidth' )} totalFilesCount={totalFilesCount} />
+                            'currentOpenPanel' )} totalFilesCount={totalFilesCount} />
                         <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                     </ButtonGroup>
                 </div>
