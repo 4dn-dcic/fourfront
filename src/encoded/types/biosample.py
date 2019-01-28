@@ -31,7 +31,12 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'badges.badge.*',
+        'badges.badge.title',
+        'badges.badge.commendation',
+        'badges.badge.warning',
+        'badges.badge.badge_classification',
+        'badges.badge.description',
+        'badges.message',
         'biosource.biosource_type',
         'biosource.individual.sex',
         'biosource.individual.organism.name',
