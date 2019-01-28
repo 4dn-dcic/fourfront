@@ -573,7 +573,8 @@ export class AggregatedLegend extends React.Component {
                     hasPopover
                     //expandable
                     //expandableAfter={8}
-                    cursorDetailActions={boundActions(this, showType)}
+                    //cursorDetailActions={boundActions(this, showType)}
+                    cursorDetailActions={this.props.cursorDetailActions}
                     aggregateType={aggregateType}
                 />
             </div>

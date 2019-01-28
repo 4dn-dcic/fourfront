@@ -140,7 +140,7 @@ export default class CursorComponent extends React.Component {
         if (isServerSide()) return null;
         if (this.props.debug) console.log('Mounted CursorComponent');
 
-        this.overlaysRoot = this.overlaysRoot || document.getElementById('overlays-root');
+        this.overlaysRoot = this.overlaysRoot || document.getElementById('overlays-root') || document.body;
         if (!this.overlaysRoot){
             throw new Error('No overlay root element to add cursor component to.');
         }
@@ -163,11 +163,6 @@ export default class CursorComponent extends React.Component {
 
         this.overlaysRoot.removeChild(this.portalElement);
         this.portalElement = null;
-
-        vizUtil.requestAnimationFrame(()=>{
-            this.overlaysRoot.removeChild(this.portalElement);
-            this.portalElement = null;
-        });
 
         this.setState({ 'mounted' : false });   
     }

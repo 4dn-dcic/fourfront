@@ -1904,8 +1904,6 @@ class BodyElement extends React.PureComponent {
 
                 <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 
-                <div id="overlays-root"/>
-
             </body>
         );
     }

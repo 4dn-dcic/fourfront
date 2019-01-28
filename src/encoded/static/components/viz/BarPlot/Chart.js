@@ -231,8 +231,6 @@ export class Chart extends React.PureComponent {
     constructor(props){
         super(props);
         this.styleOptions = this.styleOptions.bind(this);
-        this.width = this.width.bind(this);
-        this.height = this.height.bind(this);
         this.getLegendData = this.getLegendData.bind(this);
         this.getTopLevelField = this.getTopLevelField.bind(this);
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
@@ -259,29 +257,6 @@ export class Chart extends React.PureComponent {
      * @returns {Object} Style options object.
      */
     styleOptions(){ return vizUtil.extendStyleOptions(this.props.styleOptions, Chart.getDefaultStyleOpts()); }
-  
-    /**
-     * @returns props.width or width of refs.container, if mounted.
-     */
-    width(){
-        if (this.props.width) return this.props.width;
-        if (!this.refs.container) return null;
-        var width = this.refs.container.parentElement.clientWidth;
-        if (this.refs.container.parentElement.className.indexOf('col-') > -1){
-            // Subtract 20 to account for grid padding (10px each side).
-            return width - 20;
-        }
-        return width;
-    }
-
-    /**
-     * @returns props.height or height of refs.container, if mounted.
-     */
-    height(){
-        if (this.props.height) return this.props.height;
-        if (!this.refs.container) return null;
-        return this.refs.container.parentElement.clientHeight;
-    }
 
     /**
      * Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
@@ -404,36 +379,29 @@ export class Chart extends React.PureComponent {
      * @returns {JSX.Element} - Chart markup wrapped in a div.
      */
     render(){
-        if (this.state.mounted === false) return <div ref="container"></div>;
+        if (this.state.mounted === false) return <div/>;
 
-        var availHeight = this.height(),
-            availWidth = this.width(),
-            styleOpts = this.styleOptions();
+        var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions } = this.props,
+            styleOptions = this.styleOptions();
 
-        var topLevelField = (this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered) || this.props.barplot_data_unfiltered;
+        var topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
 
-        var barData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        var barData = genChartBarDims(
             topLevelField,
-            availWidth,
-            availHeight,
-            styleOpts,
-            this.props.aggregateType,
-            this.props.useOnlyPopulatedFields
+            width,
+            height,
+            styleOptions,
+            aggregateType,
+            useOnlyPopulatedFields
         );
 
         return (
-            <PopoverViewContainer
-                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
-                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
-                topLevelField={barData.field}
-                width={availWidth}
-                height={availHeight}
-                styleOptions={styleOpts}
-                showType={this.props.showType}
-                aggregateType={this.props.aggregateType}
-                bars={barData.bars}
-                //transitioning={this.state.transitioning}
-            />
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType }}
+                actions={cursorDetailActions}
+                leftAxis={this.renderParts.leftAxis.call(this, width, height, barData, styleOptions)}
+                bottomAxis={this.renderParts.bottomXAxis.call(this, width, height, barData.bars, styleOptions)}
+                topLevelField={barData.field} bars={barData.bars} />
         );
 
     }

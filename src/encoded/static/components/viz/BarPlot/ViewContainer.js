@@ -308,82 +308,6 @@ export class ViewContainer extends React.Component {
 }
 
 
-export const barPlotCursorActions = [
-    {
-        'title' : function(cursorProps){
-            if (navigate.isBrowseHref(cursorProps.href)){
-                //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
-                return "Explore";
-            }
-            return "Browse";
-        },
-        'function' : function(showType = 'all', cursorProps, mouseEvt){
-            //var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-            var baseParams = navigate.getBrowseBaseParams();
-            var href = navigate.getBrowseBaseHref(baseParams);
-
-            // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
-            var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
-
-            var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
-                // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                if (expSetFilters && expSetFilters[node.field] && expSetFilters[node.field].has(node.term)){
-                    return expSetFilters;
-                }
-                return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE
-            }, currentExpSetFilters);
-
-            // Register 'Set Filter' event for each field:term pair (node) of selected Bar Section.
-            _.forEach(cursorProps.path, function(node){
-                analytics.event('BarPlot', 'Set Filter', {
-                    'eventLabel'        : analytics.eventLabelFromChartNode(node, false),                         // 'New' filter logged here.
-                    'field'             : node.field,
-                    'term'              : node.term,
-                    'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
-                });
-            });
-
-            Filters.saveChangedFilters(newExpSetFilters, href, () => {
-                // Scroll to top of browse page container after navigation is complete.
-                setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
-            });
-
-        },
-        'disabled' : function(cursorProps){
-            var expSetFilters = Filters.currentExpSetFilters();
-
-            if (expSetFilters && typeof expSetFilters === 'object'){
-                if (
-                    Array.isArray(cursorProps.path) &&
-                    (cursorProps.path[0] && cursorProps.path[0].field) &&
-                    expSetFilters[cursorProps.path[0].field] instanceof Set &&
-                    expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
-                    (
-                        !cursorProps.path[1] || (
-                            cursorProps.path[1].field &&
-                            expSetFilters[cursorProps.path[1].field] instanceof Set &&
-                            expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
-                        )
-                    )
-                ) return true;
-            }
-            return false;
-        }
-    }
-];
-
-export function boundActions(to, showType = null){
-    if (!showType) showType = to.props.showType;
-    return barPlotCursorActions.map((action)=>{
-        var clonedAction = _.clone(action);
-        if (typeof action.function === 'function') clonedAction.function = action.function.bind(to, showType);
-        if (typeof action.title === 'function') clonedAction.title = action.title.bind(to);
-        if (typeof action.disabled === 'function') clonedAction.disabled = action.disabled.bind(to);
-        return clonedAction;
-    });
-}
-
-
 /**
  * Wraps ViewContainer with PopoverViewBounds, which feeds it
  * props.onNodeMouseEnter(node, evt), props.onNodeMouseLeave(node, evt), props.onNodeClick(node, evt),
@@ -393,7 +317,7 @@ export function boundActions(to, showType = null){
  * @class PopoverViewContainer
  * @extends {React.Component}
  */
-export class PopoverViewContainer extends React.Component {
+export class PopoverViewContainer extends React.PureComponent {
 
     static propTypes = {
         'height' : PropTypes.number,
@@ -406,52 +330,48 @@ export class PopoverViewContainer extends React.Component {
     };
 
     static defaultProps = {
-        'cursorDetailActions' : [],
         'cursorContainerMargin' : 100
     };
 
-    cursorDetailActions(){
-        return this.props.cursorDetailActions.concat(boundActions(this));
+    constructor(props){
+        super(props);
+        this.getCoordsCallback = this.getCoordsCallback.bind(this);
+        //this.cursorDetailActions = this.cursorDetailActions.bind(this);
+    }
+
+    getCoordsCallback(node, containerPosition, boundsHeight){
+        var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
+        var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+
+        var barYPos = node.attr.height;
+
+        if (node.parent){
+            var done = false;
+            barYPos = _.reduce(
+                node.parent.bars,//.slice(0).reverse(),
+                //_.sortBy(node.parent.bars, 'term').reverse(),
+                function(m, siblingNode){
+                    if (done) return m;
+                    if (siblingNode.term === node.term){
+                        done = true;
+                    }
+                    return m + siblingNode.attr.height;
+                },
+                0
+            );
+        }
+
+        return {
+            'x' : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
+            'y' : containerPosition.top + boundsHeight - bottomOffset - barYPos,
+        };
     }
 
     render(){
         return (
-            <CursorViewBounds
-                height={this.props.height}
-                width={this.props.width}
-                actions={this.cursorDetailActions.call(this)}
-                cursorContainerMargin={this.props.cursorContainerMargin}
+            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions')}
                 eventCategory="BarPlot" // For Analytics events
-                highlightTerm={false}
-                clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
-                    var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
-                    var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
-
-                    var barYPos = node.attr.height;
-
-                    if (node.parent){
-                        var done = false;
-                        barYPos = _.reduce(
-                            node.parent.bars,//.slice(0).reverse(),
-                            //_.sortBy(node.parent.bars, 'term').reverse(),
-                            function(m, siblingNode){
-                                if (done) return m;
-                                if (siblingNode.term === node.term){
-                                    done = true;
-                                }
-                                return m + siblingNode.attr.height;
-                            },
-                            0
-                        );
-                    }
-
-                    return {
-                        x : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
-                        y : containerPosition.top + boundsHeight - bottomOffset - barYPos,
-                    };
-
-                }}
-            >
+                highlightTerm={false} clickCoordsFxn={this.getCoordsCallback}>
                 <ViewContainer {...this.props} />
             </CursorViewBounds>
         );

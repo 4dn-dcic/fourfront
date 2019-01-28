@@ -9,14 +9,6 @@ import { expFxn, Schemas, console, object, isServerSide } from './../../util';
 import CursorComponent from './CursorComponent';
 import { Button } from 'react-bootstrap';
 
-/**
- * @ignore
- * @private
- */
-var updateFxns    = { 'default' : null },
-    resetFxns     = { 'default' : null },
-    getStateFxns  = { 'default' : null },
-    setCoordsFxns = { 'default' : null };
 
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
@@ -263,55 +255,6 @@ export default class ChartDetailCursor extends React.PureComponent {
         };
     }
 
-    /**
-     * A static alias of the ChartDetailCursor instance's this.update() method.
-     *
-     * @public
-     * @param {Object} state - State to update ChartDetailCursor with.
-     * @param {string} [id="default"] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
-     * @param {function} [cb] - Optional callback function.
-     * @param {boolean} [overrideSticky=false] - If true, will ignore that is stickied if is the case.
-     */
-    static update(state, id = "default", cb = null, overrideSticky = false){
-        if (typeof updateFxns[id] === 'function'){
-            return updateFxns[id](state, cb, overrideSticky);
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
-    /**
-     * A static alias of the ChartDetailCursor instance's this.reset() method.
-     *
-     * @public
-     * @param {boolean} [overrideSticky=true] - If false, will cancel out if stickied.
-     * @param {string} [id="default"] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
-     * @param {function} [cb] - Optional callback function.
-     */
-    static reset(overrideSticky = true, id = "default", cb = null){
-        if (typeof resetFxns[id] === 'function'){
-            return resetFxns[id](overrideSticky, cb);
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
-    static getState(id = 'default'){
-        if (typeof getStateFxns[id] === 'function'){
-            return getStateFxns[id]();
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
-    static setCoords(coords = {x : 0, y : 0}, callback = null, id = 'default'){
-        if (typeof setCoordsFxns[id] === 'function'){
-            return setCoordsFxns[id](coords, callback);
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
     static isTargetDetailCursor(elem){
         // Get to top-level element before document.body.
         while (elem.parentElement && elem.parentElement.tagName.toLowerCase() !== 'body'){
@@ -337,46 +280,22 @@ export default class ChartDetailCursor extends React.PureComponent {
         'horizontalOffset' : 25,
         'verticalAlign' : 'top',
         'verticalOffset' : 10,
-        'debugStyle' : false,
-        'id' : 'default'
-    }
+        'debugStyle' : false
+    };
 
     constructor(props){
         super(props);
         this.getCursorOffset = this.getCursorOffset.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.update = this.update.bind(this);
         this.reset = this.reset.bind(this);
         this.getState = this.getState.bind(this);
         this.setCoords = this.setCoords.bind(this);
-        this.render = this.render.bind(this);
         this.state = _.clone(initialDetailCursorState);
     }
 
     componentDidMount(){
         console.log('Mounted MouseDetailCursor');
-
-        // Alias this.update so we can call it statically.
-        updateFxns[this.props.id]    = this.update;
-        resetFxns[this.props.id]     = this.reset;
-        getStateFxns[this.props.id]  = this.getState;
-        setCoordsFxns[this.props.id] = this.setCoords;
         this.setState({'mounted' : true});
-    }
-
-    componentWillUnmount(){
-        // Cleanup.
-        updateFxns[this.props.id]    = null;
-        resetFxns[this.props.id]     = null;
-        getStateFxns[this.props.id]  = null;
-        setCoordsFxns[this.props.id] = null;
-        if (this.props.id !== 'default') {
-            delete    updateFxns[this.props.id];
-            delete     resetFxns[this.props.id];
-            delete  getStateFxns[this.props.id];
-            delete setCoordsFxns[this.props.id];
-        }
     }
 
     getCursorOffset(){
