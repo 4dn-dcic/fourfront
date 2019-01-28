@@ -49,7 +49,7 @@
         "preferred_symbol": {
             "title": "Common symbol",
             "description": "Preferred gene symbol commonly used by the community.",
-            "type": "string",
+            "type": "string"
         },
         "name": {
             "title": "Gene name",
@@ -66,8 +66,8 @@
             "items": {
                 "title": "Synonym",
                 "description": "An alternative symbol/name referring to the gene.",
-                "type":  "string",
-            },
+                "type":  "string"
+            }
         },
         "organism": {
             "title": "Organism",
@@ -76,6 +76,12 @@
             "type": "string",
             "linkTo": "Organism",
             "permission": "import_items"
+        },
+        "genomic_location":  {
+            "title": "Genomic Location",
+            "description": "Location of the gene on it's genome",
+            "type": "string",
+            "linkTo": "GenomicRegion"
         }
     },
     "columns": {
