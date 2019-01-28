@@ -867,6 +867,77 @@ def test_add_bedGraph_to_multiple_mcool(testapp, mcool_file_json, higlass_mcool_
     for index in range(len(top_track_count.keys())):
         assert_true(top_track_count[index] - old_top_track_count[index] == 1)
 
+def test_add_new_mcool_file(testapp, mcool_file_json, higlass_mcool_viewconf, bedGraph_file_json):
+    """ Create one view with a mcool and bedgraph file. Add another mcool file.
+    The bedGraph should be atop the mcool displays.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        mcool_file_json(dict): Fixture refers to an mcool file.
+        higlass_mcool_viewconf(obj): Higlass view configuration for an mcool file.
+        bedGraph_file_json(dict): Fixture refers to a bedgraph file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
+    """
+
+    # Post an mcool file and retrieve its uuid. Add a higlass_uid.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = "GRCm38"
+    mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+
+    # Add the bedGraph file with a higlass uid and a genome asssembly.
+    bedGraph_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bedGraph_file_json['genome_assembly'] = "GRCm38"
+    bedGraph_file_json['md5sum'] = '00000000000000000000000000000001'
+    bg_file = testapp.post_json('/file_processed', bedGraph_file_json).json['@graph'][0]
+
+    # Get the json for a viewconfig with a mcool file.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    old_top_track_count = len(higlass_json["viewconfig"]["views"][0]["tracks"]["top"])
+
+    # Add a bedGraph file.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=bg_file['uuid'])]
+    })
+
+    new_higlass_json = response.json["new_viewconfig"]
+    assert_true(response.json["success"] == True, "911")
+    assert_true(len(new_higlass_json["views"]) == 1, "912")
+    assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == old_top_track_count + 1, "913")
+    assert_true(len(new_higlass_json["views"][0]["tracks"]["center"][0]["contents"]) == 1, "914")
+
+    # Add another mcool file.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': new_higlass_json,
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=mcool_file['uuid'])]
+    })
+
+    # The bedGraph file should be above both views.
+    new_higlass_json = response.json["new_viewconfig"]
+    assert_true(response.json["success"] == True, "925")
+    assert_true(len(new_higlass_json["views"]) == 2, "926")
+
+    top_track_count = {}
+    for index, view in enumerate(new_higlass_json["views"]):
+        top_track_count[index] = len(view["tracks"]["top"])
+
+    # It should be on top of every view, and it did not create a new view.
+    for index in range(len(top_track_count.keys())):
+        assert_true(top_track_count[index] == 3, "Expected 3 tracks on top for view {view}, found {actual} instead.".format(
+            view=index,
+            actual=top_track_count[index]
+        ))
+
 def test_bogus_fileuuid(testapp, higlass_mcool_viewconf):
     """ Function should fail gracefully if there is no file with the given uuid.
 

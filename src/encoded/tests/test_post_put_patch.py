@@ -185,36 +185,18 @@ def test_put_object_editing_child_does_not_work(content_with_child, testapp):
     assert 'status' not in res.json
 
 
-def test_put_object_adding_child(content_with_child, testapp):
+def test_post_object_with_child(content_with_child, testapp):
     """
-    This works because it simply patches the reverse field, which is
-    an array
+    This will not post a rev link, since editing children through reverse links
+    is no longer done
     """
     edit = {
         'reverse': [
-            content_with_child['child'],
-            {
-                'status': 'released',
-            }
+            {'status': 'released'}
         ]
     }
-    testapp.put_json(content_with_child['@id'], edit, status=200)
-    res = testapp.get(content_with_child['@id'])
-    assert len(res.json['reverse']) == 2
-
-
-def test_post_object_with_child(testapp):
-    """
-    This functionality has changed, as reverse links are no longer supported
-    This will simply post the value below to the 'reverse' field
-    """
-    edit = {
-        'reverse': [{
-            'status': 'released',
-        }]
-    }
     res = testapp.post_json('/testing-link-targets', edit, status=201)
-    assert res.json['@graph'][0]['reverse'] == edit['reverse']
+    assert len(res.json['@graph'][0]['reverse']) == 0
 
 
 def test_retry(testapp):
@@ -223,6 +205,7 @@ def test_retry(testapp):
     res = testapp.get(url + '/@@testing-retry?datastore=database')
     assert res.json['attempt'] == 2
     assert not res.json['detached']
+
 
 def test_post_check_only(testapp, human_data, human):
     '''

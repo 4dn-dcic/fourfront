@@ -17,7 +17,6 @@ from snovault.validators import (
 )
 from .base import (
     Item,
-    paths_filtered_by_status,
     collection_add,
     item_edit,
     lab_award_attribution_embed_list
@@ -77,7 +76,12 @@ class ExperimentSet(Item):
         "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        "badges.badge.*",
+        "badges.badge.title",
+        "badges.badge.commendation",
+        "badges.badge.warning",
+        "badges.badge.badge_classification",
+        "badges.badge.description",
+        "badges.message",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",
@@ -97,7 +101,11 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
-        "experiments_in_set.badges.badge.*",
+        "experiments_in_set.badges.badge.title",
+        "experiments_in_set.badges.badge.commendation",
+        "experiments_in_set.badges.badge.warning",
+        "experiments_in_set.badges.badge.badge_classification",
+        "experiments_in_set.badges.badge.description",
         "experiments_in_set.badges.message",
 
         "experiments_in_set.biosample.accession",
@@ -110,12 +118,16 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
         "experiments_in_set.biosample.biosource.individual.organism.name",
-        'experiments_in_set.biosample.modifications.modification_type',
-        'experiments_in_set.biosample.modifications.display_title',
-        'experiments_in_set.biosample.treatments.treatment_type',
-        'experiments_in_set.biosample.treatments.display_title',
-        'experiments_in_set.biosample.treatments_summary',
-        "experiments_in_set.biosample.badges.badge.*",
+        "experiments_in_set.biosample.modifications.modification_type",
+        "experiments_in_set.biosample.modifications.display_title",
+        "experiments_in_set.biosample.treatments.treatment_type",
+        "experiments_in_set.biosample.treatments.display_title",
+        "experiments_in_set.biosample.treatments_summary",
+        "experiments_in_set.biosample.badges.badge.title",
+        "experiments_in_set.biosample.badges.badge.commendation",
+        "experiments_in_set.biosample.badges.badge.warning",
+        "experiments_in_set.biosample.badges.badge.badge_classification",
+        "experiments_in_set.biosample.badges.badge.description",
         "experiments_in_set.biosample.badges.message",
 
         "experiments_in_set.digestion_enzyme.name",
@@ -145,7 +157,11 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        "experiments_in_set.files.badges.badge.*",
+        "experiments_in_set.files.badges.badge.title",
+        "experiments_in_set.files.badges.badge.commendation",
+        "experiments_in_set.files.badges.badge.warning",
+        "experiments_in_set.files.badges.badge.badge_classification",
+        "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.message",
 
         "experiments_in_set.files.related_files.relationship_type",

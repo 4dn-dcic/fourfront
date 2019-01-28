@@ -7,8 +7,8 @@ from snovault import (
     calculated_property,
     collection,
 )
-from ..types.base import paths_filtered_by_status
 from snovault.attachment import ItemWithAttachment
+from snovault.interfaces import CONNECTION
 
 
 def includeme(config):
@@ -143,6 +143,7 @@ class TestingLinkTarget(Item):
     rev = {
         'reverse': ('TestingLinkSource', 'target'),
     }
+    filtered_rev_statuses = ('deleted', 'replaced')
     embedded = [
         'reverse.*',
     ]
@@ -155,8 +156,11 @@ class TestingLinkTarget(Item):
             "linkFrom": "TestingLinkSource.target",
         },
     })
-    def reverse(self, request, reverse):
-        return paths_filtered_by_status(request, reverse)
+    def reverse(self, request):
+        # was def reverse(self, request, reverse): ... last param needed?
+        conn = request.registry[CONNECTION]
+        return [request.resource_path(conn[uuid]) for uuid in
+                self.get_filtered_rev_links(request, 'reverse')]
 
 
 @collection(
