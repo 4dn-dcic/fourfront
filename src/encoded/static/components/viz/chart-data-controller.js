@@ -349,12 +349,6 @@ export const ChartDataController = {
                 return; // Nothing relevant has changed. Exit.
             }
 
-            // Hide any pop-overs still persisting with old filters or URL.
-            setTimeout(function(){
-                ChartDetailCursor.reset(true);
-            }, 750);
-
-
             // Step 1. Check if need to refetch both unfiltered & filtered data.
             if (refs.browseBaseState !== prevBrowseBaseState){
                 setTimeout(function(){

@@ -60,8 +60,7 @@ export default class CursorViewBounds extends React.PureComponent {
                 x : containerPosition.left,
                 y : containerPosition.top + boundsHeight,
             };
-        },
-        'cursorId' : 'default'
+        }
     };
 
     constructor(props){
@@ -98,7 +97,10 @@ export default class CursorViewBounds extends React.PureComponent {
      * @param {Object} pastState - Previous state of this component.
      */
     componentDidUpdate(pastProps, pastState){
-        if (pastState.selectedTerm !== this.state.selectedTerm){
+        
+        if (pastProps.href !== this.props.href){
+            this.cursorRef.current.reset(true);
+        } else if (pastState.selectedTerm !== this.state.selectedTerm){
             
             // If we now have a selected bar section, enable click listener.
             // Otherwise, disable it.
@@ -277,13 +279,6 @@ export default class CursorViewBounds extends React.PureComponent {
                     _.extend({ 'onRightSide' : isPopoverOnRightSide }, coords),
                     this.updateDetailCursorFromNode.bind(this, node, true)
                 );
-                /*
-                ChartDetailCursor.setCoords({
-                    x : coords.x,
-                    y : coords.y,
-                    onRightSide : isPopoverOnRightSide
-                }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'), this.props.cursorId);
-                */
             }
 
             // Set new selected bar part.

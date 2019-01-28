@@ -106,11 +106,11 @@ export default class CursorComponent extends React.Component {
         this._handleClick = this._handleClick.bind(this);
 
         this.state = {
-            x       : 0,
-            y       : 0,
-            offsetX : -1,
-            offsetY : -1,
-            mounted : false
+            'x'       : 0,
+            'y'       : 0,
+            'offsetX' : -1,
+            'offsetY' : -1,
+            'mounted' : false
         };
 
         // Reference to a DOM element in body that can hold absolutely-positioned overlays.
@@ -169,8 +169,8 @@ export default class CursorComponent extends React.Component {
 
     getHoverComponentDimensions(){
         return {
-            'width'  : ((this.props.style && this.props.style.width)  || this.props.width ) || (this.refs && this.refs.base && this.refs.base.clientWidth ),
-            'height' : ((this.props.style && this.props.style.height) || this.props.height) || (this.refs && this.refs.base && this.refs.base.clientHeight)
+            'width'  : (this.props.style && this.props.style.width)  || this.props.width,
+            'height' : (this.props.style && this.props.style.height) || this.props.height
         };
     }
 
@@ -202,10 +202,11 @@ export default class CursorComponent extends React.Component {
     }
 
     _onMouseMove(e){
-
         if (this.props.sticky) return;
 
-        var offset = layout.getElementOffset(this.props.containingElement || this.refs.base) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
+        var { containingElement, offsetLeft, offsetRight } = this.props;
+
+        var offset = layout.getElementOffset(this.props.containingElement) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;

@@ -327,6 +327,7 @@ export class Chart extends React.PureComponent {
                         angle={styleOpts.labelRotation}
                         maxLabelWidth={styleOpts.maxLabelWidth || 1000}
                         isMounted={_this.state.mounted}
+                        windowWidth={this.props.windowWidth}
                     />
                 </div>
             );
@@ -381,7 +382,7 @@ export class Chart extends React.PureComponent {
     render(){
         if (this.state.mounted === false) return <div/>;
 
-        var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions } = this.props,
+        var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props,
             styleOptions = this.styleOptions();
 
         var topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
@@ -397,7 +398,7 @@ export class Chart extends React.PureComponent {
         );
 
         return (
-            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType }}
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href }}
                 actions={cursorDetailActions}
                 leftAxis={this.renderParts.leftAxis.call(this, width, height, barData, styleOptions)}
                 bottomAxis={this.renderParts.bottomXAxis.call(this, width, height, barData.bars, styleOptions)}

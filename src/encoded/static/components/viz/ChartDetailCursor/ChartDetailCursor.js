@@ -30,7 +30,6 @@ class Body extends React.Component {
         this.renderDetailSection = this.renderDetailSection.bind(this);
         this.primaryCount = this.primaryCount.bind(this);
         this.primaryCountLabel = this.primaryCountLabel.bind(this);
-        this.render = this.render.bind(this);
     }
 
     getCurrentCounts(nodes = this.props.path){
@@ -51,9 +50,10 @@ class Body extends React.Component {
 
         var colWidth = 12 / Math.min(4, this.props.actions.length);
 
-        var actions = this.props.actions.map((action, i, a)=>{
-            var title = typeof action.title === 'function' ? action.title(this.props) : action.title;
-            var disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+        var actions = _.map(this.props.actions, (action, i, a)=>{
+            var title       = typeof action.title === 'function'    ? action.title(this.props) : action.title,
+                disabled    = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+
             return (
                 <div className={"button-container col-xs-" + colWidth} key={title || i}>
                     <Button
@@ -291,6 +291,8 @@ export default class ChartDetailCursor extends React.PureComponent {
         this.getState = this.getState.bind(this);
         this.setCoords = this.setCoords.bind(this);
         this.state = _.clone(initialDetailCursorState);
+
+        this.cursorComponentRef = React.createRef();
     }
 
     componentDidMount(){
@@ -357,11 +359,12 @@ export default class ChartDetailCursor extends React.PureComponent {
     }
 
     setCoords(coords, cb){
-        if (!this.refs || !this.refs.cursorComponent) {
+        var cursorInstance = this.cursorComponentRef.current;
+        if (!cursorInstance) {
             console.error("Cursor component not available.");
             return false;
         }
-        this.refs.cursorComponent.setState(coords, cb);
+        cursorInstance.setState(coords, cb);
     }
 
     render(){
@@ -387,7 +390,7 @@ export default class ChartDetailCursor extends React.PureComponent {
         return (
             <CursorComponent
                 {...containDims}
-                {..._.pick(this.props, 'width', 'height', 'horizontalAlign', 'debugStyle', 'id')}
+                {..._.pick(this.props, 'width', 'height', 'horizontalAlign', 'debugStyle')}
                 containingElement={this.props.containingElement}
                 cursorOffset={this.getCursorOffset()}
                 xCoordOverride={this.state.xCoordOverride}
@@ -399,7 +402,7 @@ export default class ChartDetailCursor extends React.PureComponent {
                     bottom: -50,
                     top: -10
                 }}
-                ref="cursorComponent"
+                ref={this.cursorComponentRef}
                 sticky={this.state.sticky}
                 children={React.createElement(
                     this.state.bodyComponent,

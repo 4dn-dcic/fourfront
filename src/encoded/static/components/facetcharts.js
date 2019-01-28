@@ -132,18 +132,18 @@ export class FacetCharts extends React.PureComponent {
 
     /** Defines buttons/actions to be shown in onHover popover. */
     cursorDetailActions(){
-        var { href } = this.props,
+        var { href, browseBaseState } = this.props,
             isBrowseHref = navigate.isBrowseHref(href),
             currExpSetFilters = Filters.currentExpSetFilters();
         return [
             {
                 'title' : isBrowseHref ? 'Explore' : 'Browse',
-                'function' : function(showType = 'all', cursorProps, mouseEvt){
-                    var baseParams = navigate.getBrowseBaseParams(),
+                'function' : function(cursorProps, mouseEvt){
+                    var baseParams = navigate.getBrowseBaseParams(browseBaseState),
                         browseBaseHref = navigate.getBrowseBaseHref(baseParams);
 
                     // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
-                    var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
+                    var currentExpSetFilters = browseBaseState === 'all' ? {} : Filters.currentExpSetFilters();
         
                     var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
                         // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
