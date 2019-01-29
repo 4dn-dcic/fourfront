@@ -247,7 +247,8 @@ class File(Item):
         'experiments.digestion_enzyme.name',
         'file_format.file_format',
         'related_files.relationship_type',
-        'related_files.file.accession'
+        'related_files.file.accession',
+        'quality_metric.display_title'
     ]
     name_key = 'accession'
     rev = {

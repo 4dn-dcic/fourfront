@@ -1,6 +1,9 @@
 """The type file for the workflow related items.
 """
-from collections import OrderedDict
+from collections import (
+    OrderedDict,
+    deque
+)
 from inspect import signature
 import copy
 from pyramid.view import view_config
@@ -150,20 +153,22 @@ def get_step_io_for_argument_name(argument_name, workflow_model_obj):
 
 def common_props_from_file(file_obj):
     return {
-        'uuid'          : file_obj['uuid'],
-        '@id'           : file_obj['@id'],
-        'accession'     : file_obj.get('accession'),
-        'filename'      : file_obj.get('filename'),
-        'file_format'   : file_obj.get('file_format'),
-        'file_type'     : file_obj.get('file_type'),
-        'file_size'     : file_obj.get('file_size'),
-        'display_title' : file_obj.get('display_title'),
-        'description'   : file_obj.get('description'),
-        '@type'         : file_obj.get('@type'),
-        'status'        : file_obj.get('status'),
-        'href'          : file_obj.get('href'),
-        'url'           : file_obj.get('url')
+        'uuid'           : file_obj['uuid'],
+        '@id'            : file_obj['@id'],
+        'accession'      : file_obj.get('accession'),
+        'filename'       : file_obj.get('filename'),
+        'file_format'    : file_obj.get('file_format'),
+        'file_type'      : file_obj.get('file_type'),
+        'file_size'      : file_obj.get('file_size'),
+        'display_title'  : file_obj.get('display_title'),
+        'description'    : file_obj.get('description'),
+        '@type'          : file_obj.get('@type'),
+        'status'         : file_obj.get('status'),
+        'href'           : file_obj.get('href'),
+        'url'            : file_obj.get('url'),
+        'quality_metric' : file_obj.get('quality_metric')
     }
+
 
 
 def trace_workflows(original_file_set_to_trace, request, options=None):
@@ -187,7 +192,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheModels = {}
     uuidCacheTracedHistory = {}
     uuidCacheGroupSourcesByRun = {}
-    steps = [] # Our output
+
+    steps_history_q = deque()
 
     def get_model(uuid, key=None):
         model = None
@@ -279,8 +285,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
         return (filtered_in_tuples, filtered_out_tuples)
 
-
-    def generate_sources_for_input(in_file_models, workflow_argument_name, depth = 0):
+    def generate_sources_for_input(in_file_models, workflow_argument_name):
 
         sources = [] # Our output
         step_uuids = set()
@@ -315,11 +320,15 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             output_of_workflow_runs = in_file_model.get('workflow_run_outputs', [])
             if len(output_of_workflow_runs) == 0:
                 continue
-            # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
-            last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
-            workflow_run_uuid = last_workflow_run_output_of
+
+            last_workflow_run_output_of = output_of_workflow_runs[-1]
+            if isinstance(last_workflow_run_output_of, dict): # Case if in_file_models are @@embedded representation
+                workflow_run_uuid = last_workflow_run_output_of['uuid']
+            else: # Case if in_file_models are @@object representation
+                workflow_run_uuid = last_workflow_run_output_of
             if not workflow_run_uuid:
                 continue
+
             workflow_run_model = get_model_obj(workflow_run_uuid)
             if not workflow_run_model:
                 continue
@@ -334,7 +343,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             uuidCacheTracedHistory[in_file_model['uuid']] = sources_for_in_file
             sources = sources + sources_for_in_file
 
-
+        ## This block of code, along with dependent functions such as `filter_workflow_runs`, will likely
+        ## be removed later once we can cache this output and apply better grouping.
         untraced_in_files = []
         for workflow_run_model, in_file_model in filtered_out_workflow_runs:
             untraced_in_files.append(in_file_model['uuid'])
@@ -356,7 +366,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
         else:
             for step_uuid, in_file_uuid in step_uuids:
-                trace_history([step_uuid], get_model_obj(in_file_uuid), depth + 1)
+                steps_history_q.append(( step_uuid, get_model_obj(in_file_uuid) ))
 
         return sources
 
@@ -370,6 +380,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         output['meta']['in_path'] = True
                         runs_current_file_goes_to = current_file_model_object.get('workflow_run_inputs', [])
                         for target_workflow_run_uuid in runs_current_file_goes_to:
+                            if isinstance(target_workflow_run_uuid, dict): # Case if current_file_model_object is embedded representation
+                                target_workflow_run_uuid = target_workflow_run_uuid['uuid']
                             target_workflow_run_model_obj = get_model_obj(target_workflow_run_uuid)
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model_obj.get('input_files', []))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():
@@ -388,32 +400,22 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                             "for_file"  : current_file_model_object['uuid']
                                         })
 
-    def trace_history(output_of_workflow_run_uuids, current_file_model_object, depth = 0):
-
-        if depth > options.get('max_depth_history', 3):
-            return
-
-        if len(output_of_workflow_run_uuids) == 0:
-            return
-
-        # When we trace history, we care only about the last workflow_run out of which file was generated.
-        # A file should be output of only one run.
-        last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
+    def trace_history(workflow_run_uuid, current_file_model_object):
 
         # If we've already traced inputs of this workflowrun, lets skip tracing it.
         # But, lets loop over its outputs and extend them with proper target reference to next step if our current file matches one of this already-traced runs output files.
-        if uuidCacheTracedHistory.get(last_workflow_run_uuid):
-            if uuidCacheTracedHistory[last_workflow_run_uuid] is True:
-                raise WorkflowRunTracingException("Error -- WorkflowRun with UUID '" + last_workflow_run_uuid + "' has been RE-ENCOUNTERED while tracing file with UUID '" + current_file_model_object['uuid'] + "'. Likely this file appears on both input and output -side of a WorkflowRun (or chain of WorkflowRuns).")
-            add_next_targets_to_step_from_file(uuidCacheTracedHistory[last_workflow_run_uuid], current_file_model_object)
+        if uuidCacheTracedHistory.get(workflow_run_uuid):
+            if uuidCacheTracedHistory[workflow_run_uuid] is True:
+                raise WorkflowRunTracingException("Error -- WorkflowRun with UUID '" + workflow_run_uuid + "' has been RE-ENCOUNTERED while tracing file with UUID '" + current_file_model_object['uuid'] + "'. Likely this file appears on both input and output -side of a WorkflowRun (or chain of WorkflowRuns).")
+            add_next_targets_to_step_from_file(uuidCacheTracedHistory[workflow_run_uuid], current_file_model_object)
             return
 
-        if uuidCacheGroupSourcesByRun.get(last_workflow_run_uuid) is not None:
+        if uuidCacheGroupSourcesByRun.get(workflow_run_uuid) is not None:
             return
 
-        uuidCacheTracedHistory[last_workflow_run_uuid] = True # Placeholder, becomes reference to real step (dictionary defined below as variable 'step') upon completing tracing of files being input into this step/workflow_run.
+        uuidCacheTracedHistory[workflow_run_uuid] = True # Placeholder, becomes reference to real step (dictionary defined below as variable 'step') upon completing tracing of files being input into this step/workflow_run.
 
-        workflow_run_model_obj = get_model_obj(last_workflow_run_uuid)
+        workflow_run_model_obj = get_model_obj(workflow_run_uuid)
         if not workflow_run_model_obj:
             return
 
@@ -459,14 +461,14 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             original_file_in_output = False
             for file_uuid in file_uuids:
-                file_item = get_model_obj(file_uuid)
+                file_item = get_model_embed(file_uuid)
                 if file_item is not None:
                     if file_item['uuid'] == current_file_model_object['uuid']:
                         original_file_in_output = True
                     file_items.append(common_props_from_file(file_item))
                     if not file_format:
-                        file_with_embeds = get_model_embed(file_uuid)
-                        file_format = file_with_embeds and file_with_embeds.get('file_format')
+                        #file_with_embeds = get_model_embed(file_uuid)
+                        file_format = file_item.get('file_format')
 
             step['outputs'].append({
                 "name"      : argument_name,
@@ -495,16 +497,16 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             file_format      = None
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             for file_uuid in file_uuids:
-                file_item = get_model_obj(file_uuid)
+                file_item = get_model_embed(file_uuid)
                 if file_item is not None:
                     file_items.append(file_item)
                     if not file_format:
-                        file_with_embeds = get_model_embed(file_uuid)
-                        file_format = file_with_embeds and file_with_embeds.get('file_format')
+                        #file_with_embeds = get_model_embed(file_uuid)
+                        file_format = file_item.get('file_format')
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "source" : generate_sources_for_input(file_items, argument_name, depth),
+                "source" : generate_sources_for_input(file_items, argument_name),
                 "meta" : {
                     "in_path" : True,
                     "file_format" : file_format,
@@ -518,21 +520,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 }
             })
 
-        steps.append(step) # Added to 'steps' output list in chronological order.
-        uuidCacheTracedHistory[last_workflow_run_uuid] = step
+        uuidCacheTracedHistory[workflow_run_uuid] = step
         return step
-
-
-    # TODO:
-    def trace_future(input_of_workflow_run_uuids):
-        for uuid in input_of_workflow_run_uuids:
-            #workflow_run = file_item.collection.get(uuid)
-            output_file_uuids = [ f.get('value') for f in workflow_run.properties.get('output_files', []) ]
-
-            #output_files = workflow_run.properties.get('input_files')
-            print('\n\n\n', input_file_uuids)
-            print('\n\n\n', workflow_run.properties.get('output_files'))
-
 
 
 
@@ -540,13 +529,29 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     ### Where function starts doing things. ###
     ###########################################
 
+    # Initialize our queue of steps to process with WFR(s) that file(s) we received are output from.
     for original_file in original_file_set_to_trace:
         file_item_output_of_workflow_run_uuids = original_file.get('workflow_run_outputs', []) # [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_outputs', []) ]
         #file_item_input_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_inputs', []) ]
-        if 'history' in options.get('trace_direction', ['history']):
-            if uuidCacheTracedHistory.get(original_file['uuid']) is None:
-                trace_history(file_item_output_of_workflow_run_uuids, original_file)
 
+        if len(file_item_output_of_workflow_run_uuids) == 0:
+            continue
+
+        # When we trace history, we care only about the last workflow_run out of which file was generated.
+        # A file should be output of only _one_ run.
+        last_workflow_run_uuid = file_item_output_of_workflow_run_uuids[-1]
+
+        if 'history' in options.get('trace_direction', ['history']):
+            steps_history_q.append((last_workflow_run_uuid, original_file))
+
+    while True:
+        try:
+            next_wfr_uuid, next_file = steps_history_q.pop()
+        except IndexError: # No more items in our queue.
+            break
+        step = trace_history(next_wfr_uuid, next_file)
+        if step: # Will return `None` if already encountered
+            yield step
 
     if options.get('track_performance'):
         pr.disable()
@@ -561,7 +566,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             body=output
         )
 
-    return steps
+
 
 
 @collection(
@@ -616,6 +621,7 @@ class WorkflowRun(Item):
         'input_files.value.accession',
         'input_files.value.@type',
         'input_files.value.file_size',
+        'input_files.value.quality_metric.display_title',
         'input_files.value.status',
         'output_files.workflow_argument_name',
         'output_files.value.filename',
@@ -625,6 +631,7 @@ class WorkflowRun(Item):
         'output_files.value.accession',
         'output_files.value.@type',
         'output_files.value.file_size',
+        'output_files.value.quality_metric.display_title',
         'output_files.value.status',
         'output_quality_metrics.name',
         'output_quality_metrics.value.uuid',
