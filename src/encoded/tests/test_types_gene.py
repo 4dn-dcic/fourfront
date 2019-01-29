@@ -2,7 +2,7 @@ import pytest
 from encoded.types.gene import (
     fetch_gene_info_from_ncbi,
     get_gene_info_from_response_text,
-    map_ncbi2schema
+    map_ncbi2schema,
 )
 # pytestmark = [pytest.mark.working, pytest.mark.schema]
 
@@ -161,9 +161,28 @@ def test_update_with_good_gene_id_post(testapp, human, rad21_ncbi):
     assert gene.get('url') == rad21_ncbi.get('url')
     assert len(gene.get('synonyms')) == 8
     assert gene.get('ncbi_entrez_status') == rad21_ncbi.get('Status')
+    assert gene.get('preferred_symbol') == gene.get('official_symbol')
 
 
-def test_update_with_bad_gene_id_post(testapp, human, rad21_ncbi):
+def test_update_with_bad_gene_id_post(testapp):
     geneid = '999999999'  # bad id
-    import pdb; pdb.set_trace()
-    gene = testapp.post_json('/gene', {'geneid': geneid})
+    result = testapp.post_json('/gene', {'geneid': geneid}, status=422).json
+    assert result.get('status') == 'error'
+    assert 'not a valid entrez geneid' in result.get('errors')[0].get('description')
+
+
+def test_update_post_with_preferred_symbol(testapp, human, rad21_ncbi):
+    geneid = '5885'  # human rad21
+    gene = testapp.post_json('/gene', {'geneid': geneid, 'preferred_symbol': 'George'}).json['@graph'][0]
+    assert gene.get('official_symbol') == rad21_ncbi.get('Symbol')
+    assert gene.get('preferred_symbol') == 'George'
+
+
+def test_update_patch_with_preferred_symbol(testapp, human, rad21_ncbi):
+    geneid = '5885'  # human rad21
+    gene = testapp.post_json('/gene', {'geneid': geneid}).json['@graph'][0]
+    assert gene.get('official_symbol') == rad21_ncbi.get('Symbol')
+    assert gene.get('preferred_symbol') == gene.get('official_symbol')
+    upd = testapp.patch_json(gene['@id'], {'preferred_symbol': 'George'}).json['@graph'][0]
+    assert upd.get('official_symbol') == rad21_ncbi.get('Symbol')
+    assert upd.get('preferred_symbol') == 'George'

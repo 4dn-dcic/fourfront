@@ -126,6 +126,9 @@ class Gene(Item):
     def display_title(self, request):
         return self.properties.get('preferred_symbol')
 
+    class Collection(Item.Collection):
+        pass
+
 
 # validator for geneid
 def validate_entrez_geneid(context, request):
