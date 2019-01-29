@@ -193,7 +193,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheTracedHistory = {}
     uuidCacheGroupSourcesByRun = {}
 
-    steps_history_q = deque()
+    steps_to_process_stack = deque()
 
     def get_model(uuid, key=None):
         model = None
@@ -366,7 +366,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
         else:
             for step_uuid, in_file_uuid in step_uuids:
-                steps_history_q.append(( step_uuid, get_model_obj(in_file_uuid) ))
+                steps_to_process_stack.append(( step_uuid, get_model_obj(in_file_uuid) ))
 
         return sources
 
@@ -540,16 +540,15 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         last_workflow_run_uuid = file_item_output_of_workflow_run_uuids[-1]
 
         if 'history' in options.get('trace_direction', ['history']):
-            steps_history_q.append((last_workflow_run_uuid, original_file))
+            steps_to_process_stack.append((last_workflow_run_uuid, original_file))
 
     while True:
         try:
-            next_wfr_uuid, next_file = steps_history_q.pop()
+            next_wfr_uuid, next_file = steps_to_process_stack.pop()
         except IndexError: # No more items in our queue.
             break
-        # trace_history will return `None` if UUID already traced (e.g. as consequence of some previously-encountered file that came from it as well)
         step = trace_history(next_wfr_uuid, next_file)
-        if step:
+        if step: # trace_history will return `None` if UUID already traced, e.g. as consequence of some previously-encountered file that came from it as well
             yield step
 
     if options.get('track_performance'):
