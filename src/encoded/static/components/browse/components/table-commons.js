@@ -331,11 +331,11 @@ export const defaultColumnExtensionMap = {
  * Should handle and fail cases where context and columns object reference values
  * have changed, but not contents. User-selected columns should be preserved upon faceting
  * or similar filtering, but be updated when search type changes.
- * 
+ *
  * Used as equality checker for `columnsToColumnDefinitions` `columns` param memoization as well.
  *
- * @param {Object.<Object>} pastContext Previous context, to be passed in from a lifecycle method.
- * @param {Object.<Object>} nextContext Next context, to be passed in from a lifecycle method.
+ * @param {Object.<Object>} cols1 Previous object of columns, to be passed in from a lifecycle method.
+ * @param {Object.<Object>} cols2 Next object of columns, to be passed in from a lifecycle method.
  *
  * @returns {boolean} If context columns have changed, which should be about same as if type has changed.
  */
@@ -391,7 +391,8 @@ export const columnsToColumnDefinitions = memoize(function(columns, columnDefini
 }, function(newArgs, lastArgs){
     // Custom equality function to ensure columns have changed.
     var nextCols = newArgs[0],
-        pastCols = lastArgs[0],shallowEqual = (newArgs.length === lastArgs.length) && _.every(newArgs, function(arg, argIdx){
+        pastCols = lastArgs[0],
+        shallowEqual = (newArgs.length === lastArgs.length) && _.every(newArgs, function(arg, argIdx){
             return arg === lastArgs[argIdx];
         });
     return shallowEqual && !haveContextColumnsChanged(pastCols, nextCols);
