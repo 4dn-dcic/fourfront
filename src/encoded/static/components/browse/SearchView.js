@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import url from 'url';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
@@ -12,7 +13,9 @@ import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtil
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components';
+    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns,
+    haveContextColumnsChanged
+} from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
@@ -39,18 +42,7 @@ export class SearchControllersContainer extends React.PureComponent {
      */
     static haveContextColumnsChanged(pastContext, nextContext){
         if (pastContext === nextContext) return false;
-        if (pastContext.columns && !nextContext.columns) return true;
-        if (!pastContext.columns && nextContext.columns) return true;
-        var pKeys       = _.keys(pastContext.columns),
-            pKeysLen    = pKeys.length,
-            nKeys       = _.keys(nextContext.columns),
-            i;
-
-        if (pKeysLen !== nKeys.length) return true;
-        for (i = 0; i < pKeysLen; i++){
-            if (pKeys[i] !== nKeys[i]) return true;
-        }
-        return false;
+        return haveContextColumnsChanged(pastContext.columns, nextContext.columns);
     }
 
     static defaultProps = {
@@ -95,44 +87,6 @@ export class SearchControllersContainer extends React.PureComponent {
 
 class ControlsAndResults extends React.PureComponent {
 
-    constructor(props){
-        super(props);
-        this.searchItemTypes = this.searchItemTypes.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
-        this.handleClearFilters = this.handleClearFilters.bind(this);
-        this.colDefOverrides = this.colDefOverrides.bind(this);
-        this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
-
-        var itemTypes                   = this.searchItemTypes(props),
-            columnExtensionMap          = this.colDefOverrides(props, itemTypes),
-            columnDefinitions           = columnsToColumnDefinitions(props.context.columns || {}, columnExtensionMap);
-
-        this.state = { columnExtensionMap, columnDefinitions };
-    }
-
-    componentWillReceiveProps(nextProps){
-        var stateChange = {};
-        if (this.props.href !== nextProps.href){
-            // URL and likely filters, maybe @type, etc. have changed.
-            _.extend(stateChange, this.searchItemTypes(nextProps));
-        }
-        if ((nextProps.columnExtensionMap !== this.props.columnExtensionMap) || (this.props.currentAction !== nextProps.currentAction) || stateChange.specificType){
-            stateChange.colDefOverrides = this.colDefOverrides(
-                nextProps,
-                stateChange.specificType ? stateChange : this.state
-            );
-        }
-        if (nextProps.context !== this.props.context || this.props.href !== nextProps.href){
-            stateChange.columnDefinitions = columnsToColumnDefinitions(
-                nextProps.context.columns || {},
-                stateChange.colDefOverrides || this.state.colDefOverrides
-            );
-        }
-        if (_.keys(stateChange).length > 0){
-            this.setState(stateChange);
-        }
-    }
-
     /**
      * Parses out the specific item type from `props.href` and finds the abstract item type, if any.
      *
@@ -140,9 +94,8 @@ class ControlsAndResults extends React.PureComponent {
      * @returns {{ specificType: string, abstractType: string }} The leaf specific Item type and parent abstract type (before 'Item' in `@type` array) as strings in an object.
      * Ex: `{ abstractType: null, specificType: "Item" }`, `{ abstractType: "Experiment", specificType: "ExperimentHiC" }`
      */
-    searchItemTypes(props){
-        var href                = props.href,
-            specificType        = 'Item', // Default
+    static searchItemTypesFromHref = memoize(function(href){
+        var specificType        = 'Item', // Default
             abstractType        = null,   // Will be equal to specificType if no parent type.
             itemTypeForSchemas  = null,
             urlParts            = url.parse(href, true);
@@ -157,17 +110,50 @@ class ControlsAndResults extends React.PureComponent {
 
         abstractType = Schemas.getAbstractTypeForType(specificType) || null;
         return { specificType, abstractType };
+    });
+
+    constructor(props){
+        super(props);
+        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
+        this.handleClearFilters = this.handleClearFilters.bind(this);
+        this.columnExtensionMapWithSelectButton = this.columnExtensionMapWithSelectButton.bind(this);
+        this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
     }
 
-    colDefOverrides(props = this.props, { specificType, abstractType }){
-        var { currentAction, columnExtensionMap } = props,
-            inSelectionMode = currentAction === 'selection';
+    /**
+     * This is the callback for the "select" button shown in the
+     * display_title column when `props.currentAction` is set to "selection".
+     */
+    handleSelectItemClick(result, evt){
+        var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
+
+        // Standard - postMessage
+        try {
+            window.opener.postMessage(eventJSON, '*');
+        } catch (err){
+            // Check for presence of parent window and alert if non-existent.
+            if (!(typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window)){
+                Alerts.queue({
+                    'title' : 'Failed to send data to parent window.',
+                    'message' : 'Please ensure there is a parent window to which this selection is being sent to. Alternatively, try to drag & drop the Item over instead.'
+                });
+            } else {
+                console.err('Unexpecter error -- browser may not support postMessage', err);
+            }
+        }
+
+        // Nonstandard - in case browser doesn't support postMessage but does support other cross-window events (unlikely).
+        window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
+    }
+
+    columnExtensionMapWithSelectButton = memoize((columnExtensionMap, currentAction, specificType, abstractType) => {
+        var inSelectionMode = currentAction === 'selection';
 
         if (!inSelectionMode && (!abstractType || abstractType !== specificType)){
             return columnExtensionMap;
         }
 
-        var columnDefinitionOverrides = _.clone(columnExtensionMap);
+        columnExtensionMap = _.clone(columnExtensionMap); // Avoid modifying in place
 
         // Kept for reference in case we want to re-introduce constrain that for 'select' button(s) to be visible in search result rows, there must be parent window.
         //var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
@@ -176,37 +162,16 @@ class ControlsAndResults extends React.PureComponent {
             // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
             // Also add the popLink/target=_blank functionality to links
             // Remove lab.display_title and type columns on selection
-            columnDefinitionOverrides['display_title'] = _.extend({}, columnDefinitionOverrides['display_title'], {
+            columnExtensionMap['display_title'] = _.extend({}, columnExtensionMap['display_title'], {
                 'minColumnWidth' : 120,
                 'render' : (result, columnDefinition, props, width) => {
                     var currentTitleBlock = SearchResultTable.defaultColumnExtensionMap.display_title.render(
-                        result, columnDefinition, _.extend({}, props, { currentAction }), width, true
-                    );
-                    var newChildren = currentTitleBlock.props.children.slice(0);
+                            result, columnDefinition, _.extend({}, props, { currentAction }), width, true
+                        ),
+                        newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container">
-                            <button className="select-button" onClick={function(e){
-                                var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
-
-                                // Standard - postMessage
-                                try {
-                                    window.opener.postMessage(eventJSON, '*');
-                                } catch (err){
-                                    // Check for presence of parent window and alert if non-existent.
-                                    if (!(typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window)){
-                                        Alerts.queue({
-                                            'title' : 'Failed to send data to parent window.',
-                                            'message' : 'Please ensure there is a parent window to which this selection is being sent to. Alternatively, try to drag & drop the Item over instead.'
-                                        });
-                                    } else {
-                                        console.err('Unexpecter error -- browser may not support postMessage', err);
-                                    }
-                                }
-
-                                // Nonstandard - in case browser doesn't support postMessage but does support other cross-window events (unlikely).
-                                window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
-
-                            }}>
+                            <button className="select-button" onClick={this.handleSelectItemClick.bind(this, result)}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>
@@ -215,8 +180,8 @@ class ControlsAndResults extends React.PureComponent {
                 }
             });
         }
-        return columnDefinitionOverrides;
-    }
+        return columnExtensionMap;
+    });
 
     forceUpdateOnSelf(){
         var searchResultTable   = this.searchResultTableRef.current,
@@ -257,12 +222,14 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     render() {
-        var { context, hiddenColumns, currentAction, isFullscreen } = this.props,
-            { columnDefinitions, abstractType, specificType } = this.state,
-            results                     = context['@graph'],
-            inSelectionMode             = currentAction === 'selection',
+        var { context, hiddenColumns, columnExtensionMap, currentAction, isFullscreen, href } = this.props,
+            results                         = context['@graph'],
+            inSelectionMode                 = currentAction === 'selection',
             // Facets are transformed by the SearchView component to make adjustments to the @type facet re: currentAction.
-            facets                      = this.props.facets || context.facets;
+            facets                          = this.props.facets || context.facets,
+            { specificType, abstractType }  = ControlsAndResults.searchItemTypesFromHref(href),
+            selfExtendedColumnExtensionMap  = this.columnExtensionMapWithSelectButton(columnExtensionMap, currentAction, specificType, abstractType),
+            columnDefinitions               = columnsToColumnDefinitions(context.columns || {}, selfExtendedColumnExtensionMap);
 
         return (
             <div className="row">
