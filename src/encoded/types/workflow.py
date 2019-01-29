@@ -467,7 +467,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         original_file_in_output = True
                     file_items.append(common_props_from_file(file_item))
                     if not file_format:
-                        #file_with_embeds = get_model_embed(file_uuid)
                         file_format = file_item.get('file_format')
 
             step['outputs'].append({
@@ -501,7 +500,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 if file_item is not None:
                     file_items.append(file_item)
                     if not file_format:
-                        #file_with_embeds = get_model_embed(file_uuid)
                         file_format = file_item.get('file_format')
 
             step['inputs'].append({
@@ -549,8 +547,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             next_wfr_uuid, next_file = steps_history_q.pop()
         except IndexError: # No more items in our queue.
             break
+        # trace_history will return `None` if UUID already traced (e.g. as consequence of some previously-encountered file that came from it as well)
         step = trace_history(next_wfr_uuid, next_file)
-        if step: # Will return `None` if already encountered
+        if step:
             yield step
 
     if options.get('track_performance'):
