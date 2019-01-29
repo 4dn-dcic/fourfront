@@ -144,7 +144,7 @@ export class FacetCharts extends React.PureComponent {
 
                     // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
                     var currentExpSetFilters = browseBaseState === 'all' ? {} : Filters.currentExpSetFilters();
-        
+
                     var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
                         // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
                         if (expSetFilters && expSetFilters[node.field] && expSetFilters[node.field].has(node.term)){
