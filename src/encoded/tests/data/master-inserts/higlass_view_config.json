@@ -792,5 +792,233 @@
             }
         },
         "status" : "released"
+    },
+    {
+	"uuid": "51d28485-5f94-465d-b2ec-3bf011754360",
+	"name": "51d28485-5f94-465d-b2ec-3bf011754360",
+	"title": "Empty GRCh38 HiGlass Display",
+	"viewconfig": {
+            "exportViewUrl": "/api/v1/viewconfs",
+            "zoomFixed": false,
+            "valueScaleLocks": {
+		"locksByViewUid": {},
+		"locksDict": {}
+            },
+            "trackSourceServers": [
+		"https://higlass.4dnucleome.org/api/v1"
+            ],
+            "editable": true,
+            "zoomLocks": {
+		"locksByViewUid": {
+		    "view-4dn-mcool-0": "E5WfQFehR2-Dm4BW1zS5eQ"
+		},
+		"locksDict": {
+		    "E5WfQFehR2-Dm4BW1zS5eQ": {
+			"uid": "E5WfQFehR2-Dm4BW1zS5eQ",
+			"view-4dn-mcool-0": [
+			    815066577.6957322,
+			    959291794.8369944,
+			    1341288.7398672402
+			]
+		    }
+		}
+            },
+            "views": [
+		{
+		    "tracks": {
+			"bottom": [],
+			"center": [
+			    {
+				"uid": "e6155437-5041-44ab-b090-6d27634cca8a",
+				"height": 458,
+				"type": "combined",
+				"position": "center",
+				"options": {},
+				"contents": [],
+				"width": 1040
+			    }
+			],
+			"left": [
+			    {
+				"header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+				"orientation": "1d-vertical",
+				"tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
+				"type": "vertical-gene-annotations",
+				"name": "4DNFIWG6CQQA.beddb",
+				"uid": "left-annotation-track",
+				"minWidth": 55,
+				"height": 458,
+				"server": "https://higlass.4dnucleome.org/api/v1",
+				"position": "left",
+				"options": {
+				    "geneLabelPosition": "outside",
+				    "minusStrandColor": "black",
+				    "geneAnnoHeight": 10,
+				    "plusStrandColor": "black",
+				    "geneStrandSpacing": 4,
+				    "valueScaling": "linear",
+				    "labelPosition": "hidden",
+				    "name": "Gene Annotations (GRCh38)",
+				    "geneAnnotationHeight": 10,
+				    "trackBorderWidth": 0,
+				    "showTooltip": false,
+				    "trackBorderColor": "black",
+				    "labelColor": "black",
+				    "coordSystem": "mm10",
+				    "mousePositionColor": "#999999",
+				    "showMousePosition": false,
+				    "fontSize": 11,
+				    "plusStandColor": "blue"
+				},
+				"width": 55
+			    },
+			    {
+				"tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
+				"orientation": "1d-vertical",
+				"local": true,
+				"type": "vertical-chromosome-labels",
+				"name": "Chromosome Axis",
+				"uid": "left-chromosome-track",
+				"minWidth": 20,
+				"height": 458,
+				"server": "https://higlass.4dnucleome.org/api/v1",
+				"position": "left",
+				"options": {
+				    "stroke": "#FFFFFF",
+				    "minusStrandColor": "red",
+				    "showTooltip": false,
+				    "trackBorderColor": "black",
+				    "plusStandColor": "blue",
+				    "valueScaling": "linear",
+				    "labelPosition": "hidden",
+				    "fontIsAligned": false,
+				    "trackBorderWidth": 0,
+				    "labelColor": "black",
+				    "coordSystem": "mm10",
+				    "mousePositionColor": "#999999",
+				    "showMousePosition": false,
+				    "fontSize": 12,
+				    "color": "#777777"
+				},
+				"thumbnail": null,
+				"width": 35
+			    }
+			],
+			"top": [
+			    {
+				"header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+				"orientation": "1d-horizontal",
+				"minHeight": 55,
+				"tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
+				"type": "horizontal-gene-annotations",
+				"name": "4DNFIWG6CQQA.beddb",
+				"uid": "top-annotation-track",
+				"height": 55,
+				"server": "https://higlass.4dnucleome.org/api/v1",
+				"position": "top",
+				"options": {
+				    "geneLabelPosition": "outside",
+				    "minusStrandColor": "black",
+				    "showTooltip": false,
+				    "plusStrandColor": "black",
+				    "labelColor": "black",
+				    "valueScaling": "linear",
+				    "labelPosition": "hidden",
+				    "name": "Gene Annotations (GRCh38)",
+				    "geneAnnotationHeight": 10,
+				    "trackBorderWidth": 0,
+				    "trackBorderColor": "black",
+				    "geneStrandSpacing": 4,
+				    "coordSystem": "mm10",
+				    "mousePositionColor": "#999999",
+				    "showMousePosition": false,
+				    "fontSize": 11,
+				    "plusStandColor": "blue"
+				},
+				"width": 1040
+			    },
+			    {
+				"tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
+				"orientation": "1d-horizontal",
+				"minHeight": 30,
+				"local": true,
+				"type": "horizontal-chromosome-labels",
+				"name": "Chromosome Axis",
+				"uid": "top-chromosome-track",
+				"height": 35,
+				"server": "https://higlass.4dnucleome.org/api/v1",
+				"position": "top",
+				"options": {
+				    "stroke": "#FFFFFF",
+				    "minusStrandColor": "red",
+				    "showTooltip": false,
+				    "trackBorderColor": "black",
+				    "plusStandColor": "blue",
+				    "valueScaling": "linear",
+				    "labelPosition": "hidden",
+				    "fontIsAligned": false,
+				    "trackBorderWidth": 0,
+				    "labelColor": "#888",
+				    "coordSystem": "mm10",
+				    "mousePositionColor": "#999999",
+				    "showMousePosition": false,
+				    "fontSize": 12,
+				    "color": "#777777"
+				},
+				"thumbnail": null,
+				"width": 1040
+			    }
+			],
+			"whole": [],
+			"right": [],
+			"gallery": []
+		    },
+		    "uid": "view-4dn-mcool-0",
+		    "initialYDomain": [
+			-75715159.62474918,
+			1343241337.469387
+		    ],
+		    "autocompleteSource": "/api/v1/suggest/?d=XGrAqZupQb2h5Pjiarf8PA&",
+		    "layout": {
+			"i": "view-4dn-mcool-0",
+			"h": 12,
+			"y": 0,
+			"static": false,
+			"w": 12,
+			"x": 0,
+			"moved": false
+		    },
+		    "genomePositionSearchBox": {
+			"autocompleteId": "XGrAqZupQb2h5Pjiarf8PA",
+			"chromInfoId": "GRCh38",
+			"autocompleteServer": "https://higlass.4dnucleome.org/api/v1",
+			"visible": true,
+			"chromInfoServer": "https://higlass.4dnucleome.org/api/v1"
+		    },
+		    "initialXDomain": [
+			20744841.570715845,
+			3242829463.7932086
+		    ]
+		}
+            ],
+            "locationLocks": {
+		"locksByViewUid": {
+		    "view-4dn-mcool-0": "VswR4mNAR2ysPJK5P9fMZg"
+		},
+		"locksDict": {
+		    "VswR4mNAR2ysPJK5P9fMZg": {
+			"uid": "VswR4mNAR2ysPJK5P9fMZg",
+			"view-4dn-mcool-0": [
+			    815066577.6957322,
+			    959291794.8369944,
+			    1341288.7398672402
+			]
+		    }
+		}
+            }
+	},
+	"genome_assembly": "GRCh38",
+	"submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+	"status": "released"
     }
 ]
