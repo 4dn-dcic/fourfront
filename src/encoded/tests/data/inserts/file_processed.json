@@ -434,7 +434,6 @@
     "genome_assembly": "GRCh38",
     "uuid":"a34d5ea5-eada-4def-a4a7-c227b0d32395",
     "override_experiment_type": "Dataset",
-    "file_type": "File",
     "override_assay_info": "Assay",
     "override_biosource_name" : "Biosource"
 },
@@ -449,7 +448,6 @@
     "date_created":"2018-11-29T01:37:58.357095+00:00",
     "submitted_by": "4dndcic@gmail.com",
     "uuid":"94827a84-2b65-45f4-ad4d-fc2219c52e7b",
-    "dataset_type": "Dataset",
     "genome_assembly": "GRCm38",
     "override_experiment_type": "Dataset",
     "file_type": "File",
@@ -467,11 +465,11 @@
     "date_created":"2018-11-29T01:37:58.357095+00:00",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "c1b89d72-f353-4389-8273-b63ad8f02c4d",
-    "dataset_type": "Dataset",
+    "override_experiment_type": "Dataset",
     "file_type": "counts",
-    "assay_info": "Assay",
+    "override_assay_info": "Assay",
     "genome_assembly": "GRCm38",
-    "biosource_name" : "Biosource",
+    "override_biosource_name" : "Biosource",
     "extra_files" : [
         {
             "file_format" : "bg_px2",
@@ -496,11 +494,11 @@
     "date_created":"2018-11-29T01:37:58.357095+00:00",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "648cea7a-9751-4c6a-a0ac-23b76beba6d0",
-    "dataset_type": "Dataset",
+    "override_experiment_type": "Dataset",
     "file_type": "peaks",
-    "assay_info": "Assay",
+    "override_assay_info": "Assay",
     "genome_assembly": "GRCm38",
-    "biosource_name" : "Biosource"
+    "override_biosource_name" : "Biosource"
 },
 {
     "lab": "/labs/4dn-dcic-lab/",
@@ -513,11 +511,11 @@
     "date_created":"2018-11-29T01:37:58.357095+00:00",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "04b2c874-95df-48e9-a072-cf383cd4e0a5",
-    "dataset_type": "Dataset",
+    "override_experiment_type": "Dataset",
     "file_type": "LADs",
-    "assay_info": "Assay",
+    "override_assay_info": "Assay",
     "genome_assembly": "GRCm38",
-    "biosource_name" : "Biosource",
+    "override_biosource_name" : "Biosource",
     "extra_files" : [
         {
             "file_format" : "beddb",
@@ -537,10 +535,10 @@
     "date_created":"2018-11-29T01:37:58.357095+00:00",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "a31800d0-c275-425d-b610-3efd78bdde96",
-    "dataset_type": "Dataset",
+    "override_experiment_type": "Dataset",
     "file_type": "other",
-    "assay_info": "Assay",
+    "override_assay_info": "Assay",
     "genome_assembly": "GRCm38",
-    "biosource_name" : "Biosource"
+    "override_biosource_name" : "Biosource"
 }
 ]
