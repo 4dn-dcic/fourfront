@@ -31,7 +31,6 @@
         "ncbi_entrez_status": {
           "title": "NCBI Entrez Gene Status",
           "type": "string",
-          "default": "live",
           "enum" : [
               "live",
               "secondary",

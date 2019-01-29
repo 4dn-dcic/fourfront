@@ -5,17 +5,23 @@ import requests
 import json
 import os
 import time
-from pyramid.path import DottedNameResolver
 from snovault import (
     collection,
     load_schema,
     calculated_property
 )
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
+from pyramid.view import view_config
 from .base import (
     Item,
+    collection_add,
+    item_edit,
     lab_award_attribution_embed_list
 )
-from html.parser import HTMLParser
 
 
 ################################################
@@ -83,7 +89,6 @@ def map_ncbi2schema(geneinfo):
     })
 class Gene(Item):
     """Gene class."""
-    import pdb; pdb.set_trace()
     item_type = 'gene'
     name_key = 'geneid'
     schema = load_schema('encoded:schemas/gene.json')
@@ -98,7 +103,12 @@ class Gene(Item):
         except Exception as e:
             pass
         if gene_info:
-            properties.update(map_ncbi2schema(gene_info))
+            gene_info = map_ncbi2schema(gene_info)
+            try:
+                gene_info['organism'] = str(self.registry['collections']['Organism'].get(gene_info['organism']).uuid)
+            except Exception as e:
+                gene_info = {}
+            properties.update(gene_info)
 
         if properties.get('preferred_symbol', None) is None:
             symbol = properties.get('official_symbol')
@@ -115,3 +125,48 @@ class Gene(Item):
     })
     def display_title(self, request):
         return self.properties.get('preferred_symbol')
+
+
+# validator for geneid
+def validate_entrez_geneid(context, request):
+    valid = True
+    data = request.json
+    if 'geneid' not in data:
+        return
+    geneid = data['geneid']
+    eutil = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+    query = "{NIH}efetch.fcgi?db=gene&id={id}".format(NIH=eutil, id=geneid)
+    for count in range(3):
+        resp = requests.get(query)
+        if resp.status_code == 200:
+            break
+        if resp.status_code == 429:
+            time.sleep(2)
+            continue
+        if count == 2:
+            valid = False
+    try:
+        check = resp.text
+    except AttributeError:
+        valid = False
+    else:
+        if check.startswith('Error'):
+            valid = False
+    if not valid:
+        request.errors.add('body', None, 'ID: ' + geneid + ' is not a valid entrez geneid')
+    else:
+        request.validated.update({})
+
+
+@view_config(context=Gene.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_entrez_geneid])
+def gene_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=Gene, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_entrez_geneid])
+@view_config(context=Gene, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_entrez_geneid])
+def biosource_edit(context, request, render=None):
+    return item_edit(context, request, render)
