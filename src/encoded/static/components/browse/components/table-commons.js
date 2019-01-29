@@ -105,12 +105,13 @@ export const defaultColumnExtensionMap = {
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
         'order' : -100,
-        'render' : function(result, columnDefinition, props, width, popLink = false){
+        'render' : function renderDisplayTitleColumn(result, columnDefinition, props, width, popLink = false){
             var title = object.itemUtil.getTitleStringFromContext(result),
                 link = object.itemUtil.atId(result),
                 tooltip,
                 hasPhoto = false;
 
+            /** Registers a list click event for Google Analytics then performs navigation. */
             function handleClick(evt){
                 var tableType = navigate.isBrowseHref(props.href) ? 'browse' : (navigate.isSearchHref(props.href) ? 'search' : 'other');
                 if (tableType === 'browse' || tableType === 'search'){
@@ -129,9 +130,10 @@ export const defaultColumnExtensionMap = {
             }
 
             if (title && (title.length > 20 || width < 100)) tooltip = title;
-            if (link){
+            if (link){ // This should be the case always
                 title = <a key="title" href={link || '#'} children={title} onClick={handleClick} />;
                 if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
+                    // Specific case for User items. May be removed or more cases added, if needed.
                     hasPhoto = true;
                     title = (
                         <span key="title">
@@ -326,6 +328,35 @@ export const defaultColumnExtensionMap = {
 
 
 /**
+ * Should handle and fail cases where context and columns object reference values
+ * have changed, but not contents. User-selected columns should be preserved upon faceting
+ * or similar filtering, but be updated when search type changes.
+ *
+ * Used as equality checker for `columnsToColumnDefinitions` `columns` param memoization as well.
+ *
+ * @param {Object.<Object>} cols1 Previous object of columns, to be passed in from a lifecycle method.
+ * @param {Object.<Object>} cols2 Next object of columns, to be passed in from a lifecycle method.
+ *
+ * @returns {boolean} If context columns have changed, which should be about same as if type has changed.
+ */
+export function haveContextColumnsChanged(cols1, cols2){
+    if (cols1 === cols2) return false;
+    if (cols1 && !cols2) return true;
+    if (!cols1 && cols2) return true;
+    var pKeys       = _.keys(cols1),
+        pKeysLen    = pKeys.length,
+        nKeys       = _.keys(cols2),
+        i;
+
+    if (pKeysLen !== nKeys.length) return true;
+    for (i = 0; i < pKeysLen; i++){
+        if (pKeys[i] !== nKeys[i]) return true;
+    }
+    return false;
+}
+
+
+/**
  * Convert a map of field:title to list of column definitions, setting defaults.
  *
  * @param {Object.<string>} columns         Map of field names to field/column titles, as returned from back-end.
@@ -370,6 +401,9 @@ export const defaultHiddenColumnMapFromColumns = memoize(function(columns){
         }
     });
     return hiddenColMap;
+}, function(newArgs, lastArgs){
+    // We allow different object references to be considered equal as long as their values are equal.
+    return !haveContextColumnsChanged(lastArgs[0], newArgs[0]);
 });
 
 

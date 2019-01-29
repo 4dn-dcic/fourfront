@@ -257,7 +257,7 @@ class ResultRow extends React.PureComponent {
         return _.map(columnDefinitions, (columnDefinition, columnNumber) => {
             var passedProps = _.extend(
                 _.pick(this.props, 'result', 'rowNumber', 'href', 'headerColumnWidths', 'mounted', 'windowWidth', 'schemas'),
-                { 
+                {
                     columnDefinition, columnNumber, detailOpen, currentAction,
                     'key' : columnDefinition.field,
                     'toggleDetailOpen' : this.toggleDetailOpen,
@@ -269,7 +269,7 @@ class ResultRow extends React.PureComponent {
     }
 
     render(){
-        var { 
+        var {
                 result, rowNumber, mounted, headerColumnWidths, renderDetailPane, columnDefinitions, schemas,
                 tableContainerWidth, tableContainerScrollLeft, openDetailPanes, setDetailHeight, href, currentAction, selectedFiles
             } = this.props,

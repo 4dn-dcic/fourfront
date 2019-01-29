@@ -250,7 +250,7 @@ def logout(request):
     """
     This endpoint proxies a request to Auth0 for it to remove its session cookies.
     See https://auth0.com/docs/api/authentication#enterprise-saml-and-others-
-    
+
     The Auth0 endpoint is meant to be navigated to by end-user as part of SSO logout (?)
     So this endpoint may not be needed at moment. Kept for reference.
 
