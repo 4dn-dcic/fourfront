@@ -4,7 +4,7 @@
     "id": "/profiles/bio_feature.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["award", "lab", "feature_type"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
