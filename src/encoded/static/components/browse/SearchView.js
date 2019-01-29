@@ -30,21 +30,6 @@ var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
  */
 export class SearchControllersContainer extends React.PureComponent {
 
-    /**
-     * Should handle and fail cases where context and columns object reference values
-     * have changed, but not contents. User-selected columns should be preserved upon faceting
-     * or similar filtering, but be updated when search type changes.
-     *
-     * @param {{ columns: Object.<Object> }} pastContext Previous context, to be passed in from a lifecycle method.
-     * @param {{ columns: Object.<Object> }} nextContext Next context, to be passed in from a lifecycle method.
-     *
-     * @returns {boolean} If context columns have changed, which should be about same as if type has changed.
-     */
-    static haveContextColumnsChanged(pastContext, nextContext){
-        if (pastContext === nextContext) return false;
-        return haveContextColumnsChanged(pastContext.columns, nextContext.columns);
-    }
-
     static defaultProps = {
         'navigate' : navigate
     };
@@ -53,18 +38,6 @@ export class SearchControllersContainer extends React.PureComponent {
         super(props);
         this.onFilter = onFilterHandlerMixin.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
-        this.render = this.render.bind(this);
-        this.state = {
-            'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(props.context.columns)
-        };
-
-        this.searchResultTableRef = React.createRef();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (SearchControllersContainer.haveContextColumnsChanged(this.props.context, nextProps.context)) {
-            this.setState({ 'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(nextProps.context.columns) });
-        }
     }
 
     isTermSelected(term, facet){
@@ -72,9 +45,12 @@ export class SearchControllersContainer extends React.PureComponent {
     }
 
     render(){
+        var { context } = this.props,
+            defaultHiddenColumns = defaultHiddenColumnMapFromColumns(context.columns);
+
         return (
-            <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
-                <SortController href={this.props.href} context={this.props.context} navigate={this.props.navigate}>
+            <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
+                <SortController {..._.pick(this.props, 'href', 'context', 'navigate')}>
                     <ControlsAndResults {...this.props} isTermSelected={this.isTermSelected} onFilter={this.onFilter} />
                 </SortController>
             </CustomColumnController>
@@ -118,6 +94,8 @@ class ControlsAndResults extends React.PureComponent {
         this.handleClearFilters = this.handleClearFilters.bind(this);
         this.columnExtensionMapWithSelectButton = this.columnExtensionMapWithSelectButton.bind(this);
         this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
+
+        this.searchResultTableRef = React.createRef();
     }
 
     /**

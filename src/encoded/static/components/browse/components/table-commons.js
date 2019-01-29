@@ -388,14 +388,6 @@ export const columnsToColumnDefinitions = memoize(function(columns, columnDefini
     });
 
     return _.sortBy(uninishedColumnDefinitions, 'order');
-}, function(newArgs, lastArgs){
-    // Custom equality function to ensure columns have changed.
-    var nextCols = newArgs[0],
-        pastCols = lastArgs[0],
-        shallowEqual = (newArgs.length === lastArgs.length) && _.every(newArgs, function(arg, argIdx){
-            return arg === lastArgs[argIdx];
-        });
-    return shallowEqual && !haveContextColumnsChanged(pastCols, nextCols);
 });
 
 
@@ -410,6 +402,7 @@ export const defaultHiddenColumnMapFromColumns = memoize(function(columns){
     });
     return hiddenColMap;
 }, function(newArgs, lastArgs){
+    // We allow different object references to be considered equal as long as their values are equal.
     return !haveContextColumnsChanged(lastArgs[0], newArgs[0]);
 });
 
