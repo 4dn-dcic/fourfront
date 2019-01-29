@@ -131,7 +131,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
      * @param {function} onToggleAllRuns - Callback function passed from parent Item view. Called when 'toggle all runs' checkbox is changed.
      * @returns {{ tab: JSX.Element, key: string, disabled?: boolean, isDefault?: boolean, content: JSX.Element }} Tab object
      */
-    static getTabObject(parentProps, parentState, onToggleAllRuns){
+    static getTabObject(parentProps, parentState, onToggleAllRuns, width){
         var { loadingGraphSteps, steps, mounted, allRuns } = parentState,
             { context } = parentProps,
             iconClass   = "icon icon-fw icon-",
@@ -152,12 +152,8 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
             'content'   : (
-                <FileViewGraphSection
-                    {...parentProps}
-                    {..._.pick(parentState, 'steps', 'mounted', 'allRuns')}
-                    key={"graph-for-" + context.uuid}
-                    onToggleAllRuns={onToggleAllRuns}
-                    loading={loadingGraphSteps} />
+                <FileViewGraphSection {...parentProps} {..._.pick(parentState, 'steps', 'mounted', 'allRuns')} width={width}
+                    key={"graph-for-" + context.uuid} onToggleAllRuns={onToggleAllRuns} loading={loadingGraphSteps} />
             )
         };
     }
@@ -243,7 +239,6 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'columnSpacing'         : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
             'rowSpacingType'        : this.state.rowSpacingType,
             'isNodeCurrentContext'  : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || this.isNodeCurrentContext
-
         });
     }
 

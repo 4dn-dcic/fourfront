@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
+import memoize from 'memoize-one';
 import { Fade } from 'react-bootstrap';
 import { console, isServerSide } from './../../util';
 
@@ -70,7 +71,7 @@ export default class Graph extends React.Component {
         })).isRequired,
         'nodeTitle'         : PropTypes.func,
         'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])
-    }
+    };
 
     static defaultProps = {
         'height'        : null, // Unused, should be set to nodes count in highest column * rowSpacing + innerMargins.
@@ -100,13 +101,33 @@ export default class Graph extends React.Component {
         },
         'nodeClassName' : function(node){ return ''; },
         'nodeEdgeLedgeWidths' : [3,5]
-    }
+    };
+
+    static getHeightFromNodes = memoize(function(nodes, nodesPreSortFxn, rowSpacing, minimumHeight){
+        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
+        if (typeof nodesPreSortFxn === 'function'){
+            nodes = nodesPreSortFxn(nodes.slice(0));
+        }
+        return Math.max(
+            _(nodes).chain()
+            .groupBy('column')
+            .pairs()
+            .reduce(function(maxCount, nodeSet){
+                return Math.max(nodeSet[1].length, maxCount);
+            }, 0)
+            .value() * (rowSpacing) - rowSpacing,
+            minimumHeight
+        );
+    });
+
+    static getScrollableWidthFromNodes = memoize(function(nodes, columnWidth, columnSpacing, innerMargin){
+        return (_.reduce(nodes, function(highestCol, node){
+            return Math.max(node.column, highestCol);
+        }, 0) + 1) * (columnWidth + columnSpacing) + (innerMargin.left || 0) + (innerMargin.right || 0) - columnSpacing;
+    });
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.width = this.width.bind(this);
         this.height = this.height.bind(this);
         this.state = {
             'mounted' : false
@@ -117,48 +138,14 @@ export default class Graph extends React.Component {
         this.setState({ 'mounted' : true });
     }
 
-    componentDidUpdate(pastProps){
-        if (pastProps.width && !this.props.width){
-            requestAnimationFrame(()=> {
-                // Force an update once to let this.width() get proper width after resize/redraw.
-                // If we're losing an explicit width.
-                this.forceUpdate();
-            });
-        }
-    }
-
-    width()  {
-        var width = this.props.width;
-        if ((!width || isNaN(width)) && this.state.mounted && !isServerSide()){
-            width = this.refs.outerContainer.offsetWidth;
-        } else if (!width || isNaN(width)){
-            return null;
-        }
-        return ((width - this.props.innerMargin.left) - this.props.innerMargin.right );
-    }
-
     height() {
-        var nodes = this.props.nodes;
-        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
-        if (typeof this.props.nodesPreSortFxn === 'function'){
-            nodes = this.props.nodesPreSortFxn(nodes.slice(0));
-        }
-        return Math.max(
-            _(nodes).chain()
-            .groupBy('column')
-            .pairs()
-            .reduce(function(maxCount, nodeSet){
-                return Math.max(nodeSet[1].length, maxCount);
-            }, 0)
-            .value() * (this.props.rowSpacing) - this.props.rowSpacing,
-            this.props.minimumHeight
-        );
+        var { nodes, nodesPreSortFxn, rowSpacing, minimumHeight } = this.props;
+        return Graph.getHeightFromNodes(nodes, nodesPreSortFxn, rowSpacing, minimumHeight);
     }
 
     scrollableWidth(){
-        return (_.reduce(this.props.nodes, function(highestCol, node){
-            return Math.max(node.column, highestCol);
-        }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
+        var { nodes, columnWidth, columnSpacing, innerMargin } = this.props;
+        return Graph.getScrollableWidthFromNodes(nodes, columnWidth, columnSpacing, innerMargin);
     }
 
     nodesWithCoordinates(nodes = null, viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
@@ -240,14 +227,18 @@ export default class Graph extends React.Component {
     }
 
     render(){
+        //var width = this.width();
+        var { width, innerMargin, edges, minimumHeight } = this.props,
+            height          = this.height(),
+            contentWidth    = this.scrollableWidth();
 
-        var width = this.width();
-        var height = this.height();
-        var contentWidth = this.scrollableWidth();
+        if (innerMargin && (innerMargin.left || innerMargin.right)){
+            width -= (innerMargin.left || 0);
+            width -= (innerMargin.right || 0);
+        }
 
-        var widthAndHeightSet = !isNaN(width) && width && !isNaN(height) && height;
 
-        if (!widthAndHeightSet && !this.state.mounted){
+        if (!this.state.mounted){
             return (
                 <div ref="outerContainer">
                     <Fade appear in>
@@ -258,8 +249,8 @@ export default class Graph extends React.Component {
         }
 
         var fullHeight = Math.max(
-            (typeof this.props.minimumHeight === 'number' && this.props.minimumHeight) || 0,
-            height + this.props.innerMargin.top + this.props.innerMargin.bottom
+            (typeof minimumHeight === 'number' && minimumHeight) || 0,
+            height + (innerMargin.top || 0) + (innerMargin.bottom || 0)
         );
 
         var nodes = this.nodesWithCoordinates(
@@ -268,8 +259,6 @@ export default class Graph extends React.Component {
             contentWidth,
             height
         );
-
-        var edges = this.props.edges;
 
         /* TODO: later
         var spacerCount = _.reduce(nodes, function(m,n){ if (n.nodeType === 'spacer'){ return m + 1; } else { return m; }}, 0);
