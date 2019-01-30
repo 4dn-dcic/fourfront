@@ -9069,7 +9069,10 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/",
+                        "/softwares/23c2feec-5009-44f0-9ebc-814112671d01/",
+                        "/softwares/2e1ab766-a572-46f7-869a-80f9a5d063fd/",
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "chip-aln-chip",
@@ -9489,7 +9492,10 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/",
+                        "/softwares/23c2feec-5009-44f0-9ebc-814112671d01/",
+                        "/softwares/2e1ab766-a572-46f7-869a-80f9a5d063fd/",
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "chip-aln-ctl",
@@ -9860,7 +9866,12 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/b96e6b97-2347-4e9e-b69e-15550d6268f4/",
+                        "/softwares/e97ffd0c-4bc7-4e9a-95d9-c7d90febf49e/",
+                        "/softwares/42da1570-12a6-458b-b4a8-0a6c9ddf21d6/",
+                        "/softwares/ccb61480-9b2a-441b-8af2-4c14b2d3f090/",
+                        "/softwares/f1c13b57-afab-40d9-bdf8-77d7149ad75b/",
+                        "/softwares/c460cd2e-fca9-446d-9a13-884d7788c7ef/"
                     ]
                 },
                 "name": "chip-postaln",
