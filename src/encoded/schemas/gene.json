@@ -91,14 +91,22 @@
         }
     },
     "columns": {
+        "fullname": {
+            "title": "Gene name"
+        },
         "geneid": {
             "title": "NCBI Entrez GeneID"
         },
-        "preferred_symbol": {
-            "title": "Gene symbol"
-        },
         "organism.scientific_name": {
-            "title": "Species"
+            "title": "Organism"
+        },
+        "url": {
+            "title": "NCBI link"
+        }
+    },
+    "facets": {
+        "organism.scientific_name": {
+            "title": "Organism"
         }
     }
 }

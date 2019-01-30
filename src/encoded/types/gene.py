@@ -92,7 +92,7 @@ class Gene(Item):
     item_type = 'gene'
     name_key = 'geneid'
     schema = load_schema('encoded:schemas/gene.json')
-    embedded_list = Item.embedded_list  # + lab_award_attribution_embed_list + []
+    embedded_list = lab_award_attribution_embed_list + ["organism.scientific_name"]
 
     def _update(self, properties, sheets=None):
         # fetch info from ncbi gene based on id provided
@@ -104,10 +104,13 @@ class Gene(Item):
             pass
         if gene_info:
             gene_info = map_ncbi2schema(gene_info)
-            try:
-                gene_info['organism'] = str(self.registry['collections']['Organism'].get(gene_info['organism']).uuid)
-            except Exception as e:
-                gene_info = {}
+            if 'organism' in gene_info:
+                try:
+                    # make sure the organism is in the db
+                    gene_info['organism'] = str(self.registry['collections']['Organism'].get(gene_info['organism']).uuid)
+                except Exception as e:
+                    # otherwise remove the organism
+                    del gene_info['organism']
             properties.update(gene_info)
 
         if properties.get('preferred_symbol', None) is None:

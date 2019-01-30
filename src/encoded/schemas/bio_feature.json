@@ -4,7 +4,7 @@
     "id": "/profiles/bio_feature.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab", "feature_type"],
+    "required": ["award", "lab", "description", "feature_type"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -45,7 +45,7 @@
             "description": "A sequence ontology term indicating the type of feature",
             "type": "string",
             "linkTo": "OntologyTerm",
-            "lookup": 10,
+            "lookup": 10
         },
         "genome_location": {
             "title": "Genomic Location",
@@ -60,12 +60,18 @@
                 "linkTo": "GenomicRegion"
             }
         },
-        "relevant_gene": {
+        "relevant_genes": {
             "title": "Gene",
-            "description": "Gene ID if the feature is or can be associated with a gene (eg. protein produced by a gene)",
-            "type": "string",
-            "linkTo": "Gene",
-            "lookup": 10,
+            "description": "Gene or Gene(s) that a feature can be linked to.",
+            "type": "array",
+            "comment": "Usually a single ID but in some cases such as Histones that have multiple gene clusters or a region that contains more than one relevant gene can use multiple IDs",
+            "items": {
+                  "title": "Gene ID",
+                  "description": "Entrez Gene ID",
+                  "type": "string",
+                  "linkTo": "Gene",
+                  "lookup": 10
+            }
         },
         "cellular_structure": {
             "title": "Cellular Structure",
@@ -80,10 +86,56 @@
                 "Endoplasmic reticulum",
                 "Chromosomes"
             ]
+        },
+        "feature_mods": {
+            "type": "array",
+            "uniqueItems": true,
+            "comment": "This property will be used to calculate the display_title of the feature - however a submitted preferred_label overrides this info.",
+            "items": {
+                "title": "Modification",
+                "description": "A modification to the feature.",
+                "type": "object",
+                "required": ["mod_type"],
+                "properties": {
+                    "mod_type": {
+                        "title": "Type of modification",
+                        "description": "One specific modification - list has suggested values.",
+                        "type": "string",
+                        "suggested_enum": [
+                            "3xFLAG",
+                            "6XHis",
+                            "DsRed",
+                            "eGFP",
+                            "ER",
+                            "FLAG",
+                            "GFP",
+                            "HA",
+                            "mCherry",
+                            "T2A",
+                            "TRE",
+                            "V5",
+                            "YFP",
+                            "Methylation",
+                            "Monomethylation",
+                            "Dimethylation",
+                            "Trimethylation",
+                            "Acetylation",
+                            "Phosphorylation"
+                        ]
+                    },
+                    "mod_position": {
+                        "title": "Modified Position",
+                        "description": "The position relative to the feature - aa residue, base position or descriptive (eg. N-terminus)",
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
-    },
     "facets": {
+        "feature_type.preferred_name": {
+            "title": "Feature Type"
+        }
     },
     "columns": {
     }
