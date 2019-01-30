@@ -230,19 +230,19 @@
             ],
             "editable": true,
             "zoomLocks": {
-            "locksByViewUid": {
-                "view-4dn-mcool-0": "E5WfQFehR2-Dm4BW1zS5eQ"
-            },
-            "locksDict": {
-                "E5WfQFehR2-Dm4BW1zS5eQ": {
-                    "uid": "E5WfQFehR2-Dm4BW1zS5eQ",
-                    "view-4dn-mcool-0": [
-                        815066577.6957322,
-                        959291794.8369944,
-                        1341288.7398672402
-                    ]
+                "locksByViewUid": {
+                    "view-4dn-mcool-0": "E5WfQFehR2-Dm4BW1zS5eQ"
+                },
+                "locksDict": {
+                    "E5WfQFehR2-Dm4BW1zS5eQ": {
+                        "uid": "E5WfQFehR2-Dm4BW1zS5eQ",
+                        "view-4dn-mcool-0": [
+                            815066577.6957322,
+                            959291794.8369944,
+                            1341288.7398672402
+                        ]
+                    }
                 }
-            }
             },
                 "views": [
                     {
