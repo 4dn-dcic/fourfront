@@ -639,5 +639,16 @@
         "source_url": "http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed",
         "title": "bedToBigBed",
         "uuid": "c460cd2e-fca9-446d-9a13-884d7788c7ef"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "bwa",
+        "software_type": [
+            "aligner"
+        ],
+        "title": "bwa_0.7.13",
+        "uuid": "36bb6052-082a-46a0-be86-7415782f0223",
+        "version": "0.7.13"
     }
 ]
