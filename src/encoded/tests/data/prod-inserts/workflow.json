@@ -9684,7 +9684,7 @@
                     },
                     {
                         "meta": {
-                            "cardinality": "single",
+                            "cardinality": "array",
                             "file_format": "bed",
                             "global": true,
                             "type": "data file"
