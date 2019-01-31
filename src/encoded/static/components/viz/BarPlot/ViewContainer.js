@@ -3,18 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import * as d3 from 'd3';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
-import ChartDetailCursor, { CursorViewBounds } from './../ChartDetailCursor';
+import { CursorViewBounds } from './../ChartDetailCursor';
 import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
-
-// Used for transitioning
-var cachedBars = {},
-    cachedPastBars = {},
-    cachedBarSections = {},
-    cachedPastBarSections = {};
 
 
 /**
@@ -25,10 +20,21 @@ var cachedBars = {},
  */
 class BarSection extends React.PureComponent {
 
+    constructor(props){
+        super(props);
+        this.barSectionElemRef = React.createRef();
+    }
+
+    /**
+     * Call the `onMouseLeave` prop callback fxn in preparation
+     * to dismount in order to clean up if necessary.
+     *
+     * @todo Maybe check for `props.isHoveredOver` first?
+     */
     componentWillUnmount(){
         var { isSelected, isHoveredOver, onMouseLeave, node } = this.props;
-        if (this.refs.element && (isSelected || isHoveredOver)){
-            onMouseLeave(node, { 'relatedTarget' : this.refs.element });
+        if (this.barSectionElemRef.current && (isSelected || isHoveredOver)){
+            onMouseLeave(node, { 'relatedTarget' : this.barSectionElemRef.current });
         }
     }
 
@@ -57,7 +63,7 @@ class BarSection extends React.PureComponent {
         }
 
         return (
-            <div className={className} ref="element"
+            <div className={className} ref={this.barSectionElemRef}
                 style={{
                     height, 'backgroundColor' : color
                     //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
@@ -87,7 +93,10 @@ class Bar extends React.PureComponent {
         this.verifyCounts = this.verifyCounts.bind(this);
         this.barStyle = this.barStyle.bind(this);
         this.renderBarSection = this.renderBarSection.bind(this);
-        this.render = this.render.bind(this);
+        this.state = {
+            'mounted' : false
+        };
+        this.barElemRef = React.createRef();
     }
 
     componentDidMount(){
@@ -123,14 +132,12 @@ class Bar extends React.PureComponent {
     }
 
     barStyle(){
-        var style = {};
-        var d = this.props.node;
-        var styleOpts = this.props.styleOptions;
+        var style       = {},
+            d           = this.props.node,
+            styleOpts   = this.props.styleOptions;
 
         // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
         style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
-        if ((d.removing || d.new) && this.props.transitioning) style.opacity = 0; // Fade it out from current (opacity=1) via CSS3.
-        else style.opacity = 1; // 'Default' (no transitioning) style
         style.left = styleOpts.offset.left;
         style.bottom = styleOpts.offset.bottom;
         style.width = d.attr.width;
@@ -140,42 +147,22 @@ class Bar extends React.PureComponent {
     }
 
     renderBarSection(d, i, all){
-        //var parentBarTerm = (d.parent || d).term;
-        //cachedBarSections[parentBarTerm][d.term] = d;
-        //var isNew = false;
-        //if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
-        //    isNew = true;
-        //}
-
-        var key = d.term || d.name || i,
-            isHoveredOver = CursorViewBounds.isSelected(d, this.props.hoverTerm, this.props.hoverParentTerm),
-            isSelected = CursorViewBounds.isSelected(d, this.props.selectedTerm, this.props.selectedParentTerm);
+        var { hoverTerm, hoverParentTerm, selectedTerm, selectedParentTerm, onBarPartClick,
+                onBarPartMouseEnter, onBarPartMouseOver, onBarPartMouseLeave,
+                aggregateType, transitioning, canBeHighlighted } = this.props,
+            key = d.term || d.name || i,
+            isHoveredOver   = CursorViewBounds.isSelected(d, hoverTerm, hoverParentTerm),
+            isSelected      = CursorViewBounds.isSelected(d, selectedTerm, selectedParentTerm);
 
         return (
-            <BarSection
-                key={key}
-                data-key={key}
-                node={d}
-                onClick={this.props.onBarPartClick}
-                onMouseEnter={this.props.onBarPartMouseEnter}
-                onMouseLeave={this.props.onBarPartMouseLeave}
-                aggregateType={this.props.aggregateType}
-                //isNew={isNew}
-                {...{ isHoveredOver, isSelected }}
-                isRemoving={d.removing}
-                transitioning={this.props.transitioning}
-                canBeHighlighted={this.props.canBeHighlighted}
-            />
+            <BarSection {...{ isHoveredOver, isSelected, key, aggregateType, transitioning, canBeHighlighted }} data-key={key} node={d}
+                onClick={onBarPartClick} onMouseEnter={onBarPartMouseEnter} onMouseLeave={onBarPartMouseLeave} isRemoving={d.removing} />
         );
     }
 
     render(){
         var { transitioning, canBeHighlighted, showBarCount } = this.props,
-            d = this.props.node,
-            prevBarData = null;
-
-        if (d.existing && transitioning && cachedPastBars)  prevBarData = cachedPastBars[d.term].__data__;
-        if (!cachedBarSections[d.term])                     cachedBarSections[d.term] = {};
+            d = this.props.node;
 
         var hasSubSections = Array.isArray(d.bars),
             barSections = (hasSubSections ?
@@ -185,46 +172,8 @@ class Bar extends React.PureComponent {
             className = "chart-bar",
             topLabel = showBarCount ? <span className="bar-top-label" key="text-label" children={d.count} /> : null;
 
-        // If transitioning, add existing bar sections to fade out.
-        /* Removed for now as we don't transition barSections currently
-        if (transitioning && cachedPastBarSections[d.term]){
-            barSections = barSections.concat(
-                _.map(
-                    _.filter(
-                        _.pairs(cachedPastBarSections[d.term]), // [ barNode.term, { <barSectionNode.term> : { ...barSectionNode } } ][]
-                        function(pastNodePair){
-                            if (
-                                _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
-                                    //if (typeof barNode.pastWidth !== 'number'){
-                                    //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
-                                    //}
-                                    if (barNode.term === pastNodePair[0]){
-                                        barNode.existing = true;
-                                        return true;
-                                    }
-                                    return false;
-                                }).length === 0) return true;
-                            return false;
-                        }
-                    ),
-                    function(pastNodePair){
-                        var pastNode = pastNodePair[1];
-                        pastNode.removing = true;
-                        //pastNode.attr.width = d.attr.width;
-                        //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
-                        return pastNode;
-                    }
-                )
-            );
-        }
-        */
-
         if (!canBeHighlighted)  className += ' no-highlight';
         else                    className += ' no-highlight-color';
-
-        if (transitioning)      className += ' transitioning';
-        if (d.new)              className += ' new-bar';
-        else if (d.existing)    className += ' existing-bar';
 
         return (
             <div
@@ -238,16 +187,10 @@ class Bar extends React.PureComponent {
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                 key={"bar-" + d.term}
                 style={this.barStyle()}
-                ref={(r) => {
-                    if (typeof cachedBars !== 'undefined' && r !== null){
-                        // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                        d3.select(r).datum(d);
-                        if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
-                        if (d.new && transitioning) r.style.opacity = 1;
-                    }
-                }}
-                children={[ topLabel, _.map(barSections, this.renderBarSection) ]}
-            />
+                ref={this.barElemRef}>
+                { topLabel }
+                { _.map(barSections, this.renderBarSection) }
+            </div>
         );
     }
 }
@@ -265,14 +208,13 @@ export class ViewContainer extends React.Component {
     static BarSection = BarSection
 
     static defaultProps = {
-        canBeHighlighted : true
-    }
+        'canBeHighlighted' : true
+    };
 
     constructor(props){
         super(props);
         this.verifyCounts = this.verifyCounts.bind(this);
         this.renderBars = this.renderBars.bind(this);
-        this.render = this.render.bind(this);
     }
 
     componentDidMount(){
@@ -321,38 +263,16 @@ export class ViewContainer extends React.Component {
         var { bars, transitioning, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props,
             barsToRender, currentBars;
 
-        // Global/Module-level Variables
-        cachedPastBars = _.clone(cachedBars);
-        cachedBars = {};
-        cachedPastBarSections = _.clone(cachedBarSections);
-        cachedBarSections = {};
-
-        // Current Bars only (unless transitioning).
-        barsToRender = currentBars = _.map(bars, (d)=>{
-            // Determine whether bar existed before.
-            var isExisting = typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null;
-            return _.extend(d, { 
-                'existing' : isExisting,
-                'new' : !isExisting
-            });
-        });
-
-        // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
-        if (transitioning){
-            var barsToRemove = _.map(_.difference(_.keys(cachedPastBars), _.pluck(bars, 'term')), function(barTerm){
-                return _.extend(cachedPastBars[barTerm].__data__, { 'removing' : true });
-            });
-            barsToRender = barsToRemove.concat(currentBars);
-        }
-
-        return _.map(barsToRender.sort(function(a,b){ // key will be term or name, if available
+        return _.map(bars.sort(function(a,b){ // key will be term or name, if available
             return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }), (d,i,a) =>
-            <Bar key={d.term || d.name || i} node={d}
-                showBarCount={true /*!allExpsBarDataContainer */}
-                {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
-                    'transitioning', 'aggregateType', 'showType', 'canBeHighlighted')}
-                onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
+                <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i}>
+                    <Bar key={d.term || d.name || i} node={d}
+                        showBarCount={true /*!allExpsBarDataContainer */}
+                        {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
+                            'transitioning', 'aggregateType', 'showType', 'canBeHighlighted')}
+                        onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
+                </CSSTransition>
         );
     }
 
@@ -363,7 +283,7 @@ export class ViewContainer extends React.Component {
             });
         return (
             <div className="bar-plot-chart chart-container no-highlight"
-                data-field={topLevelField.field} style={{ height, width }} ref="container"
+                data-field={topLevelField.field} style={{ height, width }}
                 /*
                 onMouseLeave={(evt)=>{
                     if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
@@ -389,7 +309,7 @@ export class ViewContainer extends React.Component {
                 : null }
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
-                { this.renderBars() }
+                <TransitionGroup>{ this.renderBars() }</TransitionGroup>
                 { this.props.bottomAxis }
             </div>
         );
@@ -399,92 +319,16 @@ export class ViewContainer extends React.Component {
 }
 
 
-export const barPlotCursorActions = [
-    {
-        'title' : function(cursorProps){
-            if (navigate.isBrowseHref(cursorProps.href)){
-                //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
-                return "Explore";
-            }
-            return "Browse";
-        },
-        'function' : function(showType = 'all', cursorProps, mouseEvt){
-            //var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
-            var baseParams = navigate.getBrowseBaseParams();
-            var href = navigate.getBrowseBaseHref(baseParams);
-
-            // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
-            var currentExpSetFilters = showType === 'all' ? {} : Filters.currentExpSetFilters();
-
-            var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
-                // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                if (expSetFilters && expSetFilters[node.field] && expSetFilters[node.field].has(node.term)){
-                    return expSetFilters;
-                }
-                return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE
-            }, currentExpSetFilters);
-
-            // Register 'Set Filter' event for each field:term pair (node) of selected Bar Section.
-            _.forEach(cursorProps.path, function(node){
-                analytics.event('BarPlot', 'Set Filter', {
-                    'eventLabel'        : analytics.eventLabelFromChartNode(node, false),                         // 'New' filter logged here.
-                    'field'             : node.field,
-                    'term'              : node.term,
-                    'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
-                });
-            });
-
-            Filters.saveChangedFilters(newExpSetFilters, href, () => {
-                // Scroll to top of browse page container after navigation is complete.
-                setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
-            });
-
-        },
-        'disabled' : function(cursorProps){
-            var expSetFilters = Filters.currentExpSetFilters();
-
-            if (expSetFilters && typeof expSetFilters === 'object'){
-                if (
-                    Array.isArray(cursorProps.path) &&
-                    (cursorProps.path[0] && cursorProps.path[0].field) &&
-                    expSetFilters[cursorProps.path[0].field] instanceof Set &&
-                    expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
-                    (
-                        !cursorProps.path[1] || (
-                            cursorProps.path[1].field &&
-                            expSetFilters[cursorProps.path[1].field] instanceof Set &&
-                            expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
-                        )
-                    )
-                ) return true;
-            }
-            return false;
-        }
-    }
-];
-
-export function boundActions(to, showType = null){
-    if (!showType) showType = to.props.showType;
-    return barPlotCursorActions.map((action)=>{
-        var clonedAction = _.clone(action);
-        if (typeof action.function === 'function') clonedAction.function = action.function.bind(to, showType);
-        if (typeof action.title === 'function') clonedAction.title = action.title.bind(to);
-        if (typeof action.disabled === 'function') clonedAction.disabled = action.disabled.bind(to);
-        return clonedAction;
-    });
-}
-
-
 /**
  * Wraps ViewContainer with PopoverViewBounds, which feeds it
  * props.onNodeMouseEnter(node, evt), props.onNodeMouseLeave(node, evt), props.onNodeClick(node, evt),
  * props.selectedTerm, props.selectedParentTerm, props.hoverTerm, and props.hoverParentTerm.
- * 
+ *
  * @export
  * @class PopoverViewContainer
  * @extends {React.Component}
  */
-export class PopoverViewContainer extends React.Component {
+export class PopoverViewContainer extends React.PureComponent {
 
     static propTypes = {
         'height' : PropTypes.number,
@@ -494,55 +338,51 @@ export class PopoverViewContainer extends React.Component {
             'function' : PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
             'disabled' : PropTypes.oneOfType([PropTypes.bool, PropTypes.func]).isRequired,
         }))
-    }
+    };
 
     static defaultProps = {
-        'cursorDetailActions' : [],
         'cursorContainerMargin' : 100
+    };
+
+    constructor(props){
+        super(props);
+        this.getCoordsCallback = this.getCoordsCallback.bind(this);
+        //this.cursorDetailActions = this.cursorDetailActions.bind(this);
     }
 
-    cursorDetailActions(){
-        return this.props.cursorDetailActions.concat(boundActions(this));
+    getCoordsCallback(node, containerPosition, boundsHeight){
+        var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
+        var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+
+        var barYPos = node.attr.height;
+
+        if (node.parent){
+            var done = false;
+            barYPos = _.reduce(
+                node.parent.bars,//.slice(0).reverse(),
+                //_.sortBy(node.parent.bars, 'term').reverse(),
+                function(m, siblingNode){
+                    if (done) return m;
+                    if (siblingNode.term === node.term){
+                        done = true;
+                    }
+                    return m + siblingNode.attr.height;
+                },
+                0
+            );
+        }
+
+        return {
+            'x' : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
+            'y' : containerPosition.top + boundsHeight - bottomOffset - barYPos,
+        };
     }
 
     render(){
         return (
-            <CursorViewBounds
-                height={this.props.height}
-                width={this.props.width}
-                actions={this.cursorDetailActions.call(this)}
-                cursorContainerMargin={this.props.cursorContainerMargin}
+            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href')}
                 eventCategory="BarPlot" // For Analytics events
-                highlightTerm={false}
-                clickCoordsFxn={(node, containerPosition, boundsHeight)=>{
-                    var bottomOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
-                    var leftOffset = (this.props && this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
-
-                    var barYPos = node.attr.height;
-
-                    if (node.parent){
-                        var done = false;
-                        barYPos = _.reduce(
-                            node.parent.bars,//.slice(0).reverse(),
-                            //_.sortBy(node.parent.bars, 'term').reverse(),
-                            function(m, siblingNode){
-                                if (done) return m;
-                                if (siblingNode.term === node.term){
-                                    done = true;
-                                }
-                                return m + siblingNode.attr.height;
-                            },
-                            0
-                        );
-                    }
-
-                    return {
-                        x : containerPosition.left + leftOffset + (node.parent || node).attr.x + ((node.parent || node).attr.width / 2),
-                        y : containerPosition.top + boundsHeight - bottomOffset - barYPos,
-                    };
-
-                }}
-            >
+                highlightTerm={false} clickCoordsFxn={this.getCoordsCallback}>
                 <ViewContainer {...this.props} />
             </CursorViewBounds>
         );

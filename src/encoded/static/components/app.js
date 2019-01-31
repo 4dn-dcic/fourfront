@@ -21,7 +21,6 @@ import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
-import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
 
 var { NavigateOpts } = typedefs;
@@ -619,10 +618,6 @@ export default class App extends React.Component {
                 }
             });
 
-            if (this.refs && this.refs.navigation){
-                this.refs.navigation.closeMobileMenu();
-            }
-
             if (target && target.blur) target.blur();
         }
     }
@@ -803,7 +798,8 @@ export default class App extends React.Component {
         // get user actions (a function of log in) from local storage
         var userActions = [],
             session     = false,
-            userInfo    = JWT.getUserInfo();
+            userInfo    = JWT.getUserInfo(),
+            stateChange = {};
 
         if (userInfo){
             userActions = userInfo.user_actions;
@@ -814,9 +810,12 @@ export default class App extends React.Component {
             }
         }
 
-        var stateChange = {};
-        if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
-        if (session !== this.state.session) stateChange.session = session;
+        if (!_.isEqual(userActions, this.state.user_actions)) {
+            stateChange.user_actions = userActions;
+        }
+        if (session !== this.state.session) {
+            stateChange.session = session;
+        }
 
         if (Object.keys(stateChange).length > 0){
             this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
@@ -1347,24 +1346,29 @@ export default class App extends React.Component {
                     }}/>
                     <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
-                    <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
-                    <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
+                    <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <script async type="application/javascript" src="//www.google-analytics.com/analytics.js" />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
-                <BodyElement {...bodyElementProps} />
+                <React.StrictMode>
+                    <BodyElement {...bodyElementProps} />
+                </React.StrictMode>
             </html>
         );
     }
 }
 
-// See https://github.com/facebook/react/issues/2323
+/**
+ * Renders out the <title> element in the <head> area of the
+ * HTML document.
+ */
 class HTMLTitle extends React.PureComponent {
 
     componentDidMount() {
+        // See https://github.com/facebook/react/issues/2323
         var node = document.querySelector('title');
         if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
             node.setAttribute('data-reactid', this._rootNodeID);
@@ -1385,6 +1389,7 @@ class HTMLTitle extends React.PureComponent {
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
+
             if (title && title != 'Home') {
                 title = title + ' – ' + portal.portal_title;
             } else {
@@ -1471,13 +1476,26 @@ class ContentRenderer extends React.PureComponent {
  */
 class BodyElement extends React.PureComponent {
 
+    static getDerivedStateFromProps(props, state){
+        var stateChange = { 'lastHref' : props.href };
+        // Unset full screen if moving away to different pathname.
+        if (state.isFullscreen && stateChange.lastHref !== state.lastHref){
+            var currParts = url.parse(state.lastHref),
+                nextParts = url.parse(stateChange.lastHref);
+
+            if (currParts.pathname !== nextParts.pathname){
+                stateChange.isFullscreen = false;
+            }
+        }
+        return stateChange;
+    }
+
     /**
      * Instantiates the BodyElement component, binds functions.
      */
     constructor(props){
         super(props);
         this.onResize = _.debounce(this.onResize.bind(this), 300);
-        this.onTooltipAfterHide = this.onTooltipAfterHide.bind(this);
         this.setupScrollHandler = this.setupScrollHandler.bind(this);
 
         this.registerWindowOnResizeHandler = this.registerWindowOnResizeHandler.bind(this);
@@ -1505,7 +1523,11 @@ class BodyElement extends React.PureComponent {
             'classList'             : [],
             'hasError'              : false,
             'errorInfo'             : null,
-            'isFullscreen'          : false
+            'isFullscreen'          : false,
+            // Because componentWillReceiveProps is deprecated in favor of (static) getDerivedStateFromProps,
+            // we ironically must now clone href in state to be able to do comparisons...
+            // See: https://stackoverflow.com/questions/49723019/compare-with-previous-props-in-getderivedstatefromprops
+            'lastHref'              : props.href
         };
 
         /**
@@ -1518,17 +1540,12 @@ class BodyElement extends React.PureComponent {
          * @private
          */
         this.resizeHandlers = [];
-    }
 
-    componentWillReceiveProps(nextProps){
-        // Unset full screen if moving away to different pathname.
-        if (this.state.isFullscreen && this.props.href !== nextProps.href){
-            var currParts = url.parse(this.props.href),
-                nextParts = url.parse(nextProps.href);
-            if (currParts.pathname !== nextParts.pathname){
-                this.setState({ 'isFullscreen' : false });
-            }
-        }
+        /**
+         * Reference to ReactTooltip component instance.
+         * Used to unset the `top` and `left` positions after hover out.
+         */
+        this.tooltipRef = React.createRef();
     }
 
     /**
@@ -1546,21 +1563,8 @@ class BodyElement extends React.PureComponent {
 
     componentDidUpdate(pastProps){
         if (pastProps.href !== this.props.href){
-
             // Remove tooltip if still lingering from previous page
-            var _tooltip    = this.refs && this.refs.tooltipComponent,
-                domElem     = ReactDOM.findDOMNode(_tooltip);
-
-            if (!domElem) return;
-
-            var className = domElem.className || '',
-                classList = className.split(' '),
-                isShowing = classList.indexOf('show') > -1;
-
-            if (isShowing){
-                domElem.className = _.without(classList, 'show').join(' ');
-            }
-
+            this.tooltipRef && this.tooltipRef.current && this.tooltipRef.current.hideTooltip();
         }
     }
 
@@ -1803,26 +1807,6 @@ class BodyElement extends React.PureComponent {
         setTimeout(this.throttledScrollHandler, 100, null);
     }
 
-    /**
-     * Is executed after ReactTooltip is hidden e.g. via moving cursor away from an element.
-     * Used to unset lingering style.left and style.top property values which may interfere with placement
-     * of the next visible tooltip.
-     *
-     * @private
-     * @returns {void}
-     */
-    onTooltipAfterHide(){
-        var _tooltip    = this.refs && this.refs.tooltipComponent,
-            domElem     = ReactDOM.findDOMNode(_tooltip);
-
-        if (!domElem) {
-            console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
-            return;
-        }
-        // Grab tip & unset style.left and style.top using same method tooltip does internally.
-        domElem.style.left = domElem.style.top = null;
-    }
-
     toggleFullScreen(isFullscreen, callback){
         if (typeof isFullscreen === 'boolean'){
             this.setState({ isFullscreen }, callback);
@@ -1895,7 +1879,7 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }} ref="navigation"
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
                                     'context', 'updateUserInfo', 'listActionsFor')} />
 
@@ -1905,7 +1889,8 @@ class BodyElement extends React.PureComponent {
                                 windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate, isFullscreen }} />
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
+                                    {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
                             <ContentErrorBoundary canonical={canonical}>
@@ -1919,12 +1904,7 @@ class BodyElement extends React.PureComponent {
                     </div>
                 </div>
 
-                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" key="tooltip" />
-
-                <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
-                    verticalAlign="center" /* cursor position relative to popover */
-                    //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
-                />
+                <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 
             </body>
         );
@@ -1953,7 +1933,10 @@ class ContentErrorBoundary extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { 'hasError' : false, 'errorInfo' : null };
+        this.state = {
+            'hasError' : false,
+            'errorInfo' : null
+        };
     }
 
     componentDidCatch(err, info){
@@ -1965,7 +1948,7 @@ class ContentErrorBoundary extends React.Component {
     /**
      * Unsets the error state if we navigate to a different view/href .. which normally should be different ContentView.
      */
-    componentWillReceiveProps(nextProps){
+    componentDidUpdate(nextProps){
         if (nextProps.canonical !== this.props.canonical){
             this.setState(function(currState){
                 if (currState.hasError) {

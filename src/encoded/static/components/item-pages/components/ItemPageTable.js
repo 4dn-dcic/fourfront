@@ -116,7 +116,7 @@ export class ItemPageTable extends React.Component {
         var commonRowProps = { width, columnDefinitions, responsiveGridState, renderDetailPane };
 
         return (
-            <div className="item-page-table-container clearfix" ref="tableContainer">
+            <div className="item-page-table-container clearfix">
                 { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
                     <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
                 : null }

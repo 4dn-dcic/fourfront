@@ -82,17 +82,34 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false
         };
+
+        this.higlassRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
-        // TODO: Improve, use var = nextState and conditionally set if have been updated,
-        // then setState(nextState) if keys.length > 0.
+        var nextState = {};
+
         if (nextProps.viewConfig !== this.props.viewConfig){
-            this.setState({
-                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig)
+            _.extend(nextState, {
+                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
                 'viewConfig' : nextProps.viewConfig,
                 'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
+        } else if (nextProps.href !== this.props.href){
+            // If component is still same instance, then is likely that we're changing
+            // the URI hash as a consequence of changing tabs.
+            // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
+            var hgc                 = this.getHiGlassComponent(),
+                currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+                currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+            currentViewConf && _.extend(nextState, {
+                'viewConfig' : currentViewConf
+            });
+        }
+
+        if (_.keys(nextState).length > 0){
+            this.setState(nextState);
         }
     }
 
@@ -463,7 +480,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     getHiGlassComponent(){
-        return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
+        return (this.higlassRef && this.higlassRef.current && this.higlassRef.current.getHiGlassComponent()) || null;
     }
 
     statusChangeButton(){
@@ -624,10 +641,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth}
-                            height={hiGlassComponentHeight}
-                            viewConfig={this.state.viewConfig}
-                            ref="higlass" />
+                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={this.state.viewConfig}
+                            ref={this.higlassRef} />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>

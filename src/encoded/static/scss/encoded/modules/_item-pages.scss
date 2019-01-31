@@ -7,6 +7,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	h1.page-title {
 		margin-bottom: 2px;
 	}
+
 }
 
 @media screen and (min-width: $screen-md-min){
@@ -17,6 +18,191 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 	*/
 
+}
+
+/*************************
+        TabbedView
+**************************/
+
+/** These are re-used for a few things outside of TabbedView **/
+
+.tab-section-title {
+	font-weight: 300;
+	margin: 0;
+	padding: 27px 0 16px; // 67px height
+}
+
+h4.tab-section-title {
+  padding-top: 36px;
+  padding-bottom: 12px;
+}
+
+.tab-section-title-horiz-divider {
+	/* Use classes 'mb-0', 'mb-1', etc. to set margins */
+	margin-top: 0;
+	margin-bottom: 0;
+	border-top-color: #ccc;
+}
+
+
+.rc-tabs-top {
+	box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
+  
+	.rc-tabs-bar.extra-style-2 {
+		border-top: none;
+		border-bottom: none;
+		background: #22656d;
+
+		.rc-tabs-nav {
+			padding: 4px 0px 4px;
+		}
+	}
+}
+  
+.rc-tabs-bar {
+
+	.rc-tabs-tab {
+		padding-left: 18px;
+		padding-right: 18px;
+		margin-right: 0px;
+		height: 38px;
+		line-height: 36px;
+		padding-top: 0px;
+		padding-bottom: 0px;
+		border-bottom: 1px solid transparent;
+		position: relative;
+		z-index: 10;
+		transition : border-color .1s ease-out;
+		color : #fff;
+
+		&:not(:nth-child(1)) {
+			border-left: 1px solid rgba(255,255,255,0.33);
+		}
+
+		//&:last-child {
+		//  border-right: 1px solid rgba(255,255,255,0.2);
+		//}
+
+		&:hover:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled) {
+			color: #fff;
+			transition: none;
+			//background-color: #fafafa;
+			border-color: rgba(255, 255, 255, 0.33);
+			border-bottom-color: transparent;
+			border-top-color: transparent;
+			//border-bottom-color: rgba(255, 255, 255, 0.2);
+			background-color: rgba(255,255,255,0.1);
+		}
+
+		&.rc-tabs-tab-disabled {
+			color: rgba(255,255,255,0.66) !important;
+			//pointer-events: none;
+			//cursor: none;
+		}
+
+		&:hover.rc-tabs-tab-active {
+			transition:
+				border-color .6s ease-out,
+				color .3s .1s ease-out,
+				background-color .3s .2s ease-out;
+		}
+
+		&.rc-tabs-tab-active {
+			border-color: transparent;
+			color: #000;
+		}
+
+		&:hover:not(.rc-tabs-tab-disabled) + .rc-tabs-tab:not(.rc-tabs-tab-active) {
+			border-left-color: rgba(255,255,255,0.33);
+		}
+
+		&.rc-tabs-tab-active + .rc-tabs-tab:not(:hover) {
+			border-left-color: transparent;
+		}
+
+		.tab {
+
+			user-select: none;
+			font-weight: 500;
+			font-size: 1.05rem;
+
+			i.icon {
+				margin-right: 3px;
+
+				&.icon-warning, &.icon-check {
+					opacity: 0.25;
+				}
+
+				&.icon-th,
+				&.icon-list,
+				&.icon-warning,
+				&.icon-microchip,
+				&.icon-leaf {
+					position: relative;
+					top: 1px;
+				}
+
+			}
+
+			span.active > i.icon {
+				opacity : 1;
+
+				&.icon-warning {
+					color: $audit-color-warning;
+				}
+
+				&.icon-ban, &.icon-exclamation-circle {
+					color : $audit-color-warning;
+					//color: #ff5757;
+				}
+
+			}
+
+		}
+	}
+
+	.rc-tabs-tab-next,
+	.rc-tabs-tab-prev {
+
+		display: none;
+
+		&.rc-tabs-tab-arrow-show {
+			display: block;
+			color: #fff;
+
+			> span.rc-tabs-tab-prev-icon, 
+			> span.rc-tabs-tab-next-icon {
+				top: 3px;
+			}
+
+			&.rc-tabs-tab-btn-disabled {
+				opacity: 0.25;
+			}
+	
+			> .rc-tabs-tab-next-icon:before {
+				font-family: FontAwesome;
+				content: "\f105";
+			}
+			> .rc-tabs-tab-prev-icon:before {
+				font-family: FontAwesome;
+				content: "\f104";
+			}
+
+		}
+	}
+
+}
+
+
+.rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
+	height: 48px;
+	background: none;
+	border: 2px solid #22656d;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	border-bottom: none;
+	border-left: none;
+	border-right: none;
+	background-color: #fff;
 }
 
 
@@ -1710,6 +1896,9 @@ $download-button-width : 100px;
 
 	.file-download-container {
 		transition: transform .4s;
+		display: flex;
+		align-items: center;
+		height: 100%;
 
 		> a.btn-block.btn-lg {
 			font-weight: 400;

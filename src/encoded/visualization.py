@@ -516,7 +516,9 @@ def add_files_to_higlass_viewconf(request):
     repack_higlass_views(new_views)
 
     # Set up the additional views so they all move and zoom with the first.
-    setZoomLocationLocks(new_views, higlass_viewconfig, first_view_location_and_zoom)
+    for view in new_views:
+        add_zoom_lock_if_needed(higlass_viewconfig, view, first_view_location_and_zoom)
+
     higlass_viewconfig["zoomFixed"] = False
     higlass_viewconfig["views"] = new_views
     return {
@@ -666,6 +668,7 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         new_view, error = create_2d_view(new_file)
         if error:
             return None, errors
+        copy_1d_tracks_into_2d_view(views, new_view)
         add_view_to_views(new_view, views)
     elif file_format == "/file-formats/beddb/":
         # Add the 1D track to top, left
@@ -722,7 +725,7 @@ def create_1d_track(new_file, side="top"):
     if new_file["file_format"] == "/file-formats/bed/":
         new_track["type"] = "bedlike"
     elif new_file["file_format"] == "/file-formats/bigbed/":
-        new_track["height"] = "100"
+        new_track["height"] = 35
         new_track["type"] = "horizontal-vector-heatmap"
         new_track["options"]["valueScaling"] = "linear"
         # Add the color range options. A list of 256 strings, each containing an integer.
@@ -973,68 +976,6 @@ def repack_higlass_views(views):
             y += height
             x = 0
 
-def setZoomLocationLocks(views, view_config, scales_and_center_k):
-    """ Set the zoom and location of the views so they match the first one.
-    Then lock them so changing one changes all of them.
-
-    Args:
-        views(list): All of the views that will be locked.
-        view_config(dict): Modify this view_config by adding the locks.
-        scales_and_center_k(list): Notes the "camera" position of the first view which other views will be locked to.
-
-    Returns:
-        None
-    """
-
-    if len(views) == 0:
-        return
-
-    # Get the x, y, zoom of the first view
-    view1_x = scales_and_center_k[0]
-    view1_y = scales_and_center_k[1]
-    view1_zoom = scales_and_center_k[2]
-
-    # Create new uuids to handle the zoom and location locks.
-    locationLockUuid = uuid.uuid4()
-    zoomLockUuid = uuid.uuid4()
-    lockUuids = {
-        "location" : str(locationLockUuid),
-        "zoom" : str(zoomLockUuid),
-    }
-
-    locks = {
-        "location" : {
-            "locksByViewUid": {},
-            "locksDict": {
-                lockUuids["location"] : {}
-            },
-        },
-        "zoom" : {
-            "locksByViewUid": {},
-            "locksDict": {
-                lockUuids["zoom"] : {}
-            },
-        },
-    }
-
-    # For each view,
-    for view in views:
-        uid = str(view["uid"])
-
-        # Add the new lock information.
-        for lockType in lockUuids:
-            lockUuid = lockUuids[lockType]
-            locks[lockType]["locksByViewUid"][uid] = lockUuid
-            locks[lockType]["locksDict"][lockUuid][uid] = [
-                view1_x,
-                view1_y,
-                view1_zoom
-            ]
-
-    # Set the view config.
-    view_config["locationLocks"] = locks["location"]
-    view_config["zoomLocks"] = locks["zoom"]
-
 def get_chromsize_grid_from_view(view):
     """ Look through the given view to find a 2d chromsize grid.
     Args:
@@ -1126,3 +1067,80 @@ def add_2d_chromsize(new_views, files_info):
         view["tracks"]["center"][0]["contents"].insert(0, chromsize_contents)
 
     return new_views, None
+
+def copy_1d_tracks_into_2d_view(views, new_view):
+    """
+    Args:
+        views: A list of views for this view config.
+        new_view: A view that needs to copy tracks from. Will be modified.
+
+    Returns:
+        Boolean indicating success.
+    """
+
+    # Get the first view, this should have all of the changes.
+    if len(views) < 1:
+        return False
+    base_view = views[0]
+
+    # Copy the genome assembly search box as well.
+    for field in ("genomePositionSearchBox", "autocompleteSource"):
+        if field in base_view:
+            new_view[field] = base_view[field]
+
+    # For each side (except center)
+    for side in ("top", "left"):
+        # If there are any tracks here
+        for track in base_view["tracks"][side]:
+            # Copy them into the new_view's side
+            new_view["tracks"][side].append(track)
+
+    return True
+
+def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
+    # Get the uid for this view
+    view_uid = str(view["uid"])
+
+    # If the view already exists in the viewconf, no work is needed.
+    if view_uid in view_config["locationLocks"]["locksByViewUid"]:
+        return
+
+    # Find the lock the first view is in.
+    base_uid = str(view_config["views"][0]["uid"])
+    base_view_x = scales_and_center_k[0]
+    base_view_y = scales_and_center_k[1]
+    base_view_zoom = scales_and_center_k[2]
+
+    base_initial_x_domain = view_config["views"][0]["initialXDomain"]
+    base_initial_y_domain = view_config["views"][0]["initialYDomain"]
+
+    # Set the location and zoom locks.
+    for lock_name in ("locationLocks", "zoomLocks"):
+        # Refer to the same lock the base view uses.
+        lockUuid = view_config[lock_name]["locksByViewUid"].get(base_uid, None)
+        if not lockUuid:
+            # The base view doesn't have a lock, so create a new one and add the base view to it.
+            lockUuid = str(uuid.uuid4())
+            view_config[lock_name]["locksByViewUid"][base_uid] = lockUuid
+            view_config[lock_name]["locksDict"][lockUuid] = {}
+            view_config[lock_name]["locksDict"][lockUuid][base_uid] = [
+                base_view_x,
+                base_view_y,
+                base_view_zoom
+            ]
+        else:
+            base_view_x = view_config[lock_name]["locksDict"][lockUuid][base_uid][0]
+            base_view_y = view_config[lock_name]["locksDict"][lockUuid][base_uid][1]
+            base_view_zoom = view_config[lock_name]["locksDict"][lockUuid][base_uid][2]
+
+        # Lock the new view with the base view.
+        view_config[lock_name]["locksByViewUid"][view_uid] = lockUuid
+        view_config[lock_name]["locksDict"][lockUuid][view_uid] = [
+            base_view_x,
+            base_view_y,
+            base_view_zoom
+        ]
+
+        # Copy the initialXDomain and initialYDomain
+        view["initialXDomain"] = view_config["views"][0]["initialXDomain"] or view["initialXDomain"]
+        view["initialYDomain"] = view_config["views"][0]["initialYDomain"] or view["initialYDomain"]

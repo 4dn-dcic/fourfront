@@ -1310,12 +1310,14 @@ def build_table_columns(request, schemas, doc_types):
     }
 
     # Add type column if any abstract types in search
-    if any_abstract_types:
+    if any_abstract_types and request.params.get('currentAction') != 'selection':
         columns['@type'] = {
             "title" : "Item Type",
             "colTitle" : "Type",
             "order" : -80,
-            "description" : "Type or category of Item"
+            "description" : "Type or category of Item",
+            # Alternative below, if we want type column to be available but hidden by default in selection mode:
+            # "default_hidden": request.params.get('currentAction') == 'selection'
         }
 
     for schema in schemas:

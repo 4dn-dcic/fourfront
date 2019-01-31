@@ -441,7 +441,8 @@
     }
 
     .chart-bar {
-        transition: transform .75s ease-out, opacity .5s, width .75s ease-out, height .75s ease-out;
+        transition: transform .75s ease-out, opacity .75s ease-out, width .75s ease-out, height .75s ease-out;
+        opacity: 1;
         position: absolute;
         transform: translate3d(0,0,0);
         //outline-offset: 5px;
@@ -492,6 +493,7 @@
                 box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
                 //outline-color: transparent !important;
             }
+
         }
 
         &.highlight {
@@ -502,14 +504,18 @@
             }
         }
 
-        &:hover,
-        &.selected {
-
+        &.barplot-transition-enter {
+            opacity: 0;
+            height: 0px !important;
         }
 
-        > rect {
-            fill-opacity: 1;
-            transition : fill-opacity .5s;
+        &.barplot-transition-enter-done {
+            opacity: 1;
+        }
+
+        &.barplot-transition-exit {
+            opacity: 0;
+            height: 0px !important;
         }
 
     }

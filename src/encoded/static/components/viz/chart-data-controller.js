@@ -337,22 +337,17 @@ export const ChartDataController = {
             var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters, prevBrowseBaseState),
                 nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState), // We don't need to pass 'current' params, but we do for clarity of differences.
                 searchQuery = Filters.searchQueryStringFromHref(refs.href),
-                didFiltersChange = !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) || (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery);
-
-            // if we are not on the browse page, no need to get chart info
-            if (refs.href.indexOf('/browse/') === -1){
-                return;
-            }
+                didFiltersChange = (
+                    !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
+                    (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery)
+                ) && (
+                    // if we are not on the browse page, no need to get chart info
+                    prevHref.indexOf('/browse/') !== -1 || refs.href.indexOf('/browse/') !== -1
+                );
 
             if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState && !didFiltersChange){
                 return; // Nothing relevant has changed. Exit.
             }
-
-            // Hide any pop-overs still persisting with old filters or URL.
-            setTimeout(function(){
-                ChartDetailCursor.reset(true);
-            }, 750);
-
 
             // Step 1. Check if need to refetch both unfiltered & filtered data.
             if (refs.browseBaseState !== prevBrowseBaseState){

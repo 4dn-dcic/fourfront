@@ -138,7 +138,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
         'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
         'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
         'self_planned_results_url'  : null
-    }
+    };
 
     constructor(props){
         super(props);
@@ -280,7 +280,6 @@ export class JointAnalysisMatrix extends React.PureComponent {
                             self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
-                            collapseToMatrix
                         />
                     </div>
                 </div>

@@ -10,6 +10,7 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "user_content.json#/properties" }
     ],
     "properties": {

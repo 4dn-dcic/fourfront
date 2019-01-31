@@ -235,7 +235,7 @@ export class FileOverviewHeading extends React.Component {
                 <div className="col-xs-12 col-md-9 col-lg-8">
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen} children={this.overviewBlocks()}/>
                 </div>
-                <div className={"col-xs-12 col-md-3 col-lg-4 mt-1" + (this.state.isPropertiesOpen || isSmallerSize ? ' mb-3' : '')}>
+                <div className="col-xs-12 col-md-3 col-lg-4 mt-1 mb-3">
                     <FileViewDownloadButtonContainer file={this.props.context} size="lg" verticallyCentered={!isSmallerSize && this.state.isPropertiesOpen} />
                 </div>
 
@@ -248,16 +248,15 @@ export class FileViewDownloadButtonContainer extends React.Component {
 
     static defaultProps = {
         'size' : null
-    }
+    };
 
     render(){
-        var file = this.props.file || this.props.context || this.props.result;
+        var { className, size } = this.props,
+            file = this.props.file || this.props.context || this.props.result;
         return (
-            <layout.VerticallyCenteredChild disabled={!this.props.verticallyCentered}>
-                <div className={"file-download-container" + (this.props.className ? ' ' + this.props.className : '')}>
-                    <fileUtil.FileDownloadButtonAuto result={file} size={this.props.size} />
-                </div>
-            </layout.VerticallyCenteredChild>
+            <div className={"file-download-container" + (className ? ' ' + className : '')}>
+                <fileUtil.FileDownloadButtonAuto result={file} size={size} />
+            </div>
         );
     }
 }
@@ -465,7 +464,7 @@ export class QualityControlResults extends React.PureComponent {
         }
 
         var itemsToReturn = [
-            renderMetric("Total reads", "Total Reads"),
+            renderMetric("Total reads", "Total Reads in File"),
             //renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
             //renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
             renderMetric("Total Sequences", "Total Sequences"),
