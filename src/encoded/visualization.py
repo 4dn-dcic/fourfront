@@ -1129,6 +1129,8 @@ def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
                 base_view_zoom
             ]
         else:
+            base_view_x = view_config[lock_name]["locksDict"][lockUuid][base_uid][0]
+            base_view_y = view_config[lock_name]["locksDict"][lockUuid][base_uid][1]
             base_view_zoom = view_config[lock_name]["locksDict"][lockUuid][base_uid][2]
 
         # Lock the new view with the base view.
