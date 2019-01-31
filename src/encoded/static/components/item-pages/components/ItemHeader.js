@@ -126,11 +126,16 @@ export class TopRow extends React.Component {
     itemActions(){
         var actions = this.props.context && this.props.context.actions;
         if (!Array.isArray(actions) || actions.length === 0) return null;
+        var descriptions = {
+            'edit'      : 'Edit the properties of this Item.',
+            'create'    : 'Create a blank new Item of the same type.',
+            'clone'     : 'Create and edit a copy of this Item.'
+        };
+
         return _.map(actions, function(action, i){
-            var title = action.title;
             return (
-                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
-                    <a href={action.href}>{ title }</a>
+                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i} data-tip={descriptions[action.name]}>
+                    <a href={action.href}>{ action.title }</a>
                 </div>
             );
         });

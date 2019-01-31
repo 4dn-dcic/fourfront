@@ -247,7 +247,16 @@ def login(request):
 @view_config(route_name='logout',
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
 def logout(request):
-    """View to forget the user"""
+    """
+    This endpoint proxies a request to Auth0 for it to remove its session cookies.
+    See https://auth0.com/docs/api/authentication#enterprise-saml-and-others-
+
+    The Auth0 endpoint is meant to be navigated to by end-user as part of SSO logout (?)
+    So this endpoint may not be needed at moment. Kept for reference.
+
+    The front-end handles logging out by discarding the locally-held JWT from
+    browser cookies and re-requesting the current 4DN URL.
+    """
     #request.session.invalidate()
     #request.response.headerlist.extend(forget(request))
 

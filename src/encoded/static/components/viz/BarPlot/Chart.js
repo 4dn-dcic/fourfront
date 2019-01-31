@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
+import memoize from 'memoize-one';
 import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
@@ -26,7 +27,7 @@ import { PopoverViewContainer } from './ViewContainer';
  * @param {?number} [fullHeightCount=null] - 100% Y-Axis count value. Overrides height of bars.
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
-export function genChartBarDims(
+export const genChartBarDims = memoize(function(
     rootField,
     availWidth              = 400,
     availHeight             = 400,
@@ -134,7 +135,7 @@ export function genChartBarDims(
 
 
     return barData;
-}
+});
 
 
 /**
@@ -208,7 +209,7 @@ export class Chart extends React.PureComponent {
         'useOnlyPopulatedFields' : PropTypes.bool,
         'showType'      : PropTypes.oneOf(['all', 'filtered', 'both']),
         'aggregateType' : PropTypes.oneOf(['experiment_sets', 'experiments', 'files']),
-    }
+    };
 
     static defaultProps = {
         'experiments' : [],
@@ -217,21 +218,23 @@ export class Chart extends React.PureComponent {
         'showType' : 'both',
         'aggregateType' : 'experiments',
         'styleOptions' : null, // Can use to override default margins/style stuff.
+    };
+    /*
+    static getDerivedStateFromProps(nextProps, ){
+        if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
+            console.log('WILL DO SLOW TRANSITION');
+            this.setState({ transitioning : true });
+        }
     }
+    */
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.styleOptions = this.styleOptions.bind(this);
-        this.width = this.width.bind(this);
-        this.height = this.height.bind(this);
         this.getLegendData = this.getLegendData.bind(this);
         this.getTopLevelField = this.getTopLevelField.bind(this);
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
         this.renderParts.leftAxis = this.renderParts.leftAxis.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'mounted' : false };
     }
 
@@ -244,34 +247,9 @@ export class Chart extends React.PureComponent {
         this.setState({ 'mounted' : false });
     }
 
-    /**
-     * @deprecated
-     * @instance
-     * @ignore
-     */
-    componentWillReceiveProps(nextProps){
-        if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
-            console.log('WILL DO SLOW TRANSITION');
-            this.setState({ transitioning : true });
-        }
-    }
-
-
     componentWillUpdate(){
         // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
         barplot_color_cycler.resetCache();
-    }
-
-    componentDidUpdate(pastProps){
-
-        if (Chart.shouldPerformManualTransitions(this.props, pastProps)){
-            // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
-            setTimeout(()=>{
-                if (!this || !this.state || !this.state.mounted) return;
-                this.setState({ transitioning : false });
-            }, 750);
-        }
-
     }
 
     /** 
@@ -279,29 +257,6 @@ export class Chart extends React.PureComponent {
      * @returns {Object} Style options object.
      */
     styleOptions(){ return vizUtil.extendStyleOptions(this.props.styleOptions, Chart.getDefaultStyleOpts()); }
-  
-    /**
-     * @returns props.width or width of refs.container, if mounted.
-     */
-    width(){
-        if (this.props.width) return this.props.width;
-        if (!this.refs.container) return null;
-        var width = this.refs.container.parentElement.clientWidth;
-        if (this.refs.container.parentElement.className.indexOf('col-') > -1){
-            // Subtract 20 to account for grid padding (10px each side).
-            return width - 20;
-        }
-        return width;
-    }
-
-    /**
-     * @returns props.height or height of refs.container, if mounted.
-     */
-    height(){
-        if (this.props.height) return this.props.height;
-        if (!this.refs.container) return null;
-        return this.refs.container.parentElement.clientHeight;
-    }
 
     /**
      * Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
@@ -349,7 +304,7 @@ export class Chart extends React.PureComponent {
                     'name'      : b.name || b.term,
                     'term'      : b.term,
                     'x'         : b.attr.x,
-                    'opacity'   : 1 //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                    'opacity'   : 1
                 }; 
             }).sort(function(a,b){
                 return a.term < b.term ? -1 : 1;
@@ -372,6 +327,7 @@ export class Chart extends React.PureComponent {
                         angle={styleOpts.labelRotation}
                         maxLabelWidth={styleOpts.maxLabelWidth || 1000}
                         isMounted={_this.state.mounted}
+                        windowWidth={this.props.windowWidth}
                     />
                 </div>
             );
@@ -424,36 +380,29 @@ export class Chart extends React.PureComponent {
      * @returns {JSX.Element} - Chart markup wrapped in a div.
      */
     render(){
-        if (this.state.mounted === false) return <div ref="container"></div>;
+        if (this.state.mounted === false) return <div/>;
 
-        var availHeight = this.height(),
-            availWidth = this.width(),
-            styleOpts = this.styleOptions();
+        var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props,
+            styleOptions = this.styleOptions();
 
-        var topLevelField = (this.props.showType === 'all' ? this.props.barplot_data_unfiltered : this.props.barplot_data_filtered) || this.props.barplot_data_unfiltered;
+        var topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
 
-        var barData = genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        var barData = genChartBarDims(
             topLevelField,
-            availWidth,
-            availHeight,
-            styleOpts,
-            this.props.aggregateType,
-            this.props.useOnlyPopulatedFields
+            width,
+            height,
+            styleOptions,
+            aggregateType,
+            useOnlyPopulatedFields
         );
 
         return (
-            <PopoverViewContainer
-                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
-                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
-                topLevelField={barData.field}
-                width={availWidth}
-                height={availHeight}
-                styleOptions={styleOpts}
-                showType={this.props.showType}
-                aggregateType={this.props.aggregateType}
-                bars={barData.bars}
-                transitioning={this.state.transitioning}
-            />
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href }}
+                actions={cursorDetailActions}
+                leftAxis={this.renderParts.leftAxis.call(this, width, height, barData, styleOptions)}
+                bottomAxis={this.renderParts.bottomXAxis.call(this, width, height, barData.bars, styleOptions)}
+                topLevelField={barData.field} bars={barData.bars} />
         );
 
     }

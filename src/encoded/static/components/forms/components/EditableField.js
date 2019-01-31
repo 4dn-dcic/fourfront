@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import * as store from './../../../store';
 import { ajax, console, object, isServerSide, navigate } from './../../util';
 
@@ -18,7 +19,7 @@ import { ajax, console, object, isServerSide, navigate } from './../../util';
  *
  * @see EditableField
  */
-export class FieldSet extends React.Component {
+export class FieldSet extends React.PureComponent {
 
     static propTypes = {
         children    : PropTypes.node,       // Inner fieldset content, should have at least 1 EditableField, probably more.
@@ -38,30 +39,22 @@ export class FieldSet extends React.Component {
         context     : {},
         className   : null,
         endpoint    : null
-    }
+    };
+
+    static extractChildrenIds = memoize(function(children){
+        var childIDs = [];
+        React.Children.map(children, (child) => {
+            if (child.props && child.props.labelID) {
+                childIDs.push(child.props.labelID);
+            }
+        });
+        return childIDs;
+    });
 
     constructor(props){
         super(props);
-        this.componentWillMount = this.componentWillMount.bind(this);
-        this.componentWillUpdate = this.componentWillUpdate.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
-        this.getChildrenIDs = this.getChildrenIDs.bind(this);
         this.fullClassName = this.fullClassName.bind(this);
-        this.render = this.render.bind(this);
-        this.children = null;
-        this.childrenIDs = [];
-    }
-
-    componentWillMount(){
-        this.children = this.adjustedChildren();
-        this.childrenIDs = this.getChildrenIDs();
-    }
-
-    componentWillUpdate(newProps){
-        if (this.props.children !== newProps.children){
-            this.children = this.adjustedChildren();
-            this.childrenIDs = this.getChildrenIDs();
-        }
     }
 
     adjustedChildren(){
@@ -88,17 +81,11 @@ export class FieldSet extends React.Component {
         });
     }
 
-    getChildrenIDs(){
-        var childIDs = [];
-        React.Children.map((this.children || this.props.children), (child) => {
-            if (child.props && child.props.labelID) childIDs.push(child.props.labelID);
-        });
-        return childIDs;
-    }
-
     fullClassName(){
-        var { className, style, inputSize, parent } = this.props,
-            stateHolder = parent || this; // Fallback to using self as state holder.
+        var { className, style, inputSize, parent, children } = this.props,
+            stateHolder = parent || this,
+            childIDs    = FieldSet.extractChildrenIds(children); // Fallback to using self as state holder.
+
         return (
             (className ? className + ' ' : '') +
             "editable-fields fieldset" +
@@ -107,7 +94,7 @@ export class FieldSet extends React.Component {
             (
                 stateHolder.state &&
                 stateHolder.state.currentlyEditing &&
-                this.childrenIDs.indexOf(stateHolder.state.currentlyEditing) > -1 ?
+                childIDs.indexOf(stateHolder.state.currentlyEditing) > -1 ?
                     ' editing' : ''
             )
         );
@@ -131,9 +118,9 @@ export class FieldSet extends React.Component {
  *
  * @see EditableField.propTypes for more info of props to provide.
  */
-export class EditableField extends React.Component {
+export class EditableField extends React.PureComponent {
 
-    static displayName = 'EditableField'
+    static displayName = 'EditableField';
 
     static propTypes = {
         label           : PropTypes.string,
@@ -153,7 +140,7 @@ export class EditableField extends React.Component {
         required        : PropTypes.bool,   // Optionally set if field is required, overriding setting derived from schema (if any). Defaults to false.
         schemas         : PropTypes.object.isRequired,
         debug           : PropTypes.bool    // Verbose lifecycle log messages.
-    }
+    };
 
     static defaultProps = {
         fieldType : 'text',
@@ -166,7 +153,7 @@ export class EditableField extends React.Component {
         required: false,
         schemas: null,
         debug: true
-    }
+    };
 
     constructor(props){
         super(props);
@@ -210,18 +197,31 @@ export class EditableField extends React.Component {
             'leanTo'            : null,                 // Re: inline style
             'leanOffset'        : 0                     // Re: inline style
         };
+
+        this.fieldRef = React.createRef();          // Field container element
+        this.inputElementRef = React.createRef();   // Input element
     }
 
     onResizeStateChange(){
-        if (this.refs.field && this.refs.field.offsetParent){
-            var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
-            //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
-            this.setState({
-                'leanTo' :
-                    this.refs.field.offsetLeft > offsetRight ? 'left' : 'right',
-                'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
-            });
+        var fieldElem = this.fieldRef.current;
+        if (!fieldElem || !fieldElem.offsetParent){
+            return;
         }
+
+        this.setState(function(currState){
+            var parentWidth = fieldElem.offsetParent.offsetWidth,
+                selfWidth   = fieldElem.offsetWidth,
+                offsetLeft  = fieldElem.offsetLeft,
+                offsetRight = (parentWidth - offsetLeft) - selfWidth,
+                leanTo      = offsetLeft > offsetRight ? 'left' : 'right',
+                leanOffset  = 280 - (parentWidth - Math.min(offsetLeft, offsetRight));
+
+            if (currState.leanTo === leanTo && currState.leanOffset === leanOffset){
+                return null;
+            }
+
+            return { leanTo, leanOffset };
+        });
     }
 
     componentWillReceiveProps(newProps, newContext){
@@ -249,7 +249,7 @@ export class EditableField extends React.Component {
             newState.validationPattern = newProps.pattern || this.validationPattern(newProps.schemas || newContext.schemas);
             newState.required = newProps.required || this.isRequired(newProps.schemas || newContext.schemas);
             // Also, update state.valid if in editing mode
-            if (this.props.parent.state && this.props.parent.state.currentlyEditing && this.refs && this.refs.inputElement){
+            if (this.props.parent.state && this.props.parent.state.currentlyEditing && this.inputElementRef.current){
                 stateChangeCallback = this.handleChange;
             }
         }
@@ -500,7 +500,7 @@ export class EditableField extends React.Component {
 
     /** Update state.value on each keystroke/input and check validity. */
     handleChange(e){
-        var inputElement = e && e.target ? e.target : this.refs.inputElement;
+        var inputElement = e && e.target ? e.target : this.inputElementRef.current;
         var state = {
             'value' : inputElement.value // ToDo: change to (inputElement.value === '' ? null : inputElement.value)  and enable to process it on backend.
         };
@@ -637,19 +637,19 @@ export class EditableField extends React.Component {
     inputField(){
         // ToDo : Select boxes, radios, checkboxes, etc.
         var commonProps = {
-            'id' : this.props.labelID,
-            'required' : this.state.required,
-            'disabled' : this.props.disabled || false,
-            'ref' : "inputElement"
+            'id'        : this.props.labelID,
+            'required'  : this.state.required,
+            'disabled'  : this.props.disabled || false,
+            'ref'       : this.inputElementRef
         };
         var commonPropsTextInput = _.extend({
-            'className' : 'form-control input-' + this.props.inputSize,
-            'value' : this.state.value || '',
-            'onChange' : this.handleChange,
-            'name' : this.props.labelID,
-            'autoFocus': true,
-            'placeholder' : this.props.placeholder,
-            'pattern' : this.state.validationPattern
+            'className'     : 'form-control input-' + this.props.inputSize,
+            'value'         : this.state.value || '',
+            'onChange'      : this.handleChange,
+            'name'          : this.props.labelID,
+            'autoFocus'     : true,
+            'placeholder'   : this.props.placeholder,
+            'pattern'       : this.state.validationPattern
         }, commonProps);
 
         switch(this.props.fieldType){
@@ -685,16 +685,17 @@ export class EditableField extends React.Component {
 
     /** Render 'in edit state' view */
     renderEditing(){
+        var { inputSize, style, labelID, label, absoluteBox } = this.props,
+            { leanTo, leanOffset } = this.state,
+            outerBaseClass = "editable-field-entry editing has-feedback" +
+                (!this.isValid(true) ? ' has-error ' : ' has-success ') +
+                ('input-size-' + inputSize + ' ');
 
-        var outerBaseClass = "editable-field-entry editing has-feedback" +
-            (!this.isValid(true) ? ' has-error ' : ' has-success ') +
-            ('input-size-' + this.props.inputSize + ' ');
-
-        if (this.props.style == 'row') {
+        if (style == 'row') {
             return (
-                <div className={outerBaseClass + this.props.labelID + ' row'}>
+                <div className={outerBaseClass + labelID + ' row'}>
                     <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
+                        <label htmlFor={labelID }>{ label }</label>
                     </div>
                     <div className="col-sm-9 value editing">
                         { this.renderActionIcon('cancel') }
@@ -705,9 +706,9 @@ export class EditableField extends React.Component {
             );
         }
 
-        if (this.props.style == 'minimal') {
+        if (style == 'minimal') {
             return (
-                <div className={ outerBaseClass + this.props.labelID }>
+                <div className={ outerBaseClass + labelID }>
                     <div className="value editing">
                         { this.renderActionIcon('cancel') }
                         { this.renderActionIcon('save') }
@@ -717,18 +718,18 @@ export class EditableField extends React.Component {
             );
         }
 
-        if (this.props.style == 'inline') {
+        if (style == 'inline') {
             var valStyle = {};
-            if (this.props.absoluteBox){
-                if (this.state.leanTo === null){
+            if (absoluteBox){
+                if (leanTo === null){
                     valStyle.display = 'none';
                 } else {
-                    valStyle[this.state.leanTo === 'left' ? 'right' : 'left'] = (this.state.leanOffset > 0 ? (0-this.state.leanOffset) : 0) + 'px';
+                    valStyle[leanTo === 'left' ? 'right' : 'left'] = (leanOffset > 0 ? (0 - leanOffset) : 0) + 'px';
                 }
             }
             return (
-                <span ref={this.props.absoluteBox ? "field" : null} className={ outerBaseClass + this.props.labelID + ' inline' + (this.props.absoluteBox ? ' block-style' : '') }>
-                    { this.props.absoluteBox ? this.renderSavedValue() : null }
+                <span ref={absoluteBox ? this.fieldRef : null} className={ outerBaseClass + labelID + ' inline' + (absoluteBox ? ' block-style' : '') }>
+                    { absoluteBox ? this.renderSavedValue() : null }
                     <span className="value editing clearfix" style={valStyle}>
                         { this.inputField() }
                         { this.renderActionIcon('cancel') }
