@@ -9,14 +9,6 @@ import { expFxn, Schemas, console, object, isServerSide } from './../../util';
 import CursorComponent from './CursorComponent';
 import { Button } from 'react-bootstrap';
 
-/**
- * @ignore
- * @private
- */
-var updateFxns    = { 'default' : null },
-    resetFxns     = { 'default' : null },
-    getStateFxns  = { 'default' : null },
-    setCoordsFxns = { 'default' : null };
 
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
@@ -38,7 +30,6 @@ class Body extends React.Component {
         this.renderDetailSection = this.renderDetailSection.bind(this);
         this.primaryCount = this.primaryCount.bind(this);
         this.primaryCountLabel = this.primaryCountLabel.bind(this);
-        this.render = this.render.bind(this);
     }
 
     getCurrentCounts(nodes = this.props.path){
@@ -59,9 +50,10 @@ class Body extends React.Component {
 
         var colWidth = 12 / Math.min(4, this.props.actions.length);
 
-        var actions = this.props.actions.map((action, i, a)=>{
-            var title = typeof action.title === 'function' ? action.title(this.props) : action.title;
-            var disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+        var actions = _.map(this.props.actions, (action, i, a)=>{
+            var title       = typeof action.title === 'function'    ? action.title(this.props) : action.title,
+                disabled    = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+
             return (
                 <div className={"button-container col-xs-" + colWidth} key={title || i}>
                     <Button
@@ -250,66 +242,17 @@ const initialDetailCursorState = {
 };
 
 
-export default class ChartDetailCursor extends React.Component {
+export default class ChartDetailCursor extends React.PureComponent {
 
-    static Body = Body
+    static Body = Body;
 
     static getCounts(d){
         return {
-            experiments : d.experiments || 0,
-            experiments_active : d.active || 0,
-            experiment_sets : d.experiment_sets || 0,
-            files : d.activeFiles || d.files || 0
+            'experiments'         : d.experiments || 0,
+            'experiments_active'  : d.active || 0,
+            'experiment_sets'     : d.experiment_sets || 0,
+            'files'               : d.activeFiles || d.files || 0
         };
-    }
-
-    /**
-     * A static alias of the ChartDetailCursor instance's this.update() method.
-     *
-     * @public
-     * @param {Object} state - State to update ChartDetailCursor with.
-     * @param {string} [id="default"] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
-     * @param {function} [cb] - Optional callback function.
-     * @param {boolean} [overrideSticky=false] - If true, will ignore that is stickied if is the case.
-     */
-    static update(state, id = "default", cb = null, overrideSticky = false){
-        if (typeof updateFxns[id] === 'function'){
-            return updateFxns[id](state, cb, overrideSticky);
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
-    /**
-     * A static alias of the ChartDetailCursor instance's this.reset() method.
-     *
-     * @public
-     * @param {boolean} [overrideSticky=true] - If false, will cancel out if stickied.
-     * @param {string} [id="default"] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
-     * @param {function} [cb] - Optional callback function.
-     */
-    static reset(overrideSticky = true, id = "default", cb = null){
-        if (typeof resetFxns[id] === 'function'){
-            return resetFxns[id](overrideSticky, cb);
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
-    static getState(id = 'default'){
-        if (typeof getStateFxns[id] === 'function'){
-            return getStateFxns[id]();
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
-    }
-
-    static setCoords(coords = {x : 0, y : 0}, callback = null, id = 'default'){
-        if (typeof setCoordsFxns[id] === 'function'){
-            return setCoordsFxns[id](coords, callback);
-        } else {
-            throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
-        }
     }
 
     static isTargetDetailCursor(elem){
@@ -337,46 +280,24 @@ export default class ChartDetailCursor extends React.Component {
         'horizontalOffset' : 25,
         'verticalAlign' : 'top',
         'verticalOffset' : 10,
-        'debugStyle' : false,
-        'id' : 'default'
-    }
+        'debugStyle' : false
+    };
 
     constructor(props){
         super(props);
         this.getCursorOffset = this.getCursorOffset.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.update = this.update.bind(this);
         this.reset = this.reset.bind(this);
         this.getState = this.getState.bind(this);
         this.setCoords = this.setCoords.bind(this);
-        this.render = this.render.bind(this);
         this.state = _.clone(initialDetailCursorState);
+
+        this.cursorComponentRef = React.createRef();
     }
 
     componentDidMount(){
         console.log('Mounted MouseDetailCursor');
-
-        // Alias this.update so we can call it statically.
-        updateFxns[this.props.id]    = this.update;
-        resetFxns[this.props.id]     = this.reset;
-        getStateFxns[this.props.id]  = this.getState;
-        setCoordsFxns[this.props.id] = this.setCoords;
         this.setState({'mounted' : true});
-    }
-
-    componentWillUnmount(){
-        // Cleanup.
-        updateFxns[this.props.id]    = null;
-        resetFxns[this.props.id]     = null;
-        getStateFxns[this.props.id]  = null;
-        setCoordsFxns[this.props.id] = null;
-        if (this.props.id !== 'default') {
-            delete    updateFxns[this.props.id];
-            delete     resetFxns[this.props.id];
-            delete  getStateFxns[this.props.id];
-            delete setCoordsFxns[this.props.id];
-        }
     }
 
     getCursorOffset(){
@@ -438,22 +359,25 @@ export default class ChartDetailCursor extends React.Component {
     }
 
     setCoords(coords, cb){
-        if (!this.refs || !this.refs.cursorComponent) {
+        var cursorInstance = this.cursorComponentRef.current;
+        if (!cursorInstance) {
             console.error("Cursor component not available.");
             return false;
         }
-        this.refs.cursorComponent.setState(coords, cb);
+        cursorInstance.setState(coords, cb);
     }
 
     render(){
-        var containDims = {};
-        if (!this.props.containingElement){
-            if (this.props.hideWhenNoContainingElement) return null;
-            containDims = this.props.cursorContainmentDimensions;
+        var { containingElement, hideWhenNoContainingElement, cursorContainmentDimensions, windowWidth, windowHeight } = this.props,
+            containDims = {};
+
+        if (!containingElement){
+            if (hideWhenNoContainingElement) return null;
+            containDims = cursorContainmentDimensions;
             if (this.state.mounted && !isServerSide()){
                 containDims = {
-                    'containingWidth'   : window.innerWidth,
-                    'containingHeight'  : window.innerHeight,
+                    'containingWidth'   : windowWidth,
+                    'containingHeight'  : windowHeight,
                     'offsetTop'         : 80,
                     'offsetLeft'        : 0
                 };
@@ -466,12 +390,10 @@ export default class ChartDetailCursor extends React.Component {
         return (
             <CursorComponent
                 {...containDims}
+                {..._.pick(this.props, 'width', 'height', 'horizontalAlign', 'debugStyle')}
                 containingElement={this.props.containingElement}
-                width={this.props.width}
-                height={this.props.height}
                 cursorOffset={this.getCursorOffset()}
                 xCoordOverride={this.state.xCoordOverride}
-                horizontalAlign={this.props.horizontalAlign}
                 className="mosaic-detail-cursor"
                 isVisible={isVisible}
                 visibilityMargin={this.props.visibilityMargin || {
@@ -480,8 +402,7 @@ export default class ChartDetailCursor extends React.Component {
                     bottom: -50,
                     top: -10
                 }}
-                debugStyle={this.props.debugStyle}
-                ref="cursorComponent"
+                ref={this.cursorComponentRef}
                 sticky={this.state.sticky}
                 children={React.createElement(
                     this.state.bodyComponent,

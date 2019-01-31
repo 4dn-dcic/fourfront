@@ -3,7 +3,7 @@
 export { 
     defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
     ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton,
-    defaultHiddenColumnMapFromColumns
+    defaultHiddenColumnMapFromColumns, haveContextColumnsChanged
 } from './table-commons';
 export { LimitAndPageControls, ColumnSorterIcon } from './LimitAndPageControls';
 export { SortController } from './SortController';

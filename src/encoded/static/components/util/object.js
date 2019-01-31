@@ -482,7 +482,7 @@ export class TooltipInfoIconContainerAuto extends React.Component {
  * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
  * @prop {string|React.Component} [wrapperElement='div'] - Element type to wrap props.children in, if any.
  */
-export class CopyWrapper extends React.Component {
+export class CopyWrapper extends React.PureComponent {
 
     static defaultProps = {
         'wrapperElement' : 'div',
@@ -532,6 +532,8 @@ export class CopyWrapper extends React.Component {
         super(props);
         this.flashEffect = this.flashEffect.bind(this);
         if (typeof props.mounted !== 'boolean') this.state = { 'mounted' : false };
+
+        this.wrapperRef = React.createRef();
     }
 
     componentDidMount(){
@@ -544,11 +546,13 @@ export class CopyWrapper extends React.Component {
     }
 
     flashEffect(){
-        var wrapper = this.refs.wrapper;
-        if (!this.props.flash || !this.refs || !wrapper) return null;
+        var wrapper = this.wrapperRef.current;
+        if (!this.props.flash || !wrapper) return null;
 
         if (typeof this.props.wrapperElement === 'function'){
             // Means we have a React component vs a React/JSX element.
+            // This approach will be deprecated soon so we should look into forwarding refs
+            // ... I think
             wrapper = ReactDOM.findDOMNode(wrapper);
         }
 
@@ -566,7 +570,7 @@ export class CopyWrapper extends React.Component {
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps, includeIcon } = this.props;
+        var { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
         if (!value) return null;
         var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
@@ -592,9 +596,9 @@ export class CopyWrapper extends React.Component {
 
         var wrapperProps = _.extend(
             {
-                'ref'       : 'wrapper',
+                'ref'       : this.wrapperRef,
                 'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
-                'className' : 'clickable copy-wrapper ' + this.props.className || '',
+                'className' : 'clickable copy-wrapper ' + className || '',
                 'onClick'   : copy
             },
             _.omit(this.props, 'children', 'style', 'value', 'onCopy', 'mounted', ..._.keys(CopyWrapper.defaultProps))

@@ -71,14 +71,14 @@ class ResultTableContainer extends React.PureComponent {
         'selectFile'                : PropTypes.func,
         'unselectFile'              : PropTypes.func,
         'selectedFiles'             : PropTypes.objectOf(PropTypes.string)
-    }
+    };
 
     static defaultProps = {
         'href'      : '/browse/',
         'debug'     : false,
         'navigate'  : navigate,
         'columnExtensionMap' : defaultColumnExtensionMap
-    }
+    };
 
     constructor(props){
         super(props);
@@ -96,11 +96,14 @@ class ResultTableContainer extends React.PureComponent {
             columnDefinitions = this.getColumnDefinitions(props, colDefOverrides);
 
         this.state = { colDefOverrides, columnDefinitions };
+
+        this.searchResultTableRef = React.createRef();
     }
 
     forceUpdateOnSelf(){
-        var searchResultTable   = this.refs.searchResultTable,
+        var searchResultTable   = this.searchResultTableRef.current,
             dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
+
         return dimContainer && dimContainer.resetWidths();
     }
 
@@ -256,7 +259,7 @@ class ResultTableContainer extends React.PureComponent {
                         showSelectedFileCount />
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth }}
-                        ref="searchResultTable"
+                        ref={this.searchResultTableRef}
                         results={context['@graph']}
                         columnDefinitions={this.state.columnDefinitions}
                         renderDetailPane={this.browseExpSetDetailPane}

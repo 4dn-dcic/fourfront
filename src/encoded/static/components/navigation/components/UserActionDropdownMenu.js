@@ -28,28 +28,34 @@ export class UserActionDropdownMenu extends React.Component {
         'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
         'listActionsFor'  : PropTypes.func.isRequired,      /** Passed in by App TODO: Make this a global function, or have it be in util/json-web-token.js */
         'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
-        'closeMobileMenu' : PropTypes.func.isRequired,      /** Passed in by Navigation */
         'updateUserInfo'  : PropTypes.func.isRequired,      /** Passed in by App */
         'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
-    }
+    };
 
     constructor(props){
         super(props);
         this.setIsLoading = this.setIsLoading.bind(this);
         this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'isLoading' : false };
     }
 
-    setIsLoading(isLoading = !this.state.isLoading){
-        this.setState({ 'isLoading' : isLoading });
+    setIsLoading(isLoading = null){
+        this.setState(function(currState){
+            if (typeof isLoading === 'boolean' && isLoading === currState.isLoading){
+                return null;
+            }
+            if (isLoading === null){
+                isLoading = !currState.isLoading;
+            }
+            return { isLoading };
+        });
     }
 
     listUserActionsAsMenuItems(){
         var { mounted, listActionsFor, href } = this.props;
         return _.reduce(listActionsFor('user_section'), (actions, action) => {
             if (action.id === "login-menu-item"){
-                actions.push( <LoginMenuItem {..._.pick(this.props, 'closeMobileMenu', 'session', 'href', 'updateUserInfo')} key={action.id} setIsLoadingIcon={this.setIsLoading} /> );
+                actions.push( <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo')} key={action.id} setIsLoadingIcon={this.setIsLoading} /> );
             } else if (action.id === "accountactions-menu-item"){
                 // link to registration page if logged out or account actions if logged in
                 if (!this.props.session) {

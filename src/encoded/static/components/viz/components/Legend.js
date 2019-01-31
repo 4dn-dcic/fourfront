@@ -2,6 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
 import { console, isServerSide, Schemas, object } from './../../util';
@@ -143,7 +144,7 @@ class LegendViewContainer extends React.Component {
     static defaultProps = {
         'expandable' : false,
         'expandableAfter' : 5
-    }
+    };
 
     constructor(props){
         super(props);
@@ -211,8 +212,8 @@ class LegendViewContainer extends React.Component {
  */
 export class Legend extends React.Component {
 
-    static Term = Term
-    static Field = Field
+    static Term = Term;
+    static Field = Field;
 
     static barPlotFieldDataToLegendFieldsData(field, sortBy = null, colorCycler = barplot_color_cycler){
         if (Array.isArray(field) && field.length > 0 && field[0] && typeof field[0] === 'object'){
@@ -282,7 +283,7 @@ export class Legend extends React.Component {
         'defaultExpanded' : false,
         'aggregateType' : 'experiment_sets',
         'title' : null //<h4 className="text-500">Legend</h4>
-    }
+    };
 
     render(){
         return <LegendExpandContainer {...this.props} />;
@@ -290,14 +291,22 @@ export class Legend extends React.Component {
 
 }
 
-class LegendExpandContainer extends React.Component {
+class LegendExpandContainer extends React.PureComponent {
+
+    static clickCoordsCallback(node, containerPosition, boundsHeight, isOnRightSide){
+        var margin = 260;
+        return {
+            'x' : !isOnRightSide ? containerPosition.left - margin : containerPosition.left + 30,
+            'y' : containerPosition.top - 10 + (16 * (node.position || 0)),
+        };
+    }
 
     static defaultProps = {
         'expandableAfter' : 5,
         'expandable' : false,
         'defaultExpanded' : false,
         'hasPopover' : false
-    }
+    };
 
     constructor(props){
         super(props);
@@ -310,7 +319,9 @@ class LegendExpandContainer extends React.Component {
     }
 
     handleExpandToggle(evt){
-        this.setState({ 'expanded' : !this.state.expanded });
+        this.setState(function({ expanded }){
+            return { 'expanded' : !expanded };
+        });
     }
 
     legendComponent(){
@@ -320,21 +331,11 @@ class LegendExpandContainer extends React.Component {
         if (!this.props.hasPopover) return <LegendViewContainer {...propsToPass} />;
         return (
             <CursorViewBounds
-                eventCategory="BarPlotLegend"
+                eventCategory="BarPlotLegend" href={this.props.href}
                 actions={this.props.cursorDetailActions}
                 highlightTerm
                 width={this.props.width}
-                clickCoordsFxn={(node, containerPosition, boundsHeight, isOnRightSide)=>{
-
-                    var margin = 260;
-
-                    return {
-                        x : !isOnRightSide ? containerPosition.left - margin : containerPosition.left + 30,
-                        y : containerPosition.top - 10 + (16 * (node.position || 0)),
-                    };
-
-                }}
-            >
+                clickCoordsFxn={LegendExpandContainer.clickCoordsCallback}>
                 <LegendViewContainer {...propsToPass} />
             </CursorViewBounds>
         );

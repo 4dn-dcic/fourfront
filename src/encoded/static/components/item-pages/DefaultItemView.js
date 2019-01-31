@@ -50,6 +50,8 @@ export default class DefaultItemView extends React.PureComponent {
          * @type {Object}
          */
         this.state = {};
+
+        this.tabbedViewRef = React.createRef();
     }
 
     /**
@@ -161,14 +163,15 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {void}
      */
     setTabViewKey(nextKey){
-        if (this.refs.tabbedView && typeof this.refs.tabbedView.setActiveKey === 'function'){
+        var tabbedView = this.tabbedViewRef.current;
+        if (tabbedView && typeof tabbedView.setActiveKey === 'function'){
             try {
-                this.refs.tabbedView.setActiveKey(nextKey);
+                tabbedView.setActiveKey(nextKey);
             } catch (e) {
                 console.warn('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
             }
         } else {
-            console.error('Cannot access refs.tabbedView.setActiveKey()');
+            console.error('Cannot access tabbedView.setActiveKey()');
         }
     }
 
@@ -243,8 +246,8 @@ export default class DefaultItemView extends React.PureComponent {
      */
     tabbedView(){
         return (
-            <TabbedView contents={this.getTabViewContents} ref="tabbedView" key="tabbedView"
-                {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')} />
+            <TabbedView {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
+                contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView" />
         );
     }
 
@@ -272,7 +275,7 @@ export default class DefaultItemView extends React.PureComponent {
                 { this.itemMidSection() }
 
                 <div className="row">
-                    <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer" children={this.tabbedView()} />
+                    <div className="col-xs-12 col-md-12 tab-view-container" children={this.tabbedView()} />
                 </div>
                 <br/>
                 { this.itemFooter() }
