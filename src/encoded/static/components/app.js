@@ -1478,6 +1478,7 @@ class BodyElement extends React.PureComponent {
 
     static getDerivedStateFromProps(props, state){
         var stateChange = { 'lastHref' : props.href };
+        // Unset full screen if moving away to different pathname.
         if (state.isFullscreen && stateChange.lastHref !== state.lastHref){
             var currParts = url.parse(state.lastHref),
                 nextParts = url.parse(stateChange.lastHref);
