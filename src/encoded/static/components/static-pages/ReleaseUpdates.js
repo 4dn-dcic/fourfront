@@ -65,14 +65,17 @@ export default class ReleaseUpdates extends React.Component {
 
 
     loadUpdates(updateTag = null, updateParam = null){
-        var useTag = updateTag || this.state.updateTag || '*';
+        var useTag = updateTag || this.state.updateTag;
         var useParam = updateParam || this.state.updateParam;
-        // enforce date ranges through the query string
-        var qString = 'update_tag:' + useTag;
-        if (useParam){
-            qString += ' AND parameters:' + useParam;
+        // enforce date ranges and required update tag
+        var update_url = '/search/?type=DataReleaseUpdate&limit=all&sort=-date_created';
+        if (useTag){
+            update_url = '&update_tag=' + useTag;
         }
-        var update_url = '/search/?type=DataReleaseUpdate&limit=all&sort=-date_created&q=' + encodeURIComponent(qString);
+        if (useParam){
+            update_url += '&parameters=' + useParam;
+        }
+
         this.setState({'updateData': null});
         ajax.promise(update_url).then(response => {
             if (response['@graph'] && response['@graph'].length > 0){
