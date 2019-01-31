@@ -725,7 +725,7 @@ def create_1d_track(new_file, side="top"):
     if new_file["file_format"] == "/file-formats/bed/":
         new_track["type"] = "bedlike"
     elif new_file["file_format"] == "/file-formats/bigbed/":
-        new_track["height"] = "100"
+        new_track["height"] = 35
         new_track["type"] = "horizontal-vector-heatmap"
         new_track["options"]["valueScaling"] = "linear"
         # Add the color range options. A list of 256 strings, each containing an integer.
@@ -1140,5 +1140,5 @@ def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
         ]
 
         # Copy the initialXDomain and initialYDomain
-        view["initialXDomain"] = view_config["views"][0]["initialXDomain"]
-        view["initialYDomain"] = view_config["views"][0]["initialYDomain"]
+        view["initialXDomain"] = view_config["views"][0]["initialXDomain"] or view["initialXDomain"]
+        view["initialYDomain"] = view_config["views"][0]["initialYDomain"] or view["initialYDomain"]
