@@ -1147,7 +1147,7 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
     """
 
     # Get a bigbed file to add.
-    bigbed_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bigbed_file_json['higlass_uid'] = "FTv3kHMmSlm0YTmtdOYAPA"
     bigbed_file_json['md5sum'] = '00000000000000000000000000000001'
     bigbed_file_json['genome_assembly'] = "GRCm38"
     bigbed_file = testapp.post_json('/file_processed', bigbed_file_json).json['@graph'][0]
@@ -1176,6 +1176,15 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
     assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+
+    # Make sure the view has an initialXDomain and initialYDomain.
+    assert_true(len(new_higlass_json["views"][0]["initialXDomain"]) == 2)
+    assert_true(new_higlass_json["views"][0]["initialXDomain"][0] != None)
+    assert_true(new_higlass_json["views"][0]["initialXDomain"][1] != None)
+
+    assert_true(len(new_higlass_json["views"][0]["initialYDomain"]) == 2)
+    assert_true(new_higlass_json["views"][0]["initialYDomain"][0] != None)
+    assert_true(new_higlass_json["views"][0]["initialYDomain"][1] != None)
 
     # Only one new top track should have appeared.
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
