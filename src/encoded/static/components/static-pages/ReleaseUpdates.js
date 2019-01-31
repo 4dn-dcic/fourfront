@@ -70,7 +70,7 @@ export default class ReleaseUpdates extends React.Component {
         // enforce date ranges and required update tag
         var update_url = '/search/?type=DataReleaseUpdate&limit=all&sort=-date_created';
         if (useTag){
-            update_url = '&update_tag=' + useTag;
+            update_url += '&update_tag=' + useTag;
         }
         if (useParam){
             update_url += '&parameters=' + useParam;
