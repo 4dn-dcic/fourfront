@@ -8710,7 +8710,7 @@
     {
         "accession": "4DNWF25VHY9",
         "app_name": "encode-chipseq-aln-chip",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "fastq",
@@ -9142,7 +9142,7 @@
     {
         "accession": "4DNWF2FBLQA1",
         "app_name": "encode-chipseq-aln-ctl",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "fastq",
@@ -9551,7 +9551,7 @@
     {
         "accession": "4DNWF3BT781",
         "app_name": "encode-chipseq-postaln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "bed",
@@ -10368,7 +10368,7 @@
     {
         "accession": "4DNWF2BBZ1E",
         "app_name": "encode-atacseq-aln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "fastq",
@@ -10761,7 +10761,7 @@
     {
         "accession": "4DNWF2VTG8I",
         "app_name": "encode-atacseq-postaln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "bed",
