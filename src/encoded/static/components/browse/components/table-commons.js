@@ -39,7 +39,7 @@ export function defaultColumnBlockRenderFxn(result, columnDefinition, props, wid
         }));
     }
 
-    var value = object.getNestedProperty(result, columnDefinition.field);
+    var value = object.getNestedProperty(result, columnDefinition.field, true);
     if (!value) value = null;
     if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
         value = filterAndUniq(_.map(value, function(v){
@@ -311,8 +311,9 @@ export const defaultColumnExtensionMap = {
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
         'render' : function(result, columnDefinition, props, width){
-            var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
-            var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
+            // We have arrays here because experiments_in_set is array.
+            var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value', true)).join('; ');
+            var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field', true))[0];
             if (cat_value === 'No value' || !cat_value){
                 return null;
             }

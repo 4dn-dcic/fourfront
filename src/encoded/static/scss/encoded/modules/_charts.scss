@@ -1518,6 +1518,21 @@ $workflow-node-color-type-global-context: #ffb3b3;
             content: "\f141";
         }
     }
+
+
+    /** Transitions **/
+
+    opacity: 0;
+
+    &.workflow-node-transition-entering,
+    &.workflow-node-transition-enter {
+        opacity: 0;
+    }
+
+    &.workflow-node-transition-enter-done {
+        opacity: 1;
+    }
+
 }
 
 @mixin workflow-edge-layer {
@@ -1539,12 +1554,15 @@ $workflow-node-color-type-global-context: #ffb3b3;
         fill: none;
         stroke-width: 1px;
         stroke-width: 1.5px;
-        transition: stroke-width .3s, opacity .5s .25s ease-out;
+        transition: opacity .5s ease-out;
 
+        /*
         &:hover {
             stroke: #000;
             stroke-width: 2px;
         }
+        */
+
         &.disabled:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
             stroke-width: 1px;
             //stroke: #bbb;
@@ -1555,10 +1573,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
             stroke: #000;
         }
         &[data-edge-related="true"]:not([data-edge-selected="true"]){
-            stroke-width: 3px;
+            stroke-width: 2px;
             stroke: #000;
+            stroke-dasharray: 10, 5;
             //stroke: rgba(0,0,0,0.75);
         }
+
     }
 }
 
@@ -1574,7 +1594,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
         .state-container {
 
             &[data-is-node-selected="true"] {
-                .nodes-layer-wrapper .nodes-layer .node:not([data-node-selected="true"]):not([data-node-in-selection-path="true"]) {
+                /* Fade out nodes not in selection path */
+                .nodes-layer-wrapper .nodes-layer .node:not([data-node-selected="true"]):not([data-node-in-selection-path="true"]):not([data-node-related="true"]) {
                     opacity: 0.15;
                 }
                 .edges-layer-wrapper .edges-layer path.edge-path:not([data-edge-selected="true"]):not([data-edge-related="true"]) {

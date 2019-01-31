@@ -4,43 +4,45 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { console, isServerSide } from './../../util';
 import { requestAnimationFrame } from './../../viz/utilities';
 
 
-export default class StateContainer extends React.Component {
+const memoizedFindNode = memoize(function(nodes, name, nodeType, id=null){
+    return _.find(nodes, function(n){
+        if (n.name !== name) return false;
+        if (n.nodeType !== nodeType) return false;
+        if (id !== null && n.id !== id) return false;
+        return true;
+    });
+});
+
+
+export default class StateContainer extends React.PureComponent {
+
+    static getDerivedStateFromProps(props, state){
+        if (state.selectedNode){
+            var foundNode = memoizedFindNode(
+                props.nodes,
+                state.selectedNode.name,
+                state.selectedNode.nodeType,
+                state.selectedNode.id || null
+            );
+            if (foundNode){
+                return { selectedNode : foundNode };
+            }
+        }
+        return null;
+    }
 
     constructor(props){
         super(props);
         this.defaultOnNodeClick = this.defaultOnNodeClick.bind(this);
         this.handleNodeClick = this.handleNodeClick.bind(this);
-        this.render = this.render.bind(this);
         this.state = {
             'selectedNode' : null
         };
-    }
-
-    componentWillReceiveProps(nextProps){
-
-        var selectedNode    = this.state.selectedNode,
-            newState        = {},
-            foundNode;
-
-        // Update own selectedNode to latest v, if still exists & new one not otherwise set.
-        if (selectedNode && ( this.props.nodes !== nextProps.nodes )){
-            var find = { 'name' : selectedNode.name, 'nodeType' : selectedNode.nodeType };
-            if (selectedNode.id) find.id = selectedNode.id; // Case: IO Node
-            foundNode = _.findWhere(nextProps.nodes, find);
-            if (foundNode){
-                newState.selectedNode = foundNode;
-            } else {
-                newState.selectedNode = null;
-            }
-        }
-
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
     }
 
     defaultOnNodeClick(node, selectedNode, evt){
@@ -69,7 +71,6 @@ export default class StateContainer extends React.Component {
     }
 
     render(){
-        var detailPane = null;
         return (
             <div className="state-container" data-is-node-selected={!!(this.state.selectedNode)}>
                 {

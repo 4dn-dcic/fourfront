@@ -65,7 +65,7 @@ export function commonGraphPropsFromProps(props){
     };
 
     if (props.isFullscreen) {
-        graphProps.width = props.windowWidth;
+        graphProps.width = props.windowWidth - 40;
     } else if (props.width){
         graphProps.width = props.width;
     }

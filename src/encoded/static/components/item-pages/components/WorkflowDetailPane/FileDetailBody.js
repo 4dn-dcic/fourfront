@@ -13,7 +13,8 @@ import { ViewMetricButton, MetricsView } from './FileDetailBodyMetricsView';
 
 
 
-export class FileDetailBody extends React.Component {
+
+export class FileDetailBody extends React.PureComponent {
 
     static propTypes = {
         'node' : PropTypes.object.isRequired,
@@ -22,107 +23,40 @@ export class FileDetailBody extends React.Component {
         'minHeight' : PropTypes.number,
         'keyTitleDescriptionMap' : PropTypes.object,
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     static defaultProps = {
         'canDownloadStatuses' : fileUtil.FileDownloadButtonAuto.defaultProps.canDownloadStatuses
-    }
-
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.maybeLoadFile = this.maybeLoadFile.bind(this);
-        this.state = {
-            file : this.props.file
-        };
-    }
-
-    componentDidMount(){
-        this.maybeLoadFile();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.file !== this.props.file) {
-            this.setState({ file : nextProps.file }, this.maybeLoadFile.bind(this, nextProps.file));
-        }
-    }
-
-    maybeLoadFile(file = this.state.file){
-        var hrefToRequest = null,
-            node = this.props.node;
-
-        if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
-            if (file === 'Forbidden' || file.length === 0) return false;
-            if (file.charAt(0) === '/') hrefToRequest = file; // Handle @ids just in case.
-            else hrefToRequest = '/' + file + '/';
-        } else if (file && typeof file === 'object' && !Array.isArray(file)){ // If we have file object but has little info. TODO: REMOVE
-            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.itemUtil.atId(file);
-        } else if (Array.isArray(file) && node && node.meta && node.meta.workflow){ // If we have a group of files
-            hrefToRequest = node.meta.workflow;
-            if (object.isUUID(hrefToRequest)){
-                hrefToRequest = '/workflows/' + hrefToRequest + '/';
-            } else if (hrefToRequest.charAt(0) !== '/') {
-                hrefToRequest = '/' + hrefToRequest;
-            }
-        }
-
-        if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
-            ajax.load(hrefToRequest, (res)=>{
-                if (res && typeof res === 'object'){
-                    this.setState({ file : res });
-                }
-            }, 'GET', (r) => {
-                if (r && r.code && r.code === 403){ // No view permissions
-                    this.setState({ file : 'Forbidden' });
-                } else {
-                    this.setState({ file : null });
-                }
-                
-            });
-            return true;
-        }
-        return false;
-    }
+    };
 
     doesDescriptionOrNotesExist(){
         var file = this.props.file;
         return !!(file.description || file.notes || false);
     }
 
-    canDownload(fileObj = this.state.file){
-        if (fileObj && !Array.isArray(fileObj) && typeof fileObj !== 'string' && this.props.canDownloadStatuses.indexOf(fileObj.status) > -1){
+    canDownload(){
+        var { file, canDownloadStatuses } = this.props;
+        if (file && !Array.isArray(file) && typeof file !== 'string' && canDownloadStatuses.indexOf(file.status) > -1){
             return true;
         }
         return false;
     }
 
     fileTitleBox(){
-        var node = this.props.node;
-        var file = this.state.file;
-        var fileTitle;
-        var fileTitleFormatted;
-        var colClassName = "col-sm-6 col-lg-4";
+        var { node, file } = this.props,
+            colClassName = "col-sm-6 col-lg-4",
+            fileTitle, fileTitleFormatted;
+
         //if (typeof file === 'object' && file && !fileUtil.isFileDataComplete(file) && !Array.isArray(file)) {}
-        if (Array.isArray(this.props.file)) { // Some sort of group
+        if (Array.isArray(file)) { // Some sort of group
             fileTitle = 'Workflow';
-            if (typeof file !== 'string' && file && file.display_title) fileTitle = file.display_title;
+            if (typeof file !== 'string' && file && file.display_title){
+                fileTitle = file.display_title;
+            }
             if (typeof node.meta.workflow === 'string'){
                 fileTitleFormatted = <a href={node.meta.workflow}>{ fileTitle }</a>;
             } else {
                 fileTitleFormatted = fileTitle;
-            }
-        } else if (typeof file === 'string') {
-            if (file === 'Forbidden'){
-                if (this.props.file && typeof this.props.file !== 'string'){
-                    fileTitle = object.itemUtil.getTitleStringFromContext(this.props.file);
-                    var fileAtID = object.atIdFromObject(this.props.file);
-                    fileTitleFormatted = fileAtID ? <a href={fileAtID}>{ fileTitle }</a> : fileTitle;
-                } else {
-                    fileTitleFormatted = <span className="text-300">Not Available</span>;
-                }
-            } else {
-                fileTitle = null;
-                fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
             }
         } else {
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
@@ -142,8 +76,8 @@ export class FileDetailBody extends React.Component {
                             node.nodeType === 'input' ? 'Used' :
                                 null
                     } {
-                        Array.isArray(this.props.file) ?
-                            this.props.file.length + ' total files from' + (file && file.display_title ? ' Workflow' : '')
+                        Array.isArray(file) ?
+                            file.length + ' total files from' + (file && file.display_title ? ' Workflow' : '')
                             :
                             'File'
                     }
@@ -154,8 +88,7 @@ export class FileDetailBody extends React.Component {
     }
 
     downloadLinkBox(){
-        var { node, windowWidth } = this.props,
-            file         = this.state.file,
+        var { node, windowWidth, file } = this.props,
             gridSize     = layout.responsiveGridState(windowWidth),
             title        = <span>Download</span>,
             disabled     = (!file.href && !file.url) || !this.canDownload(),
@@ -174,11 +107,11 @@ export class FileDetailBody extends React.Component {
     }
 
     descriptionBox(){
-        var windowWidth = this.props.windowWidth,
-            file = this.state.file,
-            gridSize = layout.responsiveGridState(windowWidth || null);
+        var { file, windowWidth } = this.props,
+            gridSize = layout.responsiveGridState(windowWidth);
 
-        if (!this.doesDescriptionOrNotesExist() || typeof file === 'string' || !fileUtil.isFileDataComplete(file)) return null;
+        if (!this.doesDescriptionOrNotesExist()) return null;
+
         return (
             <div className="col-xs-12 col-lg-4 box">
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
@@ -197,11 +130,9 @@ export class FileDetailBody extends React.Component {
     }
 
     iframeBox(){
-        var file = this.state.file;
-        var node = this.props.node;
+        var { file, node } = this.props;
         if (!node.meta || !node.meta.run_data || node.meta.run_data.type !== 'quality_metric') return null; // IFrames only for quality metrics.
         if (typeof file.url !== 'string') return null;
-
         return (
             <div className="row">
                 <div className="col-sm-12">
@@ -216,20 +147,19 @@ export class FileDetailBody extends React.Component {
      * @todo Figure out if can use state.file always in place of props.file here.
      */
     render(){
-        var { node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
-            file = this.state.file,
+        var { file, node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
             body;
 
         if (!file){
             return null;
         }
 
-        if (Array.isArray(this.props.file) && typeof this.props.file[0] === 'object' && object.atIdFromObject(this.props.file[0])) {
+        if (Array.isArray(file) && typeof file[0] === 'object' && object.atIdFromObject(file[0])) {
             // Case: Group of Files
             var columns = _.clone(SimpleFilesTable.defaultProps.columns);
             delete columns.file_type;
             columns.status = { 'title' : 'Status' };
-            body = <SimpleFilesTable results={this.props.file} columns={columns} hideTypeTitle />;
+            body = <SimpleFilesTable results={file} columns={columns} hideTypeTitle />;
         } else if (typeof file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
             // Case: Loading or Forbidden
             if (file === 'Forbidden'){
@@ -255,36 +185,31 @@ export class FileDetailBody extends React.Component {
                 })
                 .map((m)=>{
                     return _.extend(m, {
-                        'result' : this.state.file[m.key]
+                        'result' : file[m.key]
                     });
                 });
 
             body = <MetricsView metrics={metrics} />;
         } else {
             // Default Case: Single (Pre-)Loaded File
-            var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
-            if ( this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets)) ){
-                var setUrls = expFxn.experimentSetsFromFile(this.state.file, 'ids');
+            if ( file && (Array.isArray(file.experiments) || Array.isArray(file.experiment_sets)) ){
+                var setUrls = expFxn.experimentSetsFromFile(file, 'ids');
                 if (setUrls && setUrls.length > 0){
                     table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} windowWidth={windowWidth} />;
                 }
             }
             body = (
-                <Fade in={fileLoaded} appear>
-                    { fileLoaded ?
-                        <div>
-                            { table }
-                            { table ? <br/> : null }
-                            <h3 className="tab-section-title">
-                                <span>Details</span>
-                            </h3>
-                            <hr className="tab-section-title-horiz-divider"/>
-                            <ItemDetailList context={file} schemas={schemas}
-                                minHeight={minHeight} keyTitleDescriptionMap={keyTitleDescriptionMap} />
-                        </div>
-                    : <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div> }
-                </Fade>
+                <div>
+                    { table }
+                    { table ? <br/> : null }
+                    <h3 className="tab-section-title">
+                        <span>Details</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <ItemDetailList context={file} schemas={schemas}
+                        minHeight={minHeight} keyTitleDescriptionMap={keyTitleDescriptionMap} />
+                </div>
             );
         }
 

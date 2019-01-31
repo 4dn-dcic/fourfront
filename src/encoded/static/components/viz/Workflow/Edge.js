@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import * as d3 from 'd3';
 import { console } from './../../util';
 
@@ -20,8 +21,7 @@ export const pathDimensionFunctions = {
      * @param {Number[]} [ledgeWidths] - Little widths of line right before/after node. To allow for horizontal arrow.
      * @returns {string} 'd' attribute value for an SVG path.
      */
-    'drawBezierEdge' : function(startPt, endPt, config){
-        var { rowSpacing, columnSpacing, nodeEdgeLedgeWidths } = config;
+    'drawBezierEdge' : memoize(function(startPt, endPt, columnSpacing, rowSpacing, nodeEdgeLedgeWidths){
         var ledgeWidths = nodeEdgeLedgeWidths;
 
         var path = d3.path();
@@ -71,11 +71,11 @@ export const pathDimensionFunctions = {
             endPt.y
         );
         return path.toString();
-    },
+    }),
 
-    'drawStraightLineCurved' : function(startPt, endPt, config){
+    'drawStraightLineCurved' : memoize(function(startPt, endPt, curveRadius){
         var path;
-        var radius = Math.min(config.curveRadius || config.radius, Math.abs(startPt.y - endPt.y) / 2);
+        var radius = Math.min(curveRadius, Math.abs(startPt.y - endPt.y) / 2);
         path = d3.path();
         path.moveTo(startPt.x, startPt.y);
         path.lineTo(
@@ -112,7 +112,7 @@ export const pathDimensionFunctions = {
         );
 
         return path.toString();
-    },
+    }),
 
     drawStraightLineToCurve : function(){
 
@@ -134,22 +134,23 @@ export const pathDimensionFunctions = {
 
 export default class Edge extends React.Component {
 
-    static isSelected(edge, selectedNode, isNodeDisabled = null){
+    static isSelected(edge, selectedNode){
         return (
             Node.isSelected(edge.source, selectedNode) ||
             Node.isSelected(edge.target, selectedNode)
         );
     }
 
-    static isRelated(edge, selectedNode, isNodeDisabled = null){
-        return (
-            Node.isRelated(edge.source, selectedNode) ||
-            Node.isRelated(edge.target, selectedNode)
-        );
+    static isRelated(edge, selectedNode){
+        return Node.isRelated(edge.source, selectedNode);
+        // Enable the following later _if_ we go beyond 1 input node deep.
+        //return (
+        //    Node.isRelated(edge.source, selectedNode) ||
+        //    Node.isRelated(edge.target, selectedNode)
+        //);
     }
 
-    static isDistantlyRelated(edge, selectedNode, isNodeDisabled){
-        //if (Edge.isDisabled(edge, isNodeDisabled)) return false;
+    static isDistantlySelected(edge, selectedNode){
         if (!selectedNode) return false;
 
         function checkInput(node, prevNode, nextNodes){
@@ -172,7 +173,7 @@ export default class Edge extends React.Component {
         var selectedOutputs = (selectedNode && (selectedNode.outputNodes || (selectedNode.inputOf && selectedNode.inputOf))) || null;
 
         if (Array.isArray(selectedOutputs) && selectedOutputs.length > 0){
-            var resultsFuture =  _.flatten(_.map(selectedOutputs, (sO)=>{
+            var resultsFuture =  _.flatten(_.map(selectedOutputs, function(sO){
                 return traceNodePathAndRun(sO, checkOutput, 'output', selectedNode);
             }), false);
             if (_.any(resultsFuture)) return true;
@@ -191,23 +192,20 @@ export default class Edge extends React.Component {
         );
     }
 
-    static getComputedProperties(props){
-        var edge = props.edge;
-        var disabled = Edge.isDisabled(edge, props.isNodeDisabled);
-        var selected = Edge.isSelected(edge, props.selectedNode, disabled);
-        var related = false;//Edge.isRelated(edge, this.props.selectedNode, disabled);
-        //var isDistantlyRelated = false;
-        if (!related && props.selectedNode){
-            //isDistantlyRelated
-            related = Edge.isDistantlyRelated(edge, props.selectedNode, disabled);
-        }
-        return { disabled, selected, related };
+    static didNodeCoordinatesChange(nextProps, pastProps){
+        if (
+            nextProps.startX !== pastProps.startX ||
+            nextProps.startY !== pastProps.startY ||
+            nextProps.endX !== pastProps.endX ||
+            nextProps.endY !== pastProps.endY
+        ) return true;
+        return false;
     }
 
     static defaultProps = {
         'edgeStyle' : 'bezier',
         'curveRadius' : 12
-    }
+    };
 
     static pathArrowsMarkers(){
         return (
@@ -236,20 +234,48 @@ export default class Edge extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.generatePathDimension = this.generatePathDimension.bind(this);
-        this.state = _.extend({
-            'pathDimension' : this.generatePathDimension(props.edge, props.edgeStyle)
-        }, Edge.getComputedProperties(props));
+        this.transitionPathDimensions = this.transitionPathDimensions.bind(this);
+
+        // Create own memoized copy/instance of intensive static functions.
+        // Otherwise if left static, will be re-ran each time as many edges call it.
+        this.isDistantlySelected = memoize(Edge.isDistantlySelected.bind(this));
+        this.isRelated           = memoize(Edge.isRelated.bind(this));
+        this.isDisabled          = memoize(Edge.isDisabled.bind(this));
+
+        this.getComputedProperties = this.getComputedProperties.bind(this);
+
+        this.state = {
+            'pathDimension' : this.generatePathDimension()
+        };
+
+        // Alternative implementation of transition -
+        // adjust pathRef.current `d` attribute manually
+        this.pathRef = React.createRef();
+    }
+
+    getComputedProperties(){
+        var { edge, selectedNode, isNodeDisabled } = this.props,
+            disabled = this.isDisabled(edge, isNodeDisabled);
+
+        if (disabled || !selectedNode) {
+            return { disabled, 'selected' : false, 'related' : false };
+        }
+
+        var selected            = Edge.isSelected(edge, selectedNode),
+            related             = this.isRelated(edge, selectedNode),
+            distantlySelected   = selected || (selectedNode && this.isDistantlySelected(edge, selectedNode, disabled)) || false;
+
+        return { disabled, selected, related, distantlySelected };
     }
 
     /**
      * If any of our nodes' coordinates have updated, update state.pathDimension either via a D3 animation tween acting on setState or instantly via setState.
-     * Whether instant or gradual dimension update is based on result of this.doTransitionOfEdge() : boolean/
+     * Whether instant or gradual dimension update is based on result of `this.shouldDoTransitionOfEdge()` : boolean
      */
     componentDidUpdate(pastProps){
-        if (this.didNodeCoordinatesChange(this.props, pastProps)){
-            if (this.doTransitionOfEdge()) {
+        if (Edge.didNodeCoordinatesChange(this.props, pastProps)){
+            if (this.shouldDoTransitionOfEdge()) {
                 // Animate
                 this.transitionPathDimensions(
                     { 'x' : pastProps.startX,   'y' : pastProps.startY },
@@ -259,140 +285,146 @@ export default class Edge extends React.Component {
                 );
             } else {
                 // Instant
-                this.setState({
-                    'pathDimension' : this.generatePathDimension(this.props.edge, this.props.edgeStyle)
-                });
+                this.setState({ 'pathDimension' : this.generatePathDimension() });
             }
         }
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        var propKeys = _.without(_.keys(nextProps), 'scrollContainerWrapperElement', 'scrollContainerWrapperMounted', 'nodes', 'edges', 'href', 'renderDetailPane');
-        var stateKeys = _.keys(nextState);
-        var i;
-        for (i = 0; i < propKeys.length; i++){
+        if (Edge.didNodeCoordinatesChange(nextProps, this.props)){
+            return true;
+        }
+
+        if (this.state.pathDimension !== nextState.pathDimension){
+            return true;
+        }
+
+        var propKeys = _.without(
+            _.keys(nextProps),
+            'scrollContainerWrapperElement', 'scrollContainerWrapperMounted', 'nodes', 'edges', 'href', 'renderDetailPane',
+            'isNodeCurrentContext', 'contentWidth', 'onNodeClick', 'edgeCount'
+        ),
+            propKeysLen = propKeys.length,
+            i;
+
+        for (i = 0; i < propKeysLen; i++){
             if (this.props[propKeys[i]] !== nextProps[propKeys[i]]){
                 return true;
             }
         }
-        for (i = 0; i < stateKeys.length; i++){
-            if (this.state[stateKeys[i]] !== nextState[stateKeys[i]]){
-                return true;
-            }
-        }
-        if (this.didNodeCoordinatesChange(nextProps, this.props)){
-            return true;
-        }
+        
+        // If state.pathDimension changes we _do not_ update, since DOM elements should already be transitioned.
         return false;
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.selectedNode !== this.props.selectedNode){
-            this.setState(Edge.getComputedProperties(nextProps));
-        }
-    }
-
-    doTransitionOfEdge(props = this.props){
+    shouldDoTransitionOfEdge(props = this.props){
         if (props.noTransition) return false;
-        if (props.edgeCount > 80) return false;
+        // Until we adjust all Edges to transition within a single DOM update/redraw,
+        // we optimize by not transitioning unless <= 50 edges.
+        // This is because each Edge currently launches own transition
+        // which cascades into an exponential number of transitions/viewport-updates.
+        if (props.edgeCount > 60) return false;
         return true;
     }
 
-    didNodeCoordinatesChange(nextProps, pastProps){
-        if (
-            nextProps.startX !== pastProps.startX ||
-            nextProps.startY !== pastProps.startY ||
-            nextProps.endX !== pastProps.endX ||
-            nextProps.endY !== pastProps.endY
-        ) return true;
-        return false;
-    }
-
+    /**
+     * Transitions edge dimensions over time.
+     * Updates `state.pathDimension` incrementally using d3.transition().
+     * 
+     * @todo
+     * In future, all transitions could be done in `EdgesLayer` instead of `Edge`,
+     * this would allow us to batch all the DOM updates into a single function wrapped
+     * in a `requestAnimationFrame` call. This will require some dynamic programming as
+     * well as caching of ege:node-coords to detect changes and run transitions.
+     * The changeTween itself should transition _all_ Edges that need to be transitioned.
+     */
     transitionPathDimensions(startPtA, startPtB, endPtA, endPtB){
-
-        var changeTween = function(){
-            return (function(){
-                var interpolateSourceX = d3.interpolateNumber(startPtA.x, startPtB.x);
-                var interpolateSourceY = d3.interpolateNumber(startPtA.y, startPtB.y);
-                var interpolateTargetX = d3.interpolateNumber(endPtA.x, endPtB.x);
-                var interpolateTargetY = d3.interpolateNumber(endPtA.y, endPtB.y);
-
+        var interpolateSourceX = d3.interpolateNumber(startPtA.x, startPtB.x),
+            interpolateSourceY = d3.interpolateNumber(startPtA.y, startPtB.y),
+            interpolateTargetX = d3.interpolateNumber(endPtA.x, endPtB.x),
+            interpolateTargetY = d3.interpolateNumber(endPtA.y, endPtB.y),
+            pathElem = this.pathRef.current, // Necessary if using alternate transition approach(es).
+            changeTween = () => {
                 return (t)=>{
-                    this.setState({
-                        'pathDimension' : this.generatePathDimension(this.props.edge, this.props.edgeStyle,
-                            { 'x' : interpolateSourceX(t), 'y' : interpolateSourceY(t) },
-                            { 'x' : interpolateTargetX(t), 'y' : interpolateTargetY(t) },
-                        )
-                    });
-                    //window.scrollTo(0, interpolate(t));
+                    var nextCoords = [
+                        { 'x' : interpolateSourceX(t), 'y' : interpolateSourceY(t) },
+                        { 'x' : interpolateTargetX(t), 'y' : interpolateTargetY(t) }
+                    ];
+                    pathElem.setAttribute('d', this.generatePathDimension(...nextCoords));
                 };
-            }.bind(this));
-        }.bind(this);
+            };
 
-        //var origScrollTop = scrollElement.scrollTop;
+        if (!pathElem) return;
+
         var animation = d3.select(this)
             .interrupt()
             .transition()
             .ease(d3.easeQuadOut)
             .duration(500)
-            .tween("changeDimension", changeTween());
+            .tween("changeDimension", changeTween)
+            .on('end', () => {
+                this.setState({ 'pathDimension': this.generatePathDimension() });
+            });
     }
 
-    generatePathDimension(edge, edgeStyle = 'bezier', startPtOverride = null, endPtOverride = null, startOffset = 5, endOffset = -5){
-        if (this.props.pathArrows){
+    generatePathDimension(startPtOverride = null, endPtOverride = null, startOffset = 5, endOffset = -5){
+        var { 
+                edge, edgeStyle, pathArrows, selectedNode, isNodeDisabled, isRelated, startX, startY, endX, endY, columnWidth,
+                curveRadius, columnSpacing, rowSpacing, nodeEdgeLedgeWidths
+            } = this.props,
+            { disabled, selected, related, distantlySelected } = this.getComputedProperties();
+
+        if (pathArrows){
             endOffset -= 10;
         }
-        if (Edge.isSelected(edge, this.props.selectedNode, this.props.isNodeDisabled) || Edge.isRelated(edge, this.props.selectedNode, this.props.isNodeDisabled)){
-            endOffset -= 2;
-        }
-        if (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(edge.source)){
-            startOffset += 5;
-        }
-        if (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext(edge.target)){
+        if (selected || related){
             endOffset -= 5;
         }
-        
-        var startPt = {
-            x : ((startPtOverride && startPtOverride.x) || this.props.startX) + this.props.columnWidth + startOffset,
-            y : ((startPtOverride && startPtOverride.y) || this.props.startY)
-        };
+        if (distantlySelected){
+            endOffset -= 2;
+        }
+        if (edge.source.isCurrentContext){
+            startOffset += 5;
+        }
+        if (edge.target.isCurrentContext){
+            endOffset -= 5;
+        }
 
-        var endPt = {
-            x : ((endPtOverride && endPtOverride.x) || this.props.endX) + endOffset,
-            y : ((endPtOverride && endPtOverride.y) || this.props.endY)
-        };
+        var startPt = {
+                'x' : ((startPtOverride && startPtOverride.x) || startX) + columnWidth + startOffset,
+                'y' : ((startPtOverride && startPtOverride.y) || startY)
+            }, endPt = {
+                'x' : ((endPtOverride && endPtOverride.x) || endX) + endOffset,
+                'y' : ((endPtOverride && endPtOverride.y) || endY)
+            };
 
         if (edgeStyle === 'straight'){
             return pathDimensionFunctions.drawStraightEdge(startPt, endPt);
         }
         if (edgeStyle === 'curve'){
-            return pathDimensionFunctions.drawStraightLineCurved(startPt, endPt, _.pick(this.props, 'curveRadius'));
+            return pathDimensionFunctions.drawStraightLineCurved(startPt, endPt, curveRadius);
         }
         if (edgeStyle === 'bezier'){
-            return pathDimensionFunctions.drawBezierEdge(startPt, endPt, _.pick(this.props, 'columnSpacing', 'rowSpacing', 'nodeEdgeLedgeWidths'));
+            return pathDimensionFunctions.drawBezierEdge(startPt, endPt, columnSpacing, rowSpacing, nodeEdgeLedgeWidths);
         }
     }
 
     render(){
-        var edge = this.props.edge;
-        var { disabled, selected, related, pathDimension } = this.state;
+        var { edge, pathArrows, style } = this.props,
+            { disabled, selected, related, distantlySelected } = this.getComputedProperties(),
+            pathDimension = this.state.pathDimension;
 
         var markerEnd;
-        if (!this.props.pathArrows)     markerEnd = null;
+        if      (!pathArrows)           markerEnd = null;
         else if (selected || related)   markerEnd = 'pathArrowBlack';
         else if (disabled)              markerEnd = 'pathArrowLightGray';
         else                            markerEnd = 'pathArrowGray';
 
         return (
-            <path
-                d={pathDimension}
-                className={"edge-path" + (disabled ? ' disabled' : '' )}
-                data-edge-selected={selected}
-                data-edge-related={related}
-                data-source={edge.source.name}
-                data-target={edge.target.name}
-                markerEnd={markerEnd && "url(#" + markerEnd + ")"}
-            />
+            <path d={pathDimension} ref={this.pathRef} className={"edge-path" + (disabled ? ' disabled' : '' )}
+                data-edge-selected={selected || distantlySelected} data-edge-related={related}
+                data-source={edge.source.name} data-target={edge.target.name} style={style}
+                markerEnd={markerEnd && "url(#" + markerEnd + ")"} />
         );
     }
 }

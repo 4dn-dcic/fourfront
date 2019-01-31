@@ -152,22 +152,40 @@ def get_step_io_for_argument_name(argument_name, workflow_model_obj):
 
 
 def common_props_from_file(file_obj):
-    return {
-        'uuid'           : file_obj['uuid'],
-        '@id'            : file_obj['@id'],
-        'accession'      : file_obj.get('accession'),
-        'filename'       : file_obj.get('filename'),
-        'file_format'    : file_obj.get('file_format'),
-        'file_type'      : file_obj.get('file_type'),
-        'file_size'      : file_obj.get('file_size'),
-        'display_title'  : file_obj.get('display_title'),
-        'description'    : file_obj.get('description'),
-        '@type'          : file_obj.get('@type'),
-        'status'         : file_obj.get('status'),
-        'href'           : file_obj.get('href'),
-        'url'            : file_obj.get('url'),
-        'quality_metric' : file_obj.get('quality_metric')
+    '''
+    Purpose of this function is to limit the amount of properties
+    that are returned for file items to keep size of response down
+    re: nested embedded items.
+    '''
+
+    ret_obj = {
+        'uuid'            : file_obj['uuid'],
+        '@id'             : file_obj['@id'],
+        'accession'       : file_obj.get('accession'),
+        'display_title'   : file_obj.get('display_title'),
+        '@type'           : file_obj.get('@type'),
+        'status'          : file_obj.get('status')
     }
+
+    for k in ['quality_metric', 'url', 'href', 'description', 'filename', 'file_format', 'file_type', 'file_size']:
+        if k in file_obj:
+            ret_obj[k] = file_obj[k]
+
+    # For experiments and experiment sets, carry only the terminal expset @ids in as they are AJAXed in clientside.
+    # We don't need full representation
+    if 'experiment_sets' in file_obj:
+        ret_obj['experiment_sets'] = [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in file_obj['experiment_sets'] ]
+
+    if 'experiments' in file_obj:
+        ret_obj['experiments'] = []
+        for exp in file_obj['experiments']:
+            ret_obj['experiments'].append({
+                '@id' : exp['@id'],
+                'uuid' : exp['uuid'],
+                'experiment_sets' : [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in exp['experiment_sets'] ]
+            })
+
+    return ret_obj
 
 
 

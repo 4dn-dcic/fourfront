@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { console } from './../../util';
 
 /** @module parsing-functions */
@@ -139,7 +140,7 @@ export const DEFAULT_PARSING_OPTIONS = {
  * @param {ParsingOptions} [parsingOptions]             Options for parsing and post-processing.
  * @returns {{ 'nodes' : Node[], 'edges' : Edge[] }}    Container object for the two lists.
  */
-export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARSING_OPTIONS){
+export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOptions = DEFAULT_PARSING_OPTIONS){
 
     /*************
      ** Outputs **
@@ -914,8 +915,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     }, []);
 
     return { 'nodes' : sortedNodes, 'edges' : graphData.edges };
-
-}
+});
 
 /**
  * Use this function to run another function on each node recursively along a path of nodes.

@@ -2,6 +2,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
+import _ from 'underscore';
+import { TransitionGroup, Transition } from 'react-transition-group';
 import { console } from './../../util';
 
 import Edge from './Edge';
@@ -9,63 +12,81 @@ import Edge from './Edge';
 
 export default class EdgesLayer extends React.Component {
 
+    /**
+     * Move selected edges to top, and disabled ones to bottom, because CSS z-index doesn't work for SVG elements.
+     */
+    static sortedEdges(edges, selectedNode, isNodeDisabled){
+        return edges.slice(0).sort((a,b)=>{
+            var isASelected = Edge.isSelected(a, selectedNode, isNodeDisabled);
+            var isBSelected = Edge.isSelected(b, selectedNode, isNodeDisabled);
+
+            if (isASelected && !isBSelected){
+                return 1;
+            } else if (!isASelected && isBSelected){
+                return -1;
+            } else {
+                return 0;
+            }
+        }).sort((a,b)=>{
+            var isADisabled = Edge.isDisabled(a, isNodeDisabled);
+            var isBDisabled = Edge.isDisabled(b, isNodeDisabled);
+
+            if (isADisabled && !isBDisabled){
+                return -1;
+            } else if (!isADisabled && isBDisabled) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+    }
+
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
+        this.sortedEdges = memoize(EdgesLayer.sortedEdges.bind(this));
     }
+
+    static edgeOnEnter(elem)    { elem.style.opacity = 0; }
+    static edgeOnEntering(elem) { elem.style.opacity = 0; }
+    static edgeOnEntered(elem)  { elem.style.opacity = 1; }
+    static edgeOnExit(elem)     { elem.style.opacity = 0; }
 
     pathArrows(){
         if (!this.props.pathArrows) return null;
         return Edge.pathArrowsMarkers();
     }
 
+    /**
+     * @todo / in progress
+     * Wrap Edges and each Edge in TransitionGroup and Transition, respectively.
+     * We cannot use CSSTransition at the moment because it does not change the className
+     * of SVG element. We must manually change it (or an attribute of it).
+     */
     render(){
-        var fullHeight = this.props.outerHeight;
-        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
-        var divWidth = Math.max(fullWidth, this.props.contentWidth);
-        var edges = this.props.edges;
-        var edgeCount = edges.length;
+        var { outerHeight, innerWidth, innerMargin, width, edges, selectedNode, isNodeDisabled } = this.props,
+            divWidth = Math.max(width, this.props.contentWidth),
+            edgeCount = edges.length;
         return (
-            <div className="edges-layer-wrapper" style={{ width : divWidth, height : fullHeight }}>
-                <svg className="edges-layer" width={ divWidth } height={ fullHeight }>
+            <div className="edges-layer-wrapper" style={{ 'width' : divWidth, 'height' : outerHeight }}>
+                <svg className="edges-layer" width={divWidth} height={outerHeight}>
                     { this.pathArrows() }
+                    <TransitionGroup component={null}>
                     {
-                        // Move selected edges to top, and disabled ones to bottom, because CSS z-index doesn't work for SVG elements.
-                        edges.sort((a,b)=>{
-                            var isASelected = Edge.isSelected(a, this.props.selectedNode, this.props.isNodeDisabled);
-                            var isBSelected = Edge.isSelected(b, this.props.selectedNode, this.props.isNodeDisabled);
-
-                            if (isASelected && !isBSelected){
-                                return 1;
-                            } else if (!isASelected && isBSelected){
-                                return -1;
-                            } else {
-                                return 0;
-                            }
-                        }).sort((a,b)=>{
-                            var isADisabled = Edge.isDisabled(a, this.props.isNodeDisabled);
-                            var isBDisabled = Edge.isDisabled(b, this.props.isNodeDisabled);
-
-                            if (isADisabled && !isBDisabled){
-                                return -1;
-                            } else if (!isADisabled && isBDisabled) {
-                                return 1;
-                            } else {
-                                return 0;
-                            }
-                        }).map((edge)=>
-                            <Edge
-                                {...this.props}
-                                edge={edge}
-                                edgeCount={edgeCount}
-                                startX={edge.source.x}
-                                startY={edge.source.y}
-                                endX={edge.target.x}
-                                endY={edge.target.y}
-                                key={(edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name)}
-                            />
-                        )
+                        _.map(this.sortedEdges(edges, selectedNode, isNodeDisabled), (edge) => {
+                            var key = (edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name);
+                            return (
+                                <Transition unmountOnExit mountOnEnter timeout={500} key={key}
+                                    onEnter={EdgesLayer.edgeOnEnter} onEntering={EdgesLayer.edgeOnEntering}
+                                    onExit={EdgesLayer.edgeOnExit} onEntered={EdgesLayer.edgeOnEntered}>
+                                    <Edge {...this.props} key={key}
+                                        edge={edge} edgeCount={edgeCount}
+                                        startX={edge.source.x} startY={edge.source.y}
+                                        endX={edge.target.x} endY={edge.target.y} />
+                                </Transition>
+                            );
+                        })
                     }
+                    </TransitionGroup>
                 </svg>
             </div>
         );

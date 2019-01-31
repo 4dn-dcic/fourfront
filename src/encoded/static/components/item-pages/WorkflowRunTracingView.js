@@ -24,7 +24,7 @@ var _testing_data;
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNESXZ4FW4T-2';
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNES9L4AK6Q';
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNESXKBPZKQ';
-//_testing_data = STEPS;
+//_testing_data = PARTIALLY_RELEASED_PROCESSED_FILES;
 
 
 export function allFilesForWorkflowRunsMappedByUUID(items){
@@ -204,22 +204,20 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     commonGraphProps(){
-
-        var steps = this.props.steps;
-
-        var parsingOptions = _.extend(
-            {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters', 'showIndirectFiles')
-        );
-
-        var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
-
-        var graphData = parseAnalysisSteps(this.props.steps, parsingOptions);
+        var { steps, allRuns } = this.props,
+            parsingOptions = _.extend(
+                {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters', 'showIndirectFiles')
+            ),
+            legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items),
+            graphData   = parseAnalysisSteps(steps, parsingOptions);
 
         if (!this.state.showParameters){
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
-        this.anyGroupNodesExist = !this.props.allRuns && _.any(graphData.nodes, function(n){ return n.nodeType === 'input-group' || n.nodeType === 'output-group'; });
+        this.anyGroupNodesExist = !allRuns && _.any(graphData.nodes, function(n){
+            return n.nodeType === 'input-group' || n.nodeType === 'output-group';
+        });
 
         if (!this.state.showReferenceFiles || !this.state.anyReferenceFileNodes){
             delete legendItems['Input Reference File'];

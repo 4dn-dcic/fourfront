@@ -167,16 +167,6 @@ export class WorkflowNodeElement extends React.PureComponent {
         return output; 
     }
 
-    containerStyle(){
-        var { node, columnWidth } = this.props;
-        if (node.nodeType === 'input' || node.nodeType === 'output'){
-            return {
-                'width'   : columnWidth || 100,
-                'opacity' : 0 // We change this to `1` after mount.
-            };
-        }
-    }
-
     aboveNodeTitle(){
 
         var { node, title, columnWidth } = this.props,
@@ -338,13 +328,7 @@ export class WorkflowNodeElement extends React.PureComponent {
     
     render(){
         return (
-            <div className="node-visible-element" style={this.containerStyle()} ref={(r)=>{
-                if (r){
-                    requestAnimationFrame(()=>{
-                        r.style.opacity = "1";
-                    });
-                }
-            }} key="outer">
+            <div className="node-visible-element" key="outer">
                 <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html key="node-title">
                     { this.nodeTitle() }
                 </div>
