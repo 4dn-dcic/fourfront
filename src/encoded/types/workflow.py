@@ -303,7 +303,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
         return (filtered_in_tuples, filtered_out_tuples)
 
-    def generate_sources_for_input(in_file_models, workflow_argument_name):
+    def generate_sources_for_input(in_file_models, workflow_argument_name, depth=0):
 
         sources = [] # Our output
         step_uuids = set()
@@ -384,7 +384,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
         else:
             for step_uuid, in_file_uuid in step_uuids:
-                steps_to_process_stack.append(( step_uuid, get_model_obj(in_file_uuid) ))
+                steps_to_process_stack.append(( step_uuid, get_model_obj(in_file_uuid), depth + 1 ))
 
         return sources
 
@@ -418,7 +418,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                             "for_file"  : current_file_model_object['uuid']
                                         })
 
-    def trace_history(workflow_run_uuid, current_file_model_object):
+    def trace_history(workflow_run_uuid, current_file_model_object, depth=0):
 
         # If we've already traced inputs of this workflowrun, lets skip tracing it.
         # But, lets loop over its outputs and extend them with proper target reference to next step if our current file matches one of this already-traced runs output files.
@@ -522,7 +522,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
-                "source" : generate_sources_for_input(file_items, argument_name),
+                "source" : generate_sources_for_input(file_items, argument_name, depth),
                 "meta" : {
                     "in_path" : True,
                     "file_format" : file_format,
@@ -545,9 +545,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     ### Where function starts doing things. ###
     ###########################################
 
-    # Initialize our queue of steps to process with WFR(s) that file(s) we received are output from.
+    # Initialize our stack (deque) of steps to process with WFR(s) that file(s) we received are output from.
     for original_file in original_file_set_to_trace:
-        file_item_output_of_workflow_run_uuids = original_file.get('workflow_run_outputs', []) # [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_outputs', []) ]
+        file_item_output_of_workflow_run_uuids = original_file.get('workflow_run_outputs', [])
         #file_item_input_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_inputs', []) ]
 
         if len(file_item_output_of_workflow_run_uuids) == 0:
@@ -558,15 +558,24 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         last_workflow_run_uuid = file_item_output_of_workflow_run_uuids[-1]
 
         if 'history' in options.get('trace_direction', ['history']):
-            steps_to_process_stack.append((last_workflow_run_uuid, original_file))
+            steps_to_process_stack.append((last_workflow_run_uuid, original_file, 0))
 
-    while True:
+
+    while True: # Run down the stack until nothing left to trace to
         try:
-            next_wfr_uuid, next_file = steps_to_process_stack.pop()
+            next_wfr_uuid, next_file, depth_of_step = steps_to_process_stack.pop()
         except IndexError: # No more items in our queue.
             break
-        step = trace_history(next_wfr_uuid, next_file)
-        if step: # trace_history will return `None` if UUID already traced, e.g. as consequence of some previously-encountered file that came from it as well
+
+        # (Temporary?) exit condition to prevent requests from taking > 20 seconds
+        # Will be removed once/if we can cache output of this trace.
+        if depth_of_step > options.get('max_depth_history', 6):
+            return
+
+        step = trace_history(next_wfr_uuid, next_file, depth_of_step)
+        # trace_history will return `None` if UUID already traced, e.g. as
+        # consequence of some previously-encountered file that came from it as well
+        if step:
             yield step
 
     if options.get('track_performance'):

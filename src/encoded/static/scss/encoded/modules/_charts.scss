@@ -1557,7 +1557,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
         fill: none;
         stroke-width: 1px;
         stroke-width: 1.5px;
-        transition: opacity .5s ease-out;
+        transition: opacity .5s ease-out, stroke-dashoffset 2s .5s ease-out;
+        opacity: 1;
 
         /*
         &:hover {
@@ -1602,7 +1603,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     opacity: 0.15;
                 }
                 .edges-layer-wrapper .edges-layer path.edge-path:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
-                    opacity: 0.15;
+                    opacity: 0.15 !important;
                 }
             }
 

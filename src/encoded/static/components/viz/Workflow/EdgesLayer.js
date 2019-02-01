@@ -48,7 +48,7 @@ export default class EdgesLayer extends React.Component {
 
     static edgeOnEnter(elem)    { elem.style.opacity = 0; }
     static edgeOnEntering(elem) { elem.style.opacity = 0; }
-    static edgeOnEntered(elem)  { elem.style.opacity = 1; }
+    static edgeOnEntered(elem)  { elem.style.opacity = null; /** Allows CSS to override  */ }
     static edgeOnExit(elem)     { elem.style.opacity = 0; }
 
     pathArrows(){

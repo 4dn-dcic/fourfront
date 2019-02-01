@@ -412,13 +412,18 @@ export default class Edge extends React.Component {
     render(){
         var { edge, pathArrows, style } = this.props,
             { disabled, selected, related, distantlySelected } = this.getComputedProperties(),
-            pathDimension = this.state.pathDimension;
+            pathDimension = this.state.pathDimension,
+            markerEnd;
 
-        var markerEnd;
-        if      (!pathArrows)           markerEnd = null;
-        else if (selected || related)   markerEnd = 'pathArrowBlack';
-        else if (disabled)              markerEnd = 'pathArrowLightGray';
-        else                            markerEnd = 'pathArrowGray';
+        if (!pathArrows) {
+            markerEnd = null;
+        } else if (selected || related || distantlySelected){
+            markerEnd = 'pathArrowBlack';
+        } else if (disabled) {
+            markerEnd = 'pathArrowLightGray';
+        } else {
+            markerEnd = 'pathArrowGray';
+        }
 
         return (
             <path d={pathDimension} ref={this.pathRef} className={"edge-path" + (disabled ? ' disabled' : '' )}

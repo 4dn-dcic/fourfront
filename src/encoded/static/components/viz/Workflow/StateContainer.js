@@ -30,7 +30,9 @@ export default class StateContainer extends React.PureComponent {
                 state.selectedNode.id || null
             );
             if (foundNode){
-                return { selectedNode : foundNode };
+                return { 'selectedNode' : foundNode };
+            } else {
+                return { 'selectedNode' : null };
             }
         }
         return null;
