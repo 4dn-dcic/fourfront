@@ -8710,7 +8710,7 @@
     {
         "accession": "4DNWF25VHY9",
         "app_name": "encode-chipseq-aln-chip",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "fastq",
@@ -9069,7 +9069,10 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/36bb6052-082a-46a0-be86-7415782f0223/",
+                        "/softwares/23c2feec-5009-44f0-9ebc-814112671d01/",
+                        "/softwares/2e1ab766-a572-46f7-869a-80f9a5d063fd/",
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "chip-aln-chip",
@@ -9139,7 +9142,7 @@
     {
         "accession": "4DNWF2FBLQA1",
         "app_name": "encode-chipseq-aln-ctl",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "fastq",
@@ -9489,7 +9492,10 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/36bb6052-082a-46a0-be86-7415782f0223/",
+                        "/softwares/23c2feec-5009-44f0-9ebc-814112671d01/",
+                        "/softwares/2e1ab766-a572-46f7-869a-80f9a5d063fd/",
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "chip-aln-ctl",
@@ -9545,7 +9551,7 @@
     {
         "accession": "4DNWF3BT781",
         "app_name": "encode-chipseq-postaln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "bed",
@@ -9684,7 +9690,7 @@
                     },
                     {
                         "meta": {
-                            "cardinality": "single",
+                            "cardinality": "array",
                             "file_format": "bed",
                             "global": true,
                             "type": "data file"
@@ -9860,7 +9866,12 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/b96e6b97-2347-4e9e-b69e-15550d6268f4/",
+                        "/softwares/e97ffd0c-4bc7-4e9a-95d9-c7d90febf49e/",
+                        "/softwares/42da1570-12a6-458b-b4a8-0a6c9ddf21d6/",
+                        "/softwares/ccb61480-9b2a-441b-8af2-4c14b2d3f090/",
+                        "/softwares/f1c13b57-afab-40d9-bdf8-77d7149ad75b/",
+                        "/softwares/c460cd2e-fca9-446d-9a13-884d7788c7ef/"
                     ]
                 },
                 "name": "chip-postaln",
@@ -10357,7 +10368,7 @@
     {
         "accession": "4DNWF2BBZ1E",
         "app_name": "encode-atacseq-aln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "fastq",
@@ -10697,7 +10708,7 @@
                         "/softwares/6f2716b0-3c10-44d5-80ca-3d2e884d53bf"
                     ]
                 },
-                "name": "atac",
+                "name": "atac-aln",
                 "outputs": [
                     {
                         "meta": {
@@ -10750,7 +10761,7 @@
     {
         "accession": "4DNWF2VTG8I",
         "app_name": "encode-atacseq-postaln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
             {   
                 "argument_format": "bed",
@@ -10978,7 +10989,7 @@
                         "/softwares/6f2716b0-3c10-44d5-80ca-3d2e884d53bf"
                     ]
                 },
-                "name": "atac",
+                "name": "atac-postaln",
                 "outputs": [
                     {
                         "meta": {
