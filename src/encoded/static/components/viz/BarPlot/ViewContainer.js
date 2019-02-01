@@ -347,7 +347,6 @@ export class PopoverViewContainer extends React.PureComponent {
     constructor(props){
         super(props);
         this.getCoordsCallback = this.getCoordsCallback.bind(this);
-        //this.cursorDetailActions = this.cursorDetailActions.bind(this);
     }
 
     getCoordsCallback(node, containerPosition, boundsHeight){
