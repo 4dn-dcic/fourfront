@@ -464,12 +464,8 @@ export const ChartDataController = {
                 })) return;
             }
         }
-        //state.barplot_data_fields = fields;
         ChartDataController.setState({ 'barplot_data_fields' : fields, 'isLoadingChartData' : true }, callback);
-        ChartDataController.sync(function(){
-            ChartDetailCursor.reset(true);
-            //if (typeof callback === 'function') callback();
-        });
+        ChartDataController.sync();
     },
 
     /**
