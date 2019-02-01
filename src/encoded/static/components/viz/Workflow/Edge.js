@@ -234,8 +234,8 @@ export default class Edge extends React.Component {
 
     constructor(props){
         super(props);
-        this.generatePathDimension = this.generatePathDimension.bind(this);
-        this.transitionPathDimensions = this.transitionPathDimensions.bind(this);
+        this.generatePathDimension      = this.generatePathDimension.bind(this);
+        this.transitionPathDimensions   = this.transitionPathDimensions.bind(this);
 
         // Create own memoized copy/instance of intensive static functions.
         // Otherwise if left static, will be re-ran each time as many edges call it.
@@ -254,8 +254,8 @@ export default class Edge extends React.Component {
         this.pathRef = React.createRef();
     }
 
-    getComputedProperties(){
-        var { edge, selectedNode, isNodeDisabled } = this.props,
+    getComputedProperties(props = this.props){
+        var { edge, selectedNode, isNodeDisabled } = props,
             disabled = this.isDisabled(edge, isNodeDisabled);
 
         if (disabled || !selectedNode) {
@@ -287,6 +287,9 @@ export default class Edge extends React.Component {
                 // Instant
                 this.setState({ 'pathDimension' : this.generatePathDimension() });
             }
+        } else if (!_.isEqual(this.getPathOffsets(), this.getPathOffsets(pastProps))){
+            // Instant
+            this.setState({ 'pathDimension' : this.generatePathDimension() });
         }
     }
 
@@ -330,7 +333,7 @@ export default class Edge extends React.Component {
     /**
      * Transitions edge dimensions over time.
      * Updates `state.pathDimension` incrementally using d3.transition().
-     * 
+     *
      * @todo
      * In future, all transitions could be done in `EdgesLayer` instead of `Edge`,
      * this would allow us to batch all the DOM updates into a single function wrapped
@@ -367,28 +370,23 @@ export default class Edge extends React.Component {
             });
     }
 
-    generatePathDimension(startPtOverride = null, endPtOverride = null, startOffset = 5, endOffset = -5){
+    getPathOffsets(startOffset = 5, endOffset = -5, props = this.props){
+        var { edge, pathArrows } = props,
+            { disabled, selected, related, distantlySelected } = this.getComputedProperties(props);
+        if (pathArrows)             endOffset -= 10;
+        if (selected || related)    endOffset -= 5;
+        if (distantlySelected)      endOffset -= 2;
+        if (edge.source.isCurrentContext) startOffset += 5;
+        if (edge.target.isCurrentContext) endOffset -= 5;
+        return { startOffset, endOffset };
+    }
+
+    generatePathDimension(startPtOverride = null, endPtOverride = null){
         var { 
-                edge, edgeStyle, pathArrows, selectedNode, isNodeDisabled, isRelated, startX, startY, endX, endY, columnWidth,
+                edgeStyle, startX, startY, endX, endY, columnWidth,
                 curveRadius, columnSpacing, rowSpacing, nodeEdgeLedgeWidths
             } = this.props,
-            { disabled, selected, related, distantlySelected } = this.getComputedProperties();
-
-        if (pathArrows){
-            endOffset -= 10;
-        }
-        if (selected || related){
-            endOffset -= 5;
-        }
-        if (distantlySelected){
-            endOffset -= 2;
-        }
-        if (edge.source.isCurrentContext){
-            startOffset += 5;
-        }
-        if (edge.target.isCurrentContext){
-            endOffset -= 5;
-        }
+            { startOffset, endOffset } = this.getPathOffsets();
 
         var startPt = {
                 'x' : ((startPtOverride && startPtOverride.x) || startX) + columnWidth + startOffset,
