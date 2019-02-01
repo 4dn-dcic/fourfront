@@ -243,9 +243,9 @@ export default class Node extends React.PureComponent {
             disabled         = typeof node.disabled !== 'undefined' ? node.disabled : this.isDisabled(node, isNodeDisabled),
             isCurrentContext = typeof node.isCurrentContext !== 'undefined' ? node.isCurrentContext : null,
             classNameList    = ["node", "node-type-" + node.nodeType],
-            selected         = Node.isSelected(node, selectedNode) || false,
-            related          = this.isRelated(node, selectedNode) || false,
-            inSelectionPath  = selected || this.isInSelectionPath(node, selectedNode);
+            selected         = (!disabled && Node.isSelected(node, selectedNode)) || false,
+            related          = (!disabled && this.isRelated(node, selectedNode)) || false,
+            inSelectionPath  = selected || (!disabled && this.isInSelectionPath(node, selectedNode)) || false;
 
         if      (disabled)                        classNameList.push('disabled');
         if      (isCurrentContext)                classNameList.push('current-context');
