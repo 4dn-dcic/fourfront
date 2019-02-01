@@ -4,26 +4,22 @@ var gulp        = require('gulp'),
     webpack     = require('webpack');
 
 
-gulp.task('default', ['webpack', 'watch']);
-gulp.task('dev', ['default']);
-gulp.task('dev-quick', ['set-quick', 'webpack', 'watch']);
-gulp.task('dev-uglified', ['set-quick-uglified','default']);
-gulp.task('build', ['set-production', 'webpack']);
-gulp.task('build-quick', ['set-quick', 'webpack']);
-
-gulp.task('set-production', [], function () {
+var setProduction = (done) => {
     process.env.NODE_ENV = 'production';
-});
+    done();
+};
 
-gulp.task('set-quick', [], function () {
+var setQuick = (done) => {
     process.env.NODE_ENV = 'quick';
-});
+    done();
+};
 
-gulp.task('set-quick-uglified', [], function () {
+var setQuickUglified = (done) => {
     process.env.NODE_ENV = 'quick-uglified';
-});
+    done();
+};
 
-var webpackOnBuild = function (done) {
+function webpackOnBuild(done) {
     var start = Date.now();
     return function (err, stats) {
         if (err) {
@@ -36,14 +32,29 @@ var webpackOnBuild = function (done) {
         log("Build Completed, running for " + ((end - start)/1000)) + 's';
         if (done) { done(err); }
     };
-};
+}
 
-gulp.task('webpack', [], function (cb) {
+var doWebpack = (cb) => {
     var webpackConfig = require('./webpack.config.js');
     webpack(webpackConfig).run(webpackOnBuild(cb));
-});
+};
 
-gulp.task('watch', [], function (cb) {
+var watch = () => {
     var webpackConfig = require('./webpack.config.js');
     webpack(webpackConfig).watch(300, webpackOnBuild());
-});
+};
+
+
+const devSlow       = gulp.series(doWebpack, watch);
+const devQuick      = gulp.series(setQuick, doWebpack, watch);
+const devUglified   = gulp.series(setQuickUglified, doWebpack, watch);
+const build         = gulp.series(setProduction, doWebpack);
+const buildQuick    = gulp.series(setQuick, doWebpack);
+
+gulp.task('dev', devSlow);
+gulp.task('default', devQuick);
+gulp.task('dev-quick', devQuick);
+gulp.task('dev-uglified', devUglified);
+gulp.task('build', build);
+gulp.task('build-quick', buildQuick);
+
