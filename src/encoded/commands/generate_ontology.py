@@ -797,7 +797,7 @@ def main():
             # pyramids app
             try:
                 app = get_app(args.config_uri, args.app_name)
-            except Exception as e:
+            except Exception:
                 raise("Can't get the fourfront app - check config_uri and app_name")
 
             load_ontology_terms(app,
