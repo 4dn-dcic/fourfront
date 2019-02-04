@@ -43,13 +43,37 @@ export default class EdgesLayer extends React.Component {
 
     constructor(props){
         super(props);
-        this.sortedEdges = memoize(EdgesLayer.sortedEdges.bind(this));
+        this.sortedEdges = this.sortedEdges.bind(this);
+        //this.getAllPathElements = this.getAllPathElements.bind(this);
+        //this.edgeRefs = [];
     }
 
     static edgeOnEnter(elem)    { elem.style.opacity = 0; }
     static edgeOnEntering(elem) { elem.style.opacity = 0; }
-    static edgeOnEntered(elem)  { elem.style.opacity = null; /** Allows CSS to override  */ }
+    static edgeOnEntered(elem)  { elem.style.opacity = null; /** Allows CSS to override, e.g. .15 opacity for disabled edges */ }
     static edgeOnExit(elem)     { elem.style.opacity = 0; }
+
+    sortedEdges = memoize(function(edges, selectedNodes, isNodeDisabled){
+        var nextEdges = EdgesLayer.sortedEdges(edges, selectedNodes, isNodeDisabled);
+        // Create new list of refs each time we're updated.
+        //this.edgeRefs = [];
+        //_.forEach(nextEdges, ()=>{
+        //    this.edgeRefs.push(React.createRef());
+        //});
+        return nextEdges;
+    });
+
+    // Experimentation with transitioning multiple edges at once within requestAnimationFrame.
+    // Need to rethink design of this, an array for this.edgeRefs won't work as we need to keep
+    // state.source.x, state.source.y cached in state and associated w/ each edge.
+    // Possibly can use object keyed by 'key' string (as determined in render method).
+    // Keeping for reference.
+    //
+    //getAllPathElements(){
+    //    return _.map(this.edgeRefs, function(ref){
+    //        return ref && ref.current && ref.current.pathRef && ref.current.pathRef.current;
+    //    });
+    //}
 
     pathArrows(){
         if (!this.props.pathArrows) return null;
@@ -57,10 +81,9 @@ export default class EdgesLayer extends React.Component {
     }
 
     /**
-     * @todo / in progress
-     * Wrap Edges and each Edge in TransitionGroup and Transition, respectively.
+     * Wraps Edges and each Edge in TransitionGroup and Transition, respectively.
      * We cannot use CSSTransition at the moment because it does not change the className
-     * of SVG element. We must manually change it (or an attribute of it).
+     * of SVG element(s). We must manually change it (or an attribute of it).
      */
     render(){
         var { outerHeight, innerWidth, innerMargin, width, edges, selectedNode, isNodeDisabled } = this.props,
@@ -72,14 +95,13 @@ export default class EdgesLayer extends React.Component {
                     { this.pathArrows() }
                     <TransitionGroup component={null}>
                     {
-                        _.map(this.sortedEdges(edges, selectedNode, isNodeDisabled), (edge) => {
+                        _.map(this.sortedEdges(edges, selectedNode, isNodeDisabled), (edge, index) => {
                             var key = (edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name);
                             return (
                                 <Transition unmountOnExit mountOnEnter timeout={500} key={key}
                                     onEnter={EdgesLayer.edgeOnEnter} onEntering={EdgesLayer.edgeOnEntering}
                                     onExit={EdgesLayer.edgeOnExit} onEntered={EdgesLayer.edgeOnEntered}>
-                                    <Edge {...this.props} key={key}
-                                        edge={edge} edgeCount={edgeCount}
+                                    <Edge {...this.props} {...{ key, edge, edgeCount }}
                                         startX={edge.source.x} startY={edge.source.y}
                                         endX={edge.target.x} endY={edge.target.y} />
                                 </Transition>

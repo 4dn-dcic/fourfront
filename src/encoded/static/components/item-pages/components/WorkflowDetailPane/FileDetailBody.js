@@ -131,9 +131,9 @@ export class FileDetailBody extends React.PureComponent {
 
         return (
             <div className="col-sm-6 col-lg-4 right box buttons-container">
-                <Button href={qcLink} target="_blank" className="mt-06 btn-block" data-tip="View the Quality Control Metrics for this File">
-                    <i className="icon icon-fw icon-check-square-o"/>&nbsp; QC Metrics
-                </Button>
+                <a href={qcLink} className="mt-06 btn btn-block btn-secondary" data-tip="View the Quality Control Metrics for this File">
+                    <i className="icon icon-fw icon-check-square-o"/>&nbsp; Quality Metrics
+                </a>
             </div>
         );
 
