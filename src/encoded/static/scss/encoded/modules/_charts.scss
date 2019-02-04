@@ -1232,6 +1232,30 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 margin-right: 5px;
                 margin-left: 1px;
             }
+
+            /** Present on I/O file nodes which have a quality_metric available **/
+            .qc-present-node-marker {
+                position: absolute;
+                width: 24px;
+                height: 24px;
+                padding: 3px 6px;
+                border-radius: 50%;
+                font-size: 0.75rem;
+                top: -15px;
+                right: -7px;
+                background-color: #777;
+                color: #fff;
+                box-shadow: 0 0px 0px -2px #000;
+                transition: background-color .5s ease-out, box-shadow .5s ease-out;
+                
+                /* We can enable these styles if are to make the marker clickable.
+                &:hover {
+                    text-decoration: none;
+                    background-color: darken($color: #6d6d6d, $amount: 10)
+                }
+                */
+            }
+
         }
 
         .above-node-title ,
@@ -1262,18 +1286,24 @@ $workflow-node-color-type-global-context: #ffb3b3;
         }
     }
 
+    /** COMMON styles for when node is selected _or_ related **/
     &[data-node-selected="true"],
     &[data-node-related="true"],
     &:hover {
         > .inner {
-            .above-node-title {
-                transform: translate3d(0px,-6px,0);
-            }
-            .below-node-title {
-                transform: translate3d(0px,6px,0);
-                .lighter {
-                    opacity: 1;
+            .node-visible-element {
+
+                .above-node-title {
+                    transform: translate3d(0px,-6px,0);
                 }
+
+                .below-node-title {
+                    transform: translate3d(0px,6px,0);
+                    .lighter {
+                        opacity: 1;
+                    }
+                }
+
             }
         }
     }
@@ -1385,26 +1415,30 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         transform: translateY(1px);
                     }
                 }
+
+                /** Unlike the _common_ style transform, this also offsets +/- 6px horizontally due to I/O node shape **/
+                .above-node-title {
+                    transform: translate3d(-6px,0px,0);
+                }
+                .below-node-title {
+                    transform: translate3d(6px,0px,0);
+                }
+
             }
 
-            .above-node-title {
-                transform: translate3d(-6px,0px,0);
-            }
-            .below-node-title {
-                transform: translate3d(6px,0px,0);
-            }
-            
         }
 
         &[data-node-selected="true"],
         &[data-node-related="true"],
         &:hover {
             > .inner {
-                .above-node-title {
-                    transform: translate3d(-6px,-6px,0);
-                }
-                .below-node-title {
-                    transform: translate3d(6px,5px,0);
+                .node-visible-element {
+                    .above-node-title {
+                        transform: translate3d(-6px,-6px,0);
+                    }
+                    .below-node-title {
+                        transform: translate3d(6px,5px,0);
+                    }
                 }
             }
         }
@@ -1414,11 +1448,19 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 outline-color: #ddd;
             }
         }
+
         &[data-node-selected="true"]:not(.disabled){
             &:before {
                 outline-color: #000;
             }
+            > .inner .node-visible-element {
+                .qc-present-node-marker {
+                    background-color: #000;
+                    box-shadow: 0 3px 3px -2px #000;
+                }
+            }
         }
+
         &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
             &:before {
                 outline-color: rgba(0,0,0,0.55);

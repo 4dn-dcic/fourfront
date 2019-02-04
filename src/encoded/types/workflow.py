@@ -160,13 +160,13 @@ def common_props_from_file(file_obj):
 
     ret_obj = {
         '@id'             : file_obj['@id'],
+        'uuid'            : file_obj['uuid'],
         'display_title'   : file_obj['display_title'],
         'accession'       : file_obj.get('accession'),
-        '@type'           : file_obj.get('@type'),
-        'status'          : file_obj.get('status')
+        '@type'           : file_obj.get('@type')
     }
 
-    for k in ['quality_metric', 'url', 'href', 'description', 'filename', 'file_format', 'file_type', 'file_size']:
+    for k in ['quality_metric', 'url', 'href', 'description', 'filename', 'file_format', 'file_type', 'file_size', 'status']:
         if k in file_obj:
             ret_obj[k] = file_obj[k]
 
@@ -658,8 +658,7 @@ class WorkflowRun(Item):
         'output_files.value.quality_metric.display_title',
         'output_files.value.status',
         'output_quality_metrics.name',
-        'output_quality_metrics.value.@type',
-        'output_quality_metrics.value.@id'
+        'output_quality_metrics.value.*'
     ]
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')

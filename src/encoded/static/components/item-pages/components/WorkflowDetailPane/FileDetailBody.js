@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Fade } from 'react-bootstrap';
+import { Fade, Button } from 'react-bootstrap';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../../util';
 import { FlexibleDescriptionBox } from './../FlexibleDescriptionBox';
 import { SimpleFilesTable } from './../SimpleFilesTable';
@@ -25,30 +25,16 @@ export class FileDetailBody extends React.PureComponent {
         'windowWidth' : PropTypes.number.isRequired
     };
 
-    static defaultProps = {
-        'canDownloadStatuses' : fileUtil.FileDownloadButtonAuto.defaultProps.canDownloadStatuses
-    };
-
     doesDescriptionOrNotesExist(){
         var file = this.props.file;
         return !!(file.description || file.notes || false);
     }
 
-    canDownload(){
-        var { file, canDownloadStatuses } = this.props;
-        if (file && !Array.isArray(file) && typeof file !== 'string' && canDownloadStatuses.indexOf(file.status) > -1){
-            return true;
-        }
-        return false;
-    }
-
     fileTitleBox(){
         var { node, file } = this.props,
-            colClassName = "col-sm-6 col-lg-4",
-            fileTitle, fileTitleFormatted;
+            fileTitle, fileTitleFormatted, statusIndicator;
 
-        //if (typeof file === 'object' && file && !fileUtil.isFileDataComplete(file) && !Array.isArray(file)) {}
-        if (Array.isArray(file)) { // Some sort of group
+        if (Array.isArray(file)) { // Some sort of group (of files)
             fileTitle = 'Workflow';
             if (typeof file !== 'string' && file && file.display_title){
                 fileTitle = file.display_title;
@@ -58,18 +44,19 @@ export class FileDetailBody extends React.PureComponent {
             } else {
                 fileTitleFormatted = fileTitle;
             }
-        } else {
+        } else { // Single File
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
-            if (!this.doesDescriptionOrNotesExist()){
-                colClassName = "col-sm-6 col-lg-6";
-            }
             fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="inline-block">{ fileTitle }</a>;
+            statusIndicator = file.status && (
+                <i className="item-status-indicator-dot" data-status={ file.status && file.status.toLowerCase() }
+                    data-tip={"Status - " + file.status} />
+            );
         }
-        if (typeof fileTitle !== 'string' || fileTitle.length < (this.doesDescriptionOrNotesExist() ? 25 : 35)){
+        if (typeof fileTitle !== 'string' || fileTitle.length < 35){
             fileTitle = null;
         }
         return (
-            <div className={colClassName + " file-title box"}>
+            <div className="col-sm-6 col-lg-8 file-title box">
                 <div className="text-600">
                     {
                         node.nodeType === 'output' ? 'Generated' :
@@ -82,38 +69,38 @@ export class FileDetailBody extends React.PureComponent {
                             'File'
                     }
                 </div>
-                <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>{ fileTitleFormatted }</h3>
+                <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>
+                    { statusIndicator } { fileTitleFormatted }
+                </h3>
             </div>
         );
     }
 
     downloadLinkBox(){
-        var { node, windowWidth, file } = this.props,
-            gridSize     = layout.responsiveGridState(windowWidth),
-            title        = <span>Download</span>,
-            disabled     = (!file.href && !file.url) || !this.canDownload(),
-            content      = <fileUtil.FileDownloadButton {...{ title, disabled }} href={file.href || file.url} filename={file.filename} />,
-            colClassName = this.doesDescriptionOrNotesExist() ? "col-sm-6 col-lg-4" : "col-sm-6 col-lg-6";
-    
-        //if (gridSize === 'sm' || gridSize === 'xs') return null;
+        var { node, file } = this.props, content;
 
-        //if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
+        if (MetricsView.isNodeQCMetric(node)){
+            content = <ViewMetricButton {...{ node, file }}/>;
+        } else {
+            content = <fileUtil.FileDownloadButtonAuto result={file} />;
+        }
 
         return (
-            <div className={colClassName + " right box buttons-container"}>
-                <ViewMetricButton {...{ node, file }}/> { content }
+            <div className="col-sm-6 col-lg-4 right box buttons-container">
+                { content }
             </div>
         );
     }
 
     descriptionBox(){
         var { file, windowWidth } = this.props,
-            gridSize = layout.responsiveGridState(windowWidth);
+            gridSize = layout.responsiveGridState(windowWidth),
+            lgColSize = (file && file.quality_metric && file.quality_metric.display_title && '8') || '12';
 
         if (!this.doesDescriptionOrNotesExist()) return null;
 
         return (
-            <div className="col-xs-12 col-lg-4 box">
+            <div className={"col-xs-12 col-lg-" + lgColSize + " box"}>
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
                 <div className="description-box-container">
                     <FlexibleDescriptionBox
@@ -129,18 +116,27 @@ export class FileDetailBody extends React.PureComponent {
         );
     }
 
-    iframeBox(){
-        var { file, node } = this.props;
-        if (!node.meta || !node.meta.run_data || node.meta.run_data.type !== 'quality_metric') return null; // IFrames only for quality metrics.
-        if (typeof file.url !== 'string') return null;
+    qcBox(){
+        var { file, node } = this.props,
+            qc, qcLink;
+
+        if (!file || Array.isArray(file)){
+            return null;
+        }
+
+        qc = file && file.quality_metric;
+        qcLink = qc && object.itemUtil.atId(qc);
+
+        if (!qcLink) return null;
+
         return (
-            <div className="row">
-                <div className="col-sm-12">
-                    <hr/>
-                    <iframe src={file.url} width="100%" height="400"/>
-                </div>
+            <div className="col-sm-6 col-lg-4 right box buttons-container">
+                <Button href={qcLink} target="_blank" className="mt-06 btn-block" data-tip="View the Quality Control Metrics for this File">
+                    <i className="icon icon-fw icon-check-square-o"/>&nbsp; QC Metrics
+                </Button>
             </div>
         );
+
     }
 
     /**
@@ -148,7 +144,7 @@ export class FileDetailBody extends React.PureComponent {
      */
     render(){
         var { file, node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
-            body;
+            body, description, attachedQCBtn;
 
         if (!file){
             return null;
@@ -213,6 +209,8 @@ export class FileDetailBody extends React.PureComponent {
             );
         }
 
+        description = this.descriptionBox(),
+        attachedQCBtn = this.qcBox();
 
         return (
             <div>
@@ -220,8 +218,15 @@ export class FileDetailBody extends React.PureComponent {
                     <div className="row">
                         { this.fileTitleBox() }
                         { this.downloadLinkBox() }
-                        { this.descriptionBox() }
                     </div>
+                    { (description || attachedQCBtn) && <React.Fragment>
+                            <hr/>
+                            <div className="row">
+                                { description }
+                                { attachedQCBtn }
+                            </div>
+                        </React.Fragment>
+                    }
                 </div>
                 <hr/>
                 { body }

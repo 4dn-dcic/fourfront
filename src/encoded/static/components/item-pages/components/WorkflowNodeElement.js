@@ -224,6 +224,11 @@ export class WorkflowNodeElement extends React.PureComponent {
             return <div {...elemProps}>{ fileFormatAsString }</div>;
         }
 
+        // QC Report
+        if (node.ioType === 'qc') {
+            return <div {...elemProps}>Quality Control Metric</div>;
+        }
+
         // Default-ish for IO node
         if (typeof node.ioType === 'string') {
             return <div {...elemProps}>{ Schemas.Term.capitalize(node.ioType) }</div>;
@@ -325,7 +330,34 @@ export class WorkflowNodeElement extends React.PureComponent {
         // Fallback / Default - use node.name
         return <span className="node-name">{ this.icon() }{ node.title || node.name }</span>;
     }
-    
+
+    /**
+     * Return a JSX element to be shown at top of right of file node
+     * to indicate that a quality metric is present on said file.
+     *
+     * We can return a <a href={object.itemUtil.atId(qc)}>...</a> element, but
+     * seems having a link on node would be bit unexpected if clicked accidentally.
+     */
+    qcMarker(){
+        var { node } = this.props,
+            file, qc;
+
+        if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
+            return null;
+        }
+
+        file = node.meta.run_data.file,
+        qc = file && file.quality_metric;
+
+        if (!qc) return null;
+
+        return (
+            <div className="qc-present-node-marker" data-tip="This file has a quality control metric associated with it.">
+                QC
+            </div>
+        );
+    }
+
     render(){
         return (
             <div className="node-visible-element" key="outer">
@@ -334,6 +366,7 @@ export class WorkflowNodeElement extends React.PureComponent {
                 </div>
                 { this.belowNodeTitle() }
                 { this.aboveNodeTitle() }
+                { this.qcMarker() }
             </div>
         );
     }

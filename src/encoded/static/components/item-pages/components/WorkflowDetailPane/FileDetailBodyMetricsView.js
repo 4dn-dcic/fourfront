@@ -6,30 +6,29 @@ import _ from 'underscore';
 
 
 
-export class ViewMetricButton extends React.Component {
+export class ViewMetricButton extends React.PureComponent {
 
     static defaultProps = {
-        title : "View Full QC Report"
-    }
+        'title' : "View Full QC Report"
+    };
 
     render(){
-        var file = this.props.file;
-        var node = this.props.node;
-        var title = this.props.title || null;
-        var type = file.overall_quality_status;
-        if (!MetricsView.isNodeQCMetric(node)) return null;
-        if (typeof file.url !== 'string') return null;
+        var { file, node, title, className, disabled } = this.props,
+            type = file.overall_quality_status,
+            typeLowerCased = typeof type === 'string' && type.toLocaleLowerCase(),
+            usedClassName = (className || '') + " btn download-button btn-default" + (disabled ? ' disabled' : '');
 
-        var className = (this.props.className || '') + " btn download-button btn-default" + (this.props.disabled ? ' disabled' : '');
-        if (typeof type === 'string'){
-            if      (type.toLocaleLowerCase() === 'pass') className += ' btn-success';
-            else if (type.toLocaleLowerCase() === 'warn') className += ' btn-warning';
-            else if (type.toLocaleLowerCase() === 'error') className += ' btn-error';
-            else className += ' btn-info';
+        if (typeof file.url !== 'string' || !MetricsView.isNodeQCMetric(node)) return null;
+
+        if (typeLowerCased){
+            if      (typeLowerCased === 'pass') usedClassName += ' btn-success';
+            else if (typeLowerCased === 'warn') usedClassName += ' btn-warning';
+            else if (typeLowerCased === 'error') usedClassName += ' btn-error';
+            else usedClassName += ' btn-info';
         }
 
         return (
-            <a href={file.url} className={className} target="_blank" onClick={(e)=>{
+            <a href={file.url} className={usedClassName} target="_blank" onClick={(e)=>{
                 if (window && window.open){
                     e.preventDefault();
                     window.open(file.url, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=100, width=400');
@@ -41,7 +40,7 @@ export class ViewMetricButton extends React.Component {
     }
 }
 
-class MetricsViewItem extends React.Component {
+class MetricsViewItem extends React.PureComponent {
 
     static resultStringToIcon(resultStr = "UNKNOWN", extraIconClassName = ''){
         if (typeof resultStr !== 'string') return resultStr;
@@ -83,22 +82,25 @@ class MetricsViewItem extends React.Component {
     }
 }
 
-export class MetricsView extends React.Component {
+export class MetricsView extends React.PureComponent {
 
     static isNodeQCMetric(node){
+        if (node.ioType === 'qc') return true;
+        if (node.meta && node.meta.type === 'QC') return true;
         if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
+        return false;
     }
 
     static defaultProps = {
         'metrics' : [
             { 'key' : 'something', 'title' : 'Some Thing', 'result' : 'PASS' }
         ]
-    }
+    };
 
     render(){
         return (
             <div className="metrics-view row">
-                { this.props.metrics.map((m,i) => <MetricsViewItem metric={m} key={m.key || m.title || i} />) }
+                { _.map(this.props.metrics, (m,i) => <MetricsViewItem metric={m} key={m.key || m.title || i} />) }
             </div>
         );
     }
