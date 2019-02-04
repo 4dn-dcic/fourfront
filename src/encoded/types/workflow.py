@@ -159,10 +159,9 @@ def common_props_from_file(file_obj):
     '''
 
     ret_obj = {
-        'uuid'            : file_obj['uuid'],
         '@id'             : file_obj['@id'],
+        'display_title'   : file_obj['display_title'],
         'accession'       : file_obj.get('accession'),
-        'display_title'   : file_obj.get('display_title'),
         '@type'           : file_obj.get('@type'),
         'status'          : file_obj.get('status')
     }
@@ -319,7 +318,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     sources_for_in_file.append({
                         "name" : out_file.get('workflow_argument_name'),
                         "step" : workflow_run['@id'],
-                        "for_file" : in_file['uuid'],
+                        "for_file" : in_file['@id'],
                         "workflow" : workflow_run.get('workflow')
                     })
             return sources_for_in_file
@@ -367,7 +366,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         for workflow_run_model, in_file_model in filtered_out_workflow_runs:
             untraced_in_files.append(in_file_model['uuid'])
             source_for_in_file = {
-                "for_file"   : in_file_model['uuid'],
+                "for_file"   : in_file_model['@id'],
                 "step"       : workflow_run_model['@id'],
                 "grouped_by" : "workflow",
                 "workflow"   : workflow_run_model.get('workflow')
@@ -378,7 +377,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
 
         if len(sources) == 0:
-            for_files = [ f['uuid'] for f in in_file_models ]
+            for_files = [ f['@id'] for f in in_file_models ]
             if len(for_files) == 1:
                 for_files = for_files[0]
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
@@ -415,7 +414,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                         output['target'].append({
                                             "name"      : argument_name,
                                             "step"      : target_workflow_run_model_obj.get('@id'),
-                                            "for_file"  : current_file_model_object['uuid']
+                                            "for_file"  : current_file_model_object['@id']
                                         })
 
     def trace_history(workflow_run_uuid, current_file_model_object, depth=0):
@@ -642,9 +641,9 @@ class WorkflowRun(Item):
         'input_files.value.filename',
         'input_files.value.display_title',
         'input_files.value.file_format',
-        'input_files.value.uuid',
         'input_files.value.accession',
         'input_files.value.@type',
+        'input_files.value.@id',
         'input_files.value.file_size',
         'input_files.value.quality_metric.display_title',
         'input_files.value.status',
@@ -652,15 +651,15 @@ class WorkflowRun(Item):
         'output_files.value.filename',
         'output_files.value.display_title',
         'output_files.value.file_format',
-        'output_files.value.uuid',
         'output_files.value.accession',
         'output_files.value.@type',
+        'output_files.value.@id',
         'output_files.value.file_size',
         'output_files.value.quality_metric.display_title',
         'output_files.value.status',
         'output_quality_metrics.name',
-        'output_quality_metrics.value.uuid',
-        'output_quality_metrics.value.@type'
+        'output_quality_metrics.value.@type',
+        'output_quality_metrics.value.@id'
     ]
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
