@@ -13,7 +13,7 @@ from .base import (
 
 
 @collection(
-    name='bio_features',
+    name='bio-features',
     properties={
         'title': 'Biological Features',
         'description': 'Listing of BioFeature Items',
