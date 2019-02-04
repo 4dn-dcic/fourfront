@@ -87,6 +87,7 @@
             "title": "NCBI link",
             "description": "Link to the gene record in NCBI",
             "type": "string",
+            "format": "uri",
             "permission": "import_items"
         }
     },

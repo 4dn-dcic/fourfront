@@ -3,40 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def some_genomic_region(testapp, lab, award):
-    item = {'award': award['@id'],
-            'lab': lab['@id'],
-            'genome_assembly': 'GRCh38',
-            'chromosome': '1',
-            'start_coordinate': 17,
-            'end_coordinate': 544}
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
-def vague_genomic_region(testapp, lab, award):
-    item = {'award': award['@id'],
-            'lab': lab['@id'],
-            'genome_assembly': 'GRCm38',
-            'chromosome': '5',
-            'start_location': 'beginning',
-            'end_location': 'centromere'}
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
-def vague_genomic_region_w_desc(testapp, lab, award):
-    item = {'award': award['@id'],
-            'lab': lab['@id'],
-            'genome_assembly': 'GRCm38',
-            'chromosome': '5',
-            'start_location': 'beginning',
-            'end_location': 'centromere',
-            'location_description': 'gene X enhancer'}
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
 def genomic_target(testapp, lab, award, some_genomic_region):
     item = {'award': award['@id'],
             'lab': lab['@id'],
@@ -72,6 +38,7 @@ def test_target_summary_genomic(testapp, genomic_target, some_genomic_region,
     region_patch = {'targeted_genome_regions': [vague_genomic_region_w_desc['@id']]}
     res = testapp.patch_json(genomic_target['@id'], region_patch).json['@graph'][0]
     assert res['target_summary'] == 'gene X enhancer' == res['display_title']
+
 
 def test_target_summary_proteins(testapp, protein_complex_target):
     assert protein_complex_target['target_summary'] == 'Protein:SubunitA,SubunitX'

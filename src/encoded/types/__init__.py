@@ -128,6 +128,24 @@ class GenomicRegion(Item):
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
 
+    def display_title(self, request):
+        ''' If you have full genome coordinates use those, otherwise use a
+            location description (which should be provided if not coordinates)
+            with default just being genome assembly (required)
+        '''
+        props = self.properties
+        value = None
+        if props.get('location_description') and not (
+                props.get('start_coordinate') or props.get('end_coordinate')):
+            value = props['location_description']
+        else:
+            value = props.get('genome_assembly')
+            if props.get('chromosome'):
+                value += (':' + props['chromosome'])
+            if props.get('start_coordinate') and props.get('end_coordinate'):
+                value += ':' + str(props['start_coordinate']) + '-' + str(props['end_coordinate'])
+        return value
+
 
 @collection(
     name='organisms',

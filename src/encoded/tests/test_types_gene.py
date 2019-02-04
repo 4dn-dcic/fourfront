@@ -4,7 +4,7 @@ from encoded.types.gene import (
     get_gene_info_from_response_text,
     map_ncbi2schema,
 )
-# pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 def test_get_gene_info_from_response_text_good_response():

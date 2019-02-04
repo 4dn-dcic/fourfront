@@ -138,5 +138,8 @@
         }
     },
     "columns": {
+        "feature_type.preferred_name": {
+            "title": "Feature Type"
+        }
     }
 }
