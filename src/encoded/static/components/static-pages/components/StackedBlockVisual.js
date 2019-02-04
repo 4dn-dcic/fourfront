@@ -71,7 +71,7 @@ export function sumPropertyFromList(objList, property){
 
 
 
-export class StackedBlockVisual extends React.Component {
+export class StackedBlockVisual extends React.PureComponent {
 
     static defaultProps = {
         'groupingProperties' : ['grant_type', 'center_name',  'lab_name'],
@@ -312,9 +312,6 @@ export class StackedBlockVisual extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        //this.toggleGroupingOpen = this.toggleGroupingOpen.bind(this);
         this.renderContents = this.renderContents.bind(this);
 
         var state = {
@@ -399,7 +396,7 @@ export class StackedBlockVisual extends React.Component {
 
 }
 
-export class StackedBlockGroupedRow extends React.Component {
+export class StackedBlockGroupedRow extends React.PureComponent {
 
     static flattenChildBlocks(groups){
         if (Array.isArray(groups)) return groups;
@@ -687,7 +684,7 @@ export class StackedBlockGroupedRow extends React.Component {
 }
 
 
-export class StackedBlock extends React.Component {
+export class StackedBlock extends React.PureComponent {
 
     componentDidMount(){
         ReactTooltip.rebuild();
