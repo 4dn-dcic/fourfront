@@ -1243,11 +1243,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 font-size: 0.75rem;
                 top: -15px;
                 right: -7px;
-                background-color: #777;
+                background-color: #e07e05;
                 color: #fff;
                 box-shadow: 0 0px 0px -2px #000;
                 transition: background-color .5s ease-out, box-shadow .5s ease-out;
-                
+
                 /* We can enable these styles if are to make the marker clickable.
                 &:hover {
                     text-decoration: none;
@@ -1455,7 +1455,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
             > .inner .node-visible-element {
                 .qc-present-node-marker {
-                    background-color: #000;
+                    //background-color: #000;
+                    //background-color: darken($color: #e07e05, $amount: 10%);
                     box-shadow: 0 3px 3px -2px #000;
                 }
             }
