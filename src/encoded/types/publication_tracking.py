@@ -8,7 +8,6 @@ from snovault import (
 from .base import (
     Item,
     lab_award_attribution_embed_list
-    # paths_filtered_by_status,
 )
 
 

@@ -17,7 +17,6 @@ from snovault.validators import (
 )
 from .base import (
     Item,
-    paths_filtered_by_status,
     collection_add,
     item_edit,
     lab_award_attribution_embed_list
