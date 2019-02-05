@@ -300,12 +300,16 @@ class VisualBody extends React.PureComponent {
     }
 
     static blockRenderedContents(data, title, groupingPropertyTitle, blockProps){
+        var count = 0;
         if (Array.isArray(data)) {
-            return data.length;
+            count = data.length;
         } else if (data) {
-            return 1;
+            count = 1;
         }
-        return 0; // Shouldnt happen?
+        if (count > 100){
+            return <span className="small">{ count }</span>;
+        }
+        return <span>{ count }</span>;
     }
 
     constructor(props){

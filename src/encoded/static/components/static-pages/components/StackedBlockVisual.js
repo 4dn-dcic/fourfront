@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, object } from'./../../util';
@@ -76,9 +77,9 @@ export class StackedBlockVisual extends React.PureComponent {
     static defaultProps = {
         'groupingProperties' : ['grant_type', 'center_name',  'lab_name'],
         'columnGrouping' : null,
-        'blockHeight' : 35,
-        'blockVerticalSpacing' : 5,
-        'blockHorizontalSpacing' : 5,
+        'blockHeight' : 28,
+        'blockVerticalSpacing' : 2,
+        'blockHorizontalSpacing' : 2,
         'duplicateHeaders' : true,
         'collapseToMatrix' : false,
         // @param data may be either Array (if multiple grouped into 1) or object.
@@ -406,7 +407,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         }, []);
     }
 
-    static  sortByArray(array1, arrayToSortBy){
+    static sortByArray(array1, arrayToSortBy){
 
         var o = _.object(
             _.map(array1, function(k){ return [k, true]; })
@@ -425,8 +426,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
     static collapsedChildBlocks(data, props){
 
-        var allChildBlocksPerChildGroup = null;
-        var allChildBlocks = null;
+        var allChildBlocksPerChildGroup = null,
+            allChildBlocks = null;
 
         if (Array.isArray(data)){
             allChildBlocks = data;
@@ -444,16 +445,22 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         //console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
         
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
-            'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
-            'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover');
-
-        var inner = null;
-        var groupedDataIndicesPairs = (props.groupedDataIndices && _.pairs(props.groupedDataIndices)) || [];
+                'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
+                'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover'),
+            containerGroupStyle = {
+                'width'         : (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1, // Width for each column
+                'minHeight'     : props.blockHeight + props.blockVerticalSpacing,               // Height for each row
+                'paddingLeft'   : props.blockHorizontalSpacing,
+                'paddingRight'  : props.blockHorizontalSpacing,
+                'paddingTop'    : props.blockVerticalSpacing
+            },
+            inner                   = null,
+            groupedDataIndicesPairs = (props.groupedDataIndices && _.pairs(props.groupedDataIndices)) || [],
+            blocksByColumnGroup,
+            columnKeys;
 
 
         if (groupedDataIndicesPairs.length > 0){ // If columns exist, distribute these blocks by column! Otherwise (else statement @ end) we'll probably just stack em left-to-right.
-
-            var blocksByColumnGroup, columnKeys, widthPerColumn = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
 
             //console.log('TEsT',allChildBlocksPerChildGroup);
 
@@ -482,30 +489,21 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                     columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
                 }
 
-                inner = columnKeys.map(function(k){
+                inner = _.map(columnKeys, function(k){
                     return (
-                        <div
-                            className="block-container-group"
-                            style={{
-                                width : widthPerColumn,
-                                minHeight : props.blockHeight + (props.blockVerticalSpacing),
-                                paddingLeft : props.blockHorizontalSpacing,
-                                paddingRight : props.blockHorizontalSpacing,
-                                paddingTop : props.blockVerticalSpacing
-                            }}
-                            key={k}
-                            data-group-key={k}
-                            children={_.map(blocksByColumnGroup[k], (pairs,i) => <StackedBlock key={pairs[0] || i} {...commonProps} data={pairs[1]} title={pairs[0]} /> )}
-                        />
+                        <div className="block-container-group" style={containerGroupStyle}
+                            key={k} data-group-key={k}
+                            children={_.map(blocksByColumnGroup[k], ([ key, blockData ],i) =>
+                                <StackedBlock key={key || i} {...commonProps} data={blockData} title={key} />
+                            )} />
                     );
                 });
 
             } else {
 
-                blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function(pair){
-                    var listOfIndicesForGroup = pair[1];
+                blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function([ columnKey, listOfIndicesForGroup ]){
                     return [
-                        pair[0],
+                        columnKey,
                         _.filter(_.map(allChildBlocks, function(blockData){
                             if (listOfIndicesForGroup.indexOf(blockData.index) > -1){
                                 return blockData;
@@ -520,7 +518,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                     columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, props.headerColumnsOrder);
                 }
 
-                inner = columnKeys.map(function(k){
+                inner = _.map(columnKeys, function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
 
                     //console.log('BFG-1', blocksForGroup);
@@ -537,19 +535,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
                     //console.log('BFG-2', blocksForGroup);
                     return (
-                        <div
-                            className="block-container-group"
-                            style={{
-                                width : widthPerColumn,
-                                minHeight : props.blockHeight + (props.blockVerticalSpacing),
-                                paddingLeft : props.blockHorizontalSpacing,
-                                paddingRight : props.blockHorizontalSpacing,
-                                paddingTop : props.blockVerticalSpacing
-                            }}
-                            key={k}
-                            data-block-count={blocksForGroup.length}
-                            data-group-key={k}
-                        >
+                        <div className="block-container-group" style={containerGroupStyle}
+                            key={k} data-block-count={blocksForGroup.length} data-group-key={k}>
                             { blocksForGroup.map(function(blockData, i){
                                 var title = k;
                                 var parentGrouping = (props.titleMap && props.titleMap[props.groupingProperties[props.depth - 1]]) || null;
@@ -561,7 +548,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                                 } else if (typeof props.columnSubGrouping === 'string') {
                                     title = object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <StackedBlock key={title || i} {...commonProps} data={blockData} title={title} parentGrouping={parentGrouping} subGrouping={subGrouping} />;
+                                return <StackedBlock key={title || i} {...commonProps} {...{ title, parentGrouping, subGrouping }} data={blockData} />;
                             }) }
                         </div>
                     );
@@ -569,11 +556,10 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
             }
         } else {
-            inner = allChildBlocks.map((pair)=> <StackedBlock {...commonProps} key={pair[0]} data={pair[1]} title={pair[0]} /> );
+            inner = _.map(allChildBlocks, ([ key, data ]) => <StackedBlock {...commonProps} {...{ key, data }} title={key} />);
         }
 
-
-        return <div className="blocks-container" style={{ 'minHeight' : props.blockHeight + props.blockVerticalSpacing }} children={inner}/>;
+        return <div className="blocks-container" style={{ 'minHeight' : containerGroupStyle.minHeight }} children={inner}/>;
     }
 
     constructor(props){
@@ -643,22 +629,25 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             );
         }
 
-        var h4TitleProps = {
-            'className' : "text-500 text-ellipsis-container",
-            'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
-        };
-
-        var childBlocks = !isOpen ? this.childBlocksCollapsed() : null;
-
-        var maxBlocksInRow = Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count'));
+        var childBlocks = !isOpen ? this.childBlocksCollapsed() : null,
+            maxBlocksInRow  = childBlocks && Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count')),
+            blockHeightFull = blockHeight + blockVerticalSpacing,
+            rowHeight       = blockHeight + (blockVerticalSpacing * 2) + 1;
 
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
-
                 <div className="row">
-                    <div className="col col-sm-4 label-section" style={{ minHeight : blockHeight + blockVerticalSpacing }}>
-                        { groupingPropertyTitle && showGroupingPropertyTitles ? <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small> : null }
-                        <h4 {...h4TitleProps}><span onClick={toggleIcon && hasIdentifiableChildren ? this.toggleOpen : null}>{ toggleIcon } { group }</span></h4>
+                    <div className="col col-sm-4 label-section" style={depth === 0 && index === 0 ? { 'paddingTop' : Math.max(0, (isOpen ? 95 : 135) - rowHeight) } : null}>
+                        <div className="label-container" style={{ 'minHeight' : rowHeight }}>
+                            { groupingPropertyTitle && showGroupingPropertyTitles ?
+                                <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
+                            : null }
+                            <h4 className="text-ellipsis-container"
+                                data-tip={group && typeof group === 'string' && group.length > 20 ? group : null}
+                                onClick={toggleIcon && hasIdentifiableChildren ? this.toggleOpen : null}>
+                                { toggleIcon }{ group }
+                            </h4>
+                        </div>
                         {/* this.childLabels() */}
                     </div>
                     <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')}>

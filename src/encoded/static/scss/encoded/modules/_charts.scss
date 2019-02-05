@@ -2176,15 +2176,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
             //margin-top: -1px;
         }
 
-        &.may-collapse {
-            > .row > .label-section > h4 > span {
-                cursor: pointer;
-            }
-
-           
-
-        }
-
         &:not(.open):not(:first-child):not(.depth-0),
         &:not(.open):not(:first-child):not(.depth-0) + &:not(.open):not(:first-child):not(.depth-0) {
             > .row > .list-section > .blocks-container {
@@ -2198,29 +2189,58 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
 
-        .label-section > h4 {
-            margin-top: 0px;
-            margin-bottom: 2px;
-        }
-
-        &.no-grouping-property-titles {
-            .label-section > h4 {
-                margin-top: 13px;
+        .label-section > .label-container {
+            position: relative;
+            > h4 {
+                margin-top: 0px;
+                margin-bottom: 2px;
+                text-align: right;
+                width: 100%;
+                padding-left: 25px;
+                font-size: 1rem;
+                font-weight: 600;
             }
         }
 
-        .label-section > small {
+        &.may-collapse {
+            > .row > .label-section > .label-container {
+                > h4 {
+                    cursor: pointer;
+                    i.icon.icon-minus,
+                    i.icon.icon-plus {
+                        position: absolute;
+                        left: 0;
+                    }
+                }
+            }
+        }
+
+        &.no-grouping-property-titles {
+            .label-section {
+                > .label-container {
+                    display: flex !important;
+                    align-items: center;
+                    > h4 {
+                        /* margin-top: 13px; */
+                        margin-top: 0px;
+                        margin-bottom: 0px;
+                    }
+                }
+            }
+        }
+
+        .label-section > .label-container > small {
             color: #777;
             vertical-align: top;
         }
 
         @media screen and (min-width: $screen-md-min){
-            .label-section > small {
+            .label-section > .label-container > small {
                 color: #ddd;
                 transition: color .33s;
             }
             &:hover > .row {
-                > .label-section > small {
+                > .label-section > .label-container > small {
                     color: #333;
                 }
             }
@@ -2228,7 +2248,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
         &.depth-0 {
             margin-bottom: 0px;
-            //> .row > .label-section > h4 {
+            //> .row > .label-section > .label-container > h4 {
             //    margin-top: 3px;
             //}
 
@@ -2248,6 +2268,20 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
 
+            &:not(.open):not(.with-duplicate-headers):first-child {
+                > .row > .list-section {
+                    > .blocks-container {
+                        border-top: 1px solid transparent;
+                    }
+                }
+            }
+
+            &:not(.row-index-0) {
+                > .row > .label-section > .label-container {
+                    border-top: 1px dotted #eee;
+                }
+            }
+
             @media screen and (min-width: $screen-sm-min){
                 &.open > .row > .list-section.has-header,
                 &:first-child > .row > .list-section.has-header {
@@ -2264,7 +2298,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         height: 10px;
                     }
                 }
-                > .row > .label-section > h4 {
+                > .row > .label-section > .label-container > h4 { 
                     padding-top: 10px;
                     margin-bottom: 0;
                 }
@@ -2315,15 +2349,18 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
 
             > .row > .label-section {
-                > h4 {
-                    font-size: 1rem;
-                    i.icon.icon-fw {
-                        min-width: 20px;
+                > .label-container {
+                    > h4 {
+                        font-size: 1rem;
+                        font-weight: 400;
+                        i.icon.icon-fw {
+                            min-width: 20px;
+                        }
                     }
-                }
-                > small {
-                    display: inline-block;
-                    padding-top: 4px;
+                    > small {
+                        display: inline-block;
+                        padding-top: 4px;
+                    }
                 }
             }
 
@@ -2439,7 +2476,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
         }
-
+        
+        /* Disabled as we now align text to right
         @media screen and (min-width: $screen-sm-min){
             @for $i from 1 through 5 {
                 &.depth-#{$i} {
@@ -2449,6 +2487,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
         }
+        */
 
     }
 
