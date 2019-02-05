@@ -333,7 +333,22 @@ class VisualBody extends React.PureComponent {
             data = data[0];
         }
 
-        if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']));
+        if (isGroup){
+            aggrData = StackedBlockVisual.aggregateObjectFromList(
+                data,
+                _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']),
+                ['sub_cat_title'] // We use this property as an object key (string) so skip parsing to React JSX list;
+            );
+            // Custom parsing down into string -- remove 'Default' from list and ensure is saved as string.
+            if (Array.isArray(aggrData.sub_cat_title)){
+                aggrData.sub_cat_title = _.without(aggrData.sub_cat_title, 'Default');
+                if (aggrData.sub_cat_title.length > 1){
+                    aggrData.sub_cat_title = 'Assay Details';
+                } else {
+                    aggrData.sub_cat_title = aggrData.sub_cat_title[0];
+                }
+            }
+        }
 
         var groupingPropertyCurrent = props.groupingProperties[props.depth] || null,
             groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null,
@@ -396,12 +411,7 @@ class VisualBody extends React.PureComponent {
             );
         }
 
-        var keyValsToShow = _.pick(aggrData || data,
-            'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
-            'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
-        );
-
-        keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
+        var keyValsToShow = _.pick(aggrData || data, 'lab_name', 'category');
 
         if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
             keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
@@ -428,16 +438,10 @@ class VisualBody extends React.PureComponent {
     }
 
     render(){
-
-        var { results, keysToInclude } = this.props;
-
-        // Filter out properties from objects which we don't want to be shown in tooltip.
-        var listOfObjectsToVisualize = keysToInclude ? _.map(results, function(o){ return _.pick(o, ...keysToInclude); }) : results;
-
         return (
             <StackedBlockVisual {..._.pick(this.props, 'groupingProperties', 'columnGrouping',
                 'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder')}
-                data={listOfObjectsToVisualize}
+                data={this.props.results}
                 titleMap={TITLE_MAP}
                 columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
                 checkCollapsibility

@@ -168,7 +168,7 @@ export class StackedBlockVisual extends React.PureComponent {
         'groupValue' : function(data, groupingTitle, groupingPropertyTitle){
             return sumPropertyFromList(StackedBlockGroupedRow.flattenChildBlocks(data), 'experiments_expected_2017');
         }
-    }
+    };
 
     static minColumnWidth(props){
         return (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
@@ -246,30 +246,47 @@ export class StackedBlockVisual extends React.PureComponent {
         return out;
     }
 
-    static aggregateObjectFromList(dataList, keysToShow){
+    static aggregateObjectFromList(dataList, keysToShow, skipParsingKeys=null){
 
         if (!keysToShow) keysToShow = _.keys(dataList[0]);
 
-        var moreData = _.reduce(dataList, function(m, o){
-            for (var i = 0; i < keysToShow.length; i++){
-                if (m[keysToShow[i]] === null){
-                    m[keysToShow[i]] = new Set();
+        var moreData = _.reduce(
+            dataList,
+            function(m, o){
+                var i, currKey;
+                for (i = 0; i < keysToShow.length; i++){
+                    currKey = keysToShow[i];
+                    if (typeof o[currKey] === 'number'){
+                        if (m[currKey] === null){
+                            m[currKey] = 0;
+                        }
+                        m[currKey] += o[currKey];
+                    } else {
+                        if (m[currKey] === null){
+                            m[currKey] = new Set();
+                        }
+                        m[currKey].add(o[currKey]);
+                    }
                 }
-                m[keysToShow[i]].add(o[keysToShow[i]]);
-            }
-            return m;
-        }, _.object(_.zip(keysToShow, [].fill.call({ length : keysToShow.length }, null, 0, keysToShow.length))) );
+                return m;
+            },
+            _.object(_.zip(keysToShow, [].fill.call({ 'length' : keysToShow.length }, null, 0, keysToShow.length)))
+        );
 
         _.forEach(_.keys(moreData), function(k){
-            if (k === 'additional_comments'){
-                delete moreData[k]; // Don't show when multiple, too long.
+            if (typeof moreData[k] === 'number'){ // Already handled above
                 return;
             }
-            moreData[k] = _.filter(_.uniq(Array.from(moreData[k])), function(d){ return d; });
+            moreData[k] = _.filter(Array.from(moreData[k]));
             if (moreData[k].length === 0){
                 delete moreData[k];
             } else if (moreData[k].length > 1){
-                var remainingLength = moreData[k].length - 3;
+                if (skipParsingKeys && skipParsingKeys.indexOf(k) > -1){
+                    return;
+                }
+                var showLength = 5,
+                    remainingLength = moreData[k].length - showLength;
+
                 if (_.any(moreData[k], function(md){ return md && typeof md === 'object'; })){
                     if (!_.every(moreData[k], object.itemUtil.isAnItem)) {
                         moreData[k] = <span className="text-600">({ moreData[k].length } <span className="text-400">Objects</span>)</span>;
@@ -281,27 +298,28 @@ export class StackedBlockVisual extends React.PureComponent {
                         return;
                     }
                     var itemLinks = _.map(_.filter(moreData[k], function(md){ return md && typeof md === 'object' && md.display_title; }), object.itemUtil.generateLink);
-                    if (itemLinks && itemLinks.length > 0) remainingLength = itemLinks.length - 3;
+                    if (itemLinks && itemLinks.length > 0) remainingLength = itemLinks.length - showLength;
                     moreData[k] = (
                         <div>
                             <span className="text-600">({ itemLinks.length || moreData[k].length } <span className="text-400">Objects</span>)</span>
                             <ol>
-                                { _.map(itemLinks.slice(0,3), (v,i)=> <li key={i}>{ v }</li> ) }
+                                { _.map(itemLinks.slice(0,showLength), (v,i)=> <li key={i}>{ v }</li> ) }
                             </ol>
                             { remainingLength > 0 ? <div className="more-items-count"> and { remainingLength } more...</div> : null }
                         </div>
                     );
                     return;
                 }
+
                 moreData[k] = (
                     <div>
-                        <span className="text-600">({ moreData[k].length })</span>
                         <ol>
-                            { _.map(moreData[k].slice(0,3), (v,i)=> <li key={i}>{ v }</li> ) }
+                            { _.map(moreData[k].slice(0, showLength), (v,i)=> <li key={i}>{ v }</li> ) }
                         </ol>
                         { remainingLength > 0 ? <div className="more-items-count"> and { remainingLength } more...</div> : null }
                     </div>
                 );
+
             } else {
                 moreData[k] = moreData[k][0];
             }
