@@ -307,7 +307,7 @@ class VisualBody extends React.PureComponent {
             count = 1;
         }
         if (count > 100){
-            return <span className="small">{ count }</span>;
+            return <span style={{ 'fontSize' : '0.95rem' }}>{ count }</span>;
         }
         return <span>{ count }</span>;
     }
