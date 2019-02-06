@@ -346,33 +346,34 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             if not workflow_run_uuid:
                 continue
 
-            workflow_run_model = get_model_obj(workflow_run_uuid)
-            if not workflow_run_model:
+            workflow_run_embed = get_model_embed(workflow_run_uuid)
+            #workflow_run_model = get_model_obj(workflow_run_uuid)
+            if not workflow_run_embed:
                 continue
-            all_workflow_runs.append( (workflow_run_model, in_file_model) )
+            all_workflow_runs.append( (workflow_run_embed, in_file_model) )
 
 
 
         filtered_in_workflow_runs, filtered_out_workflow_runs = filter_workflow_runs(all_workflow_runs)
 
-        for workflow_run_model, in_file_model in filtered_in_workflow_runs:
-            sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model, in_file_model)
+        for workflow_run_embed, in_file_model in filtered_in_workflow_runs:
+            sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_embed, in_file_model)
             uuidCacheTracedHistory[in_file_model['uuid']] = sources_for_in_file
             sources = sources + sources_for_in_file
 
         ## This block of code, along with dependent functions such as `filter_workflow_runs`, will likely
         ## be removed later once we can cache this output and apply better grouping.
         untraced_in_files = []
-        for workflow_run_model, in_file_model in filtered_out_workflow_runs:
+        for workflow_run_embed, in_file_model in filtered_out_workflow_runs:
             untraced_in_files.append(in_file_model['uuid'])
             source_for_in_file = {
                 "for_file"   : in_file_model['@id'],
-                "step"       : workflow_run_model['@id'],
+                "step"       : workflow_run_embed['@id'],
                 "grouped_by" : "workflow",
-                "workflow"   : workflow_run_model.get('workflow')
+                "workflow"   : workflow_run_embed.get('workflow', {}).get('@id')
             }
             uuidCacheTracedHistory[in_file_model['uuid']] = [source_for_in_file]
-            uuidCacheGroupSourcesByRun[workflow_run_model['uuid']] = uuidCacheGroupSourcesByRun.get(workflow_run_model['uuid'], []) + [in_file_model['uuid']] #[source_for_in_file]
+            uuidCacheGroupSourcesByRun[workflow_run_embed['uuid']] = uuidCacheGroupSourcesByRun.get(workflow_run_embed['uuid'], []) + [in_file_model['uuid']] #[source_for_in_file]
             sources.append(source_for_in_file)
 
 
