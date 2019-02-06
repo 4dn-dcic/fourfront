@@ -26,7 +26,7 @@
                                 "type":"horizontal-gene-annotations",
                                 "header":"",
                                 "height":55,
-                                "server":"https://higlass.io/api/v1",
+                                "server":"https://higlass.4dnucleome.org/api/v1",
                                 "options":{
                                     "name":"Gene Annotations (mm10)",
                                     "fontSize":11,
@@ -56,7 +56,7 @@
                                 "type":"horizontal-chromosome-labels",
                                 "local":true,
                                 "height":35,
-                                "server":"https://higlass.io/api/v1",
+                                "server":"https://higlass.4dnucleome.org/api/v1",
                                 "options":{
                                     "color":"#777777",
                                     "stroke":"#FFFFFF",
@@ -177,8 +177,8 @@
                         "visible":true,
                         "chromInfoId":"mm10",
                         "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
-                        "chromInfoServer":"https://higlass.io/api/v1",
-                        "autocompleteServer":"https://higlass.io/api/v1"
+                        "chromInfoServer":"https://higlass.4dnucleome.org/api/v1",
+                        "autocompleteServer":"https://higlass.4dnucleome.org/api/v1"
                     }
                 }
             ],
@@ -210,7 +210,7 @@
                 }
             },
             "trackSourceServers":[
-                "https://higlass.io/api/v1"
+                "https://higlass.4dnucleome.org/api/v1"
             ]
         }
     },

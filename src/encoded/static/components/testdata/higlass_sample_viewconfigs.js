@@ -2,7 +2,7 @@ export const HIGLASS_WEBSITE = {
     "editable":false,
     "zoomFixed":false,
     "trackSourceServers":[
-        "https://higlass.io/api/v1"
+        "https://higlass.4dnucleome.org/api/v1"
     ],
     "exportViewUrl":"/api/v1/viewconfs",
     "views":[
@@ -14,25 +14,24 @@ export const HIGLASS_WEBSITE = {
             ],
             "autocompleteSource":"/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
             "genomePositionSearchBox":{
-                "autocompleteServer":"https://higlass.io/api/v1",
+                "autocompleteServer":"https://higlass.4dnucleome.org/api/v1",
                 "autocompleteId":"OHJakQICQD6gTD7skx4EWA",
-                "chromInfoServer":"https://higlass.io/api/v1",
-                "chromInfoId":"hg19",
+                "chromInfoServer":"https://higlass.4dnucleome.org/api/v1",
+                "chromInfoId":"GRCm38",
                 "visible":true
             },
-            "chromInfoPath":"//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
             "tracks":{
                 "top":[
                     {
                         "type":"horizontal-gene-annotations",
                         "height":60,
                         "tilesetUid":"OHJakQICQD6gTD7skx4EWA",
-                        "server":"https://higlass.io/api/v1",
+                        "server":"https://higlass.4dnucleome.org/api/v1",
                         "position":"top",
                         "uid":"OHJakQICQD6gTD7skx4EWA",
-                        "name":"Gene Annotations (hg19)",
+                        "name":"Gene Annotations (GRCm38)",
                         "options":{
-                            "name":"Gene Annotations (hg19)"
+                            "name":"Gene Annotations (GRCm38)"
                         },
                         "maxWidth":4294967296,
                         "maxZoom":22
@@ -54,12 +53,12 @@ export const HIGLASS_WEBSITE = {
                         "type":"vertical-gene-annotations",
                         "width":60,
                         "tilesetUid":"OHJakQICQD6gTD7skx4EWA",
-                        "server":"https://higlass.io/api/v1",
+                        "server":"https://higlass.4dnucleome.org/api/v1",
                         "position":"left",
-                        "name":"Gene Annotations (hg19)",
+                        "name":"Gene Annotations (GRCm38)",
                         "options":{
                             "labelPosition":"bottomRight",
-                            "name":"Gene Annotations (hg19)"
+                            "name":"Gene Annotations (GRCm38)"
                         },
                         "uid":"dqBTMH78Rn6DeSyDBoAEXw",
                         "maxWidth":4294967296,
@@ -69,7 +68,7 @@ export const HIGLASS_WEBSITE = {
                         "chromInfoPath":"//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
                         "type":"vertical-chromosome-labels",
                         "position":"left",
-                        "name":"Chromosome Labels (hg19)",
+                        "name":"Chromosome Labels (GRCm38)",
                         "width":30,
                         "uid":"RHdQK4IRQ7yJeDmKWb7Pcg",
                         "options":{
@@ -84,7 +83,7 @@ export const HIGLASS_WEBSITE = {
                         "height":200,
                         "contents":[
                             {
-                                "server":"https://higlass.io/api/v1",
+                                "server":"https://higlass.4dnucleome.org/api/v1",
                                 "tilesetUid":"CQMd6V_cRw6iCI_-Unl3PQ",
                                 "type":"heatmap",
                                 "position":"center",
