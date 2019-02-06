@@ -790,5 +790,13 @@
         "uuid": "bca12371-0380-402a-ac1f-fafe552c2cba",
         "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
         "term_url": "http://purl.obolibrary.org/obo/SO_0000001"
+    },
+    {
+        "namespace": "http://purl.obolibrary.org/obo/",
+        "term_id": "GO:0005575",
+        "term_name": "cellular_component",
+        "uuid": "e47e2bea-bc1e-4989-881c-521fc0b33529",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/GO_0005575"
     }
 ]
