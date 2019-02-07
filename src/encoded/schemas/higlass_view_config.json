@@ -98,14 +98,14 @@
                             },
                             "autocompleteSource" : {
                                 "type" : "string",
-                                "default" : "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&"
+                                "default" : ""
                             },
                             "genomePositionSearchBox" : {
                                 "type" : "object",
                                 "properties" : {
                                     "autocompleteId" : {
                                         "type" : "string",
-                                        "default" : "P0PLbQMwTYGy-5uPIQid7A"
+                                        "default" : ""
                                     },
                                     "autocompleteServer" : {
                                         "type" : "string",
@@ -113,7 +113,7 @@
                                     },
                                     "chromInfoId" : {
                                         "type" : "string",
-                                        "default" : "hg38"
+                                        "default" : ""
                                     },
                                     "chromInfoServer" : {
                                         "type" : "string",
