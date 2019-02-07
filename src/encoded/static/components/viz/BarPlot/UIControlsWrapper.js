@@ -3,9 +3,10 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as vizUtil from './../utilities';
-import { RotatedLabel, Legend } from './../components';
+import { Legend } from './../components';
 import { console, object, isServerSide, expFxn, Filters, Schemas, layout, analytics } from './../../util';
 import { Toggle } from './../../forms/components';
 import { boundActions } from './ViewContainer';
@@ -347,7 +348,7 @@ export class UIControlsWrapper extends React.PureComponent {
 
     render(){
         var { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData,
-            availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth } = this.props;
+            availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth, cursorDetailActions } = this.props;
         var { aggregateType, showState } = this.state;
 
         if (!UIControlsWrapper.canShowChart(barplot_data_unfiltered)) return null;
@@ -397,15 +398,10 @@ export class UIControlsWrapper extends React.PureComponent {
                         { this.renderShowTypeDropdown(contextualView) }
                         { this.renderGroupByFieldDropdown(contextualView) }
                         <div className="legend-container" style={{ 'height' : legendContainerHeight }}>
-                            <AggregatedLegend
-                                barplot_data_filtered={barplot_data_filtered}
-                                barplot_data_unfiltered={barplot_data_unfiltered}
+                            <AggregatedLegend {...{ cursorDetailActions, barplot_data_filtered, barplot_data_unfiltered, aggregateType, schemas }}
                                 height={legendContainerHeight}
                                 field={_.findWhere(availableFields_Subdivision, { 'field' : barplot_data_fields[1] }) || null}
-                                showType={showState}
-                                aggregateType={aggregateType}
-                                schemas={schemas}
-                            />
+                                showType={showState} />
                         </div>
                         <div className="x-axis-right-label">
                             <div className="row">
@@ -457,7 +453,7 @@ export class UIControlsWrapper extends React.PureComponent {
 
 export class AggregatedLegend extends React.Component {
 
-    static collectSubDivisionFieldTermCounts(rootField, aggregateType = 'experiment_sets'){
+    static collectSubDivisionFieldTermCounts = memoize(function(rootField, aggregateType = 'experiment_sets'){
         if (!rootField) return null;
 
         var retField = {
@@ -494,17 +490,16 @@ export class AggregatedLegend extends React.Component {
         retField.terms = _.object(_.sortBy(_.pairs(retField.terms), function(termPair){ return termPair[1][aggregateType]; }));
 
         return retField;
-    }
+    });
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.getFieldForLegend = this.getFieldForLegend.bind(this);
         this.updateIfShould = this.updateIfShould.bind(this);
         this.width = this.width.bind(this);
         this.height = this.height.bind(this);
-        this.shouldUpdate = false;
+
+        this.legendContainerRef = React.createRef();
     }
 
     componentDidMount(){
@@ -515,12 +510,31 @@ export class AggregatedLegend extends React.Component {
         this.updateIfShould();
     }
 
+    getFieldForLegend(){
+        var { field, barplot_data_unfiltered, barplot_data_filtered, aggregateType, showType } = this.props;
+        return Legend.barPlotFieldDataToLegendFieldsData(
+            AggregatedLegend.collectSubDivisionFieldTermCounts(
+                showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered || barplot_data_unfiltered,
+                aggregateType || 'experiment_sets',
+                field
+            ),
+            function(term){ return typeof term[aggregateType] === 'number' ? -term[aggregateType] : 'term'; }
+        );
+    }
+
     /**
      * Do a forceUpdate() in case we set this.shouldUpdate = true in an initial render.
      * this.shouldUpdate would be set if legend fields do not have colors yet from cache.
      */
     updateIfShould(){
-        if (this.shouldUpdate){
+        var fieldForLegend = this.getFieldForLegend(),
+            shouldUpdate = (
+                fieldForLegend &&
+                fieldForLegend.terms && fieldForLegend.terms.length > 0 &&
+                fieldForLegend.terms[0] && fieldForLegend.terms[0].color === null
+            );
+
+        if (shouldUpdate){
             setTimeout(()=>{
                 this.forceUpdate();
             }, 750);
@@ -528,53 +542,35 @@ export class AggregatedLegend extends React.Component {
     }
 
     width(){
-        if (this.refs && this.refs.container && this.refs.container.offsetWidth){
-            return this.refs.container.offsetWidth;
-        }
-        return layout.gridContainerWidth() * (3/12) - 15;
+        if (this.props.width) return this.props.width;
+        var elem = this.legendContainerRef.current,
+            width = elem && elem.offsetWidth;
+
+        return width || layout.gridContainerWidth(this.props.windowWidth) * (3/12) - 15;
     }
 
     height(){
         if (this.props.height) return this.props.height;
-        if (this.refs && this.refs.container && this.refs.container.offsetHeight){
-            return this.refs.container.offsetHeight;
-        }
-        return null;
+        var elem = this.legendContainerRef.current,
+            height = elem && elem.offsetHeight;
+
+        return height || null;
     }
 
     render(){
-        var { field, barplot_data_unfiltered, barplot_data_filtered, isLoadingChartData, aggregateType, showType } = this.props;
+        var { field, barplot_data_unfiltered, isLoadingChartData, aggregateType, href, cursorDetailActions } = this.props;
         if (!field || !barplot_data_unfiltered || isLoadingChartData || (barplot_data_unfiltered.total && barplot_data_unfiltered.total.experiment_sets === 0)) return null;
 
-        var fieldForLegend = Legend.barPlotFieldDataToLegendFieldsData(
-            AggregatedLegend.collectSubDivisionFieldTermCounts(
-                showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered || barplot_data_unfiltered,
-                aggregateType || 'experiment_sets',
-                field
-            ),
-            (term) => typeof term[aggregateType] === 'number' ? -term[aggregateType] : 'term'
-        );
-
-        this.shouldUpdate = false;
-        if (fieldForLegend &&
-            fieldForLegend.terms && fieldForLegend.terms.length > 0 &&
-            fieldForLegend.terms[0] && fieldForLegend.terms[0].color === null){
-            this.shouldUpdate = true;
-        }
+        var fieldForLegend = this.getFieldForLegend();
 
         return (
-            <div className="legend-container-inner" ref="container">
-                <Legend
-                    field={fieldForLegend || null}
-                    includeFieldTitles={false}
-                    schemas={this.props.schemas}
-                    width={this.width()}
-                    height={this.height()}
-                    hasPopover
+            <div className="legend-container-inner" ref={this.legendContainerRef}>
+                <Legend {...{ href, aggregateType, cursorDetailActions }} field={this.getFieldForLegend() || null}
+                    includeFieldTitles={false} schemas={this.props.schemas}
+                    width={this.width()} height={this.height()} hasPopover
                     //expandable
                     //expandableAfter={8}
-                    cursorDetailActions={boundActions(this, showType)}
-                    aggregateType={aggregateType}
+                    //cursorDetailActions={boundActions(this, showType)}
                 />
             </div>
         );

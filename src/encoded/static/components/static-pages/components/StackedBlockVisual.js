@@ -71,7 +71,7 @@ export function sumPropertyFromList(objList, property){
 
 
 
-export class StackedBlockVisual extends React.Component {
+export class StackedBlockVisual extends React.PureComponent {
 
     static defaultProps = {
         'groupingProperties' : ['grant_type', 'center_name',  'lab_name'],
@@ -312,9 +312,6 @@ export class StackedBlockVisual extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        //this.toggleGroupingOpen = this.toggleGroupingOpen.bind(this);
         this.renderContents = this.renderContents.bind(this);
 
         var state = {
@@ -359,15 +356,14 @@ export class StackedBlockVisual extends React.Component {
     }
 
     render(){
-        
         return (
-            <div className={"stacked-block-viz-container" + (this.props.duplicateHeaders ? ' with-duplicated-headers' : '')} ref="container">
-                { this.renderContents(this.refs && this.refs.container && this.refs.container.offsetWidth) }
+            <div className={"stacked-block-viz-container" + (this.props.duplicateHeaders ? ' with-duplicated-headers' : '')}>
+                { this.renderContents() }
             </div>
         );
     }
 
-    renderContents(width){
+    renderContents(){
         if (!this.state || !this.state.mounted) return null;
         var { data, titleMap, groupingProperties, columnGrouping } = this.props;
 
@@ -390,7 +386,7 @@ export class StackedBlockVisual extends React.Component {
             var leftAxisKeys = _.keys(nestedData);
             leftAxisKeys.sort();
             return _.map(leftAxisKeys, (k, idx)=>{
-                return <StackedBlockGroupedRow {...this.props} groupedDataIndices={columnGroups} parentState={this.state} data={nestedData[k]} key={k} group={k} width={width} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} />;
+                return <StackedBlockGroupedRow {...this.props} groupedDataIndices={columnGroups} parentState={this.state} data={nestedData[k]} key={k} group={k} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} />;
             });
         } else {
             // TODO: Render ... plain blocks w/o left column?
@@ -400,7 +396,7 @@ export class StackedBlockVisual extends React.Component {
 
 }
 
-export class StackedBlockGroupedRow extends React.Component {
+export class StackedBlockGroupedRow extends React.PureComponent {
 
     static flattenChildBlocks(groups){
         if (Array.isArray(groups)) return groups;
@@ -427,7 +423,7 @@ export class StackedBlockGroupedRow extends React.Component {
         return orderedList.concat( _.keys(o)); // Incl remaining keys.
     }
 
-    static collapsedChildBlocks(data, props, widthAvailable){
+    static collapsedChildBlocks(data, props){
 
         var allChildBlocksPerChildGroup = null;
         var allChildBlocks = null;
@@ -588,8 +584,8 @@ export class StackedBlockGroupedRow extends React.Component {
         this.state = { 'open' : initOpen };
     }
 
-    childBlocksCollapsed(widthAvailable = null){
-        return StackedBlockGroupedRow.collapsedChildBlocks(this.props.data, this.props, widthAvailable);
+    childBlocksCollapsed(){
+        return StackedBlockGroupedRow.collapsedChildBlocks(this.props.data, this.props);
     }
 
     toggleOpen(){
@@ -623,15 +619,6 @@ export class StackedBlockGroupedRow extends React.Component {
             totalCount = groupValue(data, group, groupingPropertyTitle);
         }
 
-        var widthAvailable = this.props.widthAvailable;
-        if (!widthAvailable) {
-            widthAvailable = (this.refs.listSection && this.refs.listSection.offsetWidth) || null;
-            if (typeof widthAvailable === 'number' && !isNaN(widthAvailable) && widthAvailable) {
-                widthAvailable -= 20;
-            }
-        }
-
-
         var header = null;
         if (depth === 0 && groupedDataIndices && ((isOpen && duplicateHeaders) || index === 0)){
             var minColumnWidth = StackedBlockVisual.minColumnWidth(this.props);
@@ -661,7 +648,7 @@ export class StackedBlockGroupedRow extends React.Component {
             'data-tip' : group && typeof group === 'string' && group.length > 20 ? group : null
         };
 
-        var childBlocks = !isOpen ? this.childBlocksCollapsed(widthAvailable) : null;
+        var childBlocks = !isOpen ? this.childBlocksCollapsed() : null;
 
         var maxBlocksInRow = Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count'));
 
@@ -674,7 +661,7 @@ export class StackedBlockGroupedRow extends React.Component {
                         <h4 {...h4TitleProps}><span onClick={toggleIcon && hasIdentifiableChildren ? this.toggleOpen : null}>{ toggleIcon } { group }</span></h4>
                         {/* this.childLabels() */}
                     </div>
-                    <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')} ref="listSection">
+                    <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')}>
                         { header }
                         { childBlocks }
                     </div>
@@ -686,7 +673,7 @@ export class StackedBlockGroupedRow extends React.Component {
 
                 <div className="child-blocks">
                     { isOpen && childRowsKeys && _.map(childRowsKeys, (k)=>
-                        <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} widthAvailable={widthAvailable} />
+                        <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} />
                     ) }
                 </div>
                 
@@ -697,7 +684,7 @@ export class StackedBlockGroupedRow extends React.Component {
 }
 
 
-export class StackedBlock extends React.Component {
+export class StackedBlock extends React.PureComponent {
 
     componentDidMount(){
         ReactTooltip.rebuild();
@@ -730,37 +717,31 @@ export class StackedBlock extends React.Component {
 
         var className = "stacked-block";
         if (typeof blockClassName === 'function'){
-            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments.slice(0));
+            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments);
         } else if (typeof blockClassName === 'string'){
             className += ' ' + blockClassName;
         }
 
         var contents = ( <span>&nbsp;</span> );
         if (typeof blockRenderedContents === 'function'){
-            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments.slice(0));
+            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments);
         }
 
         var tip = null;
         if (typeof blockTooltipContents === 'function'){
-            tip = blockTooltipContents.apply(blockTooltipContents, blockFxnArguments.slice(0));
+            tip = blockTooltipContents.apply(blockTooltipContents, blockFxnArguments);
         }
 
         var popover = null;
         if (typeof blockPopover === 'function'){
-            popover = blockPopover.apply(blockPopover, blockFxnArguments.slice(0));
+            popover = blockPopover.apply(blockPopover, blockFxnArguments);
         }
 
-        var blockElem = <div className={className} style={style} data-tip={tip} tabIndex={1} data-place="bottom" data-html onKeyUp={(e)=>{
-            if (e.keyCode === 13 && this.refs && this.refs.trigger){
-                console.log(this.refs.trigger, e.target);
-                e.target.dispatchEvent(new MouseEvent('click'), { view : window, bubbles : true });
-                this.refs.trigger.handleToggle();
-            }
-        }} >{ contents }</div>;
+        var blockElem = <div className={className} style={style} data-tip={tip} tabIndex={1} data-place="bottom" data-html>{ contents }</div>;
 
         if (popover){
             return (
-                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} children={blockElem} rootClose ref="trigger" />
+                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} children={blockElem} rootClose />
             );
         }
 

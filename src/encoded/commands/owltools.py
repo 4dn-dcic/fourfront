@@ -15,6 +15,7 @@ OnProperty = OWLNS["onProperty"]
 subClassOf = RDFS.subClassOf
 SomeValuesFrom = OWLNS["someValuesFrom"]
 IntersectionOf = OWLNS["intersectionOf"]
+Deprecated = OWLNS["deprecated"]
 
 DEFAULT_LANGUAGE = "en"
 

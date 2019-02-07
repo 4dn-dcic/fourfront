@@ -138,13 +138,11 @@ export class JointAnalysisMatrix extends React.PureComponent {
         'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
         'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
         'self_planned_results_url'  : null
-    }
+    };
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.loadSearchQueryResults = this.loadSearchQueryResults.bind(this);
-        this.toggleHiGlassView = _.throttle(this.toggleHiGlassView.bind(this), 1000);
         this.state = {
             'mounted'               : false,
             'self_planned_results'  : null,
@@ -157,27 +155,12 @@ export class JointAnalysisMatrix extends React.PureComponent {
     componentDidMount(){
         this.setState({ 'mounted' : true });
         this.loadSearchQueryResults();
-        setTimeout(()=>{
-            if (typeof window !== 'undefined' && window && window.fourfront){
-                window.fourfront.toggleHiGlassView = this.toggleHiGlassView;
-            }
-        }, 150);
     }
 
     componentDidUpdate(pastProps){
         if (this.props.session !== pastProps.session){
             this.loadSearchQueryResults();
         }
-    }
-
-    componentWillUnmount(){
-        if (typeof window !== 'undefined' && window && window.fourfront && window.fourfront.toggleHiGlassView){
-            delete window.fourfront.toggleHiGlassView;
-        }
-    }
-
-    toggleHiGlassView(visible = !this.state.higlassVisible){
-        this.setState({ 'higlassVisible' : visible });
     }
 
     loadSearchQueryResults(){
@@ -280,7 +263,6 @@ export class JointAnalysisMatrix extends React.PureComponent {
                             self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
-                            collapseToMatrix
                         />
                     </div>
                 </div>
@@ -291,181 +273,174 @@ export class JointAnalysisMatrix extends React.PureComponent {
 }
 
 
-class VisualBody extends React.Component {
+class VisualBody extends React.PureComponent {
+
+    static groupValue(data, groupingTitle, groupingPropertyTitle){
+        return StackedBlockVisual.Row.flattenChildBlocks(data).length;
+    }
+
+    static blockClassName(data, groupingTitle, groupingPropertyTitle, props, parentGrouping){
+        var origClassName = StackedBlockVisual.defaultProps.blockClassName(data),
+            submissionState = null;
+
+        if (Array.isArray(data)){
+            if      (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
+            else if (_.any(data, { 'state' : 'Internal Release' })) submissionState = 'Internal Release';
+            else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
+            else if (_.any(data, { 'state' : 'Planned'          })) submissionState = 'Planned';
+            else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
+            else if (_.any(data, { 'state' : 'Deleted'          })) submissionState = 'Deleted';
+            else if (_.any(data, { 'state' : 'None'             })) submissionState = 'None';
+        } else {
+            submissionState = data.state;
+        }
+
+        var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
+        return origClassName + ' ' + submissionStateClassName + ' hoverable';
+    }
+
+    static blockRenderedContents(data, title, groupingPropertyTitle, blockProps){
+        if (Array.isArray(data)) {
+            return data.length;
+        } else if (data) {
+            return 1;
+        }
+        return 0; // Shouldnt happen?
+    }
+
+    constructor(props){
+        super(props);
+        // Requires non-static `this.props.encode_results_url` & `this.props.self_results_url`.
+        this.blockPopover = this.blockPopover.bind(this);
+    }
+
+    /**
+     * @param {*} data An ExperimentSet or list of ExperimentSet, represented by a block/tile.
+     * @param {*} groupingTitle Title of current group.
+     * @param {*} groupingPropertyTitle Title of property which sets are grouped.
+     * @param {Object} props Props passed in from the StackedBlockVisual Component instance.
+     */
+    blockPopover(data, groupingTitle, groupingPropertyTitle, props){
+        var { self_results_url, encode_results_url } = this.props,
+            isGroup = (Array.isArray(data) && data.length > 1) || false,
+            aggrData;
+
+        if (!isGroup && Array.isArray(data) && data.length > 0) {
+            data = data[0];
+        }
+
+        if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']));
+
+        var groupingPropertyCurrent = props.groupingProperties[props.depth] || null,
+            groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null,
+            groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
+
+        var yAxisGrouping = props.columnGrouping || null,
+            yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null,
+            yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null,
+            popoverTitle = (
+                <div className="clearfix matrix-popover-title">
+                    <div className="x-axis-title pull-left">
+                        <div className="text-300">{groupingPropertyCurrentTitle}</div>
+                        <div className="text-400">{groupingPropertyCurrentValue}</div>
+                    </div>
+                    <div className="mid-icon pull-left">
+                        <i className="icon icon-times"/>
+                    </div>
+                    <div className="y-axis-title pull-left">
+                        <div className="text-300">{yAxisGroupingTitle}</div>
+                        <div className="text-400">{yAxisGroupingValue}</div>
+                    </div>
+                </div>
+            );
+
+        var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
+
+        currentFilteringProperties.push(props.columnGrouping);
+
+        var data_source = (aggrData || data).data_source;
+        var initialHref = data_source === 'ENCODE' ? encode_results_url : self_results_url;
+        var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
+
+        var currentFilteringPropertiesVals = _.object(
+            _.map(currentFilteringProperties, function(property){
+                var facetField = GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], facetTerm = (aggrData || data)[property];
+                if (property === 'cell_type' && data_source === '4DN') facetTerm = reversed_cell_type_map[facetTerm] || facetTerm;
+                return [ facetField, facetTerm ];
+            })
+        );
+
+        function makeSearchButton(){
+            var hrefParts = url.parse(initialHref, true);
+            var hrefQuery = _.clone(hrefParts.query);
+            delete hrefQuery.limit;
+            delete hrefQuery.field;
+            _.extend(hrefQuery, currentFilteringPropertiesVals);
+            hrefParts.search = '?' + queryString.stringify(hrefQuery);
+            var linkHref = url.format(hrefParts);
+
+            return (
+                <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+            );
+        }
+
+        function makeSingleItemButton(){
+            var path = object.itemUtil.atId(data);
+            if (data.data_source === 'ENCODE') path = 'https://encodeproject.org' + path;
+            return (
+                <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+            );
+        }
+
+        var keyValsToShow = _.pick(aggrData || data,
+            'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
+            'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
+        );
+
+        keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
+
+        if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
+            keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
+        }
+
+        return (
+            <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
+                { isGroup ?
+                    <div className="inner">
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
+                        <hr className="mt-0 mb-1"/>
+                        { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
+                        { makeSearchButton() }
+                    </div>
+                    :
+                    <div className="inner">
+                        { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
+                        { makeSingleItemButton() }
+                    </div>
+                }
+            </Popover>
+        );
+
+    }
+
     render(){
 
-        var { groupingProperties, columnGrouping, columnSubGrouping, results, keysToInclude, defaultDepthsOpen, duplicateHeaders, headerColumnsOrder } = this.props;
+        var { results, keysToInclude } = this.props;
 
         // Filter out properties from objects which we don't want to be shown in tooltip.
-        //var keysToInclude = [
-        //    'grant_type','center_name', 'lab_name',
-        //    'experiment_category', 'experiment_type', 'data_type',
-        //    'reference_publication', 'experiments_expected_2017', 'experiments_expected_2020', 'additional_comments', 'in_production_stage_standardized_protocol',
-        //];
-
         var listOfObjectsToVisualize = keysToInclude ? _.map(results, function(o){ return _.pick(o, ...keysToInclude); }) : results;
 
         return (
-            <StackedBlockVisual
+            <StackedBlockVisual {..._.pick(this.props, 'groupingProperties', 'columnGrouping',
+                'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder')}
                 data={listOfObjectsToVisualize}
                 titleMap={TITLE_MAP}
-                groupingProperties={groupingProperties}
-                columnGrouping={columnGrouping}
                 columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
-                columnSubGrouping={columnSubGrouping}
-                defaultDepthsOpen={defaultDepthsOpen}
-                duplicateHeaders={duplicateHeaders}
-                headerColumnsOrder={headerColumnsOrder}
                 checkCollapsibility
-                groupValue={(data, groupingTitle, groupingPropertyTitle)=>{
-                    return StackedBlockVisual.Row.flattenChildBlocks(data).length;
-                }}
-                blockPopover={(data, groupingTitle, groupingPropertyTitle, props)=>{
-
-                    var isGroup = (Array.isArray(data) && data.length > 1) || false;
-                    if (!isGroup && Array.isArray(data) && data.length > 0) {
-                        data = data[0];
-                    }
-
-                    var aggrData;
-                    if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']));
-
-                    var groupingPropertyCurrent = props.groupingProperties[props.depth] || null;
-                    var groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null;
-                    var groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
-
-                    //console.log('TTT', groupingPropertyCurrent, aggrData, groupingPropertyCurrentTitle, groupingPropertyCurrentValue);
-
-                    var yAxisGrouping = props.columnGrouping || null;
-                    var yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null;
-                    var yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null;
-
-                    var popoverTitle = (
-                        <div className="clearfix matrix-popover-title">
-                            <div className="x-axis-title pull-left">
-                                <div className="text-300">{groupingPropertyCurrentTitle}</div>
-                                <div className="text-400">{groupingPropertyCurrentValue}</div>
-                            </div>
-                            <div className="mid-icon pull-left">
-                                <i className="icon icon-times"/>
-                            </div>
-                            <div className="y-axis-title pull-left">
-                                <div className="text-300">{yAxisGroupingTitle}</div>
-                                <div className="text-400">{yAxisGroupingValue}</div>
-                            </div>
-                        </div>
-                    );
-
-                    var currentFilteringProperties = props.groupingProperties.slice(0, props.depth + 1); // TODO use to generate search link
-                    currentFilteringProperties.push(props.columnGrouping);
-
-                    var data_source = (aggrData || data).data_source;
-                    var initialHref = data_source === 'ENCODE' ? this.props.encode_results_url : this.props.self_results_url;
-                    var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
-
-                    var currentFilteringPropertiesVals = _.object(
-                        _.map(currentFilteringProperties, function(property){
-                            var facetField = GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], facetTerm = (aggrData || data)[property];
-                            if (property === 'cell_type' && data_source === '4DN') facetTerm = reversed_cell_type_map[facetTerm] || facetTerm;
-                            return [ facetField, facetTerm ];
-                        })
-                    );
-
-                    function makeSearchButton(){
-                        var hrefParts = url.parse(initialHref, true);
-                        var hrefQuery = _.clone(hrefParts.query);
-                        delete hrefQuery.limit;
-                        delete hrefQuery.field;
-                        _.extend(hrefQuery, currentFilteringPropertiesVals);
-                        hrefParts.search = '?' + queryString.stringify(hrefQuery);
-                        var linkHref = url.format(hrefParts);
-
-                        return (
-                            <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
-                        );
-                    }
-
-                    function makeSingleItemButton(){
-                        var path = object.itemUtil.atId(data);
-                        if (data.data_source === 'ENCODE') path = 'https://encodeproject.org' + path;
-                        return (
-                            <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
-                        );
-                    }
-
-                    var keyValsToShow = _.pick(aggrData || data,
-                        'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
-                        'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
-                    );
-
-                    keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
-
-                    if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
-                        keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
-                    }
-
-                    return (
-                        <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
-                            { isGroup ?
-                                <div className="inner">
-                                    <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
-                                    <hr className="mt-0 mb-1"/>
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
-                                    { makeSearchButton() }
-                                </div>
-                                :
-                                <div className="inner">
-                                    { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, props) }
-                                    { makeSingleItemButton() }
-                                </div>
-                            }
-                        </Popover>
-                    );
-                }}
-                blockClassName={(data) => {
-                    var origClassName = StackedBlockVisual.defaultProps.blockClassName(data);
-                    // TODO: Add classname for submission-state.
-
-                    var submissionState = null;
-
-                    if (Array.isArray(data)){
-                        if      (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
-                        else if (_.any(data, { 'state' : 'Internal Release' })) submissionState = 'Internal Release';
-                        else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
-                        else if (_.any(data, { 'state' : 'Planned'          })) submissionState = 'Planned';
-                        else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
-                        else if (_.any(data, { 'state' : 'Deleted'          })) submissionState = 'Deleted';
-                        else if (_.any(data, { 'state' : 'None'             })) submissionState = 'None';
-                    } else {
-                        submissionState = data.state;
-                    }
-
-                    var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
-
-                    return origClassName + ' ' + submissionStateClassName + ' hoverable';
-                }}
-                blockRenderedContents={(data, title, groupingPropertyTitle, blockProps)=>{
-                    var defaultOutput = <span>&nbsp;</span>;
-                    var experimentsCountExpected = 0;
-
-                    function getCount(num){
-                        try {
-                            var n = parseInt(num);
-                            if (isNaN(n)) return 0;
-                            return n;
-                        } catch (e){
-                            return 0;
-                        }
-                    }
-
-                    if (Array.isArray(data)) {
-                        return data.length;
-                    } else if (data) {
-                        return 1;
-                    }
-
-                    return experimentsCountExpected || defaultOutput;
-                }}
+                groupValue={VisualBody.groupValue}
+                blockPopover={this.blockPopover}
+                blockClassName={VisualBody.blockClassName}
+                blockRenderedContents={VisualBody.blockRenderedContents}
                 blockTooltipContents={null}
             />
         );

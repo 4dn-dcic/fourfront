@@ -66,19 +66,20 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
         }
 	}
 	&.cellType-internal-release {
-		background-color: rgb(190, 190, 190) !important;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#53a74e; stroke: none;"/></svg>');
-        background-size: 108%;
-        background-repeat: no-repeat;
+        background-color: #b3d4b1 !important;
+        //background-color: rgb(190, 190, 190) !important;
+        //background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#53a74e; stroke: none;"/></svg>');
+        //background-size: 108%;
+        //background-repeat: no-repeat;
         &.hoverable:hover {
-            background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
+            background-color: darken($color: #b3d4b1, $amount: 10) !important;
         }
     }
     &.cellType-in-submission {
 		background-color: rgb(190, 190, 190) !important;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#d5d813; stroke: none;"/></svg>');
-        background-size: 108%;
-        background-repeat: no-repeat;
+        //background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#d5d813; stroke: none;"/></svg>');
+        //background-size: 108%;
+        //background-repeat: no-repeat;
         &.hoverable:hover {
             background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
         }
