@@ -10,10 +10,7 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-from .base import (
-    Item,
-    paths_filtered_by_status
-)
+from .base import Item
 from snovault import (
     CONNECTION,
     calculated_property,
