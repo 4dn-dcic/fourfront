@@ -1542,3 +1542,105 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
         center_track_contents = view["tracks"]["center"][0]["contents"]
         chromosome_grid_contents = [cont for cont in center_track_contents if cont["type"] == "2d-chromosome-grid" ]
         assert_true(len(chromosome_grid_contents) == 1)
+
+def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig_file_json, mcool_file_json):
+    genome_assembly = "GRCm38"
+
+    # Save the mcool file and add a higlass_uid.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = genome_assembly
+    mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+
+    # Add the chromsizes file.
+    chromsizes_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    chromsizes_file_json['md5sum'] = '00000000000000000000000000000001'
+    chromsizes_file_json['genome_assembly'] = genome_assembly
+    chrom_file = testapp.post_json('/file_reference', chromsizes_file_json).json['@graph'][0]
+
+    # Get a bedGraph file to add.
+    bigwig_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bigwig_file_json['md5sum'] = '00000000000000000000000000000001'
+    bigwig_file_json['genome_assembly'] = genome_assembly
+    bigwig_file = testapp.post_json('/file_processed', bigwig_file_json).json['@graph'][0]
+
+    # Post the chromsizes file.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : genome_assembly,
+        'files': [
+            "{uuid}".format(uuid=chrom_file['uuid']),
+        ]
+    })
+
+    # Check the left and top sides to make sure there are tracks.
+    full_higlass_json = response.json["new_viewconfig"]
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+    assert_true(len(full_higlass_json["views"]) == 1)
+
+    # The chromsizes should have been added to the left and top sides.
+    assert_true(len(higlass_json["viewconfig"]["views"][0]["tracks"]["left"]) + 1 == len(full_higlass_json["views"][0]["tracks"]["left"]), "left side mismatch")
+
+    assert_true(len(higlass_json["viewconfig"]["views"][0]["tracks"]["top"]) + 1 == len(full_higlass_json["views"][0]["tracks"]["top"]), "top side mismatch")
+
+    assert_true(full_higlass_json["views"][0]["tracks"]["top"][0]["type"], "horizontal-chromosome-labels")
+
+    # Remove the mcool from the central contents.
+    full_higlass_json["views"][0]["tracks"]["center"] = []
+
+    # Add another 1D file. Tell the view to clean up the view.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': full_higlass_json,
+        'genome_assembly' : genome_assembly,
+        'files': [
+            "{uuid}".format(uuid=bigwig_file['uuid']),
+        ],
+        'remove_unneeded_tracks': True,
+    })
+
+    all_1d_higlass_json = response.json["new_viewconfig"]
+
+    # Make sure there are no left tracks.
+    assert_true(len(all_1d_higlass_json["views"][0]["tracks"]["left"]) == 0, "Left tracks found")
+
+    # Add a 2D file. Tell the view to clean up the view.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': all_1d_higlass_json,
+        'genome_assembly' : genome_assembly,
+        'files': [
+            "{uuid}".format(uuid=mcool_file['uuid']),
+        ],
+        'remove_unneeded_tracks': True,
+    })
+
+    # Make sure the left chromsize tracks have been added.
+    restored_2d_track_higlass_json = response.json["new_viewconfig"]
+
+    found_left_chromsizes = any([t for t in restored_2d_track_higlass_json["views"][0]["tracks"]["left"] if t["type"] == "vertical-chromosome-labels"])
+    assert_true(found_left_chromsizes, "Could not find left chromsizes track")
+
+    # Make sure the top tracks have horizontal types and the left side have vertical types
+    types_to_find = {
+        "horizontal-gene-annotations": 0,
+        "horizontal-chromosome-labels": 0,
+        "vertical-gene-annotations" : 0,
+        "vertical-chromosome-labels" : 0,
+    }
+
+    for track in restored_2d_track_higlass_json["views"][0]["tracks"]["top"]:
+        if track["type"] in types_to_find:
+            types_to_find[ track["type"] ] += 1
+
+    assert_true(types_to_find["horizontal-gene-annotations"] > 0)
+    assert_true(types_to_find["horizontal-chromosome-labels"] > 0)
+
+    for track in restored_2d_track_higlass_json["views"][0]["tracks"]["left"]:
+        if track["type"] in types_to_find:
+            types_to_find[ track["type"] ] += 1
+
+    assert_true(types_to_find["vertical-gene-annotations"] > 0)
+    assert_true(types_to_find["vertical-chromosome-labels"] > 0)
