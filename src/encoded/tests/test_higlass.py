@@ -16,7 +16,7 @@ def higlass_mcool_viewconf(testapp):
     """
     viewconf = {
         "title" : "Test MCOOL Display",
-        "description" : "An MCOOL file track plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
+        "description" : "An MCOOL file track plus annotations for gene GRCm38 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
         "uuid" : "00000000-1111-0000-1111-000000000002",
         "name" : "higlass-mcool-test-view",
         "genome_assembly" : "GRCm38",
@@ -68,13 +68,13 @@ def higlass_mcool_viewconf(testapp):
                         "autocompleteServer":"https://higlass.io/api/v1",
                         "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
                         "chromInfoServer":"https://higlass.io/api/v1",
-                        "chromInfoId":"mm10",
+                        "chromInfoId":"GRCm38",
                         "visible":True
                     },
                     "tracks":{
                         "top":[
                             {
-                                "name":"Gene Annotations (mm10)",
+                                "name":"Gene Annotations (GRCm38)",
                                 "server":"https://higlass.io/api/v1",
                                 "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
                                 "type":"horizontal-gene-annotations",
@@ -84,9 +84,9 @@ def higlass_mcool_viewconf(testapp):
                                     "plusStrandColor":"black",
                                     "minusStrandColor":"black",
                                     "trackBorderWidth":0,
-                                    "coordSystem":"mm10",
+                                    "coordSystem":"GRCm38",
                                     "trackBorderColor":"black",
-                                    "name":"Gene Annotations (mm10)",
+                                    "name":"Gene Annotations (GRCm38)",
                                     "showMousePosition":False,
                                     "mousePositionColor":"#999999"
                                 },
@@ -106,7 +106,7 @@ def higlass_mcool_viewconf(testapp):
                                 "minHeight":30,
                                 "thumbnail":None,
                                 "options":{
-                                    "coordSystem":"mm10",
+                                    "coordSystem":"GRCm38",
                                     "showMousePosition":False,
                                     "mousePositionColor":"#999999"
                                 },
@@ -130,8 +130,8 @@ def higlass_mcool_viewconf(testapp):
                                     "minusStrandColor":"black",
                                     "trackBorderWidth":0,
                                     "trackBorderColor":"black",
-                                    "coordSystem":"mm10",
-                                    "name":"Gene Annotations (mm10)",
+                                    "coordSystem":"GRCm38",
+                                    "name":"Gene Annotations (GRCm38)",
                                     "showMousePosition":False,
                                     "mousePositionColor":"#999999"
                                 },
@@ -1589,6 +1589,11 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig
 
     assert_true(full_higlass_json["views"][0]["tracks"]["top"][0]["type"], "horizontal-chromosome-labels")
 
+    # Add a height to the chromosome labels.
+    for t in full_higlass_json["views"][0]["tracks"]["top"]:
+        if t["type"] == "horizontal-chromosome-labels":
+            t['height'] = 50
+
     # Remove the mcool from the central contents.
     full_higlass_json["views"][0]["tracks"]["center"] = []
 
@@ -1606,6 +1611,9 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig
 
     # Make sure there are no left tracks.
     assert_true(len(all_1d_higlass_json["views"][0]["tracks"]["left"]) == 0, "Left tracks found")
+
+    top_chromsizes_tracks =[t for t in all_1d_higlass_json["views"][0]["tracks"]["top"] if t["type"] == "horizontal-chromosome-labels"]
+    assert_true(top_chromsizes_tracks[0]["height"] == 50, "Top chromsize track lost its height")
 
     # Add a 2D file. Tell the view to clean up the view.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -1644,3 +1652,12 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig
 
     assert_true(types_to_find["vertical-gene-annotations"] > 0)
     assert_true(types_to_find["vertical-chromosome-labels"] > 0)
+
+    # The chromsizes had a height when it was horizontal. Make sure it has a width when vertical.
+    top_chromsizes_tracks =[t for t in restored_2d_track_higlass_json["views"][0]["tracks"]["top"] if t["type"] == "horizontal-chromosome-labels"]
+
+    assert_true(top_chromsizes_tracks[0]["height"] == 50, "Top chromsize track lost its height")
+
+    left_chromsizes_tracks = [t for t in restored_2d_track_higlass_json["views"][0]["tracks"]["left"] if t["type"] == "vertical-chromosome-labels"]
+    assert_true(left_chromsizes_tracks[0]["width"] == 50, "Left chromsize track has no width")
+    assert_true("height" not in left_chromsizes_tracks[0], "Left chromsize track still has a height")

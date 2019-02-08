@@ -493,7 +493,7 @@ def add_files_to_higlass_viewconf(request):
         new_file_dict = datum["item"]
 
         # Try to add the new file to the given viewconf.
-        new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict)
+        new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict, current_genome_assembly)
 
         if errors:
             return {
@@ -601,11 +601,12 @@ def check_files_for_higlass(files_info, current_genome_assembly):
         "current_genome_assembly" : current_genome_assembly,
     }
 
-def add_single_file_to_higlass_viewconf(views, new_file):
+def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
     """ Add a single file to the list of views.
     Args:
-        views(list)     : All of the views from the view config.
-        new_file(dict)  : The file to add.
+        views(list)         : All of the views from the view config.
+        new_file(dict)      : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -621,14 +622,27 @@ def add_single_file_to_higlass_viewconf(views, new_file):
 
     # If no views exist, create one now
     if len(views) == 0:
+        # Based on the genome assembly type, we can give defaults for the initialXDomain and initialYDomain.
+        # The initialXDomain shows the range of data points which will be shown in the display. 0 would be the start of chr1, for example.
+        # initialYDomain is used to calculate the center of the 2D data.
+
+        domain_size_by_genome_assembly = {
+            "GRCm38": 2725521370,
+            "GRCh38": 3088269832,
+            "dm6": 137547960,
+            "galGal5": 1022704034
+        }
+
+        domain_size = domain_size_by_genome_assembly.get(genome_assembly, 2000000000)
+
         base_view = {
-            "initialYDomain": [
-                -10000,
-                10000
-            ],
             "initialXDomain": [
-                -10000,
-                10000
+                domain_size * -1 / 4,
+                domain_size * 5 / 4
+            ],
+            "initialYDomain": [
+                domain_size * -1 / 4,
+                domain_size * 5 / 4
             ],
             "tracks": {
                 "right": [ ],
@@ -674,6 +688,8 @@ def add_single_file_to_higlass_viewconf(views, new_file):
     ):
         # Some formats need a new 2D view added.
         new_view, error = create_2d_view(new_file)
+        print("A")
+        print(new_view["initialXDomain"])
         if error:
             return None, errors
         new_view = copy_top_reference_tracks_into_left(new_view, views)
@@ -803,14 +819,23 @@ def create_2d_view(new_file):
         a string containing an error message, if any (may be None)
     """
     # Create default view options.
+    domain_size_by_genome_assembly = {
+        "GRCm38": 2725521370,
+        "GRCh38": 3088269832,
+        "dm6": 137547960,
+        "galGal5": 1022704034
+    }
+
+    domain_size = domain_size_by_genome_assembly.get(new_file["genome_assembly"], 2000000000)
+
     new_view = {
-        "initialYDomain": [
-            -10000,
-            10000
-        ],
         "initialXDomain": [
-            -10000,
-            10000
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ],
+        "initialYDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
         ],
         "tracks": {
             "right": [ ],
@@ -913,9 +938,15 @@ def add_view_to_views(new_view, views):
     ) :
         views[0]["tracks"]["center"] = new_view["tracks"]["center"]
 
-        # Copy any left side tracks from this view, as well.
+        # Copy any left side reference tracks from this view, if the left track doesn't exist.
         for track in reversed(new_view["tracks"]["left"]):
-            views[0]["tracks"]["left"].insert(0, track)
+            if any([t for t in views[0]["tracks"]["left"] if t["type"] == track["type"]] ) == False:
+                views[0]["tracks"]["left"].insert(0, track)
+
+        # Override the initial domains.
+        views[0]["initialXDomain"] = new_view["initialXDomain"]
+        views[0]["initialYDomain"] = new_view["initialYDomain"]
+
         return True, None
 
     # If there are 6 views already, stop
@@ -1195,7 +1226,12 @@ def remove_left_side_if_all_1D(new_views):
     return True
 
 def copy_top_reference_tracks_into_left(target_view, views):
-    """
+    """ Copy the reference tracks from the top track into the left (if the left doesn't have them already.)
+    Args:
+        target_view(dict)   : View which will be modified to get the new tracks.
+        views(list)         : The first view contains the top tracks to copy from.
+    Returns:
+        Boolean value indicating success.
     """
 
     if len(views) < 1:
@@ -1216,9 +1252,37 @@ def copy_top_reference_tracks_into_left(target_view, views):
     for track in new_tracks:
         if track["type"] in reference_file_type_mappings:
             track["type"] = reference_file_type_mappings[ track["type"] ]
-        # TODO Swap the height and widths, if they are here.
 
-    # Add the copied tracks to the left side of this view.
+        # Swap the height and widths, if they are here.
+        temp_height = track.get("width", None)
+        temp_width = track.get("height", None)
+
+        if temp_height and temp_width:
+            track["height"] = temp_height
+            track["width"] = temp_width
+        elif temp_height:
+            track["height"] = temp_height
+            del track["width"]
+        elif temp_width:
+            track["width"] = temp_width
+            del track["height"]
+
+        # Also the minimum width/height
+        temp_height = track.get("minWidth", None)
+        temp_width = track.get("minHeight", None)
+
+        if temp_height and temp_width:
+            track["minHeight"] = temp_height
+            track["minWidth"] = temp_width
+        elif temp_height:
+            track["minHeight"] = temp_height
+            del track["minWidth"]
+        elif temp_width:
+            track["minWidth"] = temp_width
+            del track["minHeight"]
+
+    # Add the copied tracks to the left side of this view if it doesn't have the track already.
     for track in reversed(new_tracks):
-        target_view["tracks"]["left"].insert(0, track)
+        if any([t for t in target_view["tracks"]["left"] if t["type"] == track["type"]] ) == False:
+            target_view["tracks"]["left"].insert(0, track)
     return target_view
