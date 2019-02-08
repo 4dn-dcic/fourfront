@@ -671,8 +671,6 @@ def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
     ):
         # Some formats need a new 2D view added.
         new_view, error = create_2d_view(new_file)
-        print("A")
-        print(new_view["initialXDomain"])
         if error:
             return None, errors
         new_view = copy_top_reference_tracks_into_left(new_view, views)
@@ -1207,7 +1205,7 @@ def remove_left_side_if_all_1D(new_views):
         new_views(list): The views that will make the new HiGlass view config. May be modified.
 
     Returns:
-        A boolean value indicating success.
+        True if the left side tracks were removed, False otherwise.
     """
 
     # Search all views' central contents for any 2D files.
@@ -1218,7 +1216,7 @@ def remove_left_side_if_all_1D(new_views):
 
             # If 2D files are found, we shouldn't remove any tracks.
             if any([ t for t in center_track["contents"] if t["type"] in ("heatmap", "2d-chromosome-grid")]):
-                return True
+                return False
 
     # Remove the left side from each file in the view config.
     for view in new_views:
