@@ -622,28 +622,7 @@ def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
 
     # If no views exist, create one now
     if len(views) == 0:
-        # Based on the genome assembly type, we can give defaults for the initialXDomain and initialYDomain.
-        # The initialXDomain shows the range of data points which will be shown in the display. 0 would be the start of chr1, for example.
-        # initialYDomain is used to calculate the center of the 2D data.
-
-        domain_size_by_genome_assembly = {
-            "GRCm38": 2725521370,
-            "GRCh38": 3088269832,
-            "dm6": 137547960,
-            "galGal5": 1022704034
-        }
-
-        domain_size = domain_size_by_genome_assembly.get(genome_assembly, 2000000000)
-
         base_view = {
-            "initialXDomain": [
-                domain_size * -1 / 4,
-                domain_size * 5 / 4
-            ],
-            "initialYDomain": [
-                domain_size * -1 / 4,
-                domain_size * 5 / 4
-            ],
             "tracks": {
                 "right": [ ],
                 "gallery": [ ],
@@ -668,6 +647,10 @@ def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
                 "x": 0
             }
         }
+
+        # Based on the genome assembly type, we can give defaults for the initialXDomain and initialYDomain.
+        domain_sizes = get_initial_domains_by_genome_assembly(genome_assembly)
+        base_view.update(domain_sizes)
         views.append(base_view)
 
     # Based on the filetype's dimensions, try to add the file to the views
@@ -819,24 +802,7 @@ def create_2d_view(new_file):
         a string containing an error message, if any (may be None)
     """
     # Create default view options.
-    domain_size_by_genome_assembly = {
-        "GRCm38": 2725521370,
-        "GRCh38": 3088269832,
-        "dm6": 137547960,
-        "galGal5": 1022704034
-    }
-
-    domain_size = domain_size_by_genome_assembly.get(new_file["genome_assembly"], 2000000000)
-
     new_view = {
-        "initialXDomain": [
-            domain_size * -1 / 4,
-            domain_size * 5 / 4
-        ],
-        "initialYDomain": [
-            domain_size * -1 / 4,
-            domain_size * 5 / 4
-        ],
         "tracks": {
             "right": [ ],
             "gallery": [ ],
@@ -868,6 +834,8 @@ def create_2d_view(new_file):
             "x": 0
         }
     }
+    domain_sizes = get_initial_domains_by_genome_assembly(new_file["genome_assembly"])
+    new_view.update(domain_sizes)
 
     contents = new_view["tracks"]["center"][0]["contents"][0]
 
@@ -889,6 +857,38 @@ def create_2d_view(new_file):
     contents["options"]["coordSystem"] = new_file["genome_assembly"]
     contents["options"]["name"] = get_title(new_file)
     return new_view, None
+
+def get_initial_domains_by_genome_assembly(genome_assembly):
+    """Get a list of defaults HiGlass data ranges for a file.
+    Args:
+        genome_assembly(string): Description of the genome assembly.
+    Returns:
+        A dict with these keys:
+        initialXDomain(list): Contains 2 numbers. The HiGlass display will horizontally span all of these data points along the X axis. 0 would be the start of chr1, for example.
+        initialYDomain(list): Contains 2 numbers. The HiGlass display will focus on the center of this data (for 2D views) or ignore initialYDomain entirely (for 1D views.)
+    """
+
+    # Create default view options.
+    domain_size_by_genome_assembly = {
+        "GRCm38": 2725521370,
+        "GRCh38": 3088269832,
+        "dm6": 137547960,
+        "galGal5": 1022704034
+    }
+
+    domain_size = domain_size_by_genome_assembly.get(genome_assembly, 2000000000)
+
+    domain_ranges = {
+        "initialXDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ],
+        "initialYDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ]
+    }
+    return domain_ranges
 
 def update_genome_position_search_box(view, new_file):
     """ Update the genome position search box for this view so it uses the given file.
