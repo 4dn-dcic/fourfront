@@ -301,6 +301,9 @@ def main(global_config, **local_config):
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
 
+    # must include, as tm.attempts was removed from pyramid_tm
+    config.include('pyramid_retry')
+
     config.include(configure_dbsession)
     config.include('snovault')
     config.commit()  # commit so search can override listing
