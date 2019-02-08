@@ -136,7 +136,13 @@ export class JointAnalysisMatrix extends React.PureComponent {
 
     static defaultProps = {
         'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
+        'self_results_url_fields'   : [
+            'experiments_in_set.experiment_type', 'lab', 'experiments_in_set.biosample.biosource_summary', 'status', 'lab.display_title',
+            'experiments_in_set.experiment_categorizer.value', 'experiments_in_set.experiment_categorizer.field', 'experiments_in_set.display_title',
+            'experiments_in_set.accession'
+        ],
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all',
+        'encode_results_url_fields' : ['assay_slims', 'biosample_term_name', 'assay_term_name', 'description', 'lab', 'status'],
         'self_planned_results_url'  : null
     };
 
@@ -188,13 +194,20 @@ export class JointAnalysisMatrix extends React.PureComponent {
             _.object(_.map(dataSetNames, function(n){ return [n, null]; })), // Reset all result states to 'null'
             () => {
                 _.forEach(dataSetNames, (source_name)=>{
-                    var req_url = this.props[source_name + '_url'];
+                    var req_url = this.props[source_name + '_url'],
+                        req_url_fields = this.props[source_name + '_url_fields'];
 
                     if (typeof req_url !== 'string' || !req_url) return;
 
                     // For testing
                     if (window && window.location.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
                         req_url = 'https://data.4dnucleome.org' + req_url;
+                    }
+
+                    if (Array.isArray(req_url_fields) && req_url_fields.length > 0){
+                        _.forEach(req_url_fields, function(f){
+                            req_url += '&field=' + encodeURIComponent(f);
+                        });
                     }
 
                     if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
@@ -296,7 +309,7 @@ class VisualBody extends React.PureComponent {
         }
 
         var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
-        return origClassName + ' ' + submissionStateClassName + ' hoverable';
+        return origClassName + ' ' + submissionStateClassName + ' hoverable clickable';
     }
 
     static blockRenderedContents(data, title, groupingPropertyTitle, blockProps){
@@ -307,7 +320,7 @@ class VisualBody extends React.PureComponent {
             count = 1;
         }
         if (count > 100){
-            return <span style={{ 'fontSize' : '0.95rem' }}>{ count }</span>;
+            return <span style={{ 'fontSize' : '0.95rem', 'position' : 'relative', 'top' : -1 }}>{ count }</span>;
         }
         return <span>{ count }</span>;
     }

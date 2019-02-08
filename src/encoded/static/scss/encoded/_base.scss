@@ -53,36 +53,58 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
 
 
 @mixin planned-submitted-cell-styles {
+
+    &.hoverable:hover {
+        box-shadow: 0 1px 2px -1px #000;
+    }
+
+    &.clickable:active,
+    &.clickable:focus {
+        box-shadow: inset 0 1px 2px -1px #000;
+        outline: none;
+    }
+
 	&.cellType-submitted {
-        background-color: #53a74e !important;
-        &.hoverable:hover {
-            background-color: darken($color: #53a74e, $amount: 10) !important;
+        background-color: #3f883b !important;
+        &.hoverable:hover,
+        &.clickable:active,
+        &.clickable:focus {
+            background-color: darken($color: #3f883b, $amount: 10) !important;
         }
 	}
 	&.cellType-planned {
         background-color: rgb(190, 190, 190) !important;
-        &.hoverable:hover {
+        &.hoverable:hover,
+        &.clickable:active,
+        &.clickable:focus {
             background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
         }
 	}
 	&.cellType-internal-release {
-        background-color: #b3d4b1 !important;
+        //background-color: #b3d4b1 !important;
+        background-color: #66c560 !important;
+
         //background-color: rgb(190, 190, 190) !important;
         //background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#53a74e; stroke: none;"/></svg>');
         //background-size: 108%;
         //background-repeat: no-repeat;
-        &.hoverable:hover {
-            background-color: darken($color: #b3d4b1, $amount: 10) !important;
+        &.hoverable:hover,
+        &.clickable:active,
+        &.clickable:focus {
+            //background-color: darken($color: #b3d4b1, $amount: 10) !important;
+            background-color: darken($color: #66c560, $amount: 10) !important;
         }
     }
     &.cellType-in-submission {
         //background-color: rgb(190, 190, 190) !important;
-        border: 1px solid #333;
-        color: #333;
+        border: 1px solid #222;
+        color: #222;
         //background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 95 95"><polygon points="100,0 0,100 100,100 100,0" style="fill:#d5d813; stroke: none;"/></svg>');
         //background-size: 108%;
         //background-repeat: no-repeat;
-        &.hoverable:hover {
+        &.hoverable:hover,
+        &.clickable:active,
+        &.clickable:focus {
             //background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
             border-color: #000;
             color: #000;
@@ -93,11 +115,13 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
     }
     &.cellType-out-of-date {
         //background-color: rgba(162, 145, 55, 0.75) !important;
-        border: 1px solid #999;
-        color: #999;
-        &.hoverable:hover {
-            border-color: #646464;
-            color: #646464;
+        border: 1px solid #aaa;
+        color: #aaa;
+        &.hoverable:hover,
+        &.clickable:active,
+        &.clickable:focus {
+            border-color: #777;
+            color: #777;
             //background-color: darken($color: rgba(162, 145, 55, 0.75), $amount: 10) !important;
         }
     }
