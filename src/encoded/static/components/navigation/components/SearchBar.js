@@ -8,7 +8,7 @@ import { MenuItem, Checkbox, DropdownButton, Fade, Collapse } from 'react-bootst
 import { console, navigate, Filters } from './../../util';
 
 
-export class SearchBar extends React.Component{
+export class SearchBar extends React.PureComponent{
 
     static renderHiddenInputsForURIQuery(query){
         return _.flatten(_.map(
@@ -27,12 +27,12 @@ export class SearchBar extends React.Component{
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.toggleSearchAllItems = this.toggleSearchAllItems.bind(this);
-        this.onSearchInputChange = this.onSearchInputChange.bind(this);
-        this.onResetSearch = this.onResetSearch.bind(this);
-        this.onSearchInputBlur = this.onSearchInputBlur.bind(this);
+        this.toggleSearchAllItems   = this.toggleSearchAllItems.bind(this);
+        this.onSearchInputChange    = this.onSearchInputChange.bind(this);
+        this.onResetSearch          = this.onResetSearch.bind(this);
+        this.onSearchInputBlur      = this.onSearchInputBlur.bind(this);
         this.selectItemTypeDropdown = this.selectItemTypeDropdown.bind(this);
+
         var initialQuery = '';
         if (props.href){
             initialQuery = Filters.searchQueryStringFromHref(props.href) || '';

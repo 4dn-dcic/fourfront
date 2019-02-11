@@ -97,7 +97,7 @@ export default class CursorViewBounds extends React.PureComponent {
      * @param {Object} pastState - Previous state of this component.
      */
     componentDidUpdate(pastProps, pastState){
-        
+
         if (pastProps.href !== this.props.href){
             this.cursorRef.current.reset(true);
         } else if (pastState.selectedTerm !== this.state.selectedTerm){

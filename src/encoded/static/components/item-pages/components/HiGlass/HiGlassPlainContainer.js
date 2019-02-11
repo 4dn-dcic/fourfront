@@ -47,7 +47,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'viewConfig' : PropTypes.object.isRequired,
         'isValidating' : PropTypes.bool,
         'height' : PropTypes.number,
-        'groupID' : PropTypes.string
+        'mountDelay' : PropTypes.number.isRequired
     };
 
     static defaultProps = {
@@ -56,7 +56,15 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'disabled' : false,
         'height' : 500,
         'viewConfig' : null,
-        'groupID' : null
+        'mountDelay' : 500,
+        'placeholder' : (
+            <React.Fragment>
+                <h3>
+                    <i className="icon icon-lg icon-television"/>
+                </h3>
+                Initializing
+            </React.Fragment>
+        )
     };
 
     constructor(props){
@@ -87,7 +95,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             }, ()=>{
                 setTimeout(this.correctTrackDimensions, 500);
             });
-        }, 500);
+        }, this.props.mountDelay);
     }
 
     correctTrackDimensions(){
@@ -140,7 +148,9 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     render(){
-        var { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig } = this.props,
+        var { disabled, isValidating, tilesetUid, height, width, options, style,
+            className, viewConfig, placeholder
+            } = this.props,
             hiGlassInstance = null,
             mounted         = (this.state && this.state.mounted) || false,
             outerKey        = "mount-number-" + this.state.mountCount;
@@ -151,23 +161,16 @@ export class HiGlassPlainContainer extends React.PureComponent {
                 placeholderStyle.height = height;
                 placeholderStyle.paddingTop = (height / 2) - 40;
             }
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center" style={placeholderStyle} key={outerKey}>
-                    <h3>
-                        <i className="icon icon-lg icon-television"/>
-                    </h3>
-                    Initializing
-                </div>
-            );
+            hiGlassInstance = <div className="text-center" style={placeholderStyle} key={outerKey}>{ placeholder }</div>;
         } else if (disabled) {
             hiGlassInstance = (
-                <div className="col-sm-12 text-center" key={outerKey} style={placeholderStyle}>
+                <div className="text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Not Available</h4>
                 </div>
             );
         } else if (this.state.hasRuntimeError) {
             hiGlassInstance = (
-                <div className="col-sm-12 text-center" key={outerKey} style={placeholderStyle}>
+                <div className="text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Runtime Error</h4>
                 </div>
             );
