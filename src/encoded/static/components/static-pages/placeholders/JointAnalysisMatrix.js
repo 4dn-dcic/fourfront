@@ -136,7 +136,13 @@ export class JointAnalysisMatrix extends React.PureComponent {
 
     static defaultProps = {
         'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all&field=assay_slims&field=biosample_term_name&field=assay_term_name&field=description&field=lab&field=status',
+        'self_results_url_fields'   : [
+            'experiments_in_set.experiment_type', 'lab', 'experiments_in_set.biosample.biosource_summary', 'status', 'lab.display_title',
+            'experiments_in_set.experiment_categorizer.value', 'experiments_in_set.experiment_categorizer.field', 'experiments_in_set.display_title',
+            'experiments_in_set.accession'
+        ],
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all',
+        'encode_results_url_fields' : ['assay_slims', 'biosample_term_name', 'assay_term_name', 'description', 'lab', 'status'],
         'self_planned_results_url'  : null
     };
 
@@ -188,13 +194,20 @@ export class JointAnalysisMatrix extends React.PureComponent {
             _.object(_.map(dataSetNames, function(n){ return [n, null]; })), // Reset all result states to 'null'
             () => {
                 _.forEach(dataSetNames, (source_name)=>{
-                    var req_url = this.props[source_name + '_url'];
+                    var req_url = this.props[source_name + '_url'],
+                        req_url_fields = this.props[source_name + '_url_fields'];
 
                     if (typeof req_url !== 'string' || !req_url) return;
 
                     // For testing
                     if (window && window.location.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
                         req_url = 'https://data.4dnucleome.org' + req_url;
+                    }
+
+                    if (Array.isArray(req_url_fields) && req_url_fields.length > 0){
+                        _.forEach(req_url_fields, function(f){
+                            req_url += '&field=' + encodeURIComponent(f);
+                        });
                     }
 
                     if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
@@ -296,16 +309,20 @@ class VisualBody extends React.PureComponent {
         }
 
         var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
-        return origClassName + ' ' + submissionStateClassName + ' hoverable';
+        return origClassName + ' ' + submissionStateClassName + ' hoverable clickable';
     }
 
     static blockRenderedContents(data, title, groupingPropertyTitle, blockProps){
+        var count = 0;
         if (Array.isArray(data)) {
-            return data.length;
+            count = data.length;
         } else if (data) {
-            return 1;
+            count = 1;
         }
-        return 0; // Shouldnt happen?
+        if (count > 100){
+            return <span style={{ 'fontSize' : '0.95rem', 'position' : 'relative', 'top' : -1 }}>{ count }</span>;
+        }
+        return <span>{ count }</span>;
     }
 
     constructor(props){
@@ -329,7 +346,22 @@ class VisualBody extends React.PureComponent {
             data = data[0];
         }
 
-        if (isGroup) aggrData = StackedBlockVisual.aggregateObjectFromList(data, _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']));
+        if (isGroup){
+            aggrData = StackedBlockVisual.aggregateObjectFromList(
+                data,
+                _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']),
+                ['sub_cat_title'] // We use this property as an object key (string) so skip parsing to React JSX list;
+            );
+            // Custom parsing down into string -- remove 'Default' from list and ensure is saved as string.
+            if (Array.isArray(aggrData.sub_cat_title)){
+                aggrData.sub_cat_title = _.without(aggrData.sub_cat_title, 'Default');
+                if (aggrData.sub_cat_title.length > 1){
+                    aggrData.sub_cat_title = 'Assay Details';
+                } else {
+                    aggrData.sub_cat_title = aggrData.sub_cat_title[0];
+                }
+            }
+        }
 
         var groupingPropertyCurrent = props.groupingProperties[props.depth] || null,
             groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null,
@@ -392,12 +424,7 @@ class VisualBody extends React.PureComponent {
             );
         }
 
-        var keyValsToShow = _.pick(aggrData || data,
-            'award', 'accession', 'lab_name', 'number_of_experiments', 'data_source',
-            'submitted_by', 'experimentset_type', 'cell_type', 'category', 'experiment_type', 'short_description', 'state'
-        );
-
-        keyValsToShow.cell_type = reversed_cell_type_map[keyValsToShow.cell_type] || keyValsToShow.cell_type;
+        var keyValsToShow = _.pick(aggrData || data, 'lab_name', 'category');
 
         if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
             keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
@@ -424,16 +451,10 @@ class VisualBody extends React.PureComponent {
     }
 
     render(){
-
-        var { results, keysToInclude } = this.props;
-
-        // Filter out properties from objects which we don't want to be shown in tooltip.
-        var listOfObjectsToVisualize = keysToInclude ? _.map(results, function(o){ return _.pick(o, ...keysToInclude); }) : results;
-
         return (
             <StackedBlockVisual {..._.pick(this.props, 'groupingProperties', 'columnGrouping',
                 'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder')}
-                data={listOfObjectsToVisualize}
+                data={this.props.results}
                 titleMap={TITLE_MAP}
                 columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
                 checkCollapsibility
