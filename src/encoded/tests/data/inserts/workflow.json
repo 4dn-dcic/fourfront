@@ -8181,7 +8181,7 @@
     {
         "accession": "4DNWJV73GVL",
         "app_name": "bedGraphToBigWig",
-        "app_version": "dev",
+        "app_version": "v4",
         "arguments": [
             {
                 "argument_format": "bg",
@@ -8202,7 +8202,7 @@
         "award": "1U01CA200059-01",
         "category": "format conversion",
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/master/cwl/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/v4/cwl/",
         "cwl_main_filename": "bedGraphToBigWig.cwl",
         "cwl_pointer": "",
         "data_types": [
