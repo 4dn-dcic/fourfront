@@ -804,9 +804,9 @@
         "award": "1U01CA200059-01",
         "category": "QC",
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "pairsqc-single.cwl",
         "data_types": [
             "Hi-C",
@@ -4996,6 +4996,7 @@
     },
     {
         "app_name": "repliseq-parta",
+        "app_version": "v13.1",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -5052,9 +5053,9 @@
             "dedup.cwl",
             "count.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/repliseq",
+        "cwl_directory_url": "https://github.com/4dn-dcic/docker-4dn-repliseq/tree/v13.1/cwl",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://github.com/4dn-dcic/docker-4dn-repliseq/tree/v13.1/cwl",
         "cwl_main_filename": "repliseq-parta.cwl",
         "data_types": [
             "Repli-seq"
@@ -5796,6 +5797,7 @@
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
         "workflow_type": "Repli-seq data processing",
         "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
+        "version_upgrade_log": "The count script (used by run-count.sh) now sorts the binfile before feeding to bedtools coverage to avoid a sorting inconsistency issue.",
         "accession": "4DNWFBT37VUW"
     },
     {
