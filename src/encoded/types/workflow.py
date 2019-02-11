@@ -211,6 +211,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheGroupSourcesByRun = {}
 
     steps_to_process_stack = deque()
+    steps = []
 
     def get_model(uuid, key=None):
         model = None
@@ -275,12 +276,13 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         """
         if not options.get('group_similar_workflow_runs') or len(workflow_run_tuples) < 3:
             return (workflow_run_tuples, [])
+
         filtered_in_tuples  = []
         filtered_out_tuples = []
         tuples_by_workflow  = {}
 
         for wfr_tuple in workflow_run_tuples: # Group up into dict of { workflow-id : list-of-tuples }
-            workflow_atid = wfr_tuple[0].get('workflow')
+            workflow_atid = wfr_tuple[0]['workflow']['@id']
             if not tuples_by_workflow.get(workflow_atid):
                 tuples_by_workflow[workflow_atid] = []
             tuples_by_workflow[workflow_atid].append(wfr_tuple)
@@ -319,7 +321,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         "name" : out_file.get('workflow_argument_name'),
                         "step" : workflow_run['@id'],
                         "for_file" : in_file['@id'],
-                        "workflow" : workflow_run.get('workflow')
+                        "workflow" : workflow_run['workflow']['@id']
                     })
             return sources_for_in_file
 
@@ -370,7 +372,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 "for_file"   : in_file_model['@id'],
                 "step"       : workflow_run_embed['@id'],
                 "grouped_by" : "workflow",
-                "workflow"   : workflow_run_embed.get('workflow', {}).get('@id')
+                "workflow"   : workflow_run_embed['workflow']['@id']
             }
             uuidCacheTracedHistory[in_file_model['uuid']] = [source_for_in_file]
             uuidCacheGroupSourcesByRun[workflow_run_embed['uuid']] = uuidCacheGroupSourcesByRun.get(workflow_run_embed['uuid'], []) + [in_file_model['uuid']] #[source_for_in_file]
@@ -558,7 +560,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         last_workflow_run_uuid = file_item_output_of_workflow_run_uuids[-1]
 
         if 'history' in options.get('trace_direction', ['history']):
-            steps_to_process_stack.append((last_workflow_run_uuid, original_file, 0))
+            steps_to_process_stack.appendleft((last_workflow_run_uuid, original_file, 0))
 
 
     while True: # Run down the stack until nothing left to trace to
@@ -576,7 +578,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         # trace_history will return `None` if UUID already traced, e.g. as
         # consequence of some previously-encountered file that came from it as well
         if step:
-            yield step
+            steps.append(step)
 
     if options.get('track_performance'):
         pr.disable()
@@ -590,6 +592,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             content_type='text/plain',
             body=output
         )
+
+    return steps
 
 
 
