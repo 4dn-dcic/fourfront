@@ -623,7 +623,7 @@
                 ]
             }
         ],
-        "title": "FastQC",
+        "title": "FastQC 0.2.0",
         "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
@@ -759,7 +759,7 @@
                 ]
             }
         ],
-        "title": "PairsQC",
+        "title": "PairsQC 0.2.5",
         "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
@@ -914,7 +914,7 @@
                 ]
             }
         ],
-        "title": "PairsQC",
+        "title": "PairsQC 0.2.6",
         "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
@@ -1066,7 +1066,7 @@
                 ]
             }
         ],
-        "title": "md5",
+        "title": "md5 0.0.4",
         "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
@@ -1151,7 +1151,7 @@
                 ]
             }
         ],
-        "title": "md5",
+        "title": "md5 0.2.6",
         "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
         "workflow_diagram": "",
         "workflow_type": "Data QC"
@@ -3283,7 +3283,7 @@
                 ]
             }
         ],
-        "title": "Hi-C processing part B revision 44",
+        "title": "Hi-C processing part B revision 44 0.2.0",
         "uuid": "d9e9c966-56d9-47e8-ae21-47f94a1af417",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -3919,7 +3919,7 @@
                 ]
             }
         ],
-        "title": "Alignment for Hi-C using bwa-mem",
+        "title": "Alignment for Hi-C using bwa-mem 0.2.0",
         "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -3927,7 +3927,7 @@
     {
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
-        "app_version": "0.2.5",
+        "app_version": "0.2.6",
         "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
         "version_upgrade_log": "use of official release of bwa",
         "arguments": [
@@ -3962,9 +3962,9 @@
         "award": "1U01CA200059-01",
         "category": "alignment",
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
         "data_types": [
@@ -4061,7 +4061,7 @@
                 ]
             }
         ],
-        "title": "Alignment for Hi-C using bwa-mem",
+        "title": "Alignment for Hi-C using bwa-mem 0.2.6",
         "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -4178,7 +4178,7 @@
                 ]
             }
         ],
-        "title": "Parsing and Sorting for Hi-C using pairsamtools",
+        "title": "Parsing and Sorting for Hi-C using pairsamtools 0.2.0",
         "uuid": "65586d4b-1e3b-4b31-891e-11f48c816545",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -4276,7 +4276,7 @@
                 ]
             }
         ],
-        "title": "Merging for Hi-C using pairsamtools",
+        "title": "Merging for Hi-C using pairsamtools 0.2.0",
         "uuid": "af8908bf-fdcb-40be-8bca-f1a49226bd20",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -4357,7 +4357,7 @@
                 ]
             }
         ],
-        "title": "Duplicate Marking for Hi-C using pairsamtools",
+        "title": "Duplicate Marking for Hi-C using pairsamtools 0.2.0",
         "uuid": "a18978fa-7e78-488f-8e6b-bfb6f63b8861",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -4482,7 +4482,7 @@
                 ]
             }
         ],
-        "title": "Filtering for Hi-C using pairsamtools",
+        "title": "Filtering for Hi-C using pairsamtools 0.2.0",
         "uuid": "3758e00c-2035-43c6-b783-bb92afe57c99",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -4588,7 +4588,7 @@
                 ]
             }
         ],
-        "title": "Adding restriction fragment information for Hi-C using pairsamtools",
+        "title": "Adding restriction fragment information for Hi-C using pairsamtools 0.2.0",
         "uuid": "ef125750-8df2-418e-a1ee-402285f9dd93",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
@@ -4675,13 +4675,14 @@
                 ]
             }
         ],
-        "title": "Patching pairs file for Hi-C using pairsamtools",
+        "title": "Patching pairs file for Hi-C using pairsamtools 0.2.0",
         "uuid": "7e5dcad0-d8da-4286-9253-a779d5310a49",
         "workflow_diagram": "",
         "workflow_type": "Hi-C data analysis"
     },
     {
         "app_name": "hi-c-processing-bam",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "bam",
@@ -4723,9 +4724,9 @@
             "pairsam-markasdup.cwl",
             "pairsam-filter.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
         "data_types": [
             "Hi-C"
@@ -4990,7 +4991,7 @@
                 ]
             }
         ],
-        "title": "Hi-C Post-alignment Processing",
+        "title": "Hi-C Post-alignment Processing 0.2.6",
         "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
         "workflow_type": "Hi-C data analysis"
     },
@@ -5392,7 +5393,7 @@
                 ]
             }
         ],
-        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting v13.1",
         "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364",
         "workflow_type": "Repli-seq data processing"
     },
@@ -5793,7 +5794,7 @@
                 ]
             }
         ],
-        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting v14",
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
         "workflow_type": "Repli-seq data processing",
         "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
@@ -5802,7 +5803,7 @@
     },
     {
         "app_name": "hi-c-processing-pairs",
-        "app_version": "0.2.5",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -5898,9 +5899,9 @@
             "add-hic-normvector-to-mcool.cwl",
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
         "data_types": [
             "Hi-C"
@@ -6499,12 +6500,13 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists 0.2.6",
         "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
         "workflow_type": "Hi-C data analysis"
     },
     {
         "app_name": "hi-c-processing-pairs-nore",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -6590,9 +6592,9 @@
             "add-hic-normvector-to-mcool.cwl",
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore.cwl",
         "data_types": [
             "DNase Hi-C",
@@ -7116,12 +7118,13 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no restriction enzyme",
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no restriction enzyme 0.2.6",
         "uuid": "c19ee11e-9d5a-454f-af50-600a0cf990b6",
         "workflow_type": "Hi-C data analysis"
     },
     {
         "app_name": "hi-c-processing-pairs-nonorm",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -7210,9 +7213,9 @@
             "pairs2hic.cwl",
             "cool2mcool.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nonorm.cwl",
         "data_types": [
             "Capture Hi-C"
@@ -7678,12 +7681,13 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization",
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization 0.2.6",
         "uuid": "bd6e25ea-f368-4758-a821-d30e0b5a4100",
         "workflow_type": "Hi-C data analysis"
     },
     {
         "app_name": "hi-c-processing-pairs-nore-nonorm",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -7766,9 +7770,9 @@
             "pairs2hic.cwl",
             "cool2mcool.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore-nonorm.cwl",
         "data_types": [
             "ChIA-PET"
@@ -8174,7 +8178,7 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme",
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme 0.2.6",
         "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
         "workflow_type": "Hi-C data analysis"
     },
@@ -8272,7 +8276,7 @@
                 ]
             }
         ],
-        "title": "Converting bedgraph to bigwig",
+        "title": "Converting bedgraph to bigwig v4",
         "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e",
         "workflow_diagram": "",
         "workflow_type": "Other"
@@ -9136,7 +9140,7 @@
                 ]
             }
         ],
-        "title": "Chip-seq data processing pipeline, Align-only, ChIP",
+        "title": "Chip-seq data processing pipeline, Align-only, ChIP 1.1.1",
         "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178",
         "workflow_diagram": "",
         "workflow_type": "ChIP-seq data processing"
@@ -9545,7 +9549,7 @@
                 ]
             }
         ],
-        "title": "Chip-seq data processing pipeline, Align-only, Control",
+        "title": "Chip-seq data processing pipeline, Align-only, Control 1.1.1",
         "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179",
         "workflow_diagram": "",
         "workflow_type": "ChIP-seq data processing"
@@ -9949,7 +9953,7 @@
                 ]
             }
         ],
-        "title": "Chip-seq data processing pipeline, post-alignment",
+        "title": "Chip-seq data processing pipeline, post-alignment 1.1.1",
         "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513",
         "workflow_diagram": "",
         "workflow_type": "ChIP-seq data processing"
@@ -10755,7 +10759,7 @@
                 ]
             }
         ],
-        "title": "ATAC-seq data processing pipeline, Align-only",
+        "title": "ATAC-seq data processing pipeline, Align-only 1.1.1",
         "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa",
         "workflow_diagram": "",
         "workflow_type": "ATAC-seq data processing"
@@ -11064,7 +11068,7 @@
                 ]
             }
         ],
-        "title": "ATAC-seq data processing pipeline, post-alignment",
+        "title": "ATAC-seq data processing pipeline, post-alignment 1.1.1",
         "uuid": "510d321f-8a79-479d-95eb-c8fd703972a7",
         "workflow_diagram": "",
         "workflow_type": "ATAC-seq data processing",
@@ -11152,7 +11156,7 @@
                 ]
             }
         ],
-        "title": "Converting bed to beddb",
+        "title": "Converting bed to beddb v2",
         "uuid": "9d575e99-5ffe-4ea4-b74f-ad40f621cd39",
         "workflow_diagram": "",
         "workflow_type": "Other"
