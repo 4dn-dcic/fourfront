@@ -2,7 +2,6 @@
     given an entrez gene id
     most data fetched from ncbi entrez gene"""
 import requests
-import json
 import os
 import time
 from snovault import (
@@ -97,10 +96,10 @@ class Gene(Item):
     def _update(self, properties, sheets=None):
         # fetch info from ncbi gene based on id provided
         geneid = properties.get('geneid')
-        geneinfo = {}
+        gene_info = {}
         try:
             gene_info = fetch_gene_info_from_ncbi(geneid)
-        except Exception as e:
+        except Exception:
             pass
         if gene_info:
             gene_info = map_ncbi2schema(gene_info)
@@ -108,7 +107,7 @@ class Gene(Item):
                 try:
                     # make sure the organism is in the db
                     gene_info['organism'] = str(self.registry['collections']['Organism'].get(gene_info['organism']).uuid)
-                except Exception as e:
+                except Exception:
                     # otherwise remove the organism
                     del gene_info['organism']
             properties.update(gene_info)

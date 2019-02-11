@@ -60,14 +60,14 @@ class BioFeature(Item):
                 pass
             else:
                 featstr = featstr + symb + ', '
-            # check for mods
-            mods = props.get('feature_mods', [])
-            for mod in mods:
-                if mod.get('mod_position'):
-                    modstr += (mod.get('mod_position') + ' ')
-                modstr += (mod.get('mod_type') + ', ')
-            if modstr:
-                modstr = 'with ' + modstr[:-2]
+        # check for mods
+        mods = props.get('feature_mods', [])
+        for mod in mods:
+            if mod.get('mod_position'):
+                modstr += (mod.get('mod_position') + ' ')
+            modstr += (mod.get('mod_type') + ', ')
+        if modstr:
+            modstr = 'with ' + modstr[:-2]
         if not genes:
             for loc in props.get('genome_location', []):
                 try:
