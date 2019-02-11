@@ -65,17 +65,6 @@ export class TopRow extends React.Component {
      */
     parsedStatus(){
         if (!('status' in this.props.context)) return <div></div>;
-        /*  Removed icon in lieu of color indicator for status
-        var iconClass = null;
-        switch (this.props.context.status){
-
-            case 'in review by lab':
-            case 'submission in progress':
-                iconClass = 'icon ss-stopwatch';
-                break;
-
-        }
-        */
 
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
@@ -264,29 +253,41 @@ export class MiddleRow extends React.Component {
  * @type {Component}
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
-export class BottomRow extends React.Component {
+export class BottomRow extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.parsedCreationDate = this.parsedCreationDate.bind(this);
+        this.parsedCreationDate = this.parsedDate.bind(this);
     }
 
-    parsedCreationDate(){
-        if (!('date_created' in this.props.context)) return <span><i></i></span>;
+    parsedDate(dateToUse){
+        var context = this.props.context,
+            tooltip = dateToUse === 'date_created' ? 'Date Created' : 'Date last modified';
+
+        if (!dateToUse){
+            return <span><i></i></span>;
+        }
         return (
-            <span data-tip="Date Created" className="inline-block">
-                <i className="icon sbt-calendar"></i>&nbsp;&nbsp;
-                <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
+            <span data-tip={tooltip} className="inline-block">
+                <i className="icon icon-calendar-o"></i>&nbsp; &nbsp;
+                <DateUtility.LocalizedTime timestamp={context[dateToUse]} formatType='date-time-md' dateTimeSeparator=" at " />
             </span>
         );
     }
 
     render(){
+        var { context, children } = this.props,
+            dateToUse = null;
+    
+        if (typeof context.date_modified === 'string'){
+            dateToUse = 'date_modified';
+        } else if (typeof context.date_created === 'string'){
+            dateToUse = 'date_created';
+        }
         return (
             <div className="row clearfix bottom-row">
-                <div className="col-sm-6 item-label-extra set-type-indicators">{ this.props.children }</div>
-                <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
+                <div className="col-sm-6 item-label-extra set-type-indicators">{ children }</div>
+                <h5 className="col-sm-6 text-right text-left-xs item-label-extra">{ this.parsedDate(dateToUse) }</h5>
             </div>
         );
     }
