@@ -40,7 +40,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "experiment_type": {
             "enum": [
@@ -83,9 +83,13 @@
         "targeted_factor": {
             "title": "Target",
             "description": "Information about the target of the Antibody in an IP",
-            "type": "string",
-            "lookup": 96,
-            "linkTo": "Target"
+            "type": "array",
+            "lookup": 95,
+            "items": {
+                "title": "Feature",
+                "type": "string",
+                "linkTo": "BioFeature"
+            }
         },
         "tyramide_concentration": {
             "title": "Tyramide Concentration",

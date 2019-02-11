@@ -68,6 +68,43 @@ def experiment_mic_1(award, lab):
     }
 
 
+@pytest.fixture
+def experiment_n(target_w_genes):
+    return{
+        'targeted_factor': target_w_genes.get('aliases')[0]
+    }
+
+
+@pytest.fixture
+def targ_w_alias(testapp, target_w_genes):
+    return testapp.patch_json(target_w_genes['@id'], {'aliases': ['lab:test_targ']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def biofeat_w_alias(testapp, gene_bio_feature):
+    import pdb; pdb.set_trace()
+    return testapp.patch_json(gene_bio_feature['@id'], {'aliases': ['lab:test_targ_bf']}, status=200).json['@graph'][0]
+
+
+def test_experiment_convert_targeted_factor_to_biofeat(
+        registry, targ_w_alias, biofeat_w_alias, experiment_n):
+    ''' need to use registry to check items '''
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    upgrade_info = [
+        ('experiment_seq', '3', '4'),
+        ('experiment_chiapet', '3', '4'),
+        ('experiment_damid', '2', '3'),
+        ('experiment_tsaseq', '1', '2')
+    ]
+    for upg in upgrade_info:
+        experiment_n['schema_version'] = upg[1]
+        value = upgrader.upgrade(upg[0], experiment_n, registry=registry,
+                                 current_version=upg[1], target_version=upg[2])
+        assert value['schema_version'] == upg[2]
+        assert value['targeted_factor'][0] == biofeat_w_alias['@id']
+
+
 def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_damid', experiment_damid_1, current_version='1', target_version='2')

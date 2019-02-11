@@ -171,12 +171,12 @@ def so_ont(testapp):
 
 
 @pytest.fixture
-def gene_term(testapp, so_ont, cell_line_term):
-    import pdb; pdb.set_trace()
+def gene_term(testapp, so_ont):
     gterm = {
-        'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
+        # 'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_name': 'gene',
         'term_id': 'SO:0000704'}
-    return testapp.post('/ontology_term', gterm).json['@graph'][0]
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
 @pytest.fixture
@@ -725,6 +725,21 @@ def target_w_genes(testapp, lab, award):
         'lab': lab['@id'],
     }
     return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def gene_item(testapp, lab, award):
+    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
+
+
+@pytest.fixture
+def gene_bio_feature(testapp, lab, award, gene_term, gene_item):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Gene BioFeature',
+            'feature_type': gene_term['@id'],
+            'relevant_genes': [gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
 
 
 @pytest.fixture

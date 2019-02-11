@@ -74,3 +74,35 @@ def experiment_seq_1_2(value, system):
 def experiment_seq_2_3(value, system):
     if value.get('experiment_type') == 'CHIP-seq':
         value['experiment_type'] = 'ChIP-seq'
+
+
+@upgrade_step('experiment_seq', '3', '4')
+@upgrade_step('experiment_chiapet', '3', '4')
+@upgrade_step('experiment_damid', '2', '3')
+@upgrade_step('experiment_tsaseq', '1', '2')
+def experiment_targeted_factor_upgrade(value, system):
+    factor = value.get('targeted_factor')
+    if factor:
+        del value['targeted_factor']
+        note = 'Old Target: {}'.format(factor)
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
+        targets = system['registry']['collections']['Target']
+        biofeats = system['registry']['collections']['Biofeature']
+        target = targets.get(factor)
+        targ_aliases = target.get('aliases', [])
+        biof = None
+        for ta in targ_alias:
+            biof = biofeats.get(ta + '_bf')
+            if biof is not None:
+                try:
+                    value['targeted_factor'] = [str(biof.uuid)]
+                    break
+                except:
+                    pass
+
+
+@upgrade_step('experiment_capture_c', '1', '2')
+def experiment_capture_c_1_2(value, system):
+    pass

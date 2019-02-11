@@ -70,16 +70,6 @@ def some_genomic_region(testapp, lab, award):
 
 
 @pytest.fixture
-def gene_bio_feature(testapp, lab, award, gene_term, gene_item):
-    item = {'award': award['@id'],
-            'lab': lab['@id'],
-            'description': 'Test Gene BioFeature',
-            'feature_type': gene_term['@id'],
-            'relevant_genes': [gene_item['@id']]}
-    return testapp.post_json('/bio_feature', item).json['@graph'][0]
-
-
-@pytest.fixture
 def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_region):
     item = {'award': award['@id'],
             'lab': lab['@id'],
@@ -90,6 +80,7 @@ def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_re
 
 
 def test_bio_feature_display_title_gene(gene_bio_feature):
+    ''' gene_bio_feature is in datafixtures '''
     assert gene_bio_feature.get('display_title') == 'RAD21 gene'
 
 
@@ -105,6 +96,7 @@ def test_bio_feature_display_title_genomic_region_w_preferred_label(testapp, gen
 
 def test_bio_feature_display_title_protein_transcript(
         testapp, gene_item, gene_bio_feature, protein_term, transcript_term):
+    ''' gene_bio_feature is in datafixtures '''
     types = [protein_term, transcript_term]
     for t in types:
         res = testapp.patch_json(gene_bio_feature['@id'], {'feature_type': t['@id']}, status=200)
@@ -113,6 +105,7 @@ def test_bio_feature_display_title_protein_transcript(
 
 def test_bio_feature_display_title_modfied_protein(
         testapp, gene_item, gene_bio_feature, protein_term):
+    ''' gene_bio_feature is in datafixtures '''
     res = testapp.patch_json(
         gene_bio_feature['@id'],
         {
