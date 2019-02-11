@@ -587,6 +587,23 @@ class Workflow(Item):
         'arguments.argument_format',
         'arguments.workflow_argument_name'
     ]
+    rev = {
+        'newer_versions': ('Workflow', 'previous_version')
+    }
+
+    @calculated_property(schema={
+        "title": "Newer Versions",
+        "description": "Newer versions of this workflow",
+        "type": "array",
+        "exclude_from": ["submit4dn", "FFedit-create"],
+        "items": {
+            "title": "Newer versions",
+            "type": ["string", "object"],
+            "linkTo": "Workflow"
+        }
+    })
+    def newer_versions(self, request):
+        return self.rev_link_atids(request, "newer_versions")
 
 
 @collection(
