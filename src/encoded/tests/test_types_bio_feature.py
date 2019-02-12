@@ -27,15 +27,6 @@ def protein_term(testapp, so_ont):
 
 
 @pytest.fixture
-def region_term(testapp, so_ont):
-    gterm = {
-        'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_id': 'SO:0000001', 'term_name': 'region',
-        'source_ontology': so_ont['@id']}
-    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
-
-
-@pytest.fixture
 def transcript_term(testapp, so_ont):
     gterm = {
         'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
@@ -56,27 +47,6 @@ def component_term(testapp, so_ont):
 @pytest.fixture
 def gene_item(testapp, lab, award):
     return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
-
-
-@pytest.fixture
-def some_genomic_region(testapp, lab, award):
-    item = {'award': award['@id'],
-            'lab': lab['@id'],
-            'genome_assembly': 'GRCh38',
-            'chromosome': '1',
-            'start_coordinate': 17,
-            'end_coordinate': 544}
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
-def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_region):
-    item = {'award': award['@id'],
-            'lab': lab['@id'],
-            'description': 'Test Region BioFeature',
-            'feature_type': region_term['@id'],
-            'genome_location': [some_genomic_region['@id']]}
-    return testapp.post_json('/bio_feature', item).json['@graph'][0]
 
 
 def test_bio_feature_display_title_gene(gene_bio_feature):

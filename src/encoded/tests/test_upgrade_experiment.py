@@ -69,21 +69,43 @@ def experiment_mic_1(award, lab):
 
 
 @pytest.fixture
-def experiment_n(target_w_genes):
-    return{
-        'targeted_factor': target_w_genes.get('aliases')[0]
-    }
-
-
-@pytest.fixture
 def targ_w_alias(testapp, target_w_genes):
     return testapp.patch_json(target_w_genes['@id'], {'aliases': ['lab:test_targ']}, status=200).json['@graph'][0]
 
 
 @pytest.fixture
+def targ_gr_w_alias(testapp, target_w_region):
+    return testapp.patch_json(target_w_region['@id'], {'aliases': ['lab:test_targ_gr']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment_n(targ_w_alias):
+    return{
+        'targeted_factor': targ_w_alias.get('aliases')[0]
+    }
+
+
+@pytest.fixture
+def experiment_capc_w2targs(targ_w_alias, targ_gr_w_alias, file_fastq):
+    return{
+        'schema_version': '1',
+        'targeted_regions': [
+            {'target': targ_w_alias.get('aliases')[0],
+             'oligo_file': file_fastq['@id']},
+            {'target': targ_gr_w_alias.get('aliases')[0]}
+        ]
+    }
+
+
+@pytest.fixture
 def biofeat_w_alias(testapp, gene_bio_feature):
-    import pdb; pdb.set_trace()
     return testapp.patch_json(gene_bio_feature['@id'], {'aliases': ['lab:test_targ_bf']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def gr_biofeat_w_alias(testapp, genomic_region_bio_feature):
+    return testapp.patch_json(
+        genomic_region_bio_feature['@id'], {'aliases': ['lab:test_targ_gr_bf']}, status=200).json['@graph'][0]
 
 
 def test_experiment_convert_targeted_factor_to_biofeat(
@@ -98,11 +120,32 @@ def test_experiment_convert_targeted_factor_to_biofeat(
         ('experiment_tsaseq', '1', '2')
     ]
     for upg in upgrade_info:
-        experiment_n['schema_version'] = upg[1]
-        value = upgrader.upgrade(upg[0], experiment_n, registry=registry,
+        test_expt = experiment_n.copy()
+        test_expt['schema_version'] = upg[1]
+        value = upgrader.upgrade(upg[0], test_expt, registry=registry,
                                  current_version=upg[1], target_version=upg[2])
         assert value['schema_version'] == upg[2]
-        assert value['targeted_factor'][0] == biofeat_w_alias['@id']
+        assert value['targeted_factor'][0] == biofeat_w_alias['uuid']
+        assert targ_w_alias['aliases'][0] in value['notes']
+
+
+def test_experiment_capture_c_target_to_biofeat(
+        registry, targ_w_alias, biofeat_w_alias, targ_gr_w_alias,
+        gr_biofeat_w_alias, experiment_capc_w2targs
+):
+    ''' need to use registry to check items '''
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('experiment_capture_c', experiment_capc_w2targs, registry=registry,
+                             current_version='1', target_version='2')
+    assert value['schema_version'] == '2'
+    aliases2chk = [targ_w_alias.get('aliases')[0], targ_gr_w_alias.get('aliases')[0]]
+    uuids2chk = [biofeat_w_alias['uuid'], gr_biofeat_w_alias['uuid']]
+    trs = value['targeted_regions']
+    for a2c in aliases2chk:
+        assert a2c in value.get('notes')
+    for tr in trs:
+        assert tr.get('target') in uuids2chk
 
 
 def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):

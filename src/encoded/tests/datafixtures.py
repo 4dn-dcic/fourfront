@@ -180,6 +180,15 @@ def gene_term(testapp, so_ont):
 
 
 @pytest.fixture
+def region_term(testapp, so_ont):
+    gterm = {
+        'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000001', 'term_name': 'region',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
 def cell_line_term(testapp, ontology):
     item = {
         "is_slim_for": "cell",
@@ -774,6 +783,16 @@ def vague_genomic_region_w_desc(testapp, lab, award):
             'end_location': 'centromere',
             'location_description': 'gene X enhancer'}
     return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_region):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Region BioFeature',
+            'feature_type': region_term['@id'],
+            'genome_location': [some_genomic_region['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
 
 
 @pytest.fixture

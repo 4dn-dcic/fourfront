@@ -76,6 +76,24 @@ def experiment_seq_2_3(value, system):
         value['experiment_type'] = 'ChIP-seq'
 
 
+def _get_biofeat_for_target(target, biofeats):
+    ''' helper method shared by all experiment target upgrades
+    '''
+    try:
+        targ_aliases = target.properties.get('aliases', [])
+    except AttributeError:
+        return
+    biof = None
+    for ta in targ_aliases:
+        biof = biofeats.get(ta + '_bf')
+        if biof is not None:
+            try:
+                return str(biof.uuid)
+            except AttributeError:
+                continue
+    return None
+
+
 @upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_chiapet', '3', '4')
 @upgrade_step('experiment_damid', '2', '3')
@@ -89,20 +107,36 @@ def experiment_targeted_factor_upgrade(value, system):
             note = value['notes'] + '; ' + note
         value['notes'] = note
         targets = system['registry']['collections']['Target']
-        biofeats = system['registry']['collections']['Biofeature']
+        biofeats = system['registry']['collections']['BioFeature']
         target = targets.get(factor)
-        targ_aliases = target.get('aliases', [])
-        biof = None
-        for ta in targ_alias:
-            biof = biofeats.get(ta + '_bf')
-            if biof is not None:
-                try:
-                    value['targeted_factor'] = [str(biof.uuid)]
-                    break
-                except:
-                    pass
+        if target:
+            bfuuid = _get_biofeat_for_target(target, biofeats)
+        if bfuuid:
+            value['targeted_factor'] = [bfuuid]
 
 
 @upgrade_step('experiment_capture_c', '1', '2')
 def experiment_capture_c_1_2(value, system):
-    pass
+    tregions = value.get('targeted_regions')
+    if tregions:
+        new_vals = []
+        del value['targeted_regions']
+        targets = system['registry']['collections']['Target']
+        biofeats = system['registry']['collections']['BioFeature']
+        for tr in tregions:
+            t = tr.get('target')  # it's required
+            of = tr.get('oligo_file', '')
+            note = 'Old Target: {} {}'.format(t, of)
+            if 'notes' in value:
+                note = value['notes'] + '; ' + note
+            value['notes'] = note
+            target = targets.get(t)
+            if target:
+                bfuuid = _get_biofeat_for_target(target, biofeats)
+            if bfuuid:
+                tinfo = {'target': bfuuid}
+                if of:
+                    tinfo['oligo_file'] = of
+                new_vals.append(tinfo)
+        if new_vals:
+            value['targeted_regions'] = new_vals

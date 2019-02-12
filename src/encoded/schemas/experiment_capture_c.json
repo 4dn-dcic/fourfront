@@ -73,9 +73,13 @@
                     "target": {
                         "title": "Target",
                         "description": "The genes or region that is specifically targeted",
-                        "type": "string",
+                        "type": "array",
                         "lookup": 310,
-                        "linkTo": "Target"
+                        "items": {
+                            "title": "Feature",
+                            "type": "string",
+                            "linkTo": "Biofeature"
+                        }
                     },
                     "oligo_file": {
                         "title": "Oligonucleotide Fasta File",
