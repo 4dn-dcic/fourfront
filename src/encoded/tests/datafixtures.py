@@ -737,6 +737,21 @@ def target_w_genes(testapp, lab, award):
 
 
 @pytest.fixture
+def targ_w_alias(testapp, target_w_genes):
+    return testapp.patch_json(target_w_genes['@id'], {'aliases': ['lab:test_targ']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def targ_gr_w_alias(testapp, target_w_region):
+    return testapp.patch_json(target_w_region['@id'], {'aliases': ['lab:test_targ_gr']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def targ_agr_w_alias(testapp, another_target_w_region):
+    return testapp.patch_json(another_target_w_region['@id'], {'aliases': ['lab:test_another_gr']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
 def gene_item(testapp, lab, award):
     return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
 
@@ -749,6 +764,17 @@ def gene_bio_feature(testapp, lab, award, gene_term, gene_item):
             'feature_type': gene_term['@id'],
             'relevant_genes': [gene_item['@id']]}
     return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biofeat_w_alias(testapp, gene_bio_feature):
+    return testapp.patch_json(gene_bio_feature['@id'], {'aliases': ['lab:test_targ_bf']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def gr_biofeat_w_alias(testapp, genomic_region_bio_feature):
+    return testapp.patch_json(
+        genomic_region_bio_feature['@id'], {'aliases': ['lab:test_targ_gr_bf']}, status=200).json['@graph'][0]
 
 
 @pytest.fixture

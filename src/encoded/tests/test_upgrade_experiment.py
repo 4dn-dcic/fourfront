@@ -69,16 +69,6 @@ def experiment_mic_1(award, lab):
 
 
 @pytest.fixture
-def targ_w_alias(testapp, target_w_genes):
-    return testapp.patch_json(target_w_genes['@id'], {'aliases': ['lab:test_targ']}, status=200).json['@graph'][0]
-
-
-@pytest.fixture
-def targ_gr_w_alias(testapp, target_w_region):
-    return testapp.patch_json(target_w_region['@id'], {'aliases': ['lab:test_targ_gr']}, status=200).json['@graph'][0]
-
-
-@pytest.fixture
 def experiment_n(targ_w_alias):
     return{
         'targeted_factor': targ_w_alias.get('aliases')[0]
@@ -95,17 +85,6 @@ def experiment_capc_w2targs(targ_w_alias, targ_gr_w_alias, file_fastq):
             {'target': targ_gr_w_alias.get('aliases')[0]}
         ]
     }
-
-
-@pytest.fixture
-def biofeat_w_alias(testapp, gene_bio_feature):
-    return testapp.patch_json(gene_bio_feature['@id'], {'aliases': ['lab:test_targ_bf']}, status=200).json['@graph'][0]
-
-
-@pytest.fixture
-def gr_biofeat_w_alias(testapp, genomic_region_bio_feature):
-    return testapp.patch_json(
-        genomic_region_bio_feature['@id'], {'aliases': ['lab:test_targ_gr_bf']}, status=200).json['@graph'][0]
 
 
 def test_experiment_convert_targeted_factor_to_biofeat(

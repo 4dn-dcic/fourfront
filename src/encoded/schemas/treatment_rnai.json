@@ -32,7 +32,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "treatment_type": {
             "default": "RNAi",
@@ -50,9 +50,13 @@
         "target": {
             "title": "Target",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
-            "type": "string",
+            "type": "array",
             "lookup": 30,
-            "linkTo": "Target"
+            "items": {
+                "title": "Feature",
+                "type": "string",
+                "linkTo": "BioFeature"
+            }
         },
         "target_sequence": {
             "title": "Target Sequence",

@@ -1,4 +1,5 @@
 from snovault import upgrade_step
+from . import _get_biofeat_for_target as getbf4t
 
 
 @upgrade_step('experiment_repliseq', '1', '2')
@@ -76,24 +77,6 @@ def experiment_seq_2_3(value, system):
         value['experiment_type'] = 'ChIP-seq'
 
 
-def _get_biofeat_for_target(target, biofeats):
-    ''' helper method shared by all experiment target upgrades
-    '''
-    try:
-        targ_aliases = target.properties.get('aliases', [])
-    except AttributeError:
-        return
-    biof = None
-    for ta in targ_aliases:
-        biof = biofeats.get(ta + '_bf')
-        if biof is not None:
-            try:
-                return str(biof.uuid)
-            except AttributeError:
-                continue
-    return None
-
-
 @upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_chiapet', '3', '4')
 @upgrade_step('experiment_damid', '2', '3')
@@ -110,7 +93,7 @@ def experiment_targeted_factor_upgrade(value, system):
         biofeats = system['registry']['collections']['BioFeature']
         target = targets.get(factor)
         if target:
-            bfuuid = _get_biofeat_for_target(target, biofeats)
+            bfuuid = getbf4t(target, biofeats)
         if bfuuid:
             value['targeted_factor'] = [bfuuid]
 
@@ -132,7 +115,7 @@ def experiment_capture_c_1_2(value, system):
             value['notes'] = note
             target = targets.get(t)
             if target:
-                bfuuid = _get_biofeat_for_target(target, biofeats)
+                bfuuid = getbf4t(target, biofeats)
             if bfuuid:
                 tinfo = {'target': bfuuid}
                 if of:

@@ -24,7 +24,7 @@
     "identifyingProperties": ["uuid","aliases","antibody_id"],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "antibody_name": {
             "title": "Antibody Name",
@@ -70,9 +70,13 @@
         "antibody_target": {
             "title": "Target",
             "description": "Information about the target of the Antibody",
-            "type": "string",
+            "type": "array",
             "lookup": 40,
-            "linkTo": "Target"
+            "items": {
+                "title": "Feature",
+                "type": "string",
+                "linkTo": "BioFeature"
+            }
         }
     },
     "facets": {
