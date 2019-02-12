@@ -487,9 +487,7 @@
             }
         ],
         "title": "GITAR",
-        "uuid": "c7a60edf-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFAW5VTA5",
@@ -624,9 +622,7 @@
             }
         ],
         "title": "FastQC 0.2.0",
-        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9"
     },
     {
         "accession": "4DNWF36CF3A1",
@@ -760,9 +756,7 @@
             }
         ],
         "title": "PairsQC 0.2.5",
-        "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117"
     },
     {
         "accession": "4DNWFHB26CID",
@@ -915,9 +909,7 @@
             }
         ],
         "title": "PairsQC 0.2.6",
-        "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3"
     },
     {
         "accession": "4DNWF6DUSPTF",
@@ -988,9 +980,7 @@
             }
         ],
         "title": "ValidateFiles",
-        "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7"
     },
     {
         "accession": "4DNWFG6JOL4D",
@@ -1067,9 +1057,7 @@
             }
         ],
         "title": "md5 0.0.4",
-        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41"
     },
     {
         "accession": "4DNWF2HFF82B",
@@ -1152,9 +1140,7 @@
             }
         ],
         "title": "md5 0.2.6",
-        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6"
     },
     {
         "accession": "4DNWFSOZLMGE",
@@ -1420,9 +1406,7 @@
             }
         ],
         "title": "Hi-C processing part A",
-        "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e"
     },
     {
         "accession": "4DNWFSOZLMGT",
@@ -1688,9 +1672,7 @@
             }
         ],
         "title": "Hi-C processing part A revision 9",
-        "uuid": "02d636b9-d82d-4da9-950c-2ca994a09411",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a09411"
     },
     {
         "arguments": [
@@ -2063,9 +2045,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 15",
-        "uuid": "b9829418-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "b9829418-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFSOZLJGI",
@@ -2196,9 +2176,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 6",
-        "uuid": "a217d61c-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a217d61c-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFSOZLJBM",
@@ -2444,9 +2422,7 @@
             }
         ],
         "title": "hi-c-processing-parta-juicer",
-        "uuid": "a9caf6f3-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a9caf6f3-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFSOBBBBB",
@@ -2709,9 +2685,7 @@
             }
         ],
         "title": "hi-c-processing-parta-juicer",
-        "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c"
     },
     {
         "accession": "4DNWFSOZLMMB",
@@ -3016,9 +2990,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 24",
-        "uuid": "b9829418-49e5-4c33-afab-9ec90d659999",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "b9829418-49e5-4c33-afab-9ec90d659999"
     },
     {
         "accession": "4DNWFP00U73B",
@@ -3284,9 +3256,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 44 0.2.0",
-        "uuid": "d9e9c966-56d9-47e8-ae21-47f94a1af417",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "d9e9c966-56d9-47e8-ae21-47f94a1af417"
     },
     {
         "accession": "4DNWFG6JYY2P",
@@ -3378,9 +3348,7 @@
             }
         ],
         "title": "add-hic-normvector-to-mcool",
-        "uuid": "e8b6d4be-20c4-4e39-b1a3-f04592894521",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "e8b6d4be-20c4-4e39-b1a3-f04592894521"
     },
     {
         "accession": "4DNWFG6JJBM8",
@@ -3468,9 +3436,7 @@
             }
         ],
         "title": "extract-mcool-normvector-for-juicebox",
-        "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1"
     },
     {
         "accession": "4DNWFG6J82TH",
@@ -3576,9 +3542,7 @@
             }
         ],
         "title": "addnormtohic",
-        "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2"
     },
     {
         "accession": "4DNWF06BPEF2",
@@ -3780,9 +3744,7 @@
             }
         ],
         "title": "hi-c-processing-partc/6",
-        "uuid": "c6480905-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "c6480905-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFZOGJEI4",
@@ -3920,9 +3882,7 @@
             }
         ],
         "title": "Alignment for Hi-C using bwa-mem 0.2.0",
-        "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5"
     },
     {
         "accession": "4DNWF84NFOQP",
@@ -4062,9 +4022,7 @@
             }
         ],
         "title": "Alignment for Hi-C using bwa-mem 0.2.6",
-        "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc"
     },
     {
         "accession": "4DNWF37VHW0F",
@@ -4179,9 +4137,7 @@
             }
         ],
         "title": "Parsing and Sorting for Hi-C using pairsamtools 0.2.0",
-        "uuid": "65586d4b-1e3b-4b31-891e-11f48c816545",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "65586d4b-1e3b-4b31-891e-11f48c816545"
     },
     {
         "accession": "4DNWF3YV81HS",
@@ -4277,9 +4233,7 @@
             }
         ],
         "title": "Merging for Hi-C using pairsamtools 0.2.0",
-        "uuid": "af8908bf-fdcb-40be-8bca-f1a49226bd20",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "af8908bf-fdcb-40be-8bca-f1a49226bd20"
     },
     {
         "accession": "4DNWF1Y7DN3H",
@@ -4358,9 +4312,7 @@
             }
         ],
         "title": "Duplicate Marking for Hi-C using pairsamtools 0.2.0",
-        "uuid": "a18978fa-7e78-488f-8e6b-bfb6f63b8861",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a18978fa-7e78-488f-8e6b-bfb6f63b8861"
     },
     {
         "accession": "4DNWF38VH15",
@@ -4483,9 +4435,7 @@
             }
         ],
         "title": "Filtering for Hi-C using pairsamtools 0.2.0",
-        "uuid": "3758e00c-2035-43c6-b783-bb92afe57c99",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "3758e00c-2035-43c6-b783-bb92afe57c99"
     },
     {
         "accession": "4DNWZJ2G671",
@@ -4589,9 +4539,7 @@
             }
         ],
         "title": "Adding restriction fragment information for Hi-C using pairsamtools 0.2.0",
-        "uuid": "ef125750-8df2-418e-a1ee-402285f9dd93",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "ef125750-8df2-418e-a1ee-402285f9dd93"
     },
     {
         "accession": "4DNWZH36VU2",
@@ -4676,9 +4624,7 @@
             }
         ],
         "title": "Patching pairs file for Hi-C using pairsamtools 0.2.0",
-        "uuid": "7e5dcad0-d8da-4286-9253-a779d5310a49",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "7e5dcad0-d8da-4286-9253-a779d5310a49"
     },
     {
         "app_name": "hi-c-processing-bam",
@@ -4992,8 +4938,7 @@
             }
         ],
         "title": "Hi-C Post-alignment Processing 0.2.6",
-        "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68"
     },
     {
         "app_name": "repliseq-parta",
@@ -5394,8 +5339,7 @@
             }
         ],
         "title": "Repli-seq data processing pipeline for alignment, filtering and counting v13.1",
-        "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364",
-        "workflow_type": "Repli-seq data processing"
+        "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364"
     },
     {
         "app_name": "repliseq-parta",
@@ -5796,7 +5740,6 @@
         ],
         "title": "Repli-seq data processing pipeline for alignment, filtering and counting v14",
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
-        "workflow_type": "Repli-seq data processing",
         "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
         "version_upgrade_log": "The count script (used by run-count.sh) now sorts the binfile before feeding to bedtools coverage to avoid a sorting inconsistency issue.",
         "accession": "4DNWFBT37VUW"
@@ -6501,8 +6444,7 @@
             }
         ],
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists 0.2.6",
-        "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0"
     },
     {
         "app_name": "hi-c-processing-pairs-nore",
@@ -7119,8 +7061,7 @@
             }
         ],
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no restriction enzyme 0.2.6",
-        "uuid": "c19ee11e-9d5a-454f-af50-600a0cf990b6",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "c19ee11e-9d5a-454f-af50-600a0cf990b6"
     },
     {
         "app_name": "hi-c-processing-pairs-nonorm",
@@ -7682,8 +7623,7 @@
             }
         ],
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization 0.2.6",
-        "uuid": "bd6e25ea-f368-4758-a821-d30e0b5a4100",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "bd6e25ea-f368-4758-a821-d30e0b5a4100"
     },
     {
         "app_name": "hi-c-processing-pairs-nore-nonorm",
@@ -8179,8 +8119,7 @@
             }
         ],
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme 0.2.6",
-        "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd"
     },
     {
         "accession": "4DNWJV73GVL",
@@ -8277,9 +8216,7 @@
             }
         ],
         "title": "Converting bedgraph to bigwig v4",
-        "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e",
-        "workflow_diagram": "",
-        "workflow_type": "Other"
+        "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e"
     },
     {
         "accession": "4DNWJL752HA",
@@ -8709,9 +8646,7 @@
             }
         ],
         "title": "Chip-seq data processing pipeline",
-        "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3"
     },
     {
         "accession": "4DNWF25VHY9",
@@ -9141,9 +9076,7 @@
             }
         ],
         "title": "Chip-seq data processing pipeline, Align-only, ChIP 1.1.1",
-        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178"
     },
     {
         "accession": "4DNWF2FBLQA1",
@@ -9550,9 +9483,7 @@
             }
         ],
         "title": "Chip-seq data processing pipeline, Align-only, Control 1.1.1",
-        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179"
     },
     {
         "accession": "4DNWF3BT781",
@@ -9954,9 +9885,7 @@
             }
         ],
         "title": "Chip-seq data processing pipeline, post-alignment 1.1.1",
-        "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513"
     },
     {
         "accession": "4DNWB42C877",
@@ -10367,9 +10296,7 @@
             }
         ],
         "title": "ATAC-seq data processing pipeline",
-        "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5",
-        "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing"
+        "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5"
     },
     {
         "accession": "4DNWF2BBZ1E",
@@ -10760,9 +10687,7 @@
             }
         ],
         "title": "ATAC-seq data processing pipeline, Align-only 1.1.1",
-        "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa",
-        "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing"
+        "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa"
     },
     {
         "accession": "4DNWF2VTG8I",
@@ -11070,8 +10995,6 @@
         ],
         "title": "ATAC-seq data processing pipeline, post-alignment 1.1.1",
         "uuid": "510d321f-8a79-479d-95eb-c8fd703972a7",
-        "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing",
         "aliases": ["4dn-dcic-lab:wf-encode-atacseq-postaln"]
     },
     {
@@ -11157,8 +11080,6 @@
             }
         ],
         "title": "Converting bed to beddb v2",
-        "uuid": "9d575e99-5ffe-4ea4-b74f-ad40f621cd39",
-        "workflow_diagram": "",
-        "workflow_type": "Other"
+        "uuid": "9d575e99-5ffe-4ea4-b74f-ad40f621cd39"
     }
 ]

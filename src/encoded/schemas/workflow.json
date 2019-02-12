@@ -26,7 +26,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "accession": {
             "accessionType": "WF"
@@ -60,11 +60,6 @@
         "category": {
             "title": "Category",
             "description": "A short text description of the workflow's category (e.g. alignment).",
-            "type": "string"
-        },
-        "workflow_diagram": {
-            "title": "Workflow diagram",
-            "description": "Image of workflow diagram",
             "type": "string"
         },
         "cwl_pointer": {

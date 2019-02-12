@@ -411,3 +411,12 @@ def workflow_4_5(value, system):
                     value['steps'][s]['inputs'][i]['meta']['notes'] = msg
                 else:
                     value['steps'][s]['inputs'][i]['meta']['file_format'] = ffuuid
+
+
+@upgrade_step('workflow', '5', '6')
+def workflow_5_6(value, system):
+    '''remove workflow type (and workflow diagram) field'''
+    if 'workflow_type' in value:
+        del value['workflow_type']
+    if 'workflow_diagram' in value:
+        del value['workflow_diagram']
