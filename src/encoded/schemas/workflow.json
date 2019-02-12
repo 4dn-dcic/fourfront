@@ -430,6 +430,12 @@
         },
         "experiment_types": {
             "title": "Experiment Types"
+        },
+        "app_name": {
+            "title": "App Name"
+        },
+        "app_version": {
+            "title": "App version"
         }
     }
 }
