@@ -926,13 +926,14 @@ def add_view_to_views(new_view, views):
         a boolean indicating success.
         a string containing an error message, if any (may be None)
     """
-    # If the first view is blank, override it with the new view.
+    # If the first view's center is blank, override it with the new view.
     if not (
         len(views) > 0 \
         and "center" in views[0]["tracks"] \
         and len(views[0]["tracks"]["center"]) > 0 \
         and "contents" in views[0]["tracks"]["center"][0] \
         and len(views[0]["tracks"]["center"][0]["contents"]) > 0
+        and len(new_view["tracks"]["center"]) > 0
     ) :
         views[0]["tracks"]["center"] = new_view["tracks"]["center"]
 
@@ -1240,6 +1241,11 @@ def copy_top_reference_tracks_into_left(target_view, views):
         "horizontal-gene-annotations": "vertical-gene-annotations",
     }
 
+    orientation_mappings = {
+        "1d-horizontal": "1d-vertical",
+        "1d-vertical" : "1d-horizontal",
+    }
+
     # Look through all of the top views for the chromsize and the gene annotation tracks.
     # Make a shallow copy of the found reference tracks.
     new_tracks = []
@@ -1248,6 +1254,12 @@ def copy_top_reference_tracks_into_left(target_view, views):
 
     # Change the horizontal track type to vertical track types.
     for track in new_tracks:
+        # Rename the uid so it doesn't conflict with the top track.
+        if "uid" in track and track["uid"].startswith("top"):
+            track["uid"] = track["uid"].replace("top", "left", 1)
+        else:
+            track["uid"] = uuid.uuid4()
+
         if track["type"] in reference_file_type_mappings:
             track["type"] = reference_file_type_mappings[ track["type"] ]
 
@@ -1278,6 +1290,11 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["minWidth"] = temp_width
             del track["minHeight"]
+
+        # And the orientation
+        track_orientation = track.get("orientation", None)
+        if track_orientation in orientation_mappings:
+            track["orientation"] = orientation_mappings[track_orientation]
 
     # Add the copied tracks to the left side of this view if it doesn't have the track already.
     for track in reversed(new_tracks):

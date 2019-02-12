@@ -1593,6 +1593,7 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig
     for t in full_higlass_json["views"][0]["tracks"]["top"]:
         if t["type"] == "horizontal-chromosome-labels":
             t['height'] = 50
+            t["orientation"] = "1d-horizontal"
 
     # Remove the mcool from the central contents.
     full_higlass_json["views"][0]["tracks"]["center"] = []
@@ -1639,19 +1640,31 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig
         "vertical-chromosome-labels" : 0,
     }
 
+    top_track_uids = []
     for track in restored_2d_track_higlass_json["views"][0]["tracks"]["top"]:
+        if "uid" in track:
+            top_track_uids.append(track["uid"])
         if track["type"] in types_to_find:
             types_to_find[ track["type"] ] += 1
 
     assert_true(types_to_find["horizontal-gene-annotations"] > 0)
     assert_true(types_to_find["horizontal-chromosome-labels"] > 0)
 
+    vertical_tracks_found = 0
     for track in restored_2d_track_higlass_json["views"][0]["tracks"]["left"]:
+        if "uid" in track:
+            assert_true(
+                track["uid"] not in top_track_uids,
+                "Top track uid reused for left track: {uid}".format(uid=track["uid"])
+            )
         if track["type"] in types_to_find:
             types_to_find[ track["type"] ] += 1
+        if track["orientation"] == "1d-vertical":
+            vertical_tracks_found += 1
 
     assert_true(types_to_find["vertical-gene-annotations"] > 0)
     assert_true(types_to_find["vertical-chromosome-labels"] > 0)
+    assert_true(vertical_tracks_found > 0)
 
     # The chromsizes had a height when it was horizontal. Make sure it has a width when vertical.
     top_chromsizes_tracks =[t for t in restored_2d_track_higlass_json["views"][0]["tracks"]["top"] if t["type"] == "horizontal-chromosome-labels"]
