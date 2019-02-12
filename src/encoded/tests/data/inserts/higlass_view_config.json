@@ -1,7 +1,7 @@
 [
     {
         "title" : "Test BigWig Display",
-        "description" : "Two BigWig tracks plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
+        "description" : "Two BigWig tracks plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'Z_YbBZW9RAq5V1oKvvp3hg'.",
         "uuid" : "00000000-1111-0000-1111-000000000001",
         "status" : "released",
         "genome_assembly" : "GRCm38",
@@ -77,7 +77,7 @@
                                 "position":"top",
                                 "minHeight":30,
                                 "thumbnail":null,
-                                "tilesetUid":"JXbq7f-GTeq3FJy_ilIomQ",
+                                "tilesetUid":"Z_YbBZW9RAq5V1oKvvp3hg",
                                 "orientation":"1d-horizontal"
                             },
                             {
@@ -165,12 +165,12 @@
                         ]
                     },
                     "initialXDomain":[
-                        -544140022.2230138,
-                        579928228.3034478
+                        -681380342.5,
+                        3406901712.5
                     ],
                     "initialYDomain":[
-                        -58953193.651658446,
-                        139996939.18488348
+                        -681380342.5,
+                        3406901712.5
                     ],
                     "autocompleteSource":"/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
                     "genomePositionSearchBox":{
@@ -231,17 +231,8 @@
             "editable": true,
             "zoomLocks": {
                 "locksByViewUid": {
-                    "view-4dn-mcool-0": "E5WfQFehR2-Dm4BW1zS5eQ"
                 },
                 "locksDict": {
-                    "E5WfQFehR2-Dm4BW1zS5eQ": {
-                        "uid": "E5WfQFehR2-Dm4BW1zS5eQ",
-                        "view-4dn-mcool-0": [
-                            815066577.6957322,
-                            959291794.8369944,
-                            1341288.7398672402
-                        ]
-                    }
                 }
             },
                 "views": [
