@@ -64,7 +64,8 @@
             "items": {
                 "title": "Category",
                 "description": "the workflow's category",
-                "type": "enum"
+                "type": "string",
+                "enum" : [
                     "processing",
                     "QC",
                     "format conversion",
