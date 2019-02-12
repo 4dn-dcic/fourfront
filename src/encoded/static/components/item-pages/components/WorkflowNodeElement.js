@@ -17,7 +17,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
         'columnWidth' : PropTypes.number
-    }
+    };
 
     static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
 
@@ -31,6 +31,15 @@ export class WorkflowNodeElement extends React.PureComponent {
 
     static isNodeGroup(node){
         return ((node.nodeType || '').indexOf('group') > -1);
+    }
+
+    static isNodeQCMetric(node){
+        if (node.ioType === 'qc') return true;
+        if (node.ioType === 'report') return true;
+        if (node.meta && node.meta.type === 'QC') return true;
+        if (node.meta && node.meta.type === 'report') return true;
+        if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
+        return false;
     }
 
     static doesRunDataExist(node){
@@ -73,7 +82,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             else if (typeof ioType === 'undefined'){
                 iconClass = 'question';
             } else if (typeof ioType === 'string') {
-                if (ioType === 'qc' || ioType === 'QC') {
+                if (WorkflowNodeElement.isNodeQCMetric(node)) {
                     iconClass = 'check-square-o';
                 } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
                     iconClass = 'wrench';

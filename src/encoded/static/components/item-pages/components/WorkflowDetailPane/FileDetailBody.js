@@ -10,6 +10,7 @@ import { SimpleFilesTable } from './../SimpleFilesTable';
 import { ItemDetailList } from './../ItemDetailList';
 import { ExperimentSetTablesLoaded } from './../ExperimentSetTables';
 import { ViewMetricButton, MetricsView } from './FileDetailBodyMetricsView';
+import { WorkflowNodeElement } from './../WorkflowNodeElement';
 
 
 
@@ -79,7 +80,7 @@ export class FileDetailBody extends React.PureComponent {
     downloadLinkBox(){
         var { node, file } = this.props, content;
 
-        if (MetricsView.isNodeQCMetric(node)){
+        if (WorkflowNodeElement.isNodeQCMetric(node)){
             content = <ViewMetricButton {...{ node, file }}/>;
         } else {
             content = <fileUtil.FileDownloadButtonAuto result={file} />;
@@ -170,7 +171,7 @@ export class FileDetailBody extends React.PureComponent {
             } else {
                 body = null;
             }
-        } else if (MetricsView.isNodeQCMetric(node)){
+        } else if (WorkflowNodeElement.isNodeQCMetric(node)){
             // Case: QC Metric
             var metrics = object.listFromTips(object.tipsFromSchema(schemas, file))
                 .filter(function(m){

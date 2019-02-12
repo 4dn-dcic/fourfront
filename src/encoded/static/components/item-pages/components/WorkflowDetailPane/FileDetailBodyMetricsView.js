@@ -18,7 +18,7 @@ export class ViewMetricButton extends React.PureComponent {
             typeLowerCased = typeof type === 'string' && type.toLocaleLowerCase(),
             usedClassName = (className || '') + " btn download-button btn-default" + (disabled ? ' disabled' : '');
 
-        if (typeof file.url !== 'string' || !MetricsView.isNodeQCMetric(node)) return null;
+        if (typeof file.url !== 'string') return null;
 
         if (typeLowerCased){
             if      (typeLowerCased === 'pass') usedClassName += ' btn-success';
@@ -83,13 +83,6 @@ class MetricsViewItem extends React.PureComponent {
 }
 
 export class MetricsView extends React.PureComponent {
-
-    static isNodeQCMetric(node){
-        if (node.ioType === 'qc') return true;
-        if (node.meta && node.meta.type === 'QC') return true;
-        if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
-        return false;
-    }
 
     static defaultProps = {
         'metrics' : [

@@ -62,7 +62,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
             _.filter(
                 (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []),
                 function(fileContainer){
-                    var file = fileContainer.value || null;
+                    var file = fileContainer.value || fileContainer.value_qc || null;
                     if (!file || typeof file !== 'object') {
                         console.error("No file ('value' property) embedded for: ", fileContainer);
                         return false;
@@ -78,7 +78,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                 }
             ),
             function(fileContainer){
-                var file = fileContainer.value || null;
+                var file = fileContainer.value || fileContainer.value_qc || null;
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value
