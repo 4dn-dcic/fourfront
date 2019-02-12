@@ -96,7 +96,7 @@ def trace_workflow_runs(context, request):
         raise HTTPBadRequest(detail="This type of Item is not traceable: " + ', '.join(item_types))
 
     try:
-        return list(trace_workflows(files_objs_to_trace, request, options))
+        return trace_workflows(files_objs_to_trace, request, options)
     except WorkflowRunTracingException as e:
         raise HTTPBadRequest(detail=e.args[0])
 

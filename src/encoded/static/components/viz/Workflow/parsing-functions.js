@@ -251,7 +251,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
         if (typeof file1 === 'string' && typeof file2 === 'string' && file1 === file2){ // Somewhat deprecated case, but can still occur if WorkflowRun has not finished indexing and we are graphing it.
             return true;
         }
-        if (typeof file1 === 'object' && typeof file2 === 'object' && (file1['@id'] || 'a') === (file2['@id']|| 'b')){ // Common case.
+        if (typeof file1 === 'object' && typeof file2 === 'object' && (file1['@id'] || 'a') === (file2['@id'] || 'b')){ // Common case.
             return true;
         }
         if (typeof file1 === 'object' && typeof file2 === 'string' && (file1['@id'] || 'a') === file2){
