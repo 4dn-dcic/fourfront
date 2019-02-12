@@ -259,7 +259,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         files_by_argument_name = OrderedDict()
         for f in set_of_files:
             arg_name = f.get('workflow_argument_name')
-            if arg_name and f.get('value', f.get('value_qc')):
+            if arg_name and (f.get('value') or f.get('value_qc')):
                 if files_by_argument_name.get(arg_name) is None:
                     files_by_argument_name[arg_name] = [f]
                 else:
@@ -321,7 +321,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         def try_match_input_with_workflow_run_output_to_generate_source(workflow_run, in_file):
             sources_for_in_file = [] # We only are looking for 1 source, but might re-use for trace_future later
             for out_file_wrapper in workflow_run.get('output_files', []):
-                out_file = out_file_wrapper['value']
+                out_file = out_file_wrapper.get('value') or out_file_wrapper.get('value_qc')
                 if out_file['uuid'] == in_file.get('uuid', 'b'):
                     step_uuid = workflow_run['uuid']
                     if step_uuid:
@@ -332,7 +332,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         "for_file" : in_file['@id'],
                         "workflow" : workflow_run['workflow']['@id']
                     })
-            print('\n\nSOURCES', sources_for_in_file, step_uuids)
             return sources_for_in_file
 
         # Gather all workflow_runs out of which our input files (1 run per file) come from
@@ -394,12 +393,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             if len(for_files) == 1:
                 for_files = for_files[0]
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
-            print('LEN0', sources)
         else:
-            print('LENMORE', step_uuids)
             for step_uuid, in_file_uuid in step_uuids:
                 next_params = ( step_uuid, get_model_obj(in_file_uuid), depth + 1 )
-                print('\n\n\nADDING:\n', next_params)
                 steps_to_process_stack.append(( step_uuid, get_model_obj(in_file_uuid), depth + 1 ))
 
         return sources
@@ -419,14 +415,13 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     if outfile['uuid'] == current_file_model_object['uuid']:
                         output['meta']['in_path'] = True
                         runs_current_file_goes_to = current_file_model_object.get('workflow_run_inputs', [])
-                        print('\n\n\noutpitos', runs_current_file_goes_to, '\n\n', current_file_model_object)
                         for target_workflow_run_uuid in runs_current_file_goes_to:
                             if isinstance(target_workflow_run_uuid, dict): # Case if current_file_model_object is embedded representation
                                 target_workflow_run_uuid = target_workflow_run_uuid['uuid']
                             target_workflow_run_model_obj = get_model_obj(target_workflow_run_uuid)
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model_obj.get('input_files', []))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():
-                                input_files_for_arg_uuids = list(map(lambda f: f.get('value') or f.get('value_qc') or None, input_files_for_arg))
+                                input_files_for_arg_uuids = [ (f.get('value') or f.get('value_qc') or None) for f in input_files_for_arg ]
                                 if current_file_model_object['uuid'] in input_files_for_arg_uuids:
                                     # Check that we don't have this already
                                     exists = False
@@ -534,7 +529,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         input_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('input_files', []))
         for argument_name, input_files_for_arg in input_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
-            file_uuids       = [ f.get('value') for f in input_files_for_arg ]
+            file_uuids       = [ (f.get('value') or f.get('value_qc') or None) for f in input_files_for_arg ]
             file_items       = []
             file_format      = None
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
@@ -557,7 +552,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 "run_data" : {
                     "file" : [ common_props_from_file(file_item) for file_item in file_items ],
                     "type" : "input",
-                    "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in input_files_for_arg ]
+                    "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'value_qc' 'workflow_argument_name'] } for f in input_files_for_arg ]
                 }
             })
 
