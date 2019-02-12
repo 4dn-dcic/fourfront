@@ -8181,17 +8181,17 @@
         "app_name": "bedGraphToBigWig",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "bg",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bgfile"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output to-be-extra-input file",
                 "workflow_argument_name": "bwfile"
@@ -8280,98 +8280,98 @@
         "app_name": "encode-chipseq",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.fastqs"
             },
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.fraglen"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bwa.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.merge_fastq.cpu"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.peak_calls"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {   
+            {
                 "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
@@ -8712,39 +8712,39 @@
         "app_name": "encode-chipseq-aln-chip",
         "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
@@ -8756,53 +8756,53 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.fraglen"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bwa.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.merge_fastq.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.align_only"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta_xcor"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -8933,7 +8933,7 @@
                             }
                         ]
                     },
-                    {   
+                    {
                         "meta": {
                             "cardinality": "single",
                             "global": true,
@@ -8941,7 +8941,7 @@
                         },
                         "name": "chip.qc_report.name",
                         "source": [
-                            {   
+                            {
                                 "name": "chip.qc_report.name"
                             }
                         ]
@@ -9144,39 +9144,39 @@
         "app_name": "encode-chipseq-aln-ctl",
         "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
@@ -9188,23 +9188,23 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta_ctl.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bwa_ctl.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.filter_ctl.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta_ctl.cpu"
             },
@@ -9212,20 +9212,20 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.align_only"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.merge_fastq_ctl.cpu"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta_ctl"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -9356,7 +9356,7 @@
                             }
                         ]
                     },
-                    {   
+                    {
                         "meta": {
                             "cardinality": "single",
                             "global": true,
@@ -9364,7 +9364,7 @@
                         },
                         "name": "chip.qc_report.name",
                         "source": [
-                            {   
+                            {
                                 "name": "chip.qc_report.name"
                             }
                         ]
@@ -9553,91 +9553,91 @@
         "app_name": "encode-chipseq-postaln",
         "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.tas"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_tas"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bam2ta_no_filt_R1.ta"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.fraglen"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.xcor.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.spp_cpu"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.optimal_peak"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.conservative_peak"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
@@ -9957,93 +9957,93 @@
         "app_name": "encode-atacseq",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bowtie2Index",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.bowtie2_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.disable_ataqc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bowtie2.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.peak_calls"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
-            {   
+            {
                 "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.qc_json"
@@ -10370,88 +10370,88 @@
         "app_name": "encode-atacseq-aln",
         "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bowtie2Index",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.bowtie2_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.disable_ataqc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bowtie2.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.first_ta"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.qc_json"
             }
@@ -10763,69 +10763,69 @@
         "app_name": "encode-atacseq-postaln",
         "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.tas"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.disable_ataqc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.optimal_peak"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.conservative_peak"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.qc_json"
             }
