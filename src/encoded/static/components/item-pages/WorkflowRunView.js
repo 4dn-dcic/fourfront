@@ -134,7 +134,7 @@ export default class WorkflowRunView extends DefaultItemView {
             workflow = context.workflow,
             topRightTitle = (workflow && (workflow.title || workflow.display_title)) || null;
 
-        if (topRightTitle && Array.isArray(workflow.category)){
+        if (topRightTitle && Array.isArray(workflow.category) && workflow.category.length > 0){
             topRightTitle = (
                 <React.Fragment>
                     <span className="text-400">{ topRightTitle }</span> ({ workflow.category.join(', ') })
