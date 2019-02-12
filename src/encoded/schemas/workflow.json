@@ -4,7 +4,7 @@
     "id": "/profiles/workflow.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "name", "workflow_type", "award", "lab"],
+    "required": ["title", "name", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "accession"],
     "mixinProperties": [
@@ -61,21 +61,6 @@
             "title": "Category",
             "description": "A short text description of the workflow's category (e.g. alignment).",
             "type": "string"
-        },
-        "workflow_type": {
-            "title": "Workflow Type",
-            "type": "string",
-            "enum": [
-                "Hi-C data analysis",
-                "Image processing",
-                "Visualization processing",
-                "Repli-seq data processing",
-                "ChIP-seq data processing",
-                "ATAC-seq data processing",
-                "RNA-seq data processing",
-                "Data QC",
-                "Other"
-            ]
         },
         "workflow_diagram": {
             "title": "Workflow diagram",
