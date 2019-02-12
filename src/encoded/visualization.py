@@ -1133,10 +1133,17 @@ def copy_1d_tracks_into_all_views(views, new_view):
 
     # For each side (except center)
     for side in ("top", "left"):
+        if side not in base_view["tracks"]:
+            continue
+
+        # Compile that side's track uids
+        new_view_track_uids = [ track["uid"] for track in new_view["tracks"][side] if "uid" in track]
+
         # If there are any tracks here
         for track in base_view["tracks"][side]:
-            # Copy them into the new_view's side
-            new_view["tracks"][side].append(track)
+            # Copy them into the new_view's side if the uid doesn't exist.
+            if track["uid"] not in new_view_track_uids:
+                new_view["tracks"][side].append(track)
 
     return True
 
