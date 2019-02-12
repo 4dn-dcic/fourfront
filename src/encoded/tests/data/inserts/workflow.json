@@ -71,7 +71,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + filtering + matrix generation",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0",
         "data_types": [
             "Hi-C"
@@ -517,7 +516,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": ["QC"],
         "cwl_child_filenames": [
             "fastqc-0-11-4.cwl"
         ],
@@ -656,7 +655,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": ["QC"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
@@ -796,7 +795,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": ["QC"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_directory_url_draft3": "",
@@ -927,7 +926,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": ["QC"],
         "data_types": [
             "Hi-C",
             "Capture Hi-C",
@@ -1000,7 +999,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": ["QC"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
@@ -1080,7 +1079,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": ["QC"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_directory_url_draft3": "",
@@ -1193,7 +1192,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + format conversion",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
         "data_types": [
             "Hi-C"
@@ -1459,7 +1457,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + format conversion",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
         "data_types": [
             "Hi-C"
@@ -1734,7 +1731,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.15.cwl",
         "data_types": [
             "Hi-C"
@@ -2081,7 +2077,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
         "cwl_pointer": "https://github.com/4dn-dcic/pipelines-cwl/blob/master/cwl_sbg/hi-c-processing-partb.6.cwl",
         "data_types": [
             "Hi-C"
@@ -2227,7 +2222,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + filtering",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
         "data_types": [
             "Hi-C"
@@ -2477,7 +2471,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + filtering",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.16.cwl",
         "data_types": [
             "Hi-C"
@@ -2739,7 +2732,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.24.cwl",
         "data_types": [
             "Hi-C"
@@ -3039,7 +3031,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "pairs2hic.cwl",
@@ -3281,7 +3272,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format_integration",
+        "category": ["miscellaneous"],
         "data_types": [
             "Hi-C"
         ],
@@ -3371,7 +3362,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "data extraction",
+        "category": ["miscellaneous"],
         "data_types": [
             "Hi-C"
         ],
@@ -3463,7 +3454,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "normalization",
         "data_types": [
             "Hi-C"
         ],
@@ -3568,7 +3558,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "aggregation",
         "cwl_pointer": "",
         "data_types": [
             "Hi-C"
@@ -3780,7 +3769,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -3920,7 +3908,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_directory_url_draft3": "",
@@ -4050,7 +4037,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "annotation+sorting",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4160,7 +4146,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging",
+        "category": ["miscellaneous"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4252,7 +4238,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "annotating",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4344,7 +4329,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "filtering",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4462,7 +4446,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": ["format conversion"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4561,7 +4545,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": ["format conversion"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4663,7 +4647,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "filter",
         "cwl_child_filenames": [
             "pairsam-parse-sort.cwl",
             "pairsam-merge.cwl",
@@ -4991,7 +4974,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "align + filter + count",
         "cwl_child_filenames": [
             "clip.cwl",
             "align.cwl",
@@ -5392,7 +5374,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "align + filter + count",
         "cwl_child_filenames": [
             "clip.cwl",
             "align.cwl",
@@ -5832,7 +5813,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "addfragtopairs.cwl",
@@ -6525,7 +6505,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "cooler.cwl",
@@ -7146,7 +7125,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "addfragtopairs.cwl",
@@ -7703,7 +7681,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "cooler.cwl",
@@ -8143,7 +8120,7 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": ["format conversion"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/v4/cwl/",
         "cwl_main_filename": "bedGraphToBigWig.cwl",
@@ -8321,7 +8298,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
         "wdl_main_filename": "chip.wdl",
@@ -8749,7 +8725,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
         "wdl_main_filename": "chip.wdl",
@@ -9170,7 +9145,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
         "wdl_main_filename": "chip.wdl",
@@ -9580,7 +9554,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
         "wdl_main_filename": "chip.wdl",
@@ -9985,7 +9958,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
         "wdl_main_filename": "atac.wdl",
@@ -10390,7 +10362,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
         "wdl_main_filename": "atac.wdl",
@@ -10762,7 +10733,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
         "wdl_child_filenames": [],
         "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
         "wdl_main_filename": "atac.wdl",
@@ -11021,7 +10991,7 @@
         ],
 
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": ["format conversion"],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtobeddb/v2/cwl/",
         "cwl_main_filename": "bedtobeddb.cwl",

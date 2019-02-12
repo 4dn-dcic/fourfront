@@ -59,8 +59,21 @@
         },
         "category": {
             "title": "Category",
-            "description": "A short text description of the workflow's category (e.g. alignment).",
-            "type": "string"
+            "description": "A short text description of the workflow's category.",
+            "type": "array",
+            "items": {
+                "title": "Category",
+                "description": "the workflow's category",
+                "type": "enum"
+                    "processing",
+                    "QC",
+                    "format conversion",
+                    "feature calling",
+                    "miscellaneous",
+                    "provenance"
+                ],
+                "default": "processing"
+            }
         },
         "cwl_pointer": {
             "title": "SBG CWL Path",
