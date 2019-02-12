@@ -596,6 +596,59 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     assert_true(layout1["w"] == 6)
     assert_true(layout1["h"] == 12)
 
+def test_correct_duplicate_tracks(testapp, higlass_mcool_viewconf, mcool_file_json):
+    """When creating new views, make sure the correct number of 2D tracks are copied over.
+    """
+    # Post an mcool file and retrieve its uuid. Add a higlass_uid.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = "GRCm38"
+    mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+
+    # Get the json for a viewconfig with a mcool file.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add an mcool with the same genome assembly.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=mcool_file['uuid'])]
+    })
+
+    assert_true(response.json["success"] == True)
+
+    # Make sure the mcool displays are next to each other.
+    new_higlass_json = response.json["new_viewconfig"]
+
+    assert_true(len(new_higlass_json["views"]) == 2)
+
+    # Both views should have the same types of tracks.
+    view0 = new_higlass_json["views"][0]
+    view1 = new_higlass_json["views"][1]
+
+    for side in ("top", "left"):
+        assert_true(len(view0["tracks"][side]) == 2, "{side} does not have 2 tracks".format(side=side))
+
+        assert_true(
+            len(view0["tracks"][side]) == len(view1["tracks"][side]),
+            "{side} number of tracks do not match: {zero} versus {one}".format(
+                side=side,
+                zero=len(view0["tracks"][side]),
+                one= len(view1["tracks"][side]),
+            )
+        )
+        for i in range(len(view0["tracks"][side])):
+            assert_true(
+                view0["tracks"][side][i]["uid"] == view1["tracks"][side][i]["uid"],
+                "{side} track {index} do not match: {zero} versus {one}".format(
+                    side=side,
+                    index=i,
+                    zero=view0["tracks"][side][i]["uid"],
+                    one= view1["tracks"][side][i]["uid"]
+                )
+            )
+
 def assert_expected_viewconf_dimensions(viewconf, expected_dimensions):
     """ Given a viewconf and a list of expected dimensions, assert_true(each view has the correct dimensions in each.)
 
