@@ -299,7 +299,7 @@
     },
     {
         "title" : "HiGlass Views - 4DN in situ Hi-C contact matrices",
-        "description" : "An MCOOL file track plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'Z_YbBZW9RAq5V1oKvvp3hg'.",
+        "description" : "An MCOOL file track plus annotations for gene GRCh38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'Z_YbBZW9RAq5V1oKvvp3hg'.",
         "uuid" : "00000000-1111-0000-1111-000000000003",
         "name" : "joint-analysis-data-plans.higlass",
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
