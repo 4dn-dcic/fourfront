@@ -428,8 +428,8 @@
         "category": {
             "title": "Workflow Category"
         },
-        "workflow_type": {
-            "title": "Workflow Type"
+        "experiment_types": {
+            "title": "Experiment Types"
         }
     }
 }
