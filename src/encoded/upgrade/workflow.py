@@ -415,8 +415,22 @@ def workflow_4_5(value, system):
 
 @upgrade_step('workflow', '5', '6')
 def workflow_5_6(value, system):
-    '''remove workflow type (and workflow diagram) field'''
+    '''remove workflow type (and workflow diagram) field and clean up workflow cateogory'''
     if 'workflow_type' in value:
         del value['workflow_type']
     if 'workflow_diagram' in value:
         del value['workflow_diagram']
+    if 'data_types' in value:
+        value['experiment_types'] = value['data_types'].copy()
+        del value['data_types']
+    if 'workflow_category' in value:
+        if value['workflow_category'] in ['QC', 'format_conversion', 'provenance', 'Other']:
+            pass
+        elif value['workflow_category'].endswith('calling'):
+            value['workflow_category'] = 'Feature calling'
+        elif value['workflow_category'] in ['data extraction', 'merging', 'format_integration']:
+            value['workflow_category'] = 'Miscellaneous'
+        else:
+            value['workflow_category'] = 'Processing'
+    elif 'processing' in value['title']:
+            value['workflow_category'] = 'Processing'

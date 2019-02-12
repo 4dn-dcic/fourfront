@@ -47,13 +47,13 @@
             "type": "string",
             "formInput": "textarea"
         },
-        "data_types": {
-            "title": "Data types",
-            "description": "Types of the data that the workflow is applied to.",
+        "experiment_types": {
+            "title": "Experiment types",
+            "description": "Types of the experiment that the workflow is applied to.",
             "type": "array",
             "items": {
-                "title": "Data type",
-                "description": "type of data that the workflow is applied to",
+                "title": "Experiment type",
+                "description": "type of experiment that the workflow is applied to",
                 "type": "string"
             }
         },
