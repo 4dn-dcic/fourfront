@@ -1143,13 +1143,19 @@ def copy_1d_tracks_into_all_views(views, new_view):
 def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
     """ If there are multiple views, create a lock to keep them at the same position and scale.
     Args:
-        view_config (dict)          : The HiGlass view config.
-        view (dict)                 : The view to add the lock to.
+        view_config (dict)          : The HiGlass view config. Will be modified.
+        view (dict)                 : The view to add the lock to. Will be modified.
         scales_and_center_k(list)   : 3 numbers used to note the position and zoom level.
 
     Returns:
         Boolean indicating success.
     """
+
+    # If there is only 1 view, then there is no need to add a lock.
+    if len(view_config["views"]) <= 1:
+        view_config["locationLocks"] = {}
+        view_config["zoomLocks"] = {}
+        return
 
     # Get the uid for this view
     view_uid = str(view["uid"])
