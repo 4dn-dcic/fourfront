@@ -1,7 +1,7 @@
 [
     {
         "title" : "Test BigWig Display",
-        "description" : "Two BigWig tracks plus annotations for gene mm10 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
+        "description" : "Two BigWig tracks plus annotations for gene mm10 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
         "uuid" : "00000000-1111-0000-1111-000000000001",
         "status" : "released",
         "genome_assembly" : "GRCm38",
@@ -22,13 +22,13 @@
                         "top":[
                             {
                                 "uid":"top-annotation-track",
-                                "name":"Gene Annotations (mm10)",
+                                "name":"Gene Annotations (GRCm38)",
                                 "type":"horizontal-gene-annotations",
                                 "header":"",
                                 "height":55,
                                 "server":"https://higlass.4dnucleome.org/api/v1",
                                 "options":{
-                                    "name":"Gene Annotations (mm10)",
+                                    "name":"Gene Annotations (GRCm38)",
                                     "fontSize":11,
                                     "labelColor":"black",
                                     "coordSystem":"mm10",
@@ -47,7 +47,7 @@
                                 },
                                 "position":"top",
                                 "minHeight":55,
-                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "tilesetUid":"IUcqX4GzTNWJIzE2-b_sZg",
                                 "orientation":"1d-horizontal"
                             },
                             {
@@ -77,7 +77,7 @@
                                 "position":"top",
                                 "minHeight":30,
                                 "thumbnail":null,
-                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "tilesetUid":"JXbq7f-GTeq3FJy_ilIomQ",
                                 "orientation":"1d-horizontal"
                             },
                             {
@@ -172,11 +172,11 @@
                         -58953193.651658446,
                         139996939.18488348
                     ],
-                    "autocompleteSource":"/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                    "autocompleteSource":"/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
                     "genomePositionSearchBox":{
                         "visible":true,
-                        "chromInfoId":"mm10",
-                        "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
+                        "chromInfoId":"GRCm38",
+                        "autocompleteId":"IUcqX4GzTNWJIzE2-b_sZg",
                         "chromInfoServer":"https://higlass.4dnucleome.org/api/v1",
                         "autocompleteServer":"https://higlass.4dnucleome.org/api/v1"
                     }
@@ -395,9 +395,13 @@
                             "gallery": []
                         },
                         "uid": "view-4dn-mcool-0",
+                        "initialXDomain": [
+                            -772067458,
+                            3860337290
+                        ],
                         "initialYDomain": [
-                            -75715159.62474918,
-                            1343241337.469387
+                            -772067458,
+                            3860337290
                         ],
                         "autocompleteSource": "/api/v1/suggest/?d=XGrAqZupQb2h5Pjiarf8PA&",
                         "layout": {
@@ -415,11 +419,7 @@
                             "autocompleteServer": "https://higlass.4dnucleome.org/api/v1",
                             "visible": true,
                             "chromInfoServer": "https://higlass.4dnucleome.org/api/v1"
-                        },
-                        "initialXDomain": [
-                            20744841.570715845,
-                            3242829463.7932086
-                        ]
+                        }
                     }
                 ],
                 "locationLocks": {

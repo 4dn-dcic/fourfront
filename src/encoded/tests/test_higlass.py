@@ -16,7 +16,7 @@ def higlass_mcool_viewconf(testapp):
     """
     viewconf = {
         "title" : "Test MCOOL Display",
-        "description" : "An MCOOL file track plus annotations for gene GRCm38 (tileset 'QDutvmyiSrec5nX4pA5WGQ') and chromosome 'EtrWT0VtScixmsmwFSd7zg'.",
+        "description" : "An MCOOL file track plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
         "uuid" : "00000000-1111-0000-1111-000000000002",
         "name" : "higlass-mcool-test-view",
         "genome_assembly" : "GRCm38",
@@ -63,10 +63,10 @@ def higlass_mcool_viewconf(testapp):
                         129711724.73566854,
                         1810982460.1999617
                     ],
-                    "autocompleteSource":"/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&",
+                    "autocompleteSource":"/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
                     "genomePositionSearchBox":{
                         "autocompleteServer":"https://higlass.4dnucleome.org/api/v1",
-                        "autocompleteId":"P0PLbQMwTYGy-5uPIQid7A",
+                        "autocompleteId":"IUcqX4GzTNWJIzE2-b_sZg",
                         "chromInfoServer":"https://higlass.4dnucleome.org/api/v1",
                         "chromInfoId":"GRCm38",
                         "visible":True
@@ -76,7 +76,7 @@ def higlass_mcool_viewconf(testapp):
                             {
                                 "name":"Gene Annotations (GRCm38)",
                                 "server":"https://higlass.4dnucleome.org/api/v1",
-                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "tilesetUid":"IUcqX4GzTNWJIzE2-b_sZg",
                                 "type":"horizontal-gene-annotations",
                                 "options":{
                                     "labelColor":"black",
@@ -100,7 +100,7 @@ def higlass_mcool_viewconf(testapp):
                             {
                                 "name":"Chromosome Axis",
                                 "server":"https://higlass.4dnucleome.org/api/v1",
-                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "tilesetUid":"JXbq7f-GTeq3FJy_ilIomQ",
                                 "type":"horizontal-chromosome-labels",
                                 "local":True,
                                 "minHeight":30,
@@ -120,7 +120,7 @@ def higlass_mcool_viewconf(testapp):
                             {
                                 "name":"Gene Annotations (GRCm38)",
                                 "server":"https://higlass.4dnucleome.org/api/v1",
-                                "tilesetUid":"QDutvmyiSrec5nX4pA5WGQ",
+                                "tilesetUid":"IUcqX4GzTNWJIzE2-b_sZg",
                                 "uid":"left-annotation-track",
                                 "type":"vertical-gene-annotations",
                                 "options":{
@@ -143,7 +143,7 @@ def higlass_mcool_viewconf(testapp):
                             {
                                 "name":"Chromosome Axis",
                                 "server":"https://higlass.4dnucleome.org/api/v1",
-                                "tilesetUid":"EtrWT0VtScixmsmwFSd7zg",
+                                "tilesetUid":"JXbq7f-GTeq3FJy_ilIomQ",
                                 "uid":"left-chromosome-track",
                                 "type":"vertical-chromosome-labels",
                                 "options":{
