@@ -10,6 +10,7 @@
         "submits_for": ["4dn-dcic-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "date_created": "2017-04-07T19:56:09.710360+00:00",
         "viewing_groups": ["4DN"]
     },
     {
@@ -21,8 +22,14 @@
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"],
-        "preferred_email" : "fake_email_address@email.com"
+        "preferred_email" : "fake_email_address@email.com",
+        "submits_for": [
+            "4dn-dcic-lab"
+        ],
+        "aliases": [
+            "dcic:burak_alver",
+            "4dn-dcic-lab:burak_alver"
+        ]
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",
@@ -33,7 +40,8 @@
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
+        "submits_for": ["4dn-dcic-lab"],
+        "date_created": "2017-04-07T19:56:09.798042+00:00"
     },
     {
         "email": "johnsonjp@gmail.com",
@@ -110,7 +118,8 @@
         "uuid": "56c9c683-bb11-471b-b590-c656f7dc03c1",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
+        "submits_for": ["4dn-dcic-lab"],
+        "date_created": "2018-08-08T14:23:59.757516+00:00"
     },
     {
         "email": "shannon.ehmsen@gmail.com",
