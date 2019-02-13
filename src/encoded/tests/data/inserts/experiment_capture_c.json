@@ -31,11 +31,11 @@
         "files": ["4DNFIN232JJ2", "4DNFIN232JJ3"],
         "targeted_regions": [
           {
-              "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
+              "target": ["67c54a0d-f27c-43c7-b36c-d51dd52f7073"],
               "oligo_file": "4DNFIO67APA1"
           },
           {
-              "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
+              "target": ["a8ab8bca-4840-41b7-88d7-04cc19a54657"],
               "oligo_file": "4DNFIO67APB1"
           }
         ]
@@ -71,14 +71,14 @@
         "rna_tag": "biotin-dUTP",
         "files": ["4DNFIN232JJ4", "4DNFIN232JJ5"],
         "targeted_regions": [
-            {
-                "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-                "oligo_file": "4DNFIO67APA1"
-            },
-            {
-                "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
-                "oligo_file": "4DNFIO67APB1"
-            }
+          {
+              "target": ["67c54a0d-f27c-43c7-b36c-d51dd52f7073"],
+              "oligo_file": "4DNFIO67APA1"
+          },
+          {
+              "target": ["a8ab8bca-4840-41b7-88d7-04cc19a54657"],
+              "oligo_file": "4DNFIO67APB1"
+          }
         ]
     },
     {

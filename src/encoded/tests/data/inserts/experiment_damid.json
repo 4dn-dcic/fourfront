@@ -3,7 +3,7 @@
         "accession":"4DNEX067BBB1",
         "biosample":"111111bc-1111-4448-903e-854af460b123",
         "experiment_type": "DAM-ID seq",
-        "targeted_factor": "d1115d5e-40aa-43bc-b81c-32c70c9afb21",
+        "targeted_factor": ["5a5b6f55-0b54-441c-86bf-292d41e443a0"],
         "sap_treatment": "No",
         "me_pcr_cycles": 8,
         "y_ligation_dna_input": 250,
