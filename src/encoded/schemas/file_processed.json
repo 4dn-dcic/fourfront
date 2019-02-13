@@ -99,6 +99,12 @@
                 "title": "Input File",
                 "type": "string"
             }
+        },
+        "disable_wfr_inputs": {
+            "title": "Disable wfr inputs field",
+            "description": "Do not compute workflow_run_inputs field for files used as control",
+            "type": "boolean",
+            "exclude_from": ["submit4dn", "FFedit-create"]
         }
      },
     "facets" : {

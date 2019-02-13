@@ -802,7 +802,9 @@ class FileProcessed(File):
         }
     })
     def workflow_run_inputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_inputs")
+        # switch this calc prop off for some processed files, i.e. control exp files
+        if not self.properties.get('disable_wfr_inputs'):
+            return self.rev_link_atids(request, "workflow_run_inputs")
 
     @calculated_property(schema={
         "title": "Output of Workflow Runs",
