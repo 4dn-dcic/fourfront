@@ -66,8 +66,8 @@ file_workflow_run_embeds = [
     'workflow_run_inputs.output_files.value.file_format',
     'workflow_run_inputs.output_files.value.uuid',
     'workflow_run_inputs.output_files.value.accession',
-    'workflow_run_inputs.output_quality_metrics.name',
-    'workflow_run_inputs.output_quality_metrics.value.uuid'
+    'workflow_run_inputs.output_files.value_qc.url',
+    'workflow_run_inputs.output_files.value_qc.overall_quality_status'
 ]
 
 file_workflow_run_embeds_processed = file_workflow_run_embeds + [e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds]

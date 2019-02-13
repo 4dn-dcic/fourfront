@@ -483,7 +483,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     'accession'         : workflow_model_obj.get('accession'),
                     'steps'             : workflow_model_obj.get('steps'),
                     'uuid'              : workflow_uuid,
-                    'workflow_type'     : workflow_model_obj.get('workflow_type')
+                    'category'          : workflow_model_obj.get('category')
                 }
 
 
@@ -693,7 +693,6 @@ class WorkflowRun(Item):
         'workflow.steps.meta.software_used.title',
         'workflow.steps.meta.software_used.version',
         'workflow.steps.meta.software_used.source_url',
-        'workflow.workflow_type',
         'input_files.workflow_argument_name',
         'input_files.value.filename',
         'input_files.value.display_title',
