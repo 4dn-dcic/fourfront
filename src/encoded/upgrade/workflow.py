@@ -429,7 +429,10 @@ def workflow_5_6(value, system):
         del value['data_types']
 
     if 'category' in value:
-        if value['category'] in ['QC', 'format_conversion', 'provenance']:
+
+        if isinstance(value['category'], list):
+            pass
+        elif value['category'] in ['QC', 'format_conversion', 'provenance']:
             pass
         elif value['category'].endswith('calling'):
             value['category'] = 'feature calling'

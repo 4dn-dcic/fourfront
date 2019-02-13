@@ -72,10 +72,10 @@
         ],
         "award": "1U01CA200059-01",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0",
-        "data_types": [
+        "description": "GITAR Hi-C data processing pipeline",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "GITAR Hi-C data processing pipeline",
         "lab": "4dn-dcic-lab",
         "name": "gitar",
         "steps": [
@@ -516,7 +516,11 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["QC"],
+        "category": [
+            [
+                "QC"
+            ]
+        ],
         "cwl_child_filenames": [
             "fastqc-0-11-4.cwl"
         ],
@@ -525,14 +529,14 @@
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "fastqc-0-11-4-1.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0",
-        "data_types": [
+        "description": "FastQC quality control step for fastq files",
+        "docker_image_name": "duplexa/4dn-hic:v32",
+        "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "FastQC quality control step for fastq files",
-        "docker_image_name": "duplexa/4dn-hic:v32",
-        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "fastqc-0-11-4-1",
         "steps": [
@@ -655,17 +659,21 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["QC"],
+        "category": [
+            [
+                "QC"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "pairsqc-single.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/pairsqc-0-11-4/0",
-        "data_types": [
+        "description": "PairsQC quality control step for pairs files",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C"
         ],
-        "description": "PairsQC quality control step for pairs files",
         "lab": "4dn-dcic-lab",
         "name": "pairsqc-single",
         "status": "released",
@@ -761,8 +769,6 @@
         "accession": "4DNWFHB26CID",
         "app_name": "pairsqc-single",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
-        "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -795,19 +801,24 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["QC"],
+        "category": [
+            [
+                "QC"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "pairsqc-single.cwl",
-        "data_types": [
+        "description": "PairsQC quality control step for pairs files",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C"
         ],
-        "description": "PairsQC quality control step for pairs files",
         "lab": "4dn-dcic-lab",
         "name": "pairsqc-single",
+        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
         "status": "released",
         "steps": [
             {
@@ -908,7 +919,8 @@
             }
         ],
         "title": "PairsQC 0.2.6",
-        "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3"
+        "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3",
+        "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)"
     },
     {
         "accession": "4DNWF6DUSPTF",
@@ -926,13 +938,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["QC"],
-        "data_types": [
+        "category": [
+            [
+                "QC"
+            ]
+        ],
+        "description": "ValidateFiles quality control step for fastq files",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "ValidateFiles quality control step for fastq files",
         "lab": "4dn-dcic-lab",
         "name": "validate",
         "steps": [
@@ -999,17 +1015,21 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["QC"],
+        "category": [
+            [
+                "QC"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
         "cwl_main_filename": "md5.cwl",
-        "data_types": [
+        "description": "md5 on uncompressed file",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "md5 on uncompressed file",
         "lab": "4dn-dcic-lab",
         "name": "md5",
         "steps": [
@@ -1060,11 +1080,11 @@
     },
     {
         "accession": "4DNWF2HFF82B",
+        "aliases": [
+            "4dn-dcic-lab:wf-md5-0.2.6"
+        ],
         "app_name": "md5",
         "app_version": "0.2.6",
-        "aliases": ["4dn-dcic-lab:wf-md5-0.2.6"],
-        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
-        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -1079,22 +1099,27 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["QC"],
+        "category": [
+            [
+                "QC"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "md5.cwl",
-        "data_types": [
+        "description": "md5 on uncompressed file",
+        "docker_image_name": "duplexa/md5:v2",
+        "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "md5 on uncompressed file",
-        "docker_image_name": "duplexa/md5:v2",
-        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "md5",
+        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
         "steps": [
             {
                 "inputs": [
@@ -1139,7 +1164,8 @@
             }
         ],
         "title": "md5 0.2.6",
-        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6"
+        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
+        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files"
     },
     {
         "accession": "4DNWFSOZLMGE",
@@ -1192,11 +1218,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
-        "data_types": [
+        "description": "Creating a bam and pairs files from a pair of fastq files",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Creating a bam and pairs files from a pair of fastq files",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta",
         "steps": [
@@ -1457,11 +1486,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
-        "data_types": [
+        "description": "Creating a bam and pairs files from a pair of fastq files",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Creating a bam and pairs files from a pair of fastq files",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta/9",
         "steps": [
@@ -1731,11 +1763,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.15.cwl",
-        "data_types": [
+        "description": "Hi-C processing part B revision 15",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing part B revision 15",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/15",
         "steps": [
@@ -2077,11 +2112,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://github.com/4dn-dcic/pipelines-cwl/blob/master/cwl_sbg/hi-c-processing-partb.6.cwl",
-        "data_types": [
+        "description": "Hi-C processing part B revision 6",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing part B revision 6",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/6",
         "steps": [
@@ -2222,11 +2260,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
-        "data_types": [
+        "description": "Hi-C processing partA based on Juicer",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing partA based on Juicer",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta-juicer/5",
         "steps": [
@@ -2471,11 +2512,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.16.cwl",
-        "data_types": [
+        "description": "Hi-C processing partA based on Juicer",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing partA based on Juicer",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta-juicer/16",
         "steps": [
@@ -2732,11 +2776,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.24.cwl",
-        "data_types": [
+        "description": "Hi-C processing part B revision 24",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing part B revision 24",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/24",
         "steps": [
@@ -3031,6 +3078,9 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "pairs2hic.cwl",
@@ -3040,12 +3090,12 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-partb.cwl",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_sbg/hi-c-processing-partb.44.cwl",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Hi-C processing part B revision 44",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/44",
         "steps": [
@@ -3272,11 +3322,15 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["miscellaneous"],
-        "data_types": [
-            "Hi-C"
+        "category": [
+            [
+                "miscellaneous"
+            ]
         ],
         "description": "add-hic-normvector-to-mcool",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "add-hic-normvector-to-mcool/2",
         "steps": [
@@ -3362,11 +3416,15 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["miscellaneous"],
-        "data_types": [
-            "Hi-C"
+        "category": [
+            [
+                "miscellaneous"
+            ]
         ],
         "description": "extract-mcool-normvector-for-juicebox",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "extract-mcool-normvector-for-juicebox/2",
         "steps": [
@@ -3454,10 +3512,10 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "data_types": [
+        "description": "addnormtohic",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "addnormtohic",
         "lab": "4dn-dcic-lab",
         "name": "addnormtohic/7",
         "steps": [
@@ -3558,11 +3616,14 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "",
-        "data_types": [
+        "description": "Hi-C processing partC Revision 6",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing partC Revision 6",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partc/6",
         "steps": [
@@ -3774,12 +3835,12 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Creating a lossless alignment bam file from a pair of fastq files",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
         "status": "released",
@@ -3876,8 +3937,6 @@
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
-        "version_upgrade_log": "use of official release of bwa",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3914,14 +3973,15 @@
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Creating a lossless alignment bam file from a pair of fastq files",
         "docker_image_name": "duplexa/4dn-hic:v42",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
+        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
         "steps": [
             {
                 "inputs": [
@@ -4009,7 +4069,8 @@
             }
         ],
         "title": "Alignment for Hi-C using bwa-mem 0.2.6",
-        "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc"
+        "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
+        "version_upgrade_log": "use of official release of bwa"
     },
     {
         "accession": "4DNWF37VHW0F",
@@ -4042,12 +4103,12 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-parse-sort.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Parsing and Sorting for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-parse-sort",
         "steps": [
@@ -4146,18 +4207,22 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["miscellaneous"],
+        "category": [
+            [
+                "miscellaneous"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-merge.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Merging for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-merge",
         "steps": [
@@ -4243,12 +4308,12 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-markasdup.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Duplicate Marking for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-markasdup",
         "steps": [
@@ -4334,12 +4399,12 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-filter.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Filtering for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-filter",
         "steps": [
@@ -4446,18 +4511,22 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["format conversion"],
+        "category": [
+            [
+                "format conversion"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "addfragtopairs.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Adding restriction fragment information for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "addfragtopairs",
         "steps": [
@@ -4545,18 +4614,22 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["format conversion"],
+        "category": [
+            [
+                "format conversion"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairs-patch.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Patching pairs file for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairs-patch",
         "steps": [
@@ -4657,12 +4730,12 @@
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "This is a subworkflow of the Hi-C data processing pipeline. It takes a bam file as input and performs parsing, sorting, filtering and deduping. It produces two output files, a lossless, filter-annotated bam file and a filtered pairs (contact list) file.",
         "docker_image_name": "duplexa/4dn-hic:v42",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-bam",
         "status": "released",
@@ -4974,6 +5047,9 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_child_filenames": [
             "clip.cwl",
             "align.cwl",
@@ -4985,10 +5061,10 @@
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://github.com/4dn-dcic/docker-4dn-repliseq/tree/v13.1/cwl",
         "cwl_main_filename": "repliseq-parta.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "experiment_types": [
             "Repli-seq"
         ],
-        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
         "lab": "4dn-dcic-lab",
         "name": "repliseq-parta",
         "steps": [
@@ -5324,6 +5400,7 @@
         "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364"
     },
     {
+        "accession": "4DNWFBT37VUW",
         "app_name": "repliseq-parta",
         "app_version": "v14",
         "arguments": [
@@ -5374,6 +5451,9 @@
             }
         ],
         "award": "1U01CA200059-01",
+        "category": [
+            "processing"
+        ],
         "cwl_child_filenames": [
             "clip.cwl",
             "align.cwl",
@@ -5384,12 +5464,13 @@
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
         "cwl_main_filename": "repliseq-parta.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "experiment_types": [
             "Repli-seq"
         ],
-        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
         "lab": "4dn-dcic-lab",
         "name": "repliseq-parta",
+        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
         "steps": [
             {
                 "inputs": [
@@ -5721,9 +5802,7 @@
         ],
         "title": "Repli-seq data processing pipeline for alignment, filtering and counting v14",
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
-        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
-        "version_upgrade_log": "The count script (used by run-count.sh) now sorts the binfile before feeding to bedtools coverage to avoid a sorting inconsistency issue.",
-        "accession": "4DNWFBT37VUW"
+        "version_upgrade_log": "The count script (used by run-count.sh) now sorts the binfile before feeding to bedtools coverage to avoid a sorting inconsistency issue."
     },
     {
         "app_name": "hi-c-processing-pairs",
@@ -5826,12 +5905,12 @@
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "docker_image_name": "duplexa/4dn-hic:v42",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs",
         "status": "released",
@@ -6517,11 +6596,11 @@
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline for data generated without restriction enzyme. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "experiment_types": [
             "DNase Hi-C",
             "micro-C"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline for data generated without restriction enzyme. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs-nore",
         "steps": [
@@ -7136,10 +7215,10 @@
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nonorm.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "experiment_types": [
             "Capture Hi-C"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs-nonorm",
         "steps": [
@@ -7691,10 +7770,10 @@
         "cwl_directory_url_draft3": "",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore-nonorm.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline for the data generated without restriction enzyme, without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "experiment_types": [
             "ChIA-PET"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline for the data generated without restriction enzyme, without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs-nore-nonorm",
         "steps": [
@@ -8120,17 +8199,22 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": ["format conversion"],
+        "category": [
+            [
+                "format conversion"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/v4/cwl/",
         "cwl_main_filename": "bedGraphToBigWig.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C", "Repli-seq"
-        ],
         "description": "Converting bedgraph to bigwig",
         "docker_image_name": "4dn-dcic/docker-4dn-bedgraphtobigwig",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C",
+            "Repli-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bedGraphToBigWig",
         "steps": [
@@ -8298,16 +8382,15 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq",
         "steps": [
@@ -8622,10 +8705,17 @@
             }
         ],
         "title": "Chip-seq data processing pipeline",
-        "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3"
+        "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF25VHY9",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-chipseq-aln-chip"
+        ],
         "app_name": "encode-chipseq-aln-chip",
         "app_version": "1.1.1",
         "arguments": [
@@ -8725,19 +8815,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline, Alignment-only, ChIP",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-aln-chip",
-        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-aln-chip"],
         "steps": [
             {
                 "inputs": [
@@ -9051,10 +9139,17 @@
             }
         ],
         "title": "Chip-seq data processing pipeline, Align-only, ChIP 1.1.1",
-        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178"
+        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF2FBLQA1",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-chipseq-aln-ctl"
+        ],
         "app_name": "encode-chipseq-aln-ctl",
         "app_version": "1.1.1",
         "arguments": [
@@ -9145,19 +9240,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline, Align-only, Control",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-aln-ctl",
-        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-aln-ctl"],
         "steps": [
             {
                 "inputs": [
@@ -9457,10 +9550,17 @@
             }
         ],
         "title": "Chip-seq data processing pipeline, Align-only, Control 1.1.1",
-        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179"
+        "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF3BT781",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-chipseq-postaln"
+        ],
         "app_name": "encode-chipseq-postaln",
         "app_version": "1.1.1",
         "arguments": [
@@ -9554,19 +9654,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-postaln",
-        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-postaln"],
         "steps": [
             {
                 "inputs": [
@@ -9858,7 +9956,11 @@
             }
         ],
         "title": "Chip-seq data processing pipeline, post-alignment 1.1.1",
-        "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513"
+        "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWB42C877",
@@ -9958,16 +10060,15 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
-        "wdl_main_filename": "atac.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ATAC-seq"
+        "category": [
+            "processing"
         ],
         "description": "ATAC-seq data processing pipeline",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ATAC-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq",
         "steps": [
@@ -10253,8 +10354,8 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "global": true,
                             "file_format": "bw",
+                            "global": true,
                             "type": "data file"
                         },
                         "name": "atac.qc_json",
@@ -10268,10 +10369,17 @@
             }
         ],
         "title": "ATAC-seq data processing pipeline",
-        "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5"
+        "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF2BBZ1E",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-atacseq-aln"
+        ],
         "app_name": "encode-atacseq-aln",
         "app_version": "1.1.1",
         "arguments": [
@@ -10362,19 +10470,18 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
-        "wdl_main_filename": "atac.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ATAC-seq"
+        "category": [
+            "processing"
         ],
         "description": "ATAC-seq data processing pipeline, Align-only",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ATAC-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq-aln",
-        "aliases": ["4dn-dcic-lab:wf-encode-atacseq-aln"],
+        
         "steps": [
             {
                 "inputs": [
@@ -10658,10 +10765,17 @@
             }
         ],
         "title": "ATAC-seq data processing pipeline, Align-only 1.1.1",
-        "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa"
+        "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF2VTG8I",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-atacseq-postaln"
+        ],
         "app_name": "encode-atacseq-postaln",
         "app_version": "1.1.1",
         "arguments": [
@@ -10733,16 +10847,15 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
-        "wdl_main_filename": "atac.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ATAC-seq"
+        "category": [
+            "processing"
         ],
         "description": "ATAC-seq data processing pipeline, post-alignment",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ATAC-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq-postaln",
         "steps": [
@@ -10965,7 +11078,10 @@
         ],
         "title": "ATAC-seq data processing pipeline, post-alignment 1.1.1",
         "uuid": "510d321f-8a79-479d-95eb-c8fd703972a7",
-        "aliases": ["4dn-dcic-lab:wf-encode-atacseq-postaln"]
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWLM174GGG",
@@ -10985,23 +11101,25 @@
             {
                 "argument_type": "parameter",
                 "workflow_argument_name": "assembly"
-
             }
-
         ],
-
         "award": "1U01CA200059-01",
-        "category": ["format conversion"],
+        "category": [
+            [
+                "format conversion"
+            ]
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtobeddb/v2/cwl/",
         "cwl_main_filename": "bedtobeddb.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C", "DAM-ID"
-        ],
         "description": "Converting bed to beddb",
         "docker_image_name": "4dn-dcic/docker-4dn-bedtobeddb",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C",
+            "DAM-ID"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bedtobeddb",
         "steps": [
@@ -11027,7 +11145,7 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                       "/softwares/d064191c-b2fc-4c7b-971f-5e2034dc902d/"
+                        "/softwares/d064191c-b2fc-4c7b-971f-5e2034dc902d/"
                     ]
                 },
                 "name": "bedtobeddb",

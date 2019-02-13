@@ -474,8 +474,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         workflow_uuid = workflow_run_model_obj.get('workflow') #get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
         if workflow_uuid:
             workflow_model_obj = get_model_obj(workflow_uuid)
-            if workflow_model_obj and workflow_model_obj.get('workflow_type'):
-                step['meta']['analysis_step_types'].append(workflow_model_obj['workflow_type'])
+            if workflow_model_obj:
+                step['meta']['analysis_step_types'].extend(workflow_model_obj.get('experiment_types', []))
                 step['meta']['workflow'] = {
                     '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
                     '@type'             : workflow_model_obj.get('@type'),

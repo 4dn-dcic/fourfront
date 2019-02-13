@@ -34,7 +34,13 @@ def main():
     upgrader_fxn = getattr(upgrader_module, args.upgrader_method_name)
 
 
-    print(json.dumps([ upgrader_fxn(item, None) for item in get_inserts(args.inserts_folder or 'inserts', args.item_type) ], indent=4, sort_keys=True)) # Return instead of print?
+    results = []
+
+    for item in get_inserts(args.inserts_folder or 'inserts', args.item_type):
+        upgrader_fxn(item, None) # Modifies in place
+        results.append(item)
+
+    print(json.dumps(results, indent=4, sort_keys=True)) # Return instead of print?
 
 if __name__ == "__main__":
     main()
