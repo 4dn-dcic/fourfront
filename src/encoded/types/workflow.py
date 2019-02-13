@@ -624,7 +624,6 @@ class WorkflowRun(Item):
         'workflow.steps.meta.software_used.title',
         'workflow.steps.meta.software_used.version',
         'workflow.steps.meta.software_used.source_url',
-        'workflow.workflow_type',
         'input_files.workflow_argument_name',
         'input_files.value.filename',
         'input_files.value.display_title',
