@@ -67,7 +67,7 @@ export class FileDetailBody extends React.PureComponent {
                         Array.isArray(file) ?
                             file.length + ' total files from' + (file && file.display_title ? ' Workflow' : '')
                             :
-                            'File'
+                            WorkflowNodeElement.isNodeQCMetric(node) ? 'Report' : 'File'
                     }
                 </div>
                 <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>
@@ -132,9 +132,7 @@ export class FileDetailBody extends React.PureComponent {
 
         return (
             <div className="col-sm-6 col-lg-4 right box buttons-container">
-                <a href={qcLink} target="_blank" className="mt-06 btn btn-block btn-secondary" data-tip="View the Quality Control Metrics for this File">
-                    <i className="icon icon-fw icon-check-square-o"/>&nbsp; Quality Metrics
-                </a>
+                <ViewMetricButton file={qc} defaultBtnClassName="btn-secondary" data-tip="View the Quality Control Metrics for this File" />
             </div>
         );
 

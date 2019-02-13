@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { console, Schemas, fileUtil, object } from './../../util';
 import _ from 'underscore';
 import { requestAnimationFrame } from './../../viz/utilities';
+import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
 
 
 
@@ -349,25 +350,38 @@ export class WorkflowNodeElement extends React.PureComponent {
      */
     qcMarker(){
         var { node, selected } = this.props,
-            file, qc, markerProps;
+            file, qc, qcStatus, markerProps;
 
         if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
             return null;
         }
 
-        file    = node.meta.run_data.file,
-        qc      = file && file.quality_metric;
+        file     = node.meta.run_data.file,
+        qc       = file && file.quality_metric;
 
         if (!qc) return null;
 
+        qcStatus = qc.overall_quality_status && qc.overall_quality_status.toLowerCase();
         markerProps = {
             'className' : "qc-present-node-marker",
             'data-tip'  : "This file has a quality control metric associated with it.",
-            'children'  : "QC"
+            'children'  : "QC",
+            'key'       : 'qc-marker'
         };
 
+        if (qcStatus){
+            if (qcStatus === 'pass')       markerProps.className += ' status-passing';
+            else if (qcStatus === 'warn')  markerProps.className += ' status-warning';
+            else if (qcStatus === 'error') markerProps.className += ' status-error';
+        }
+
         if (selected && qc.url){
-            return <a href={qc.url} target="_blank" {...markerProps} />;
+            markerProps.className += ' clickable';
+            return <a href={qc.url} target="_blank" {...markerProps} onClick={function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                ViewMetricButton.openChildWindow(qc.url);
+            }} />;
         }
 
         return <div {...markerProps} />;
@@ -379,9 +393,9 @@ export class WorkflowNodeElement extends React.PureComponent {
                 <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html key="node-title">
                     { this.nodeTitle() }
                 </div>
+                { this.qcMarker() }
                 { this.belowNodeTitle() }
                 { this.aboveNodeTitle() }
-                { this.qcMarker() }
             </div>
         );
     }

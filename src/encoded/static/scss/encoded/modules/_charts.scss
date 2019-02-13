@@ -1248,12 +1248,33 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 box-shadow: 0 0px 0px -2px #000;
                 transition: background-color .5s ease-out, box-shadow .5s ease-out;
 
-                /* We can enable these styles if are to make the marker clickable.
-                &:hover {
+                &.clickable:hover {
                     text-decoration: none;
-                    background-color: darken($color: #6d6d6d, $amount: 10)
+                    background-color: darken($color: #e07e05, $amount: 10)
                 }
-                */
+
+                &.status-error {
+                    background-color: #e00505;
+                    &.clickable:hover {
+                        background-color: darken($color: #e00505, $amount: 10)
+                    }
+                }
+
+                &.status-warning {
+                    background-color: #e05605;
+                    &.clickable:hover {
+                        background-color: darken($color: #e05605, $amount: 10)
+                    }
+                }
+
+                &.status-passing {
+                    background-color: #69a705;
+                    &.clickable:hover {
+                        background-color: darken($color: #69a705, $amount: 10)
+                    }
+                }
+
+                
             }
 
         }

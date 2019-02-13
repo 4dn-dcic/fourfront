@@ -9,31 +9,47 @@ import _ from 'underscore';
 export class ViewMetricButton extends React.PureComponent {
 
     static defaultProps = {
-        'title' : "View Full QC Report"
+        'title' : "View QC Report",
+        'defaultBtnClassName' : 'btn-info',
+        'className' : 'btn-block'
     };
 
+    static openChildWindow(url){
+        if (!url || typeof url !== 'string') return;
+        window.open(url, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=100, width=400');
+    }
+
+    constructor(props){
+        super(props);
+        this.onClick = _.throttle(this.onClick.bind(this), 1000);
+    }
+
+    onClick(e){
+        var file = this.props.file;
+        e.preventDefault();
+        ViewMetricButton.openChildWindow(file && file.url);
+    }
+
     render(){
-        var { file, node, title, className, disabled } = this.props,
+        var { file, title, className, disabled, defaultBtnClassName } = this.props,
             type = file.overall_quality_status,
             typeLowerCased = typeof type === 'string' && type.toLocaleLowerCase(),
-            usedClassName = (className || '') + " btn download-button btn-default" + (disabled ? ' disabled' : '');
+            usedClassName = (className || '') + " btn download-button btn-default" + (disabled ? ' disabled' : ''),
+            btnStyle = defaultBtnClassName;
 
         if (typeof file.url !== 'string') return null;
 
         if (typeLowerCased){
-            if      (typeLowerCased === 'pass') usedClassName += ' btn-success';
-            else if (typeLowerCased === 'warn') usedClassName += ' btn-warning';
-            else if (typeLowerCased === 'error') usedClassName += ' btn-error';
-            else usedClassName += ' btn-info';
+            if      (typeLowerCased === 'pass')     btnStyle = 'btn-success';
+            else if (typeLowerCased === 'warn')     btnStyle = 'btn-warning';
+            else if (typeLowerCased === 'error')    btnStyle = 'btn-error';
         }
 
+        usedClassName += ' ' + btnStyle;
+
         return (
-            <a href={file.url} className={usedClassName} target="_blank" onClick={(e)=>{
-                if (window && window.open){
-                    e.preventDefault();
-                    window.open(file.url, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=100, width=400');
-                }
-            }}>
+            <a href={file.url} className={usedClassName} target="_blank" onClick={this.onClick}
+                {..._.omit(this.props, 'file', 'title', 'defaultBtnClassName', 'className', 'disabled', 'onClick', 'target', 'href')}>
                 <i className="icon icon-fw icon-external-link" style={{ top : 1, position: 'relative' }}/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );

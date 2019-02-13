@@ -417,24 +417,31 @@ def workflow_4_5(value, system):
 def workflow_5_6(value, system):
     '''remove workflow type (and workflow diagram) field
        clean up workflow cateogory and convert it to an array'''
+
     if 'workflow_type' in value:
         del value['workflow_type']
+
     if 'workflow_diagram' in value:
         del value['workflow_diagram']
+
     if 'data_types' in value:
         value['experiment_types'] = value['data_types'].copy()
         del value['data_types']
-    if 'workflow_category' in value:
-        if value['workflow_category'] in ['QC', 'format_conversion', 'provenance']:
+
+    if 'category' in value:
+        if value['category'] in ['QC', 'format_conversion', 'provenance']:
             pass
-        elif value['workflow_category'].endswith('calling'):
-            value['workflow_category'] = 'feature calling'
-        elif value['workflow_category'] in ['data extraction', 'merging', 'format_integration']:
-            value['workflow_category'] = 'miscellaneous'
-        elif value['workflow_category'] == 'Other' and 'processing' in value['title']:
-            value['workflow_category'] = 'processing'
+        elif value['category'].endswith('calling'):
+            value['category'] = 'feature calling'
+        elif value['category'] in ['data extraction', 'merging', 'format_integration']:
+            value['category'] = 'miscellaneous'
+        elif value['category'] == 'Other' and 'processing' in value['title']:
+            value['category'] = 'processing'
         else:
-            value['workflow_category'] = 'processing'
+            value['category'] = 'processing'
+        value['category'] = [value['category']]  # convert to an array
     elif 'processing' in value['title']:
-            value['workflow_category'] = 'processing'
-    value['workflow_category'] = [value['workflow_category']]  # convert to an array
+        value['category'] = 'processing'
+        value['category'] = [value['category']]  # convert to an array
+
+    
