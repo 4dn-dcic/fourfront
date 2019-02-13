@@ -388,8 +388,8 @@ class ExperimentCaptureC(Experiment):
         if targeted_regions is not None:
             regions = []
             for target in targeted_regions:
-                if target['target']:
-                    region = request.embed('/', target['target'], '@@object')['display_title']
+                for t in target['target']:
+                    region = request.embed('/', t, '@@object')['display_title']
                     regions.append(region)
             if regions:
                 value = ', '.join(sorted(regions))
