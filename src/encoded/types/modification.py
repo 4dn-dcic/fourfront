@@ -26,7 +26,7 @@ class Modification(Item):
         'constructs.tags',
         'constructs.designed_to_target',
         'modified_regions.aliases',
-        'target_of_mod.target_summary'
+        'target_of_mod.display_title'
     ]
 
     @calculated_property(schema={
@@ -43,8 +43,11 @@ class Modification(Item):
         if genomic_change:
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
-            target = request.embed(target_of_mod, '@@object')
-            mod_name = mod_name + " for " + target['target_summary']
+            tstring = ''
+            for tom in target_of_mod:
+                target = request.embed(tom, '@@object')
+                tstring += '{}, '.format(target['display_title'])
+            mod_name = mod_name + " for " + tstring[:-2]
         return mod_name
 
     @calculated_property(schema={
@@ -56,17 +59,11 @@ class Modification(Item):
                                 genomic_change=None, target_of_mod=None):
         mod_name = genomic_change if genomic_change else modification_type
         if target_of_mod:
-            target = request.embed(target_of_mod, '@@object')
-            mod_name = target['target_summary'].replace('Gene:', '') + ' ' + mod_name
-        # if not modification_type:
-        #     return "None"
-        #
-        # mod_name = modification_type
-        # if genomic_change:
-        #     mod_name = mod_name + " " + genomic_change
-        # if target_of_mod:
-        #     target = request.embed(target_of_mod, '@@object')
-        #     mod_name = mod_name + " for " + target['target_summary']
+            tstring = ''
+            for tom in target_of_mod:
+                target = request.embed(tom, '@@object')
+                tstring += '{}, '.format(target['display_title'])
+            mod_name = tstring[:-2].replace('Gene:', '') + ' ' + mod_name
         return mod_name
 
     @calculated_property(schema={

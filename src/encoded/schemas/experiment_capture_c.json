@@ -78,7 +78,7 @@
                         "items": {
                             "title": "Feature",
                             "type": "string",
-                            "linkTo": "Biofeature"
+                            "linkTo": "BioFeature"
                         }
                     },
                     "oligo_file": {

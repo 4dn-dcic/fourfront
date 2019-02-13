@@ -122,7 +122,7 @@ class TreatmentRnai(Treatment):
     embedded_list = Treatment.embedded_list + [
         'rnai_vendor.name',
         'rnai_constructs.designed_to_target',
-        'target.target_summary'
+        'target.display_title'
     ]
 
     @calculated_property(schema={
@@ -132,8 +132,11 @@ class TreatmentRnai(Treatment):
     })
     def display_title(self, request, rnai_type=None, target=None):
         if rnai_type and target:
-            targetObj = request.embed(target, '@@object')
-            rnai_value = rnai_type + " of " + targetObj['target_summary']
+            tstring = ''
+            for t in target:
+                target = request.embed(t, '@@object')
+                tstring += '{}, '.format(target['display_title'])
+            rnai_value = rnai_type + " of " + tstring[:-2]
         else:
             rnai_value = rnai_type + " treatment"
         return rnai_value

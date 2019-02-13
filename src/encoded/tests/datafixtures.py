@@ -875,18 +875,18 @@ def mod_w_genomic_change(testapp, mod_basic_info):
 
 
 @pytest.fixture
-def mod_w_target(testapp, mod_basic_info, target_w_genes):
+def mod_w_target(testapp, mod_basic_info, gene_bio_feature):
     mod = copy.deepcopy(mod_basic_info)
     mod['description'] = 'mod with target'
-    mod['target_of_mod'] = target_w_genes['@id']
+    mod['target_of_mod'] = [gene_bio_feature['@id']]
     return testapp.post_json('/modification', mod).json['@graph'][0]
 
 
 @pytest.fixture
-def mod_w_change_and_target(testapp, mod_basic_info, target_w_genes):
+def mod_w_change_and_target(testapp, mod_basic_info, gene_bio_feature):
     mod = copy.deepcopy(mod_basic_info)
     mod['description'] = 'mod with target and genomic change'
-    mod['target_of_mod'] = target_w_genes['@id']
+    mod['target_of_mod'] = [gene_bio_feature['@id']]
     mod['genomic_change'] = "deletion"
     return testapp.post_json('/modification', mod).json['@graph'][0]
 

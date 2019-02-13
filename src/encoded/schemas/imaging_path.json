@@ -44,7 +44,7 @@
             "items": {
                 "title": "Target of labelling",
                 "type": "string",
-                "linkTo": "Biofeature"
+                "linkTo": "BioFeature"
             }
         },
         "labeled_probe": {

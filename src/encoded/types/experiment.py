@@ -283,9 +283,12 @@ class Experiment(Item):
             out_dict['field'] = 'Target'
             out_dict['value'] = 'None (Control)'
         elif targeted_factor is not None:
-            obj = request.embed('/', targeted_factor, '@@object')
             out_dict['field'] = 'Target'
-            out_dict['value'] = obj['display_title']
+            val = ''
+            for tf in targeted_factor:
+                obj = request.embed('/', tf, '@@object')
+                val += '{}, '.format(obj['display_title'])
+            out_dict['value'] = val[:-2]
         elif digestion_enzyme is not None:
             obj = request.embed('/', digestion_enzyme, '@@object')
             out_dict['field'] = 'Enzyme'
@@ -348,7 +351,7 @@ class ExperimentCaptureC(Experiment):
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
     embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
-                                                "targeted_regions.target.target_summary",
+                                                "targeted_regions.target.display_title",
                                                 "targeted_regions.oligo_file.href"]
     name_key = 'accession'
 
@@ -386,7 +389,7 @@ class ExperimentCaptureC(Experiment):
             regions = []
             for target in targeted_regions:
                 if target['target']:
-                    region = request.embed('/', target['target'], '@@object')['target_summary']
+                    region = request.embed('/', target['target'], '@@object')['display_title']
                     regions.append(region)
             if regions:
                 value = ', '.join(sorted(regions))
@@ -605,7 +608,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
 
         if target:
             target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary']
+            target_summary = target_props['display_title']
             sum_str += ('against ' + target_summary)
 
         if biosample:
@@ -648,7 +651,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
 
         if target:
             target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary']
+            target_summary = target_props['display_title']
             sum_str += ('against ' + target_summary)
 
         if biosample:
@@ -719,14 +722,14 @@ class ExperimentMic(Experiment):
             for pathobj in imaging_paths:
                 path = request.embed('/', pathobj['path'], '@@object')
                 for target in path.get('target', []):
-                    summ = request.embed('/', target, '@@object')['target_summary']
+                    summ = request.embed('/', target, '@@object')['display_title']
                     path_targets.append(summ)
             if path_targets:
                 value = ', '.join(list(set(path_targets)))
                 return {
                     'field': 'Target',
                     'value': value,
-                    'combined' : 'Target: ' + value
+                    'combined': 'Target: ' + value
                 }
         return super(ExperimentMic, self).experiment_categorizer(request)
 
