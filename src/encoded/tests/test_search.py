@@ -1,7 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
-from encoded.commands.upgrade_test_inserts import get_inserts
+from encoded.commands.run_upgrader_on_inserts import get_inserts
 import json
 import time
 pytestmark = [pytest.mark.working, pytest.mark.schema]
