@@ -173,9 +173,9 @@ def so_ont(testapp):
 @pytest.fixture
 def gene_term(testapp, so_ont):
     gterm = {
-        # 'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_name': 'gene',
-        'term_id': 'SO:0000704'}
+        'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000704', 'term_name': 'gene',
+        'source_ontology': so_ont['@id']}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -184,6 +184,34 @@ def region_term(testapp, so_ont):
     gterm = {
         'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000001', 'term_name': 'region',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def protein_term(testapp, so_ont):
+    gterm = {
+        'uuid': '8bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000104', 'term_name': 'polypeptide',
+        'preferred_name': 'protein',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def transcript_term(testapp, so_ont):
+    gterm = {
+        'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000673', 'term_name': 'transcript',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def component_term(testapp, so_ont):
+    gterm = {
+        'uuid': '4bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'GO:0005575', 'term_name': 'cellular_component',
         'source_ontology': so_ont['@id']}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
@@ -767,6 +795,16 @@ def gene_bio_feature(testapp, lab, award, gene_term, gene_item):
 
 
 @pytest.fixture
+def prot_bio_feature(testapp, lab, award, protein_term, gene_item):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Protein BioFeature',
+            'feature_type': protein_term['@id'],
+            'relevant_genes': [gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
 def biofeat_w_alias(testapp, gene_bio_feature):
     return testapp.patch_json(gene_bio_feature['@id'], {'aliases': ['lab:test_targ_bf']}, status=200).json['@graph'][0]
 
@@ -809,6 +847,15 @@ def vague_genomic_region_w_desc(testapp, lab, award):
             'end_location': 'centromere',
             'location_description': 'gene X enhancer'}
     return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def basic_region_bio_feature(testapp, lab, award, region_term):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Region BioFeature with minimal info',
+            'feature_type': region_term['@id']}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
 
 
 @pytest.fixture

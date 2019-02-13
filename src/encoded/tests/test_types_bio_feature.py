@@ -3,48 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def so_ont(testapp):
-    return testapp.post_json('/ontology', {'ontology_name': 'SO'}).json['@graph'][0]
-
-
-@pytest.fixture
-def gene_term(testapp, so_ont):
-    gterm = {
-        'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_id': 'SO:0000704', 'term_name': 'gene',
-        'source_ontology': so_ont['@id']}
-    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
-
-
-@pytest.fixture
-def protein_term(testapp, so_ont):
-    gterm = {
-        'uuid': '8bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_id': 'SO:0000104', 'term_name': 'polypeptide',
-        'preferred_name': 'protein',
-        'source_ontology': so_ont['@id']}
-    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
-
-
-@pytest.fixture
-def transcript_term(testapp, so_ont):
-    gterm = {
-        'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_id': 'SO:0000673', 'term_name': 'transcript',
-        'source_ontology': so_ont['@id']}
-    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
-
-
-@pytest.fixture
-def component_term(testapp, so_ont):
-    gterm = {
-        'uuid': '4bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_id': 'GO:0005575', 'term_name': 'cellular_component',
-        'source_ontology': so_ont['@id']}
-    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
-
-
-@pytest.fixture
 def gene_item(testapp, lab, award):
     return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
 

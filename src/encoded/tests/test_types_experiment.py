@@ -539,13 +539,13 @@ def target_w_prot(testapp, lab, award):
 
 @pytest.fixture
 def exp_w_target_info(lab, award, human_biosample,
-                      mboI, target_w_region):
+                      mboI, genomic_region_bio_feature):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'capture Hi-C',
-        'targeted_regions': [{'target': target_w_region['@id']}]
+        'targeted_regions': [{'target': [genomic_region_bio_feature['@id']]}]
     }
 
 
@@ -555,21 +555,21 @@ def expt_w_targ_region(testapp, exp_w_target_info):
 
 
 @pytest.fixture
-def expt_w_2_targ_regions(testapp, exp_w_target_info, another_target_w_region):
-    region = {'target': another_target_w_region['@id']}
+def expt_w_2_targ_regions(testapp, exp_w_target_info, gene_bio_feature):
+    region = {'target': [gene_bio_feature['@id']]}
     exp_w_target_info['targeted_regions'].append(region)
     return testapp.post_json('/experiment_capture_c', exp_w_target_info).json['@graph'][0]
 
 
 @pytest.fixture
 def expt_w_target(testapp, lab, award, human_biosample,
-                  mboI, target_w_prot):
+                  mboI, prot_bio_feature):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'ChIA-PET',
-        'targeted_factor': target_w_prot['@id']
+        'targeted_factor': [prot_bio_feature['@id']]
     }
     return testapp.post_json('/experiment_chiapet', item).json['@graph'][0]
 
@@ -609,9 +609,9 @@ def damid_no_fusion(testapp, repliseq_info):
 
 
 @pytest.fixture
-def damid_w_fusion(testapp, repliseq_info, target_w_prot):
+def damid_w_fusion(testapp, repliseq_info, prot_bio_feature):
     repliseq_info['experiment_type'] = 'DAM-ID seq'
-    repliseq_info['targeted_factor'] = target_w_prot['@id']
+    repliseq_info['targeted_factor'] = [prot_bio_feature['@id']]
     return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
 
 
@@ -624,22 +624,22 @@ def basic_info(lab, award):
 
 
 @pytest.fixture
-def imaging_path_1(testapp, basic_info, target_w_region):
-    basic_info['target'] = [target_w_region['@id']]
+def imaging_path_1(testapp, basic_info, genomic_region_bio_feature):
+    basic_info['target'] = [genomic_region_bio_feature['@id']]
     basic_info['labeled_probe'] = 'FITC goat anti rabbit'
     return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
 
 
 @pytest.fixture
-def imaging_path_2(testapp, basic_info, target_w_region):
-    basic_info['target'] = [target_w_region['@id']]
+def imaging_path_2(testapp, basic_info, genomic_region_bio_feature):
+    basic_info['target'] = [genomic_region_bio_feature['@id']]
     basic_info['labeled_probe'] = 'TRITC horse anti rabbit'
     return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
 
 
 @pytest.fixture
-def imaging_path_3(testapp, basic_info, target_w_desc):
-    basic_info['target'] = [target_w_desc['@id']]
+def imaging_path_3(testapp, basic_info, basic_region_bio_feature):
+    basic_info['target'] = [basic_region_bio_feature['@id']]
     basic_info['labeled_probe'] = 'DAPI'
     return testapp.post_json('/imaging_path', basic_info).json['@graph'][0]
 
@@ -674,13 +674,13 @@ def test_experiment_categorizer_4_mic_no_path(testapp, microscopy_no_path):
     assert microscopy_no_path['experiment_categorizer'].get('value') is None
 
 
-def test_experiment_categorizer_4_mic_w_path(testapp, microscopy_w_path, target_w_region):
+def test_experiment_categorizer_4_mic_w_path(testapp, microscopy_w_path, genomic_region_bio_feature):
     assert microscopy_w_path['experiment_categorizer']['field'] == 'Target'
-    assert microscopy_w_path['experiment_categorizer']['value'] == target_w_region['target_summary']
+    assert microscopy_w_path['experiment_categorizer']['value'] == genomic_region_bio_feature['display_title']
 
 
-def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipath, target_w_region, target_w_desc):
-    vals2chk = [target_w_region['target_summary'], target_w_desc['target_summary']]
+def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipath, genomic_region_bio_feature, basic_region_bio_feature):
+    vals2chk = [genomic_region_bio_feature['display_title'], basic_region_bio_feature['display_title']]
     len2chk = len(vals2chk[0]) + len(vals2chk[1]) + 2
     assert microscopy_w_multipath['experiment_categorizer']['field'] == 'Target'
     value = microscopy_w_multipath['experiment_categorizer']['value']
@@ -701,9 +701,9 @@ def test_experiment_categorizer_4_damid_no_fusion(testapp, damid_no_fusion):
     assert damid_no_fusion['experiment_categorizer'].get('value') == 'None (Control)'
 
 
-def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion, target_w_prot):
+def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion, prot_bio_feature):
     assert damid_w_fusion['experiment_categorizer']['field'] == 'Target'
-    assert damid_w_fusion['experiment_categorizer']['value'] == target_w_prot['display_title']
+    assert damid_w_fusion['experiment_categorizer']['value'] == prot_bio_feature['display_title']
 
 
 def test_experiment_categorizer_4_repliseq_no_fraction_info(testapp, repliseq_1):
@@ -724,9 +724,9 @@ def test_experiment_categorizer_4_repliseq_fraction_and_total(testapp, repliseq_
     assert repliseq_3['experiment_categorizer']['value'] == wanted
 
 
-def test_experiment_categorizer_w_target(testapp, expt_w_target, target_w_prot):
+def test_experiment_categorizer_w_target(testapp, expt_w_target, prot_bio_feature):
     assert expt_w_target['experiment_categorizer']['field'] == 'Target'
-    assert expt_w_target['experiment_categorizer']['value'] == target_w_prot['display_title']
+    assert expt_w_target['experiment_categorizer']['value'] == prot_bio_feature['display_title']
 
 
 def test_experiment_categorizer_w_enzyme(testapp, experiment, mboI):
@@ -734,12 +734,12 @@ def test_experiment_categorizer_w_enzyme(testapp, experiment, mboI):
     assert experiment['experiment_categorizer']['value'] == mboI['display_title']
 
 
-def test_experiment_categorizer_w_target_and_enzyme(testapp, expt_w_target, target_w_prot, mboI):
+def test_experiment_categorizer_w_target_and_enzyme(testapp, expt_w_target, prot_bio_feature, mboI):
     # import pdb; pdb.set_trace()
     res = testapp.patch_json(expt_w_target['@id'], {'digestion_enzyme': mboI['@id']}).json['@graph'][0]
     assert res['digestion_enzyme'] == mboI['@id']
     assert res['experiment_categorizer']['field'] == 'Target'
-    assert res['experiment_categorizer']['value'] == target_w_prot['display_title']
+    assert res['experiment_categorizer']['value'] == prot_bio_feature['display_title']
 
 
 def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
@@ -757,13 +757,13 @@ def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI)
     assert expt['experiment_categorizer']['value'] == mboI['display_title']
 
 
-def test_experiment_categorizer_cap_c_w_region(expt_w_targ_region, target_w_region):
+def test_experiment_categorizer_cap_c_w_region(expt_w_targ_region, genomic_region_bio_feature):
     assert expt_w_targ_region['experiment_categorizer']['field'] == 'Target'
-    assert expt_w_targ_region['experiment_categorizer']['value'] == target_w_region['target_summary']
+    assert expt_w_targ_region['experiment_categorizer']['value'] == genomic_region_bio_feature['display_title']
 
 
 def test_experiment_categorizer_cap_c_w_2regions(
-        expt_w_2_targ_regions, target_w_region, another_target_w_region):
-    wanted = ', '.join(sorted([target_w_region['target_summary'], another_target_w_region['target_summary']]))
+        expt_w_2_targ_regions, genomic_region_bio_feature, gene_bio_feature):
+    wanted = ', '.join(sorted([genomic_region_bio_feature['display_title'], gene_bio_feature['display_title']]))
     assert expt_w_2_targ_regions['experiment_categorizer']['field'] == 'Target'
     assert expt_w_2_targ_regions['experiment_categorizer']['value'] == wanted
