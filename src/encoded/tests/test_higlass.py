@@ -1332,7 +1332,7 @@ def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf, bed_beddb_file_json
 
     assert_true(found_data_track == True)
 
-def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
+def test_add_beddb(testapp, higlass_mcool_viewconf, beddb_file_json):
     """ Add a beddb file to the HiGlass file.
 
     Args:
@@ -1355,7 +1355,7 @@ def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
     bed_file = testapp.post_json('/file_processed', beddb_file_json).json['@graph'][0]
 
     # Get the Higlass Viewconf that will be edited.
-    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000002"
     response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
     higlass_json = response.json
 
@@ -1383,25 +1383,17 @@ def test_add_beddb(testapp, higlass_blank_viewconf, beddb_file_json):
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
     # Central track is unchanged
-    assert_true(len(tracks["center"][0]["contents"]) == 0)
+    assert_true(len(tracks["center"][0]["contents"]) == 1)
 
-    # The top track should be a bed-like track
-    found_top_data_track = False
-    for track in tracks["top"]:
-        if "tilesetUid" in track and track["tilesetUid"] == beddb_file_json['higlass_uid']:
-            found_top_data_track = True
-            assert_true(track["type"] == "horizontal-gene-annotations")
+    # The top track should contain a bed-like track in the first spot
+    track = tracks["top"][0]
+    assert_true(track["tilesetUid"] == beddb_file_json['higlass_uid'])
+    assert_true(track["type"] == "horizontal-gene-annotations")
 
-    assert_true(found_top_data_track == True)
-
-    # The left track should be a bed-like track
-    found_left_data_track = False
-    for track in tracks["left"]:
-        if "tilesetUid" in track and track["tilesetUid"] == beddb_file_json['higlass_uid']:
-            found_left_data_track = True
-            assert_true(track["type"] == "vertical-gene-annotations")
-
-    assert_true(found_left_data_track == True)
+    # The left track should contain a bed-like track in the first spot
+    track = tracks["left"][0]
+    assert_true(track["tilesetUid"] == beddb_file_json['higlass_uid'])
+    assert_true(track["type"] == "vertical-gene-annotations")
 
     # The searchbar needs to be updated, too
     main_view = new_higlass_json["views"][0]

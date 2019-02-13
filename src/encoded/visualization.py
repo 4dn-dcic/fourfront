@@ -673,8 +673,8 @@ def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
         new_view, error = create_2d_view(new_file)
         if error:
             return None, errors
-        new_view = copy_top_reference_tracks_into_left(new_view, views)
         copy_1d_tracks_into_all_views(views, new_view)
+        new_view = copy_top_reference_tracks_into_left(new_view, views)
         add_view_to_views(new_view, views)
     elif file_format == "/file-formats/beddb/":
         # Add the 1D track to top, left
@@ -787,8 +787,12 @@ def add_track_to_views(new_track, views, side="top"):
         # Make sure the side exists
         if not side in view["tracks"]:
             return False, "View does not contain the side{side}".format(side=side)
-        # Add the new track to the view
-        view["tracks"][side].append(new_track)
+        # If this track is a gene annotation, put it as the first entry of the track
+        if "gene-annotation" in new_track["type"]:
+            view["tracks"][side].insert(0, new_track)
+        else:
+            # Add the new track to the view
+            view["tracks"][side].append(new_track)
 
 def create_2d_view(new_file):
     """ Creates a dictionary representing a 2d view of the given file.
@@ -1138,7 +1142,6 @@ def copy_1d_tracks_into_all_views(views, new_view):
 
         # Compile that side's track uids
         new_view_track_uids = [ track["uid"] for track in new_view["tracks"][side] if "uid" in track]
-
         # If there are any tracks here
         for track in base_view["tracks"][side]:
             # Copy them into the new_view's side if the uid doesn't exist.
