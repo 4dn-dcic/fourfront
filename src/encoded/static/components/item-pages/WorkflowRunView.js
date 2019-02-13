@@ -130,11 +130,15 @@ export default class WorkflowRunView extends DefaultItemView {
 
     typeInfo(){
         // TODO: Get rid of this and show a link + maybe more info inside the page body / midsection?
-        var context = this.props.context;
-        var topRightTitle = (context.workflow && (context.workflow.title || context.workflow.display_title)) || null;
-        if (topRightTitle && context.workflow.workflow_type){
+        var context = this.props.context,
+            workflow = context.workflow,
+            topRightTitle = (workflow && (workflow.title || workflow.display_title)) || null;
+
+        if (topRightTitle && Array.isArray(workflow.category) && workflow.category.length > 0){
             topRightTitle = (
-                <span><span className="text-400">{ topRightTitle }</span> ({ context.workflow.workflow_type })</span>
+                <React.Fragment>
+                    <span className="text-400">{ topRightTitle }</span> ({ workflow.category.join(', ') })
+                </React.Fragment>
             );
         }
         return { 'title' : topRightTitle, 'description' : 'Workflow used for this run' };

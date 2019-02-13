@@ -411,3 +411,30 @@ def workflow_4_5(value, system):
                     value['steps'][s]['inputs'][i]['meta']['notes'] = msg
                 else:
                     value['steps'][s]['inputs'][i]['meta']['file_format'] = ffuuid
+
+
+@upgrade_step('workflow', '5', '6')
+def workflow_5_6(value, system):
+    '''remove workflow type (and workflow diagram) field
+       clean up workflow cateogory and convert it to an array'''
+    if 'workflow_type' in value:
+        del value['workflow_type']
+    if 'workflow_diagram' in value:
+        del value['workflow_diagram']
+    if 'data_types' in value:
+        value['experiment_types'] = value['data_types'].copy()
+        del value['data_types']
+    if 'workflow_category' in value:
+        if value['workflow_category'] in ['QC', 'format_conversion', 'provenance']:
+            pass
+        elif value['workflow_category'].endswith('calling'):
+            value['workflow_category'] = 'feature calling'
+        elif value['workflow_category'] in ['data extraction', 'merging', 'format_integration']:
+            value['workflow_category'] = 'miscellaneous'
+        elif value['workflow_category'] == 'Other' and 'processing' in value['title']:
+            value['workflow_category'] = 'processing'
+        else:
+            value['workflow_category'] = 'processing'
+    elif 'processing' in value['title']:
+            value['workflow_category'] = 'processing'
+    value['workflow_category'] = [value['workflow_category']]  # convert to an array
