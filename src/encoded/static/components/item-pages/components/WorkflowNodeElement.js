@@ -348,23 +348,29 @@ export class WorkflowNodeElement extends React.PureComponent {
      * seems having a link on node would be bit unexpected if clicked accidentally.
      */
     qcMarker(){
-        var { node } = this.props,
-            file, qc;
+        var { node, selected } = this.props,
+            file, qc, markerProps;
 
         if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
             return null;
         }
 
-        file = node.meta.run_data.file,
-        qc = file && file.quality_metric;
+        file    = node.meta.run_data.file,
+        qc      = file && file.quality_metric;
 
         if (!qc) return null;
 
-        return (
-            <div className="qc-present-node-marker" data-tip="This file has a quality control metric associated with it.">
-                QC
-            </div>
-        );
+        markerProps = {
+            'className' : "qc-present-node-marker",
+            'data-tip'  : "This file has a quality control metric associated with it.",
+            'children'  : "QC"
+        };
+
+        if (selected && qc.url){
+            return <a href={qc.url} target="_blank" {...markerProps} />;
+        }
+
+        return <div {...markerProps} />;
     }
 
     render(){

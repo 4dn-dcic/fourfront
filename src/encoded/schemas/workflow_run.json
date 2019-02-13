@@ -128,6 +128,7 @@
         "output_quality_metrics": {
             "title" : "Output quality metrics",
             "description": "All quality metric objects that are outputs of the workflow run",
+            "comments": "DEPRECATED - THIS IS BEING PRESERVED ONLY TO HANDLE EXISTING ITEMS UNTIL PATCHED",
             "type": "array",
             "items": {
                 "title": "Output quality metric",
@@ -148,8 +149,7 @@
                     "value": {
                         "title": "Link to quality metric object",
                         "description": "a specific quality metric object",
-                        "type": "string",
-                        "linkTo": "QualityMetric"
+                        "type": "string"
                     }
                 }
             }

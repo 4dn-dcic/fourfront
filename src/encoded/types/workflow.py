@@ -488,9 +488,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
 
         # Add Output Files and Metrics, 1-level deep max (maybe change in future)
-        output_files_by_argument_name = group_files_by_workflow_argument_name(
-            workflow_run_model_obj.get('output_files', []) + workflow_run_model_obj.get('output_quality_metrics', [])
-        )
+        output_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('output_files', []))
         for argument_name, output_files_for_arg in output_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
             file_uuids       = [ (f.get('value') or f.get('value_qc') or None) for f in output_files_for_arg ]
@@ -716,8 +714,8 @@ class WorkflowRun(Item):
         'output_files.value.file_size',
         'output_files.value.quality_metric.display_title',
         'output_files.value.status',
-        'output_quality_metrics.name',
-        'output_quality_metrics.value.*'
+        'output_files.value_qc.url',
+        'output_files.value_qc.overall_quality_status'
     ]
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
@@ -814,24 +812,15 @@ class WorkflowRun(Item):
             return resultArgs
 
 
-        # Metrics will overwrite output_files in case of duplicate keys.
-        combined_output_files = mergeArgumentsWithSameArgumentName(
-            [ dict(f, type = "output" ) for f in self.properties.get('output_files',[]) ] +
-            [ dict(f, type = "quality_metric" ) for f in self.properties.get('output_quality_metrics',[]) ]
-        )
-
-        input_files = mergeArgumentsWithSameArgumentName(
-            [ dict(f, type = "input" ) for f in self.properties.get('input_files',[]) ]
-        )
-
-        input_params = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
-
+        output_files    = mergeArgumentsWithSameArgumentName(self.properties.get('output_files',[]))
+        input_files     = mergeArgumentsWithSameArgumentName(self.properties.get('input_files',[]))
+        input_params    = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
 
         for step in analysis_steps:
             # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
 
             for output in step['outputs']:
-                map_run_data_to_io_arg(output, combined_output_files, 'output')
+                map_run_data_to_io_arg(output, output_files, 'output')
 
             for input in step['inputs']:
                 if input.get('meta', {}).get('type') != 'parameter':
