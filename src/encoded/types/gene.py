@@ -75,7 +75,7 @@ def map_ncbi2schema(geneinfo):
     '''
     field_map = {'tax_id': 'organism', 'Status': 'ncbi_entrez_status', 'Symbol': 'official_symbol',
                  'Aliases': 'synonyms', 'description': 'fullname', 'url': 'url'}
-    return {field_map[k]: v for k, v in geneinfo.items() if k in field_map}
+    return {field_map[k]: v for k, v in geneinfo.items() if k in field_map and v}
 
 
 @collection(
