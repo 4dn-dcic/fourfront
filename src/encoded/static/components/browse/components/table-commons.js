@@ -324,6 +324,20 @@ export const defaultColumnExtensionMap = {
                 </div>
             );
         }
+    },
+    'workflow.title' : {
+        'title' : "Workflow",
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.workflow || !result.workflow.title) return null;
+            var title = result.workflow.title,
+                link = object.itemUtil.atId(result.workflow);
+
+            if (link){
+                return <a href={link}>{ title }</a>;
+            } else {
+                return title;
+            }
+        }
     }
 };
 

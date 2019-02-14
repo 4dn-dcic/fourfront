@@ -417,16 +417,27 @@
         "category": {
             "title": "Workflow Category"
         },
-        "workflow_type": {
-            "title": "Workflow Type"
+        "experiment_types": {
+            "title": "Experiment Type"
         },
-        "data_types": {
-            "title": "Data Type"
+        "steps.meta.analysis_step_types" : {
+            "title" : "Analysis Step Type"
+        },
+        "steps.inputs.meta.file_format.display_title" : {
+            "title" : "Input File Format"
+        },
+        "steps.outputs.meta.file_format.display_title" : {
+            "title" : "Output File Format"
+        },
+        "workflow_language" : {
+            "title" : "Workflow Language"
         }
     },
     "columns" : {
         "category": {
-            "title": "Workflow Category"
+            "title": "Workflow Category",
+            "colTitle": "Category",
+            "default_hidden" : true
         },
         "experiment_types": {
             "title": "Experiment Types"
@@ -435,7 +446,13 @@
             "title": "App Name"
         },
         "app_version": {
-            "title": "App version"
+            "title": "App Version",
+            "colTitle" : "App Ver."
+        },
+        "workflow_language" : {
+            "title" : "Workflow Language",
+            "colTitle" : "WL Lang.",
+            "default_hidden" : true
         }
     }
 }

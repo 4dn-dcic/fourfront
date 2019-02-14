@@ -608,7 +608,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             while True:
                 try:
                     curr_step = current_step_route.pop()
-                except:
+                except IndexError:
                     break
                 steps.append(curr_step)
 
@@ -621,7 +621,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     while True:
         try:
             curr_step = current_step_route.pop()
-        except:
+        except IndexError:
             break
         steps.append(curr_step)
 
@@ -697,6 +697,9 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        'workflow.category',
+        'workflow.experiment_types',
+        'workflow.app_name',
         'workflow.title',
         'workflow.steps.name',
         'workflow.steps.meta.software_used.name',

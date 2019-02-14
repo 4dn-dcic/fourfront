@@ -429,7 +429,6 @@ def workflow_5_6(value, system):
         del value['data_types']
 
     if 'category' in value:
-
         if isinstance(value['category'], list):
             pass
         elif value['category'] in ['QC', 'format_conversion', 'provenance']:

@@ -247,6 +247,35 @@
         },
         "run_status": {
             "title": "Run Status"
+        },
+        "input_files.value.file_format.display_title" : {
+            "title" : "File Format (Input)"
+        },
+        "output_files.value.file_format.display_title" : {
+            "title" : "File Format (Output)"
+        }
+    },
+    "columns" : {
+        "workflow.title" : {
+            "title" : "Workflow"
+        },
+        "workflow.category": {
+            "title": "Workflow Category",
+            "colTitle": "Category",
+            "default_hidden" : true
+        },
+        "workflow.experiment_types": {
+            "title": "Experiment Types"
+        },
+        "workflow.app_name": {
+            "title": "Application Name",
+            "colTitle" : "App Name",
+            "default_hidden" : true
+        },
+        "run_platform": {
+            "title": "Run Platform",
+            "colTitle": "Platform",
+            "default_hidden" : true
         }
     }
 }
