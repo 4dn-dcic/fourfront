@@ -10,7 +10,7 @@ import { console } from './../../util';
 import Edge from './Edge';
 
 
-export default class EdgesLayer extends React.Component {
+export default class EdgesLayer extends React.PureComponent {
 
     /**
      * Move selected edges to top, and disabled ones to bottom, because CSS z-index doesn't work for SVG elements.
@@ -89,6 +89,7 @@ export default class EdgesLayer extends React.Component {
         var { outerHeight, innerWidth, innerMargin, width, edges, selectedNode, isNodeDisabled } = this.props,
             divWidth = Math.max(width, this.props.contentWidth),
             edgeCount = edges.length;
+
         return (
             <div className="edges-layer-wrapper" style={{ 'width' : divWidth, 'height' : outerHeight }}>
                 <svg className="edges-layer" width={divWidth} height={outerHeight}>

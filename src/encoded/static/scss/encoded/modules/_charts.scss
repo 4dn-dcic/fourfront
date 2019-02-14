@@ -1686,6 +1686,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 position: relative;
                 transition: height .5s ease-out;
 
+                &.height-decreasing {
+                    transition: height .5s .5s ease-out;
+                }
+
                 .nodes-layer-wrapper,
                 .edges-layer-wrapper {
                     position: absolute;

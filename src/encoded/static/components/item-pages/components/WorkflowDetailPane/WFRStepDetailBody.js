@@ -44,7 +44,7 @@ class WorkflowDetailsForWorkflowNodeRow extends React.Component {
             <div className="row">
 
                 <div className="col-sm-6 box">
-                    <span className="text-600">Workflow Name</span>
+                    <span className="text-600">Workflow</span>
                     <h4 className="text-400 text-ellipsis-container" data-tip={tipIfLongString(title)}>
                         { innerContent }
                     </h4>
