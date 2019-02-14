@@ -116,29 +116,6 @@
             "type": "string",
             "enum": ["Reads (fastq) provided by lab"]
         },
-        "processed_files": {
-            "title": "Processed Files",
-            "description": "The type of processed files typically associated with the experiment type in the portal",
-            "type": "string",
-            "linkTo": "StaticSection"
-        },
-        "data_analysis": {
-            "title": "Data Analysis",
-            "description": "Static sections that contain information about relevant workflows",
-            "type": "array",
-            "items": {
-                "title": "Static Section",
-                "description": "Static section describing workflow",
-                "type": "string",
-                "linkTo": "StaticSection"
-            }
-        },
-        "assay_description": {
-            "title": "Assay Description",
-            "description": "Static section to be included on experiments of this type, detailing purpose/summary",
-            "type": "string",
-            "linkTo": "StaticSection"
-        },
         "sop": {
             "title": "SOP",
             "description": "Approved SOP for the experiment type",
