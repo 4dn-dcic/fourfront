@@ -221,12 +221,14 @@ export class WorkflowNodeElement extends React.PureComponent {
             return <div {...elemProps}>{ title }</div>;
         }
 
-        if ( // If Analysis Step
-            node.nodeType === 'step' && node.meta.uuid &&
-            Array.isArray(node.meta.analysis_step_types) &&
-            node.meta.analysis_step_types.length > 0
-        ){
-            return <div {...elemProps}>{  node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ') }</div>;
+        // If Analysis Step
+        if (node.nodeType === 'step' && node.meta.uuid){
+            if (node.meta.uuid && Array.isArray(node.meta.analysis_step_types) && node.meta.analysis_step_types.length > 0){
+                return <div {...elemProps}>{  _.map(node.meta.analysis_step_types, Schemas.Term.capitalize).join(', ') }</div>;
+            }
+            if (node.meta.workflow && Array.isArray(node.meta.workflow.experiment_types) && node.meta.workflow.experiment_types.length > 0){
+                return <div {...elemProps}>{  _.map(node.meta.workflow.experiment_types, Schemas.Term.capitalize).join(', ') }</div>;
+            }
         }
 
         // If IO Arg w/o file but w/ format
