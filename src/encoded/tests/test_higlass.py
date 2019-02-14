@@ -419,7 +419,7 @@ def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
     assert_true(center_track["type"] == "combined")
     assert_true("contents" in center_track)
 
-    # The contents should have the mcool's heatmap.
+    # The contents should have the mcool's heatmap
     contents = center_track["contents"]
     assert_true(len(contents) == 1)
 
@@ -566,7 +566,8 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     })
 
     assert_true(response.json["success"] == False)
-    assert_true("has the wrong Genome Assembly" in response.json["errors"])
+    assert_true("All files are not" in response.json["errors"])
+    assert_true(mcool_file_with_different_genome_assembly['uuid'] in response.json["errors"])
 
     # Try to add an mcool with the same genome assembly.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -1118,7 +1119,8 @@ def test_add_bedGraph_to_mcool(testapp, higlass_mcool_viewconf, bedGraph_file_js
     })
 
     assert_true(response.json["success"] == False)
-    assert_true("has the wrong Genome Assembly" in response.json["errors"])
+    assert_true("genome assembly" in response.json["errors"])
+    assert_true(bg_file_with_different_genome_assembly['uuid'] in response.json["errors"])
 
     # Try to add an mcool with the same genome assembly.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
@@ -1449,12 +1451,14 @@ def test_add_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json):
 
     assert_true(len(new_higlass_json["views"]) == 1)
 
-    # The view should have a new top track and a new left track
+    # The view should have a new top track
     tracks = new_higlass_json["views"][0]["tracks"]
     old_tracks = higlass_json["viewconfig"]["views"][0]["tracks"]
 
-    assert_true(len(tracks["left"]) == len(old_tracks["left"]) + 1)
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
+
+    # There is no left track or central content, so don't add the track to the left.
+    assert_true(len(tracks["left"]) == len(old_tracks["left"]))
 
     # There are no other 2D views, so we should not have a center track.
     assert_true(len(tracks["center"][0]["contents"]) == 0)
@@ -1467,15 +1471,6 @@ def test_add_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json):
             assert_true(track["type"] == "horizontal-chromosome-labels")
 
     assert_true(found_top_data_track == True)
-
-    # The left track should have chromosome labels
-    found_left_data_track = False
-    for track in tracks["left"]:
-        if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
-            found_left_data_track = True
-            assert_true(track["type"] == "vertical-chromosome-labels")
-
-    assert_true(found_left_data_track == True)
 
 def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json, mcool_file_json):
     """ Add a chromsizes file and add a top, left and center tracks to the view.
