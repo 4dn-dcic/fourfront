@@ -115,6 +115,12 @@
                         "description": "a specified output file",
                         "type": "string",
                         "linkTo": "File"
+                    },
+                    "value_qc": {
+                        "title": "Output Quality Control",
+                        "description": "a specified output report",
+                        "type": "string",
+                        "linkTo": "QualityMetric"
                     }
                 }
             }
@@ -122,6 +128,7 @@
         "output_quality_metrics": {
             "title" : "Output quality metrics",
             "description": "All quality metric objects that are outputs of the workflow run",
+            "comments": "DEPRECATED - THIS IS BEING PRESERVED ONLY TO HANDLE EXISTING ITEMS UNTIL PATCHED",
             "type": "array",
             "items": {
                 "title": "Output quality metric",
@@ -142,8 +149,7 @@
                     "value": {
                         "title": "Link to quality metric object",
                         "description": "a specific quality metric object",
-                        "type": "string",
-                        "linkTo": "QualityMetric"
+                        "type": "string"
                     }
                 }
             }
@@ -241,6 +247,35 @@
         },
         "run_status": {
             "title": "Run Status"
+        },
+        "input_files.value.file_format.display_title" : {
+            "title" : "File Format (Input)"
+        },
+        "output_files.value.file_format.display_title" : {
+            "title" : "File Format (Output)"
+        }
+    },
+    "columns" : {
+        "workflow.title" : {
+            "title" : "Workflow"
+        },
+        "workflow.category": {
+            "title": "Workflow Category",
+            "colTitle": "Category",
+            "default_hidden" : true
+        },
+        "workflow.experiment_types": {
+            "title": "Experiment Types"
+        },
+        "workflow.app_name": {
+            "title": "Application Name",
+            "colTitle" : "App Name",
+            "default_hidden" : true
+        },
+        "run_platform": {
+            "title": "Run Platform",
+            "colTitle": "Platform",
+            "default_hidden" : true
         }
     }
 }
