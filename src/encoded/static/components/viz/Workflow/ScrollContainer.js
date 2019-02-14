@@ -5,38 +5,68 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 
 
-export default class ScrollContainer extends React.Component {
+export default class ScrollContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.state= { 'mounted' : false };
+        this.state = {
+            'mounted' : false,
+            'isHeightDecreasing' : false,
+            'outerHeight' : props.outerHeight,
+            'pastHeight' : null
+        };
+        this.containerRef = React.createRef();
     }
 
     componentDidMount(){
         this.setState({ 'mounted' : true });
     }
 
+    componentDidUpdate(prevProps, pastState){
+        if (this.props.outerHeight < prevProps.outerHeight){
+            this.setState(({ isHeightDecreasing })=>{
+                if (isHeightDecreasing) {
+                    return null;
+                }
+                return { 'isHeightDecreasing' : true, 'pastHeight' : prevProps.outerHeight, 'outerHeight' : this.props.outerHeight };
+            });
+            return;
+        }
+
+        if (this.props.outerHeight > prevProps.outerHeight){
+            this.setState({ 'isHeightDecreasing' : false, 'pastHeight' : null, 'outerHeight' : this.props.outerHeight });
+            return;
+        }
+
+        if (!pastState.isHeightDecreasing && this.state.isHeightDecreasing){
+            setTimeout(()=>{
+                this.setState({ 'isHeightDecreasing' : false, 'pastHeight' : null, 'outerHeight' : this.props.outerHeight });
+            }, 500);
+        }
+    }
+
     render(){
-        //var fullHeight = this.props.innerHeight + this.props.innerMargin.top + this.props.innerMargin.bottom;
-        var fullHeight = this.props.outerHeight;
-        var fullWidth = this.props.innerWidth + this.props.innerMargin.left + this.props.innerMargin.right;
+        var { innerMargin, innerWidth, children, contentWidth, width } = this.props,
+            { outerHeight, pastHeight, isHeightDecreasing } = this.state,
+            innerCls = 'scroll-container' + (isHeightDecreasing ? ' height-decreasing' : '');
+
         return (
-            <div className="scroll-container-wrapper" ref="scrollContainerWrapper">
-                <div className="scroll-container" style={{ 
-                    'width' : Math.max(this.props.contentWidth, fullWidth),
-                    'height': fullHeight,
+            <div className="scroll-container-wrapper" ref={this.containerRef} style={{ width }}>
+                <div className={innerCls} style={{ 
+                    'width' : Math.max(contentWidth, width),
+                    'height': outerHeight,
                 }}>
                 {
-                    React.Children.map(this.props.children, (child)=>{
+                    React.Children.map(children, (child)=>{
                         return React.cloneElement(
                             child,
                             _.extend(
+                                _.omit(this.props, 'children'),
                                 {
-                                    'scrollContainerWrapperElement' : (this.refs && this.refs.scrollContainerWrapper) || null,
-                                    'scrollContainerWrapperMounted' : this.state.mounted
-                                },
-                                _.omit(this.props, 'children')
+                                    'scrollContainerWrapperElement' : this.containerRef.current || null,
+                                    'scrollContainerWrapperMounted' : this.state.mounted,
+                                    'outerHeight' : pastHeight || outerHeight
+                                }
                             )
                         );
                     })

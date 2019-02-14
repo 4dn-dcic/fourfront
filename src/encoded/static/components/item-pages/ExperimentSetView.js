@@ -116,7 +116,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tabs.push(FileViewGraphSection.getTabObject(
                     _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
                     this.state,
-                    this.handleToggleAllRuns
+                    this.handleToggleAllRuns,
+                    width
                 ));
             }
         }

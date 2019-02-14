@@ -2,7 +2,7 @@ export const HIGLASS_WEBSITE = {
     "editable":false,
     "zoomFixed":false,
     "trackSourceServers":[
-        "https://higlass.io/api/v1"
+        "https://higlass.4dnucleome.org/api/v1"
     ],
     "exportViewUrl":"/api/v1/viewconfs",
     "views":[
@@ -12,27 +12,26 @@ export const HIGLASS_WEBSITE = {
                 0,
                 3100000000
             ],
-            "autocompleteSource":"/api/v1/suggest/?d=OHJakQICQD6gTD7skx4EWA&",
+            "autocompleteSource":"/api/v1/suggest/?d=X_5ssAfGQOKnSEyrI_8NVA&",
             "genomePositionSearchBox":{
-                "autocompleteServer":"https://higlass.io/api/v1",
-                "autocompleteId":"OHJakQICQD6gTD7skx4EWA",
-                "chromInfoServer":"https://higlass.io/api/v1",
-                "chromInfoId":"hg19",
+                "autocompleteServer":"https://higlass.4dnucleome.org/api/v1",
+                "autocompleteId":"X_5ssAfGQOKnSEyrI_8NVA",
+                "chromInfoServer":"https://higlass.4dnucleome.org/api/v1",
+                "chromInfoId":"GRCh38",
                 "visible":true
             },
-            "chromInfoPath":"//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
             "tracks":{
                 "top":[
                     {
                         "type":"horizontal-gene-annotations",
                         "height":60,
-                        "tilesetUid":"OHJakQICQD6gTD7skx4EWA",
-                        "server":"https://higlass.io/api/v1",
+                        "tilesetUid":"X_5ssAfGQOKnSEyrI_8NVA",
+                        "server":"https://higlass.4dnucleome.org/api/v1",
                         "position":"top",
-                        "uid":"OHJakQICQD6gTD7skx4EWA",
-                        "name":"Gene Annotations (hg19)",
+                        "uid":"X_5ssAfGQOKnSEyrI_8NVA",
+                        "name":"Gene Annotations (GRCh38)",
                         "options":{
-                            "name":"Gene Annotations (hg19)"
+                            "name":"Gene Annotations (GRCh38)"
                         },
                         "maxWidth":4294967296,
                         "maxZoom":22
@@ -53,28 +52,17 @@ export const HIGLASS_WEBSITE = {
                     {
                         "type":"vertical-gene-annotations",
                         "width":60,
-                        "tilesetUid":"OHJakQICQD6gTD7skx4EWA",
-                        "server":"https://higlass.io/api/v1",
+                        "tilesetUid":"X_5ssAfGQOKnSEyrI_8NVA",
+                        "server":"https://higlass.4dnucleome.org/api/v1",
                         "position":"left",
-                        "name":"Gene Annotations (hg19)",
+                        "name":"Gene Annotations (GRCh38)",
                         "options":{
                             "labelPosition":"bottomRight",
-                            "name":"Gene Annotations (hg19)"
+                            "name":"Gene Annotations (GRCh38)"
                         },
                         "uid":"dqBTMH78Rn6DeSyDBoAEXw",
                         "maxWidth":4294967296,
                         "maxZoom":22
-                    },
-                    {
-                        "chromInfoPath":"//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv",
-                        "type":"vertical-chromosome-labels",
-                        "position":"left",
-                        "name":"Chromosome Labels (hg19)",
-                        "width":30,
-                        "uid":"RHdQK4IRQ7yJeDmKWb7Pcg",
-                        "options":{
-
-                        }
                     }
                 ],
                 "center":[
@@ -84,8 +72,8 @@ export const HIGLASS_WEBSITE = {
                         "height":200,
                         "contents":[
                             {
-                                "server":"https://higlass.io/api/v1",
-                                "tilesetUid":"CQMd6V_cRw6iCI_-Unl3PQ",
+                                "server":"https://higlass.4dnucleome.org/api/v1",
+                                "tilesetUid":"LefipAxFTh-HeTeOo4s8Mg",
                                 "type":"heatmap",
                                 "position":"center",
                                 "options":{
@@ -167,7 +155,7 @@ export const SERVER_4DN = {
                         "contents": [
                             {
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "tilesetUid": "W2hNwnu2TwiDqqCUxxzA1g",
+                                "tilesetUid": "LefipAxFTh-HeTeOo4s8Mg",
                                 "type": "heatmap",
                                 "position": "center",
                                 "uid": "GjuZed1ySGW1IzZZqFB9BA"
