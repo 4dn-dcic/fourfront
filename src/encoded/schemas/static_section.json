@@ -37,6 +37,7 @@
             "title": "Section Type",
             "type": "string",
             "description": "What this section is used for. Defaults to 'Page Section'.",
+            "permission" : "import_items",
             "default": "Page Section",
             "enum" : [
                 "Page Section",

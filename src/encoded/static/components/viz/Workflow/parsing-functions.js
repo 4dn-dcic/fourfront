@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { console } from './../../util';
 
 /** @module parsing-functions */
@@ -139,7 +140,7 @@ export const DEFAULT_PARSING_OPTIONS = {
  * @param {ParsingOptions} [parsingOptions]             Options for parsing and post-processing.
  * @returns {{ 'nodes' : Node[], 'edges' : Edge[] }}    Container object for the two lists.
  */
-export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARSING_OPTIONS){
+export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOptions = DEFAULT_PARSING_OPTIONS){
 
     /*************
      ** Outputs **
@@ -239,23 +240,24 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     }
 
     /**
-    * Returns true if the files are the same, using the uuid. Returns false if file1 or file2 is falsy.
-    * @param {string|object} file1  First file to compare. May be a string containing the file's uuid or an object with the uuid field.
-    * @param {string|object} file2  Second file to compare. May be a string containing the file's uuid or an object with the uuid field.
+    * Returns true if the files are the same, using the @id. Returns false if file1 or file2 is falsy.
+    *
+    * @param {string|object} file1  First file to compare. May be a string containing the file's @id or an object with the @id field.
+    * @param {string|object} file2  Second file to compare. May be a string containing the file's @id or an object with the @id field.
     * @returns {boolean}
     */
-    function compareTwoFilesByUUID(file1, file2){
+    function compareTwoFilesByID(file1, file2){
         if (!file1 || !file2) return false;
         if (typeof file1 === 'string' && typeof file2 === 'string' && file1 === file2){ // Somewhat deprecated case, but can still occur if WorkflowRun has not finished indexing and we are graphing it.
             return true;
         }
-        if (typeof file1 === 'object' && typeof file2 === 'object' && (file1.uuid || 'a') === (file2.uuid || 'b')){ // Common case.
+        if (typeof file1 === 'object' && typeof file2 === 'object' && (file1['@id'] || 'a') === (file2['@id'] || 'b')){ // Common case.
             return true;
         }
-        if (typeof file1 === 'object' && typeof file2 === 'string' && (file1.uuid || 'a') === file2){
+        if (typeof file1 === 'object' && typeof file2 === 'string' && (file1['@id'] || 'a') === file2){
             return true;
         }
-        if (typeof file1 === 'string' && typeof file2 === 'object' && file1 === (file2.uuid || 'b')){
+        if (typeof file1 === 'string' && typeof file2 === 'object' && file1 === (file2['@id'] || 'b')){
             return true;
         }
         return false;
@@ -264,7 +266,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     function checkNodeFileForMatch(n, file){
         return (n.meta && n.meta.run_data && n.meta.run_data.file &&
                 file &&
-                compareTwoFilesByUUID(file, n.meta.run_data.file));
+                compareTwoFilesByID(file, n.meta.run_data.file));
     }
 
     /**
@@ -405,7 +407,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                     if (typeof filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]] === 'undefined'){
                         filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]] = new Set();
                     }
-                    filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]].add(groupSource.for_file) ;
+                    filesByGroup[groupSource.grouped_by][groupSource[groupSource.grouped_by]].add(groupSource.for_file);
                     return filesByGroup;
                 }, {}),
                 groupKeys = _.keys(groups),
@@ -414,7 +416,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                     var incl = false;
                     _.forEach(groupKeys, function(groupingTypeKey){ // = 'workflow'
                         _.forEach(_.keys(groups[groupingTypeKey]), function(group){ // id of workflow
-                            if (groups[groupingTypeKey][group].has(file.uuid || file)){
+                            if (groups[groupingTypeKey][group].has(file['@id'] || file)){
                                 if (typeof m[groupingTypeKey] === 'undefined'){
                                     m[groupingTypeKey] = {};
                                 }
@@ -501,7 +503,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
             if (!node.meta || !node.meta.run_data) return false;
             var stepIOFiles = (stepIO.run_data && Array.isArray(stepIO.run_data.file) && stepIO.run_data.file) || [];
             return (
-                (node.meta.run_data.file && _.any(stepIOFiles, compareTwoFilesByUUID.bind(null, node.meta.run_data.file))) ||
+                (node.meta.run_data.file && _.any(stepIOFiles, compareTwoFilesByID.bind(null, node.meta.run_data.file))) ||
                 (typeof node.meta.run_data.value !== 'undefined' && stepIO.run_data && typeof stepIO.run_data.value !== 'undefined' && node.meta.run_data.value === stepIO.run_data.value)
             );
         }
@@ -612,19 +614,19 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                                     var origFile = n.meta.run_data.file,
                                         fileToCheck = inMore.meta.run_data.file;
                                     if (!Array.isArray(origFile) && !Array.isArray(fileToCheck)){ // Common case. Other cases are re: groups.
-                                        return compareTwoFilesByUUID(n.meta.run_data.file, inMore.meta.run_data.file);
+                                        return compareTwoFilesByID(n.meta.run_data.file, inMore.meta.run_data.file);
                                     } else if (Array.isArray(origFile) && !Array.isArray(fileToCheck)){
                                         return _.any(origFile, function(oF){
-                                            return compareTwoFilesByUUID(oF, fileToCheck);
+                                            return compareTwoFilesByID(oF, fileToCheck);
                                         });
                                     } else if (!Array.isArray(origFile) && Array.isArray(fileToCheck)){
                                         return _.any(fileToCheck, function(fTC){
-                                            return compareTwoFilesByUUID(origFile, fTC);
+                                            return compareTwoFilesByID(origFile, fTC);
                                         });
                                     } else if (Array.isArray(origFile) && Array.isArray(fileToCheck)){
                                         return _.any(fileToCheck, function(fTC){
                                             return _.any(origFile, function(oF){
-                                                return compareTwoFilesByUUID(oF, fTC);
+                                                return compareTwoFilesByID(oF, fTC);
                                             });
                                         });
                                     }
@@ -648,17 +650,17 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                     // TEMP: Re Grouping
                     if (n.meta.run_data && Array.isArray(n.meta.run_data.file)){ // Combine run data (files) from both nodes, in case of groups.
                         var runDataToUse            = n.meta.run_data, //useNewRunData ? n.meta.run_data : inNode.meta.run_data,
-                            runDataToUseFileUUIDs   = _.pluck(runDataToUse.file, 'uuid');
+                            runDataToUseFileIDs     = _.pluck(runDataToUse.file, '@id');
 
                         if (Array.isArray(inNode.meta.run_data.file)){
                             _.forEach(inNode.meta.run_data.file, function(f, idx){
-                                if (runDataToUseFileUUIDs.indexOf(f.uuid) === -1){
+                                if (runDataToUseFileIDs.indexOf(f['@id']) === -1){
                                     runDataToUse.file.push(f);
                                     runDataToUse.meta.push(inNode.meta.run_data.meta[idx]);
                                 }
                             });
                         } else {
-                            if (runDataToUseFileUUIDs.indexOf(inNode.meta.run_data.file.uuid) === -1){
+                            if (runDataToUseFileIDs.indexOf(inNode.meta.run_data.file['@id']) === -1){
                                 runDataToUse.file.push(inNode.meta.run_data.file);
                                 runDataToUse.meta.push(inNode.meta.run_data.meta);
                             }
@@ -695,13 +697,13 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
                         // Compare new node's file with already-matched files to filter new node out, if have files.
                         if (n.meta && n.meta.run_data && n.meta.run_data.file){
 
-                            // Get the uuid or obj representation of the file we want to match.
+                            // Get the @id or obj representation of the file we want to match.
                             var fileToMatch = n.meta.run_data.file,
                                 filesToCheck = _.filter(_.map(currentIONodesMatched, function(n2){	
                                     return (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;	
                                 }), function(file){ return file !== null; });
 
-                            if ( _.any(filesToCheck, compareTwoFilesByUUID.bind(compareTwoFilesByUUID, fileToMatch))){
+                            if ( _.any(filesToCheck, compareTwoFilesByID.bind(null, fileToMatch))){
                                 return false;
                             }
                         }
@@ -914,8 +916,7 @@ export function parseAnalysisSteps(analysis_steps, parsingOptions = DEFAULT_PARS
     }, []);
 
     return { 'nodes' : sortedNodes, 'edges' : graphData.edges };
-
-}
+});
 
 /**
  * Use this function to run another function on each node recursively along a path of nodes.
@@ -1317,7 +1318,7 @@ export function nodesInColumnPostSortFxn(nodesInColumn, columnNumber){
         _.forEach(groupNodes, function(gN){
             var relatedFileSource = _.find(gN._source, function(s){ return typeof s.grouped_by === 'undefined' && typeof s.name === 'string' && s.for_file; });
             var relatedFileNode = relatedFileSource && _.find(nodesInColumn, function(n){
-                if (n && n.meta && n.meta.run_data && n.meta.run_data.file && (n.meta.run_data.file.uuid || n.meta.run_data.file) === (relatedFileSource.for_file || 'x') ){
+                if (n && n.meta && n.meta.run_data && n.meta.run_data.file && (n.meta.run_data.file['@id'] || n.meta.run_data.file) === (relatedFileSource.for_file || 'x') ){
                     return true;
                 }
                 return false;

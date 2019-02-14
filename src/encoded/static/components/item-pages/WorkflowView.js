@@ -65,7 +65,7 @@ export function commonGraphPropsFromProps(props){
     };
 
     if (props.isFullscreen) {
-        graphProps.width = props.windowWidth;
+        graphProps.width = props.windowWidth - 40;
     } else if (props.width){
         graphProps.width = props.width;
     }
@@ -150,7 +150,6 @@ export class WorkflowGraphSection extends React.PureComponent {
         this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
         this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
         this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
-        this.render = this.render.bind(this);
         this.state = _.extend({
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
@@ -249,6 +248,7 @@ export class WorkflowGraphSection extends React.PureComponent {
     render(){
         var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
             { isFullscreen } = this.props;
+
         return (
             <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">

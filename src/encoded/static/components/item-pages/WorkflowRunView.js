@@ -53,16 +53,16 @@ export function mapEmbeddedFilesToStepRunDataIDs(nodes, uuidFileMap){
  * Given a WorkflowRun item, looks at its 'input_files', 'output_files', etc. lists and generates an Object
  * with file/item UUIDs as keys and the file/Item object embedded (from WorkflowRun embedded list) representation as value.
  *
- * @param {{ 'input_files' : Object[], 'output_files' : Object[], 'output_quality_metrics' : Object[] }} item - The WorkflowRun from which we're grabbing embedded files.
+ * @param {{ 'input_files' : Object[], 'output_files' : Object[] }} item - The WorkflowRun from which we're grabbing embedded files.
  * @returns {Object} Object keyed by embedded file/qc/report UUID and with embedded Item representation of that UUID as value.
  */
 export function allFilesForWorkflowRunMappedByUUID(item){
     return _.object(
         _.map(
             _.filter(
-                (item.output_files || []).concat(item.input_files || []).concat(item.output_quality_metrics || []),
+                (item.output_files || []).concat(item.input_files || []),
                 function(fileContainer){
-                    var file = fileContainer.value || null;
+                    var file = fileContainer.value || fileContainer.value_qc || null; // quality_metrics would be present under value_qc.
                     if (!file || typeof file !== 'object') {
                         console.error("No file ('value' property) embedded for: ", fileContainer);
                         return false;
@@ -78,7 +78,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                 }
             ),
             function(fileContainer){
-                var file = fileContainer.value || null;
+                var file = fileContainer.value || fileContainer.value_qc || null;
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value

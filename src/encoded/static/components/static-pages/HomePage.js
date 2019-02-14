@@ -23,25 +23,7 @@ export default class HomePage extends React.PureComponent {
         "context" : PropTypes.shape({
             "content" : PropTypes.array
         }).isRequired
-    }
-
-    midHeader(){
-        return null;// <div className="mt-2" />; // Temporary -- remove and uncomment lines below when we have better "Getting Started" page or static section or w/e.
-        /*
-        return (
-            <div className="homepage-mid-header row mb-4 mt-2">
-                <div className="col-md-6">
-                    <BigBrowseButton />
-                </div>
-                <div className="col-md-6">
-                    <Button className="btn-block btn-lg text-300" href="/help/user-guide/data-organization">
-                        Guide to Getting Started
-                    </Button>
-                </div>
-            </div>
-        );
-        */
-    }
+    };
 
     introText(){
         var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
@@ -53,15 +35,6 @@ export default class HomePage extends React.PureComponent {
         return <p className="text-center">Introduction content not yet indexed.</p>;
     }
 
-    announcements(){
-        return (
-            <React.Fragment>
-                <h2 className="homepage-section-title">Announcements</h2>
-                <Announcements loaded session={this.props.session} announcements={this.props.context.announcements || null} />
-            </React.Fragment>
-        );
-    }
-
     /**
      * The render function. Renders homepage contents.
      * @returns {Element} A React <div> element.
@@ -69,7 +42,6 @@ export default class HomePage extends React.PureComponent {
     render() {
         return (
             <div className="home-content-area">
-                { this.midHeader() }
                 <HomePageCarousel {..._.pick(this.props, 'windowWidth')} />
                 <div className="row">
                     <div className="col-xs-12 col-md-8">
@@ -81,7 +53,8 @@ export default class HomePage extends React.PureComponent {
                     </div>
                 </div>
                 <div className="mt-4">
-                    { this.announcements() }
+                    <h2 className="homepage-section-title">Announcements</h2>
+                    <Announcements loaded session={this.props.session} announcements={this.props.context.announcements || null} />
                 </div>
             </div>
         );
