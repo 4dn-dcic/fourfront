@@ -109,7 +109,9 @@ class ExperimentType(Item):
     item_type = 'experiment_type'
     schema = load_schema('encoded:schemas/experiment_type.json')
     name_key = 'experiment_name'
-
+    rev = {
+        'additional_protocols': ('Protocol', 'experiment_type')
+    }
     embedded_list = [
         "static_headers.content",
         "static_headers.title",
