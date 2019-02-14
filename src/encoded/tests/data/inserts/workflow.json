@@ -517,9 +517,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "QC"
-            ]
+            "QC"
         ],
         "cwl_child_filenames": [
             "fastqc-0-11-4.cwl"
@@ -660,9 +658,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "QC"
-            ]
+            "QC"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
@@ -802,9 +798,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "QC"
-            ]
+            "QC"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
@@ -939,9 +933,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "QC"
-            ]
+            "QC"
         ],
         "description": "ValidateFiles quality control step for fastq files",
         "experiment_types": [
@@ -1016,9 +1008,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "QC"
-            ]
+            "QC"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
@@ -1100,9 +1090,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "QC"
-            ]
+            "QC"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
@@ -3323,9 +3311,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "miscellaneous"
-            ]
+            "miscellaneous"
         ],
         "description": "add-hic-normvector-to-mcool",
         "experiment_types": [
@@ -3417,9 +3403,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "miscellaneous"
-            ]
+            "miscellaneous"
         ],
         "description": "extract-mcool-normvector-for-juicebox",
         "experiment_types": [
@@ -4208,9 +4192,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "miscellaneous"
-            ]
+            "miscellaneous"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4512,9 +4494,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "format conversion"
-            ]
+            "format conversion"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -4615,9 +4595,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "format conversion"
-            ]
+            "format conversion"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
@@ -8200,9 +8178,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "format conversion"
-            ]
+            "format conversion"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/v4/cwl/",
@@ -11105,9 +11081,7 @@
         ],
         "award": "1U01CA200059-01",
         "category": [
-            [
-                "format conversion"
-            ]
+            "format conversion"
         ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtobeddb/v2/cwl/",
