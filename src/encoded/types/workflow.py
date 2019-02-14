@@ -455,6 +455,12 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         if not workflow_run_model_obj:
             return
 
+        # We create the structure of our steps to emulate the structure of `Workflow.steps`,
+        # as defined in the Workflow schema. This means we might wedge another field into the
+        # `step.meta.analysis_step_types` property here.
+        #
+        # This allows us to use the same frontend graphing mechanics/code on one common "step"
+        # data structure for both Worfklow Steps, WorkflowRun Steps, and Provenance Graph Steps (Workflow(Runs)).
         step = {
             "name"      : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
             "meta"      : {
@@ -464,7 +470,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 '@type'         : workflow_run_model_obj.get('@type'),
                 '@id'           : workflow_run_model_obj.get('@id'),
                 'date_created'  : workflow_run_model_obj.get('date_created'),
-                "analysis_step_types" : [],
+                "analysis_step_types" : []
             },
             "inputs"    : [],
             "outputs"   : []
@@ -475,7 +481,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         if workflow_uuid:
             workflow_model_obj = get_model_obj(workflow_uuid)
             if workflow_model_obj:
-                step['meta']['analysis_step_types'].extend(workflow_model_obj.get('experiment_types', []))
+                # `step.meta.analysis_step_types` is defined in Workflow schema. It holds e.g. 'purposes' list for each step.
+                # Since each workflow(run) acts as a step within a provenance graph, we fill this property with something that
+                # might have an analogous-enough meaning, e.g. `category`.
+                step['meta']['analysis_step_types'].extend(workflow_model_obj.get('category', []))
                 step['meta']['workflow'] = {
                     '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
                     '@type'             : workflow_model_obj.get('@type'),
@@ -483,7 +492,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     'accession'         : workflow_model_obj.get('accession'),
                     'steps'             : workflow_model_obj.get('steps'),
                     'uuid'              : workflow_uuid,
-                    'category'          : workflow_model_obj.get('category')
+                    'category'          : workflow_model_obj.get('category'),
+                    'experiment_types'  : workflow_model_obj.get('experiment_types', [])
                 }
 
 
