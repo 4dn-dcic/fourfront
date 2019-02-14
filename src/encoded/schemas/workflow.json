@@ -451,7 +451,7 @@
         },
         "workflow_language" : {
             "title" : "Workflow Language",
-            "colTitle" : "WL Lang.",
+            "colTitle" : "Lang.",
             "default_hidden" : true
         }
     }
