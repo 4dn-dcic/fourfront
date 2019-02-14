@@ -126,7 +126,13 @@ export default class WorkflowView extends DefaultItemView {
     }
 
     typeInfo(){
-        return { 'title' : this.props.context.workflow_type, description : 'Type of Workflow' };
+        var context = this.props.context,
+            categories = Array.isArray(context.categories) && context.categories.length > 0 && context.categories;
+        if (!categories) return null;
+        return {
+            'title'         : categories.join(', '),
+            'description'   : (categories.length === 1 ? 'Workflow Category' : 'Workflow Categories')
+        };
     }
 
 }
