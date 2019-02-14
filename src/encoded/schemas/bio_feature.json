@@ -42,7 +42,7 @@
         },
         "feature_type": {
             "title": "Feature Type",
-            "description": "A sequence ontology term indicating the type of feature",
+            "description": "An (usually sequence) ontology term indicating the type of feature - eg. gene, protein, region",
             "type": "string",
             "linkTo": "OntologyTerm",
             "lookup": 10

@@ -54,8 +54,18 @@ def component_term(testapp, so_ont):
 
 
 @pytest.fixture
-def gene_item(testapp, lab, award):
+def gene_item(testapp, lab, award, human):
     return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
+
+
+@pytest.fixture
+def mouse_gene_item(testapp, lab, award, mouse):
+    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '16825'}).json['@graph'][0]
+
+
+@pytest.fixture
+def armadillo_gene_item(testapp, lab, award):
+    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '101428042'}).json['@graph'][0]
 
 
 @pytest.fixture
@@ -70,12 +80,53 @@ def some_genomic_region(testapp, lab, award):
 
 
 @pytest.fixture
-def gene_bio_feature(testapp, lab, award, gene_term, gene_item):
+def gene_bio_feature(testapp, lab, award, gene_term, gene_item, human):
     item = {'award': award['@id'],
             'lab': lab['@id'],
             'description': 'Test Gene BioFeature',
             'feature_type': gene_term['@id'],
             'relevant_genes': [gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def mouse_gene_bio_feature(testapp, lab, award, gene_term, mouse_gene_item, human, mouse):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Mouse Gene BioFeature',
+            'feature_type': gene_term['@id'],
+            'relevant_genes': [mouse_gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def armadillo_gene_bio_feature(testapp, lab, award, gene_term, armadillo_gene_item):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Mouse Gene BioFeature',
+            'feature_type': gene_term['@id'],
+            'relevant_genes': [armadillo_gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def multi_species_gene_bio_feature(testapp, lab, award, gene_term, gene_item, mouse_gene_item, human, mouse):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Multi Gene BioFeature',
+            'feature_type': gene_term['@id'],
+            'relevant_genes': [mouse_gene_item['@id'], gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def multi_species_including_unkorg_gene_bio_feature(
+        testapp, lab, award, gene_term, gene_item, armadillo_gene_item, human, mouse):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Multi Gene BioFeature',
+            'feature_type': gene_term['@id'],
+            'relevant_genes': [armadillo_gene_item['@id'], gene_item['@id']]}
     return testapp.post_json('/bio_feature', item).json['@graph'][0]
 
 
@@ -89,8 +140,8 @@ def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_re
     return testapp.post_json('/bio_feature', item).json['@graph'][0]
 
 
-def test_bio_feature_display_title_gene(gene_bio_feature):
-    assert gene_bio_feature.get('display_title') == 'RAD21 gene'
+def test_bio_feature_display_title_gene(gene_bio_feature, gene_item):
+    assert gene_bio_feature.get('display_title') == gene_item.get('display_title') + ' gene'
 
 
 def test_bio_feature_display_title_genomic_region(genomic_region_bio_feature):
@@ -137,3 +188,23 @@ def test_bio_feature_display_title_cellular_component(testapp, component_term, l
     }
     res = testapp.post_json('/bio_feature', item, status=201)
     assert res.json['@graph'][0].get('display_title') == struct
+
+
+def test_bio_feature_display_title_mouse_gene(
+        mouse_gene_bio_feature, mouse_gene_item):
+    assert mouse_gene_bio_feature.get('display_title') == mouse_gene_item.get('display_title') + ' mouse gene'
+
+
+def test_bio_feature_display_title_multi_species_gene(
+        multi_species_gene_bio_feature):
+    assert multi_species_gene_bio_feature.get('display_title') == 'Ldb1, RAD21 genes multiple organisms'
+
+
+def test_bio_feature_display_title_unknown_organism_gene(
+        armadillo_gene_bio_feature, armadillo_gene_item):
+    assert armadillo_gene_bio_feature.get('display_title') == armadillo_gene_item.get('display_title') + ' gene'
+
+
+def test_bio_feature_display_title_multi_w_unknown_organism(
+        multi_species_including_unkorg_gene_bio_feature):
+    assert multi_species_including_unkorg_gene_bio_feature.get('display_title') == 'ARMCX4, RAD21 genes multiple organisms'
