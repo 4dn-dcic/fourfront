@@ -11051,5 +11051,82 @@
         ],
         "title": "Converting bed to beddb v2",
         "uuid": "9d575e99-5ffe-4ea4-b74f-ad40f621cd39"
+    },
+    {
+        "accession": "4DNWFHB53RQO",
+        "app_name": "mergebed",
+        "app_version": "v1",
+        "arguments": [
+            {
+                "argument_format": "bed",
+                "argument_type": "Input file",
+                "workflow_argument_name": "input_bed"
+            },
+            {
+                "argument_format": "bed",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "merged_bed"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": ["miscellaneous"],
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-mergebed/v1/cwl/",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-mergebed/v1/cwl/",
+        "cwl_main_filename": "mergebed.cwl",
+        "data_types": [
+            "ATAC-seq", "ChIP-seq"
+        ],
+        "description": "Merging unsorted gzipped bed files",
+        "docker_image_name": "4dndcic/4dn-mergebed:v1",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "mergebed",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "input_bed",
+                        "source": [
+                            {
+                                "name": "input_bed"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "merging"
+                    ],
+                    "software_used": [
+                    ]
+                },
+                "name": "mergebed",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bed",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "merged_bed",
+                        "target": [
+                            {
+                                "name": "merged_bed"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Merging unsorted gzipped bed v1",
+        "uuid": "2b10e472-065e-43ed-992c-fccad6417b65"
     }
 ]
