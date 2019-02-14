@@ -653,7 +653,6 @@ def workflow_bam(testapp, lab, award):
     item = {
         'title': "test workflow",
         'name': "test_workflow",
-        'workflow_type': "Hi-C data analysis",
         'award': award['@id'],
         'lab': lab['@id']
     }
