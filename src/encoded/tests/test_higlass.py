@@ -1393,9 +1393,14 @@ def test_add_beddb(testapp, higlass_mcool_viewconf, beddb_file_json):
     assert_true(track["type"] == "horizontal-gene-annotations")
 
     # The left track should contain a bed-like track in the first spot
-    track = tracks["left"][0]
-    assert_true(track["tilesetUid"] == beddb_file_json['higlass_uid'])
-    assert_true(track["type"] == "vertical-gene-annotations")
+    left_track = tracks["left"][0]
+    assert_true(left_track["tilesetUid"] == beddb_file_json['higlass_uid'])
+    assert_true(left_track["type"] == "vertical-gene-annotations")
+
+    # uids should be different
+    print(track)
+    print(left_track)
+    assert_true(left_track["uid"] != track["uid"])
 
     # The searchbar needs to be updated, too
     main_view = new_higlass_json["views"][0]
