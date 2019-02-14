@@ -23,7 +23,7 @@ import { WFRStepDetailBody } from './WFRStepDetailBody';
  * @prop {./../../../viz/Workflow/parsing-functions.Node} selectedNode - Currently-selected node as passed in callback /viz/Workflow/Graph props.renderDetailPane( {Node} selectedNode, {Object} graphProps )
  */
 
-export class WorkflowDetailPane extends React.Component {
+export class WorkflowDetailPane extends React.PureComponent {
 
     static Legend = Legend
 
@@ -56,13 +56,14 @@ export class WorkflowDetailPane extends React.Component {
         if (node){
 
             var commonDetailProps = _.extend(
-                _.pick(this.props, 'schemas', 'minHeight', 'keyTitleDescriptionMap', 'windowHeight', 'windowWidth'),
-                {
-                    'key' : 'body',
-                    'node' : node
-                }
+                _.pick(this.props, 'schemas', 'keyTitleDescriptionMap', 'windowHeight', 'windowWidth'),
+                { 'key' : 'body', 'node' : node }
             );
-            
+
+            if (!this.props.isFullscreen){
+                commonDetailProps.minWidth = 800;
+            }
+
             if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
                 // File
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;

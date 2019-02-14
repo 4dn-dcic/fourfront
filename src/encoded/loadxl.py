@@ -988,15 +988,13 @@ def load_jin_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='jin_inserts',
               clear_tables=clear_tables)
 
+
 def load_wfr_data(app, access_key_loc=None, clear_tables=False):
     load_data(app, access_key_loc, indir='wfr-grouping-inserts',
               clear_tables=clear_tables)
 
 
-def load_ontology_terms(app,
-                        post_json='tests/data/ontology-term-inserts/ontology_post.json',
-                        patch_json='tests/data/ontology-term-inserts/ontology_patch.json',):
-
+def load_ontology_terms(app, post_json=None, patch_json=None,):
     from webtest import TestApp
     from webtest.app import AppError
     environ = {
@@ -1005,15 +1003,14 @@ def load_ontology_terms(app,
     }
     testapp = TestApp(app, environ)
 
-    from pkg_resources import resource_filename
-    posts = resource_filename('encoded', post_json)
-    patches = resource_filename('encoded',patch_json)
     docsdir = []
-    load_all(testapp, posts, docsdir, itype='ontology_term')
-    load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
+    if post_json:
+        load_all(testapp, post_json, docsdir, itype='ontology_term')
+    if patch_json:
+        load_all(testapp, patch_json, docsdir, itype='ontology_term', phase='patch_ontology')
 
     # now keep track of the last time we loaded these suckers
-    data = {"name" : "ffsysinfo", "ontology_updated":datetime.today().isoformat()}
+    data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
     try:
         testapp.post_json("/sysinfo", data)
     except AppError:

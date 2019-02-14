@@ -65,26 +65,12 @@ export class TopRow extends React.Component {
      */
     parsedStatus(){
         if (!('status' in this.props.context)) return <div></div>;
-        /*  Removed icon in lieu of color indicator for status
-        var iconClass = null;
-        switch (this.props.context.status){
-
-            case 'in review by lab':
-            case 'submission in progress':
-                iconClass = 'icon ss-stopwatch';
-                break;
-
-        }
-        */
 
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
-            <div
-                className="indicator-item expset-status"
+            <div className="indicator-item item-status"
                 data-status={ this.props.context.status.toLowerCase() }
-                data-tip="Current Status"
-                children={this.props.context.status}
-            />
+                data-tip="Current Status" children={this.props.context.status} />
         );
     }
     /**
@@ -129,11 +115,16 @@ export class TopRow extends React.Component {
     itemActions(){
         var actions = this.props.context && this.props.context.actions;
         if (!Array.isArray(actions) || actions.length === 0) return null;
+        var descriptions = {
+            'edit'      : 'Edit the properties of this Item.',
+            'create'    : 'Create a blank new Item of the same type.',
+            'clone'     : 'Create and edit a copy of this Item.'
+        };
+
         return _.map(actions, function(action, i){
-            var title = action.title;
             return (
-                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
-                    <a href={action.href}>{ title }</a>
+                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i} data-tip={descriptions[action.name]}>
+                    <a href={action.href}>{ action.title }</a>
                 </div>
             );
         });
@@ -262,29 +253,41 @@ export class MiddleRow extends React.Component {
  * @type {Component}
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
-export class BottomRow extends React.Component {
+export class BottomRow extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.parsedCreationDate = this.parsedCreationDate.bind(this);
+        this.parsedCreationDate = this.parsedDate.bind(this);
     }
 
-    parsedCreationDate(){
-        if (!('date_created' in this.props.context)) return <span><i></i></span>;
+    parsedDate(dateToUse){
+        var context = this.props.context,
+            tooltip = dateToUse === 'date_created' ? 'Date Created' : 'Date last modified';
+
+        if (!dateToUse){
+            return <span><i></i></span>;
+        }
         return (
-            <span data-tip="Date Created" className="inline-block">
-                <i className="icon sbt-calendar"></i>&nbsp;&nbsp;
-                <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
+            <span data-tip={tooltip} className="inline-block">
+                <i className="icon icon-calendar-o"></i>&nbsp; &nbsp;
+                <DateUtility.LocalizedTime timestamp={context[dateToUse]} formatType='date-time-md' dateTimeSeparator=" at " />
             </span>
         );
     }
 
     render(){
+        var { context, children } = this.props,
+            dateToUse = null;
+    
+        if (typeof context.date_modified === 'string'){
+            dateToUse = 'date_modified';
+        } else if (typeof context.date_created === 'string'){
+            dateToUse = 'date_created';
+        }
         return (
             <div className="row clearfix bottom-row">
-                <div className="col-sm-6 item-label-extra set-type-indicators">{ this.props.children }</div>
-                <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
+                <div className="col-sm-6 item-label-extra set-type-indicators">{ children }</div>
+                <h5 className="col-sm-6 text-right text-left-xs item-label-extra">{ this.parsedDate(dateToUse) }</h5>
             </div>
         );
     }

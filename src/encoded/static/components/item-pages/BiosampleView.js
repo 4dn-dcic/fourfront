@@ -5,12 +5,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
-import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
+import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch, ItemPageTable } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
 
 
 export default class BiosampleView extends DefaultItemView {
@@ -20,9 +18,7 @@ export default class BiosampleView extends DefaultItemView {
         var initTabs = [],
             context = this.props.context,
             windowWidth = this.props.windowWidth,
-            width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-
-        if (width) width -= 20;
+            width = this.getTabViewWidth();
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
         initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
@@ -40,23 +36,22 @@ export class BiosourcesTable extends React.PureComponent {
 
     static defaultProps = {
         'columns' : {
-            "biosource_type"       : "Type",
-            "biosource_vendor"         : "Vendor",
-            "cell_line" : "Cell Line",
-            "individual" : "Individual",
-        },
-        'columnDefinitionOverrideMap' : _.extend({
+            "display_title" : { "title" : "Title" },
+            "biosource_type" : { "title" : "Type" },
+            "biosource_vendor" : { "title" : "Vendor" },
+            "cell_line" : { "title" : "Cell Line" },
             "individual" : {
+                "title" : "Individual",
                 "render" : function(result, columnDefinition, props, width){
                     if (!result || !result.individual || !object.atIdFromObject(result.individual)) return '-';
                     return <IndividualItemTitle context={result.individual} />;
                 }
             }
-        }, ItemPageTable.defaultProps.columnDefinitionOverrideMap)
+        }
     }
 
     render(){
-        return <ItemPageTable {..._.pick(this.props, 'schemas', 'columns', 'columnDefinitionOverrideMap', 'width')} results={this.props.biosources} renderDetailPane={null} />;
+        return <ItemPageTable {..._.pick(this.props, 'schemas', 'columns', 'width')} results={this.props.biosources} renderDetailPane={null} />;
     }
 
 }

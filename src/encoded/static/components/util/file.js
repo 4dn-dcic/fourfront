@@ -60,7 +60,7 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
 
 /*** Common React Classes ***/
 
-export class FileDownloadButton extends React.Component {
+export class FileDownloadButton extends React.PureComponent {
 
     static defaultProps = {
         'title' : 'Download',
@@ -78,7 +78,7 @@ export class FileDownloadButton extends React.Component {
     }
 }
 
-export class FileDownloadButtonAuto extends React.Component {
+export class FileDownloadButtonAuto extends React.PureComponent {
 
     static canDownload(file, validStatuses = FileDownloadButtonAuto.defaultProps.canDownloadStatuses){
         if (!file || typeof file !== 'object'){
@@ -100,8 +100,8 @@ export class FileDownloadButtonAuto extends React.Component {
         'result' : PropTypes.shape({
             'href' : PropTypes.string.isRequired,
             'filename' : PropTypes.string.isRequired,
-        })
-    }
+        }).isRequired
+    };
 
     static defaultProps = {
         'canDownloadStatuses' : [

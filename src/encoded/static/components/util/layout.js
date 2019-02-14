@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { isServerSide } from './misc';
 import * as d3 from 'd3';
 import * as vizUtil from './../viz/utilities';
@@ -55,7 +56,7 @@ export function getElementOffsetFine(el) {
  * @param {boolean} [addEllipsis=true]
  * @param {string}  [splitOn=' ']
  */
-export function shortenString(originalText, maxChars = 28, addEllipsis = true, splitOn = ' '){
+export const shortenString = memoize(function(originalText, maxChars = 28, addEllipsis = true, splitOn = ' '){
     var textArr         = originalText.split(splitOn),
         nextLength,
         returnArr       = [],
@@ -71,7 +72,7 @@ export function shortenString(originalText, maxChars = 28, addEllipsis = true, s
     }
     if (textArr.length === 0) return originalText;
     return returnArr.join(splitOn) + (addEllipsis ? '...' : '');
-}
+});
 
 /**
  * Get current grid size, if need to sidestep CSS.
@@ -80,14 +81,17 @@ export function shortenString(originalText, maxChars = 28, addEllipsis = true, s
  *
  * @return {string} - Abbreviation for column/grid Bootstrap size, e.g. 'lg', 'md', 'sm', or 'xs'.
  */
-export function responsiveGridState(width = null){
-    if (isServerSide()) return 'lg';
-    width = typeof width === 'number' ? width : window.innerWidth;
+export const responsiveGridState = memoize(function(width = null){
+    if (typeof width !== 'number') {
+        // Assumed to be null or undefined which should mean we are
+        // server-side or not yet mounted.
+        return 'lg';
+    }
     if (width >= 1200) return 'lg';
     if (width >= 992) return 'md';
     if (width >= 768) return 'sm';
     return 'xs';
-}
+});
 
 
 /**
@@ -116,17 +120,18 @@ export function gridContainerWidth(windowWidth = null){
 
 /**
  * Check width of text if it were to fit on one line.
+ * Must only be called client-side. Will throw error server-side.
+ *
  * @param {string} textContent - Either text or text-like content, e.g. with span elements.
  * @param {string} [font] - Font to use/measure. Include font-size. Defaults to "1rem 'Work Sans'".
  * @param {boolean} [roundToPixel] - Whether to round result up.
  * @return {integer} - Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
  */
-export function textWidth(
+export const textWidth = memoize(function(
     textContent,
     font = "1rem 'Work Sans'",
     roundToPixel = false
 ){
-    if (isServerSide()) return null;
     var canvas, context, width;
 
     try {
@@ -152,20 +157,17 @@ export function textWidth(
     } else {
         return width;
     }
-}
+});
 
 
-export function textHeight(
+export const textHeight = memoize(function(
     textContent = "Some String",
     width = 200,
     containerClassName = null,
     style = null,
     containerElement = null
 ){
-    if (isServerSide()) return null;
-    
-    var height;
-    var contElem;
+    var height, contElem;
     if (containerElement && typeof containerElement.cloneNode === 'function'){
         contElem = containerElement.cloneNode(false);
     } else {
@@ -188,7 +190,7 @@ export function textHeight(
         document.body.removeChild(contElem);
     }
     return height;
-}
+});
 
 
 /**
@@ -201,16 +203,13 @@ export function textHeight(
  * @param {?Object} [style=null]                    Any additional style properties.
  * @return {integer|{ containerHeight: number, textWidth: number }} Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
  */
-export function textContentWidth(
+export const textContentWidth = memoize(function(
     textContent,
     containerElementType = 'div',
     containerClassName = null,
     widthForHeightCheck = null,
     style = null
 ){
-    if (isServerSide()){
-        return null;
-    }
     var contElem = document.createElement(containerElementType);
     contElem.className = "off-screen " + (containerClassName || '');
     contElem.innerHTML = textContent;
@@ -230,7 +229,7 @@ export function textContentWidth(
         return { containerHeight : fullContainerHeight, textWidth : textLineWidth };
     }
     return textLineWidth;
-}
+});
 
 
 export function verticalCenterOffset(innerElem, extraHeight = 0, outerElem = null){
@@ -365,12 +364,16 @@ export function toggleBodyClass(className, toggleTo = null, bodyElement = null){
 
 /**
  * Pass 'windowWidth' through props down from BodyElement for this element to update.
+ *
+ * @deprecated
+ * We should know what our width is; try to set/determine it off of `windowWidth` and `responsiveGridState(windowWidth)`
+ * where/when possible to avoid needing to query the DOM for width.
  */
 export class WidthProvider extends React.Component {
 
     static propTypes = {
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     constructor(props){
         super(props);
@@ -401,58 +404,6 @@ export class WidthProvider extends React.Component {
         return <div ref="wrapper" children={React.cloneElement(this.props.children, passProps)} />;
     }
 }
-
-export class VerticallyCenteredChild extends React.Component {
-
-    static defaultProps = {
-        'calculate' : function(heightParent, heightChild){
-            return Math.floor((heightParent - heightChild) / 2);
-        }
-    }
-
-    constructor(props){
-        super(props);
-        this.state = { 'mounted' : false };
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
-    }
-
-    render(){
-
-        var childClassName = this.props.children.props.className;
-        var className = 'vertically-centered-child' + (childClassName ? ' ' + childClassName : '');
-
-        if (this.props.disabled) return React.cloneElement(this.props.children, { ref : 'childElement', 'className' : className } );
-
-        var style = null;
-        //var domParentBlock = (this.state.mounted && this.refs && this.refs.parentBlock) || null;
-        var domChildBlock = (this.state.mounted && this.refs && this.refs.childElement) || null;
-        if (domChildBlock){
-            var domParentBlock = domChildBlock.parentElement;
-
-            var heightParent = domParentBlock.offsetHeight;
-            if (typeof this.props.verticalPaddingOffset === 'number'){
-                heightParent -= this.props.verticalPaddingOffset;
-            }
-            var heightChild = domChildBlock.offsetHeight;
-            if (heightParent && heightChild && heightChild < heightParent){
-                style = {
-                    'transform' : 'translateY(' + this.props.calculate(heightParent, heightChild) + 'px)'
-                };
-            }
-
-        }
-        if (style){
-            var origStyle = this.props.children.props.style || {};
-            style = _.extend(style, origStyle);
-        }
-
-        return React.cloneElement(this.props.children, { ref : 'childElement', 'style' : style, 'className' : className } );
-    }
-}
-
 
 
 /**

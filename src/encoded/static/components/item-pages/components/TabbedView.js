@@ -4,17 +4,51 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import Tabs, { TabPane, TabContent } from './../../lib/rc-tabs';
-import ScrollableInkTabBar from './../../lib/rc-tabs/ScrollableInkTabBar';
-import { navigate } from './../../util';
+import memoize from 'memoize-one';
+
+import Tabs, { TabPane } from 'rc-tabs';
+import TabContent from 'rc-tabs/lib/TabContent';
+import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
+
+import { navigate, layout } from './../../util';
 import { BasicUserContentBody, UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
+
+
+
+export function getIconForCustomTab(tabName){
+    switch(tabName){
+        case 'summary':
+        case 'overview':
+        case 'experiment-summaries':
+            return 'file-text';
+        case 'higlass':
+        case 'higlass_displays':
+            return 'television';
+        default:
+            return null;
+    }
+}
+
+export function getTitleForCustomTab(tabName){
+    switch(tabName){
+        case 'experiment-summaries':
+            return 'Experiment Summaries';
+        case 'higlass':
+            return 'HiGlass';
+        case 'higlass_displays':
+            return 'HiGlass Displays';
+        default:
+            return null; // Fallback: Will convert tabKey _ to " " and capitalize words.
+    }
+}
+
 
 
 /**
  * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
  */
 
-export class TabbedView extends React.Component {
+export class TabbedView extends React.PureComponent {
 
     static getDefaultActiveKeyFromContents(contents){
         var defaultActiveTab = _.findWhere(contents, { 'isDefault' : true });
@@ -34,7 +68,9 @@ export class TabbedView extends React.Component {
                 data-tab-key={tabObj.key}
                 id={'tab:' + tabObj.key}
                 tab={<span className="tab" data-tab-key={tabObj.key} children={tabObj.tab}/>}
-                children={tabObj.content} placeholder={tabObj.placeholder} disabled={tabObj.disabled} style={tabObj.style} />
+                children={tabObj.content}
+                placeholder={tabObj.placeholder || <TabPlaceHolder/> }
+                disabled={tabObj.disabled} style={tabObj.style} />
         );
     }
 
@@ -57,89 +93,8 @@ export class TabbedView extends React.Component {
         };
     }
 
-    static propTypes = {
-        'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
-            'tab'       : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
-            'content'   : PropTypes.element.isRequired,
-            'key'       : PropTypes.string.isRequired,
-            'disabled'  : PropTypes.bool
-        }))  ]).isRequired,
-        'href' : PropTypes.string.isRequired
-    };
-
-    static defaultProps = {
-        'contents' : [
-            { tab : "Tab 1", content : <span>Test1</span>, key : 'tab-id-1' },
-            { tab : "Tab 2", content : <span>Test2</span>, key : 'tab-id-2' }
-        ],
-        'animated' : false,
-        'destroyInactiveTabPane' : false // Maybe make true? Need to profile performance
-    };
-
-    constructor(props){
-        super(props);
-        this.setActiveKey = this.setActiveKey.bind(this);
-        this.maybeSwitchTabAccordingToHref = this.maybeSwitchTabAccordingToHref.bind(this);
-        this.onTabClick = this.onTabClick.bind(this);
-        this.render = this.render.bind(this);
-    }
-
-    componentDidMount(){
-        this.maybeSwitchTabAccordingToHref();
-    }
-
-    componentDidUpdate(pastProps){
-        if (pastProps.href !== this.props.href){
-            this.maybeSwitchTabAccordingToHref();
-        }
-    }
-
-    maybeSwitchTabAccordingToHref(props = this.props){
-        var { contents, href } = props,
-            hrefParts       = url.parse(href),
-            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
-            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
-            currKey         = foundContent && this.refs.tabs.state.activeKey;
-
-        if (!foundContent || currKey === hash) return false;
-    
-        this.setActiveKey(foundContent.key); // Same as `hash`
-        return true;
-    }
-
-    setActiveKey(nextKey){
-        if (this.refs.tabs && typeof this.refs.tabs.setActiveKey === 'function'){
-            return this.refs.tabs.setActiveKey(nextKey);
-        } else {
-            console.error('Manually setting active tab key not currently supported...');
-            return false;
-        }
-    }
-
-    onTabClick(tabKey, evt){
-        var { onTabClick } = this.props;
-
-        // We add 'replace: true' to replace current Browser History entry with new entry.
-        // Entry will refer to same pathname but different hash.
-        // This is so people don't need to click 'back' button 10 times to get to previous /search/ or /browse/ page for example,
-        // since they might browse around tabs for some time.
-        navigate('#' + tabKey, { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true });
-
-        if (typeof onTabClick === 'function'){
-            return onTabClick(tabKey, evt);
-        }
-    }
-
-    additionalTabs(){
-        var { context, contents } = this.props,
-            resultArr = [],
-            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
-
-        if (staticContentList.length === 0) return []; // No content defined for Item.
-
-        if (typeof contents === 'function') contents = contents();
-
+    static calculateAdditionalTabs = memoize(function(staticContentList, contents){
+        var resultArr = [];
         //
         // PART 1
         // Content grouped by 'tab:some_title' is put into new tab with 'Some Title' as title.
@@ -166,16 +121,21 @@ export class TabbedView extends React.Component {
 
         _.forEach(_.pairs(groupedContent), function([ tabKey, contentForTab ]){
 
-            var splitTabKey = tabKey.split(':'), // This could have more ':'s in it, theoretically. Use only first part, and assume 2nd part is icon.
-                xformedKeyAsTitle = _.map(
-                    splitTabKey[0].split('_'),
+            var tabTitle, icon;
+
+            tabTitle = contentForTab.title || getTitleForCustomTab(tabKey);
+            if (!tabTitle){ // Auto-generate one from key
+                tabTitle = _.map(
+                    tabKey.split('_'),
                     function(str){
                         return str.charAt(0).toUpperCase() + str.slice(1);
                     }
-                ).join(' '),
-                icon = splitTabKey.length > 1 ? splitTabKey[1] : null;
+                ).join(' ');
+            }
 
-            resultArr.push(TabbedView.createTabObject(tabKey, xformedKeyAsTitle, icon, contentForTab));
+            icon = contentForTab.icon || getIconForCustomTab(tabKey);
+
+            resultArr.push(TabbedView.createTabObject(tabKey, tabTitle, icon, contentForTab));
         });
 
         //
@@ -196,19 +156,12 @@ export class TabbedView extends React.Component {
 
             resultArr.push(TabbedView.createTabObject(tabKey, title, icon, [s], { 'hideTitles' : true }));
         });
-    
+
         return resultArr;
+    });
 
-    }
-
-    render(){
-        var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, renderTabContent } = this.props;
-        if (typeof contents === 'function') contents = contents();
-        if (!Array.isArray(contents)) return null;
-
-        var additionalTabs = this.additionalTabs(),
-            allTabs;
-
+    static combineSystemAndCustomTabs = memoize(function(additionalTabs, contents){
+        var allTabs;
         if (additionalTabs.length === 0){
             allTabs = contents;
         } else {
@@ -222,21 +175,142 @@ export class TabbedView extends React.Component {
                 allTabs.splice(addIdx, 0, ...additionalTabs);
             }
         }
+        return allTabs;
+    });
 
-        var tabsProps = {
-            'renderTabBar'          : () => <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent} className="extra-style-2" />,
-            'renderTabContent'      : () => <TabContent animated={animated} />,
-            'onChange'              : onChange,
-            'destroyInactiveTabPane': destroyInactiveTabPane,
-            'ref'                   : 'tabs',
-            'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents),
-            'children'              : _.map(allTabs, TabbedView.renderTabPane)
-        };
+    static propTypes = {
+        'contents' : PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.shape({
+            'tab'       : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
+            'content'   : PropTypes.element.isRequired,
+            'key'       : PropTypes.string.isRequired,
+            'disabled'  : PropTypes.bool
+        }))  ]).isRequired,
+        'href' : PropTypes.string.isRequired
+    };
+
+    static defaultProps = {
+        'contents' : [
+            { tab : "Tab 1", content : <span>Test1</span>, key : 'tab-id-1' },
+            { tab : "Tab 2", content : <span>Test2</span>, key : 'tab-id-2' }
+        ],
+        'animated' : false,
+        'destroyInactiveTabPane' : false // Maybe make true? Need to profile performance
+    };
+
+    constructor(props){
+        super(props);
+        this.getActiveKey = this.getActiveKey.bind(this);
+        this.setActiveKey = this.setActiveKey.bind(this);
+        this.maybeSwitchTabAccordingToHref = this.maybeSwitchTabAccordingToHref.bind(this);
+        this.onTabClick = this.onTabClick.bind(this);
+
+        this.tabsRef = React.createRef();
+    }
+
+    componentDidMount(){
+        this.maybeSwitchTabAccordingToHref();
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        if (pastProps.href !== this.props.href){
+            this.maybeSwitchTabAccordingToHref();
+        }
+    }
+
+    getActiveKey(){
+        var tabsInstance = this.tabsRef.current,
+            currKey = tabsInstance && tabsInstance.state.activeKey;
+
+        return currKey;
+    }
+
+    setActiveKey(nextKey){
+        var tabsInstance = this.tabsRef.current;
+        if (typeof tabsInstance.setActiveKey === 'function'){
+            return tabsInstance.setActiveKey(nextKey);
+        } else {
+            console.error('Manually setting active tab key not currently supported...');
+            return false;
+        }
+    }
+
+    maybeSwitchTabAccordingToHref(props = this.props){
+        var { contents, href } = props,
+            hrefParts       = url.parse(href),
+            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
+            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
+            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
+            currKey         = foundContent && this.getActiveKey();
+
+        if (!foundContent || currKey === hash){
+            console.log('Already on tab', hash);
+            return false;
+        }
+    
+        this.setActiveKey(foundContent.key); // Same as `hash`
+        return true;
+    }
+
+    onTabClick(tabKey, evt){
+        var { onTabClick } = this.props;
+
+        // We add 'replace: true' to replace current Browser History entry with new entry.
+        // Entry will refer to same pathname but different hash.
+        // This is so people don't need to click 'back' button 10 times to get to previous /search/ or /browse/ page for example,
+        // since they might browse around tabs for some time.
+        navigate('#' + tabKey, { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true });
+
+        if (typeof onTabClick === 'function'){
+            return onTabClick(tabKey, evt);
+        }
+    }
+
+    additionalTabs(){
+        var { context, contents } = this.props,
+            resultArr = [],
+            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
+
+        if (staticContentList.length === 0) return []; // No content defined for Item.
+
+        if (typeof contents === 'function') contents = contents();
+
+        return TabbedView.calculateAdditionalTabs(staticContentList, contents);
+    }
+
+    render(){
+        var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
+        if (typeof contents === 'function') contents = contents();
+        if (!Array.isArray(contents)) return null;
+
+        var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
+            tabsProps = {
+                onChange, destroyInactiveTabPane,
+                'renderTabBar'          : () => (
+                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent} className="extra-style-2"
+                        tabBarGutter={0} />
+                ),
+                'renderTabContent'      : () => <TabContent animated={animated} />,
+                'ref'                   : this.tabsRef,
+                'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents),
+                'children'              : _.map(allTabs, TabbedView.renderTabPane)
+            };
 
         if (activeKey) tabsProps.activeKey = activeKey;
 
-        return <Tabs {...tabsProps} />;
+        return <Tabs {...tabsProps} key="tabs" />;
     }
 
+}
+
+class TabPlaceHolder extends React.PureComponent {
+    render(){
+        return (
+            <div>
+                <h3 className="text-400 mb-5 mt-5">
+                    <i className="icon icon-spin icon-circle-o-notch"/>
+                </h3>
+            </div>
+        );
+    }
 }
 

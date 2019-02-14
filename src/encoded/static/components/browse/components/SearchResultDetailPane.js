@@ -15,7 +15,7 @@ export class SearchResultDetailPane extends React.Component {
             'description' : PropTypes.string
         }),
         'popLink' : PropTypes.bool,
-        'windowWidth' : PropTypes.number.isRequired
+        //'windowWidth' : PropTypes.number.isRequired
     }
 
     componentDidMount(){
@@ -32,7 +32,7 @@ export class SearchResultDetailPane extends React.Component {
             <div className="flex-description-container">
                 <h5><i className="icon icon-fw icon-align-left"/>&nbsp; Description</h5>
                 <FlexibleDescriptionBox
-                    windowWidth={this.props.windowWidth}
+                    //windowWidth={this.props.windowWidth}
                     description={ description }
                     fitTo="self"
                     textClassName="text-normal"

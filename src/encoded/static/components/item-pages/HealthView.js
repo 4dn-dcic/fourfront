@@ -68,9 +68,10 @@ export class HealthView extends React.Component {
     }
 
     render() {
-        var { context, schemas, session, windowWidth } = this.props;
-        var { db_es_compare, db_es_total, mounted } = this.state;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
+        var { context, schemas, session, windowWidth, href } = this.props,
+            { db_es_compare, db_es_total, mounted } = this.state,
+            title = typeof context.title === "string" ? context.title : url.parse(href).path,
+            width = layout.gridContainerWidth(windowWidth);
 
         return (
             <div className="view-item">
@@ -135,9 +136,7 @@ export class HealthView extends React.Component {
                     }
                 }} />
 
-                <layout.WidthProvider ref="widthProvider" windowWidth={windowWidth}>
-                    <HealthChart {...{ db_es_compare, mounted, session, context }} height={600} />
-                </layout.WidthProvider>
+                <HealthChart {...{ db_es_compare, mounted, session, context, width }} height={600} />
 
             </div>
         );
@@ -146,7 +145,10 @@ export class HealthView extends React.Component {
 
 content_views.register(HealthView, 'Health');
 
-
+/**
+ * This is a React wrapper around a D3 visualization.
+ * It is not super performant but is used on a single page, so should be OK / low-priority.
+ */
 class HealthChart extends React.PureComponent {
 
     static es_compare_to_d3_hierarchy(es_compare){
@@ -166,6 +168,11 @@ class HealthChart extends React.PureComponent {
 
     static defaultProps = {
         'mounted' : false,
+    };
+
+    constructor(props){
+        super(props);
+        this.svgRef = React.createRef();
     }
 
     componentDidUpdate(pastProps, pastState){      
@@ -185,7 +192,7 @@ class HealthChart extends React.PureComponent {
 
     transitionSize(){
         if (!this.props.mounted) return null;
-        var svg = this.refs && this.refs.svg && d3.select(this.refs.svg);
+        var svg = this.svgRef && this.svgRef.current && d3.select(this.svgRef.current);
         svg.selectAll('g').transition()
             .duration(750)
             .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
@@ -202,7 +209,7 @@ class HealthChart extends React.PureComponent {
 
         if (!dataToShow || !mounted) return null;
 
-        var svg = this.refs && this.refs.svg && d3.select(this.refs.svg),
+        var svg = this.svgRef && this.svgRef.current && d3.select(this.svgRef.current),
             fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); },
             colorFallback = d3.scaleOrdinal(d3.schemeCategory10.map(fader));
 
@@ -295,7 +302,7 @@ class HealthChart extends React.PureComponent {
                         '.treemap-rect-elem:hover .title-text { fill: #000; }'
                     )
                 }}/>
-                <svg width={width} height={height} ref="svg" />
+                <svg width={width} height={height} ref={this.svgRef} />
             </div>
         );
 

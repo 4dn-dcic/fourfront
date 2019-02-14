@@ -4,7 +4,7 @@
     "id": "/profiles/workflow.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "name", "workflow_type", "award", "lab"],
+    "required": ["title", "name", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "accession"],
     "mixinProperties": [
@@ -26,7 +26,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "5"
+            "default": "6"
         },
         "accession": {
             "accessionType": "WF"
@@ -47,40 +47,34 @@
             "type": "string",
             "formInput": "textarea"
         },
-        "data_types": {
-            "title": "Data types",
-            "description": "Types of the data that the workflow is applied to.",
+        "experiment_types": {
+            "title": "Experiment types",
+            "description": "Types of the experiment that the workflow is applied to.",
             "type": "array",
             "items": {
-                "title": "Data type",
-                "description": "type of data that the workflow is applied to",
+                "title": "Experiment type",
+                "description": "type of experiment that the workflow is applied to",
                 "type": "string"
             }
         },
         "category": {
             "title": "Category",
-            "description": "A short text description of the workflow's category (e.g. alignment).",
-            "type": "string"
-        },
-        "workflow_type": {
-            "title": "Workflow Type",
-            "type": "string",
-            "enum": [
-                "Hi-C data analysis",
-                "Image processing",
-                "Visualization processing",
-                "Repli-seq data processing",
-                "ChIP-seq data processing",
-                "ATAC-seq data processing",
-                "RNA-seq data processing",
-                "Data QC",
-                "Other"
-            ]
-        },
-        "workflow_diagram": {
-            "title": "Workflow diagram",
-            "description": "Image of workflow diagram",
-            "type": "string"
+            "description": "A short text description of the workflow's category.",
+            "type": "array",
+            "items": {
+                "title": "Category",
+                "description": "the workflow's category",
+                "type": "string",
+                "enum" : [
+                    "processing",
+                    "QC",
+                    "format conversion",
+                    "feature calling",
+                    "miscellaneous",
+                    "provenance"
+                ],
+                "default": "processing"
+            }
         },
         "cwl_pointer": {
             "title": "SBG CWL Path",
@@ -423,19 +417,42 @@
         "category": {
             "title": "Workflow Category"
         },
-        "workflow_type": {
-            "title": "Workflow Type"
+        "experiment_types": {
+            "title": "Experiment Type"
         },
-        "data_types": {
-            "title": "Data Type"
+        "steps.meta.analysis_step_types" : {
+            "title" : "Analysis Step Type"
+        },
+        "steps.inputs.meta.file_format.display_title" : {
+            "title" : "Input File Format"
+        },
+        "steps.outputs.meta.file_format.display_title" : {
+            "title" : "Output File Format"
+        },
+        "workflow_language" : {
+            "title" : "Workflow Language"
         }
     },
     "columns" : {
         "category": {
-            "title": "Workflow Category"
+            "title": "Workflow Category",
+            "colTitle": "Category",
+            "default_hidden" : true
         },
-        "workflow_type": {
-            "title": "Workflow Type"
+        "experiment_types": {
+            "title": "Experiment Types"
+        },
+        "app_name": {
+            "title": "App Name"
+        },
+        "app_version": {
+            "title": "App Version",
+            "colTitle" : "App Ver."
+        },
+        "workflow_language" : {
+            "title" : "Workflow Language",
+            "colTitle" : "Lang.",
+            "default_hidden" : true
         }
     }
 }

@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ItemPageTable, ItemPageTableLoader } from './../../browse/components/ItemPageTable';
+import { ItemPageTable, ItemPageTableLoader } from './ItemPageTable';
 import { ajax, console, layout, expFxn, object } from './../../util';
 
 
@@ -23,21 +23,20 @@ export class SimpleFilesTable extends React.Component {
                 'link_id'               : PropTypes.string.isRequired
             })
         }))
-    }
+    };
 
     static defaultProps = {
         'columns' : {
+            "display_title"     : { "title" : "Title" },
             "file_format"       : { "title" : "Format" },
-            "file_size"         : { "title" : "Size" },
-            "file_type"         : { "title" : "File Type" },
-        },
-        'columnDefinitionOverrideMap' : _.extend({}, ItemPageTable.defaultProps.columnDefinitionOverrideMap, {
-            'file_size' : {
+            "file_size"         : {
+                "title" : "Size",
                 'minColumnWidth' : 60,
                 'widthMap' : { 'sm' : 50, 'md' : 50, 'lg' : 60 }
-            }
-        })
-    }
+            },
+            "file_type"         : { "title" : "File Type" },
+        }
+    };
 
     render(){
         var reducedFiles = expFxn.reduceProcessedFilesWithExperimentsAndSets(this.props.results);
@@ -49,10 +48,6 @@ export class SimpleFilesTable extends React.Component {
                 //renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
                 //    'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
                 //}} />}
-                schemas={this.props.schemas}
-                columns={this.props.columns}
-                columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
-                width={this.props.width}
                 loading={this.props.loading && (!reducedFiles || !reducedFiles.length)}
             />
         );
@@ -62,37 +57,16 @@ export class SimpleFilesTable extends React.Component {
 
 
 export class SimpleFilesTableLoaded extends React.Component {
-    
+
     static propTypes = {
-        'files' : SimpleFilesTable.propTypes.files,
-        'sortFxn' : PropTypes.func
-    }
-
-    static defaultProps = {
-        'columns' : SimpleFilesTable.defaultProps.columns,
-        'columnDefinitionOverrideMap' : SimpleFilesTable.defaultProps.columnDefinitionOverrideMap
-    }
-
-    static isFileCompleteEnough(expSet){
-        // TODO
-        return false;
-    }
+        'fileUrls' : PropTypes.arrayOf(PropTypes.string).isRequired
+    };
 
     render(){
-        var filesObj = _.object(_.zip(
-            _.map(this.props.files, object.atIdFromObject),
-            this.props.files
-        ));
         return (
-            <ItemPageTableLoader itemsObject={filesObj} isItemCompleteEnough={SimpleFilesTableLoaded.isFileCompleteEnough}>
-                <SimpleFilesTable
-                    sortFxn={this.props.sortFxn}
-                    width={this.props.width}
-                    defaultOpenIndices={this.props.defaultOpenIndices}
-                    defaultOpenIds={this.props.defaultOpenIds}
-                    columns={this.props.columns}
-                    columnDefinitionOverrideMap={this.props.columnDefinitionOverrideMap}
-                />
+            <ItemPageTableLoader itemUrls={this.props.fileUrls}>
+                <SimpleFilesTable {..._.pick(this.props, 'width', 'defaultOpenIndices',
+                    'defaultOpenIds', 'columns', 'columnExtensionMap')} />
             </ItemPageTableLoader>
         );
     }

@@ -11,13 +11,9 @@ import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide 
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable, ProcessedFilesQCStackedTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
 import { requestAnimationFrame } from './../viz/utilities';
-import { commonGraphPropsFromProps, doValidAnalysisStepsExist, RowSpacingTypeDropdown } from './WorkflowView';
-import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING
@@ -93,7 +89,7 @@ export default class FileView extends WorkflowRunTracingView {
         initTabs.push(FileViewOverview.getTabObject(this.props, width));
 
         if (FileView.shouldGraphExist(context)){
-            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns));
+            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
         }
 
         if (FileView.shouldHiGlassViewExist(context)){
@@ -153,17 +149,11 @@ class FileViewOverview extends React.Component {
     render(){
         var { context, windowWidth, width, tips } = this.props;
 
-        var setsByKey;
-        var table = null;
+        var setUrls = expFxn.experimentSetsFromFile(context, 'ids'),
+            table;
 
-        if (context && (
-            (Array.isArray(context.experiments) && context.experiments.length > 0) || (Array.isArray(context.experiment_sets) && context.experiment_sets.length > 0)
-        )){
-            setsByKey = expFxn.experimentSetsFromFile(context);
-        }
-
-        if (setsByKey && _.keys(setsByKey).length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
+        if (setUrls && setUrls.length > 0){
+            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
         }
 
         return (
@@ -245,7 +235,7 @@ export class FileOverviewHeading extends React.Component {
                 <div className="col-xs-12 col-md-9 col-lg-8">
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen} children={this.overviewBlocks()}/>
                 </div>
-                <div className={"col-xs-12 col-md-3 col-lg-4 mt-1" + (this.state.isPropertiesOpen || isSmallerSize ? ' mb-3' : '')}>
+                <div className="col-xs-12 col-md-3 col-lg-4 mt-1 mb-3">
                     <FileViewDownloadButtonContainer file={this.props.context} size="lg" verticallyCentered={!isSmallerSize && this.state.isPropertiesOpen} />
                 </div>
 
@@ -258,16 +248,15 @@ export class FileViewDownloadButtonContainer extends React.Component {
 
     static defaultProps = {
         'size' : null
-    }
+    };
 
     render(){
-        var file = this.props.file || this.props.context || this.props.result;
+        var { className, size } = this.props,
+            file = this.props.file || this.props.context || this.props.result;
         return (
-            <layout.VerticallyCenteredChild disabled={!this.props.verticallyCentered}>
-                <div className={"file-download-container" + (this.props.className ? ' ' + this.props.className : '')}>
-                    <fileUtil.FileDownloadButtonAuto result={file} size={this.props.size} />
-                </div>
-            </layout.VerticallyCenteredChild>
+            <div className={"file-download-container" + (className ? ' ' + className : '')}>
+                <fileUtil.FileDownloadButtonAuto result={file} size={size} />
+            </div>
         );
     }
 }
@@ -402,18 +391,23 @@ export class FileOverViewBody extends React.Component {
             fileFormat              = fileUtil.getFileFormatStr(file),
             fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
             fileIsHic               = (fileFormat === 'hic'),
-            externalLinkButton      = null,
             genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
             fileHref                = file.href,
             pageHref                = this.props.href || (store && store.getState().href),
             hrefParts               = url.parse(pageHref),
-            host                    = hrefParts.protocol + '//' + hrefParts.host;
+            host                    = hrefParts.protocol + '//' + hrefParts.host,
+            juiceBoxBtn             = this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
+            epigenomeBtn            = this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly);
+
+        if (!juiceBoxBtn && !epigenomeBtn){
+            return null;
+        }
 
         return (
-            <OverViewBodyItem tips={tips} file={file} wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
+            <OverViewBodyItem wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
                 <React.Fragment>
-                    {this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host)}
-                    {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+                    { juiceBoxBtn }
+                    { epigenomeBtn }
                 </React.Fragment>
             } />
         );
@@ -470,7 +464,7 @@ export class QualityControlResults extends React.PureComponent {
         }
 
         var itemsToReturn = [
-            renderMetric("Total reads", "Total Reads"),
+            renderMetric("Total reads", "Total Reads in File"),
             //renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
             //renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
             renderMetric("Total Sequences", "Total Sequences"),

@@ -14,6 +14,17 @@ def drug_treatment(testapp, lab, award):
 
 
 @pytest.fixture
+def viral_treatment(testapp, lab, award):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'treatment_type': 'Biological',
+        'biological_agent': 'Virus',
+    }
+    return testapp.post_json('/treatment_agent', item).json['@graph'][0]
+
+
+@pytest.fixture
 def heatshock_treatment(testapp, lab, award):
     item = {
         'award': award['@id'],
@@ -24,7 +35,6 @@ def heatshock_treatment(testapp, lab, award):
 
 
 def test_calculated_agent_treatment_display_title(testapp, heatshock_treatment):
-    # import pdb; pdb.set_trace()
     assert heatshock_treatment['display_title'] == 'Heat Shock'
     res = testapp.patch_json(
         heatshock_treatment['@id'],
@@ -35,7 +45,6 @@ def test_calculated_agent_treatment_display_title(testapp, heatshock_treatment):
 
 
 def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
-    # import pdb; pdb.set_trace()
     assert drug_treatment['display_title'] == 'Drug treatment'
     res = testapp.patch_json(
         drug_treatment['@id'],
@@ -49,8 +58,16 @@ def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
     assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5 M, 3.5h at 3.5°C)'
 
 
+def test_calculated_biological_treatment_display_title(testapp, viral_treatment):
+    assert viral_treatment['display_title'] == 'Virus treatment'
+    res = testapp.patch_json(viral_treatment['@id'], {
+        'duration': 3.5, 'duration_units': 'hour',
+        'concentration': 2, 'concentration_units': 'MOI'
+    })
+    assert res.json['@graph'][0]['display_title'] == 'Virus treatment (2 MOI, 3.5h)'
+
+
 def test_calculated_rnai_treatment_display_title(testapp, rnai, target_w_genes):
-    # import pdb; pdb.set_trace()
     assert rnai['display_title'] == 'shRNA treatment'
     res = testapp.patch_json(rnai['@id'], {'target': target_w_genes['@id']})
     assert res.json['@graph'][0]['display_title'] == 'shRNA of Gene:eeny,meeny'

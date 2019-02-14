@@ -80,15 +80,10 @@ class Term extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.experimentSetsCount = this.experimentSetsCount.bind(this);
         this.handleClick = _.debounce(this.handleClick.bind(this), 500, true);
         this.state = {
             'filtering' : false
         };
-    }
-
-    experimentSetsCount(){
-        return (this.props.term && this.props.term.doc_count) || 0;
     }
 
     handleClick(e) {
@@ -128,12 +123,13 @@ class Term extends React.PureComponent {
     }
 
     render() {
-        var { term, facet, isTermSelected } = this.props;
-        //var selected = this.isSelectedExpItem();
-        var selected = isTermSelected(term, facet);
-        var title = this.customTitleRender() || this.props.title || Schemas.Term.toName(facet.field, term.key);
+        var { term, facet, isTermSelected } = this.props,
+            selected    = isTermSelected(term, facet),
+            title       = this.customTitleRender() || Schemas.Term.toName(facet.field, term.key) || term.key,
+            count       = (term && term.doc_count) || 0;
 
         if (!title || title === 'null' || title === 'undefined') title = 'None';
+
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={term.key} data-key={term.key}>
                 <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={term.key}>
@@ -144,8 +140,8 @@ class Term extends React.PureComponent {
                                 <i className="icon icon-times-circle icon-fw"></i>
                                 : '' }
                     </span>
-                    <span className="facet-item" data-tip={title.length > 30 ? title : null}>{ title || "None" }</span>
-                    <span className="facet-count">{this.experimentSetsCount()}</span>
+                    <span className="facet-item" data-tip={title.length > 30 ? title : null}>{ title }</span>
+                    <span className="facet-count">{ count }</span>
                 </a>
             </li>
         );
@@ -167,33 +163,31 @@ class FacetTermsList extends React.Component {
 
     static defaultProps = {
         'persistentCount' : 10
-    }
+    };
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.handleOpenToggleClick = this.handleOpenToggleClick.bind(this);
         this.handleExpandListToggleClick = this.handleExpandListToggleClick.bind(this);
         this.renderTerms = this.renderTerms.bind(this);
         this.state = {
-            'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true,
-            'facetClosing' : false,
-            'expanded' : false
+            'facetOpen'     : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true,
+            'facetClosing'  : false,
+            'expanded'      : false
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
-        if (
-            (nextProps.mounted && !this.props.mounted) &&
-            (typeof nextProps.defaultFacetOpen === 'boolean' && nextProps.defaultFacetOpen !== this.props.defaultFacetOpen)
-        ){
-            this.setState({ facetOpen : nextProps.defaultFacetOpen });
-        }
-    }
-
     componentDidUpdate(pastProps, pastState){
+        if (
+            (
+                !pastProps.mounted && this.props.mounted &&
+                typeof this.props.defaultFacetOpen === 'boolean' && this.props.defaultFacetOpen !== pastProps.defaultFacetOpen
+            ) || (
+                this.props.defaultFacetOpen === true && !pastProps.defaultFacetOpen && !this.state.facetOpen
+            )
+        ){
+            this.setState({ 'facetOpen' : true });
+        }
         if (pastState.facetOpen !== this.state.facetOpen){
             ReactTooltip.rebuild();
         }
@@ -220,35 +214,36 @@ class FacetTermsList extends React.Component {
 
 
     renderTerms(terms){
-        var { facet, persistentCount, onTermClick } = this.props;
+        var { facet, persistentCount, onTermClick } = this.props,
+            { expanded } = this.state,
+            makeTermComponent = (term) => <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />;
 
-        var makeTermComponent = (term) => <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />;
+        if (terms.length > persistentCount){
+            var persistentTerms     = terms.slice(0, persistentCount),
+                collapsibleTerms    = terms.slice(persistentCount),
+                remainingTermsCount = !expanded ? _.reduce(collapsibleTerms, function(m, term){
+                    return m + (term.doc_count || 0);
+                }, 0) : null,
+                expandButtonTitle;
 
-        if (terms.length > this.props.persistentCount){
-            var persistentTerms = terms.slice(0, persistentCount);
-            var collapsibleTerms = terms.slice(persistentCount);
-
-            var remainingTermsCount = !this.state.expanded ? _.reduce(collapsibleTerms, function(m, term){
-                return m + (term.doc_count || 0);
-            }, 0) : null;
-
-            var expandButtonTitle = (
-                this.state.expanded ?
+            if (expanded){
+                expandButtonTitle = (
                     <span>
                         <i className="icon icon-fw icon-minus"/> Collapse
                     </span>
-                    :
+                );
+            } else {
+                expandButtonTitle = (
                     <span>
                         <i className="icon icon-fw icon-plus"/> View {terms.length - persistentCount} More
                         <span className="pull-right">{ remainingTermsCount }</span>
                     </span>
-            );
+                );
+            }
 
             return (
                 <div className="facet-list nav">
-                    <PartialList open={this.state.expanded}
-                        persistent={ _.map(persistentTerms,  makeTermComponent)}
-                        collapsible={_.map(collapsibleTerms, makeTermComponent)} />
+                    <PartialList open={expanded} persistent={ _.map(persistentTerms,  makeTermComponent)} collapsible={_.map(collapsibleTerms, makeTermComponent)} />
                     <div className="view-more-button" onClick={this.handleExpandListToggleClick} children={expandButtonTitle} />
                 </div>
             );
@@ -260,14 +255,15 @@ class FacetTermsList extends React.Component {
     }
 
     render(){
-        var { facet, tooltip } = this.props;
-        var { facetOpen, facetClosing } = this.state;
-
-        // Filter out terms w/ 0 counts in case of range, etc.
-        var terms = _.filter(facet.terms, function(term){ return term.doc_count > 0; });
+        var { facet, tooltip, title } = this.props,
+            { facetOpen, facetClosing } = this.state,
+            // Filter out terms w/ 0 counts in case of range, etc.
+            terms = _.filter(facet.terms, function(term){ return term.doc_count > 0; });
 
         // Filter out type=Item for now (hardcode)
-        if (facet.field === 'type') terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
+        if (facet.field === 'type'){
+            terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
+        }
 
         var indicator = (
             <Fade in={facetClosing || !facetOpen}>
@@ -286,7 +282,7 @@ class FacetTermsList extends React.Component {
                     <span className="expand-toggle">
                         <i className={"icon icon-fw " + (facetOpen && !facetClosing ? "icon-minus" : "icon-plus")}/>
                     </span>
-                    <span className="inline-block" data-tip={tooltip} data-place="right">{ facet.title || facet.field }</span>
+                    <span className="inline-block" data-tip={tooltip} data-place="right">{ title }</span>
                     { indicator }
                 </h5>
                 <Collapse in={facetOpen && !facetClosing} children={this.renderTerms(terms)}/>
@@ -321,16 +317,10 @@ class Facet extends React.PureComponent {
         }),
         'defaultFacetOpen'      : PropTypes.bool,
         'onFilter'              : PropTypes.func,           // Executed on term click
-        'width'                 : PropTypes.any,
         'extraClassname'        : PropTypes.string,
         'schemas'               : PropTypes.object,
-        'isTermSelected'        : PropTypes.func.isRequired,
-        'facetOrder'            : PropTypes.number
-    }
-
-    static defaultProps = {
-        width: 'inherit'
-    }
+        'isTermSelected'        : PropTypes.func.isRequired
+    };
 
     constructor(props){
         super(props);
@@ -338,16 +328,16 @@ class Facet extends React.PureComponent {
         this.isEmpty = this.isEmpty.bind(this);
         this.handleStaticClick = this.handleStaticClick.bind(this);
         this.handleTermClick = this.handleTermClick.bind(this);
-        this.state = {
-            'facetOpen' : typeof props.defaultFacetOpen === 'boolean' ? props.defaultFacetOpen : true
-        };
+        this.state = { 'filtering' : false };
     }
 
     isStatic(props = this.props){
         return Facet.isStatic(props.facet);
     }
 
-    isEmpty(props = this.props) { return !!(props.facet.terms.length === 0); }
+    isEmpty(props = this.props) {
+        return !!(props.facet.terms.length === 0);
+    }
 
     /**
      * For cases when there is only one option for a facet - we render a 'static' row.
@@ -382,23 +372,10 @@ class Facet extends React.PureComponent {
     }
 
     render() {
-        var { facet, schemas, itemTypeForSchemas, isTermSelected, extraClassname } = this.props;
-        var filtering = this.state.filtering;
-        if (typeof facet.title !== 'string'){
-            facet = _.extend({}, facet, {
-                'title' : Schemas.Field.toName(facet.field, schemas || null)
-            });
-        }
-
-        var description = facet.description || null;
-        if (!description){
-            try {
-                var schemaProperty = Schemas.Field.getSchemaProperty(facet.field, schemas, itemTypeForSchemas || 'ExperimentSet');
-                description = schemaProperty && schemaProperty.description;
-            } catch(e){
-                console.warn("Could not find schema property (for description tooltip) for field " + facet.field, e);
-            }
-        }
+        var { facet, schemas, itemTypeForSchemas, isTermSelected, extraClassname } = this.props,
+            { filtering } = this.state,
+            description = facet.description || null,
+            title       = facet.title || facet.field;
 
         if (this.isStatic()){
             // Only one term
@@ -406,19 +383,20 @@ class Facet extends React.PureComponent {
                 termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
 
             if (!termName || termName === 'null' || termName === 'undefined') termName = 'None';
+
             return (
                 <div className={"facet static row" + (selected ? ' selected' : '') + ( filtering ? ' filtering' : '') + ( extraClassname ? ' ' + extraClassname : '' )}
                     data-field={facet.field}>
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
-                            <span className="inline-block" data-tip={description} data-place="right">&nbsp;{ facet.title || Schemas.Field.toName(facet.field, this.props.schemas || null) }</span>
+                            <span className="inline-block" data-tip={description} data-place="right">&nbsp;{ title }</span>
                         </h5>
                         <div className={ "facet-item term" + (selected? ' selected' : '') + (filtering ? ' filtering' : '')}>
                             <span onClick={this.handleStaticClick} title={
                                 'All results have ' +
                                 facet.terms[0].key +
                                 ' as their ' +
-                                (facet.title || facet.field ).toLowerCase() + '; ' +
+                                title.toLowerCase() + '; ' +
                                 (selected ?
                                     'currently active as portal-wide filter.' :
                                     'not currently active as portal-wide filter.'
@@ -436,7 +414,7 @@ class Facet extends React.PureComponent {
                 </div>
             );
         } else {
-            return <FacetTermsList {...this.props} onTermClick={this.handleTermClick} tooltip={description} />;
+            return <FacetTermsList {...this.props} onTermClick={this.handleTermClick} tooltip={description} title={title} />;
         }
 
 
@@ -525,20 +503,6 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
 
 export class FacetList extends React.PureComponent {
 
-    /**
-     * @deprecated
-     *
-     * @returns {boolean} True if filled.
-     */
-    static checkFilledFacets(facets){
-        if (!facets.length) return false;
-        for (var i = 0; i < facets.length; i++){
-            if (typeof facets[i].total !== 'number') return false;
-            if (typeof facets[i].terms === 'undefined') return false;
-        }
-        return true;
-    }
-
     static onFilterHandlerMixin = onFilterHandlerMixin
 
     static propTypes = {
@@ -557,7 +521,6 @@ export class FacetList extends React.PureComponent {
          */
         'schemas' : PropTypes.object,
         // { '<schemaKey : string > (active facet categories)' : Set (active filters within category) }
-        'orientation' : PropTypes.string,   // 'vertical' or 'horizontal'
         'title' : PropTypes.string,         // Title to put atop FacetList
         'className' : PropTypes.string,     // Extra class
         'href' : PropTypes.string,
@@ -570,56 +533,11 @@ export class FacetList extends React.PureComponent {
         'restrictions' : PropTypes.object,  // Unused
         'mode' : PropTypes.string,          // Unused
         'onChange' : PropTypes.func,        // Unused
-        'hideDataTypeFacet' : PropTypes.bool
-    }
-
-    static isLoggedInAsAdmin(){
-        var details = JWT.getUserDetails();
-        if (details && Array.isArray(details.groups) && details.groups.indexOf('admin') > -1){
-            return true;
-        }
-        return false;
-    }
-
-
-    static filterFacetsForBrowse(facet, props, state){
-
-        if (facet.hide_from_view) return false;
-
-        // Exclude facets which are part of browse base state filters.
-        if (props.browseBaseState){
-            var browseBaseParams = navigate.getBrowseBaseParams(props.browseBaseState);
-            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
-        }
-
-        if (facet.field.substring(0, 6) === 'audit.'){
-            if (props.session && FacetList.isLoggedInAsAdmin()) return true;
-            return false; // Exclude audit facets temporarily, if not logged in as admin.
-        }
-
-        return true;
-    }
-
-    static filterFacetsForSearch(facet, props, state){
-        if (facet.hide_from_view) return false;
-        if (facet.field.indexOf('experiments.experiment_sets.') > -1) return false;
-        if (facet.field === 'experiment_sets.@type') return false;
-        if (facet.field === 'experiment_sets.experimentset_type') return false;
-        if (facet.field.substring(0, 6) === 'audit.'){
-            if (props.session && FacetList.isLoggedInAsAdmin()) return true;
-            return false; // Ignore audit facets temporarily, esp if logged out.
-        }
-        // logic for removing Data Type facet on submissions page-title
-        if (facet.field === 'type' && props.hideDataTypeFacet) return false;
-        return true;
-    }
-
+    };
 
     static defaultProps = {
-        'orientation'       : 'vertical', // Probably unnecessary.
         'facets'            : null,
         'title'             : "Properties",
-        'filterFacetsFxn'   : FacetList.filterFacetsForBrowse, // Filters out 'Item Type', etc.
         'debug'             : false,
         'showClearFiltersButton' : false,
 
@@ -645,8 +563,9 @@ export class FacetList extends React.PureComponent {
         'isTermSelected'    : function (term, facet){
             // Check against responseContext.filters, or expSetFilters in Redux store.
             return false;
-        }
-    }
+        },
+        'itemTypeForSchemas': 'ExperimentSetReplicate'
+    };
 
 
     constructor(props){
@@ -677,13 +596,23 @@ export class FacetList extends React.PureComponent {
         return href && url.parse(href, true).query;
     }
 
-    renderFacets(facets = this.props.facets, maxTermsToShow = 12){
+    renderFacets(maxTermsToShow = 12){
 
-        var { href, onFilter, schemas, isTermSelected, itemTypeForSchemas, windowWidth } = this.props;
+        var { facets, href, onFilter, schemas, isTermSelected, itemTypeForSchemas, windowWidth } = this.props;
 
-        facets = _.uniq(
-            _.filter(facets, (facet) => this.props.filterFacetsFxn(facet, this.props, this.state)),
-            false, function(f){ return f.field; }
+        // Ensure facets are unique, field-wise.
+        facets = _.uniq(facets, false, function(f){ return f.field; });
+
+        // Ensure each facets has an `order` property and default it to 0 if not.
+        // And then sort by `order`.
+        facets = _.sortBy(
+            _.map(facets, function(f){
+                if (typeof f.order !== 'number'){
+                    return _.extend({ 'order' : 0 }, f);
+                }
+                return f;
+            }),
+            'order'
         );
 
         var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
@@ -702,45 +631,38 @@ export class FacetList extends React.PureComponent {
                 facet={facet} href={href} isTermSelected={isTermSelected}
                 schemas={schemas} itemTypeForSchemas={itemTypeForSchemas} mounted={this.state.mounted}
                 defaultFacetOpen={ !this.state.mounted ? false : !!(
-                    _.any(facet.terms, (t) => isTermSelected(t, facet)) || (
-                        layout.responsiveGridState(windowWidth || null) !== 'xs' &&
-                        i < (facetIndexWherePastXTerms || 1)
-                    )
+                    _.any(facet.terms, (t) => isTermSelected(t, facet)) ||
+                    ( layout.responsiveGridState(windowWidth || null) !== 'xs' && i < (facetIndexWherePastXTerms || 1) )
                 )} />
         );
     }
 
 
     render() {
-        var { debug, facets, className, orientation, title, showClearFiltersButton, onClearFilters } = this.props;
+        var { debug, facets, className, title, showClearFiltersButton, onClearFilters, windowHeight } = this.props;
         if (debug) console.log('render facetlist');
 
-        var exptypeDropdown;
-        if (!facets || !facets.length) {
-            if (!this.state.facetsLoaded && (!Array.isArray(facets) || facets.length === 0)) {
-                return (
-                    <div className="text-center" style={{ padding : "162px 0", fontSize : '26px', color : "#aaa" }}>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
-                    </div>
-                );
-            } else {
-                return null;
-            }
+        if (!facets || !Array.isArray(facets) || facets.length === 0) {
+            return (
+                <div className="pt-2 pb-2" style={{ color : "#aaa" }}>
+                    No facets available
+                </div>
+            );
         }
 
-        var clearButtonStyle = (className && className.indexOf('with-header-bg') > -1) ?
-            "btn-outline-white" : "btn-outline-default";
-
-        var facetElements = this.renderFacets(facets);
-
-        var staticFacetElements = _.filter(facetElements, function(f){
-            return Facet.isStatic(f.props.facet);
-        });
-
-        facetElements = _.difference(facetElements, staticFacetElements);
+        var clearButtonClassName = (
+            (className && className.indexOf('with-header-bg') > -1) ?
+                "btn-outline-white" : "btn-outline-default"
+            ),
+            maxTermsToShow          = typeof windowHeight === 'number' && !isNaN(windowHeight) ? Math.floor(windowHeight / 60) : 12,
+            allFacetElements        = this.renderFacets(maxTermsToShow),
+            staticFacetElements     = _.filter(allFacetElements, function(f){
+                return Facet.isStatic(f.props.facet);
+            }),
+            selectableFacetElements = _.difference(allFacetElements, staticFacetElements);
 
         return (
-            <div className={"facets-container facets " + orientation + (className ? ' ' + className : '')}>
+            <div className={"facets-container facets" + (className ? ' ' + className : '')}>
                 <div className="row facets-header">
                     <div className="col-xs-6 facets-title-column">
                         <i className="icon icon-fw icon-filter"></i>
@@ -748,12 +670,12 @@ export class FacetList extends React.PureComponent {
                         <h4 className="facets-title">{ title }</h4>
                     </div>
                     <div className={"col-xs-6 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
-                        <a href="#" onClick={onClearFilters} className={"btn btn-xs rounded " + clearButtonStyle}>
+                        <a href="#" onClick={onClearFilters} className={"btn btn-xs rounded " + clearButtonClassName}>
                             <i className="icon icon-times"></i> Clear All
                         </a>
                     </div>
                 </div>
-                { facetElements }
+                { selectableFacetElements }
                 { staticFacetElements.length > 0 ?
                     <div className="row facet-list-separator">
                         <div className="col-xs-12">
