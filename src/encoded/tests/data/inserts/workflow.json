@@ -11077,7 +11077,7 @@
         "experiment_types": [
             "ATAC-seq", "ChIP-seq"
         ],
-        "description": "Merging and sorting gzipped bed files",
+        "description": "Merging unsorted gzipped bed files",
         "docker_image_name": "4dndcic/4dn-mergebed:v1",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
@@ -11126,7 +11126,7 @@
                 ]
             }
         ],
-        "title": "Merging and sorting gzipped bed v1",
+        "title": "Merging unsorted gzipped bed v1",
         "uuid": "2b10e472-065e-43ed-992c-fccad6417b65"
     }
 ]

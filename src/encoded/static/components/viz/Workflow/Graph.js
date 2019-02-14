@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
+import memoize from 'memoize-one';
 import { Fade } from 'react-bootstrap';
 import { console, isServerSide } from './../../util';
 
@@ -70,7 +71,7 @@ export default class Graph extends React.Component {
         })).isRequired,
         'nodeTitle'         : PropTypes.func,
         'rowSpacingType'    : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])
-    }
+    };
 
     static defaultProps = {
         'height'        : null, // Unused, should be set to nodes count in highest column * rowSpacing + innerMargins.
@@ -90,7 +91,7 @@ export default class Graph extends React.Component {
         'innerMargin'   : {
             'top' : 60,
             'bottom' : 60,
-            'left' : 20,
+            'left' : 30,
             'right' : 20
         },
         'minimumHeight' : 75,
@@ -100,14 +101,146 @@ export default class Graph extends React.Component {
         },
         'nodeClassName' : function(node){ return ''; },
         'nodeEdgeLedgeWidths' : [3,5]
-    }
+    };
+
+    static getHeightFromNodes = memoize(function(nodes, nodesPreSortFxn, rowSpacing, minimumHeight){
+        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
+        if (typeof nodesPreSortFxn === 'function'){
+            nodes = nodesPreSortFxn(nodes.slice(0));
+        }
+        return Math.max(
+            _(nodes).chain()
+            .groupBy('column')
+            .pairs()
+            .reduce(function(maxCount, nodeSet){
+                return Math.max(nodeSet[1].length, maxCount);
+            }, 0)
+            .value() * (rowSpacing) - rowSpacing,
+            minimumHeight
+        );
+    });
+
+    static getScrollableWidthFromNodes = memoize(function(nodes, columnWidth, columnSpacing, innerMargin){
+        return (_.reduce(nodes, function(highestCol, node){
+            return Math.max(node.column, highestCol);
+        }, 0) + 1) * (columnWidth + columnSpacing) + (innerMargin.left || 0) + (innerMargin.right || 0) - columnSpacing;
+    });
+
+    /**
+     * Extends each node with X & Y coordinates.
+     *
+     * Converts column placement and position within columns,
+     * along with other chart dimension settings, into X & Y coordinates.
+     *
+     * IMPORTANT:
+     * Returns a new array but _modifies array items in place_.
+     * If need fresh nodes, deep-clone before supplying `props.nodes`.
+     *
+     * @static
+     * @memberof Graph
+     */
+    static getNodesWithCoordinates = memoize(function(
+        nodes                = null,
+        viewportWidth        = null,
+        contentWidth         = null,
+        contentHeight        = null,
+        innerMargin          = { top: 0, right: 0, bottom: 0, left: 0 },
+        rowSpacingType       = 'compact',
+        rowSpacing           = 75,
+        columnWidth          = 150,
+        columnSpacing        = 56,
+        isNodeCurrentContext = false
+    ){
+
+        /** Vertically centers a single node within a column */
+        function centerNode(n){
+            n.y = (contentHeight / 2) + innerMargin.top;
+            n.nodesInColumn = 1;
+            n.indexInColumn = 0;
+        }
+
+        var nodesByColumnPairs, leftOffset, nodesWithCoords;
+
+        // Arrange into lists of columns
+        // Ensure we're sorted, using column _numbers_ (JS objs keyed by str).
+        nodesByColumnPairs = _.sortBy(_.map(
+            _.pairs(_.groupBy(nodes, 'column')),
+            function([ columnNumStr, nodesInColumn ]){
+                return [ parseInt(columnNumStr), nodesInColumn ];
+            }
+        ), 0);
+
+        // Set correct Y coordinate on each node depending on how many nodes are in each column.
+        _.forEach(nodesByColumnPairs, ([ columnNumber, nodesInColumn ]) => {
+
+            var countInCol = nodesInColumn.length;
+
+            nodesInColumn = _.sortBy(nodesInColumn, 'indexInColumn');
+
+            if (rowSpacingType === 'compact') {
+                if (countInCol === 1) centerNode(nodesInColumn[0]);
+                else {
+                    var padding = Math.max(0, contentHeight - ((countInCol - 1) * rowSpacing)) / 2;
+                    _.forEach(nodesInColumn, function(nodeInCol, idx){
+                        nodeInCol.y = ((idx + 0) * rowSpacing) + (innerMargin.top) + padding;
+                        nodeInCol.nodesInColumn = countInCol;
+                    });
+                }
+            } else if (rowSpacingType === 'stacked') {
+                _.forEach(nodesInColumn, function(nodeInCol, idx){
+                    if (!nodeInCol) return;
+                    nodeInCol.y = (rowSpacing * idx) + innerMargin.top; //num + (this.props.innerMargin.top + verticalMargin);
+                    nodeInCol.nodesInColumn = countInCol;
+                });
+            } else if (rowSpacingType === 'wide') {
+                if (countInCol === 1) centerNode(nodesInColumn[0]);
+                else {
+                    _.forEach(
+                        d3.range(0, contentHeight, contentHeight / (countInCol - 1)).concat([contentHeight]),
+                        function(yCoordinate, idx){
+                            var nodeInCol = nodesInColumn[idx];
+                            if (!nodeInCol) return;
+                            nodeInCol.y = yCoordinate + innerMargin.top;
+                            nodeInCol.nodesInColumn = countInCol;
+                        }
+                    );
+                }
+            } else {
+                console.error("Prop 'rowSpacingType' not valid. Must be ", Graph.propTypes.rowSpacingType);
+                throw new Error("Prop 'rowSpacingType' not valid.");
+            }
+        });
+
+        nodesWithCoords = _.reduce(nodesByColumnPairs, function(m, [ columnNumber, nodesInColumn ]){
+            return m.concat(nodesInColumn);
+        }, []);
+
+        leftOffset = innerMargin.left;
+
+        // Center graph contents horizontally if needed.
+        if (contentWidth && viewportWidth && contentWidth < viewportWidth){
+            leftOffset += (viewportWidth - contentWidth) / 2;
+        }
+
+        // Set correct X coordinate on each node depending on column and spacing prop.
+        _.forEach(nodesWithCoords, (node, i) => {
+            node.x = (node.column * (columnWidth + columnSpacing)) + leftOffset;
+        });
+
+        // Finally, add boolean `isCurrentContext` flag to each node object if needed.
+        if (typeof isNodeCurrentContext === 'function'){
+            _.forEach(nodesWithCoords, function(node){
+                node.isCurrentContext = isNodeCurrentContext(node);
+            });
+        }
+
+        return nodesWithCoords;
+    });
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.width = this.width.bind(this);
         this.height = this.height.bind(this);
+        this.nodesWithCoordinates = this.nodesWithCoordinates.bind(this);
         this.state = {
             'mounted' : false
         };
@@ -117,139 +250,33 @@ export default class Graph extends React.Component {
         this.setState({ 'mounted' : true });
     }
 
-    componentDidUpdate(pastProps){
-        if (pastProps.width && !this.props.width){
-            requestAnimationFrame(()=> {
-                // Force an update once to let this.width() get proper width after resize/redraw.
-                // If we're losing an explicit width.
-                this.forceUpdate();
-            });
-        }
-    }
-
-    width()  {
-        var width = this.props.width;
-        if ((!width || isNaN(width)) && this.state.mounted && !isServerSide()){
-            width = this.refs.outerContainer.offsetWidth;
-        } else if (!width || isNaN(width)){
-            return null;
-        }
-        return ((width - this.props.innerMargin.left) - this.props.innerMargin.right );
-    }
-
     height() {
-        var nodes = this.props.nodes;
-        // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
-        if (typeof this.props.nodesPreSortFxn === 'function'){
-            nodes = this.props.nodesPreSortFxn(nodes.slice(0));
-        }
-        return Math.max(
-            _(nodes).chain()
-            .groupBy('column')
-            .pairs()
-            .reduce(function(maxCount, nodeSet){
-                return Math.max(nodeSet[1].length, maxCount);
-            }, 0)
-            .value() * (this.props.rowSpacing) - this.props.rowSpacing,
-            this.props.minimumHeight
-        );
+        var { nodes, nodesPreSortFxn, rowSpacing, minimumHeight } = this.props;
+        return Graph.getHeightFromNodes(nodes, nodesPreSortFxn, rowSpacing, minimumHeight);
     }
 
     scrollableWidth(){
-        return (_.reduce(this.props.nodes, function(highestCol, node){
-            return Math.max(node.column, highestCol);
-        }, 0) + 1) * (this.props.columnWidth + this.props.columnSpacing) + this.props.innerMargin.left + this.props.innerMargin.right - this.props.columnSpacing;
+        var { nodes, columnWidth, columnSpacing, innerMargin } = this.props;
+        return Graph.getScrollableWidthFromNodes(nodes, columnWidth, columnSpacing, innerMargin);
     }
 
-    nodesWithCoordinates(nodes = null, viewportWidth = null, contentWidth = null, contentHeight = null, verticalMargin = 0){
-
-        if (!contentHeight) contentHeight = this.height();
-
-        if (!nodes) nodes = this.props.nodes.slice(0);
-
-        /****** Step 1: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
-         ****** Run optional post/pre-process functions to re-sort or arrange nodes in/within columns.
-         ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
-
-        // Arrange into lists of columns
-        var nodesByColumnPairs = _.pairs(_.groupBy(nodes, 'column'));
-
-        /****** Step 2: ***** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******
-         ****** Convert column placement and position within columns, along with other chart dimension settings, into X & Y coordinates.
-         ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ****** ******/
-
-        // Set correct Y coordinate on each node depending on how many nodes are in each column.
-        nodesByColumnPairs.forEach((columnGroup) => {
-
-            var nodesInColumn = _.sortBy(columnGroup[1], 'indexInColumn');
-            var countInCol = nodesInColumn.length;
-
-            var centerNode = function(n){
-                n.y = (contentHeight / 2) + this.props.innerMargin.top + verticalMargin;
-                n.nodesInColumn = countInCol;
-                n.indexInColumn = 0;
-            }.bind(this);
-
-            if (this.props.rowSpacingType === 'compact') {
-                if (countInCol === 1) centerNode(nodesInColumn[0]);
-                else {
-                    var padding = Math.max(0, contentHeight - ((countInCol - 1) * this.props.rowSpacing)) / 2;
-                    d3.range(countInCol).forEach((i) => {
-                        nodesInColumn[i].y = ((i + 0) * this.props.rowSpacing) + (this.props.innerMargin.top) + padding + verticalMargin;
-                        nodesInColumn[i].nodesInColumn = countInCol;
-                    });
-                }
-            } else if (this.props.rowSpacingType === 'stacked') {
-                _.forEach(nodesInColumn, (nodeInCol, idx)=>{
-                    if (!nodeInCol) return;
-                    nodeInCol.y = (this.props.rowSpacing * idx) + (this.props.innerMargin.top + verticalMargin);//num + (this.props.innerMargin.top + verticalMargin);
-                    nodeInCol.nodesInColumn = countInCol;
-                });
-
-            } else if (this.props.rowSpacingType === 'wide') {
-                if (countInCol === 1) centerNode(nodesInColumn[0]);
-                else {
-                    _.forEach(d3.range(0, contentHeight, contentHeight / (countInCol - 1) ).concat([contentHeight]), (num, idx)=>{
-                        var nodeInCol = nodesInColumn[idx];
-                        if (!nodeInCol) return;
-                        nodeInCol.y = num + (this.props.innerMargin.top + verticalMargin);
-                        nodeInCol.nodesInColumn = countInCol;
-                    });
-                }
-            } else {
-                console.error("Prop 'rowSpacingType' not valid. Must be ", Graph.propTypes.rowSpacingType);
-                throw new Error("Prop 'rowSpacingType' not valid.");
-            }
-        });
-
-        var leftOffset = this.props.innerMargin.left;
-        if (contentWidth && viewportWidth && contentWidth < viewportWidth){
-            leftOffset += (viewportWidth - contentWidth) / 2;
-        }
-
-        nodes = _.reduce(nodesByColumnPairs, function(m,colPair){
-            return m.concat(colPair[1]);
-        }, []);
-
-        // Set correct X coordinate on each node depending on column and spacing prop.
-        _.forEach(nodes, (node, i) => {
-            node.x = (node.column * (this.props.columnWidth + this.props.columnSpacing)) + leftOffset;
-        });
-
-        return nodes;
+    nodesWithCoordinates(viewportWidth, contentWidth, contentHeight){
+        var { nodes, innerMargin, rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext } = this.props;
+        return Graph.getNodesWithCoordinates(
+            nodes, viewportWidth, contentWidth, contentHeight, innerMargin,
+            rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext
+        );
     }
 
     render(){
+        var { width, innerMargin, edges, minimumHeight } = this.props,
+            innerHeight     = this.height(),
+            contentWidth    = this.scrollableWidth(),
+            innerWidth      = width;
 
-        var width = this.width();
-        var height = this.height();
-        var contentWidth = this.scrollableWidth();
-
-        var widthAndHeightSet = !isNaN(width) && width && !isNaN(height) && height;
-
-        if (!widthAndHeightSet && !this.state.mounted){
+        if (!this.state.mounted){
             return (
-                <div ref="outerContainer">
+                <div key="outer">
                     <Fade appear in>
                         <div>&nbsp;</div>
                     </Fade>
@@ -257,19 +284,16 @@ export default class Graph extends React.Component {
             );
         }
 
-        var fullHeight = Math.max(
-            (typeof this.props.minimumHeight === 'number' && this.props.minimumHeight) || 0,
-            height + this.props.innerMargin.top + this.props.innerMargin.bottom
-        );
+        if (innerMargin && (innerMargin.left || innerMargin.right)){
+            innerWidth -= (innerMargin.left || 0);
+            innerWidth -= (innerMargin.right || 0);
+        }
 
-        var nodes = this.nodesWithCoordinates(
-            this.props.nodes.slice(0),
-            width,
-            contentWidth,
-            height
-        );
-
-        var edges = this.props.edges;
+        var nodes       = this.nodesWithCoordinates(innerWidth, contentWidth, innerHeight),
+            fullHeight  = Math.max(
+                (typeof minimumHeight === 'number' && minimumHeight) || 0,
+                innerHeight + (innerMargin.top || 0) + (innerMargin.bottom || 0)
+            );
 
         /* TODO: later
         var spacerCount = _.reduce(nodes, function(m,n){ if (n.nodeType === 'spacer'){ return m + 1; } else { return m; }}, 0);
@@ -280,15 +304,14 @@ export default class Graph extends React.Component {
         */
 
         return (
-            <div ref="outerContainer" className="worfklow-chart-outer-container">
-                <Fade appear in>
+            <div className="worfklow-chart-outer-container" key="outer">
+                <Fade in appear>
                     <div className="workflow-chart-inner-container">
-                        <StateContainer nodes={nodes} edges={edges}
-                            innerWidth={width} innerHeight={height} contentWidth={contentWidth}
+                        <StateContainer {...{ nodes, edges, innerWidth, innerHeight, contentWidth, width }}
                             {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}>
                             <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'edgeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
-                                <NodesLayer {..._.pick(this.props, 'nodeElement', 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
+                                <EdgesLayer {..._.pick(this.props, 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
+                                <NodesLayer {..._.pick(this.props, 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
                             </ScrollContainer>
                         </StateContainer>
                     </div>

@@ -153,6 +153,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.extra_files",
         "experiments_in_set.files.extra_files.href",
         "experiments_in_set.files.extra_files.file_format",
+        "experiments_in_set.files.quality_metric.display_title",
         "experiments_in_set.files.quality_metric.Total Sequences",
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
@@ -189,6 +190,7 @@ class ExperimentSet(Item):
         #"processed_files.quality_metric.Total reads",
         #"processed_files.quality_metric.Total Sequences",
         #"processed_files.quality_metric.Sequence length",
+        "processed_files.quality_metric.display_title",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
 
@@ -214,6 +216,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
         "experiments_in_set.processed_files.extra_files.file_format",
+        "experiments_in_set.processed_files.quality_metric.display_title",
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
         "experiments_in_set.processed_files.quality_metric.Total reads",

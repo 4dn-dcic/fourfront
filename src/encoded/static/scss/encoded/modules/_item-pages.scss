@@ -441,6 +441,7 @@ h3.submission-subtitle {
 
 i.item-status-indicator-dot {
 	display: inline-block;
+	position: relative;
 	&:before {
 		content: "";
 		width: 9px;
@@ -1756,6 +1757,8 @@ $download-button-width : 100px;
 		}
 		> .detail-pane-body {
 			overflow-x: hidden;
+			max-width: 1140px;
+			margin: 0 auto;
 		}
 		.information {
 			margin-top: 12px;
@@ -1827,6 +1830,14 @@ $download-button-width : 100px;
 
 				> h3.node-file-title {
 					overflow: hidden;
+
+					.item-status-indicator-dot {
+						margin-left: 12px;
+						&:before {
+							width: 12px;
+							height: 12px;
+						}
+					}
 				}
 
 				.download-button-container {
