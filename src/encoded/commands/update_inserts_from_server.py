@@ -27,7 +27,7 @@ def main():
     )
     parser.add_argument('--env', default='data',
                         help='FF environment to update from. Defaults to data')
-    parser.add_argument('--dest', default='master-inserts',
+    parser.add_argument('--dest', default='inserts',
                         help="destination file in inserts dir to write to")
     parser.add_argument('--item-type', action='append', default=[],
                         help="item type, e.g. file_fastq. Defaults to all types")
@@ -68,19 +68,15 @@ def main():
         use_ignore = args.ignore_field + ['attachments']
     else:
         use_ignore = args.ignore_field
-    import pdb; pdb.set_trace()
     svr_inserts, svr_uuids = expand_es_metadata(item_uuids, ff_env=args.env,
-                                                store_frame='object', add_pc_wfr=True,
+                                                store_frame='raw', add_pc_wfr=True,
                                                 ignore_field=use_ignore)
     # now we need to update the server inserts with contents from local inserts
     for item_type in local_inserts:
         for item_uuid in local_inserts[item_type]:
             if item_uuid not in svr_uuids:
                 svr_inserts[item_type].append(local_inserts[item_type][item_uuid])
-    ### TEST ###
-    test_path = 'delete_inserts'
-    dump_results_to_json(svr_inserts, test_path)
-    # dump_results_to_json(svr_inserts, inserts_path)
+    dump_results_to_json(svr_inserts, inserts_path)
 
 
 if __name__ == "__main__":
