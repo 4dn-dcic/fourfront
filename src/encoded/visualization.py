@@ -730,7 +730,14 @@ def get_view_content_info(view):
     view_has_center_content = view_has_any_center_content and \
     any([t for t in view["tracks"]["center"][0]["contents"] if "type" != "2d-chromosome-grid"])
 
-    # Determine the index of the chromosome grid (we assume there is only 1)
+    view_center_content_indecies = []
+    if view_has_center_content:
+        view_center_content_indecies = [i for i, t in enumerate(view["tracks"]["center"][0]["contents"]) if "type" != "2d-chromosome-grid"]
+    view_center_content_index = None
+    if len(view_center_content_indecies) > 0:
+        view_center_content_index = view_center_content_indecies[0]
+
+    # Determine the index of the chromosome grid (we assume there is at most 1)
     view_center_chromsize_indecies = []
     if view_has_any_center_content:
         view_center_chromsize_indecies = [i for i, t in enumerate(view["tracks"]["center"][0]["contents"]) if "type" == "2d-chromosome-grid"]
@@ -742,6 +749,7 @@ def get_view_content_info(view):
         "has_left_tracks" : view_has_left_tracks,
         "has_center_content" : view_has_center_content,
         "center_chromsize_index" : view_center_chromsize_index,
+        "first_center_content_index" : view_center_content_index,
     }
 
 def add_bg_file(views, file, genome_assembly, viewconfig_info):
@@ -1020,7 +1028,6 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
     new_tracks_by_side = {
         "top": deepcopy(new_track_base_1d),
         "left": deepcopy(new_track_base_1d),
-        "center": create_2d_content(file, "2d-chromosome-grid"),
     }
 
     new_tracks_by_side["top"]["type"] = "horizontal-chromosome-labels"
@@ -1047,12 +1054,15 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
             # Add in the 0th position if it doesn't exist already.
             view["tracks"][side].insert(0, new_track)
 
-        # add a 2D chromsize grid overlay on the center (replace the existing track if it exists)
-        if view_content_info["has_center_content"]:
-            if view_content_info["center_chromsize_index"] != None:
-                view["tracks"]["center"][0]["contents"][view_content_info["center_chromsize_index"]] =  new_tracks_by_side["center"]
-            else:
-                view["tracks"]["center"][0]["contents"].insert(0, new_tracks_by_side["center"])
+        # add a 2D chromsize grid overlay on the center if it doesn't exist.
+        if view_content_info["has_center_content"] and view_content_info["center_chromsize_index"] == None:
+            # Clone the center content, but change the type to 2d-chromosome-grid
+            new_2d_chromosome_grid = deepcopy(view["tracks"]["center"][0]["contents"][view_content_info["first_center_content_index"]])
+            # Make a new uid.
+            new_2d_chromosome_grid["uid"] = uuid.uuid4()
+            new_2d_chromosome_grid["type"] = "2d-chromosome-grid"
+
+            view["tracks"]["center"][0]["contents"].insert(0, new_2d_chromosome_grid)
     return views, ""
 
 def add_mcool_file(views, file, genome_assembly, viewconfig_info):
@@ -1103,22 +1113,10 @@ def add_2d_file(views, new_content, viewconfig_info):
 
         # Add the chromsize track as a 2D grid, if it doesn't exist.
         if base_view_info["center_chromsize_index"] == None:
-            # Get the chromsize from the top tracks.
-            chromsize_tracks = [ t for t in views[0]["tracks"]["top"] if "-chromosome-labels" in t["type"] ]
-
-            contents = {}
-            if len(chromsize_tracks) > 0:
-                chrom_source = chromsize_tracks[-1]
-
-                for key in ("tilesetUid", "name"):
-                    contents[key] = chrom_source.get(key, "")
-
-                contents["options"] = {}
-                for key in ("coordSystem", "name"):
-                    contents["options"][key] = chrom_source["options"].get(key, "")
-
-                contents["type"] = "2d-chromosome-grid"
-                views[0]["tracks"]["center"][0]["contents"].insert(0, contents)
+            grid_content = deepcopy(new_content)
+            grid_content["uid"] = uuid.uuid4()
+            grid_content["type"] = "2d-chromosome-grid"
+            views[0]["tracks"]["center"][0]["contents"].insert(0, grid_content)
         return views, ""
 
     # If there is central content, then we need to make a new view.
