@@ -1248,8 +1248,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 box-shadow: 0 0px 0px -2px #000;
                 transition: background-color .5s ease-out, box-shadow .5s ease-out;
 
-                &.clickable:hover {
+                &.clickable:hover,
+                &.clickable:active {
                     text-decoration: none;
+                }
+
+                &.clickable:hover {
                     background-color: darken($color: #e07e05, $amount: 10)
                 }
 
@@ -1475,10 +1479,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 outline-color: #000;
             }
             > .inner .node-visible-element {
-                .qc-present-node-marker {
+                .qc-present-node-marker:hover {
                     //background-color: #000;
                     //background-color: darken($color: #e07e05, $amount: 10%);
-                    box-shadow: 0 3px 3px -2px #000;
+                    box-shadow: 0 3px 2px -2px #000;
                 }
             }
         }
