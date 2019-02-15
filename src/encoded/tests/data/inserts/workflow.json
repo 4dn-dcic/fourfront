@@ -11063,6 +11063,10 @@
                 "workflow_argument_name": "input_bed"
             },
             {
+                "argument_type": "parameter",
+                "workflow_argument_name": "sortv"
+            },
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "merged_bed"
@@ -11096,6 +11100,19 @@
                         "source": [
                             {
                                 "name": "input_bed"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "sortv",
+                        "source": [
+                            {
+                                "name": "sortv"
                             }
                         ]
                     }
