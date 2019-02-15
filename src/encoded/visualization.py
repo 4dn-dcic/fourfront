@@ -548,14 +548,20 @@ def get_file_higlass_information(request, file_uuids):
     return files_info, ""
 
 def validate_higlass_file_sources(files_info, expected_genome_assembly):
-    """TODO
+    """
+    Args:
+        files_info(list)            : A list of dicts. Each dict contains the
+            file's uuid and data.
+        expected_genome_assembly(str, optional, default=None): If provided,
+            each file should have this genome assembly. If it's not provided,
+            all of the files will be checked to ensure they have a matching
+            genome assembly.
 
     Returns:
-        {
+        A dictionary with the following keys:
             success(bool)               : True if there were no errors.
             current_genome_assembly(str): A string indicating the genome assembly of the files.
             errors(str)                 : A string (or None if there are no errors)
-        }
     """
 
     files_by_genome_assembly = {}
