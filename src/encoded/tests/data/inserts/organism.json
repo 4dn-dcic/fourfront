@@ -3,24 +3,28 @@
         "name": "human",
         "scientific_name": "Homo sapiens",
         "taxon_id": "9606",
+        "genome_assembly": "GRCh38",
         "uuid": "7745b647-ff15-4ff3-9ced-b897d4e2983c"
     },
     {
         "name": "mouse",
         "scientific_name": "Mus musculus",
         "taxon_id": "10090",
+        "genome_assembly": "GRCm38",
         "uuid": "3413218c-3d86-498b-a0a2-9a406638e786"
     },
     {
         "name": "fly",
         "scientific_name": "Drosophila melanogaster",
         "taxon_id": "7227",
+        "genome_assembly": "dm6",
         "uuid": "b3911449-1b28-44cf-af23-084ae4eff147"
     },
     {
         "name": "chicken",
         "scientific_name": "Gallus gallus",
         "taxon_id": "9031",
+        "genome_assembly": "galGal5",
         "uuid": "fed8c206-762f-497f-821b-1c8ff7900bd2"
     }
 ]

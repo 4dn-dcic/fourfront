@@ -59,6 +59,17 @@
             "lookup": 40,
             "pattern": "^[0-9]+$",
             "uniqueKey": true
+        },
+        "genome_assembly": {
+            "title": "Genome Assembly",
+            "description": "The reference genome assembly used for analyses for this organism",
+            "type": "string",
+            "enum": [
+                "GRCh38",
+                "GRCm38",
+                "dm6",
+                "galGal5"
+            ]
         }
     }
 }

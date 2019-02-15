@@ -314,6 +314,7 @@ def human_data():
         'name': 'human',
         'scientific_name': 'Homo sapiens',
         'taxon_id': '9606',
+        'genome_assembly': 'GRCh38'
     }
 
 
@@ -329,6 +330,7 @@ def mouse(testapp):
         'name': 'mouse',
         'scientific_name': 'Mus musculus',
         'taxon_id': '10090',
+        'genome_assembly': 'GRCm38'
     }
     return testapp.post_json('/organism', item).json['@graph'][0]
 
