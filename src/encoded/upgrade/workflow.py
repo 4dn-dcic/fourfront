@@ -413,8 +413,8 @@ def workflow_4_5(value, system):
                     value['steps'][s]['inputs'][i]['meta']['file_format'] = ffuuid
 
 
-@upgrade_step('workflow', '6', '7')
-def workflow_6_7(value, system):
+@upgrade_step('workflow', '5', '6')
+def workflow_5_6(value, system):
     '''remove workflow type (and workflow diagram) field
        clean up workflow cateogory and convert it to an array'''
 
