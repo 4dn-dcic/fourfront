@@ -650,5 +650,20 @@
         "title": "bwa_0.7.13",
         "uuid": "36bb6052-082a-46a0-be86-7415782f0223",
         "version": "0.7.13"
+    },
+    {
+        "uuid": "d064191c-b2fc-4c7b-971f-5e2034dc902d",
+        "title": "clodius_0.9.4",
+        "description": "Clodius is a tool for breaking up large data sets into smaller tiles that can subsequently be displayed using an appropriate viewer.",
+        "project_release": "2019-01-31",
+        "software_type": [
+            "Tile generator for big data"
+        ],
+        "name": "Clodius",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "0.9.4",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "status": "released",
+        "source_url": "https://github.com/higlass/clodius"
     }
 ]
