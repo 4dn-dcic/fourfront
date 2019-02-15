@@ -820,7 +820,7 @@ def lung_oterm(oterm, testapp):
 
 
 @pytest.fixture
-def quality_metric_fastqc(test_app, award, lab):
+def quality_metric_fastqc(testapp, award, lab):
     return {
         "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
         "award": award['@id'],
