@@ -208,3 +208,7 @@ def test_bio_feature_display_title_unknown_organism_gene(
 def test_bio_feature_display_title_multi_w_unknown_organism(
         multi_species_including_unkorg_gene_bio_feature):
     assert multi_species_including_unkorg_gene_bio_feature.get('display_title') == 'ARMCX4, RAD21 genes multiple organisms'
+
+
+def test_bio_feature_organism_name(mouse_gene_bio_feature, human, mouse):
+    pass

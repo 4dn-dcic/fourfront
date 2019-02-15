@@ -25,8 +25,60 @@ class BioFeature(Item):
     schema = load_schema('encoded:schemas/bio_feature.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'feature_type.preferred_name',
-        'organism.name'
     ]
+
+    @calculated_property(schema={
+        "title": "Species",
+        "description": "The organism common name",
+        "type": "string"
+    })
+    def organism_name(self, request):
+        props = self.properties
+        if 'override_organism_name' in props:
+            return props.get('override_organism_name')
+
+        # get info on organisms in database
+        dborgs = self.registry.get('collections').get('Organism').values()
+        taxid2name = {}
+        genome2name = {}
+        for dorg in dborgs:
+            oprops = dorg.properties
+            name = oprops.get('name')
+            taxid2name[oprops.get('taxon_id')] = name
+            if 'genome_assembly' in oprops:
+                genome2name[oprops.get('genome_assembly')] = name
+
+        organisms = set()
+        # first see if we can get any info from genes
+        genes = props.get('relevant_genes', [])
+        for g in genes:
+            gene = get_item_if_you_can(request, g)
+            if gene is not None:
+                orgn = gene.get('organism')
+                if orgn is None:
+                    organisms.add(orgn)
+                else:
+                    if orgn.endswith('/'):
+                        orgn = orgn[:-1]
+                    for tid, name in taxid2name.items():
+                        if orgn.endswith(tid):
+                            organisms.add(name)
+                            break
+
+        # now check for genomic regions
+        regions = props.get('genome_location', [])
+        for r in regions:
+            region = get_item_if_you_can(request, r)
+            if region is not None:
+                assembly = region.get('genome_assembly')  # required
+                if assembly in genome2name:
+                    organisms.add(genome2name[assembly])
+        if organisms:
+            if len(organisms) > 1:
+                return 'multiple organisms'
+            oname = organisms.pop()
+            if oname:
+                return oname
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -50,36 +102,22 @@ class BioFeature(Item):
                 struct = 'unspecified cellular component'
             return struct
 
-        # gene overrides location
         featstr = ''
         modstr = ''
         orgstr = ''
+        # see if there is an organism_name
+        oname = self.organism_name(request)
+        if oname and oname != 'human':
+            orgstr = oname
+
+        # gene trumps location
         genes = props.get('relevant_genes', [])
-        orgns = set()
         for g in genes:
             gene = get_item_if_you_can(request, g)
             if gene is not None:
                 symb = gene.get('display_title')
                 featstr = featstr + symb + ', '
-                # try to get organism names to add
-                o = gene.get('organism')
-                # if human just add the taxid to orgns list
-                if o is None or '9606' in o:
-                    orgns.add(o)
-                else:
-                    orgn = get_item_if_you_can(request, o)
-                    try:
-                        orgn = orgn.get('name')
-                    except AttributeError:
-                        pass
-                    orgns.add(orgn)
-        if orgns:
-            if len(orgns) != 1:
-                orgstr = 'multiple organisms'
-            else:
-                orgn = orgns.pop()
-                if orgn is not None and '9606' not in orgn:
-                    orgstr = orgn
+
         # check for mods
         mods = props.get('feature_mods', [])
         for mod in mods:
@@ -88,6 +126,8 @@ class BioFeature(Item):
             modstr += (mod.get('mod_type') + ', ')
         if modstr:
             modstr = 'with ' + modstr[:-2]
+
+        # if no genes use genome location
         if not genes:
             for loc in props.get('genome_location', []):
                 try:

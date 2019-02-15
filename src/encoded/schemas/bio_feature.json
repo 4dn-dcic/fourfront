@@ -130,16 +130,26 @@
                     }
                 }
             }
+        },
+        "override_organism_name": {
+            "type": "string",
+            "description": "will be used as organism_name in preference to the calculated property"
         }
     },
     "facets": {
         "feature_type.preferred_name": {
             "title": "Feature Type"
+        },
+        "organism_name": {
+            "title": "Species"
         }
     },
     "columns": {
         "feature_type.preferred_name": {
             "title": "Feature Type"
+        },
+        "organism_name": {
+            "title": "Species"
         }
     }
 }
