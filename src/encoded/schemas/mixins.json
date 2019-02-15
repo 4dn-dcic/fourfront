@@ -484,6 +484,12 @@
                             "type": "string",
                             "linkTo": "FileProcessed"
                         }
+                    },
+                    "higlass_view_config": {
+                        "title": "Higlass View Config",
+                        "type": "string",
+                        "linkTo": "HiglassViewConfig",
+                        "exclude_from": ["submit4dn"]
                     }
                 }
             }
