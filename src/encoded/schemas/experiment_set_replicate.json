@@ -80,5 +80,11 @@
                 }
             }
         }
+    },
+    "columns": {
+        "experimentset_type": {
+            "title": "Set Type",
+            "default_hidden": true
+        }
     }
 }
