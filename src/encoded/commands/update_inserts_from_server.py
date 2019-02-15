@@ -35,10 +35,11 @@ def main():
                         help='field name to ignore when running expand_es_metadata')
 
     args = parser.parse_args()
-    # this will work since bin/ commands are run from root
+    # this will work since bin/ commands are run from root FF directory
     inserts_dir = 'src/encoded/tests/data'
     # hardcode these to prevent accidental creation of inserts files
-    inserts_files = ['inserts', 'master-inserts', 'perf-testing', 'workbook-inserts']
+    inserts_files = ['inserts', 'master-inserts', 'perf-testing',
+                     'workbook-inserts', 'temp-local-inserts']
     if args.dest not in inserts_files:
         raise Exception('Specified inserts destination %s must be one of: %s'
                         % (args.dest, inserts_files))
