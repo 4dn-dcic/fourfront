@@ -518,10 +518,16 @@ def add_files_to_higlass_viewconf(request):
     }
 
 def get_file_higlass_information(request, file_uuids):
-    """TODO
+    """Retrieve the given file data and their formats.
+    Args:
+        request         : Network request
+        file_uuids(list): A list of strings, where each string is a unique identifier to find a file.
 
     Returns:
-        A list of dictionaries, one for each file.
+        A list of dictionaries, one for each file. They contain one of these keys:
+            uuid(string)        : The text identifier
+            data(dict)          : Information on the file.
+            file_format(string) : The type of file present.
         A string containing an error.
     """
     # Collect more info on each file.
@@ -624,10 +630,11 @@ def validate_higlass_file_sources(files_info, expected_genome_assembly):
 def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom):
     """ Add a single file to the list of views.
     Args:
-        views(list)         : All of the views from the view config.
-        file(dict)          : The file to add.
-        genome_assembly(str): A string showing the new genome assembly.
-        , higlass_viewconfig
+        views(list)             : All of the views from the view config.
+        file(dict)              : The file to add.
+        genome_assembly(str)    : A string showing the new genome assembly.
+        higlass_viewconfig(dict): View config description.
+        first_view_location_and_zoom(list): 3 numbers (or None) used to describe the camera position of the first view.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -650,17 +657,17 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         "/file-formats/bg/" : {
             "dimensions": 1,
             "reference": None,
-            "function": add_bg_file,
+            "function": add_bg_bw_bed_file,
         },
         "/file-formats/bw/" : {
             "dimensions": 1,
             "reference": None,
-            "function": add_bw_file,
+            "function": add_bg_bw_bed_file,
         },
         "/file-formats/bed/" : {
             "dimensions": 1,
             "reference": None,
-            "function": add_bed_file,
+            "function": add_bg_bw_bed_file,
         },
         "/file-formats/bigbed/": {
             "dimensions": 1,
@@ -680,12 +687,12 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         "/file-formats/mcool/" : {
             "dimensions": 2,
             "reference": None,
-            "function": add_mcool_file,
+            "function": add_mcool_hic_file,
         },
         "/file-formats/hic/" : {
             "dimensions": 2,
             "reference": None,
-            "function": add_hic_file,
+            "function": add_mcool_hic_file,
         },
     }
 
@@ -718,7 +725,16 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
     )
 
 def get_view_content_info(view):
-    """ TODO
+    """ Determines if the view has an empty center, and looks for 2d chromosome grids.
+
+    Args:
+        view(dict): The view to analyze.
+
+    Returns:
+        A dictionary with these keys:
+        has_left_tracks(bool)       : True if the view has left side tracks
+        has_center_content(bool)    : True if there is any content in the center tracks.
+        center_chromsize_index(int) : If there is a 2d chromosome grid in the center, get the index in the list to find it.
     """
     view_has_left_tracks = len(view["tracks"].get("left", [])) > 0
 
@@ -744,13 +760,13 @@ def get_view_content_info(view):
         "center_chromsize_index" : view_center_chromsize_index,
     }
 
-def add_bg_file(views, file, genome_assembly, viewconfig_info):
-    """ Use the bedGraph file to add to the given views.
+def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info):
+    """ Add the bedGraph, bed, or bigwig file to add to the given views.
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -771,7 +787,11 @@ def add_bg_file(views, file, genome_assembly, viewconfig_info):
         "uid": uuid.uuid4(),
     }
 
-    return add_1d_file(views, new_track_base, file, genome_assembly)
+    # bed files use the bedlike type instead.
+    if file["file_format"] == "/file-formats/bed/":
+        new_track_base["type"] = "bedlike"
+
+    return add_1d_file(views, new_track_base, genome_assembly)
 
 def get_title(file):
     """ Returns a string containing the title for the given file.
@@ -786,70 +806,13 @@ def get_title(file):
     title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
     return title
 
-def add_bw_file(views, file, genome_assembly, viewconfig_info):
-    """ Use the bigwig file to add to the given views.
-    Args:
-        views(list)         : All of the views from the view config.
-        file(dict)          : The file to add.
-        genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
-
-    Returns:
-        views(list) : A list of the modified views. None if there is an error.
-        error(str) : A string explaining the error. This is None if there is no error.
-    """
-
-    # Create a new track.
-    new_track_base = {
-        "server": "https://higlass.4dnucleome.org/api/v1",
-        "tilesetUid": file["higlass_uid"],
-        "name": file["display_title"],
-        "options": {
-            "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
-        },
-        "type": "horizontal-divergent-bar",
-        "orientation": "1d-horizontal",
-        "uid": uuid.uuid4(),
-    }
-
-    return add_1d_file(views, new_track_base, file, genome_assembly)
-
-def add_bed_file(views, file, genome_assembly, viewconfig_info):
-    """ Use the bed file to add to the given views.
-    Args:
-        views(list)         : All of the views from the view config.
-        file(dict)          : The file to add.
-        genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
-
-    Returns:
-        views(list) : A list of the modified views. None if there is an error.
-        error(str) : A string explaining the error. This is None if there is no error.
-    """
-    # Create a new track.
-    new_track_base = {
-        "server": "https://higlass.4dnucleome.org/api/v1",
-        "tilesetUid": file["higlass_uid"],
-        "name": file["display_title"],
-        "options": {
-            "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
-        },
-        "type": "bedlike",
-        "orientation": "1d-horizontal",
-        "uid": uuid.uuid4(),
-    }
-
-    return add_1d_file(views, new_track_base, file, genome_assembly)
-
 def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
     """ Use the bigbed file to add to the given views.
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -885,14 +848,13 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
             )
         )
 
-    return add_1d_file(views, new_track_base, file, genome_assembly)
+    return add_1d_file(views, new_track_base, genome_assembly)
 
-def add_1d_file(views, new_track, file, genome_assembly):
+def add_1d_file(views, new_track, genome_assembly):
     """ Use file to add to all of view's tracks.
     Args:
         views(list)         : All of the views from the view config.
-        new_track(): TODO
-        file(dict)          : The file to add.
+        new_track(dict)     : The track to add.
         genome_assembly(str): A string showing the new genome assembly.
 
     Returns:
@@ -917,7 +879,7 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info):
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -971,8 +933,8 @@ def update_genome_position_search_box(view, new_file):
     """ Update the genome position search box for this view so it uses the given file.
 
     Args:
-        view(dict): Modifies the view containing the search box.
-        new_file(dict): Description of the source file.
+        view(dict)      : Modifies the view containing the search box.
+        new_file(dict)  : Description of the source file.
 
     Returns:
         None
@@ -1000,7 +962,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -1059,13 +1021,15 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
                 view["tracks"]["center"][0]["contents"].insert(0, new_tracks_by_side["center"])
     return views, ""
 
-def add_mcool_file(views, file, genome_assembly, viewconfig_info):
-    """ Use the mcool file to add to the given view.
+def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info):
+    """ Use the mcool or hic file to add to the given view.
+
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+
     Returns:
         views(list) : A list of the modified views. None if there is an error.
         error(str) : A string explaining the error. This is None if there is no error.
@@ -1079,8 +1043,8 @@ def add_2d_file(views, new_content, viewconfig_info):
     """ Add the new 2D content generated by the file to add to the first available view (create a new view if needed.)
     Args:
         views(list)         : All of the views from the view config.
-        new_content(dict): TODO
-        viewconfig_info
+        new_content(dict)   : Description of the new center track.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -1159,6 +1123,14 @@ def add_2d_file(views, new_content, viewconfig_info):
     return views, ""
 
 def create_2d_content(file, type):
+    """ Generates a 2D track.
+    Args:
+        file(dict): Information about the given file.
+        type(string): The desired content type.
+
+    Returns:
+        A dictionary that describes the content.
+    """
     contents = {}
 
     contents["tilesetUid"] = file["higlass_uid"]
@@ -1172,26 +1144,13 @@ def create_2d_content(file, type):
     contents["options"]["name"] = get_title(file)
     return contents
 
-def add_hic_file(views, file, genome_assembly, viewconfig_info):
-    """ Use the hic file to add to the given view.
-    Args:
-        views(list)         : All of the views from the view config.
-        file(dict)          : The file to add.
-        genome_assembly(str): A string showing the new genome assembly.
-        viewconfig_info(TODO):
-
-    Returns:
-        views(list) : A list of the modified views. None if there is an error.
-        error(str) : A string explaining the error. This is None if there is no error.
-    """
-    new_content = create_2d_content(file, "heatmap")
-    return add_2d_file(views, new_content, viewconfig_info)
-
 def copy_top_reference_tracks_into_left(target_view, views):
     """ Copy the reference tracks from the top track into the left (if the left doesn't have them already.)
+
     Args:
         target_view(dict)   : View which will be modified to get the new tracks.
         views(list)         : The first view contains the top tracks to copy from.
+
     Returns:
         Boolean value indicating success.
     """
