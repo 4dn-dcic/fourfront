@@ -55,12 +55,14 @@ def main():
             raise Exception('Specified item type(s) %s are not found in the inserts '
                             'dir. Found: %s' % (bad_item_types, item_types))
     # update item_types if user specified specific ones
-    item_types = args.item_type if args.item_type else item_types
+    fetch_item_types = args.item_type if args.item_type else item_types
     # load current insert contents from json file
     for item_type in item_types:
         local_inserts[item_type] = {}  # key these by uuid for now
         for it_item in get_inserts(args.dest, item_type):
-            item_uuids.append(it_item['uuid'])
+            # only fetch items for specified fetch_item_types
+            if item_type in fetch_item_types:
+                item_uuids.append(it_item['uuid'])
             local_inserts[item_type][it_item['uuid']] = it_item
     # now find uuids and all linked from the given server
     # ignore attachments and add workflow runs related to file_fastq/file_processed
@@ -72,8 +74,8 @@ def main():
                                                 store_frame='raw', add_pc_wfr=True,
                                                 ignore_field=use_ignore)
     # now we need to update the server inserts with contents from local inserts
-    for item_type in local_inserts:
-        for item_uuid in local_inserts[item_type]:
+    for item_type in svr_inserts:
+        for item_uuid in local_inserts.get(item_type, {}):
             if item_uuid not in svr_uuids:
                 svr_inserts[item_type].append(local_inserts[item_type][item_uuid])
     dump_results_to_json(svr_inserts, inserts_path)
