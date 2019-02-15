@@ -260,18 +260,17 @@ class FourfrontRoot(Root):
     @calculated_property(schema={
         "title": "Static Page Content",
         "type": "array"
-    }, category="page")
+    })
     def content(self, request):
         '''Returns -object- with pre-named sections'''
         sections_to_get = ['home.introduction']
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         return_list = []
         for section_name in sections_to_get:
-            try:
-                # A 404 error might be an exception (?)
+            try: # Can be caused by 404 / Not Found during indexing
                 res = request.embed('/static-sections', section_name, '@@embedded', as_user=user)
                 return_list.append(res)
-            except:
+            except KeyError:
                 pass
         return return_list
 
@@ -283,9 +282,10 @@ class FourfrontRoot(Root):
         '''Returns -object- with pre-named sections'''
         sections_to_get = ['home.introduction']
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
-        return_list = []
-
-        return request.embed('/search/?type=StaticSection&submitted_by.uuid=986b362f-4eb6-4a9c-8173-3ab267307e3a&section_type=Home+Page+Slide&sort=name', as_user=user).get('@graph', [])
+        try:
+            return request.embed('/search/?type=StaticSection&section_type=Home+Page+Slide&sort=name', as_user=user).get('@graph', [])
+        except KeyError: # Can be caused by 404 / Not Found during indexing
+            return []
 
     @calculated_property(schema={
         "title": "Announcements",
@@ -296,8 +296,8 @@ class FourfrontRoot(Root):
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         try:
             return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=user).get('@graph', [])
-        except KeyError:
-            return [ ]
+        except KeyError: # Can be caused by 404 / Not Found during indexing
+            return []
 
     @calculated_property(schema={
         "title": "Application version",

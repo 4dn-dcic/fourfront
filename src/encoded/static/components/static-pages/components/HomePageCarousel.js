@@ -37,24 +37,29 @@ export class HomePageCarousel extends React.PureComponent {
         }
     };
 
+    static getDerivedStateFromProps(props, state){
+        if (Array.isArray(props.context.carousel)){
+            return { 'sections' : props.context.carousel };
+        }
+        return null;
+    }
+
     constructor(props){
         super(props);
         this.refFunc = this.refFunc.bind(this);
-        this.state = {
-            'sections'  : null,
-            'loading'   : true,
-            'error'     : false
-        };
+        var sections = (props.context && Array.isArray(props.context.carousel) && props.context.carousel) || null, // carousel slides
+            loading  = !sections; 
+        this.state = { sections, loading, error: false };
     }
 
     componentDidUpdate(pastProps){
-        if (pastProps.session !== this.props.session) {
+        if (pastProps.session !== this.props.session && !this.state.sections) {
             this.searchForSlides();
         }
     }
 
     componentDidMount(){
-        this.searchForSlides();
+        if (!this.state.sections) this.searchForSlides();
     }
 
     searchForSlides(){
@@ -109,7 +114,7 @@ export class HomePageCarousel extends React.PureComponent {
         setTimeout(()=>{
             if (!elem) return;
             elem.style.opacity = 1;
-        }, 100);
+        }, 10);
     }
 
     render(){
@@ -125,7 +130,7 @@ export class HomePageCarousel extends React.PureComponent {
             );
         }
 
-        if (error || !Array.isArray(sections) || sections.length === 0){
+        if (error || !sections || !Array.isArray(sections) || sections.length === 0){
             return null;
         }
 

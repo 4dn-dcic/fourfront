@@ -42,7 +42,7 @@ export default class HomePage extends React.PureComponent {
     render() {
         return (
             <div className="home-content-area">
-                <HomePageCarousel {..._.pick(this.props, 'windowWidth')} />
+                <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
                 <div className="row">
                     <div className="col-xs-12 col-md-8">
                         <h2 className="homepage-section-title">Introduction</h2>
