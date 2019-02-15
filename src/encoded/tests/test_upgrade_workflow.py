@@ -574,7 +574,7 @@ def workflow_5(software, award, lab):
         "workflow_type": "Other",
         "data_types": ["Hi-C"],
         "category": "alignment",
-        "stddeps": [{ "meta": { "software_used" : software['@id'] } }]
+        "steps": [{ "meta": { "software_used" : software['@id'] } }]
     }
 
 
