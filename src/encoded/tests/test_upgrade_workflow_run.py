@@ -89,4 +89,4 @@ def test_workflow_run_upgrade_2_3(workflow_run_2, registry):
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow_run', workflow_run_2, registry=registry,
                              current_version='2', target_version='3')
-    assert 'output_quality_metric' not in value
+    assert 'output_quality_metrics' not in value

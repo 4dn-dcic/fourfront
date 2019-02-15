@@ -28,5 +28,5 @@ def workflow_run_1_2(value, system):
 
 @upgrade_step('workflow_run', '2', '3')
 def workflow_run_2_3(value, system):
-    if 'output_quality_metric' in value:
-        del value['output_quality_metric']
+    if 'output_quality_metrics' in value:
+        del value['output_quality_metrics']
