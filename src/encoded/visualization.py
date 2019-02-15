@@ -430,6 +430,7 @@ def add_files_to_higlass_viewconf(request):
             higlass_viewconfig(obj)                     : JSON of the current Higlass views. If None, uses a default view.
             files(array)                                : A list of file uuids to add.
             firstViewLocationAndZoom(array, optional)   : A list of three numbers indicating the location and zoom levels of the first existing view.
+            remove_unneeded_tracks(boolean, optional, default=False): If True, we'll remove tracks that are not needed for the view.
 
     Returns:
         {
@@ -443,6 +444,7 @@ def add_files_to_higlass_viewconf(request):
     # Get the viewconfig and its genome assembly. If none is provided, use the default empty higlass viewconf.
     higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     current_genome_assembly = request.json_body.get('genome_assembly', None)
+    remove_unneeded_tracks = request.json_body.get('remove_unneeded_tracks', None)
     if not higlass_viewconfig:
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
@@ -491,7 +493,7 @@ def add_files_to_higlass_viewconf(request):
         new_file_dict = datum["item"]
 
         # Try to add the new file to the given viewconf.
-        new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict)
+        new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict, current_genome_assembly)
 
         if errors:
             return {
@@ -516,8 +518,14 @@ def add_files_to_higlass_viewconf(request):
     repack_higlass_views(new_views)
 
     # Set up the additional views so they all move and zoom with the first.
-    for view in new_views:
-        add_zoom_lock_if_needed(higlass_viewconfig, view, first_view_location_and_zoom)
+    # A single view does not need a lock.
+    if len(new_views) > 1:
+        for view in new_views:
+            add_zoom_lock_if_needed(higlass_viewconfig, view, first_view_location_and_zoom)
+
+    # Remove tracks that we don't need to represent this view conf.
+    if remove_unneeded_tracks:
+        remove_left_side_if_all_1D(new_views)
 
     higlass_viewconfig["zoomFixed"] = False
     higlass_viewconfig["views"] = new_views
@@ -593,11 +601,12 @@ def check_files_for_higlass(files_info, current_genome_assembly):
         "current_genome_assembly" : current_genome_assembly,
     }
 
-def add_single_file_to_higlass_viewconf(views, new_file):
+def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
     """ Add a single file to the list of views.
     Args:
-        views(list)     : All of the views from the view config.
-        new_file(dict)  : The file to add.
+        views(list)         : All of the views from the view config.
+        new_file(dict)      : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -614,14 +623,6 @@ def add_single_file_to_higlass_viewconf(views, new_file):
     # If no views exist, create one now
     if len(views) == 0:
         base_view = {
-            "initialYDomain": [
-                -10000,
-                10000
-            ],
-            "initialXDomain": [
-                -10000,
-                10000
-            ],
             "tracks": {
                 "right": [ ],
                 "gallery": [ ],
@@ -646,6 +647,10 @@ def add_single_file_to_higlass_viewconf(views, new_file):
                 "x": 0
             }
         }
+
+        # Based on the genome assembly type, we can give defaults for the initialXDomain and initialYDomain.
+        domain_sizes = get_initial_domains_by_genome_assembly(genome_assembly)
+        base_view.update(domain_sizes)
         views.append(base_view)
 
     # Based on the filetype's dimensions, try to add the file to the views
@@ -668,7 +673,8 @@ def add_single_file_to_higlass_viewconf(views, new_file):
         new_view, error = create_2d_view(new_file)
         if error:
             return None, errors
-        copy_1d_tracks_into_2d_view(views, new_view)
+        copy_1d_tracks_into_all_views(views, new_view)
+        new_view = copy_top_reference_tracks_into_left(new_view, views)
         add_view_to_views(new_view, views)
     elif file_format == "/file-formats/beddb/":
         # Add the 1D track to top, left
@@ -781,8 +787,12 @@ def add_track_to_views(new_track, views, side="top"):
         # Make sure the side exists
         if not side in view["tracks"]:
             return False, "View does not contain the side{side}".format(side=side)
-        # Add the new track to the view
-        view["tracks"][side].append(new_track)
+        # If this track is a gene annotation, put it as the first entry of the track
+        if "gene-annotation" in new_track["type"]:
+            view["tracks"][side].insert(0, new_track)
+        else:
+            # Add the new track to the view
+            view["tracks"][side].append(new_track)
 
 def create_2d_view(new_file):
     """ Creates a dictionary representing a 2d view of the given file.
@@ -795,14 +805,6 @@ def create_2d_view(new_file):
     """
     # Create default view options.
     new_view = {
-        "initialYDomain": [
-            -10000,
-            10000
-        ],
-        "initialXDomain": [
-            -10000,
-            10000
-        ],
         "tracks": {
             "right": [ ],
             "gallery": [ ],
@@ -834,6 +836,8 @@ def create_2d_view(new_file):
             "x": 0
         }
     }
+    domain_sizes = get_initial_domains_by_genome_assembly(new_file["genome_assembly"])
+    new_view.update(domain_sizes)
 
     contents = new_view["tracks"]["center"][0]["contents"][0]
 
@@ -855,6 +859,38 @@ def create_2d_view(new_file):
     contents["options"]["coordSystem"] = new_file["genome_assembly"]
     contents["options"]["name"] = get_title(new_file)
     return new_view, None
+
+def get_initial_domains_by_genome_assembly(genome_assembly):
+    """Get a list of defaults HiGlass data ranges for a file.
+    Args:
+        genome_assembly(string): Description of the genome assembly.
+    Returns:
+        A dict with these keys:
+        initialXDomain(list): Contains 2 numbers. The HiGlass display will horizontally span all of these data points along the X axis. 0 would be the start of chr1, for example.
+        initialYDomain(list): Contains 2 numbers. The HiGlass display will focus on the center of this data (for 2D views) or ignore initialYDomain entirely (for 1D views.)
+    """
+
+    # Create default view options.
+    domain_size_by_genome_assembly = {
+        "GRCm38": 2725521370,
+        "GRCh38": 3088269832,
+        "dm6": 137547960,
+        "galGal5": 1022704034
+    }
+
+    domain_size = domain_size_by_genome_assembly.get(genome_assembly, 2000000000)
+
+    domain_ranges = {
+        "initialXDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ],
+        "initialYDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ]
+    }
+    return domain_ranges
 
 def update_genome_position_search_box(view, new_file):
     """ Update the genome position search box for this view so it uses the given file.
@@ -894,15 +930,26 @@ def add_view_to_views(new_view, views):
         a boolean indicating success.
         a string containing an error message, if any (may be None)
     """
-    # If the first view is blank, override it with the new view.
+    # If the first view's center is blank, override it with the new view.
     if not (
         len(views) > 0 \
         and "center" in views[0]["tracks"] \
         and len(views[0]["tracks"]["center"]) > 0 \
         and "contents" in views[0]["tracks"]["center"][0] \
         and len(views[0]["tracks"]["center"][0]["contents"]) > 0
+        and len(new_view["tracks"]["center"]) > 0
     ) :
         views[0]["tracks"]["center"] = new_view["tracks"]["center"]
+
+        # Copy any left side reference tracks from this view, if the left track doesn't exist.
+        for track in reversed(new_view["tracks"]["left"]):
+            if any([t for t in views[0]["tracks"]["left"] if t["type"] == track["type"]] ) == False:
+                views[0]["tracks"]["left"].insert(0, track)
+
+        # Override the initial domains.
+        views[0]["initialXDomain"] = new_view["initialXDomain"]
+        views[0]["initialYDomain"] = new_view["initialYDomain"]
+
         return True, None
 
     # If there are 6 views already, stop
@@ -1068,8 +1115,8 @@ def add_2d_chromsize(new_views, files_info):
 
     return new_views, None
 
-def copy_1d_tracks_into_2d_view(views, new_view):
-    """
+def copy_1d_tracks_into_all_views(views, new_view):
+    """ Copy all of the top and left side tracks into all of the views.
     Args:
         views: A list of views for this view config.
         new_view: A view that needs to copy tracks from. Will be modified.
@@ -1090,14 +1137,36 @@ def copy_1d_tracks_into_2d_view(views, new_view):
 
     # For each side (except center)
     for side in ("top", "left"):
+        if side not in base_view["tracks"]:
+            continue
+
+        # Compile that side's track uids
+        new_view_track_uids = [ track["uid"] for track in new_view["tracks"][side] if "uid" in track]
         # If there are any tracks here
         for track in base_view["tracks"][side]:
-            # Copy them into the new_view's side
-            new_view["tracks"][side].append(track)
+            # Copy them into the new_view's side if the uid doesn't exist.
+            if ("uid" in track and track["uid"] in new_view_track_uids) == False:
+                new_view["tracks"][side].append(track)
 
     return True
 
 def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
+    """ If there are multiple views, create a lock to keep them at the same position and scale.
+    Args:
+        view_config (dict)          : The HiGlass view config. Will be modified.
+        view (dict)                 : The view to add the lock to. Will be modified.
+        scales_and_center_k(list)   : 3 numbers used to note the position and zoom level.
+
+    Returns:
+        Boolean indicating success.
+    """
+
+    # If there is only 1 view, then there is no need to add a lock.
+    if len(view_config["views"]) <= 1:
+        view_config["locationLocks"] = {}
+        view_config["zoomLocks"] = {}
+        return
+
     # Get the uid for this view
     view_uid = str(view["uid"])
 
@@ -1144,3 +1213,107 @@ def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
         # Copy the initialXDomain and initialYDomain
         view["initialXDomain"] = view_config["views"][0]["initialXDomain"] or view["initialXDomain"]
         view["initialYDomain"] = view_config["views"][0]["initialYDomain"] or view["initialYDomain"]
+    return True
+
+def remove_left_side_if_all_1D(new_views):
+    """ If the view config has no 2D files, then remove the left side from the view config.
+
+    Args:
+        new_views(list): The views that will make the new HiGlass view config. May be modified.
+
+    Returns:
+        True if the left side tracks were removed, False otherwise.
+    """
+
+    # Search all views' central contents for any 2D files.
+    for view in new_views:
+        for center_track in view["tracks"]["center"]:
+            if "contents" not in center_track:
+                continue
+
+            # If 2D files are found, we shouldn't remove any tracks.
+            if any([ t for t in center_track["contents"] if t["type"] in ("heatmap", "2d-chromosome-grid")]):
+                return False
+
+    # Remove the left side from each file in the view config.
+    for view in new_views:
+        view["tracks"]["left"] = []
+    return True
+
+def copy_top_reference_tracks_into_left(target_view, views):
+    """ Copy the reference tracks from the top track into the left (if the left doesn't have them already.)
+    Args:
+        target_view(dict)   : View which will be modified to get the new tracks.
+        views(list)         : The first view contains the top tracks to copy from.
+    Returns:
+        Boolean value indicating success.
+    """
+
+    if len(views) < 1:
+        return target_view
+
+    reference_file_type_mappings = {
+        "horizontal-chromosome-labels": "vertical-chromosome-labels",
+        "horizontal-gene-annotations": "vertical-gene-annotations",
+    }
+
+    orientation_mappings = {
+        "1d-horizontal": "1d-vertical",
+        "1d-vertical" : "1d-horizontal",
+    }
+
+    # Look through all of the top views for the chromsize and the gene annotation tracks.
+    # Make a shallow copy of the found reference tracks.
+    new_tracks = []
+    for track in (t for t in views[0]["tracks"]["top"] if t["type"] in reference_file_type_mappings.keys()):
+        new_tracks.append(deepcopy(track))
+
+    # Change the horizontal track type to vertical track types.
+    for track in new_tracks:
+        # Rename the uid so it doesn't conflict with the top track.
+        if "uid" in track and track["uid"].startswith("top"):
+            track["uid"] = track["uid"].replace("top", "left", 1)
+        else:
+            track["uid"] = uuid.uuid4()
+
+        if track["type"] in reference_file_type_mappings:
+            track["type"] = reference_file_type_mappings[ track["type"] ]
+
+        # Swap the height and widths, if they are here.
+        temp_height = track.get("width", None)
+        temp_width = track.get("height", None)
+
+        if temp_height and temp_width:
+            track["height"] = temp_height
+            track["width"] = temp_width
+        elif temp_height:
+            track["height"] = temp_height
+            del track["width"]
+        elif temp_width:
+            track["width"] = temp_width
+            del track["height"]
+
+        # Also the minimum width/height
+        temp_height = track.get("minWidth", None)
+        temp_width = track.get("minHeight", None)
+
+        if temp_height and temp_width:
+            track["minHeight"] = temp_height
+            track["minWidth"] = temp_width
+        elif temp_height:
+            track["minHeight"] = temp_height
+            del track["minWidth"]
+        elif temp_width:
+            track["minWidth"] = temp_width
+            del track["minHeight"]
+
+        # And the orientation
+        track_orientation = track.get("orientation", None)
+        if track_orientation in orientation_mappings:
+            track["orientation"] = orientation_mappings[track_orientation]
+
+    # Add the copied tracks to the left side of this view if it doesn't have the track already.
+    for track in reversed(new_tracks):
+        if any([t for t in target_view["tracks"]["left"] if t["type"] == track["type"]] ) == False:
+            target_view["tracks"]["left"].insert(0, track)
+    return target_view
