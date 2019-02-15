@@ -7,7 +7,7 @@ import { console, object } from'./../util';
 import * as plansData from './../testdata/stacked-block-matrix-list';
 import * as globals from './../globals';
 import StaticPage from './StaticPage';
-import { StackedBlockVisual } from './components';
+import { StackedBlockVisual, sumPropertyFromList, StackedBlockGroupedRow } from './components';
 
 
 
@@ -74,6 +74,35 @@ export default class PlannedSubmissionsPage extends React.Component {
                     columnGrouping={columnGrouping}
                     headerColumnsOrder={headerColumnsOrder}
                     columnSubGrouping={columnSubGrouping}
+                    groupValue={function(data){
+                        return sumPropertyFromList(StackedBlockGroupedRow.flattenChildBlocks(data), 'experiments_expected_2017');
+                    }}
+                    blockRenderedContents={function(data){
+                        var defaultOutput = <span>&nbsp;</span>;
+                        var experimentsCountExpected = 0;
+
+                        function getCount(num){
+                            try {
+                                var n = parseInt(num);
+                                if (isNaN(n)) return 0;
+                                return n;
+                            } catch (e){
+                                return 0;
+                            }
+                        }
+
+                        if (Array.isArray(data)) {
+                            experimentsCountExpected = sumPropertyFromList(data, 'experiments_expected_2017');
+                        } else if (data) {
+                            experimentsCountExpected = getCount(data.experiments_expected_2017);
+                        }
+
+                        if (experimentsCountExpected && experimentsCountExpected >= 1000){
+                            return <span style={{ fontSize: '0.825rem', position: 'relative', top: -1 }}>{ experimentsCountExpected }</span>;
+                        }
+
+                        return experimentsCountExpected || defaultOutput;
+                    }}
                     blockClassName={function(data){
 
                         // Figure out if we are submitted, planned, or N/A.
@@ -89,12 +118,12 @@ export default class PlannedSubmissionsPage extends React.Component {
 
                         var origClassName = StackedBlockVisual.defaultProps.blockClassName(data);
 
-                        var statusClass = null;
+                        var statusClass = 'cellType-in-submission';
 
                         if (Array.isArray(data)) {
-                            if (_.any(data, checkDataObjForProduction)) statusClass = 'production';
+                            if (_.any(data, checkDataObjForProduction)) statusClass = 'cellType-submitted';
                         } else if (data && checkDataObjForProduction(data)) {
-                            statusClass = 'production';
+                            statusClass = 'cellType-submitted';
                         }
 
                         return origClassName + (statusClass ? ' ' + statusClass : '');

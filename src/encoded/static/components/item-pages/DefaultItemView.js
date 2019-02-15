@@ -187,7 +187,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {string} A className
      */
     itemClassName(){
-        return itemClass(this.props.context, 'view-detail item-page-container');
+        return itemClass(this.props.context, 'view-detail item-page-container container');
     }
 
     /**
@@ -272,7 +272,7 @@ export default class DefaultItemView extends React.PureComponent {
      */
     render() {
         return (
-            <div className={this.itemClassName()}>
+            <div className={this.itemClassName()} id="content">
 
                 { this.itemHeader() }
                 { this.itemMidSection() }

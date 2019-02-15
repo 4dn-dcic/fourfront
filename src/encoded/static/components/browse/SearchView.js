@@ -364,9 +364,11 @@ export default class SearchView extends React.PureComponent {
 
     render() {
         return (
-            <div className="search-page-container">
-                <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
-                <SearchControllersContainer {...this.props} facets={this.state.transformedFacets} navigate={this.props.navigate || navigate} />
+            <div className="container" id="content">
+                <div className="search-page-container">
+                    <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
+                    <SearchControllersContainer {...this.props} facets={this.state.transformedFacets} navigate={this.props.navigate || navigate} />
+                </div>
             </div>
         );
     }

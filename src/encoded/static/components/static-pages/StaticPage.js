@@ -181,9 +181,11 @@ class Wrapper extends React.PureComponent {
             mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
 
         return (
-            <div className="static-page row" key="wrapper">
-                { this.renderToC() }
-                <div key="main-column" className={mainColClassName} children={this.props.children}/>
+            <div className="container" id="content">
+                <div className="static-page row" key="wrapper">
+                    { this.renderToC() }
+                    <div key="main-column" className={mainColClassName} children={this.props.children}/>
+                </div>
             </div>
         );
     }

@@ -9,6 +9,7 @@ import { Collapse, Button } from 'react-bootstrap';
 import * as store from '../../store';
 import * as globals from './../globals';
 import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
+import { FacetCharts } from './../browse/components/FacetCharts';
 
 
 /**
@@ -41,20 +42,22 @@ export default class HomePage extends React.PureComponent {
      */
     render() {
         return (
-            <div className="home-content-area">
-                <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
-                <div className="row">
-                    <div className="col-xs-12 col-md-8">
-                        <h2 className="homepage-section-title">Introduction</h2>
-                        { this.introText() }
+            <div className="container" id="content">
+                <div className="home-content-area">
+                    <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
+                    <div className="row">
+                        <div className="col-xs-12 col-md-8">
+                            <h2 className="homepage-section-title">Introduction</h2>
+                            { this.introText() }
+                        </div>
+                        <div className="col-xs-12 col-md-4 pull-right">
+                            <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
+                        </div>
                     </div>
-                    <div className="col-xs-12 col-md-4 pull-right">
-                        <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
+                    <div className="mt-4">
+                        <h2 className="homepage-section-title">Announcements</h2>
+                        <Announcements session={this.props.session} announcements={this.props.context.announcements || null} />
                     </div>
-                </div>
-                <div className="mt-4">
-                    <h2 className="homepage-section-title">Announcements</h2>
-                    <Announcements session={this.props.session} announcements={this.props.context.announcements || null} />
                 </div>
             </div>
         );

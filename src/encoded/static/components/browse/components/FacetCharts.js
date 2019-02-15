@@ -3,11 +3,11 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import { expFxn, Filters, ajax, console, layout, isServerSide, navigate, analytics } from './util';
-import * as vizUtil from './viz/utilities';
-import ChartDetailCursor from './viz/ChartDetailCursor';
-import { ChartDataController } from './viz/chart-data-controller';
-import * as BarPlot from './viz/BarPlot';
+import { expFxn, Filters, ajax, console, layout, isServerSide, navigate, analytics } from '../../util';
+import * as vizUtil from '../../viz/utilities';
+import ChartDetailCursor from '../../viz/ChartDetailCursor';
+import { ChartDataController } from '../../viz/chart-data-controller';
+import * as BarPlot from '../../viz/BarPlot';
 
 
 /**

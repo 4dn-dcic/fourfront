@@ -18,7 +18,7 @@ import * as store from '../store';
 import * as origin from '../libs/origin';
 import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
-import { FacetCharts } from './facetcharts';
+import { FacetCharts } from './browse/components/FacetCharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import PageTitle from './PageTitle';
@@ -1459,7 +1459,11 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return content;
+        return (
+            //<div className="container" id="content">
+                <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>
+            //</div>
+        );
     }
 }
 
@@ -1893,10 +1897,8 @@ class BodyElement extends React.PureComponent {
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <ContentErrorBoundary canonical={canonical}>
-                                <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
-                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
-                            </ContentErrorBoundary>
+                            <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
 
                             <div id="layout-footer"/>
                         </div>
@@ -1967,6 +1969,6 @@ class ContentErrorBoundary extends React.Component {
             return ContentErrorBoundary.errorNotice();
         }
 
-        return <div className="container" id="content">{ this.props.children }</div>;
+        return this.props.children; //<div className="container" id="content">{ this.props.children }</div>;
     }
 }

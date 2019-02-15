@@ -616,16 +616,18 @@ export default class BrowseView extends React.Component {
         }
 
         return (
-            <div className="browse-page-container search-page-container" id="browsePageContainer">
-                <SelectedFilesController href={href}>
-                    <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
-                        <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
-                            <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets, facets }}
-                                {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen', 'isFullscreen')}
-                                totalExpected={context && context.total} />
-                        </SortController>
-                    </CustomColumnController>
-                </SelectedFilesController>
+            <div className="container" id="content">
+                <div className="browse-page-container search-page-container" id="browsePageContainer">
+                    <SelectedFilesController href={href}>
+                        <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
+                            <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
+                                <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets, facets }}
+                                    {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen', 'isFullscreen')}
+                                    totalExpected={context && context.total} />
+                            </SortController>
+                        </CustomColumnController>
+                    </SelectedFilesController>
+                </div>
             </div>
         );
     }

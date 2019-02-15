@@ -19,7 +19,7 @@ var Subscription;
  * Container component for the submissions page. Fetches the user info and
  * coordinates individual subscriptions.
  */
-export class SubscriptionView extends React.Component {
+export class SubscriptionsView extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -65,37 +65,26 @@ export class SubscriptionView extends React.Component {
     }
 
     /**
-     * Generates a subscription list item.
-     *
-     * @private
-     * @param {Subscription} scrip      Current subscription.
-     * @param {number} index            Index of current subscription/
-     * @param {Subscription[]} all      All subscriptions.
-     * @returns {JSX.Element} A `SubscriptionEntry` component instance.
-     */
-    generateSubscription = (scrip, index, all) => {
-        return(
-            <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />
-        );
-    }
-
-    /**
      * @private
      * @returns {JSX.Element} Div containing list of subscription views.
      */
     render(){
-        var subscrip_list, main_message;
-        if(this.state.subscriptions){
-            subscrip_list = _.map(this.state.subscriptions, this.generateSubscription);
+        var { subscriptions, initialized } = this.state,
+            subscrip_list, main_message;
+
+        if (Array.isArray(subscriptions) && subscriptions.length > 0){
+            subscrip_list = _.map(subscriptions, function(scrip){
+                return <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />;
+            });
             main_message = "View your 4DN submissions and track those you're associated with.";
-        }else if(this.state.initialized){
+        } else if (initialized){
             main_message = "No submissions to track; you are not a submitter nor associated with any labs.";
-        }else{
-            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>;
+        } else {
+            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}/>;
         }
-        return(
-            <div>
-                <div className="flexible-description-box item-page-heading" style={{'marginBottom':'25px'}}>
+        return (
+            <div id="content" className="container">
+                <div className="flexible-description-box item-page-heading mb-25 mt-1">
                     <p className="text-larger">{main_message}</p>
                 </div>
                 {subscrip_list}
@@ -314,7 +303,7 @@ class SubscriptionEntry extends React.Component{
             submissions = this.state.data.map((entry) => this.generateEntry(entry));
         }
         return(
-            <div>
+            <div className="mb-1">
                 <div className='submission-page-heading'>
                     <h3 className='submission-subtitle'>{this.props.title}</h3>
                     <h3 className='submission-subtitle'>{this.displayToggle()}</h3>
@@ -343,4 +332,4 @@ class SubscriptionEntry extends React.Component{
     }
 }
 
-globals.content_views.register(SubscriptionView, 'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
+globals.content_views.register(SubscriptionsView, 'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)

@@ -324,7 +324,7 @@ class AccessKeyTable extends React.Component {
  * @memberof module:item-pages/user
  */
 
-export default class UserView extends React.Component {
+export default class UserView extends React.PureComponent {
 
     static propTypes = {
         'context' : PropTypes.shape({
@@ -376,7 +376,7 @@ export default class UserView extends React.Component {
         var ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
 
         return (
-            <div className="user-profile-page">
+            <div className="user-profile-page container" id="content">
 
                 <header className="row">
                     <div className="col-sm-12">
@@ -744,7 +744,7 @@ export class ImpersonateUserForm extends React.Component {
 
     render() {
         return (
-            <div className="mt-3">
+            <div className="mt-3 container" id="content">
                 <hr />
                 <h2 className="text-400 mt-5">Impersonate a User</h2>
                 <div className="row">
