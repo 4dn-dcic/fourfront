@@ -1534,23 +1534,16 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
     assert_true(len(tracks["left"]) == len(old_tracks["left"]) + 1)
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
-    # The top track should have chromosome labels
-    found_top_data_track = False
-    for track in tracks["top"]:
-        if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
-            found_top_data_track = True
-            assert_true(track["type"] == "horizontal-chromosome-labels")
+    # The top and left tracks should have chromosome labels as the last track.
+    for side in ("top", "left"):
+        assert_true("tilesetUid" in tracks[side][-1])
+        assert_true(tracks[side][-1]["tilesetUid"] == chromsizes_file_json['higlass_uid'])
 
-    assert_true(found_top_data_track == True)
-
-    # The left track should have chromosome labels
-    found_left_data_track = False
-    for track in tracks["left"]:
-        if "tilesetUid" in track and track["tilesetUid"] == chromsizes_file_json['higlass_uid']:
-            found_left_data_track = True
-            assert_true(track["type"] == "vertical-chromosome-labels")
-
-    assert_true(found_left_data_track == True)
+        type_by_side = {
+            "top": "horizontal-chromosome-labels",
+            "left": "vertical-chromosome-labels",
+        }
+        assert_true(tracks[side][-1]["type"] == type_by_side[side])
 
     # The view should also have a new center track with 2 views inside
     assert_true(len(tracks["center"][0]["contents"]) == 2)
@@ -1579,14 +1572,14 @@ def test_add_2d_chromsizes(testapp, higlass_blank_viewconf, chromsizes_file_json
     assert_true(response.json["errors"] == '')
     assert_true(response.json["success"])
 
-    # Assert_true(there are 2 views)
+    # Assert there are 2 views
     assert_true(len(two_view_higlass_json["views"]) == 2)
 
-    # Assert_true(there is only 1 grid in each view)
+    # There is only 1 grid in each view and it's the last item (draw order is important)
     for view in two_view_higlass_json["views"]:
         center_track_contents = view["tracks"]["center"][0]["contents"]
-        chromosome_grid_contents = [cont for cont in center_track_contents if cont["type"] == "2d-chromosome-grid" ]
-        assert_true(len(chromosome_grid_contents) == 1)
+        assert_true(center_track_contents[0]["type"] != "2d-chromosome-grid")
+        assert_true(center_track_contents[1]["type"] == "2d-chromosome-grid")
 
 def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig_file_json, mcool_file_json):
     genome_assembly = "GRCm38"
