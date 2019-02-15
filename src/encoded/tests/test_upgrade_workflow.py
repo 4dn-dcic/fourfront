@@ -564,9 +564,9 @@ def test_workflow_upgrade_4_5(
 
 
 @pytest.fixture
-def workflow_5(software, award, lab):
+def workflow_6(software, award, lab):
     return{
-        "schema_version": '2',
+        "schema_version": '6',
         "award": award['@id'],
         "lab": lab['@id'],
         "title": "some workflow",
@@ -578,13 +578,13 @@ def workflow_5(software, award, lab):
     }
 
 
-def test_workflow_upgrade_5_6(
-        workflow_5, registry):
+def test_workflow_upgrade_6_7(
+        workflow_6, registry):
     from snovault import UPGRADER
     upgrader = registry[UPGRADER]
-    value = upgrader.upgrade('workflow', workflow_5, registry=registry,
-                             current_version='5', target_version='6')
-    assert value['schema_version'] == '6'
+    value = upgrader.upgrade('workflow', workflow_6, registry=registry,
+                             current_version='6', target_version='7')
+    assert value['schema_version'] == '7'
     assert 'workflow_type' not in value
     assert 'category' in value
     assert isinstance(value['category'], list)
