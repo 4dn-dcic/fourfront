@@ -626,6 +626,14 @@ def validate_higlass_file_sources(files_info, expected_genome_assembly):
                         files_by_ga = "; ".join(human_readable_ga_listings),
                     )
                 }
+
+    # Make sure we found a genome assembly.
+    if not (expected_genome_assembly or files_by_genome_assembly):
+        return {
+            "success" : False,
+            "errors": "No Genome Assembly provided or found in files."
+        }
+
     # Everything is verified.
     return {
         "success" : True,
@@ -640,21 +648,16 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         file(dict)              : The file to add.
         genome_assembly(str)    : A string showing the new genome assembly.
         higlass_viewconfig(dict): View config description.
-        first_view_location_and_zoom(list): 3 numbers (or None) used to describe the camera position of the first view.
+        first_view_location_and_zoom(list): 3 numbers (or 3 None) used to describe the camera position of the first view.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
         error(str) : A string explaining the error. This is None if there is no error.
     """
 
-    # Investigate the base view to see if it:
-    # - has a left track with contents
-    # - has a center track with contents (excluding 2d-chromosome-grid)
-    base_view = views[0]
-    base_view_has_left_tracks = len(base_view["tracks"].get("left", [])) > 0
-    base_view_has_center_content =  len(base_view["tracks"].get("center", [])) > 0 \
-    and len(base_view["tracks"]["center"][0].get("contents", [])) > 0 \
-    and any([t for t in base_view["tracks"]["center"][0]["contents"] if "type" != "2d-chromosome-grid"])
+    # Investigate the base view to see if it has a center track with contents (excluding 2d-chromosome-grid)
+    base_view_info = get_view_content_info(views[0])
+    base_view_has_center_content = base_view_info["has_center_content"]
 
     # Determine the kind of file we're working on:
     # - Is it 1D or 2D? (chromsize is considered 1D)
@@ -702,7 +705,6 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         },
     }
 
-    # From this we can decide if we need to make a new view or not.
     file_format = file["file_format"]
     if file_format not in file_format_settings:
         return None, "Unknown file format {file_format}".format(file_format = file_format)
