@@ -817,3 +817,12 @@ def oterm(uberon_ont):
 @pytest.fixture
 def lung_oterm(oterm, testapp):
     return testapp.post_json('/ontology_term', oterm).json['@graph'][0]
+
+
+@pytest.fixture
+def quality_metric_fastqc(test_app, award, lab):
+    return {
+        "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
