@@ -12,7 +12,6 @@ from snovault import (
 from .base import (
     Item,
     set_namekey_from_title
-    # paths_filtered_by_status,
 )
 
 

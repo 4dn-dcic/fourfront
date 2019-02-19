@@ -103,24 +103,19 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		}
 	}
 	.search-icon-button {
-		display: none;
-	}
-	&:not(.has-query){
-		.search-icon-button {
-			display: block;
-			line-height: 14px;
-			position: absolute;
-			top: 50%;
-			margin-top: -12px;
-			right: 12px;
-			opacity: 0.25;
-			border: none;
-			background: none;
-			padding: 4px 4px 2px;
+		display: block;
+		line-height: 14px;
+		position: absolute;
+		top: 50%;
+		margin-top: -12px;
+		right: 12px;
+		opacity: 0.25;
+		border: none;
+		background: none;
+		padding: 4px 4px 2px;
 
-			@media (max-width: $screen-xs-max) {
-				right: 32px;
-			}
+		@media (max-width: $screen-xs-max) {
+			right: 32px;
 		}
 	}
 	@media (max-width: $screen-xs-max) {

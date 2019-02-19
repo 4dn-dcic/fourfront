@@ -24,7 +24,6 @@ from elasticsearch import (
     ConnectionTimeout
 )
 from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.security import effective_principals
 from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
@@ -69,7 +68,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         'notification': '',
         'sort': {}
     }
-    principals = effective_principals(request)
+    principals = request.effective_principals
     es = request.registry[ELASTIC_SEARCH]
     search_audit = request.has_permission('search_audit')
 
@@ -213,7 +212,7 @@ def get_available_facets(context, request, search_type=None):
     types = request.registry[TYPES]
     doc_types = set_doc_types(request, types, search_type)
     schemas = (types[item_type].schema for item_type in doc_types)
-    principals = effective_principals(request)
+    principals = request.effective_principals
     prepared_terms = prepare_search_term(request)
     facets = initialize_facets(request, doc_types, request.has_permission('search_audit'), principals, prepared_terms, schemas)
 
@@ -1310,12 +1309,14 @@ def build_table_columns(request, schemas, doc_types):
     }
 
     # Add type column if any abstract types in search
-    if any_abstract_types:
+    if any_abstract_types and request.params.get('currentAction') != 'selection':
         columns['@type'] = {
             "title" : "Item Type",
             "colTitle" : "Type",
             "order" : -80,
-            "description" : "Type or category of Item"
+            "description" : "Type or category of Item",
+            # Alternative below, if we want type column to be available but hidden by default in selection mode:
+            # "default_hidden": request.params.get('currentAction') == 'selection'
         }
 
     for schema in schemas:

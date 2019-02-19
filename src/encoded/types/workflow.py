@@ -1,6 +1,9 @@
 """The type file for the workflow related items.
 """
-from collections import OrderedDict
+from collections import (
+    OrderedDict,
+    deque
+)
 from inspect import signature
 import copy
 from pyramid.view import view_config
@@ -149,21 +152,40 @@ def get_step_io_for_argument_name(argument_name, workflow_model_obj):
 
 
 def common_props_from_file(file_obj):
-    return {
-        'uuid'          : file_obj['uuid'],
-        '@id'           : file_obj['@id'],
-        'accession'     : file_obj.get('accession'),
-        'filename'      : file_obj.get('filename'),
-        'file_format'   : file_obj.get('file_format'),
-        'file_type'     : file_obj.get('file_type'),
-        'file_size'     : file_obj.get('file_size'),
-        'display_title' : file_obj.get('display_title'),
-        'description'   : file_obj.get('description'),
-        '@type'         : file_obj.get('@type'),
-        'status'        : file_obj.get('status'),
-        'href'          : file_obj.get('href'),
-        'url'           : file_obj.get('url')
+    '''
+    Purpose of this function is to limit the amount of properties
+    that are returned for file items to keep size of response down
+    re: nested embedded items.
+    '''
+
+    ret_obj = {
+        '@id'             : file_obj['@id'],
+        'uuid'            : file_obj['uuid'],
+        'display_title'   : file_obj['display_title'],
+        'accession'       : file_obj.get('accession'),
+        '@type'           : file_obj.get('@type')
     }
+
+    for k in ['quality_metric', 'url', 'href', 'description', 'filename', 'file_format', 'file_type', 'file_size', 'status']:
+        if k in file_obj:
+            ret_obj[k] = file_obj[k]
+
+    # For experiments and experiment sets, carry only the terminal expset @ids in as they are AJAXed in clientside.
+    # We don't need full representation
+    if 'experiment_sets' in file_obj:
+        ret_obj['experiment_sets'] = [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in file_obj['experiment_sets'] ]
+
+    if 'experiments' in file_obj:
+        ret_obj['experiments'] = []
+        for exp in file_obj['experiments']:
+            ret_obj['experiments'].append({
+                '@id' : exp['@id'],
+                'uuid' : exp['uuid'],
+                'experiment_sets' : [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in exp['experiment_sets'] ]
+            })
+
+    return ret_obj
+
 
 
 def trace_workflows(original_file_set_to_trace, request, options=None):
@@ -172,9 +194,17 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
     -- TODO: After grouping design: CLEANUP! Rename get_model to get_item, etc. Remove grouping. --
 
-    :param original_file_set_to_trace: Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar. Each dict should have at minimum:
-        - uuid, workflow_run_inputs, workflow_run_outputs
-    :param request: Request instance.
+    Argumements:
+
+        original_file_set_to_trace      Must be a list of DICTIONARIES. If have Item instances, grab their model.source['object'] or similar.
+                                        Each dict should have the following fields:
+                                            `uuid` (string), `workflow_run_inputs` (list of UUIDs, NOT embeds), & `workflow_run_outputs` (list of UUIDs, NOT embeds)
+        request                         The request instance.
+        options                         Dict of options to use for tracing. These may change; it is suggested to use the defaults.
+
+    Returns:
+        A chronological list of steps (as dictionaries)
+
     '''
 
     if options is None:
@@ -187,7 +217,10 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     uuidCacheModels = {}
     uuidCacheTracedHistory = {}
     uuidCacheGroupSourcesByRun = {}
-    steps = [] # Our output
+
+    steps_to_process_stack = deque()    # A stack holding next tuples of WFR+File+depth to trace.
+    steps = []                          # What we return
+    current_step_route = []             # Intermediate structure to hold chronologically-ordered steps while tracing a connected route
 
     def get_model(uuid, key=None):
         model = None
@@ -226,7 +259,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         files_by_argument_name = OrderedDict()
         for f in set_of_files:
             arg_name = f.get('workflow_argument_name')
-            if arg_name and f.get('value', f.get('value_qc')):
+            if arg_name and (f.get('value') or f.get('value_qc')):
                 if files_by_argument_name.get(arg_name) is None:
                     files_by_argument_name[arg_name] = [f]
                 else:
@@ -252,12 +285,13 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         """
         if not options.get('group_similar_workflow_runs') or len(workflow_run_tuples) < 3:
             return (workflow_run_tuples, [])
+
         filtered_in_tuples  = []
         filtered_out_tuples = []
         tuples_by_workflow  = {}
 
         for wfr_tuple in workflow_run_tuples: # Group up into dict of { workflow-id : list-of-tuples }
-            workflow_atid = wfr_tuple[0].get('workflow')
+            workflow_atid = wfr_tuple[0]['workflow']['@id']
             if not tuples_by_workflow.get(workflow_atid):
                 tuples_by_workflow[workflow_atid] = []
             tuples_by_workflow[workflow_atid].append(wfr_tuple)
@@ -279,89 +313,109 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
         return (filtered_in_tuples, filtered_out_tuples)
 
-
-    def generate_sources_for_input(in_file_models, workflow_argument_name, depth = 0):
+    def generate_sources_for_input(in_file_embeds, workflow_argument_name, depth=0):
 
         sources = [] # Our output
         step_uuids = set()
 
         def try_match_input_with_workflow_run_output_to_generate_source(workflow_run, in_file):
             sources_for_in_file = [] # We only are looking for 1 source, but might re-use for trace_future later
-            for out_file in workflow_run.get('output_files', []):
-                out_file_uuid = out_file.get('value', 'a')
-                if out_file_uuid == in_file.get('uuid', 'b'):
+            for out_file_wrapper in workflow_run.get('output_files', []):
+                out_file = out_file_wrapper.get('value') or out_file_wrapper.get('value_qc') or None
+                if out_file is None:
+                    # This can occur if there is WorkflowRun with an output but no output `value` linkedTo from it
+                    continue
+                if out_file['uuid'] == in_file.get('uuid', 'b'):
                     step_uuid = workflow_run['uuid']
                     if step_uuid:
                         step_uuids.add( (step_uuid, in_file['uuid']) )
                     sources_for_in_file.append({
-                        "name" : out_file.get('workflow_argument_name'),
-                        "step" : workflow_run['@id'],
-                        "for_file" : in_file['uuid'],
-                        "workflow" : workflow_run.get('workflow')
+                        "name"      : out_file_wrapper.get('workflow_argument_name'),
+                        "step"      : workflow_run['@id'],
+                        "for_file"  : in_file['@id'],
+                        "workflow"  : workflow_run['workflow']['@id']
                     })
             return sources_for_in_file
 
         # Gather all workflow_runs out of which our input files (1 run per file) come from
         all_workflow_runs = []
 
-        for in_file_model in in_file_models:
-            in_file_uuid = in_file_model['uuid']
+        for in_file_embed in in_file_embeds:
+            in_file_uuid = in_file_embed['uuid']
 
             if uuidCacheTracedHistory.get(in_file_uuid):
                 sources = sources + uuidCacheTracedHistory[in_file_uuid]
                 continue
 
             # Get @ids from ES source.
-            output_of_workflow_runs = in_file_model.get('workflow_run_outputs', [])
+            output_of_workflow_runs = in_file_embed.get('workflow_run_outputs', [])
             if len(output_of_workflow_runs) == 0:
                 continue
-            # There should only ever be one 'workflow_run_outputs' at most, or versions of same one (grab most recent).
-            last_workflow_run_output_of = output_of_workflow_runs[len(output_of_workflow_runs) - 1]
-            workflow_run_uuid = last_workflow_run_output_of
+
+            last_workflow_run_output_of = output_of_workflow_runs[-1]
+            if isinstance(last_workflow_run_output_of, dict): # Case if in_file_embed are @@embedded representation
+                workflow_run_uuid = last_workflow_run_output_of['uuid']
+            else: # Case if in_file_embed are @@object representation
+                workflow_run_uuid = last_workflow_run_output_of
             if not workflow_run_uuid:
                 continue
-            workflow_run_model = get_model_obj(workflow_run_uuid)
-            if not workflow_run_model:
+
+            workflow_run_embed = get_model_embed(workflow_run_uuid)
+            #workflow_run_model = get_model_obj(workflow_run_uuid)
+            if not workflow_run_embed:
                 continue
-            all_workflow_runs.append( (workflow_run_model, in_file_model) )
+            all_workflow_runs.append( (workflow_run_embed, in_file_embed) )
 
 
 
         filtered_in_workflow_runs, filtered_out_workflow_runs = filter_workflow_runs(all_workflow_runs)
 
-        for workflow_run_model, in_file_model in filtered_in_workflow_runs:
-            sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_model, in_file_model)
-            uuidCacheTracedHistory[in_file_model['uuid']] = sources_for_in_file
+        for workflow_run_embed, in_file_embed in filtered_in_workflow_runs:
+            sources_for_in_file = try_match_input_with_workflow_run_output_to_generate_source(workflow_run_embed, in_file_embed)
+            uuidCacheTracedHistory[in_file_embed['uuid']] = sources_for_in_file
             sources = sources + sources_for_in_file
 
-
+        ## This block of code, along with dependent functions such as `filter_workflow_runs`, will likely
+        ## be removed later once we can cache this output and apply better grouping.
         untraced_in_files = []
-        for workflow_run_model, in_file_model in filtered_out_workflow_runs:
-            untraced_in_files.append(in_file_model['uuid'])
+        for workflow_run_embed, in_file_embed in filtered_out_workflow_runs:
+            untraced_in_files.append(in_file_embed['uuid'])
             source_for_in_file = {
-                "for_file"   : in_file_model['uuid'],
-                "step"       : workflow_run_model['@id'],
+                "for_file"   : in_file_embed['@id'],
+                "step"       : workflow_run_embed['@id'],
                 "grouped_by" : "workflow",
-                "workflow"   : workflow_run_model.get('workflow')
+                "workflow"   : workflow_run_embed['workflow']['@id']
             }
-            uuidCacheTracedHistory[in_file_model['uuid']] = [source_for_in_file]
-            uuidCacheGroupSourcesByRun[workflow_run_model['uuid']] = uuidCacheGroupSourcesByRun.get(workflow_run_model['uuid'], []) + [in_file_model['uuid']] #[source_for_in_file]
+            uuidCacheTracedHistory[in_file_embed['uuid']] = [source_for_in_file]
+            uuidCacheGroupSourcesByRun[workflow_run_embed['uuid']] = uuidCacheGroupSourcesByRun.get(workflow_run_embed['uuid'], []) + [in_file_embed['uuid']] #[source_for_in_file]
             sources.append(source_for_in_file)
 
 
         if len(sources) == 0:
-            for_files = [ f['uuid'] for f in in_file_models ]
+            for_files = [ f['@id'] for f in in_file_embeds ]
             if len(for_files) == 1:
                 for_files = for_files[0]
             sources = [{ "name" : workflow_argument_name, "for_file" : for_files }]
         else:
             for step_uuid, in_file_uuid in step_uuids:
-                trace_history([step_uuid], get_model_obj(in_file_uuid), depth + 1)
+                next_params = ( step_uuid, get_model_obj(in_file_uuid), depth + 1 )
+                # Potentially temporary check to skip further tracing of files which we don't
+                # have WFR inputs for.
+                next_file_model_obj = get_model_obj(in_file_uuid)
+                if next_file_model_obj.get('disable_wfr_inputs'):
+                    continue
+                steps_to_process_stack.append(( step_uuid, next_file_model_obj, depth + 1 ))
 
         return sources
 
     def add_next_targets_to_step_from_file(step, current_file_model_object):
-        '''Compare our current_file_model_object with each output run data file of step and if is a match, add target to step output argument which points to the next step(s) the file goes to, if any.'''
+        '''
+        Compare our current_file_model_object with each output run data file of step and if is a match, add target to step output argument which points to the next step(s) the file goes to, if any.
+
+        Arguments:
+            step                        - Current step representation (dictionary)
+            current_file_model_object   - The @@object representation of a File Item. Must be @@object and have all linkTos present as UUIDs.
+        '''
         for output in step['outputs']:
             if type(output.get('run_data', {}).get('file')) is list:
                 files_for_this_output = output['run_data']['file']
@@ -370,10 +424,15 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         output['meta']['in_path'] = True
                         runs_current_file_goes_to = current_file_model_object.get('workflow_run_inputs', [])
                         for target_workflow_run_uuid in runs_current_file_goes_to:
+                            if isinstance(target_workflow_run_uuid, dict): # Case if current_file_model_object is embedded representation
+                                target_workflow_run_uuid = target_workflow_run_uuid['uuid']
+                            # Slight Optimization - skip creating target conntections to steps/wfrs which we have not (yet) encountered
+                            if uuidCacheTracedHistory.get(target_workflow_run_uuid) is None:
+                                continue
                             target_workflow_run_model_obj = get_model_obj(target_workflow_run_uuid)
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model_obj.get('input_files', []))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():
-                                input_files_for_arg_uuids = [ f.get('value') for f in input_files_for_arg ]
+                                input_files_for_arg_uuids = [ (f.get('value') or f.get('value_qc') or None) for f in input_files_for_arg ]
                                 if current_file_model_object['uuid'] in input_files_for_arg_uuids:
                                     # Check that we don't have this already
                                     exists = False
@@ -385,38 +444,34 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                                         output['target'].append({
                                             "name"      : argument_name,
                                             "step"      : target_workflow_run_model_obj.get('@id'),
-                                            "for_file"  : current_file_model_object['uuid']
+                                            "for_file"  : current_file_model_object['@id']
                                         })
 
-    def trace_history(output_of_workflow_run_uuids, current_file_model_object, depth = 0):
-
-        if depth > options.get('max_depth_history', 3):
-            return
-
-        if len(output_of_workflow_run_uuids) == 0:
-            return
-
-        # When we trace history, we care only about the last workflow_run out of which file was generated.
-        # A file should be output of only one run.
-        last_workflow_run_uuid = output_of_workflow_run_uuids[len(output_of_workflow_run_uuids) - 1]
+    def trace_history(workflow_run_uuid, current_file_model_object, depth=0):
 
         # If we've already traced inputs of this workflowrun, lets skip tracing it.
         # But, lets loop over its outputs and extend them with proper target reference to next step if our current file matches one of this already-traced runs output files.
-        if uuidCacheTracedHistory.get(last_workflow_run_uuid):
-            if uuidCacheTracedHistory[last_workflow_run_uuid] is True:
-                raise WorkflowRunTracingException("Error -- WorkflowRun with UUID '" + last_workflow_run_uuid + "' has been RE-ENCOUNTERED while tracing file with UUID '" + current_file_model_object['uuid'] + "'. Likely this file appears on both input and output -side of a WorkflowRun (or chain of WorkflowRuns).")
-            add_next_targets_to_step_from_file(uuidCacheTracedHistory[last_workflow_run_uuid], current_file_model_object)
+        if uuidCacheTracedHistory.get(workflow_run_uuid):
+            if uuidCacheTracedHistory[workflow_run_uuid] is True:
+                raise WorkflowRunTracingException("Error -- WorkflowRun with UUID '" + workflow_run_uuid + "' has been RE-ENCOUNTERED while tracing file with UUID '" + current_file_model_object['uuid'] + "'. Likely this file appears on both input and output -side of a WorkflowRun (or chain of WorkflowRuns).")
+            add_next_targets_to_step_from_file(uuidCacheTracedHistory[workflow_run_uuid], current_file_model_object)
             return
 
-        if uuidCacheGroupSourcesByRun.get(last_workflow_run_uuid) is not None:
+        if uuidCacheGroupSourcesByRun.get(workflow_run_uuid) is not None:
             return
 
-        uuidCacheTracedHistory[last_workflow_run_uuid] = True # Placeholder, becomes reference to real step (dictionary defined below as variable 'step') upon completing tracing of files being input into this step/workflow_run.
+        uuidCacheTracedHistory[workflow_run_uuid] = True # Placeholder, becomes reference to real step (dictionary defined below as variable 'step') upon completing tracing of files being input into this step/workflow_run.
 
-        workflow_run_model_obj = get_model_obj(last_workflow_run_uuid)
+        workflow_run_model_obj = get_model_obj(workflow_run_uuid)
         if not workflow_run_model_obj:
             return
 
+        # We create the structure of our steps to emulate the structure of `Workflow.steps`,
+        # as defined in the Workflow schema. This means we might wedge another field into the
+        # `step.meta.analysis_step_types` property here.
+        #
+        # This allows us to use the same frontend graphing mechanics/code on one common "step"
+        # data structure for both Worfklow Steps, WorkflowRun Steps, and Provenance Graph Steps (Workflow(Runs)).
         step = {
             "name"      : workflow_run_model_obj.get('@id'), # We use our front-end Node component to show display_title or something else from meta instead.
             "meta"      : {
@@ -426,7 +481,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 '@type'         : workflow_run_model_obj.get('@type'),
                 '@id'           : workflow_run_model_obj.get('@id'),
                 'date_created'  : workflow_run_model_obj.get('date_created'),
-                "analysis_step_types" : [],
+                "analysis_step_types" : []
             },
             "inputs"    : [],
             "outputs"   : []
@@ -436,8 +491,11 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         workflow_uuid = workflow_run_model_obj.get('workflow') #get_unique_key_from_at_id(workflow_run_model_obj.get('workflow')) #workflow_run.properties.get('workflow')
         if workflow_uuid:
             workflow_model_obj = get_model_obj(workflow_uuid)
-            if workflow_model_obj and workflow_model_obj.get('workflow_type'):
-                step['meta']['analysis_step_types'].append(workflow_model_obj['workflow_type'])
+            if workflow_model_obj:
+                # `step.meta.analysis_step_types` is defined in Workflow schema. It holds e.g. 'purposes' list for each step.
+                # Since each workflow(run) acts as a step within a provenance graph, we fill this property with something that
+                # might have an analogous-enough meaning, e.g. `category`.
+                step['meta']['analysis_step_types'].extend(workflow_model_obj.get('category', []))
                 step['meta']['workflow'] = {
                     '@id'               : workflow_model_obj.get('@id') or workflow_run_model_obj.get('workflow'),
                     '@type'             : workflow_model_obj.get('@type'),
@@ -445,28 +503,28 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     'accession'         : workflow_model_obj.get('accession'),
                     'steps'             : workflow_model_obj.get('steps'),
                     'uuid'              : workflow_uuid,
-                    'workflow_type'     : workflow_model_obj.get('workflow_type')
+                    'category'          : workflow_model_obj.get('category'),
+                    'experiment_types'  : workflow_model_obj.get('experiment_types', [])
                 }
 
 
-        # Add Output Files, 1-level deep max (maybe change in future)
+        # Add Output Files and Metrics, 1-level deep max (maybe change in future)
         output_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('output_files', []))
         for argument_name, output_files_for_arg in output_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
-            file_uuids       = [ f.get('value') for f in output_files_for_arg ]
+            file_uuids       = [ (f.get('value') or f.get('value_qc') or None) for f in output_files_for_arg ]
             file_items       = []
             file_format      = None
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             original_file_in_output = False
             for file_uuid in file_uuids:
-                file_item = get_model_obj(file_uuid)
+                file_item = get_model_embed(file_uuid)
                 if file_item is not None:
                     if file_item['uuid'] == current_file_model_object['uuid']:
                         original_file_in_output = True
                     file_items.append(common_props_from_file(file_item))
                     if not file_format:
-                        file_with_embeds = get_model_embed(file_uuid)
-                        file_format = file_with_embeds and file_with_embeds.get('file_format')
+                        file_format = file_item.get('file_format')
 
             step['outputs'].append({
                 "name"      : argument_name,
@@ -480,7 +538,7 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 "run_data"  : {
                     "file"          : file_items,               # Partially-pseudo-embedded file Items
                     "type"          : "input",                  # Unused?
-                    "meta"          : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in output_files_for_arg ] # A
+                    "meta"          : [ { k:v for k,v in f.items() if k not in ['value', 'value_qc', 'workflow_argument_name'] } for f in output_files_for_arg ] # A
                 }
             })
             add_next_targets_to_step_from_file(step, current_file_model_object)
@@ -490,17 +548,16 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         input_files_by_argument_name = group_files_by_workflow_argument_name(workflow_run_model_obj.get('input_files', []))
         for argument_name, input_files_for_arg in input_files_by_argument_name.items():
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
-            file_uuids       = [ f.get('value') for f in input_files_for_arg ]
+            file_uuids       = [ (f.get('value') or f.get('value_qc') or None) for f in input_files_for_arg ]
             file_items       = []
             file_format      = None
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             for file_uuid in file_uuids:
-                file_item = get_model_obj(file_uuid)
+                file_item = get_model_embed(file_uuid)
                 if file_item is not None:
                     file_items.append(file_item)
                     if not file_format:
-                        file_with_embeds = get_model_embed(file_uuid)
-                        file_format = file_with_embeds and file_with_embeds.get('file_format')
+                        file_format = file_item.get('file_format')
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
@@ -514,25 +571,12 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 "run_data" : {
                     "file" : [ common_props_from_file(file_item) for file_item in file_items ],
                     "type" : "input",
-                    "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'workflow_argument_name'] } for f in input_files_for_arg ]
+                    "meta" : [ { k:v for k,v in f.items() if k not in ['value', 'value_qc' 'workflow_argument_name'] } for f in input_files_for_arg ]
                 }
             })
 
-        steps.append(step) # Added to 'steps' output list in chronological order.
-        uuidCacheTracedHistory[last_workflow_run_uuid] = step
+        uuidCacheTracedHistory[workflow_run_uuid] = step
         return step
-
-
-    # TODO:
-    def trace_future(input_of_workflow_run_uuids):
-        for uuid in input_of_workflow_run_uuids:
-            #workflow_run = file_item.collection.get(uuid)
-            output_file_uuids = [ f.get('value') for f in workflow_run.properties.get('output_files', []) ]
-
-            #output_files = workflow_run.properties.get('input_files')
-            print('\n\n\n', input_file_uuids)
-            print('\n\n\n', workflow_run.properties.get('output_files'))
-
 
 
 
@@ -540,13 +584,57 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     ### Where function starts doing things. ###
     ###########################################
 
+    # Initialize our stack (deque) of steps to process with WFR(s) that file(s) we received are output from.
     for original_file in original_file_set_to_trace:
-        file_item_output_of_workflow_run_uuids = original_file.get('workflow_run_outputs', []) # [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_outputs', []) ]
-        #file_item_input_of_workflow_run_uuids = [ get_unique_key_from_at_id(wfr) for wfr in original_file.get('workflow_run_inputs', []) ]
-        if 'history' in options.get('trace_direction', ['history']):
-            if uuidCacheTracedHistory.get(original_file['uuid']) is None:
-                trace_history(file_item_output_of_workflow_run_uuids, original_file)
+        file_item_output_of_workflow_run_uuids = original_file.get('workflow_run_outputs', [])
 
+        if len(file_item_output_of_workflow_run_uuids) == 0:
+            continue
+
+        # When we trace history, we care only about the last workflow_run out of which file was generated.
+        # A file should be output of only _one_ run.
+        last_workflow_run_uuid = file_item_output_of_workflow_run_uuids[-1]
+
+        if 'history' in options.get('trace_direction', ['history']):
+            steps_to_process_stack.appendleft((last_workflow_run_uuid, original_file, 0))
+
+
+    # Keep tracing whatever is at the tip of our stack until nothing left to trace.
+    # This is depth-first tracing.
+    while True:
+        try:
+            next_wfr_uuid, next_file, depth_of_step = steps_to_process_stack.pop()
+        except IndexError: # No more items in our queue.
+            break
+
+        # (Temporary?) exit condition to prevent requests from taking > 20 seconds
+        # Will be removed once/if we can cache output of traces.
+        if depth_of_step > options.get('max_depth_history', 6):
+            continue
+
+        if depth_of_step == 0:
+            # This means we're starting a new route vs continuing tracing inputs of existing route
+            # Append existing inverted history to our steps by popping off steps so that
+            # the final 'steps' list is returned in a chronological order.
+            while True:
+                try:
+                    curr_step = current_step_route.pop()
+                except IndexError:
+                    break
+                steps.append(curr_step)
+
+        step = trace_history(next_wfr_uuid, next_file, depth_of_step)
+        if step:
+            current_step_route.append(step)
+
+
+    # Add leftover steps from last traced route to final output list.
+    while True:
+        try:
+            curr_step = current_step_route.pop()
+        except IndexError:
+            break
+        steps.append(curr_step)
 
     if options.get('track_performance'):
         pr.disable()
@@ -562,6 +650,8 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         )
 
     return steps
+
+
 
 
 @collection(
@@ -587,6 +677,23 @@ class Workflow(Item):
         'arguments.argument_format',
         'arguments.workflow_argument_name'
     ]
+    rev = {
+        'newer_versions': ('Workflow', 'previous_version')
+    }
+
+    @calculated_property(schema={
+        "title": "Newer Versions",
+        "description": "Newer versions of this workflow",
+        "type": "array",
+        "exclude_from": ["submit4dn", "FFedit-create"],
+        "items": {
+            "title": "Newer versions",
+            "type": ["string", "object"],
+            "linkTo": "Workflow"
+        }
+    })
+    def newer_versions(self, request):
+        return self.rev_link_atids(request, "newer_versions")
 
 
 @collection(
@@ -601,34 +708,39 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        'workflow.category',
+        'workflow.experiment_types',
+        'workflow.app_name',
         'workflow.title',
         'workflow.steps.name',
         'workflow.steps.meta.software_used.name',
         'workflow.steps.meta.software_used.title',
         'workflow.steps.meta.software_used.version',
         'workflow.steps.meta.software_used.source_url',
-        'workflow.workflow_type',
         'input_files.workflow_argument_name',
         'input_files.value.filename',
         'input_files.value.display_title',
         'input_files.value.file_format',
-        'input_files.value.uuid',
         'input_files.value.accession',
         'input_files.value.@type',
+        'input_files.value.@id',
         'input_files.value.file_size',
+        'input_files.value.quality_metric.url',
+        'input_files.value.quality_metric.overall_quality_status',
         'input_files.value.status',
         'output_files.workflow_argument_name',
         'output_files.value.filename',
         'output_files.value.display_title',
         'output_files.value.file_format',
-        'output_files.value.uuid',
         'output_files.value.accession',
         'output_files.value.@type',
+        'output_files.value.@id',
         'output_files.value.file_size',
+        'output_files.value.quality_metric.url',
+        'output_files.value.quality_metric.overall_quality_status',
         'output_files.value.status',
-        'output_quality_metrics.name',
-        'output_quality_metrics.value.uuid',
-        'output_quality_metrics.value.@type'
+        'output_files.value_qc.url',
+        'output_files.value_qc.overall_quality_status'
     ]
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
@@ -682,18 +794,26 @@ class WorkflowRun(Item):
 
             matched_runtime_io_data = [
                 io_object for io_object in wfr_runtime_inputs
-                if global_pointing_source_target['name'] == io_object.get('workflow_argument_name') and io_object.get('value') is not None
+                if (
+                    global_pointing_source_target['name'] == io_object.get('workflow_argument_name') and
+                    # Quality Metrics might be saved with `value_qc` in place of `value`
+                    (io_object.get('value') is not None or io_object.get('value_qc') is not None)
+                )
             ]
 
             if len(matched_runtime_io_data) > 0:
                 matched_runtime_io_data = sorted(matched_runtime_io_data, key=lambda io_object: io_object.get('ordinal', 1))
                 step_io_arg['run_data'] = {
-                    value_field_name : [ io_object['value'] for io_object in matched_runtime_io_data ], # List of file UUIDs.
+                    value_field_name : [
+                        # List of file UUIDs
+                        # Also, Quality Metrics might be saved with `value_qc` instead of `value`
+                        (io_object.get('value') or io_object.get('value_qc')) for io_object in matched_runtime_io_data
+                    ],
                     "type" : io_type,
                     "meta" : [ # Aligned-to-file-list list of file metadata
                         {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
                             k:v for (k,v) in p.items()
-                            if k not in [ 'value', 'type', 'workflow_argument_name' ]
+                            if k not in [ 'value', 'value_qc', 'type', 'workflow_argument_name' ]
                         } for p in matched_runtime_io_data
                     ]
                 }
@@ -717,24 +837,15 @@ class WorkflowRun(Item):
             return resultArgs
 
 
-        # Metrics will overwrite output_files in case of duplicate keys.
-        combined_output_files = mergeArgumentsWithSameArgumentName(
-            [ dict(f, type = "output" ) for f in self.properties.get('output_files',[]) ] +
-            [ dict(f, type = "quality_metric" ) for f in self.properties.get('output_quality_metrics',[]) ]
-        )
-
-        input_files = mergeArgumentsWithSameArgumentName(
-            [ dict(f, type = "input" ) for f in self.properties.get('input_files',[]) ]
-        )
-
-        input_params = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
-
+        output_files    = mergeArgumentsWithSameArgumentName(self.properties.get('output_files',[]))
+        input_files     = mergeArgumentsWithSameArgumentName(self.properties.get('input_files',[]))
+        input_params    = mergeArgumentsWithSameArgumentName(self.properties.get('parameters',[]))
 
         for step in analysis_steps:
             # Add output file metadata to step outputs & inputs, based on workflow_argument_name v step output target name.
 
             for output in step['outputs']:
-                map_run_data_to_io_arg(output, combined_output_files, 'output')
+                map_run_data_to_io_arg(output, output_files, 'output')
 
             for input in step['inputs']:
                 if input.get('meta', {}).get('type') != 'parameter':

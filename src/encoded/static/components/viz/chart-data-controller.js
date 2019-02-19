@@ -349,12 +349,6 @@ export const ChartDataController = {
                 return; // Nothing relevant has changed. Exit.
             }
 
-            // Hide any pop-overs still persisting with old filters or URL.
-            setTimeout(function(){
-                ChartDetailCursor.reset(true);
-            }, 750);
-
-
             // Step 1. Check if need to refetch both unfiltered & filtered data.
             if (refs.browseBaseState !== prevBrowseBaseState){
                 setTimeout(function(){
@@ -470,12 +464,8 @@ export const ChartDataController = {
                 })) return;
             }
         }
-        //state.barplot_data_fields = fields;
         ChartDataController.setState({ 'barplot_data_fields' : fields, 'isLoadingChartData' : true }, callback);
-        ChartDataController.sync(function(){
-            ChartDetailCursor.reset(true);
-            //if (typeof callback === 'function') callback();
-        });
+        ChartDataController.sync();
     },
 
     /**

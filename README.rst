@@ -39,7 +39,7 @@ Step 2: Install or update dependencies::
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install caskroom/versions/java8
     $ brew tap homebrew/versions
-    $ brew install elasticsearch@5.6 node@8
+    $ brew install elasticsearch@5.6 node@10
 
 
 You may need to link the brew-installed elasticsearch::
@@ -90,6 +90,14 @@ In a second terminal, run the app with::
     $ bin/pserve development.ini
 
 Indexing will then proceed in a background thread similar to the production setup.
+
+Running the app with the `--reload` flag will cause the app to restart when changes to the Python source files are detected::
+
+    $ bin/pserve development.ini --reload
+
+If doing this, it is highly recommended to set the following environment variable to override the default file monitor used. The default monitor on Unix systems is watchman, which can cause problems due too tracking too many files and degrade performance. Use the following environment variable::
+
+    $ HUPPER_DEFAULT_MONITOR=hupper.polling.PollingFileMonitor
 
 Browse to the interface at http://localhost:8000/.
 

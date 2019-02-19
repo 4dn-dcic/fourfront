@@ -47,7 +47,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'viewConfig' : PropTypes.object.isRequired,
         'isValidating' : PropTypes.bool,
         'height' : PropTypes.number,
-        'groupID' : PropTypes.string
+        'mountDelay' : PropTypes.number.isRequired
     };
 
     static defaultProps = {
@@ -56,19 +56,30 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'disabled' : false,
         'height' : 500,
         'viewConfig' : null,
-        'groupID' : null
+        'mountDelay' : 500,
+        'placeholder' : (
+            <React.Fragment>
+                <h3>
+                    <i className="icon icon-lg icon-television"/>
+                </h3>
+                Initializing
+            </React.Fragment>
+        )
     };
 
     constructor(props){
         super(props);
         this.instanceContainerRefFunction = this.instanceContainerRefFunction.bind(this);
         this.correctTrackDimensions = this.correctTrackDimensions.bind(this);
+        this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
 
         this.state = {
             'mounted' : false,
             'mountCount' : 0,
             'hasRuntimeError' : false
         };
+
+        this.hgcRef = React.createRef();
     }
 
     componentDidMount(){
@@ -84,7 +95,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             }, ()=>{
                 setTimeout(this.correctTrackDimensions, 500);
             });
-        }, 500);
+        }, this.props.mountDelay);
     }
 
     correctTrackDimensions(){
@@ -109,7 +120,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
      * For prettiness only.
      */
     instanceContainerRefFunction(element){
-        if (element){ // Fade this in. After HiGlass initiates & loads in first tile etc. (about 500ms). For prettiness only.
+        if (element){
             setTimeout(function(){
                 requestAnimationFrame(function(){
                     element.style.transition = null; // Use transition as defined in stylesheet
@@ -120,17 +131,26 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     getHiGlassComponent(){
-        return (this && this.refs && this.refs.hiGlassComponent) || null;
+        return (this && this.hgcRef && this.hgcRef.current) || null;
     }
 
+    /**
+     * This returns the viewconfig currently stored in PlainContainer _state_.
+     * We should adjust this to instead return `JSON.parse(hgc.api.exportViewConfigAsString())`,
+     * most likely, to be of any use because HiGlassComponent keeps its own representation of the
+     * viewConfig.
+     *
+     * @todo Change to the above once needed. Don't rely on until then.
+     */
     getCurrentViewConfig(){
-        return (
-            this.refs && this.refs.hiGlassComponent && this.refs.hiGlassComponent.state.viewConfig
-        ) || null;
+        var hgc = this.getHiGlassComponent();
+        return (hgc && hgc.state.viewConfig) || null;
     }
 
     render(){
-        var { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig } = this.props,
+        var { disabled, isValidating, tilesetUid, height, width, options, style,
+            className, viewConfig, placeholder
+            } = this.props,
             hiGlassInstance = null,
             mounted         = (this.state && this.state.mounted) || false,
             outerKey        = "mount-number-" + this.state.mountCount;
@@ -141,30 +161,23 @@ export class HiGlassPlainContainer extends React.PureComponent {
                 placeholderStyle.height = height;
                 placeholderStyle.paddingTop = (height / 2) - 40;
             }
-            hiGlassInstance = (
-                <div className="col-sm-12 text-center" style={placeholderStyle} key={outerKey}>
-                    <h3>
-                        <i className="icon icon-lg icon-television"/>
-                    </h3>
-                    Initializing
-                </div>
-            );
+            hiGlassInstance = <div className="text-center" style={placeholderStyle} key={outerKey}>{ placeholder }</div>;
         } else if (disabled) {
             hiGlassInstance = (
-                <div className="col-sm-12 text-center" key={outerKey} style={placeholderStyle}>
+                <div className="text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Not Available</h4>
                 </div>
             );
         } else if (this.state.hasRuntimeError) {
             hiGlassInstance = (
-                <div className="col-sm-12 text-center" key={outerKey} style={placeholderStyle}>
+                <div className="text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Runtime Error</h4>
                 </div>
             );
         } else {
             hiGlassInstance = (
                 <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
-                    <HiGlassComponent {...{ options, viewConfig, width, height }} ref="hiGlassComponent" />
+                    <HiGlassComponent {...{ options, viewConfig, width, height }} ref={this.hgcRef} />
                 </div>
             );
         }

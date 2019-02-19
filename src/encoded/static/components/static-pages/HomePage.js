@@ -141,14 +141,8 @@ class BigBrowseButton extends React.Component {
     }
 }
 
-/**
- * @deprecated
- */
-class LinksRow extends React.Component {
 
-    static defaultProps = {
-        'linkBoxVerticalPaddingOffset' : 22
-    }
+class LinksColumn extends React.PureComponent {
 
     jointAnalysisPageLink(colSize){
         var className = "link-block";
@@ -158,17 +152,15 @@ class LinksRow extends React.Component {
         return (
             <div className={className}>
                 <a href="/joint-analysis">
-                    <layout.VerticallyCenteredChild verticalPaddingOffset={this.props.linkBoxVerticalPaddingOffset}>
-                        <span>Joint Analysis Page</span>
-                    </layout.VerticallyCenteredChild>
+                    <span>Joint Analysis Page</span>
                 </a>
             </div>
         );
     }
 
     /**
-    * Add a link for the NOFIC-AICS Collaboration page.
-    */
+     * Add a link for the NOFIC-AICS Collaboration page.
+     */
     nofisAicsCollaborationPageLink(colSize){
         var className = "link-block";
         if (colSize){
@@ -177,94 +169,11 @@ class LinksRow extends React.Component {
         return (
             <div className={className}>
                 <a href="/4DN-AICS-Collaboration">
-                    <layout.VerticallyCenteredChild verticalPaddingOffset={this.props.linkBoxVerticalPaddingOffset}>
-                        <span>NOFIC-AICS Collaboration</span>
-                    </layout.VerticallyCenteredChild>
+                    <span>NOFIC-AICS Collaboration</span>
                 </a>
             </div>
         );
     }
-
-    componentDidUpdate(pastProps, pastState){
-        if (pastProps.session !== this.props.session){
-            setTimeout(this.forceUpdate.bind(this), 500);
-        }
-    }
-
-    internalLinks(){
-        var { linkBoxVerticalPaddingOffset, session } = this.props;
-        var colSize = session ? 4 : 6;
-        return (
-            <div className="homepage-links-row internal-links">
-                <h3 className="text-300 mb-2 mt-3">Recommended</h3>
-                <div className="links-wrapper clearfix row">
-                    <div className={"link-block col-sm-" + colSize}>
-                        <BigBrowseButton className={null}>
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>{ BigBrowseButton.defaultProps.children }</span>
-                            </layout.VerticallyCenteredChild>
-                        </BigBrowseButton>
-                    </div>
-                    <div className={"link-block col-sm-" + colSize}>
-                        <a href="/help/user-guide/data-organization">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Introduction to 4DN Metadata</span>
-                            </layout.VerticallyCenteredChild>
-                        </a>
-                    </div>
-                    { (session && this.jointAnalysisPageLink(colSize)) || null }
-                </div>
-            </div>
-        );
-    }
-
-    externalLinks(){
-        var linkBoxVerticalPaddingOffset = this.props.linkBoxVerticalPaddingOffset;
-        return (
-            <div className="homepage-links-row external-links">
-                <h3 className="text-300 mb-2 mt-3">External Links</h3>
-                <div className="links-wrapper clearfix row">
-                    <div className="link-block col-sm-3">
-                        <a href="http://www.4dnucleome.org/" target="_blank">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Main Portal</span>
-                            </layout.VerticallyCenteredChild>
-                        </a>
-                    </div>
-                    <div className="link-block col-sm-3">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>4DN DCIC</span>
-                            </layout.VerticallyCenteredChild>
-                        </a>
-                    </div>
-                    <div className="link-block col-sm-3">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>NIH Common Fund</span>
-                            </layout.VerticallyCenteredChild>
-                        </a>
-                    </div>
-                    <div className="link-block col-sm-3">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Centers and Labs</span>
-                            </layout.VerticallyCenteredChild>
-                        </a>
-                    </div>
-                </div>
-                <br/>
-            </div>
-        );
-    }
-
-    render(){
-        return <div className="homepage-links">{ this.internalLinks() }{ this.externalLinks() }</div>;
-    }
-}
-
-
-class LinksColumn extends LinksRow {
 
     internalLinks(){
         var { linkBoxVerticalPaddingOffset, session } = this.props;
@@ -275,38 +184,28 @@ class LinksColumn extends LinksRow {
                 <div className="links-wrapper clearfix">
                     <div className="link-block">
                         <BigBrowseButton className="browse-btn">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>{ BigBrowseButton.defaultProps.children }</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>{ BigBrowseButton.defaultProps.children }</span>
                         </BigBrowseButton>
                     </div>
                     <div className="link-block">
                         <a href="/search/?award.project=4DN&type=Publication">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Browse 4DN Publications</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>Browse 4DN Publications</span>
                         </a>
                     </div>
                     <div className="link-block">
                         <a href="/jupyterhub">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Explore 4DN Data (JupyterHub)</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>Explore 4DN Data (JupyterHub)</span>
                         </a>
                     </div>
                     <div className="link-block">
                         <a href="/visualization/index">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Visualize 4DN Data (HiGlass)</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>Visualize 4DN Data (HiGlass)</span>
                         </a>
                     </div>
                     {/*
                     <div className="link-block">
                         <a href="/help/user-guide/data-organization">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Introduction to 4DN Metadata</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>Introduction to 4DN Metadata</span>
                         </a>
                     </div>
                     */}
@@ -326,30 +225,22 @@ class LinksColumn extends LinksRow {
                 <div className="links-wrapper clearfix">
                     <div className="link-block">
                         <a href="http://www.4dnucleome.org/" target="_blank" className="external-link">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Main Portal</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>Main Portal</span>
                         </a>
                     </div>
                     <div className="link-block">
                         <a href="http://dcic.4dnucleome.org/" target="_blank" className="external-link">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>4DN DCIC</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>4DN DCIC</span>
                         </a>
                     </div>
                     <div className="link-block">
                         <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" className="external-link">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>NIH Common Fund</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>NIH Common Fund</span>
                         </a>
                     </div>
                     <div className="link-block">
                         <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" className="external-link">
-                            <layout.VerticallyCenteredChild verticalPaddingOffset={linkBoxVerticalPaddingOffset}>
-                                <span>Centers and Labs</span>
-                            </layout.VerticallyCenteredChild>
+                            <span>Centers and Labs</span>
                         </a>
                     </div>
                 </div>
@@ -357,6 +248,11 @@ class LinksColumn extends LinksRow {
             </div>
         );
     }
+
+    render(){
+        return <div className="homepage-links">{ this.internalLinks() }{ this.externalLinks() }</div>;
+    }
+
 }
 
 

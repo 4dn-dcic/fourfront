@@ -71,12 +71,11 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + filtering + matrix generation",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0",
-        "data_types": [
+        "description": "GITAR Hi-C data processing pipeline",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "GITAR Hi-C data processing pipeline",
         "lab": "4dn-dcic-lab",
         "name": "gitar",
         "steps": [
@@ -487,9 +486,7 @@
             }
         ],
         "title": "GITAR",
-        "uuid": "c7a60edf-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFAW5VTA5",
@@ -519,23 +516,25 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": [
+            "QC"
+        ],
         "cwl_child_filenames": [
             "fastqc-0-11-4.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "fastqc-0-11-4-1.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0",
-        "data_types": [
+        "description": "FastQC quality control step for fastq files",
+        "docker_image_name": "duplexa/4dn-hic:v32",
+        "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "FastQC quality control step for fastq files",
-        "docker_image_name": "duplexa/4dn-hic:v32",
-        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "fastqc-0-11-4-1",
         "steps": [
@@ -623,10 +622,8 @@
                 ]
             }
         ],
-        "title": "FastQC",
-        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "title": "FastQC 0.2.0",
+        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9"
     },
     {
         "accession": "4DNWF36CF3A1",
@@ -660,17 +657,19 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": [
+            "QC"
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
         "cwl_main_filename": "pairsqc-single.cwl",
         "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/pairsqc-0-11-4/0",
-        "data_types": [
+        "description": "PairsQC quality control step for pairs files",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C"
         ],
-        "description": "PairsQC quality control step for pairs files",
         "lab": "4dn-dcic-lab",
         "name": "pairsqc-single",
         "status": "released",
@@ -759,17 +758,13 @@
                 ]
             }
         ],
-        "title": "PairsQC",
-        "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "title": "PairsQC 0.2.5",
+        "uuid": "ae3a87cb-3fa2-469e-97c7-540fc2d0a117"
     },
     {
         "accession": "4DNWFHB26CID",
         "app_name": "pairsqc-single",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
-        "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -802,19 +797,22 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": [
+            "QC"
+        ],
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "pairsqc-single.cwl",
-        "data_types": [
+        "description": "PairsQC quality control step for pairs files",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C"
         ],
-        "description": "PairsQC quality control step for pairs files",
         "lab": "4dn-dcic-lab",
         "name": "pairsqc-single",
+        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
         "status": "released",
         "steps": [
             {
@@ -914,10 +912,9 @@
                 ]
             }
         ],
-        "title": "PairsQC",
+        "title": "PairsQC 0.2.6",
         "uuid": "b8c533e0-f8c0-4510-b4a1-ac35158e27c3",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)"
     },
     {
         "accession": "4DNWF6DUSPTF",
@@ -935,13 +932,15 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
-        "data_types": [
+        "category": [
+            "QC"
+        ],
+        "description": "ValidateFiles quality control step for fastq files",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "ValidateFiles quality control step for fastq files",
         "lab": "4dn-dcic-lab",
         "name": "validate",
         "steps": [
@@ -988,9 +987,7 @@
             }
         ],
         "title": "ValidateFiles",
-        "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7"
     },
     {
         "accession": "4DNWFG6JOL4D",
@@ -1010,17 +1007,19 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": [
+            "QC"
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
         "cwl_main_filename": "md5.cwl",
-        "data_types": [
+        "description": "md5 on uncompressed file",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "md5 on uncompressed file",
         "lab": "4dn-dcic-lab",
         "name": "md5",
         "steps": [
@@ -1066,18 +1065,16 @@
                 ]
             }
         ],
-        "title": "md5",
-        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "title": "md5 0.0.4",
+        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41"
     },
     {
         "accession": "4DNWF2HFF82B",
+        "aliases": [
+            "4dn-dcic-lab:wf-md5-0.2.6"
+        ],
         "app_name": "md5",
         "app_version": "0.2.6",
-        "aliases": ["4dn-dcic-lab:wf-md5-0.2.6"],
-        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
-        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -1092,22 +1089,25 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "QC",
+        "category": [
+            "QC"
+        ],
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "md5.cwl",
-        "data_types": [
+        "description": "md5 on uncompressed file",
+        "docker_image_name": "duplexa/md5:v2",
+        "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
             "Hi-C",
             "Capture Hi-C",
             "Repli-seq"
         ],
-        "description": "md5 on uncompressed file",
-        "docker_image_name": "duplexa/md5:v2",
-        "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
         "name": "md5",
+        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
         "steps": [
             {
                 "inputs": [
@@ -1117,7 +1117,7 @@
                             "description": "File on which MD5 calculation is run on.",
                             "file_format": "fastq",
                             "global": true,
-                            "type": "reference file"
+                            "type": "data file"
                         },
                         "name": "input_file",
                         "source": [
@@ -1151,10 +1151,9 @@
                 ]
             }
         ],
-        "title": "md5",
+        "title": "md5 0.2.6",
         "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
-        "workflow_diagram": "",
-        "workflow_type": "Data QC"
+        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files"
     },
     {
         "accession": "4DNWFSOZLMGE",
@@ -1207,12 +1206,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + format conversion",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
-        "data_types": [
+        "description": "Creating a bam and pairs files from a pair of fastq files",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Creating a bam and pairs files from a pair of fastq files",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta",
         "steps": [
@@ -1420,9 +1421,7 @@
             }
         ],
         "title": "Hi-C processing part A",
-        "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e"
     },
     {
         "accession": "4DNWFSOZLMGT",
@@ -1475,12 +1474,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + format conversion",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta.9.cwl",
-        "data_types": [
+        "description": "Creating a bam and pairs files from a pair of fastq files",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Creating a bam and pairs files from a pair of fastq files",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta/9",
         "steps": [
@@ -1688,9 +1689,7 @@
             }
         ],
         "title": "Hi-C processing part A revision 9",
-        "uuid": "02d636b9-d82d-4da9-950c-2ca994a09411",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a09411"
     },
     {
         "arguments": [
@@ -1752,12 +1751,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.15.cwl",
-        "data_types": [
+        "description": "Hi-C processing part B revision 15",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing part B revision 15",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/15",
         "steps": [
@@ -2063,9 +2064,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 15",
-        "uuid": "b9829418-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "b9829418-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFSOZLJGI",
@@ -2101,12 +2100,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://github.com/4dn-dcic/pipelines-cwl/blob/master/cwl_sbg/hi-c-processing-partb.6.cwl",
-        "data_types": [
+        "description": "Hi-C processing part B revision 6",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing part B revision 6",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/6",
         "steps": [
@@ -2196,9 +2197,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 6",
-        "uuid": "a217d61c-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a217d61c-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFSOZLJBM",
@@ -2249,12 +2248,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + filtering",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.5.cwl",
-        "data_types": [
+        "description": "Hi-C processing partA based on Juicer",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing partA based on Juicer",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta-juicer/5",
         "steps": [
@@ -2444,9 +2445,7 @@
             }
         ],
         "title": "hi-c-processing-parta-juicer",
-        "uuid": "a9caf6f3-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a9caf6f3-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFSOBBBBB",
@@ -2501,12 +2500,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment + filtering",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-parta-juicer.16.cwl",
-        "data_types": [
+        "description": "Hi-C processing partA based on Juicer",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing partA based on Juicer",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-parta-juicer/16",
         "steps": [
@@ -2709,9 +2710,7 @@
             }
         ],
         "title": "hi-c-processing-parta-juicer",
-        "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "a9caf6f3-49e5-4c33-bfab-9ec90d65111c"
     },
     {
         "accession": "4DNWFSOZLMMB",
@@ -2765,12 +2764,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/master/cwl_sbg/hi-c-processing-partb.24.cwl",
-        "data_types": [
+        "description": "Hi-C processing part B revision 24",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing part B revision 24",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/24",
         "steps": [
@@ -3016,9 +3017,7 @@
             }
         ],
         "title": "Hi-C processing part B revision 24",
-        "uuid": "b9829418-49e5-4c33-afab-9ec90d659999",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "b9829418-49e5-4c33-afab-9ec90d659999"
     },
     {
         "accession": "4DNWFP00U73B",
@@ -3067,7 +3066,9 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + matrix generation",
+        "category": [
+            "processing"
+        ],
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "pairs2hic.cwl",
@@ -3077,12 +3078,12 @@
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "hi-c-processing-partb.cwl",
         "cwl_pointer": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_sbg/hi-c-processing-partb.44.cwl",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Hi-C processing part B revision 44",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partb/44",
         "steps": [
@@ -3283,10 +3284,8 @@
                 ]
             }
         ],
-        "title": "Hi-C processing part B revision 44",
-        "uuid": "d9e9c966-56d9-47e8-ae21-47f94a1af417",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Hi-C processing part B revision 44 0.2.0",
+        "uuid": "d9e9c966-56d9-47e8-ae21-47f94a1af417"
     },
     {
         "accession": "4DNWFG6JYY2P",
@@ -3311,11 +3310,13 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format_integration",
-        "data_types": [
-            "Hi-C"
+        "category": [
+            "miscellaneous"
         ],
         "description": "add-hic-normvector-to-mcool",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "add-hic-normvector-to-mcool/2",
         "steps": [
@@ -3378,9 +3379,7 @@
             }
         ],
         "title": "add-hic-normvector-to-mcool",
-        "uuid": "e8b6d4be-20c4-4e39-b1a3-f04592894521",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "e8b6d4be-20c4-4e39-b1a3-f04592894521"
     },
     {
         "accession": "4DNWFG6JJBM8",
@@ -3403,11 +3402,13 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "data extraction",
-        "data_types": [
-            "Hi-C"
+        "category": [
+            "miscellaneous"
         ],
         "description": "extract-mcool-normvector-for-juicebox",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "extract-mcool-normvector-for-juicebox/2",
         "steps": [
@@ -3468,9 +3469,7 @@
             }
         ],
         "title": "extract-mcool-normvector-for-juicebox",
-        "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "441b46f5-5193-41ee-a90e-c7a74fbb65c1"
     },
     {
         "accession": "4DNWFG6J82TH",
@@ -3497,11 +3496,10 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "normalization",
-        "data_types": [
+        "description": "addnormtohic",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "addnormtohic",
         "lab": "4dn-dcic-lab",
         "name": "addnormtohic/7",
         "steps": [
@@ -3576,9 +3574,7 @@
             }
         ],
         "title": "addnormtohic",
-        "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "e554d10d-d1e7-4055-aef6-4226ff1bcdb2"
     },
     {
         "accession": "4DNWF06BPEF2",
@@ -3604,12 +3600,14 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "aggregation",
+        "category": [
+            "processing"
+        ],
         "cwl_pointer": "",
-        "data_types": [
+        "description": "Hi-C processing partC Revision 6",
+        "experiment_types": [
             "Hi-C"
         ],
-        "description": "Hi-C processing partC Revision 6",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-partc/6",
         "steps": [
@@ -3780,9 +3778,7 @@
             }
         ],
         "title": "hi-c-processing-partc/6",
-        "uuid": "c6480905-49e5-4c33-afab-9ec90d65faf3",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "uuid": "c6480905-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "accession": "4DNWFZOGJEI4",
@@ -3818,18 +3814,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Creating a lossless alignment bam file from a pair of fastq files",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
         "status": "released",
@@ -3919,17 +3914,13 @@
                 ]
             }
         ],
-        "title": "Alignment for Hi-C using bwa-mem",
-        "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Alignment for Hi-C using bwa-mem 0.2.0",
+        "uuid": "0fbe4db8-0b5f-448e-8b58-3f8c84baabf5"
     },
     {
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
-        "app_version": "0.2.5",
-        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
-        "version_upgrade_log": "use of official release of bwa",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -3960,21 +3951,21 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "alignment",
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "bwa-mem.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Creating a lossless alignment bam file from a pair of fastq files",
         "docker_image_name": "duplexa/4dn-hic:v42",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bwa-mem",
+        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
         "steps": [
             {
                 "inputs": [
@@ -4061,10 +4052,9 @@
                 ]
             }
         ],
-        "title": "Alignment for Hi-C using bwa-mem",
+        "title": "Alignment for Hi-C using bwa-mem 0.2.6",
         "uuid": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "version_upgrade_log": "use of official release of bwa"
     },
     {
         "accession": "4DNWF37VHW0F",
@@ -4092,18 +4082,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "annotation+sorting",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-parse-sort.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Parsing and Sorting for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-parse-sort",
         "steps": [
@@ -4178,10 +4167,8 @@
                 ]
             }
         ],
-        "title": "Parsing and Sorting for Hi-C using pairsamtools",
-        "uuid": "65586d4b-1e3b-4b31-891e-11f48c816545",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Parsing and Sorting for Hi-C using pairsamtools 0.2.0",
+        "uuid": "65586d4b-1e3b-4b31-891e-11f48c816545"
     },
     {
         "accession": "4DNWF3YV81HS",
@@ -4204,18 +4191,20 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging",
+        "category": [
+            "miscellaneous"
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-merge.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Merging for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-merge",
         "steps": [
@@ -4276,10 +4265,8 @@
                 ]
             }
         ],
-        "title": "Merging for Hi-C using pairsamtools",
-        "uuid": "af8908bf-fdcb-40be-8bca-f1a49226bd20",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Merging for Hi-C using pairsamtools 0.2.0",
+        "uuid": "af8908bf-fdcb-40be-8bca-f1a49226bd20"
     },
     {
         "accession": "4DNWF1Y7DN3H",
@@ -4298,18 +4285,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "annotating",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-markasdup.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Duplicate Marking for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-markasdup",
         "steps": [
@@ -4357,10 +4343,8 @@
                 ]
             }
         ],
-        "title": "Duplicate Marking for Hi-C using pairsamtools",
-        "uuid": "a18978fa-7e78-488f-8e6b-bfb6f63b8861",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Duplicate Marking for Hi-C using pairsamtools 0.2.0",
+        "uuid": "a18978fa-7e78-488f-8e6b-bfb6f63b8861"
     },
     {
         "accession": "4DNWF38VH15",
@@ -4392,18 +4376,17 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "filtering",
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairsam-filter.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Filtering for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairsam-filter",
         "steps": [
@@ -4482,10 +4465,8 @@
                 ]
             }
         ],
-        "title": "Filtering for Hi-C using pairsamtools",
-        "uuid": "3758e00c-2035-43c6-b783-bb92afe57c99",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Filtering for Hi-C using pairsamtools 0.2.0",
+        "uuid": "3758e00c-2035-43c6-b783-bb92afe57c99"
     },
     {
         "accession": "4DNWZJ2G671",
@@ -4512,18 +4493,20 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": [
+            "format conversion"
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "addfragtopairs.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Adding restriction fragment information for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "addfragtopairs",
         "steps": [
@@ -4588,10 +4571,8 @@
                 ]
             }
         ],
-        "title": "Adding restriction fragment information for Hi-C using pairsamtools",
-        "uuid": "ef125750-8df2-418e-a1ee-402285f9dd93",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Adding restriction fragment information for Hi-C using pairsamtools 0.2.0",
+        "uuid": "ef125750-8df2-418e-a1ee-402285f9dd93"
     },
     {
         "accession": "4DNWZH36VU2",
@@ -4613,18 +4594,20 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": [
+            "format conversion"
+        ],
         "cwl_child_filenames": [],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.0/cwl_awsem/",
         "cwl_main_filename": "pairs-patch.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "Patching pairs file for Hi-C using pairsamtools",
         "docker_image_name": "duplexa/4dn-hic:v40",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "pairs-patch",
         "steps": [
@@ -4675,13 +4658,12 @@
                 ]
             }
         ],
-        "title": "Patching pairs file for Hi-C using pairsamtools",
-        "uuid": "7e5dcad0-d8da-4286-9253-a779d5310a49",
-        "workflow_diagram": "",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Patching pairs file for Hi-C using pairsamtools 0.2.0",
+        "uuid": "7e5dcad0-d8da-4286-9253-a779d5310a49"
     },
     {
         "app_name": "hi-c-processing-bam",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "bam",
@@ -4716,23 +4698,22 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "filter",
         "cwl_child_filenames": [
             "pairsam-parse-sort.cwl",
             "pairsam-merge.cwl",
             "pairsam-markasdup.cwl",
             "pairsam-filter.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-bam.cwl",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "This is a subworkflow of the Hi-C data processing pipeline. It takes a bam file as input and performs parsing, sorting, filtering and deduping. It produces two output files, a lossless, filter-annotated bam file and a filtered pairs (contact list) file.",
         "docker_image_name": "duplexa/4dn-hic:v42",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-bam",
         "status": "released",
@@ -4990,12 +4971,12 @@
                 ]
             }
         ],
-        "title": "Hi-C Post-alignment Processing",
-        "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Hi-C Post-alignment Processing 0.2.6",
+        "uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68"
     },
     {
         "app_name": "repliseq-parta",
+        "app_version": "v13.1",
         "arguments": [
             {
                 "argument_format": "fastq",
@@ -5044,7 +5025,9 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "align + filter + count",
+        "category": [
+            "processing"
+        ],
         "cwl_child_filenames": [
             "clip.cwl",
             "align.cwl",
@@ -5052,14 +5035,14 @@
             "dedup.cwl",
             "count.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/repliseq",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/repliseq",
+        "cwl_directory_url": "https://github.com/4dn-dcic/docker-4dn-repliseq/tree/v13.1/cwl",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://github.com/4dn-dcic/docker-4dn-repliseq/tree/v13.1/cwl",
         "cwl_main_filename": "repliseq-parta.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "experiment_types": [
             "Repli-seq"
         ],
-        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
         "lab": "4dn-dcic-lab",
         "name": "repliseq-parta",
         "steps": [
@@ -5391,11 +5374,11 @@
                 ]
             }
         ],
-        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
-        "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364",
-        "workflow_type": "Repli-seq data processing"
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting v13.1",
+        "uuid": "146da22a-502d-4500-bf57-a7cf0b4b2364"
     },
     {
+        "accession": "4DNWFBT37VUW",
         "app_name": "repliseq-parta",
         "app_version": "v14",
         "arguments": [
@@ -5446,7 +5429,9 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "align + filter + count",
+        "category": [
+            "processing"
+        ],
         "cwl_child_filenames": [
             "clip.cwl",
             "align.cwl",
@@ -5457,12 +5442,13 @@
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-repliseq/v14/cwl",
         "cwl_main_filename": "repliseq-parta.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
+        "experiment_types": [
             "Repli-seq"
         ],
-        "description": "This is a subworkflow of the Repli-seq data processing pipeline. It takes a raw fastq file, aligns to the reference genome, performs filtering and reports read counts in a bedgraph (bg) format.",
         "lab": "4dn-dcic-lab",
         "name": "repliseq-parta",
+        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
         "steps": [
             {
                 "inputs": [
@@ -5792,15 +5778,13 @@
                 ]
             }
         ],
-        "title": "Repli-seq data processing pipeline for alignment, filtering and counting",
+        "title": "Repli-seq data processing pipeline for alignment, filtering and counting v14",
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
-        "workflow_type": "Repli-seq data processing",
-        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
-        "accession": "4DNWFBT37VUW"
+        "version_upgrade_log": "The count script (used by run-count.sh) now sorts the binfile before feeding to bedtools coverage to avoid a sorting inconsistency issue."
     },
     {
         "app_name": "hi-c-processing-pairs",
-        "app_version": "0.2.5",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -5886,7 +5870,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "addfragtopairs.cwl",
@@ -5896,16 +5879,16 @@
             "add-hic-normvector-to-mcool.cwl",
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.5/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
-        "data_types": [
-            "Hi-C"
-        ],
         "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "docker_image_name": "duplexa/4dn-hic:v42",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs",
         "status": "released",
@@ -6497,12 +6480,12 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists",
-        "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists 0.2.6",
+        "uuid": "c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0"
     },
     {
         "app_name": "hi-c-processing-pairs-nore",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -6579,7 +6562,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "cooler.cwl",
@@ -6588,15 +6570,15 @@
             "add-hic-normvector-to-mcool.cwl",
             "extract-mcool-normvector-for-juicebox.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline for data generated without restriction enzyme. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "experiment_types": [
             "DNase Hi-C",
             "micro-C"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline for data generated without restriction enzyme. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs-nore",
         "steps": [
@@ -7114,12 +7096,12 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no restriction enzyme",
-        "uuid": "c19ee11e-9d5a-454f-af50-600a0cf990b6",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no restriction enzyme 0.2.6",
+        "uuid": "c19ee11e-9d5a-454f-af50-600a0cf990b6"
     },
     {
         "app_name": "hi-c-processing-pairs-nonorm",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -7200,7 +7182,6 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "addfragtopairs.cwl",
@@ -7208,14 +7189,14 @@
             "pairs2hic.cwl",
             "cool2mcool.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nonorm.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "experiment_types": [
             "Capture Hi-C"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs-nonorm",
         "steps": [
@@ -7676,12 +7657,12 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization",
-        "uuid": "bd6e25ea-f368-4758-a821-d30e0b5a4100",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization 0.2.6",
+        "uuid": "bd6e25ea-f368-4758-a821-d30e0b5a4100"
     },
     {
         "app_name": "hi-c-processing-pairs-nore-nonorm",
+        "app_version": "0.2.6",
         "arguments": [
             {
                 "argument_format": "pairs",
@@ -7757,21 +7738,20 @@
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "merging + aggregation + normalization",
         "cwl_child_filenames": [
             "merge-pairs.cwl",
             "cooler.cwl",
             "pairs2hic.cwl",
             "cool2mcool.cwl"
         ],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem/",
-        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/dev/cwl_awsem_v1/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
         "cwl_main_filename": "hi-c-processing-pairs-nore-nonorm.cwl",
-        "data_types": [
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline for the data generated without restriction enzyme, without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "experiment_types": [
             "ChIA-PET"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline for the data generated without restriction enzyme, without matrix normalization. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
         "lab": "4dn-dcic-lab",
         "name": "hi-c-processing-pairs-nore-nonorm",
         "steps": [
@@ -8172,43 +8152,45 @@
                 ]
             }
         ],
-        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme",
-        "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
-        "workflow_type": "Hi-C data analysis"
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists, no normalization, no restriction enzyme 0.2.6",
+        "uuid": "05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd"
     },
     {
         "accession": "4DNWJV73GVL",
         "app_name": "bedGraphToBigWig",
-        "app_version": "dev",
+        "app_version": "v4",
         "arguments": [
-            {   
+            {
                 "argument_format": "bg",
                 "argument_type": "Input file",
                 "workflow_argument_name": "bgfile"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chromsize"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output to-be-extra-input file",
                 "workflow_argument_name": "bwfile"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "format conversion",
+        "category": [
+            "format conversion"
+        ],
         "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/master/cwl/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedGraphToBigWig/v4/cwl/",
         "cwl_main_filename": "bedGraphToBigWig.cwl",
         "cwl_pointer": "",
-        "data_types": [
-            "Hi-C", "Repli-seq"
-        ],
         "description": "Converting bedgraph to bigwig",
         "docker_image_name": "4dn-dcic/docker-4dn-bedgraphtobigwig",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C",
+            "Repli-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "bedGraphToBigWig",
         "steps": [
@@ -8270,125 +8252,121 @@
                 ]
             }
         ],
-        "title": "Converting bedgraph to bigwig",
-        "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e",
-        "workflow_diagram": "",
-        "workflow_type": "Other"
+        "title": "Converting bedgraph to bigwig v4",
+        "uuid": "667b14a7-a47e-4857-adf1-12a6393c4b8e"
     },
     {
         "accession": "4DNWJL752HA",
         "app_name": "encode-chipseq",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.fastqs"
             },
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.fraglen"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bwa.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.merge_fastq.cpu"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.peak_calls"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {   
+            {
                 "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq",
         "steps": [
@@ -8704,47 +8682,52 @@
         ],
         "title": "Chip-seq data processing pipeline",
         "uuid": "5b44ce1b-0347-40a6-bc9c-f39fb5d7bce3",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF25VHY9",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-chipseq-aln-chip"
+        ],
         "app_name": "encode-chipseq-aln-chip",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
@@ -8756,72 +8739,69 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.fraglen"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bwa.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.merge_fastq.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.align_only"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta_xcor"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline, Alignment-only, ChIP",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-aln-chip",
-        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-aln-chip"],
         "steps": [
             {
                 "inputs": [
@@ -8933,7 +8913,7 @@
                             }
                         ]
                     },
-                    {   
+                    {
                         "meta": {
                             "cardinality": "single",
                             "global": true,
@@ -8941,7 +8921,7 @@
                         },
                         "name": "chip.qc_report.name",
                         "source": [
-                            {   
+                            {
                                 "name": "chip.qc_report.name"
                             }
                         ]
@@ -9069,7 +9049,10 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/36bb6052-082a-46a0-be86-7415782f0223/",
+                        "/softwares/23c2feec-5009-44f0-9ebc-814112671d01/",
+                        "/softwares/2e1ab766-a572-46f7-869a-80f9a5d063fd/",
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "chip-aln-chip",
@@ -9131,49 +9114,54 @@
                 ]
             }
         ],
-        "title": "Chip-seq data processing pipeline, Align-only, ChIP",
+        "title": "Chip-seq data processing pipeline, Align-only, ChIP 1.1.1",
         "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e178",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF2FBLQA1",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-chipseq-aln-ctl"
+        ],
         "app_name": "encode-chipseq-aln-ctl",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bwaIndex",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bwa_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
@@ -9185,23 +9173,23 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta_ctl.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bwa_ctl.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.filter_ctl.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.bam2ta_ctl.cpu"
             },
@@ -9209,39 +9197,36 @@
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.align_only"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.merge_fastq_ctl.cpu"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.first_ta_ctl"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {  
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline, Align-only, Control",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-aln-ctl",
-        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-aln-ctl"],
         "steps": [
             {
                 "inputs": [
@@ -9353,7 +9338,7 @@
                             }
                         ]
                     },
-                    {   
+                    {
                         "meta": {
                             "cardinality": "single",
                             "global": true,
@@ -9361,7 +9346,7 @@
                         },
                         "name": "chip.qc_report.name",
                         "source": [
-                            {   
+                            {
                                 "name": "chip.qc_report.name"
                             }
                         ]
@@ -9489,7 +9474,10 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/36bb6052-082a-46a0-be86-7415782f0223/",
+                        "/softwares/23c2feec-5009-44f0-9ebc-814112671d01/",
+                        "/softwares/2e1ab766-a572-46f7-869a-80f9a5d063fd/",
+                        "/softwares/02d636b9-d82d-4da9-950c-2ca994a06735/"
                     ]
                 },
                 "name": "chip-aln-ctl",
@@ -9537,120 +9525,122 @@
                 ]
             }
         ],
-        "title": "Chip-seq data processing pipeline, Align-only, Control",
+        "title": "Chip-seq data processing pipeline, Align-only, Control 1.1.1",
         "uuid": "1dfb78e8-9844-48c6-804e-d05e7257e179",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF3BT781",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-chipseq-postaln"
+        ],
         "app_name": "encode-chipseq-postaln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.tas"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.ctl_tas"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.bam2ta_no_filt_R1.ta"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "chip.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.peak_caller"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.choose_ctl.always_use_pooled_ctl"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.fraglen"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.xcor.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "chip.spp_cpu"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.optimal_peak"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.conservative_peak"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "chip.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.report"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "chip.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
-        "wdl_main_filename": "chip.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ChIP-seq"
+        "category": [
+            "processing"
         ],
         "description": "ChIP-seq data processing pipeline",
         "docker_image_name": "4dndcic/encode-chipseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ChIP-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-chipseq-postaln",
-        "aliases": ["4dn-dcic-lab:wf-encode-chipseq-postaln"],
         "steps": [
             {
                 "inputs": [
@@ -9684,7 +9674,7 @@
                     },
                     {
                         "meta": {
-                            "cardinality": "single",
+                            "cardinality": "array",
                             "file_format": "bed",
                             "global": true,
                             "type": "data file"
@@ -9860,7 +9850,12 @@
                         "file format conversion"
                     ],
                     "software_used": [
-                        "/softwares/5befdeda-66a8-43bc-a469-5a5e7248198e/"
+                        "/softwares/b96e6b97-2347-4e9e-b69e-15550d6268f4/",
+                        "/softwares/e97ffd0c-4bc7-4e9a-95d9-c7d90febf49e/",
+                        "/softwares/42da1570-12a6-458b-b4a8-0a6c9ddf21d6/",
+                        "/softwares/ccb61480-9b2a-441b-8af2-4c14b2d3f090/",
+                        "/softwares/f1c13b57-afab-40d9-bdf8-77d7149ad75b/",
+                        "/softwares/c460cd2e-fca9-446d-9a13-884d7788c7ef/"
                     ]
                 },
                 "name": "chip-postaln",
@@ -9936,120 +9931,120 @@
                 ]
             }
         ],
-        "title": "Chip-seq data processing pipeline, post-alignment",
+        "title": "Chip-seq data processing pipeline, post-alignment 1.1.1",
         "uuid": "1f04547b-7d26-43a4-888d-2d8a4595f513",
-        "workflow_diagram": "",
-        "workflow_type": "ChIP-seq data processing"
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/chip-seq-pipeline2/master/",
+        "wdl_main_filename": "chip.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWB42C877",
         "app_name": "encode-atacseq",
         "app_version": "dev",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bowtie2Index",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.bowtie2_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.disable_ataqc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bowtie2.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.peak_calls"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
-            {   
+            {
                 "argument_format": "json",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
-        "wdl_main_filename": "atac.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ATAC-seq"
+        "category": [
+            "processing"
         ],
         "description": "ATAC-seq data processing pipeline",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ATAC-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq",
         "steps": [
@@ -10335,8 +10330,8 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "global": true,
                             "file_format": "bw",
+                            "global": true,
                             "type": "data file"
                         },
                         "name": "atac.qc_json",
@@ -10351,115 +10346,118 @@
         ],
         "title": "ATAC-seq data processing pipeline",
         "uuid": "6fb021e9-858c-4561-8ce1-e0adc673e0b5",
-        "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing"
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF2BBZ1E",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-atacseq-aln"
+        ],
         "app_name": "encode-atacseq-aln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "fastq",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.fastqs"
             },
-            {   
+            {
                 "argument_format": "uncompressed_bowtie2Index",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.bowtie2_idx_tar"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.auto_detect_adapter"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.disable_ataqc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.regex_grep_v_ta"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bowtie2.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.trim_adapter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.filter.cpu"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.bam2ta.cpu"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.first_ta"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
-        "wdl_main_filename": "atac.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ATAC-seq"
+        "category": [
+            "processing"
         ],
         "description": "ATAC-seq data processing pipeline, Align-only",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ATAC-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq-aln",
-        "aliases": ["4dn-dcic-lab:wf-encode-atacseq-aln"],
+        
         "steps": [
             {
                 "inputs": [
@@ -10697,7 +10695,7 @@
                         "/softwares/6f2716b0-3c10-44d5-80ca-3d2e884d53bf"
                     ]
                 },
-                "name": "atac",
+                "name": "atac-aln",
                 "outputs": [
                     {
                         "meta": {
@@ -10742,95 +10740,98 @@
                 ]
             }
         ],
-        "title": "ATAC-seq data processing pipeline, Align-only",
+        "title": "ATAC-seq data processing pipeline, Align-only 1.1.1",
         "uuid": "d497c075-ab57-4c5b-8c65-7bb8410f26fa",
-        "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing"
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL"
     },
     {
         "accession": "4DNWF2VTG8I",
+        "aliases": [
+            "4dn-dcic-lab:wf-encode-atacseq-postaln"
+        ],
         "app_name": "encode-atacseq-postaln",
-        "app_version": "dev",
+        "app_version": "1.1.1",
         "arguments": [
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.tas"
             },
-            {   
+            {
                 "argument_format": "bed",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.blacklist"
             },
-            {   
+            {
                 "argument_format": "chromsizes",
                 "argument_type": "Input file",
                 "workflow_argument_name": "atac.chrsz"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.pipeline_type"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.paired_end"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.enable_xcor"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.disable_ataqc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.name"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.qc_report.desc"
             },
-            {   
+            {
                 "argument_type": "parameter",
                 "workflow_argument_name": "atac.gensz"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.optimal_peak"
             },
-            {   
+            {
                 "argument_format": "bigbed",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.conservative_peak"
             },
-            {   
+            {
                 "argument_format": "bw",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "atac.sig_fc"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.report"
             },
-            {   
+            {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "atac.qc_json"
             }
         ],
         "award": "1U01CA200059-01",
-        "category": "Other",
-        "wdl_child_filenames": [],
-        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
-        "wdl_main_filename": "atac.wdl",
-        "workflow_language": "WDL",
-        "data_types": [
-            "ATAC-seq"
+        "category": [
+            "processing"
         ],
         "description": "ATAC-seq data processing pipeline, post-alignment",
         "docker_image_name": "4dndcic/encode-atacseq:v1.1.1",
         "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "ATAC-seq"
+        ],
         "lab": "4dn-dcic-lab",
         "name": "encode-atacseq-postaln",
         "steps": [
@@ -10978,7 +10979,7 @@
                         "/softwares/6f2716b0-3c10-44d5-80ca-3d2e884d53bf"
                     ]
                 },
-                "name": "atac",
+                "name": "atac-postaln",
                 "outputs": [
                     {
                         "meta": {
@@ -11051,10 +11052,96 @@
                 ]
             }
         ],
-        "title": "ATAC-seq data processing pipeline, post-alignment",
+        "title": "ATAC-seq data processing pipeline, post-alignment 1.1.1",
         "uuid": "510d321f-8a79-479d-95eb-c8fd703972a7",
-        "workflow_diagram": "",
-        "workflow_type": "ATAC-seq data processing",
-        "aliases": ["4dn-dcic-lab:wf-encode-atacseq-postaln"]
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/atac-seq-pipeline/master/",
+        "wdl_main_filename": "atac.wdl",
+        "workflow_language": "WDL"
+    },
+    {
+        "accession": "4DNWLM174GGG",
+        "app_name": "bedtobeddb",
+        "app_version": "v2",
+        "arguments": [
+            {
+                "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bedfile"
+            },
+            {
+                "argument_format": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
+                "argument_type": "Output to-be-extra-input file",
+                "workflow_argument_name": "beddbfile"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "assembly"
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "category": [
+            "format conversion"
+        ],
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtobeddb/v2/cwl/",
+        "cwl_main_filename": "bedtobeddb.cwl",
+        "cwl_pointer": "",
+        "description": "Converting bed to beddb",
+        "docker_image_name": "4dn-dcic/docker-4dn-bedtobeddb",
+        "docker_registry_url": "https://hub.docker.com/",
+        "experiment_types": [
+            "Hi-C",
+            "DAM-ID"
+        ],
+        "lab": "4dn-dcic-lab",
+        "name": "bedtobeddb",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bedfile",
+                        "source": [
+                            {
+                                "name": "bedfile"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                        "/softwares/d064191c-b2fc-4c7b-971f-5e2034dc902d/"
+                    ]
+                },
+                "name": "bedtobeddb",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "beddbfile",
+                        "target": [
+                            {
+                                "name": "beddbfile"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Converting bed to beddb v2",
+        "uuid": "9d575e99-5ffe-4ea4-b74f-ad40f621cd39"
     }
 ]
