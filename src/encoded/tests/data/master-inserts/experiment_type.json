@@ -1,0 +1,97 @@
+[
+    {
+        "title": "In situ Hi-C",
+        "experiment_category": "Sequencing",
+        "assay_classification": "3C via Ligation",
+        "assay_subclassification": "DNA-DNA Pairwise Interactions",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "Dilution Hi-C",
+        "experiment_category": "Sequencing",
+        "assay_classification": "3C via Ligation",
+        "assay_subclassification": "DNA-DNA Pairwise Interactions",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "b17b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "ATAC-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Linear DNA Enrichment",
+        "assay_subclassification": "Open Chromatin",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "c17b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "Capture Hi-C",
+        "experiment_category": "Sequencing",
+        "assay_classification": "3C via Ligation",
+        "assay_subclassification": "DNA-DNA Multiway Interactions of Selected Loci",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "d17b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "ChIA-PET",
+        "experiment_category": "Sequencing",
+        "assay_classification": "3C via Ligation",
+        "assay_subclassification": "DNA-DNA Pairwise Interactions of Enriched Regions",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "e17b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "PLAC-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "3C via Ligation",
+        "assay_subclassification": "DNA-DNA Pairwise Interactions of Enriched Regions",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "f17b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "DamID-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Linear DNA Enrichment",
+        "assay_subclassification": "Proximity to Organelle",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "a27b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "DNA FISH",
+        "experiment_category": "Microscopy",
+        "assay_classification": "Fluorescence Localization",
+        "assay_subclassification": "Fixed Sample DNA Localization",
+        "uuid": "b27b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "Repli-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Linear DNA Enrichment",
+        "assay_subclassification": "Replication Timing",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "c27b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "TSA-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Linear DNA Enrichment",
+        "assay_subclassification": "Proximity to Organelle",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "d27b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "ChIP-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Linear DNA Enrichment",
+        "assay_subclassification": "DNA Binding",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "e27b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "CUT&RUN",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Linear DNA Enrichment",
+        "assay_subclassification": "DNA Binding",
+        "raw_files": "Reads (fastq) provided by lab",
+        "uuid": "f27b17cd-544a-3a3b-abc3-17a544544b3c"
+    }
+]
