@@ -53,7 +53,7 @@
         },
         "controlled_term": {
             "title": "Ontology Term",
-            "description": "EFO ontology term that matches this experiment type",
+            "description": "Ontology term that matches this experiment type",
             "type": "string",
             "linkTo": "OntologyTerm"
         },
@@ -64,40 +64,37 @@
             "enum": ["Sequencing", "Microscopy"],
             "lookup": 100
         },
-        "experiment_subcategory": {
-            "title": "Experiment Subcategory",
-            "description": "Sequencing or microscopy subcategory of the experiment type",
+        "assay_classification": {
+            "title": "Assay Classification",
+            "description": "Classification of assay type",
             "type": "string",
             "enum": [
-                "1D DNA Enrichment",
-                "3C Ligation-based Assays",
-                "3C Unligated Multi-contact Assays",
-                "Single Cell Assays",
-                "RNA Enrichment",
-                "DNA-RNA Interactions",
-                "Nucleic Acid Labeling",
-                "Live-cell Time-lapse Imaging"
+                "Linear DNA Enrichment",
+                "3C via Ligation",
+                "Ligation-free Multi-fragment 3C",
+                "RNA Quantification",
+                "RNA-DNA Proximity Capture",
+                "Fluorescence Localization"
             ]
         },
-        "grouping": {
-            "title": "Experiment Type Grouping",
-            "description": "Grouping of related experiment types within a subcategory",
+        "assay_subclassification": {
+            "title": "Assay Sub-classification",
+            "description": "Sub-classification of assay based on what is measured",
             "type": "string",
             "enum": [
                 "Replication Timing",
                 "Proximity to Organelle",
                 "DNA Binding",
                 "Open Chromatin",
-                "Minimum-bias Genome-wide Proximity Assays",
-                "Targeted Genome-wide Proximity Assays",
-                "Selected Region Proximity Assays",
-                "SPRITE",
-                "GAM",
-                "Single Cell HiC",
-                "RNA-seq",
-                "DNA-RNA Interactions",
-                "DNA FISH",
-                "RNA FISH"
+                "DNA-DNA Pairwise Interactions",
+                "DNA-DNA Pairwise Interactions - Single Cell",
+                "DNA-DNA Multi-way Interactions",
+                "DNA-DNA Pairwise Interactions of Enriched Regions",
+                "DNA-DNA Pairwise Interactions of Selected Loci",
+                "RNA-DNA Multi-way Interactions",
+                "Fixed Sample DNA Localization",
+                "Fixed Sample RNA Localization",
+                "Time-Lapse"
             ]
         },
         "other_tags": {
