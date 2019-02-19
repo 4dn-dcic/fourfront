@@ -39,7 +39,7 @@ These inserts are loaded in a couple tests within `test_loadxl.py`, so it is imp
 
 ### temp-local-inserts
 
-This is a special directory that is meant to be used locally as an "override" option for the test inserts. To use them, you must both add json inserts to the directory and use `load_local_data` load function in the .ini configuration file. When `temp-local-inserts` are loaded, neither `inserts` or `master-inserts` will be loaded to provide isolation of inserts.
+Only loaded locally (or if the load function is set to `load_local_data`). This is a special directory that is meant to be used as an "override" option for the test inserts by adding json inserts to the directory. When `temp-local-inserts` are loaded, neither `inserts` or `master-inserts` will be loaded to provide isolation of inserts.
 
 If there is nothing in this directory, then the `inserts` and `master-inserts` will be used regularly with `load_local_data`.
 
