@@ -1,4 +1,4 @@
-Data Inserts
+Metadata Inserts
 ============
 
 [This directory](.) contains subdirectories for each of the different inserts folders we used for Fourfront. Each folder contains a number of json files which are named by the type of item they contain -- for example, file_fastq.json contains a list of individual json objects that represent FileFastq items.

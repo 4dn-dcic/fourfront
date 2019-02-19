@@ -35,7 +35,9 @@ package-lock.json
 /src/encoded/static/css/responsive.css
 /src/encoded/static/css/style.css
 /src/encoded/static/scss/_variables.original.scss
+
 /src/encoded/tests/data/temp-local-inserts/*
+!/src/encoded/tests/data/temp-local-inserts/.gitkeep
 
 *.swp
 *.hprof
