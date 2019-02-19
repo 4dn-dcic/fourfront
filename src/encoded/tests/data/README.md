@@ -11,7 +11,7 @@ It may also be helpful to read [the documentation](../../../../docs/inserts.md) 
 
 - **inserts** are loaded for local, mastertest
 - **master-inserts** are loaded everywhere, but not by default on staging/data
-- **temp-local-inserts** are exclusively loaded with `load_test_data` if data exists in the directory
+- **temp-local-inserts** are exclusively loaded for local (or with `load_local_data` load function) if data exists in the directory
 - **perf-testing** used with `pytest -m performance` tests. Currently not working
 - **workbook-inserts** used in a number of tests, including those leveraging ES
 
