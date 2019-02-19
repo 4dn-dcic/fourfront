@@ -1010,14 +1010,6 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False):
               clear_tables=clear_tables)
 
 
-def load_jin_data(app, access_key_loc=None, clear_tables=False):
-    """
-    Load jin-inserts and master-inserts
-    """
-    load_data(app, access_key_loc, indir='jin_inserts',
-              clear_tables=clear_tables)
-
-
 def load_ontology_terms(app, post_json=None, patch_json=None,):
     from webtest import TestApp
     from webtest.app import AppError

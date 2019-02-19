@@ -14,12 +14,17 @@ EPILOG = __doc__
 
 def main():
     """
+    CURRENTLY UNUSED. RETURN TO THIS ONCE LOADXL IS REFACTORED
+
     Use this command to update the inserts from a given fourfront env
     """
     logging.basicConfig()
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.DEBUG)
 
+    # TODO: update after loadxl is changed
+    logger.error("update-inserts-from-server is currently disabled")
+    return
 
     parser = argparse.ArgumentParser(
         description="Update Inserts", epilog=EPILOG,
