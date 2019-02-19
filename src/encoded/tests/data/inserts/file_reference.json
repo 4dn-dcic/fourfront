@@ -124,5 +124,26 @@
      "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fafa",
      "status": "uploaded",
      "filename": "test_fasta2.fasta.gz"
+ },
+ {
+   "uuid": "9c78392f-d183-418f-8cbb-eafe544b9de0",
+   "description": "This file is used to see the annotations in higlass",
+   "filename": "gene-annotations-hg38.beddb",
+   "file_classification": "ancillary file",
+   "higlass_uid": "XGrAqZupQb2h5Pjiarf8PA",
+   "award": "1U01CA200059-01",
+   "status": "released",
+   "file_format": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
+   "tags": [
+     "higlass_reference"
+   ],
+   "accession": "4DNFIWG6CQQA",
+   "file_size": 11776000,
+   "lab": "4dn-dcic-lab",
+   "submitted_by": "4dndcic@gmail.com",
+   "genome_assembly": "GRCh38",
+   "aliases": [
+     "4dn-dcic-lab:higlass_annotation_hg38"
+   ]
  }
 ]
