@@ -11,7 +11,7 @@ It may also be helpful to read [the documentation](../../../../docs/inserts.md) 
 
 - **inserts** are loaded for local, mastertest
 - **master-inserts** are loaded everywhere, but not by default on staging/data
-- **temp-local-inserts** are exclusively loaded with `load_test_data` if data exists in the directory
+- **temp-local-inserts** are exclusively loaded for local (or with `load_local_data` load function) if data exists in the directory. This directory is ignored by git
 - **perf-testing** used with `pytest -m performance` tests. Currently not working
 - **workbook-inserts** used in a number of tests, including those leveraging ES
 
@@ -42,6 +42,8 @@ These inserts are loaded in a couple tests within `test_loadxl.py`, so it is imp
 Only loaded locally (or if the load function is set to `load_local_data`). This is a special directory that is meant to be used as an "override" option for the test inserts by adding json inserts to the directory. When `temp-local-inserts` are loaded, neither `inserts` or `master-inserts` will be loaded to provide isolation of inserts.
 
 If there is nothing in this directory, then the `inserts` and `master-inserts` will be used regularly with `load_local_data`.
+
+This directory is ignored by git; inserts that you want to permanently add for use on local/mastertests should be added the `inserts` directory instead.
 
 ### perf-testing
 
