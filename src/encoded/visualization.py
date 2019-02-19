@@ -433,12 +433,11 @@ def add_files_to_higlass_viewconf(request):
             remove_unneeded_tracks(boolean, optional, default=False): If True, we'll remove tracks that are not needed for the view.
 
     Returns:
-        {
+        A dictionary.
             success(bool)           : Boolean indicating success.
             errors(str)             : A string containing errors. Will be None if this is successful.
             new_viewconfig(dict)    : New dict representing the new viewconfig.
             new_genome_assembly(str): A string showing the new genome assembly.
-        }
     """
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
@@ -446,7 +445,6 @@ def add_files_to_higlass_viewconf(request):
     if not higlass_viewconfig:
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
-        current_genome_assembly = None
 
     # If no view config could be found, fail
     if not higlass_viewconfig:
@@ -659,6 +657,11 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
     base_view_info = get_view_content_info(views[0])
     base_view_has_center_content = base_view_info["has_center_content"]
 
+    # If there is only one view with no files inside, set the initial domains based on the genome assembly
+    if len(views) == 1 and not (base_view_has_center_content or base_view_info["has_left_tracks"] or base_view_info["has_top_tracks"]):
+        domain_sizes = get_initial_domains_by_genome_assembly(genome_assembly)
+        views[0].update(domain_sizes)
+
     # Determine the kind of file we're working on:
     # - Is it 1D or 2D? (chromsize is considered 1D)
     # - Is it a reference file? (Positioning rules are different)
@@ -732,6 +735,38 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         }
     )
 
+def get_initial_domains_by_genome_assembly(genome_assembly):
+    """Get a list of defaults HiGlass data ranges for a file.
+    Args:
+        genome_assembly(string): Description of the genome assembly.
+    Returns:
+        A dict with these keys:
+        initialXDomain(list): Contains 2 numbers. The HiGlass display will horizontally span all of these data points along the X axis. 0 would be the start of chr1, for example.
+        initialYDomain(list): Contains 2 numbers. The HiGlass display will focus on the center of this data (for 2D views) or ignore initialYDomain entirely (for 1D views.)
+    """
+
+    # Create default view options.
+    domain_size_by_genome_assembly = {
+        "GRCm38": 2725521370,
+        "GRCh38": 3088269832,
+        "dm6": 137547960,
+        "galGal5": 1022704034
+    }
+
+    domain_size = domain_size_by_genome_assembly.get(genome_assembly, 2000000000)
+
+    domain_ranges = {
+        "initialXDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ],
+        "initialYDomain": [
+            domain_size * -1 / 4,
+            domain_size * 5 / 4
+        ]
+    }
+    return domain_ranges
+
 def get_view_content_info(view):
     """ Determines if the view has an empty center, and looks for 2d chromosome grids.
 
@@ -740,11 +775,13 @@ def get_view_content_info(view):
 
     Returns:
         A dictionary with these keys:
+        has_top_tracks(bool)       : True if the view has top side tracks
         has_left_tracks(bool)       : True if the view has left side tracks
         has_center_content(bool)    : True if there is any content in the center tracks.
         center_chromsize_index(int) : If there is a 2d chromosome grid in the center, get the index in the list to find it.
     """
     view_has_left_tracks = len(view["tracks"].get("left", [])) > 0
+    view_has_top_tracks = len(view["tracks"].get("top", [])) > 0
 
     # See if there is any center content (including chromsize grids)
     view_has_any_center_content = len(view["tracks"].get("center", [])) > 0 \
@@ -763,6 +800,7 @@ def get_view_content_info(view):
         view_center_chromsize_index = view_center_chromsize_indecies[0]
 
     return {
+        "has_top_tracks" : view_has_top_tracks,
         "has_left_tracks" : view_has_left_tracks,
         "has_center_content" : view_has_center_content,
         "center_chromsize_index" : view_center_chromsize_index,
@@ -1130,11 +1168,11 @@ def add_2d_file(views, new_content, viewconfig_info):
             add_zoom_lock_if_needed(viewconfig_info["higlass_viewconfig"], view, viewconfig_info["first_view_location_and_zoom"])
     return views, ""
 
-def create_2d_content(file, type):
+def create_2d_content(file, viewtype):
     """ Generates a 2D track.
     Args:
         file(dict): Information about the given file.
-        type(string): The desired content type.
+        viewtype(string): The desired content type.
 
     Returns:
         A dictionary that describes the content.
@@ -1143,7 +1181,7 @@ def create_2d_content(file, type):
 
     contents["tilesetUid"] = file["higlass_uid"]
     contents["name"] = file["display_title"]
-    contents["type"] = type
+    contents["type"] = viewtype
     contents["server"] = "https://higlass.4dnucleome.org/api/v1"
 
     # Add specific information for this file.

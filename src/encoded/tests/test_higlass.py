@@ -427,6 +427,24 @@ def test_add_mcool(testapp, higlass_blank_viewconf, mcool_file_json):
     if "tilesetUid" in contents and contents[0]["tilesetUid"] == mcool_file_json['higlass_uid']:
         assert_true(track["type"] == "heatmap")
 
+    # Check the initial domain to make sure the view is centered.
+    assert_true(
+        abs(view["initialXDomain"][0] + 681380342) < 100,
+        "initialXDomain left side is wrong. Should be around -681380342, instead got " + str(view["initialXDomain"][0])
+    )
+    assert_true(
+        abs(view["initialXDomain"][1] - 3406901712) < 100,
+        "initialXDomain right side is wrong. Should be around 3406901712, instead got " + str(view["initialXDomain"][1])
+    )
+    assert_true(
+        abs(view["initialYDomain"][0] + 681380342) < 100,
+        "initialYDomain top side is wrong. Should be around -681380342, instead got " + str(view["initialYDomain"][0])
+    )
+    assert_true(
+        abs(view["initialYDomain"][1] - 3406901712) < 100,
+        "initialYDomain bottom side is wrong. Should be around 3406901712, instead got " + str(view["initialYDomain"][1])
+    )
+
 def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
 
