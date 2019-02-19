@@ -147,7 +147,7 @@
     ]
  },
  {
-   "uuid": "9866d158-da3c-4d9b-96a9-1d59632eabeb",
+   "uuid": "4a6d10ee-2edb-4402-a98f-0edb1d58f5e9",
    "description": "Full chromosome sizes file for the human genome reference GRCh38",
    "file_classification": "ancillary file",
    "aliases": [
@@ -155,7 +155,7 @@
    ],
    "accession": "4DNFIZJB62D1",
    "filename": "GRCh38.full.chrom.sizes",
-   "higlass_uid": "NThJBk8mSnqaTzeDaWL-kg",
+   "higlass_uid": "JXbq7f-GTeq3FJy_ilIomQ",
    "award": "1U01CA200059-01",
    "status": "released",
    "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
