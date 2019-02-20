@@ -34,7 +34,7 @@ export class SortController extends React.Component {
      */
     static getPageAndLimitFromURL(href){
         var urlParts = url.parse(href, true);
-        var limit = parseInt(urlParts.query.limit || Filters.getLimit() || 25);
+        var limit = parseInt(urlParts.query.limit || Filters.getters.limit() || 25);
         var from  = parseInt(urlParts.query.from  || 0);
         if (isNaN(limit)) limit = 25;
         if (isNaN(from)) from = 0;
@@ -71,7 +71,7 @@ export class SortController extends React.Component {
         // State
 
         // Have Filters use our state.limit, until another component overrides.
-        Filters.getLimit = function(){
+        Filters.getters.limit = function(){
             return (this && this.state && this.state.limit) || 25;
         }.bind(this);
 
@@ -155,7 +155,7 @@ export class SortController extends React.Component {
         if (typeof urlParts.query.limit === 'number'){
             urlParts.query.from = (urlParts.query.limit * (page - 1)) + '';
         } else {
-            urlParts.query.from = (Filters.getLimit() * (page - 1)) + '';
+            urlParts.query.from = (Filters.getters.limit() * (page - 1)) + '';
         }
         urlParts.search = '?' + queryString.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{

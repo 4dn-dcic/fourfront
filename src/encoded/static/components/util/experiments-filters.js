@@ -12,10 +12,17 @@ import * as object from './object';
 import * as Schemas from './Schemas';
 import { navigate } from './navigate';
 
-
+/*
 export let getSchemas = null;
 export let getPage =  function(){ return 1;  };
 export let getLimit = function(){ return 25; };
+*/
+
+export const getters = {
+    'schemas' : null,
+    'page' : function(){ return 1; },
+    'limit' : function(){ return 25; }
+};
 
 
 

@@ -1,6 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var env = process.env.NODE_ENV;
+var TerserPlugin = require('terser-webpack-plugin');
 
 var PATHS = {
     static: path.resolve(__dirname, 'src/encoded/static'),
@@ -30,20 +31,13 @@ if (env === 'production') {
             'NODE_ENV': '"production"'
         }
     }));
-    // uglify code for production
-    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true, compress: { warnings: false}}));
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
 } else if (env === 'quick') {
     devTool = 'eval'; // Fastest
-} else if (env === 'quick-uglified') {
-    // Uglify JS for dev as well on task 'npm run dev-uglified' -
-    // slightly slower but reduces invariant violations where
-    // client-side render != server-side reason (*perhaps* allowing clientside JS to exec faster)
-    // set 'beautify : true' to get nicer output (whitespace, linebreaks) for debugging.
-    plugins.push(new webpack.optimize.UglifyJsPlugin({compress: false, mangle: false, minimize: false, sourceMap: true}));
-    devTool = 'source-map';
+} else if (env === 'development') {
+    devTool = 'inline-source-map';
 }
 
 var rules = [
@@ -76,7 +70,17 @@ var resolve = {
 };
 
 var optimization = {
-    minimize: mode === "production"
+    minimize: mode === "production",
+    minimizer: [
+        new TerserPlugin({
+            parallel: true,
+            terserOptions:{
+                compress: true,
+                mangle: true,
+                sourceMap: true
+            }
+        })
+    ]
 };
 
 
@@ -144,7 +148,7 @@ module.exports = [
         output: {
             path: PATHS.build,
             filename: '[name].js',
-            libraryTarget: 'commonjs2',
+            libraryTarget: 'umd',
             chunkFilename: chunkFilename,
         },
         module: {

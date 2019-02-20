@@ -92,6 +92,6 @@ var render = function (Component, body, res) {
 };
 
 
-module.exports.build = function (Component) {
+export function build(Component) {
     return transformResponse(render.bind(render, Component));
 };
