@@ -68,6 +68,13 @@
             "lookup": 95,
             "linkTo": "Target"
         },
+        "tagging_rounds": {
+            "title": "Tagging Rounds",
+            "description": "Number of rounds of split-pool tagging (for SPRITE)",
+            "type": "integer",
+            "lookup": 96,
+            "use_for": ["DNA SPRITE", "RNA-DNA SPRITE"]
+        },
         "reaction_time": {
             "title": "Reaction Time (min)",
             "description": "Time of a reaction in minutes eg. Digestion time in CUT&RUN experiments",
