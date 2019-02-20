@@ -1064,7 +1064,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
             if view_content_info["center_chromsize_index"] != None:
                 view["tracks"]["center"][0]["contents"][view_content_info["center_chromsize_index"]] =  new_tracks_by_side["center"]
             else:
-                view["tracks"]["center"][0]["contents"].insert(0, new_tracks_by_side["center"])
+                view["tracks"]["center"][0]["contents"].append(new_tracks_by_side["center"])
     return views, ""
 
 def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info):

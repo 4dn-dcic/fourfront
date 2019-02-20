@@ -1730,3 +1730,89 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json, bigwig
     left_chromsizes_tracks = [t for t in restored_2d_track_higlass_json["views"][0]["tracks"]["left"] if t["type"] == "vertical-chromosome-labels"]
     assert_true(left_chromsizes_tracks[0]["width"] == 50, "Left chromsize track has no width")
     assert_true("height" not in left_chromsizes_tracks[0], "Left chromsize track still has a height")
+
+def test_2d_chromsize_always_last_track(testapp, higlass_blank_viewconf, mcool_file_json, chromsizes_file_json):
+    """ 2d-chromsize-grid tracks need to be the last center track, or other tracks will occlude them during rendering.
+
+    Args:
+        testapp(obj): This object can make RESTful API calls to the test server.
+        higlass_blank_viewconf(obj): Empty Higlass view
+        mcool_file_json(dict): Fixture refers to an mcool file.
+        chromsizes_file_json(dict): Fixture refers to a chromsizes file.
+
+    Returns:
+        Nothing
+
+    Raises:
+        AssertionError if the test fails.
+    """
+
+    genome_assembly = "GRCm38"
+
+    # Post an mcool file and retrieve its uuid. Add a higlass_uid.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = genome_assembly
+    mcool_file = testapp.post_json('/file_processed', mcool_file_json).json['@graph'][0]
+
+    # Add the chromsizes file.
+    chromsizes_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    chromsizes_file_json['md5sum'] = '00000000000000000000000000000001'
+    chromsizes_file_json['genome_assembly'] = genome_assembly
+    chrom_file = testapp.post_json('/file_reference', chromsizes_file_json).json['@graph'][0]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Add an mcool file, then add the chromsize file.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': [
+            "{uuid}".format(uuid=mcool_file['uuid']),
+        ]
+    })
+
+    step1a_viewconfig = response.json["new_viewconfig"]
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': step1a_viewconfig,
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': [
+            "{uuid}".format(uuid=chrom_file['uuid']),
+        ]
+    })
+
+    # Center track should have a mcool heatmat and a chromsize grid, in that order.
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    mcool_first_viewconf = response.json["new_viewconfig"]
+    print(mcool_first_viewconf)
+    assert_true(len(mcool_first_viewconf["views"]) == 1)
+    assert_true(len(mcool_first_viewconf["views"][0]['tracks']['center']) == 1)
+    assert_true(len(mcool_first_viewconf["views"][0]['tracks']['center'][0]["contents"]) == 2)
+    assert_true(mcool_first_viewconf["views"][0]['tracks']['center'][0]["contents"][0]["type"] == "heatmap")
+    assert_true(mcool_first_viewconf["views"][0]['tracks']['center'][0]["contents"][1]["type"] == "2d-chromosome-grid")
+
+    # Add another mcool file.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': mcool_first_viewconf,
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': [
+            "{uuid}".format(uuid=mcool_file['uuid']),
+        ]
+    })
+
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    mcool_two_viewconf = response.json["new_viewconfig"]
+
+    # There should be two views.
+    assert_true(len(mcool_two_viewconf["views"]) == 2)
+
+    # The second view's center track should have a mcool heatmat and a chromsize grid, in that order.
+    assert_true(len(mcool_two_viewconf["views"][1]['tracks']['center']) == 1)
+    assert_true(len(mcool_two_viewconf["views"][1]['tracks']['center'][0]["contents"]) == 2)
+    assert_true(mcool_two_viewconf["views"][1]['tracks']['center'][0]["contents"][0]["type"] == "heatmap")
+    assert_true(mcool_two_viewconf["views"][1]['tracks']['center'][0]["contents"][1]["type"] == "2d-chromosome-grid")
