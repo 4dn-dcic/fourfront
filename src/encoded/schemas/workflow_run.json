@@ -25,7 +25,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "title": {
             "title": "Title",
@@ -121,35 +121,6 @@
                         "description": "a specified output report",
                         "type": "string",
                         "linkTo": "QualityMetric"
-                    }
-                }
-            }
-        },
-        "output_quality_metrics": {
-            "title" : "Output quality metrics",
-            "description": "All quality metric objects that are outputs of the workflow run",
-            "comments": "DEPRECATED - THIS IS BEING PRESERVED ONLY TO HANDLE EXISTING ITEMS UNTIL PATCHED",
-            "type": "array",
-            "items": {
-                "title": "Output quality metric",
-                "description": "output quality metric object",
-                "type": "object",
-                "additionalProperties": false,
-                "properties":{
-                    "name": {
-                        "title": "Name (type) of quality metric",
-                        "description": "quality metric identifier",
-                        "type": "string"
-                    },
-                    "workflow_argument_name" : {
-                        "title": "Workflow argument name",
-                        "description": "Argument name of node in workflow that corresponds to the output file",
-                        "type": "string"
-                    },
-                    "value": {
-                        "title": "Link to quality metric object",
-                        "description": "a specific quality metric object",
-                        "type": "string"
                     }
                 }
             }

@@ -57,7 +57,8 @@
                 "cryomilling TCC",
                 "single cell Hi-C",
                 "sci-Hi-C",
-                "MC-3C"
+                "MC-3C",
+                "MC-Hi-C"
             ]
         },
         "crosslinking_method": {
