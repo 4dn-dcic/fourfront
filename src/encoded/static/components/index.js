@@ -6,11 +6,13 @@
  * @file
  * @alias module:app
  */
-
+/*
 require('./lib');
 require('./util');
 require('./viz/utilities');
 require('./footer');
+require('./globals');
+*/
 require('./globals');
 require('./static-pages/StaticPage');
 require('./static-pages/DirectoryPage');
