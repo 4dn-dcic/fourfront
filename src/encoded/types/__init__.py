@@ -99,6 +99,7 @@ class Enzyme(Item):
 @collection(
     name='experiment-types',
     unique_key='experiment_type:experiment_name',
+    lookup_key='title',
     properties={
         'title': 'Experiment Types',
         'description': 'Listing of experiment types for 4DN items',
