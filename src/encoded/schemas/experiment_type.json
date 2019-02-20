@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["title"],
-    "identifyingProperties": ["experiment_name", "uuid", "aliases"],
+    "identifyingProperties": ["experiment_name", "uuid"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -68,7 +68,7 @@
             "title": "Assay Classification",
             "description": "Classification of assay type",
             "type": "string",
-            "enum": [
+            "suggested_enum": [
                 "Linear DNA Enrichment",
                 "3C via Ligation",
                 "Ligation-free Multi-fragment 3C",
@@ -81,7 +81,7 @@
             "title": "Assay Sub-classification",
             "description": "Sub-classification of assay based on what is measured",
             "type": "string",
-            "enum": [
+            "suggested_enum": [
                 "Replication Timing",
                 "Proximity to Organelle",
                 "DNA Binding",
@@ -108,11 +108,11 @@
                 "type":  "string"
             }
         },
-        "raw_files": {
+        "raw_file_types": {
             "title": "Raw Files",
             "description": "The type of raw files typically associated with the experiment type in the portal",
             "type": "string",
-            "enum": ["Reads (fastq) provided by lab"]
+            "suggested_enum": ["Reads (fastq) provided by lab"]
         },
         "sop": {
             "title": "SOP",
