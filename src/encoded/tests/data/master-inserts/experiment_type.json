@@ -27,7 +27,7 @@
         "title": "Capture Hi-C",
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
-        "assay_subclassification": "DNA-DNA Multiway Interactions of Selected Loci",
+        "assay_subclassification": "DNA-DNA Multi-way Interactions of Selected Loci",
         "raw_files": "Reads (fastq) provided by lab",
         "uuid": "d17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
