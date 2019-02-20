@@ -4,7 +4,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -12,7 +12,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "b17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -20,7 +20,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
         "assay_subclassification": "Open Chromatin",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "c17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -28,7 +28,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Multi-way Interactions of Selected Loci",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "d17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -36,7 +36,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Pairwise Interactions of Enriched Regions",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "e17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -44,7 +44,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Pairwise Interactions of Enriched Regions",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "f17b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -52,7 +52,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
         "assay_subclassification": "Proximity to Organelle",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "a27b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -67,7 +67,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
         "assay_subclassification": "Replication Timing",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "c27b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -75,7 +75,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
         "assay_subclassification": "Proximity to Organelle",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "d27b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -83,7 +83,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
         "assay_subclassification": "DNA Binding",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "e27b17cd-544a-3a3b-abc3-17a544544b3c"
     },
     {
@@ -91,7 +91,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
         "assay_subclassification": "DNA Binding",
-        "raw_files": "Reads (fastq) provided by lab",
+        "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "f27b17cd-544a-3a3b-abc3-17a544544b3c"
     }
 ]
