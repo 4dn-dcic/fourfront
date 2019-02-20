@@ -3,7 +3,7 @@
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault import (
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
     CONNECTION
@@ -112,25 +112,22 @@ class ExperimentType(Item):
     rev = {
         'additional_protocols': ('Protocol', 'experiment_type')
     }
-    embedded_list = [
-        "static_headers.content",
-        "static_headers.title",
-        "static_headers.filetype",
-        "static_headers.section_type",
-        "static_headers.options.default_open",
-        "static_headers.options.title_icon"
-        ]
+
+    @calculated_property(schema={
+        "title": "Other Protocols",
+        "description": "Other protocols associated with this experiment type besides the SOP",
+        "type": "string",
+        "linkTo": "Protocol"
+    })
+    def other_protocols(self, request, sop=None):
+        protocol_paths = self.rev_link_atids(request, 'additional_protocols')
+        protocols = [request.embed('/', path, '@@object') for path in protocol_paths if path != sop]
+        if protocols:
+            return protocols
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
         properties['experiment_name'] = set_namekey_from_title(properties)
-
-        static_keys = ['processed_files', 'assay_description', 'data_analysis']
-        if len([properties[key] for key in static_keys if properties.get(key)]) > 0:
-            headers = [properties.get('assay_description'), properties.get('processed_files')]
-            headers += properties.get('data_analysis', [])
-            properties['static_headers'] = [header for header in headers if header]
-
         super(ExperimentType, self)._update(properties, sheets)
 
 
