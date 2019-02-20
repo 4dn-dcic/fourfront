@@ -10,7 +10,6 @@
 require('./lib');
 require('./util');
 require('./viz/utilities');
-require('./app');
 require('./footer');
 require('./globals');
 require('./static-pages/StaticPage');
@@ -41,4 +40,6 @@ require('./browse/BrowseView');
 require('./browse/SearchView');
 require('./browse/SubscriptionsView');
 
-module.exports = require('./app').default;
+const App = require('./app').default;
+
+export default App;

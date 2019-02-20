@@ -3,7 +3,7 @@
 /* jshint strict: false */
 
 if (process.env.NODE_ENV === undefined) {
-    require("babel-core/register")({
+    require("@babel/register")({
       only: ['src/encoded/static'],
     });
 } else {
@@ -15,7 +15,7 @@ require('./libs/react-patches');
 var argv = process.argv.slice(2);
 var debug = (argv[0] === '--debug');
 
-var appRendererFxn = require('./libs/react-middleware').build(require('./components'));
+var appRendererFxn = require('./libs/react-middleware').build(require('./components').default);
 var http_stream = require('subprocess-middleware').HTTPStream({app: appRendererFxn, captureConsole: !debug});
 http_stream.pipe(process.stdout);
 if (debug) {

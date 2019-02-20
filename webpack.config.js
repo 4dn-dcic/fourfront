@@ -7,11 +7,21 @@ var PATHS = {
     build: path.resolve(__dirname, 'src/encoded/static/build'),
 };
 
+var mode = (env === 'production' ? 'production' : 'development');
+
 var plugins = [];
+
 // don't include momentjs locales (large)
-plugins.push(new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]));
+plugins.push(
+    new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/
+    })
+);
+
 var chunkFilename = '[name].js';
 var devTool = 'source-map'; // Default, slowest.
+
 
 if (env === 'production') {
     // tell react to use production build
@@ -36,42 +46,48 @@ if (env === 'production') {
     devTool = 'source-map';
 }
 
-var preLoaders = [
+var rules = [
     // Strip @jsx pragma in react-forms, which makes babel abort
     {
         test: /\.js$/,
-        loader: 'string-replace',
+        loader: 'string-replace-loader',
+        enforce: 'pre',
         query: {
             search: '@jsx',
             replace: 'jsx',
         }
-    }
-];
-
-var loaders = [
+    },
     // add babel to load .js files as ES6 and transpile JSX
     {
         test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
         ],
-        loader: 'babel',
-    },
-    {
-        test: /\.json$/,
-        loader: 'json',
+        use: [
+            {
+                loader: 'babel-loader'
+            }
+        ]
     }
 ];
 
 var resolve = {
-    extensions : ["", ".webpack.js", ".web.js", ".js", ".json", '.jsx']
+    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx']
 };
+
+var optimization = {
+    minimize: mode === "production"
+};
+
 
 module.exports = [
     // for browser
     {
-        context: PATHS.static,
-        entry: {bundle: './browser'},
+        mode: mode,
+        entry: {
+            bundle: PATHS.static + '/browser',
+        },
+        target: "web",
         output: {
             path: PATHS.build,
             publicPath: '/static/build/',
@@ -79,6 +95,10 @@ module.exports = [
                                             // this library, https://www.npmjs.com/package/chunkhash-replace-webpack-plugin, to replace the <script> tag's src attribute.
                                             // For now, to prevent caching JS, we append a timestamp to JS request.
             chunkFilename: chunkFilename,
+
+            libraryTarget: "umd",
+            library: "App",
+            umdNamedDefine: true
         },
         // https://github.com/hapijs/joi/issues/665
         // stub modules on client side depended on by joi (a dependency of jwt)
@@ -91,20 +111,20 @@ module.exports = [
             {'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}'}
         ],
         module: {
-            preLoaders: preLoaders,
-            loaders: loaders,
+            rules: rules
         },
+        optimization: optimization,
         resolve : resolve,
         resolveLoader : resolve,
         devtool: devTool,
-        plugins: plugins,
-        debug: env !== 'production'
+        plugins: plugins
     },
     // for server-side rendering
     ///*
     {
+        mode: mode,
         entry: {
-            renderer: './src/encoded/static/server.js',
+            renderer: PATHS.static + '/server',
         },
         target: 'node',
         // make sure compiled modules can use original __dirname
@@ -117,7 +137,7 @@ module.exports = [
             'brace/theme/solarized_light',
             'd3',
             'dagre-d3',
-            'babel-core/register', // avoid bundling babel transpiler, which is not used at runtime
+            '@babel/register', // avoid bundling babel transpiler, which is not used at runtime
             'higlass',
             'auth0-lock'
         ],
@@ -128,14 +148,13 @@ module.exports = [
             chunkFilename: chunkFilename,
         },
         module: {
-            preLoaders: preLoaders,
-            loaders: loaders,
+            rules: rules
         },
+        optimization: optimization,
         resolve : resolve,
         resolveLoader : resolve,
         devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
-        plugins: plugins,
-        debug: false // See devtool comment.
+        plugins: plugins
     }
     //*/
 ];

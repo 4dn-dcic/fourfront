@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { isServerSide } from './misc';
 
-var DateUtility = module.exports = (function(){
+var DateUtility = (function(){
 
     // ToDo : Handle locales (w/ moment)
 
@@ -202,3 +202,7 @@ var DateUtility = module.exports = (function(){
 
     return DateUtility;
 })();
+
+export const LocalizedTime = DateUtility.LocalizedTime;
+export const format = DateUtility.format;
+export default DateUtility;

@@ -5,7 +5,7 @@ import * as aws from 'aws-sdk';
 // for a given object. upload_credentials is an object, made from /types/file.py
 // File is given from <input type=file>
 // If you return null, the upload will fail with a warning message
-var s3UploadFile = module.exports.s3UploadFile = function(file, upload_credentials){
+export function s3UploadFile(file, upload_credentials){
 
     aws.config.update({
         accessKeyId: upload_credentials.AccessKeyId,
@@ -28,4 +28,4 @@ var s3UploadFile = module.exports.s3UploadFile = function(file, upload_credentia
     var s3 = new aws.S3();
     // this function returns an uploadManager
     return s3.upload({Bucket: bucket, Key: upload_credentials.key, Body: file });
-};
+}
