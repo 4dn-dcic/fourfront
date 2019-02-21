@@ -4,7 +4,7 @@
   "description": "domready held back.",
   "scripts": {
     "test": "jest",
-    "build": "node --max-old-space-size=2048 ./node_modules/.bin/gulp build",
+    "build": "node --max-old-space-size=4096 ./node_modules/.bin/gulp build",
     "build-quick": "gulp build-quick",
     "dev": "gulp dev",
     "dev-quick": "gulp dev-quick",
