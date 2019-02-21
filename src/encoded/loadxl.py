@@ -203,9 +203,12 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         obj_type = "".join([i.title() for i in a_type.split('_')])
         # minimal schema
         schema_info = profiles[obj_type]
-        req_fields = schema_info['required']
-        ids = schema_info['identifyingProperties']
-        first_fields = list(set(req_fields+ids + ['schema_version']))
+        req_fields = schema_info.get('required', [])
+        ids = schema_info.get('identifyingProperties', [])
+        # some schemas did not include aliases
+        if 'aliases' not in ids:
+            ids.append('aliases')
+        first_fields = list(set(req_fields+ids))
         remove_existing_items = []
         posted = 0
         patched = 0
@@ -214,7 +217,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         patch_error = 0
         for an_item in store[a_type]:
             try:
-                check_req = testapp.get('/'+an_item['uuid'], status=200)
+                testapp.get('/'+an_item['uuid'], status=200)
                 exists = True
             except:
                 exists = False
@@ -231,7 +234,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 testapp.post_json('/'+a_type, post_first, status=201)
                 posted += 1
             except Exception as e:
-                logger.error(trim(e))
+                logger.error(str(trim(e)))
                 post_error += 1
 
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in remove_existing_items]
@@ -247,7 +250,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         for an_item in second_round_items[a_type]:
             an_item = format_for_attachment(an_item, docsdir)
             try:
-                testapp.patch_json('/'+an_item['uuid'], an_item, status=201)
+                testapp.patch_json('/'+an_item['uuid'], an_item, status=200)
                 patched += 1
             except Exception as e:
                 logger.error(trim(e))
@@ -319,7 +322,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False,  overwrite=True):
     '''
     This function will take the inserts folder as input, and place them to the given environment.
     args:
@@ -366,23 +369,43 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
         if not docsdir.endswith('/'):
             docsdir += '/'
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
-    load_all(testapp, inserts, docsdir)
+    load_all(testapp, inserts, docsdir, overwrite=overwrite)
     keys = generate_access_key(testapp, access_key_loc)
     store_keys(app, access_key_loc, keys)
 
 
 def load_test_data(app, access_key_loc=None, clear_tables=False):
+    """
+    Load inserts and master-inserts
+    """
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
               clear_tables=clear_tables)
 
 
+def load_local_data(app, access_key_loc=None, clear_tables=False):
+    """
+    Load temp-local-inserts. If not present, load inserts and master-inserts
+    """
+    from pkg_resources import resource_filename
+    # if we have any json files in temp-local-inserts, use those
+    chk_dir = resource_filename('encoded', 'tests/data/temp-local-inserts')
+    use_temp_local = False
+    for (dirpath, dirnames, filenames) in os.walk(chk_dir):
+        use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
+
+    if use_temp_local:
+        load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
+                  clear_tables=clear_tables, use_master_inserts=False)
+    else:
+        load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                  clear_tables=clear_tables)
+
+
 def load_prod_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='prod-inserts',
-              clear_tables=clear_tables)
-
-
-def load_wfr_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
+    """
+    Load master-inserts
+    """
+    load_data(app, access_key_loc, indir='master-inserts',
               clear_tables=clear_tables)
 
 
