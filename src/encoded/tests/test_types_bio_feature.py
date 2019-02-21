@@ -131,7 +131,7 @@ def multi_species_including_unkorg_gene_bio_feature(
 
 
 @pytest.fixture
-def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_region):
+def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_region, human):
     item = {'award': award['@id'],
             'lab': lab['@id'],
             'description': 'Test Region BioFeature',
@@ -212,5 +212,26 @@ def test_bio_feature_display_title_multi_w_unknown_organism(
     assert multi_species_including_unkorg_gene_bio_feature.get('display_title') == 'ARMCX4, RAD21 genes multiple organisms'
 
 
-def test_bio_feature_organism_name(mouse_gene_bio_feature, human, mouse):
-    pass
+def test_bio_feature_organism_name_from_gene(mouse_gene_bio_feature):
+    assert mouse_gene_bio_feature.get('organism_name') == 'mouse'
+
+
+def test_bio_feature_organism_name_gene_unk_organism(armadillo_gene_bio_feature):
+    assert 'organism_name' not in armadillo_gene_bio_feature
+
+
+def test_bio_feature_organism_name_genomic_region_w_assembly(genomic_region_bio_feature):
+    assert genomic_region_bio_feature.get('organism_name') == 'human'
+
+
+def test_bio_feature_organism_name_multispecies(
+        multi_species_including_unkorg_gene_bio_feature, multi_species_gene_bio_feature):
+    assert multi_species_including_unkorg_gene_bio_feature.get('organism_name') == 'multiple organisms'
+    assert multi_species_gene_bio_feature.get('organism_name') == 'multiple organisms'
+
+
+def test_bio_feature_organism_name_w_override(testapp, armadillo_gene_bio_feature):
+    oname = 'Fancy armadillo'
+    assert 'organism_name' not in armadillo_gene_bio_feature
+    res = testapp.patch_json(armadillo_gene_bio_feature['@id'], {'override_organism_name': oname}, status=200)
+    assert res.json['@graph'][0].get('organism_name') == oname
