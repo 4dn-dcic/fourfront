@@ -19,7 +19,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-08 13:58:14.732369",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXNT6XXHX",
         "public_release": "2018-06-13",
@@ -99,7 +99,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-06-07 19:38:54.456715",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFI8FFGW1D_4DNFIELODJVM33b38fce-73ee-46b4-bb99-21d69a93e155",
         "public_release": "2018-06-13",
@@ -148,15 +148,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:28:16.682781",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFI8FFGW1D",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "a6ca4f65-b738-4350-bdbe-8e0b75a89c85"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/a6ca4f65-b738-4350-bdbe-8e0b75a89c85/",
@@ -191,7 +185,7 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/9otrz0LV86LQ.postrun.json",
-        "schema_version": "1",
+        "schema_version": "3",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "run_platform": "AWSEM",
         "date_created": "2018-05-29T16:17:03.280484+00:00",
@@ -220,15 +214,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:20:05.884287",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIELODJVM",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "6cda9262-c4f1-4c23-b413-3ae76cc0a41b"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/6cda9262-c4f1-4c23-b413-3ae76cc0a41b/",
@@ -260,7 +248,7 @@
         "title": "md5 run 2018-05-29 17:16:48.090186",
         "description_only": false,
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
-        "schema_version": "1",
+        "schema_version": "3",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -308,15 +296,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:56:56.977521",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFICLCWWLH",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "d048c98a-a370-4750-8356-e14b3f05d18a"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/d048c98a-a370-4750-8356-e14b3f05d18a/",
@@ -364,7 +346,7 @@
         ],
         "title": "hi-c-processing-pairs 0.2.5 run 2018-06-11 17:10:41.474153",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-pairs_4DNESKKSKG7Y",
         "public_release": "2018-06-13",
@@ -472,7 +454,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:15:26.481370",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXB65W9GS",
         "public_release": "2018-06-13",
@@ -547,7 +529,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:21:55.511247",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFIYLQUX3N_4DNFI2TXU67D",
         "public_release": "2018-06-13",
@@ -596,15 +578,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:27:15.341479",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIYLQUX3N",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "a63513e6-bb28-4d5e-8def-c3f7fb220e97"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/a63513e6-bb28-4d5e-8def-c3f7fb220e97/",
@@ -636,7 +612,7 @@
         "title": "md5 run 2018-05-29 16:28:19.676986",
         "description_only": false,
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
-        "schema_version": "1",
+        "schema_version": "3",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -668,15 +644,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:19:04.624805",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFI2TXU67D",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "d254c8c1-1456-4123-a4df-ec8c0a95895d"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/d254c8c1-1456-4123-a4df-ec8c0a95895d/",
@@ -711,7 +681,7 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/m5MSzyAqO3zZ.postrun.json",
-        "schema_version": "1",
+        "schema_version": "3",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "run_platform": "AWSEM",
         "date_created": "2018-05-29T17:31:13.595919+00:00",
@@ -756,15 +726,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:17.558963",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIBDZ8KDQce2e36ab-4d6f-47b5-9c7a-ad6f3656de2c",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "0397bc5c-1a4f-4370-959b-f39407d7e438"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/0397bc5c-1a4f-4370-959b-f39407d7e438/",
@@ -812,7 +776,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:14:47.619428",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXLWC9JX7",
         "public_release": "2018-06-07",
@@ -887,7 +851,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:21:21.628625",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFI3C4KK9M_4DNFIZXMF559",
         "public_release": "2018-06-07",
@@ -936,15 +900,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:26:14.003451",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFI3C4KK9M",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "1f4ba632-b8cd-4c9f-9c6e-61de0534c24c"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/1f4ba632-b8cd-4c9f-9c6e-61de0534c24c/",
@@ -975,7 +933,7 @@
         "parameters": [],
         "title": "md5 run 2018-05-29 16:35:32.501568",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "awsem_job_id": "",
         "awsem_app_name": "md5",
@@ -1008,15 +966,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:18:02.404608",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIZXMF559",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "c3aeeda6-576d-458d-aa82-bf7587cc350c"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/c3aeeda6-576d-458d-aa82-bf7587cc350c/",
@@ -1047,7 +999,7 @@
         "parameters": [],
         "title": "md5 run 2018-05-29 17:39:59.265466",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "awsem_job_id": "",
         "awsem_app_name": "md5",
@@ -1096,15 +1048,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:31.613665",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIYRP9RLI0eba4119-f80a-4c5a-b698-2a8f6555319c",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "8ce03740-0cd3-4469-9b86-a89bbe4afb46"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/8ce03740-0cd3-4469-9b86-a89bbe4afb46/",
@@ -1152,7 +1098,7 @@
         ],
         "title": "hi-c-processing-pairs 0.2.5 run 2018-06-05 14:25:46.470769",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-pairs_4DNESQMM4EBN",
         "public_release": "2018-06-07",
@@ -1260,7 +1206,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:20:09.742391",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXU87YSSY",
         "public_release": "2018-06-07",
@@ -1335,7 +1281,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:20:49.151518",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFIWCIOQ34_4DNFIFPMXXQY",
         "public_release": "2018-06-07",
@@ -1384,15 +1330,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:25:12.580554",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIWCIOQ34",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "7718010e-9675-42bc-9dc3-86c0c711f5b3"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/7718010e-9675-42bc-9dc3-86c0c711f5b3/",
@@ -1423,7 +1363,7 @@
         "parameters": [],
         "title": "md5 run 2018-05-29 16:38:59.314495",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "awsem_job_id": "",
         "awsem_app_name": "md5",
@@ -1456,15 +1396,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:17:01.443493",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIFPMXXQY",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "538a098c-8fe9-4e75-b567-5fa3f360da67"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/538a098c-8fe9-4e75-b567-5fa3f360da67/",
@@ -1495,7 +1429,7 @@
         "parameters": [],
         "title": "md5 run 2018-05-29 17:43:38.329105",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "awsem_job_id": "",
         "awsem_app_name": "md5",
@@ -1544,15 +1478,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:59:09.245462",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIVPADLI265f31282-897b-485f-bce2-c6b1df193acb",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "9c40b49b-643f-4776-935a-a6f1d87fcb75"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/9c40b49b-643f-4776-935a-a6f1d87fcb75/",
@@ -1605,15 +1533,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:57:25.721044",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFI3Y5YTC6",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "a194ac70-afc3-4dff-9f9c-becf221dec91"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/a194ac70-afc3-4dff-9f9c-becf221dec91/",
@@ -1661,7 +1583,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:14:05.069591",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXVGS8FQQ",
         "public_release": "2018-06-07",
@@ -1736,7 +1658,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:25:12.985904",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFIUGHDYE8_4DNFIIQB1R6Xad0cca86-1733-49f8-bd3f-463eb68c30f7",
         "public_release": "2018-06-07",
@@ -1785,15 +1707,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:24:11.380798",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIUGHDYE8",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "fc14cd1b-a253-40c2-81fb-999074745ad6"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/fc14cd1b-a253-40c2-81fb-999074745ad6/",
@@ -1825,7 +1741,7 @@
         "title": "md5 run 2018-05-29 16:45:37.581359",
         "description_only": false,
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
-        "schema_version": "1",
+        "schema_version": "3",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -1857,15 +1773,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:15:59.425005",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIIQB1R6X",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "5f80e593-9618-4d29-98e5-2d575415c9da"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/5f80e593-9618-4d29-98e5-2d575415c9da/",
@@ -1897,7 +1807,7 @@
         "title": "md5 run 2018-05-29 17:52:10.590438",
         "description_only": false,
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
-        "schema_version": "1",
+        "schema_version": "3",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -1945,15 +1855,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:44.600953",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIKYF3V7If0a526f5-254a-4f1d-99d6-d9f647a75077",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "93451a27-04ea-4d62-84b9-b6c22253d0b2"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/93451a27-04ea-4d62-84b9-b6c22253d0b2/",
@@ -2001,7 +1905,7 @@
         ],
         "title": "hi-c-processing-pairs 0.2.5 run 2018-06-05 14:25:01.061900",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-pairs_4DNESWDLDMGN",
         "public_release": "2018-06-07",
@@ -2109,7 +2013,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:19:31.454830",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXA7ZMMK3",
         "public_release": "2018-06-07",
@@ -2184,7 +2088,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:19:43.063394",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFI6CU7V24_4DNFI67MVM1D",
         "public_release": "2018-06-07",
@@ -2233,15 +2137,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:23:10.082200",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFI6CU7V24",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "e2d46255-ae16-41f2-8b8d-3a727e9cdd3b"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/e2d46255-ae16-41f2-8b8d-3a727e9cdd3b/",
@@ -2274,7 +2172,7 @@
         "aliases": [],
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
@@ -2305,15 +2203,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:14:57.723638",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFI67MVM1D",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "5ed9129d-ecef-47f0-abfc-883e0ce734df"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/5ed9129d-ecef-47f0-abfc-883e0ce734df/",
@@ -2346,7 +2238,7 @@
         "aliases": [],
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
@@ -2393,15 +2285,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:59:26.448952",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIVMRIR5Hb1be1eb1-0c71-4ccd-971c-689dbb9fcbba",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "6616d374-32bd-46a4-b8b3-5d12fe4e995c"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/6616d374-32bd-46a4-b8b3-5d12fe4e995c/",
@@ -2454,15 +2340,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:57:39.478999",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIDHNCVEM",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "5c24f96b-0d09-4d2d-8661-cac7f2d7eb0e"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/5c24f96b-0d09-4d2d-8661-cac7f2d7eb0e/",
@@ -2510,7 +2390,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 13:13:22.324937",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEXRI9JYW6",
         "public_release": "2018-06-07",
@@ -2585,7 +2465,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:19:08.490720",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFIACGSJ6Y_4DNFIE6CHISE",
         "public_release": "2018-06-07",
@@ -2634,15 +2514,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:22:09.053037",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIACGSJ6Y",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "2579f50f-2004-4c54-b5cf-7cf6cc9d74f2"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/2579f50f-2004-4c54-b5cf-7cf6cc9d74f2/",
@@ -2675,7 +2549,7 @@
         "parameters": [],
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
@@ -2706,15 +2580,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:11:32.938254",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIE6CHISE",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "d8ed2336-a9ad-4cb2-b839-f7283c0aba69"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/d8ed2336-a9ad-4cb2-b839-f7283c0aba69/",
@@ -2746,7 +2614,7 @@
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "description_only": false,
         "title": "md5 run 2018-05-29 18:04:37.536842",
-        "schema_version": "1",
+        "schema_version": "3",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "awsem_job_id": "",
         "awsem_app_name": "md5",
@@ -2794,15 +2662,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:58:57.058974",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFI6S3I9XZf0864eab-debf-4db7-a558-c5ae214f6cf3",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "8a5c7242-1f68-44bb-88a6-57595a7397e0"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/8a5c7242-1f68-44bb-88a6-57595a7397e0/",
@@ -2850,7 +2712,7 @@
         ],
         "title": "hi-c-processing-pairs 0.2.5 run 2018-06-05 14:24:17.836789",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-pairs_4DNES1QUXG92",
         "public_release": "2018-06-07",
@@ -2958,7 +2820,7 @@
         ],
         "title": "hi-c-processing-bam 0.2.5 run 2018-06-01 01:18:46.916947",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:hi-c-processing-bam_4DNEX4J4Z9WE",
         "public_release": "2018-06-07",
@@ -3033,7 +2895,7 @@
         ],
         "title": "bwa-mem 0.2.5 run 2018-05-31 17:18:35.326338",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:bwa-mem_4DNFISZ9R28D_4DNFIK862O38",
         "public_release": "2018-06-07",
@@ -3082,15 +2944,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 20:21:07.449093",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFISZ9R28D",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "8eeda6b3-947f-4c88-a2cf-0a910aabe19d"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/8eeda6b3-947f-4c88-a2cf-0a910aabe19d/",
@@ -3122,7 +2978,7 @@
         "title": "md5 run 2018-05-29 17:01:19.784141",
         "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/lmPohWnJHaUn.postrun.json",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -3154,15 +3010,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 19:50:58.444255",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIK862O383c474776-6e36-4153-902f-4abb5fd19499",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "e028d0d6-4222-450b-8a52-050a8d07aabc"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/e028d0d6-4222-450b-8a52-050a8d07aabc/",
@@ -3194,15 +3044,9 @@
         "parameters": [],
         "title": "fastqc-0-11-4-1  run 2018-05-30 19:35:54.368169",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIK862O38fea97cd6-371a-442a-b751-fd9301538be8",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_fastqc",
-                "value": "959d5ddd-c034-46fc-a9a3-d59a6fab7094"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-fastqc/959d5ddd-c034-46fc-a9a3-d59a6fab7094/",
@@ -3235,7 +3079,7 @@
         "description_only": false,
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
         "uuid": "376abbf7-7ebb-4ec2-8710-d14a4759559b",
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIK862O38aac38b13-b837-4984-a0eb-331726465bac",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -3268,7 +3112,7 @@
         "description_only": false,
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
         "uuid": "944c7588-c8c6-4c6b-a306-550452979661",
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:fastqc-0-11-4-1_4DNFIK862O38",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -3316,15 +3160,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:59:37.918968",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIUZJOJW9bc41cc3a-a045-4471-919e-bb2bc528a1b8",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "4cbe624e-c8ba-4793-ae92-c2d39f9c1af0"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/4cbe624e-c8ba-4793-ae92-c2d39f9c1af0/",
@@ -3377,15 +3215,9 @@
         ],
         "title": "pairsqc-single 0.2.5 run 2018-06-22 17:57:50.329081",
         "description_only": false,
-        "schema_version": "1",
+        "schema_version": "3",
         "awsem_job_id": "",
         "run_url": "https://console.aws.amazon.com/states/home?region=us-east-1#/executions/details/arn:aws:states:us-east-1:643366669028:execution:tibanna_pony:pairsqc-single_4DNFIW3YHQXS",
-        "output_quality_metrics": [
-            {
-                "name": "quality_metric_pairsqc",
-                "value": "3fe85883-38ec-4161-8d93-8f22b5880ba2"
-            }
-        ],
         "output_files": [
             {
                 "value_qc": "/quality-metrics-pairsqc/3fe85883-38ec-4161-8d93-8f22b5880ba2/",
