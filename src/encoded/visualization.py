@@ -433,23 +433,20 @@ def add_files_to_higlass_viewconf(request):
             remove_unneeded_tracks(boolean, optional, default=False): If True, we'll remove tracks that are not needed for the view.
 
     Returns:
-        {
+        A dictionary.
             success(bool)           : Boolean indicating success.
             errors(str)             : A string containing errors. Will be None if this is successful.
             new_viewconfig(dict)    : New dict representing the new viewconfig.
             new_genome_assembly(str): A string showing the new genome assembly.
-        }
     """
 
-    # Get the viewconfig and its genome assembly. If none is provided, use the default empty higlass viewconf.
+    # Get the view config and its genome assembly. (Use a fall back if none was provided.)
     higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
-    current_genome_assembly = request.json_body.get('genome_assembly', None)
-    remove_unneeded_tracks = request.json_body.get('remove_unneeded_tracks', None)
     if not higlass_viewconfig:
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
-        current_genome_assembly = None
 
+    # If no view config could be found, fail
     if not higlass_viewconfig:
         return {
             "success" : False,
@@ -458,26 +455,29 @@ def add_files_to_higlass_viewconf(request):
             "new_genome_assembly" : None
         }
 
-    first_view_location_and_zoom = request.json_body.get('firstViewLocationAndZoom', [None, None, None])
-
-    # Get the file list.
-    files = request.json_body.get('files')
-    if not isinstance(files, list):
+    # Get the list of files.
+    file_uuids = request.json_body.get('files')
+    if not isinstance(file_uuids, list):
         raise Exception("Expecting list of files.")
 
-    new_file_uuids = files
-    new_views = higlass_viewconfig["views"]
+    # Collect other parameters from the request.
+    first_view_location_and_zoom = request.json_body.get('firstViewLocationAndZoom', [None, None, None])
+    remove_unneeded_tracks = request.json_body.get('remove_unneeded_tracks', None)
+    genome_assembly = request.json_body.get('genome_assembly', None)
 
-    # Get all of the file information.
-    files_info = []
-    for file_uuid in new_file_uuids:
-        files_info.append({
-            "uuid" : file_uuid,
-            "item" : get_item_if_you_can(request, file_uuid),
-        })
+    # Collect more info on each file.
+    files_info, errors = get_file_higlass_information(request, file_uuids)
+    if errors:
+        return {
+            "success" : False,
+            "errors" : errors,
+            "new_viewconfig": None,
+            "new_genome_assembly" : None
+        }
 
-    # Scan the files to make sure they exist and have the expected fields.
-    validation_check = check_files_for_higlass(files_info, current_genome_assembly)
+    # Validate the files to make sure they exist and have the correct genome assemblies.
+    validation_check = validate_higlass_file_sources(files_info, genome_assembly)
+
     if not validation_check["success"]:
         return_keys = ("success", "errors")
         error_response = { key:validation_check[key] for key in return_keys if key in validation_check }
@@ -486,379 +486,254 @@ def add_files_to_higlass_viewconf(request):
         return error_response
 
     # Extract the current_genome_assembly from the validation check.
-    current_genome_assembly = validation_check["current_genome_assembly"]
+    genome_assembly = genome_assembly or validation_check["genome_assembly"]
 
-    for datum in files_info:
-        file_uuid = datum["uuid"]
-        new_file_dict = datum["item"]
-
-        # Try to add the new file to the given viewconf.
-        new_views, errors = add_single_file_to_higlass_viewconf(higlass_viewconfig["views"], new_file_dict, current_genome_assembly)
+    views = higlass_viewconfig["views"]
+    # For each file
+    for current_file in files_info:
+        # Try to add this file to the current views.
+        views, errors = add_single_file_to_higlass_viewconf(views, current_file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom)
 
         if errors:
             return {
                 "success" : False,
-                "errors" : "errors found while adding {file_uuid} : {errors}".format(file_uuid=file_uuid, errors=errors),
+                "errors" : "errors found while adding {file_uuid} : {errors}".format(file_uuid=current_file["uuid"], errors=errors),
                 "new_viewconfig": None,
                 "new_genome_assembly" : None
             }
 
-    # See if 2D chromsize files need to be added.
-    views, errors = add_2d_chromsize(new_views, files_info)
-    if errors:
-        return {
-            "success" : False,
-            "errors" : "errors found while adding chromsizes file : {errors}".format(errors=errors),
-            "new_viewconfig": None,
-            "new_genome_assembly" : None
-        }
-
-    new_views = views
-    # Resize and reposition the Higlass views.
-    repack_higlass_views(new_views)
-
-    # Set up the additional views so they all move and zoom with the first.
-    # A single view does not need a lock.
-    if len(new_views) > 1:
-        for view in new_views:
-            add_zoom_lock_if_needed(higlass_viewconfig, view, first_view_location_and_zoom)
-
     # Remove tracks that we don't need to represent this view conf.
     if remove_unneeded_tracks:
-        remove_left_side_if_all_1D(new_views)
+        remove_left_side_if_all_1D(views)
 
     higlass_viewconfig["zoomFixed"] = False
-    higlass_viewconfig["views"] = new_views
+    higlass_viewconfig["views"] = views
     return {
         "success" : True,
         "errors": "",
         "new_viewconfig" : higlass_viewconfig,
-        "new_genome_assembly" : current_genome_assembly
+        "new_genome_assembly" : genome_assembly
     }
 
-def check_files_for_higlass(files_info, current_genome_assembly):
-    """ Scan the files to make sure they exist and have the expected fields.
+def get_file_higlass_information(request, file_uuids):
+    """Retrieve the given file data and their formats.
     Args:
-        files_info(list): A list of dictionaries describing each file with a Higlass view. Each dict contains:
-            uuid(str): Unique identifier
-            item(dict): File metadata
-        current_genome_assembly(str): If not None, all of the files with genome assemblies must match this.
+        request         : Network request
+        file_uuids(list): A list of strings, where each string is a unique identifier to find a file.
 
     Returns:
-        {
+        A list of dictionaries, one for each file. They contain one of these keys:
+            uuid(string)        : The text identifier
+            data(dict)          : Information on the file.
+            file_format(string) : The type of file present.
+        A string containing an error.
+    """
+    # Collect more info on each file.
+    files_info = []
+    for file_uuid in file_uuids:
+        data = {
+            "uuid" : file_uuid,
+            "data" : get_item_if_you_can(request, file_uuid),
+        }
+
+        if data["data"] == None:
+            return [], "{uuid} does not exist, aborting".format(uuid=file_uuid)
+
+        data["file_format"] = data["data"]["file_format"]
+
+        files_info.append(data)
+
+    return files_info, ""
+
+def validate_higlass_file_sources(files_info, expected_genome_assembly):
+    """
+    Args:
+        files_info(list)            : A list of dicts. Each dict contains the
+            file's uuid and data.
+        expected_genome_assembly(str, optional, default=None): If provided,
+            each file should have this genome assembly. If it's not provided,
+            all of the files will be checked to ensure they have a matching
+            genome assembly.
+
+    Returns:
+        A dictionary with the following keys:
             success(bool)               : True if there were no errors.
             current_genome_assembly(str): A string indicating the genome assembly of the files.
             errors(str)                 : A string (or None if there are no errors)
-        }
     """
-    for datum in files_info:
-        file_uuid = datum["uuid"]
-        new_file_dict = datum["item"]
 
-        if not new_file_dict:
+    files_by_genome_assembly = {}
+    for file in files_info:
+        # Get the uuid.
+        uuid = file["uuid"]
+
+        # Get the file data.
+        data = file["data"]
+
+        if not data:
             return {
                 "success" : False,
-                "errors" : "File {uuid} does not exist".format(uuid=file_uuid),
-            }
-        if not "higlass_uid" in new_file_dict:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} does not have higlass_uid".format(uuid=file_uuid)
-            }
-        if not "genome_assembly" in new_file_dict:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} does not have genome assembly".format(uuid=file_uuid)
+                "errors" : "File {uuid} does not exist".format(uuid=uuid),
             }
 
-        # If the display doesn't have a genome_assembly, set it to this one.
-        genome_assembly_mapping = {
-            'GRCm38' : ('GRCm38', 'mm10'),
-            'GRCh38' : ('GRCh38', 'hg38'),
-            'dm6' : ('dm6'),
-            'galGal5' : ('galGal5'),
+        # Get the higlass_uid.
+        if "higlass_uid" not in data:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have higlass_uid".format(uuid=uuid)
+            }
+
+        # Get the genome_assembly.
+        if "genome_assembly" not in data:
+            return {
+                "success" : False,
+                "errors" : "File {uuid} does not have genome assembly".format(uuid=uuid)
+            }
+
+        if data["genome_assembly"] not in files_by_genome_assembly:
+            files_by_genome_assembly[data["genome_assembly"]] = []
+        files_by_genome_assembly[data["genome_assembly"]].append(uuid)
+
+    # Make sure all of the files have the same genome assembly.
+    human_readable_ga_listings = []
+    for ga in [g for g in files_by_genome_assembly if g != expected_genome_assembly]:
+        human_readable_ga_listings.append(
+            "{ga}: {uuids}".format(
+                ga=ga,
+                uuids=", ".join(files_by_genome_assembly[ga])
+            )
+        )
+
+    if len(files_info) > 0:
+        if expected_genome_assembly:
+            if expected_genome_assembly not in files_by_genome_assembly or \
+                len(files_by_genome_assembly.keys()) > 1:
+                return {
+                    "success" : False,
+                    "errors" : "All files are not {expected} genome assembly: {files_by_ga}".format(
+                        expected = expected_genome_assembly,
+                        files_by_ga = "; ".join(human_readable_ga_listings),
+                    )
+                }
+        else:
+            if len(files_by_genome_assembly.keys()) > 1:
+                return {
+                    "success" : False,
+                    "errors" : "Files have multiple genome assemblies: {files_by_ga}".format(
+                        expected = expected_genome_assembly,
+                        files_by_ga = "; ".join(human_readable_ga_listings),
+                    )
+                }
+
+    # Make sure we found a genome assembly.
+    if not (expected_genome_assembly or files_by_genome_assembly):
+        return {
+            "success" : False,
+            "errors": "No Genome Assembly provided or found in files."
         }
-        if not current_genome_assembly in genome_assembly_mapping.keys():
-            for new_assembly in genome_assembly_mapping:
-                aliases = genome_assembly_mapping[new_assembly]
-                if new_file_dict["genome_assembly"] in aliases:
-                    current_genome_assembly = new_assembly
-                    break
 
-        # Make sure the file's genome_assembly matches the viewConfig.
-        expected_genome_assemblies = genome_assembly_mapping[current_genome_assembly]
-        if not new_file_dict["genome_assembly"] in expected_genome_assemblies:
-            return {
-                "success" : False,
-                "errors" : "File {uuid} has the wrong Genome Assembly. Expected {expected}, found {actual} instead".format(
-                    uuid=file_uuid,
-                    expected = current_genome_assembly,
-                    actual = new_file_dict["genome_assembly"]
-                )
-            }
+    # Everything is verified.
     return {
         "success" : True,
-        "current_genome_assembly" : current_genome_assembly,
+        "errors": "",
+        "genome_assembly": expected_genome_assembly or list(files_by_genome_assembly.keys())[0]
     }
 
-def add_single_file_to_higlass_viewconf(views, new_file, genome_assembly):
+def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom):
     """ Add a single file to the list of views.
     Args:
-        views(list)         : All of the views from the view config.
-        new_file(dict)      : The file to add.
-        genome_assembly(str): A string showing the new genome assembly.
+        views(list)             : All of the views from the view config.
+        file(dict)              : The file to add.
+        genome_assembly(str)    : A string showing the new genome assembly.
+        higlass_viewconfig(dict): View config description.
+        first_view_location_and_zoom(list): 3 numbers (or 3 None) used to describe the camera position of the first view.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
         error(str) : A string explaining the error. This is None if there is no error.
     """
 
-    # If there are already 6 views, stop and return an error.
-    if len(views) >= 6:
-        return None, "You cannot have more than 6 views in a single display."
+    # Investigate the base view to see if it has a center track with contents (excluding 2d-chromosome-grid)
+    base_view_info = get_view_content_info(views[0])
+    base_view_has_center_content = base_view_info["has_center_content"]
 
-    # Get the file format and format of the extra files, if any.
-    file_format = new_file["file_format"]
-
-    # If no views exist, create one now
-    if len(views) == 0:
-        base_view = {
-            "tracks": {
-                "right": [ ],
-                "gallery": [ ],
-                "left": [ ],
-                "whole": [ ],
-                "bottom": [ ],
-                "top": [],
-                "center": [
-                    {
-                        "contents" : []
-                    }
-                ],
-            },
-            "uid": "Not set yet",
-            "layout": {
-                "w": 12,
-                "static": False,
-                "h": 12,
-                "y": 0,
-                "i": "Not set yet",
-                "moved": False,
-                "x": 0
-            }
-        }
-
-        # Based on the genome assembly type, we can give defaults for the initialXDomain and initialYDomain.
+    # If there is only one view with no files inside, set the initial domains based on the genome assembly
+    if len(views) == 1 and not (base_view_has_center_content or base_view_info["has_left_tracks"] or base_view_info["has_top_tracks"]):
         domain_sizes = get_initial_domains_by_genome_assembly(genome_assembly)
-        base_view.update(domain_sizes)
-        views.append(base_view)
+        views[0].update(domain_sizes)
 
-    # Based on the filetype's dimensions, try to add the file to the views
-    if file_format in (
-        "/file-formats/bg/",
-        "/file-formats/bw/",
-        "/file-formats/bed/",
-        "/file-formats/bigbed/"
-    ):
-        # Many file formats we just need a new 1D track added to the top of each view.
-        new_track, error = create_1d_track(new_file, "top")
-        if error:
-            return None, errors
-        add_track_to_views(new_track, views, "top")
-    elif file_format in (
-        "/file-formats/mcool/",
-        "/file-formats/hic/"
-    ):
-        # Some formats need a new 2D view added.
-        new_view, error = create_2d_view(new_file)
-        if error:
-            return None, errors
-        copy_1d_tracks_into_all_views(views, new_view)
-        new_view = copy_top_reference_tracks_into_left(new_view, views)
-        add_view_to_views(new_view, views)
-    elif file_format == "/file-formats/beddb/":
-        # Add the 1D track to top, left
-        new_track, error = create_1d_track(new_file, "top")
-        if error:
-            return None, errors
-        add_track_to_views(new_track, views, "top")
+    # Determine the kind of file we're working on:
+    # - Is it 1D or 2D? (chromsize is considered 1D)
+    # - Is it a reference file? (Positioning rules are different)
+    file_format_settings = {
+        "/file-formats/bg/" : {
+            "dimensions": 1,
+            "reference": None,
+            "function": add_bg_bw_bed_file,
+        },
+        "/file-formats/bw/" : {
+            "dimensions": 1,
+            "reference": None,
+            "function": add_bg_bw_bed_file,
+        },
+        "/file-formats/bed/" : {
+            "dimensions": 1,
+            "reference": None,
+            "function": add_bg_bw_bed_file,
+        },
+        "/file-formats/bigbed/": {
+            "dimensions": 1,
+            "reference": None,
+            "function": add_bigbed_file,
+        },
+        "/file-formats/beddb/": {
+            "dimensions": 1,
+            "reference": "gene-annotations",
+            "function": add_beddb_file,
+        },
+        "/file-formats/chromsizes/" : {
+            "dimensions": 1,
+            "reference": "chromsizes",
+            "function": add_chromsizes_file,
+        },
+        "/file-formats/mcool/" : {
+            "dimensions": 2,
+            "reference": None,
+            "function": add_mcool_hic_file,
+        },
+        "/file-formats/hic/" : {
+            "dimensions": 2,
+            "reference": None,
+            "function": add_mcool_hic_file,
+        },
+    }
 
-        new_track, error = create_1d_track(new_file, "left")
-        if error:
-            return None, errors
-        add_track_to_views(new_track, views, "left")
-        # Add to the search bar, too.
-        for view in views:
-            update_genome_position_search_box(view, new_file)
-    elif file_format == "/file-formats/chromsizes/":
-        # Add the 1D track to top, left
-        new_track, error = create_1d_track(new_file, "top")
-        if error:
-            return None, errors
-        add_track_to_views(new_track, views, "top")
-
-        new_track, error = create_1d_track(new_file, "left")
-        if error:
-            return None, errors
-        add_track_to_views(new_track, views, "left")
-
-        # We may have to add a 2D chromosome grid. This is done after the individual files have been added.
-    else:
+    file_format = file["file_format"]
+    if file_format not in file_format_settings:
         return None, "Unknown file format {file_format}".format(file_format = file_format)
 
-    # Success! Return the modified view conf.
-    return views, None
+    file_settings = file_format_settings[file_format]
 
-def create_1d_track(new_file, side="top"):
-    """ Creates a dictionary representing a 1d track of the given file.
+    # Add a new view if all of these are true:
+    # - This file is 2D.
+    # - The base view has a central track with a 2D file.
+    add_new_view = file_settings["dimensions"] == 2 and base_view_has_center_content
 
-    Args:
-        new_file(dict)          : Describes the source file.
-        side(str, optional): Specifies the side of the view to add to. Determines the track type.
-            Defaults to "top".
+    if add_new_view:
+        # If there are already 6 views and we need to add a new one, stop and return an error.
+        if len(views) >= 6:
+            return None, "You cannot have more than 6 views in a single display."
 
-    Returns:
-        a dict containing information for a new track (or None if there is an error)
-        a string containing an error message, if any (may be None)
-    """
-    # Create default track options.
-    new_track = {
-        "server": "https://higlass.4dnucleome.org/api/v1",
-        "options": {}
-    }
-
-    # Based on the file type and the side, override options.
-    if new_file["file_format"] == "/file-formats/bed/":
-        new_track["type"] = "bedlike"
-    elif new_file["file_format"] == "/file-formats/bigbed/":
-        new_track["height"] = 35
-        new_track["type"] = "horizontal-vector-heatmap"
-        new_track["options"]["valueScaling"] = "linear"
-        # Add the color range options. A list of 256 strings, each containing an integer.
-        new_track["options"]["colorRange"] = []
-        for index in range(256):
-            red = int(index * 252 / 255)
-            green = int(index * 253 / 255)
-            blue = int((index * 188 / 255) + 3)
-            new_track["options"]["colorRange"].append(
-                "rgba({r},{g},{b},1)".format(
-                    r=red,
-                    g=green,
-                    b=blue,
-                )
-            )
-    elif new_file["file_format"] == "/file-formats/beddb/":
-        if side == "top":
-            new_track["type"] = "horizontal-gene-annotations"
-        elif side == "left":
-            new_track["type"] = "vertical-gene-annotations"
-    elif new_file["file_format"] == "/file-formats/chromsizes/":
-        if side == "top":
-            new_track["type"] = "horizontal-chromosome-labels"
-        elif side == "left":
-            new_track["type"] = "vertical-chromosome-labels"
-    else:
-        new_track["type"] = "horizontal-divergent-bar"
-
-    # Add specific information for this file.
-    new_track["tilesetUid"] = new_file["higlass_uid"]
-    new_track["name"] = new_file["display_title"]
-    new_track["options"]["name"] = get_title(new_file)
-    new_track["options"]["coordSystem"] = new_file["genome_assembly"]
-
-    return new_track, None
-
-def add_track_to_views(new_track, views, side="top"):
-    """ Add the given new track to all of the sides of all of the views.
-
-    Args:
-        new_track(dict): The new track to add.
-        views(list): Modifies views by adding the new_track to the views.
-        side(str, optional): Specifies the side of the view to add to. Determines the track type.
-            Defaults to "top".
-
-    Returns:
-        a boolean indicating success.
-        a string containing an error message, if any (may be None)
-    """
-
-    # For each view
-    for view in views:
-        # Make sure the side exists
-        if not side in view["tracks"]:
-            return False, "View does not contain the side{side}".format(side=side)
-        # If this track is a gene annotation, put it as the first entry of the track
-        if "gene-annotation" in new_track["type"]:
-            view["tracks"][side].insert(0, new_track)
-        else:
-            # Add the new track to the view
-            view["tracks"][side].append(new_track)
-
-def create_2d_view(new_file):
-    """ Creates a dictionary representing a 2d view of the given file.
-    Args:
-        new_file(dict)          : Describes the source file.
-
-    Returns:
-        a dict containing information for a new view (or None if there is an error)
-        a string containing an error message, if any (may be None)
-    """
-    # Create default view options.
-    new_view = {
-        "tracks": {
-            "right": [ ],
-            "gallery": [ ],
-            "left": [ ],
-            "whole": [ ],
-            "bottom": [ ],
-            "top": [],
-            "center": [
-                {
-                    "type" : "combined",
-                    "position" : "center",
-                    "contents" : [
-                        {
-                            "options" : {},
-                            "server" : "https://higlass.4dnucleome.org/api/v1",
-                        }
-                    ]
-                }
-            ],
-        },
-        "uid": "Not set yet",
-        "layout": {
-            "w": 12,
-            "static": False,
-            "h": 12,
-            "y": 0,
-            "i": "Not set yet",
-            "moved": False,
-            "x": 0
+    # Based on the file type, call a subfunction to add the given file.
+    return file_settings["function"](
+        views,
+        file["data"],
+        genome_assembly,
+        {
+            "higlass_viewconfig": higlass_viewconfig,
+            "first_view_location_and_zoom": first_view_location_and_zoom,
         }
-    }
-    domain_sizes = get_initial_domains_by_genome_assembly(new_file["genome_assembly"])
-    new_view.update(domain_sizes)
-
-    contents = new_view["tracks"]["center"][0]["contents"][0]
-
-    contents["tilesetUid"] = new_file["higlass_uid"]
-    contents["name"] = new_file["display_title"]
-
-    # Based on the file type, override the options.
-    if new_file["file_format"] == "/file-formats/chromsizes/":
-        contents["type"] = "2d-chromosome-grid"
-    else:
-        contents["type"] = "heatmap"
-
-    # Add a uuid for this view.
-    new_view["uid"] = uuid.uuid4()
-    new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
-    new_view["layout"]["i"] = new_view["uid"]
-
-    # Add specific information for this file.
-    contents["options"]["coordSystem"] = new_file["genome_assembly"]
-    contents["options"]["name"] = get_title(new_file)
-    return new_view, None
+    )
 
 def get_initial_domains_by_genome_assembly(genome_assembly):
     """Get a list of defaults HiGlass data ranges for a file.
@@ -892,12 +767,220 @@ def get_initial_domains_by_genome_assembly(genome_assembly):
     }
     return domain_ranges
 
+def get_view_content_info(view):
+    """ Determines if the view has an empty center, and looks for 2d chromosome grids.
+
+    Args:
+        view(dict): The view to analyze.
+
+    Returns:
+        A dictionary with these keys:
+        has_top_tracks(bool)       : True if the view has top side tracks
+        has_left_tracks(bool)       : True if the view has left side tracks
+        has_center_content(bool)    : True if there is any content in the center tracks.
+        center_chromsize_index(int) : If there is a 2d chromosome grid in the center, get the index in the list to find it.
+    """
+    view_has_left_tracks = len(view["tracks"].get("left", [])) > 0
+    view_has_top_tracks = len(view["tracks"].get("top", [])) > 0
+
+    # See if there is any center content (including chromsize grids)
+    view_has_any_center_content = len(view["tracks"].get("center", [])) > 0 \
+    and len(view["tracks"]["center"][0].get("contents", [])) > 0
+
+    # See if there is any non-chromosome grid content.
+    view_has_center_content = view_has_any_center_content and \
+    any([t for t in view["tracks"]["center"][0]["contents"] if "type" != "2d-chromosome-grid"])
+
+    # Determine the index of the chromosome grid (we assume there is only 1)
+    view_center_chromsize_indecies = []
+    if view_has_any_center_content:
+        view_center_chromsize_indecies = [i for i, t in enumerate(view["tracks"]["center"][0]["contents"]) if "type" == "2d-chromosome-grid"]
+    view_center_chromsize_index = None
+    if len(view_center_chromsize_indecies) > 0:
+        view_center_chromsize_index = view_center_chromsize_indecies[0]
+
+    return {
+        "has_top_tracks" : view_has_top_tracks,
+        "has_left_tracks" : view_has_left_tracks,
+        "has_center_content" : view_has_center_content,
+        "center_chromsize_index" : view_center_chromsize_index,
+    }
+
+def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info):
+    """ Add the bedGraph, bed, or bigwig file to add to the given views.
+    Args:
+        views(list)         : All of the views from the view config.
+        file(dict)          : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+
+    # Create a new track.
+    new_track_base = {
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "tilesetUid": file["higlass_uid"],
+        "name": file["display_title"],
+        "options": {
+            "name": get_title(file),
+            "coordSystem": file["genome_assembly"],
+        },
+        "type": "horizontal-divergent-bar",
+        "orientation": "1d-horizontal",
+        "uid": uuid.uuid4(),
+    }
+
+    # bed files use the bedlike type instead.
+    if file["file_format"] == "/file-formats/bed/":
+        new_track_base["type"] = "bedlike"
+
+    return add_1d_file(views, new_track_base, genome_assembly)
+
+def get_title(file):
+    """ Returns a string containing the title for the given file.
+
+    Args:
+        file(dict): Describes the file.
+
+    Returns:
+        String representing the title.
+    """
+    # Use the track title. As a fallback, use the display title.
+    title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
+    return title
+
+def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
+    """ Use the bigbed file to add to the given views.
+    Args:
+        views(list)         : All of the views from the view config.
+        file(dict)          : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+    # Create a new track.
+    new_track_base = {
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "tilesetUid": file["higlass_uid"],
+        "name": file["display_title"],
+        "options": {
+            "name": get_title(file),
+            "coordSystem": file["genome_assembly"],
+            "colorRange": [],
+            "valueScaling": "linear",
+        },
+        "height": 35,
+        "type": "horizontal-vector-heatmap",
+        "orientation": "1d-horizontal",
+        "uid": uuid.uuid4(),
+    }
+
+    # Add the color range options. A list of 256 strings, each containing an integer.
+    for index in range(256):
+        red = int(index * 252 / 255)
+        green = int(index * 253 / 255)
+        blue = int((index * 188 / 255) + 3)
+        new_track_base["options"]["colorRange"].append(
+            "rgba({r},{g},{b},1)".format(
+                r=red,
+                g=green,
+                b=blue,
+            )
+        )
+
+    return add_1d_file(views, new_track_base, genome_assembly)
+
+def add_1d_file(views, new_track, genome_assembly):
+    """ Use file to add to all of view's tracks.
+    Args:
+        views(list)         : All of the views from the view config.
+        new_track(dict)     : The track to add.
+        genome_assembly(str): A string showing the new genome assembly.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+
+    # For each view:
+    for view in views:
+        # Add to the "top" tracks, after the gene annotation track but before the chromsize tracks.
+        non_gene_annotation_indecies = [i for i, track in enumerate(view["tracks"]["top"]) if "gene-annotations" not in track["type"]]
+
+        if len(non_gene_annotation_indecies) > 0:
+            view["tracks"]["top"].insert(non_gene_annotation_indecies[-1], new_track)
+        else:
+            view["tracks"]["top"].insert(0, new_track)
+    return views, ""
+
+def add_beddb_file(views, file, genome_assembly, viewconfig_info):
+    """ Use the beddb file to add to the given view.
+    Args:
+        views(list)         : All of the views from the view config.
+        file(dict)          : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+    # Create a new track.
+    new_track_base = {
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "tilesetUid": file["higlass_uid"],
+        "name": file["display_title"],
+        "options": {
+            "name": get_title(file),
+            "coordSystem": file["genome_assembly"],
+        }
+    }
+
+    new_tracks_by_side = {
+        "top": deepcopy(new_track_base),
+        "left": deepcopy(new_track_base),
+    }
+
+    new_tracks_by_side["top"]["type"] = "horizontal-gene-annotations"
+    new_tracks_by_side["top"]["orientation"] = "1d-horizontal"
+    new_tracks_by_side["top"]["uid"] = uuid.uuid4()
+
+    new_tracks_by_side["left"]["type"] = "vertical-gene-annotations"
+    new_tracks_by_side["left"]["orientation"] = "1d-vertical"
+    new_tracks_by_side["left"]["uid"] = uuid.uuid4()
+
+    # For each view:
+    for view in views:
+        # Find out about the left and center tracks.
+        view_content_info = get_view_content_info(view)
+
+        # Update the genome position search bar
+        update_genome_position_search_box(view, file)
+
+        # Add the track to the 0th position
+        for side in ("top", "left"):
+            new_track = new_tracks_by_side[side]
+
+            # Add the track to the left side if there is left content or there is central content.
+            if side == "left" and not (view_content_info["has_left_tracks"] or view_content_info["has_center_content"]):
+                continue
+
+            # Add in the 0th position if it doesn't exist already.
+            view["tracks"][side].insert(0, new_track)
+    return views, ""
+
 def update_genome_position_search_box(view, new_file):
     """ Update the genome position search box for this view so it uses the given file.
 
     Args:
-        view(dict): Modifies the view containing the search box.
-        new_file(dict): Description of the source file.
+        view(dict)      : Modifies the view containing the search box.
+        new_file(dict)  : Description of the source file.
 
     Returns:
         None
@@ -919,59 +1002,277 @@ def update_genome_position_search_box(view, new_file):
 
     view["genomePositionSearchBox"]["visible"] = True
 
-def add_view_to_views(new_view, views):
-    """ Add the given new view to the collection of views.
-
+def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
+    """ Use the chromsizes file to add to the given view.
     Args:
-        new_view(dict)  : Describes the new view.
-        views(list)     : Modifies views by adding new_view to this list.
+        views(list)         : All of the views from the view config.
+        file(dict)          : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
 
     Returns:
-        a boolean indicating success.
-        a string containing an error message, if any (may be None)
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
     """
-    # If the first view's center is blank, override it with the new view.
-    if not (
-        len(views) > 0 \
-        and "center" in views[0]["tracks"] \
-        and len(views[0]["tracks"]["center"]) > 0 \
-        and "contents" in views[0]["tracks"]["center"][0] \
-        and len(views[0]["tracks"]["center"][0]["contents"]) > 0
-        and len(new_view["tracks"]["center"]) > 0
-    ) :
-        views[0]["tracks"]["center"] = new_view["tracks"]["center"]
+    # Create a new track.
+    new_track_base_1d = {
+        "server": "https://higlass.4dnucleome.org/api/v1",
+        "tilesetUid": file["higlass_uid"],
+        "name": file["display_title"],
+        "options": {
+            "name": get_title(file),
+            "coordSystem": file["genome_assembly"],
+        }
+    }
 
-        # Copy any left side reference tracks from this view, if the left track doesn't exist.
-        for track in reversed(new_view["tracks"]["left"]):
-            if any([t for t in views[0]["tracks"]["left"] if t["type"] == track["type"]] ) == False:
-                views[0]["tracks"]["left"].insert(0, track)
+    new_tracks_by_side = {
+        "top": deepcopy(new_track_base_1d),
+        "left": deepcopy(new_track_base_1d),
+        "center": create_2d_content(file, "2d-chromosome-grid"),
+    }
 
-        # Override the initial domains.
-        views[0]["initialXDomain"] = new_view["initialXDomain"]
-        views[0]["initialYDomain"] = new_view["initialYDomain"]
+    new_tracks_by_side["top"]["type"] = "horizontal-chromosome-labels"
+    new_tracks_by_side["top"]["orientation"] = "1d-horizontal"
+    new_tracks_by_side["top"]["uid"] = uuid.uuid4()
 
-        return True, None
+    new_tracks_by_side["left"]["type"] = "vertical-chromosome-labels"
+    new_tracks_by_side["left"]["orientation"] = "1d-vertical"
+    new_tracks_by_side["left"]["uid"] = uuid.uuid4()
 
-    # If there are 6 views already, stop
+    new_tracks_by_side["center"]["name"] = "Chromosome Grid"
+    del new_tracks_by_side["center"]["options"]["name"]
+    del new_tracks_by_side["center"]["options"]["coordSystem"]
+
+    # For each view:
+    for view in views:
+        # Find out about the left and center tracks.
+        view_content_info = get_view_content_info(view)
+
+        # Add the track to the 0th position
+        for side in ("top", "left"):
+            new_track = new_tracks_by_side[side]
+
+            # Add the track to the left side if there is left content or there is central content.
+            if side == "left" and not (view_content_info["has_left_tracks"] or view_content_info["has_center_content"]):
+                continue
+
+            # Add in the last position if it doesn't exist already.
+            view["tracks"][side].append(new_track)
+
+        # add a 2D chromsize grid overlay on the center (replace the existing track if it exists)
+        if view_content_info["has_center_content"]:
+            if view_content_info["center_chromsize_index"] != None:
+                view["tracks"]["center"][0]["contents"][view_content_info["center_chromsize_index"]] =  new_tracks_by_side["center"]
+            else:
+                view["tracks"]["center"][0]["contents"].append(new_tracks_by_side["center"])
+    return views, ""
+
+def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info):
+    """ Use the mcool or hic file to add to the given view.
+
+    Args:
+        views(list)         : All of the views from the view config.
+        file(dict)          : The file to add.
+        genome_assembly(str): A string showing the new genome assembly.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+
+    # Make 2D content.
+    new_content = create_2d_content(file, "heatmap")
+    return add_2d_file(views, new_content, viewconfig_info)
+
+def add_2d_file(views, new_content, viewconfig_info):
+    """ Add the new 2D content generated by the file to add to the first available view (create a new view if needed.)
+    Args:
+        views(list)         : All of the views from the view config.
+        new_content(dict)   : Description of the new center track.
+        viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+    # Look at the first view.
+    base_view_info = get_view_content_info(views[0])
+
+    # If there is no center non-chromsize content, then this means the base view has an empty central contents.
+    if not base_view_info["has_center_content"]:
+        # Create a base central track if one doesn't exist.
+        if len(views[0]["tracks"]["center"]) == 0:
+            views[0]["tracks"]["center"] = [
+                {
+                    "contents":[],
+                    "type": "combined",
+                }
+            ]
+
+        # Add the file to the center
+        views[0]["tracks"]["center"][0]["contents"].append(new_content)
+        # Copy the top reference tracks to the left
+        copy_top_reference_tracks_into_left(views[0], views)
+
+        # Add the chromsize track as a 2D grid, if it doesn't exist.
+        if base_view_info["center_chromsize_index"] == None:
+            # Get the chromsize from the top tracks.
+            chromsize_tracks = [ t for t in views[0]["tracks"]["top"] if "-chromosome-labels" in t["type"] ]
+
+            contents = {
+                "name": "Chromosome Grid"
+            }
+            if len(chromsize_tracks) > 0:
+                chrom_source = chromsize_tracks[-1]
+
+                for key in ("tilesetUid", "server"):
+                    contents[key] = chrom_source.get(key, "")
+
+                contents["options"] = {}
+                contents["type"] = "2d-chromosome-grid"
+                # The grid should be the last item to draw so it is always visible.
+                views[0]["tracks"]["center"][0]["contents"].append(contents)
+        return views, ""
+
+    # If there is central content, then we need to make a new view.
+    # Stop if there are already 6 views.
     if len(views) >= 6:
-        return False, "You cannot have more than 6 views in a single display."
+        return None, "You cannot have more than 6 views in a single display."
 
-    # Append the view to the views.
+    # Clone the base view, including tracks. Make sure the view and layout uids are unique.
+    new_view = deepcopy(views[0])
+    new_view["uid"] = uuid.uuid4()
+    new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
+    new_view["layout"]["i"] = new_view["uid"]
+
+    # Replace the central track with the new file
+    for i, track in enumerate(new_view["tracks"]["center"][0]["contents"]):
+        if track["type"] != "2d-chromosome-grid":
+            new_view["tracks"]["center"][0]["contents"][i] = new_content
+            break
+
+    # Change the uid of the chromosome grid on the central track.
+    for i, track in enumerate(new_view["tracks"]["center"][0]["contents"]):
+        if track["type"] == "2d-chromosome-grid":
+            new_view["tracks"]["center"][0]["contents"][i]["uid"] = uuid.uuid4()
+
     views.append(new_view)
-    return True, None
 
-def get_title(file):
-    """ Returns a string containing the title for the given file.
+    # Resize/Repack views
+    repack_higlass_views(views)
 
+    # Create locks based on the base view.
+    if len(views) > 1:
+        for view in views:
+            add_zoom_lock_if_needed(viewconfig_info["higlass_viewconfig"], view, viewconfig_info["first_view_location_and_zoom"])
+    return views, ""
+
+def create_2d_content(file, viewtype):
+    """ Generates a 2D track.
     Args:
-        file(dict): Describes the file.
+        file(dict): Information about the given file.
+        viewtype(string): The desired content type.
 
     Returns:
-        String representing the title.
+        A dictionary that describes the content.
     """
-    # Use the track title. As a fallback, use the display title.
-    title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
-    return title
+    contents = {}
+
+    contents["tilesetUid"] = file["higlass_uid"]
+    contents["name"] = file["display_title"]
+    contents["type"] = viewtype
+    contents["server"] = "https://higlass.4dnucleome.org/api/v1"
+
+    # Add specific information for this file.
+    contents["options"] = {}
+    contents["options"]["coordSystem"] = file["genome_assembly"]
+    contents["options"]["name"] = get_title(file)
+    return contents
+
+def copy_top_reference_tracks_into_left(target_view, views):
+    """ Copy the reference tracks from the top track into the left (if the left doesn't have them already.)
+
+    Args:
+        target_view(dict)   : View which will be modified to get the new tracks.
+        views(list)         : The first view contains the top tracks to copy from.
+
+    Returns:
+        Boolean value indicating success.
+    """
+
+    if len(views) < 1:
+        return target_view
+
+    reference_file_type_mappings = {
+        "horizontal-chromosome-labels": "vertical-chromosome-labels",
+        "horizontal-gene-annotations": "vertical-gene-annotations",
+    }
+
+    orientation_mappings = {
+        "1d-horizontal": "1d-vertical",
+        "1d-vertical" : "1d-horizontal",
+    }
+
+    # Look through all of the top views for the chromsize and the gene annotation tracks.
+    # Make a shallow copy of the found reference tracks.
+    new_tracks = []
+    for track in (t for t in views[0]["tracks"]["top"] if t["type"] in reference_file_type_mappings.keys()):
+        new_tracks.append(deepcopy(track))
+
+    # Change the horizontal track type to vertical track types.
+    for track in new_tracks:
+        # Rename the uid so it doesn't conflict with the top track.
+        if "uid" in track:
+            track_string = str(track["uid"])
+            if track_string.startswith("top"):
+                track["uid"] = track_string.replace("top", "left", 1)
+            else:
+                track["uid"] = uuid.uuid4()
+        else:
+            track["uid"] = uuid.uuid4()
+
+        if track["type"] in reference_file_type_mappings:
+            track["type"] = reference_file_type_mappings[ track["type"] ]
+
+        # Swap the height and widths, if they are here.
+        temp_height = track.get("width", None)
+        temp_width = track.get("height", None)
+
+        if temp_height and temp_width:
+            track["height"] = temp_height
+            track["width"] = temp_width
+        elif temp_height:
+            track["height"] = temp_height
+            del track["width"]
+        elif temp_width:
+            track["width"] = temp_width
+            del track["height"]
+
+        # Also the minimum width/height
+        temp_height = track.get("minWidth", None)
+        temp_width = track.get("minHeight", None)
+
+        if temp_height and temp_width:
+            track["minHeight"] = temp_height
+            track["minWidth"] = temp_width
+        elif temp_height:
+            track["minHeight"] = temp_height
+            del track["minWidth"]
+        elif temp_width:
+            track["minWidth"] = temp_width
+            del track["minHeight"]
+
+        # And the orientation
+        track_orientation = track.get("orientation", None)
+        if track_orientation in orientation_mappings:
+            track["orientation"] = orientation_mappings[track_orientation]
+
+    # Add the copied tracks to the left side of this view if it doesn't have the track already.
+    for track in reversed(new_tracks):
+        if any([t for t in target_view["tracks"]["left"] if t["type"] == track["type"]] ) == False:
+            target_view["tracks"]["left"].insert(0, track)
+    return target_view
 
 def repack_higlass_views(views):
     """Set up the higlass views so they fit in a 3 x 2 grid. The packing order is:
@@ -1022,133 +1323,6 @@ def repack_higlass_views(views):
         if x >= 12:
             y += height
             x = 0
-
-def get_chromsize_grid_from_view(view):
-    """ Look through the given view to find a 2d chromsize grid.
-    Args:
-        view(dict): Describes the given view.
-
-    Returns:
-        The grid information, or return None if it doesn't exist.
-    """
-
-    # Skip if the view lacks a central track.
-    if "center" not in view["tracks"]:
-        return None
-
-    for track in view["tracks"]["center"]:
-        # Skip if the track's center has no contents.
-        if 'contents' not in track:
-            return None
-        if len(track['contents']) == 0:
-            return None
-        # See if any of the contents have the 2d chromosome grid type.
-        chromsize_contents = [ cont for cont in track['contents'] if  cont["type"] == "2d-chromosome-grid"]
-        if len(chromsize_contents) > 0:
-            return chromsize_contents[0]
-    return None
-
-def get_chromsize_grid_from_viewconf(views, files_info):
-    """ Look through the files_info and the views to find the 2d chromsize grid.
-    Args:
-        views(list)     : A list of dictionaries containing all of the views.
-        files_info(list): A list of dictionaries containing the files used to make this view config.
-
-    Returns:
-        The grid information, or return None if it doesn't exist.
-    """
-    # Check all of the views' central tracks and see if any of them are 2d grids.
-
-    for view in views:
-        chromsize_grid = get_chromsize_grid_from_view(view)
-        if chromsize_grid:
-            return chromsize_grid
-
-    # Look through files_info and see if there is a chromsize file.
-    chromsize_files = [ info["item"] for info in files_info if info["item"]["file_format"] == "/file-formats/chromsizes/" ]
-
-    if len(chromsize_files) > 0:
-        # Get the contents for the chromosome grid. We assume there is only 1 chromsize file.
-        chromsize_view, error = create_2d_view(chromsize_files[0])
-        if error:
-            return None
-
-        chromsize_contents = chromsize_view["tracks"]["center"][0]["contents"][0]
-        return chromsize_contents
-
-    return None
-
-def add_2d_chromsize(new_views, files_info):
-    """ If files_info has a chromsize file and new_views contains a 2D view,
-    all of the views will get a 2D chromsize file.
-
-    Args:
-        new_views(list)     : This list of dictionaries containing all of the views will be modified.
-        files_info(list)    : A list of dictionaries containing the files used to make this view config.
-
-    Returns:
-        new_views (This function modifies new_views in place)
-        A string explaining the error (or None if there is no error)
-    """
-
-    chromsize_contents = get_chromsize_grid_from_viewconf(new_views, files_info)
-
-    # If there are no chromsize contents, return
-    if not chromsize_contents:
-        return new_views, None
-
-    # Look through the new_views for any with a central view with contents.
-    views_2d = [ view for view in new_views if  view["tracks"]["center"] and len(view["tracks"]["center"][0]["contents"]) > 0 ]
-
-    # No 2D views, return
-    if len(views_2d) == 0:
-        return new_views, None
-
-    # For each view:
-    for view in views_2d:
-        # If it already has a chromsize grid, skip to the next one.
-        if get_chromsize_grid_from_view(view):
-            continue
-
-        # Append the chromsize grid on top
-        view["tracks"]["center"][0]["contents"].insert(0, chromsize_contents)
-
-    return new_views, None
-
-def copy_1d_tracks_into_all_views(views, new_view):
-    """ Copy all of the top and left side tracks into all of the views.
-    Args:
-        views: A list of views for this view config.
-        new_view: A view that needs to copy tracks from. Will be modified.
-
-    Returns:
-        Boolean indicating success.
-    """
-
-    # Get the first view, this should have all of the changes.
-    if len(views) < 1:
-        return False
-    base_view = views[0]
-
-    # Copy the genome assembly search box as well.
-    for field in ("genomePositionSearchBox", "autocompleteSource"):
-        if field in base_view:
-            new_view[field] = base_view[field]
-
-    # For each side (except center)
-    for side in ("top", "left"):
-        if side not in base_view["tracks"]:
-            continue
-
-        # Compile that side's track uids
-        new_view_track_uids = [ track["uid"] for track in new_view["tracks"][side] if "uid" in track]
-        # If there are any tracks here
-        for track in base_view["tracks"][side]:
-            # Copy them into the new_view's side if the uid doesn't exist.
-            if ("uid" in track and track["uid"] in new_view_track_uids) == False:
-                new_view["tracks"][side].append(track)
-
-    return True
 
 def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
     """ If there are multiple views, create a lock to keep them at the same position and scale.
@@ -1239,81 +1413,3 @@ def remove_left_side_if_all_1D(new_views):
     for view in new_views:
         view["tracks"]["left"] = []
     return True
-
-def copy_top_reference_tracks_into_left(target_view, views):
-    """ Copy the reference tracks from the top track into the left (if the left doesn't have them already.)
-    Args:
-        target_view(dict)   : View which will be modified to get the new tracks.
-        views(list)         : The first view contains the top tracks to copy from.
-    Returns:
-        Boolean value indicating success.
-    """
-
-    if len(views) < 1:
-        return target_view
-
-    reference_file_type_mappings = {
-        "horizontal-chromosome-labels": "vertical-chromosome-labels",
-        "horizontal-gene-annotations": "vertical-gene-annotations",
-    }
-
-    orientation_mappings = {
-        "1d-horizontal": "1d-vertical",
-        "1d-vertical" : "1d-horizontal",
-    }
-
-    # Look through all of the top views for the chromsize and the gene annotation tracks.
-    # Make a shallow copy of the found reference tracks.
-    new_tracks = []
-    for track in (t for t in views[0]["tracks"]["top"] if t["type"] in reference_file_type_mappings.keys()):
-        new_tracks.append(deepcopy(track))
-
-    # Change the horizontal track type to vertical track types.
-    for track in new_tracks:
-        # Rename the uid so it doesn't conflict with the top track.
-        if "uid" in track and track["uid"].startswith("top"):
-            track["uid"] = track["uid"].replace("top", "left", 1)
-        else:
-            track["uid"] = uuid.uuid4()
-
-        if track["type"] in reference_file_type_mappings:
-            track["type"] = reference_file_type_mappings[ track["type"] ]
-
-        # Swap the height and widths, if they are here.
-        temp_height = track.get("width", None)
-        temp_width = track.get("height", None)
-
-        if temp_height and temp_width:
-            track["height"] = temp_height
-            track["width"] = temp_width
-        elif temp_height:
-            track["height"] = temp_height
-            del track["width"]
-        elif temp_width:
-            track["width"] = temp_width
-            del track["height"]
-
-        # Also the minimum width/height
-        temp_height = track.get("minWidth", None)
-        temp_width = track.get("minHeight", None)
-
-        if temp_height and temp_width:
-            track["minHeight"] = temp_height
-            track["minWidth"] = temp_width
-        elif temp_height:
-            track["minHeight"] = temp_height
-            del track["minWidth"]
-        elif temp_width:
-            track["minWidth"] = temp_width
-            del track["minHeight"]
-
-        # And the orientation
-        track_orientation = track.get("orientation", None)
-        if track_orientation in orientation_mappings:
-            track["orientation"] = orientation_mappings[track_orientation]
-
-    # Add the copied tracks to the left side of this view if it doesn't have the track already.
-    for track in reversed(new_tracks):
-        if any([t for t in target_view["tracks"]["left"] if t["type"] == track["type"]] ) == False:
-            target_view["tracks"]["left"].insert(0, track)
-    return target_view
