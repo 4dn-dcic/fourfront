@@ -4,7 +4,7 @@
   "description": "domready held back.",
   "scripts": {
     "test": "jest",
-    "build": "gulp build",
+    "build": "node --max-old-space-size=2048 ./node_modules/.bin/gulp build",
     "build-quick": "gulp build-quick",
     "dev": "gulp dev",
     "dev-quick": "gulp dev-quick",
@@ -48,11 +48,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.1.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
-    "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/register": "^7.0.0",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^24.1.0",
     "babel-loader": "^8.0.4",
     "codacy-coverage": "^3.4.0",
@@ -81,6 +82,7 @@
     "source-map-support": "^0.5.10",
     "string-replace-loader": "^1.0.0",
     "terser-webpack-plugin": "^1.2.2",
+    "uglifyjs-webpack-plugin": "^2.1.1",
     "webpack": "^4.29.5"
   },
   "dependencies": {

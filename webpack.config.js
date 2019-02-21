@@ -1,16 +1,17 @@
-var path = require('path');
-var webpack = require('webpack');
-var env = process.env.NODE_ENV;
-var TerserPlugin = require('terser-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const env = process.env.NODE_ENV;
+const TerserPlugin = require('terser-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-var PATHS = {
-    static: path.resolve(__dirname, 'src/encoded/static'),
-    build: path.resolve(__dirname, 'src/encoded/static/build'),
+const PATHS = {
+    "static": path.resolve(__dirname, 'src/encoded/static'),
+    "build" : path.resolve(__dirname, 'src/encoded/static/build'),
 };
 
-var mode = (env === 'production' ? 'production' : 'development');
+const mode = (env === 'production' ? 'production' : 'development');
 
-var plugins = [];
+const plugins = [];
 
 // don't include momentjs locales (large)
 plugins.push(
@@ -20,8 +21,8 @@ plugins.push(
     })
 );
 
-var chunkFilename = '[name].js';
-var devTool = 'source-map'; // Default, slowest.
+let chunkFilename = '[name].js';
+let devTool = 'source-map'; // Default, slowest.
 
 
 if (env === 'production') {
@@ -72,14 +73,18 @@ var resolve = {
 var optimization = {
     minimize: mode === "production",
     minimizer: [
-        new TerserPlugin({
+        new UglifyJsPlugin({
             parallel: true,
-            terserOptions:{
-                compress: true,
-                mangle: true,
-                sourceMap: true
-            }
+            sourceMap: true
         })
+        //new TerserPlugin({
+        //    parallel: true,
+        //    terserOptions:{
+        //        compress: true,
+        //        mangle: true,
+        //        sourceMap: true
+        //    }
+        //})
     ]
 };
 

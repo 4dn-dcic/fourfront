@@ -4,8 +4,9 @@
         "linebreak-style": [2, "unix"],
         "semi": [2, "always"],
         "no-console": 0,
-        "no-unused-vars": 0,
-        "no-empty": 0
+        "no-unused-vars": 1,
+        "no-empty": 0,
+        "no-undef": 0
 
     },
     "env": {
