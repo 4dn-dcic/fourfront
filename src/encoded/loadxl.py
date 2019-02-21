@@ -1,8 +1,5 @@
 """Load collections and determine the order."""
 from past.builtins import basestring
-from .typedsheets import cast_row_values
-from functools import reduce
-import io
 import json
 import structlog
 import os.path
@@ -11,91 +8,31 @@ import os
 from datetime import datetime
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
 from pyramid.paster import get_app
-
 from pyramid.view import view_config
-
+import magic
+import mimetypes
+from PIL import Image
+from base64 import b64encode
 
 text = type(u'')
-
 logger = structlog.getLogger('encoded')
+
 
 def includeme(config):
     # provide an endpoint to do bulk uploading that just uses loadxl
     config.add_route('load_data', '/load_data')
     config.scan(__name__)
 
+# order of items references in 'required' field in schemas
 ORDER = [
     'user',
     'award',
     'lab',
-    'static_section',
-    'higlass_view_config',
-    'page',
-    'ontology',
-    'ontology_term',
     'file_format',
-    'badge',
-    'organism',
-    'genomic_region',
-    'target',
-    'imaging_path',
-    'publication',
-    'publication_tracking',
-    'document',
-    'image',
-    'vendor',
-    'construct',
-    'modification',
-    'protocol',
-    'sop_map',
-    'biosample_cell_culture',
-    'individual_human',
-    'individual_mouse',
-    'individual_fly',
-    'individual_chicken',
+    'experiment_type',
     'biosource',
-    'antibody',
-    'enzyme',
-    'treatment_rnai',
-    'treatment_agent',
     'biosample',
-    'quality_metric_fastqc',
-    'quality_metric_bamqc',
-    'quality_metric_pairsqc',
-    'quality_metric_dedupqc_repliseq',
-    'quality_metric_chipseq',
-    'quality_metric_atacseq',
-    'microscope_setting_d1',
-    'microscope_setting_d2',
-    'microscope_setting_a1',
-    'microscope_setting_a2',
-    'file_fastq',
-    'file_processed',
-    'file_reference',
-    'file_calibration',
-    'file_microscopy',
-    'file_set',
-    'file_set_calibration',
-    'file_set_microscope_qc',
-    'file_vistrack',
-    'experiment_hi_c',
-    'experiment_capture_c',
-    'experiment_repliseq',
-    'experiment_atacseq',
-    'experiment_chiapet',
-    'experiment_damid',
-    'experiment_seq',
-    'experiment_tsaseq',
-    'experiment_mic',
-    'experiment_set',
-    'experiment_set_replicate',
-    'data_release_update',
-    'software',
-    'analysis_step',
-    'workflow',
-    'workflow_mapping',
-    'workflow_run_sbg',
-    'workflow_run_awsem'
+    'workflow'
 ]
 
 IS_ATTACHMENT = [
@@ -107,317 +44,38 @@ IS_ATTACHMENT = [
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
     '''
-    we expect to get posted data in the form of
-    {'item_type': [items], 'item_type2': [items]}
-    then we just use load_all to load all that stuff in
+    post can contain 2 different styles of data
+    1) reference to a folder in tests/data/, with keyword local_dir
+       not sure if that is ever used
+    2) json content in form of {'item_type': [items], 'item_type2': [items]}
+       item_type should be same as insert file names i.e. file_fastq
     '''
-
     # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
     config_uri = request.json.get('config_uri', 'production.ini')
     app = get_app(config_uri, 'app')
     from webtest import TestApp
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
+    environ = {'HTTP_ACCEPT': 'application/json', 'REMOTE_USER': 'TEST'}
     testapp = TestApp(app, environ)
-
     # expected response
     request.response.status = 200
     result = {
         'status': 'success',
         '@type': ['result'],
     }
-    # if we post local_dir key then we use local data
-    # actually load the stuff
     from pkg_resources import resource_filename
     local_dir = request.json.get('local_dir')
-    if  local_dir:
+    if local_dir:
         local_inserts = resource_filename('encoded', 'tests/data/' + local_dir + '/')
         res = load_all(testapp, local_inserts, [])
     else:
         res = load_all(testapp, request.json, [], from_json=True)
 
+    # Expect res to be empty if load_all is success?
     if res:
         request.response.status = 422
         result['status'] = 'error'
         result['@graph'] = res
-
     return result
-
-
-##############################################################################
-# Pipeline components
-#
-# http://www.stylight.com/Numbers/pipes-and-filters-architectures-with-python-generators/
-#
-# Dictionaries are passed through the pipeline. By convention, values starting
-# with an underscore (_) are ignored by the component posting a final value
-# so are free for communicating information down the pipeline.
-
-
-def noop(dictrows):
-    """ No-op component
-
-    Useful for pipeline component factories.
-    """
-    return dictrows
-
-
-def remove_keys_with_empty_value(dictrows):
-    for row in dictrows:
-        yield {
-            k: v for k, v in row.items()
-            if k and v not in ('', None, [])
-        }
-
-
-##############################################################################
-# Pipeline component factories
-
-
-def warn_keys_with_unknown_value_except_for(*keys):
-    def component(dictrows):
-        for row in dictrows:
-            for k, v in row.items():
-                if k not in keys and text(v).lower() == 'unknown':
-                    logger.warn('unknown %r for %s' % (k, row.get('uuid', '<empty uuid>')))
-            yield row
-
-    return component
-
-
-def skip_rows_missing_all_keys(*keys):
-    def component(dictrows):
-        for row in dictrows:
-            if not any(key in row for key in keys):
-                row['_skip'] = True
-            yield row
-
-    return component
-
-
-def skip_rows_with_all_key_value(**kw):
-    def component(dictrows):
-        for row in dictrows:
-            if all(row[k] == v if k in row else False for k, v in kw.items()):
-                row['_skip'] = True
-            yield row
-
-    return component
-
-
-def skip_rows_in_excludes(**kw):
-    def component(dictrows):
-        for row in dictrows:
-            excludes = kw.get('excludes')
-            if excludes is None:
-                excludes = []
-            if row.get('uuid') in excludes:
-                row['_skip'] = True
-            yield row
-
-    return component
-
-
-def skip_rows_without_all_key_value(**kw):
-    def component(dictrows):
-        for row in dictrows:
-            if not all(row[k] == v if k in row else False for k, v in kw.items()):
-                row['_skip'] = True
-            yield row
-
-    return component
-
-
-def remove_keys(*keys):
-    def component(dictrows):
-        for row in dictrows:
-            for key in keys:
-                row.pop(key, None)
-            yield row
-
-    return component
-
-
-def skip_rows_with_all_falsey_value(*keys):
-    def component(dictrows):
-        for row in dictrows:
-            if all(not row[key] if key in row else False for key in keys):
-                row['_skip'] = True
-            yield row
-
-    return component
-
-
-def add_attachments(docsdir):
-    def component(dictrows):
-        for row in dictrows:
-            for attachment_property in IS_ATTACHMENT:
-                filename = row.get(attachment_property, None)
-                if filename is None:
-                    continue
-                try:
-                    path = find_doc(docsdir, filename)
-                    row[attachment_property] = attachment(path)
-                except ValueError as e:
-                    row['_errors'] = repr(e)
-            yield row
-
-    return component
-
-
-##############################################################################
-# Read input from spreadsheets
-#
-# Downloading a zipfile of xlsx files from Google Drive is most convenient
-# but it's better to check tsv into git.
-
-
-def read_single_sheet(path, name=None):
-    """ Read an xlsx, csv, json, or tsv from a zipfile or directory
-    """
-    from zipfile import ZipFile
-    from . import xlreader
-    if name is None or path.endswith('.json'):
-        root, ext = os.path.splitext(path)
-        stream = open(path, 'r')
-
-        if ext == '.xlsx':
-            return read_xl(stream)
-
-        if ext == '.tsv':
-            return read_csv(stream, dialect='excel-tab')
-
-        if ext == '.csv':
-            return read_csv(stream)
-
-        if ext == '.json':
-            return read_json(stream)
-
-        raise ValueError('Unknown file extension for %r' % path)
-
-    if path.endswith('.xlsx'):
-        return cast_row_values(xlreader.DictReader(open(path, 'rb'), sheetname=name))
-
-    if path.endswith('.zip'):
-        zf = ZipFile(path)
-        names = zf.namelist()
-
-        if (name + '.xlsx') in names:
-            stream = zf.open(name + '.xlsx', 'r')
-            return read_xl(stream)
-
-        if (name + '.tsv') in names:
-            stream = io.TextIOWrapper(zf.open(name + '.tsv'), encoding='utf-8')
-            return read_csv(stream, dialect='excel-tab')
-
-        if (name + '.csv') in names:
-            stream = io.TextIOWrapper(zf.open(name + '.csv'), encoding='utf-8')
-            return read_csv(stream)
-
-        if (name + '.json') in names:
-            stream = io.TextIOWrapper(zf.open(name + '.json'), encoding='utf-8')
-            return read_json(stream)
-
-    if os.path.isdir(path):
-        root = os.path.join(path, name)
-
-        if os.path.exists(root + '.xlsx'):
-            stream = open(root + '.xlsx', 'rb')
-            return read_xl(stream)
-
-        if os.path.exists(root + '.tsv'):
-            stream = open(root + '.tsv', 'rU')
-            return read_csv(stream, dialect='excel-tab')
-
-        if os.path.exists(root + '.csv'):
-            stream = open(root + '.csv', 'rU')
-            return read_csv(stream)
-
-        if os.path.exists(root + '.json'):
-            stream = open(root + '.json', 'r')
-            return read_json(stream)
-
-    return []
-
-
-def read_xl(stream):
-    from . import xlreader
-    return cast_row_values(xlreader.DictReader(stream))
-
-
-def read_csv(stream, **kw):
-    import csv
-    return cast_row_values(csv.DictReader(stream, **kw))
-
-
-def read_json(stream):
-    import json
-    obj = json.load(stream)
-    if isinstance(obj, dict):
-        return [obj]
-    return obj
-
-
-##############################################################################
-# Posting json
-#
-# This would a one liner except for logging
-
-def request_url(item_type, method):
-    def component(rows):
-        for row in rows:
-            if method == 'POST':
-                url = row['_url'] = '/' + item_type
-                yield row
-                continue
-
-            if '@id' in row:
-                url = row['@id']
-                if not url.startswith('/'):
-                    url = '/' + url
-                row['_url'] = url
-                yield row
-                continue
-
-            # XXX support for aliases
-            for key in ['uuid', 'accession']:
-                if key in row:
-                    url = row['_url'] = '/' + row[key]
-                    break
-            else:
-                row['_errors'] = ValueError('No key found. Need uuid or accession.')
-
-            yield row
-
-    return component
-
-
-def make_request(testapp, item_type, method):
-    json_method = getattr(testapp, method.lower() + '_json')
-
-    def component(rows):
-        for row in rows:
-            if row.get('_skip') or row.get('_errors') or not row.get('_url'):
-                continue
-
-            # Keys with leading underscores are for communicating between
-            # sections
-            value = row['_value'] = {
-                k: v for k, v in row.items() if not k.startswith('_') and not k.startswith('@')
-            }
-
-            url = row['_url']
-            row['_response'] = json_method(url, value, status='*')
-
-            yield row
-
-    return component
-
-
-##############################################################################
-# Logging
 
 
 def trim(value):
@@ -429,63 +87,6 @@ def trim(value):
     if isinstance(value, basestring) and len(value) > 160:
         return value[:77] + '...' + value[-80:]
     return value
-
-
-def pipeline_logger(item_type, phase):
-    def component(rows):
-        created = 0
-        updated = 0
-        errors = 0
-        skipped = 0
-        count = 0
-        for index, row in enumerate(rows):
-            row_number = index + 2  # header row
-            count = index + 1
-            res = row.get('_response')
-
-            if res is None:
-                # _skip = row.get('_skip')
-                _errors = row.get('_errors')
-                if row.get('_skip'):
-                    skipped += 1
-                elif _errors:
-                    errors += 1
-                    logger.error('%s row %d: Error PROCESSING: %s\n%r\n' % (item_type, row_number, _errors, trim(row)))
-                yield row
-                continue
-
-            url = row.get('_url')
-            # uuid = row.get('uuid')
-
-            if res.status_int == 200:
-                updated += 1
-                logger.debug('UPDATED: %s' % url)
-
-            if res.status_int == 201:
-                created += 1
-                logger.debug('CREATED: %s' % res.location)
-
-            if res.status_int == 409:
-                logger.error('CONFLICT: %r' % res.json['detail'])
-
-            if res.status_int == 422:
-                logger.error('VALIDATION FAILED: %r' % trim(res.json['errors']))
-
-            if res.status_int // 100 == 4:
-                errors += 1
-                logger.error('%s row %d: %s (%s)\n%r\n' % (item_type, row_number, res.status, url, trim(row['_value'])))
-
-            yield row
-
-        loaded = created + updated
-        logger.info('Loaded %d of %d %s (phase %s). CREATED: %d, UPDATED: %d, SKIPPED: %d, ERRORS: %d' % (
-            loaded, count, item_type, phase, created, updated, skipped, errors))
-
-    return component
-
-
-##############################################################################
-# Attachments
 
 
 def find_doc(docsdir, filename):
@@ -506,11 +107,6 @@ def find_doc(docsdir, filename):
 
 def attachment(path):
     """Create an attachment upload object from a filename Embeds the attachment as a data url."""
-    import magic
-    import mimetypes
-    from PIL import Image
-    from base64 import b64encode
-
     filename = os.path.basename(path)
     mime_type, encoding = mimetypes.guess_type(path)
     major, minor = mime_type.split('/')
@@ -518,25 +114,19 @@ def attachment(path):
         detected_type = magic.from_file(path, mime=True).decode('ascii')
     except AttributeError:
         detected_type = magic.from_file(path, mime=True)
-
     # XXX This validation logic should move server-side.
     if not (detected_type == mime_type or
             detected_type == 'text/plain' and major == 'text'):
         raise ValueError('Wrong extension for %s: %s' % (detected_type, filename))
-
     with open(path, 'rb') as stream:
-        attach = {
-            'download': filename,
-            'type': mime_type,
-            'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
-        }
-
+        attach = {'download': filename,
+                  'type': mime_type,
+                  'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))}
         if mime_type in ('application/pdf', "application/zip", 'text/plain',
-                         'text/tab-separated-values', 'text/html', 'application/msword',
-                         'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
+                         'text/tab-separated-values', 'text/html', 'application/msword', 'application/vnd.ms-excel',
+                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
-
         if major == 'image' and minor in ('png', 'jpeg', 'gif', 'tiff'):
             # XXX we should just convert our tiffs to pngs
             stream.seek(0, 0)
@@ -545,323 +135,127 @@ def attachment(path):
             if im.format != minor.upper():
                 msg = "Image file format %r does not match extension for %s"
                 raise ValueError(msg % (im.format, filename))
-
             attach['width'], attach['height'] = im.size
             return attach
-
     raise ValueError("Unknown file type for %s" % filename)
 
 
-##############################################################################
-# Pipelines
+def format_for_attachment(json_data, docsdir):
+    for field in IS_ATTACHMENT:
+        if field in json_data:
+            if not isinstance(json_data[field], 'str'):
+                # malformatted attachment
+                del json_data[field]
+                logger.error('Removing {} form {}, expecting path'.format(field, json_data['uuid']))
+            else:
+                path = find_doc(docsdir, json_data[field])
+                json_data[field] = attachment(json_data[field])
+    return json_data
 
 
-def combine(source, pipeline):
-    """Construct a combined generator from a source and pipeline."""
-    return reduce(lambda x, y: y(x), pipeline, source)
-
-
-def process(rows):
-    """Pull rows through the pipeline."""
-    for row in rows:
-        pass
-
-
-def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, exclude=None, method=None):
-    """smth."""
-    pipeline = [
-        skip_rows_with_all_key_value(test='skip'),
-        skip_rows_with_all_key_value(_test='skip'),
-        skip_rows_in_excludes(excludes=exclude),
-        skip_rows_with_all_falsey_value('test') if test_only else noop,
-        skip_rows_with_all_falsey_value('_test') if test_only else noop,
-        remove_keys_with_empty_value,
-        skip_rows_missing_all_keys('uuid', 'accession', '@id', 'name'),
-        remove_keys('schema_version'),
-        warn_keys_with_unknown_value_except_for(
-            'lot_id', 'sex', 'life_stage', 'health_status', 'ethnicity',
-            'strain_background', 'age', 'version',
-            'model_organism_health_status',
-            'model_organism_age',
-            'model_organism_sex',
-            'mouse_life_stage',
-            # 'flowcell_details.machine',
-        ),
-        add_attachments(docsdir),
-    ]
-    # special case for incremental ontology updates
-    if phase == 'patch_ontology':
-        method = 'PATCH'
-    elif phase is None and method is not None:
-        method = method
-    elif phase == 1:
-        method = 'POST'
-        pipeline.extend(PHASE1_PIPELINES.get(item_type, []))
-    elif phase == 2:
-        method = 'PUT'
-        pipeline.extend(PHASE2_PIPELINES.get(item_type, []))
-    elif phase == 3:
-        method = 'PUT'
-        pipeline.extend(PHASE2_PIPELINES.get(item_type, []))
-    pipeline.extend([
-        request_url(item_type, method),
-        remove_keys('uuid') if method in ('PUT', 'PATCH') else noop,
-        make_request(testapp, item_type, method),
-        pipeline_logger(item_type, phase),
-    ])
-    return pipeline
-
-
-# Additional pipeline sections for item types
-
-PHASE1_PIPELINES = {
-    'ontology': [
-        remove_keys('synonym_terms', 'definition_terms', 'relation_terms')
-    ],
-    'ontology_term': [
-        remove_keys('parents', 'slim_terms')
-    ],
-    'user': [
-        remove_keys('lab', 'submits_for'),
-    ],
-    'file_format': [
-        remove_keys('extrafile_formats'),
-    ],
-    'file_fastq': [
-        remove_keys('related_files'),
-    ],
-    'file_processed': [
-        remove_keys('related_files', "workflow_run", "source_experiments", 'produced_from'),
-    ],
-    'file_reference': [
-        remove_keys('related_files'),
-    ],
-    'file_calibration': [
-        remove_keys('related_files'),
-    ],
-    'file_microscopy': [
-        remove_keys('related_files'),
-    ],
-    'file_set': [
-        remove_keys('files_in_set'),
-    ],
-    'file_set_calibration': [
-        remove_keys('files_in_set'),
-    ],
-    'file_set_microscope_qc': [
-        remove_keys('files_in_set'),
-    ],
-    'experiment_hi_c': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_capture_c': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_repliseq': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_atacseq': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_chiapet': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_damid': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_seq': [
-        remove_keys('experiment_relation'),
-    ],
-    'experiment_tsaseq': [
-        remove_keys('experiment_relation'),
-    ],
-    'publication': [
-        remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
-    ],
-    'publication_tracking': [
-        remove_keys('experiment_sets_in_pub'),
-    ],
-    'biosource': [
-        remove_keys('cell_line')
-    ]
-}
-
-
-##############################################################################
-# Phase 2 pipelines
-#
-# A second pass is required to cope with self reference cycles. Only rows with
-# filtered out keys are updated.
-
-
-PHASE2_PIPELINES = {
-    'ontology_term': [
-        skip_rows_missing_all_keys('parents', 'slim_terms'),
-    ],
-    'file_format': [
-        skip_rows_missing_all_keys('extrafile_formats'),
-    ],
-    'file_fastq': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'file_processed': [
-        skip_rows_missing_all_keys('related_files', 'produced_from'),
-    ],
-    'file_reference': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'file_calibration': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'file_microscopy': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'experiment_hi_c': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_capture_c': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_repliseq': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_atacseq': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_chiapet': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_damid': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_seq': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ],
-    'experiment_tsaseq': [
-        skip_rows_missing_all_keys('experiment_relation'),
-    ]
-}
-
-
-####
-# and a third phase is needed for non-self references
-PHASE3_PIPELINES = {
-    'ontology': [
-        skip_rows_missing_all_keys('synonym_terms', 'definition_terms', 'relation_terms'),
-    ],
-    'user': [
-        skip_rows_missing_all_keys('lab', 'submits_for'),
-    ],
-    'file_processed': [
-        skip_rows_missing_all_keys('workflow_run', 'source_experiments'),
-    ],
-    'file_set': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'file_set_calibration': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'file_set_microscope_qc': [
-        skip_rows_missing_all_keys('files_in_set'),
-    ],
-    'publication': [
-        skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
-    ],
-    'publication_tracking': [
-        skip_rows_missing_all_keys('experiment_sets_in_pub'),
-    ],
-    'biosource': [
-        skip_rows_missing_all_keys('cell_line')
-    ]
-}
-
-
-def check_result(data, errors=[], exclude=[]):
-    for result in data:
-        if result.get('_response') and result.get('_response').status_code not in [200, 201]:
-            errors.append({'uuid': result['uuid'],
-                           'error': result['_response'].json})
-
-            exclude.append(result['uuid'])
-            print("excluding uuid %s due to error" % result['uuid'])
-
-
-def load_all(testapp, filename, docsdir, test=False, phase=None, itype=None, from_json=False):
-    """smth."""
-    # exclude_list is for items that fail phase1 to be excluded from phase2
-    exclude_list = []
-    errors = []
-    order = list(ORDER)
-    # default incase no data comes in
-    force_return = False
+def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
+    """convert data to store format dictionary (same format expected from from_json=True),
+    assume main function is to load reasonable number of inserts from a folder
+    args:
+        testapp
+        inserts : either a folder, or a dictionary in the store format
+        docsdir : attachment folder
+        overwrite (bool)   : if the database contains the item already, skip or patch
+        itype (list or str): limit selection to certain type/types
+        from_json (bool)   : if set to true, inserts should be dict instead of folder name
+    """
+    # Collect Items
+    store = {}
+    if from_json:
+        store = inserts
+    if not from_json:
+        # grab json files
+        if not inserts.endswith('/'):
+            inserts += '/'
+        files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+        for a_file in files:
+            item_type = a_file.split('/')[-1].replace(".json", "")
+            with open(inserts + a_file) as f:
+                store[item_type] = json.loads(f.read())
+    # if there is a defined set of items, subtract the rest
     if itype is not None:
         if isinstance(itype, list):
-            order = itype
+            store = {i: store[i] for i in itype if i in store}
         else:
-            order = [itype]
-    for item_type in order:
-        try:
-            if from_json:
-                source = filename.get(item_type)
-                if source is None:
-                    continue
-            else:
-                source = read_single_sheet(filename, item_type)
-        except ValueError:
-            logger.error('Opening %s %s failed.', filename, item_type)
-            continue
-
-        # special case for patching ontology terms
-        if item_type == 'ontology_term' and phase == 'patch_ontology':
-            force_return = True
-        else:
-            force_return = False
-            phase = 1
-
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase)
-        processed_data = combine(source, pipeline)
-        check_result(processed_data, exclude=exclude_list, errors=errors)
-        # for result in processed_data:
-        #     if result.get('_response') and result.get('_response').status_code not in [200, 201]:
-        #         errors.append({'uuid': result['uuid'],
-        #                        'error': result['_response'].json})
-        #         # import pdb; pdb.set_trace()
-        #         exclude_list.append(result['uuid'])
-        #         print("excluding uuid %s due to error" % result['uuid'])
-
-        # load self referential phase2
-        if force_return:
-            continue
-        elif item_type not in PHASE2_PIPELINES:
-            continue
-        else:
-            phase = 2
-            pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=phase, exclude=exclude_list)
-            processed_data = combine(source, pipeline)
-            check_result(processed_data, exclude=exclude_list, errors=errors)
-
-    if force_return:
+            store = {itype: store.get(itype, [])}
+    # clear empty values
+    store = {k: v for k, v in store.items() if v is not None}
+    if not store:
+        logger.error('No items found in %s %s', inserts, item_type)
         return
+    # order Items
+    all_types = list(store.keys())
+    for ref_item in reversed(ORDER):
+        if ref_item in all_types:
+            all_types.insert(0, all_types.pop(all_types.index(ref_item)))
+    # collect schemas
+    profiles = testapp.get('/profiles/?frame=raw').json
 
-    for item_type in order:
-        if item_type not in PHASE3_PIPELINES:
+    # run step1 - if item does not exist, post with minimal metadata
+    second_round_items = {}
+    for a_type in all_types:
+        # this conversion of schema name to object type works for all existing schemas at the moment
+        obj_type = "".join([i.title() for i in a_type.split('_')])
+        # minimal schema
+        schema_info = profiles[obj_type]
+        req_fields = schema_info['required']
+        ids = schema_info['identifyingProperties']
+        first_fields = list(set(req_fields+ids + ['schema_version']))
+        remove_existing_items = []
+        posted = 0
+        patched = 0
+        skip_exist = 0
+        post_error = 0
+        patch_error = 0
+        for an_item in store[a_type]:
+            try:
+                check_req = testapp.get('/'+an_item['uuid'], status=200)
+                exists = True
+            except:
+                exists = False
+            # skip the items that exists, if overwrite is not allowed, they them out from patch list
+            if exists:
+                skip_exist += 1
+                if not overwrite:
+                    remove_existing_items.append(an_item['uuid'])
+                # print("{} {} can not post existing item".format(obj_type, an_item['uuid']))
+                continue
+            post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+            post_first = format_for_attachment(post_first, docsdir)
+            try:
+                testapp.post_json('/'+a_type, post_first, status=201)
+                posted += 1
+            except Exception as e:
+                logger.error(trim(e))
+                post_error += 1
+
+        second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in remove_existing_items]
+        logger.info('{} 1st: {} items posted and {} items errored, {} items exists.'.format(a_type, posted, post_error, skip_exist))
+        logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items[a_type]))))
+
+    # Round II - patch the rest of the metadata
+    for a_type in all_types:
+        obj_type = "".join([i.title() for i in a_type.split('_')])
+        if not second_round_items[a_type]:
+            logger.info('{} 2nd: no items to patch'.format(a_type))
             continue
-        try:
-            if from_json:
-                source = filename.get(item_type)
-                if source is None:
-                    continue
-            else:
-                source = read_single_sheet(filename, item_type)
-        except ValueError:
-            continue
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=3, exclude=exclude_list)
-        process(combine(source, pipeline))
-    return errors
+        for an_item in second_round_items[a_type]:
+            an_item = format_for_attachment(an_item, docsdir)
+            try:
+                testapp.patch_json('/'+an_item['uuid'], an_item, status=201)
+                patched += 1
+            except Exception as e:
+                logger.error(trim(e))
+                patch_error += 1
+        logger.info('{} 2nd: {} items patched and {} items errored.'.format(a_type, patched, patch_error))
 
 
-def generate_access_key(testapp, store_access_key,
-                        email='4dndcic@gmail.com'):
+def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
@@ -925,12 +319,15 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
-              clear_tables=False, use_master_inserts=True):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
     '''
-    generic load data function
-    indir for inserts should be relative to tests/data/
-    docsdir is relative to tests/data and defaults to no docs dir
+    This function will take the inserts folder as input, and place them to the given environment.
+    args:
+        app:
+        access_key_loc (None):
+        indir (inserts): inserts folder, should be relative to tests/data/
+        docsdir (None): folder with attachment documents, relative to tests/data
+        clear_tables (False): Not sure- clear existing database before loading inserts
     '''
     if clear_tables:
         from snovault import DBSESSION
@@ -956,8 +353,7 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    # load master-inserts unless argument specifies not to
-    if indir != 'master-inserts' and use_master_inserts:
+    if indir != 'master-inserts':  # Always load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
 
@@ -976,37 +372,17 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
 
 
 def load_test_data(app, access_key_loc=None, clear_tables=False):
-    """
-    Load inserts and master-inserts
-    """
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
               clear_tables=clear_tables)
 
 
-def load_local_data(app, access_key_loc=None, clear_tables=False):
-    """
-    Load temp-local-inserts. If not present, load inserts and master-inserts
-    """
-    from pkg_resources import resource_filename
-    # if we have any json files in temp-local-inserts, use those
-    chk_dir = resource_filename('encoded', 'tests/data/temp-local-inserts')
-    use_temp_local = False
-    for (dirpath, dirnames, filenames) in os.walk(chk_dir):
-        use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
-
-    if use_temp_local:
-        load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
-                  clear_tables=clear_tables, use_master_inserts=False)
-    else:
-        load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-                  clear_tables=clear_tables)
-
-
 def load_prod_data(app, access_key_loc=None, clear_tables=False):
-    """
-    Load master-inserts
-    """
-    load_data(app, access_key_loc, indir='master-inserts',
+    load_data(app, access_key_loc, indir='prod-inserts',
+              clear_tables=clear_tables)
+
+
+def load_wfr_data(app, access_key_loc=None, clear_tables=False):
+    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
               clear_tables=clear_tables)
 
 
