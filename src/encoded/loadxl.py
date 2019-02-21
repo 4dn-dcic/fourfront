@@ -931,6 +931,7 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
     generic load data function
     indir for inserts should be relative to tests/data/
     docsdir is relative to tests/data and defaults to no docs dir
+    if use_master_inserts is True, 'master-inserts' are loaded along with indir
     '''
     if clear_tables:
         from snovault import DBSESSION

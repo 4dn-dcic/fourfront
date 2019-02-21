@@ -1,5 +1,6 @@
 import argparse
 import logging
+import structlog
 
 from pyramid.path import DottedNameResolver
 from pyramid.paster import get_app
@@ -7,12 +8,11 @@ from encoded import configure_dbsession
 import sys
 import os
 
-logger = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 EPILOG = __doc__
 
 
 def main():
-
     logging.basicConfig()
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.DEBUG)
@@ -37,10 +37,10 @@ def main():
     #create db schema
     configure_dbsession(app)
 
-    env = app.registry.settings.get('env.name')
-
+    env = app.registry.settings.get('env.name', '')
+    
     load_test_data = app.registry.settings.get('snovault.load_test_data')
-    print("****** load test data is %s" % (load_test_data))
+    log.info("load_data: load_test_data function is %s" % (load_test_data))
     load_test_data = DottedNameResolver().resolve(load_test_data)
 
     # clear database on mastertest when flag is set and on the right env
@@ -48,6 +48,7 @@ def main():
 
     # do not run on webprod/webprod2 unless we set --prod flag
     if 'webprod' in env and not args.prod:
+        log.info('load_data: skipping, since we are on webprod/webprod2 and --prod not used')
         return
 
     load_test_data(app, args.access_key, clear_tables)

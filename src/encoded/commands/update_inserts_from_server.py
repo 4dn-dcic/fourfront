@@ -1,11 +1,11 @@
-import argparse
 import structlog
 import logging
-from os import walk
-# use ff_utils to find inserts and write data
-from dcicutils.ff_utils import expand_es_metadata, dump_results_to_json
-# use this function to read inserts
-from .run_upgrader_on_inserts import get_inserts
+# import argparse
+# from os import walk
+# # use ff_utils to find inserts and write data
+# from dcicutils.ff_utils import expand_es_metadata, dump_results_to_json
+# # use this function to read inserts
+# from .run_upgrader_on_inserts import get_inserts
 
 logger = structlog.getLogger(__name__)
 EPILOG = __doc__
