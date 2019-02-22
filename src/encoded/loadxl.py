@@ -143,13 +143,13 @@ def attachment(path):
 def format_for_attachment(json_data, docsdir):
     for field in IS_ATTACHMENT:
         if field in json_data:
-            if not isinstance(json_data[field], 'str'):
+            if not isinstance(json_data[field], str):
                 # malformatted attachment
                 del json_data[field]
                 logger.error('Removing {} form {}, expecting path'.format(field, json_data['uuid']))
             else:
                 path = find_doc(docsdir, json_data[field])
-                json_data[field] = attachment(json_data[field])
+                json_data[field] = attachment(path)
     return json_data
 
 
@@ -165,6 +165,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
     """
     # Collect Items
+    print('----------')
+    print(inserts)
     store = {}
     if from_json:
         store = inserts
@@ -174,6 +176,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
             inserts += '/'
         files = [i for i in os.listdir(inserts) if i.endswith('.json')]
         for a_file in files:
+            print(a_file)
             item_type = a_file.split('/')[-1].replace(".json", "")
             with open(inserts + a_file) as f:
                 store[item_type] = json.loads(f.read())
@@ -199,6 +202,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     # run step1 - if item does not exist, post with minimal metadata
     second_round_items = {}
     for a_type in all_types:
+        print(a_type, 'posting')
         # this conversion of schema name to object type works for all existing schemas at the moment
         obj_type = "".join([i.title() for i in a_type.split('_')])
         # minimal schema
@@ -226,7 +230,6 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 skip_exist += 1
                 if not overwrite:
                     remove_existing_items.append(an_item['uuid'])
-                # print("{} {} can not post existing item".format(obj_type, an_item['uuid']))
                 continue
             post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
             post_first = format_for_attachment(post_first, docsdir)
@@ -234,7 +237,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 testapp.post_json('/'+a_type, post_first, status=201)
                 posted += 1
             except Exception as e:
-                logger.error(str(trim(e)))
+                res = testapp.post_json('/'+a_type, post_first)
+                logger.error(str(trim(e)) + '\n' + str(res.json))
                 post_error += 1
 
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in remove_existing_items]
@@ -243,6 +247,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
 
     # Round II - patch the rest of the metadata
     for a_type in all_types:
+        print(a_type, 'patching')
         obj_type = "".join([i.title() for i in a_type.split('_')])
         if not second_round_items[a_type]:
             logger.info('{} 2nd: no items to patch'.format(a_type))
@@ -253,7 +258,9 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 testapp.patch_json('/'+an_item['uuid'], an_item, status=200)
                 patched += 1
             except Exception as e:
-                logger.error(trim(e))
+                res = testapp.patch_json('/'+an_item['uuid'], an_item, status=200)
+                logger.error(trim(str(e)) + '\n' + str(res.json))
+                break
                 patch_error += 1
         logger.info('{} 2nd: {} items patched and {} items errored.'.format(a_type, patched, patch_error))
 
