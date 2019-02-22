@@ -29,7 +29,7 @@ ORDER = [
     'award',
     'lab',
     'file_format',
-    'experiment_type',
+    # 'experiment_type',
     'biosource',
     'biosample',
     'workflow',
