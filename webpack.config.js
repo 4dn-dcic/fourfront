@@ -181,7 +181,9 @@ module.exports = [
             'dagre-d3',
             '@babel/register', // avoid bundling babel transpiler, which is not used at runtime
             'higlass',
-            'auth0-lock'
+            'auth0-lock',
+            'aws-sdk',
+            'src/encoded/static/components/utils/aws'
         ],
         output: {
             path: PATHS.build,
@@ -190,7 +192,9 @@ module.exports = [
             chunkFilename: chunkFilename,
         },
         module: {
-            rules: rules
+            rules: rules.concat([
+                { parser: { requireEnsure: false } }
+            ])
         },
         optimization: optimization,
         resolve : resolve,

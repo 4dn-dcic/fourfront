@@ -1142,7 +1142,7 @@ export default class SubmissionView extends React.PureComponent{
                                 // that is not added from /types/file.py get_upload
                                 var creds = responseData['upload_credentials'];
 
-                                require.ensure(['../util/aws'], ()=>{
+                                require.ensure(['../util/aws'], (require)=>{
 
                                     var awsUtil = require('../util/aws'),
                                         upload_manager = awsUtil.s3UploadFile(this.state.file, creds);
@@ -1159,7 +1159,7 @@ export default class SubmissionView extends React.PureComponent{
                                         this.setState(stateToSet);
                                         this.updateUpload(upload_manager);
                                     }
-                                });
+                                }, "aws-utils-bundle");
                                 
                             }else{
                                 // state cleanup for this key
