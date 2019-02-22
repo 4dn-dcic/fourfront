@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const env = process.env.NODE_ENV;
 const TerserPlugin = require('terser-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const DeadCodePlugin = require('webpack-deadcode-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const PATHS = {
     "static": path.resolve(__dirname, 'src/encoded/static'),
@@ -25,13 +27,20 @@ let chunkFilename = '[name].js';
 let devTool = 'source-map'; // Default, slowest.
 
 
-if (env === 'production') {
+if (mode === 'production') {
     // tell react to use production build
     plugins.push(new webpack.DefinePlugin({
         'process.env': {
             'NODE_ENV': '"production"'
         }
     }));
+
+    plugins.push(new DeadCodePlugin({
+        exclude: [
+            '**/*.(stories|spec).(js|jsx)'
+        ]
+    }));
+
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
@@ -40,6 +49,7 @@ if (env === 'production') {
 } else if (env === 'development') {
     devTool = 'inline-source-map';
 }
+
 
 var rules = [
     // Strip @jsx pragma in react-forms, which makes babel abort
@@ -73,28 +83,51 @@ var resolve = {
 var optimization = {
     minimize: mode === "production",
     minimizer: [
-        new UglifyJsPlugin({
-            parallel: true,
-            sourceMap: true
-        })
-        //new TerserPlugin({
+        //new UglifyJsPlugin({
         //    parallel: true,
-        //    terserOptions:{
-        //        compress: true,
-        //        mangle: true,
-        //        sourceMap: true
-        //    }
+        //    sourceMap: true
         //})
+        new TerserPlugin({
+            parallel: true,
+            terserOptions:{
+                compress: true,
+                mangle: true,
+                sourceMap: true
+            }
+        })
     ]
 };
 
+
+const webPlugins = plugins.slice(0);
+const serverPlugins = plugins.slice(0);
+
+if (mode === 'development'){
+    webPlugins.push(
+        new BundleAnalyzerPlugin({
+            "analyzerMode" : "static",
+            "openAnalyzer" : false,
+            "logLevel" : "warn",
+            "reportFilename" : "report-web-bundle.html"
+        })
+    );
+    serverPlugins.push(
+        new BundleAnalyzerPlugin({
+            "analyzerMode" : "static",
+            "openAnalyzer" : false,
+            "logLevel" : "warn",
+            "reportFilename" : "report-server-renderer.html"
+        })
+    );
+}
 
 module.exports = [
     // for browser
     {
         mode: mode,
         entry: {
-            bundle: PATHS.static + '/browser',
+            "bundle"    : PATHS.static + '/browser',
+            //"util-aws"  : PATHS.static + '/components/util/aws',
         },
         target: "web",
         output: {
@@ -126,7 +159,7 @@ module.exports = [
         resolve : resolve,
         resolveLoader : resolve,
         devtool: devTool,
-        plugins: plugins
+        plugins: webPlugins
     },
     // for server-side rendering
     ///*
@@ -163,7 +196,7 @@ module.exports = [
         resolve : resolve,
         resolveLoader : resolve,
         devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
-        plugins: plugins
+        plugins: serverPlugins
     }
     //*/
 ];

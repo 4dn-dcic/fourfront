@@ -1376,7 +1376,7 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-        var { canonical, currentAction, context, listActionsFor, status } = this.props,
+        var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
             title;
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1385,7 +1385,7 @@ class HTMLTitle extends React.PureComponent {
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context, currentAction);
+            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
@@ -1417,7 +1417,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf } = this.props,
+        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props,
             contextAtID     = object.itemUtil.atId(context),
             key             = contextAtID && contextAtID.split('?')[0], // Switching between collections may leave component in place
             content; // Output
@@ -1439,7 +1439,7 @@ class ContentRenderer extends React.PureComponent {
             content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context, currentAction);
+            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
@@ -1885,8 +1885,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="pre-content-placeholder"/>
 
-                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')}
-                                windowWidth={windowWidth} />
+                            <PageTitle {...this.props} windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}

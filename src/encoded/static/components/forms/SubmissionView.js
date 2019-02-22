@@ -1,13 +1,11 @@
 'use strict';
 
 import React from 'react';
-import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
-import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
-import moment from 'moment';
-import { s3UploadFile } from '../util/aws';
+import { ajax, console, JWT, object, layout, Schemas } from '../util';
+//import { s3UploadFile } from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import SearchView from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
@@ -1143,19 +1141,26 @@ export default class SubmissionView extends React.PureComponent{
                                 // add important info to result from finalizedContext
                                 // that is not added from /types/file.py get_upload
                                 var creds = responseData['upload_credentials'];
-                                var upload_manager = s3UploadFile(this.state.file, creds);
-                                if (upload_manager === null){
-                                    // bad upload manager. Cause an alert
-                                    alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
-                                }else{
-                                    // this will set off a chain of aync events.
-                                    // first, md5 will be calculated and then the
-                                    // file will be uploaded to s3. If all of this
-                                    // is succesful, call finishRoundTwo.
-                                    stateToSet.uploadStatus = null;
-                                    this.setState(stateToSet);
-                                    this.updateUpload(upload_manager);
-                                }
+
+                                require.ensure(['../util/aws'], ()=>{
+
+                                    var awsUtil = require('../util/aws'),
+                                        upload_manager = awsUtil.s3UploadFile(this.state.file, creds);
+
+                                    if (upload_manager === null){
+                                        // bad upload manager. Cause an alert
+                                        alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
+                                    } else {
+                                        // this will set off a chain of aync events.
+                                        // first, md5 will be calculated and then the
+                                        // file will be uploaded to s3. If all of this
+                                        // is succesful, call finishRoundTwo.
+                                        stateToSet.uploadStatus = null;
+                                        this.setState(stateToSet);
+                                        this.updateUpload(upload_manager);
+                                    }
+                                });
+                                
                             }else{
                                 // state cleanup for this key
                                 this.finishRoundTwo();
@@ -2113,11 +2118,6 @@ class RoundTwoDetailPanel extends React.Component{
         );
     }
 }
-
-globals.content_views.register(SubmissionView, 'Item', 'edit');
-globals.content_views.register(SubmissionView, 'Item', 'create');
-globals.content_views.register(SubmissionView, 'Item', 'clone');
-globals.content_views.register(SubmissionView, 'Search', 'add');
 
 /***** MISC. FUNCIONS *****/
 

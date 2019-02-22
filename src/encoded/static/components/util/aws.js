@@ -1,4 +1,4 @@
-import * as aws from 'aws-sdk';
+import { S3, config } from 'aws-sdk';
 
 
 // Uploads a given file to s3 using the upload_credentials metadata
@@ -7,7 +7,7 @@ import * as aws from 'aws-sdk';
 // If you return null, the upload will fail with a warning message
 export function s3UploadFile(file, upload_credentials){
 
-    aws.config.update({
+    config.update({
         accessKeyId: upload_credentials.AccessKeyId,
         secretAccessKey: upload_credentials.SecretAccessKey,
         sessionToken: upload_credentials.SessionToken
@@ -25,7 +25,7 @@ export function s3UploadFile(file, upload_credentials){
     if(!bucket){
         return null;
     }
-    var s3 = new aws.S3();
+    var s3 = new S3();
     // this function returns an uploadManager
     return s3.upload({Bucket: bucket, Key: upload_credentials.key, Body: file });
 }

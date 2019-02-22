@@ -6,8 +6,12 @@
         "no-console": 0,
         "no-unused-vars": 1,
         "no-empty": 0,
-        "no-undef": 0
-
+        "no-undef": 0,
+        "no-global-assign" :"error",
+        "react/button-has-type" : "error",
+        "react/no-access-state-in-setstate" : "error",
+        "react/no-direct-mutation-state" : "error",
+        "react/prop-types": [1, { "skipUndeclared" : true }]
     },
     "env": {
         "es6": true,
@@ -16,7 +20,10 @@
         "cypress/globals" : true
     },
     "parser" : "babel-eslint",
-    "extends": "eslint:recommended",
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended"
+    ],
     "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module",

@@ -3,11 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, layout, navigate } from'./../util';
+import { console, navigate } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { Collapse, Button } from 'react-bootstrap';
-import * as store from '../../store';
-import * as globals from './../globals';
 import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
 
 
@@ -255,5 +253,3 @@ class LinksColumn extends React.PureComponent {
 
 }
 
-
-globals.content_views.register(HomePage, 'HomePage');

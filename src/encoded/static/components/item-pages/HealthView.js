@@ -5,13 +5,11 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import { Button } from 'react-bootstrap';
 import { content_views } from './../globals';
-import { ajax, console, object, Filters, JWT, DateUtility, layout, navigate } from './../util';
-import { ItemPageTitle, ItemDetailList } from './components';
+import { ajax, layout, navigate } from './../util';
+import { ItemDetailList } from './components';
 import ReactTooltip from 'react-tooltip';
-import * as vizUtil from './../viz/utilities';
 import * as d3 from 'd3';
 import _ from 'underscore';
-import JSONTree from 'react-json-tree';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -21,7 +19,7 @@ import JSONTree from 'react-json-tree';
  * @class Item
  * @extends {React.Component}
  */
-export class HealthView extends React.Component {
+export default class HealthView extends React.Component {
 
     static notFinishedIndexing(db_es_total){
         return db_es_total && (db_es_total.indexOf('< DB has') > -1 || db_es_total.indexOf('loading') > -1) ? true : false;
@@ -142,8 +140,6 @@ export class HealthView extends React.Component {
         );
     }
 }
-
-content_views.register(HealthView, 'Health');
 
 /**
  * This is a React wrapper around a D3 visualization.

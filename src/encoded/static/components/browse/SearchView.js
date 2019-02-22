@@ -2,19 +2,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import queryString from 'query-string';
 import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import * as globals from './../globals';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, DateUtility, navigate, JWT, typedefs } from './../util';
+import { ajax, console, object, Filters, Schemas, DateUtility, navigate, JWT, typedefs } from './../util';
 import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
 import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns,
-    haveContextColumnsChanged
+    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns
 } from './components';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
@@ -149,7 +146,7 @@ class ControlsAndResults extends React.PureComponent {
                         newChildren = currentTitleBlock.props.children.slice(0);
                     newChildren.unshift(
                         <div className="select-button-container">
-                            <button className="select-button" onClick={this.handleSelectItemClick.bind(this, result)}>
+                            <button type="button" className="select-button" onClick={this.handleSelectItemClick.bind(this, result)}>
                                 <i className="icon icon-fw icon-check"/>
                             </button>
                         </div>
@@ -238,12 +235,12 @@ class ControlsAndResults extends React.PureComponent {
 
 export default class SearchView extends React.PureComponent {
 
-    /**
-     * @ignore
-     */
     static propTypes = {
-        'context' : PropTypes.object.isRequired,
-        'currentAction' : PropTypes.string
+        'context'       : PropTypes.object.isRequired,
+        'currentAction' : PropTypes.string,
+        'href'          : PropTypes.string.isRequired,
+        'session'       : PropTypes.bool.isRequired,
+        'navigate'      : PropTypes.func
     };
 
     /**
@@ -259,25 +256,6 @@ export default class SearchView extends React.PureComponent {
         'columnExtensionMap' : defaultColumnExtensionMap
     };
 
-    constructor(props){
-        super(props);
-        this.filterFacet = this.filterFacet.bind(this);
-        this.transformedFacets = this.transformedFacets.bind(this);
-        this.state = {
-            'transformedFacets' : this.transformedFacets(props)
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (this.props.context !== nextProps.context){
-            this.setState({ 'transformedFacets' : this.transformedFacets(nextProps) });
-        }
-    }
-
-    componentDidMount(){
-        ReactTooltip.rebuild();
-    }
-
     /**
      * Function which is passed into a `.filter()` call to
      * filter context.facets down, usually in response to frontend-state.
@@ -289,13 +267,9 @@ export default class SearchView extends React.PureComponent {
      * @todo Potentially get rid of this and do on backend.
      *
      * @param {{ field: string }} facet - Object representing a facet.
-     * @param {number} facetIdx - Index of current facet being iterated on.
-     * @param {Object[]} all - All facets.
      * @returns {boolean} Whether to keep or discard facet.
      */
-    filterFacet(facet, facetIdx, all){
-        var { currentAction, session } = this.props;
-
+    static filterFacet(facet, currentAction, session){
         // Set in backend or schema for facets which are under development or similar.
         if (facet.hide_from_view) return false;
 
@@ -316,14 +290,8 @@ export default class SearchView extends React.PureComponent {
         return true;
     }
 
-    /**
-     * Filter the `@type` facet options down to abstract types only (if none selected) for Search.
-     *
-     * @param {Object} props Component props.
-     */
-    transformedFacets(props = this.props){
-        var { href, context } = props,
-            facets,
+    static transformedFacets = memoize(function(href, context, currentAction, session){
+        var facets,
             typeFacetIndex,
             hrefQuery,
             itemTypesInSearch;
@@ -331,7 +299,10 @@ export default class SearchView extends React.PureComponent {
         // Clone/filter list of facets.
         // We may filter out type facet completely at this step,
         // in which case we can return out of func early.
-        facets = _.filter(context.facets, this.filterFacet);
+        facets = _.filter(
+            context.facets,
+            function(facet){ return SearchView.filterFacet(facet, currentAction, session); }
+        );
 
         // Find facet for '@type'
         typeFacetIndex = _.findIndex(facets, { 'field' : 'type' });
@@ -360,18 +331,43 @@ export default class SearchView extends React.PureComponent {
         });
 
         return facets;
+    });
+
+    /*
+    constructor(props){
+        super(props);
+        this.filterFacet = this.filterFacet.bind(this);
+        this.transformedFacets = this.transformedFacets.bind(this);
+        this.state = {
+            'transformedFacets' : this.transformedFacets(props)
+        };
+    }
+
+    componentWillReceiveProps(nextProps){
+        if (this.props.context !== nextProps.context){
+            this.setState({ 'transformedFacets' : this.transformedFacets(nextProps) });
+        }
+    }
+    */
+
+    componentDidMount(){
+        ReactTooltip.rebuild();
+    }
+
+    /**
+     * Filter the `@type` facet options down to abstract types only (if none selected) for Search.
+     */
+    transformedFacets(){
+        var { href, context, currentAction, session } = this.props;
+        return SearchView.transformedFacets(href, context, currentAction, session);
     }
 
     render() {
         return (
             <div className="search-page-container">
                 <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
-                <SearchControllersContainer {...this.props} facets={this.state.transformedFacets} navigate={this.props.navigate || navigate} />
+                <SearchControllersContainer {...this.props} facets={this.transformedFacets()} navigate={this.props.navigate || navigate} />
             </div>
         );
     }
 }
-
-globals.content_views.register(SearchView, 'Search');
-globals.content_views.register(SearchView, 'Search', 'selection');
-globals.content_views.register(SearchView, 'Browse', 'selection');

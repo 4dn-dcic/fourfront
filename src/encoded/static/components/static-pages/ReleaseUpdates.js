@@ -6,7 +6,6 @@ import _ from 'underscore';
 import url from 'url';
 import {  Collapse, Table } from 'react-bootstrap';
 import { console, object, ajax, JWT, analytics, isServerSide } from'./../util';
-import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import { BasicStaticSectionBody } from './components';
 
@@ -142,7 +141,6 @@ export default class ReleaseUpdates extends React.Component {
     }
 
 }
-globals.content_views.register(ReleaseUpdates, 'Release-updatesPage');
 
 
 class SingleUpdate extends React.Component {

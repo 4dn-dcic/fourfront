@@ -9,8 +9,8 @@ import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import { Modal, ButtonGroup, Checkbox, Button } from 'react-bootstrap';
-import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs, layout } from './../../../util';
-import { windowHref } from './../../../globals';
+import { Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
+import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import * as vizUtil from './../../../viz/utilities';
 import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
 
@@ -148,7 +148,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                 </Modal.Header>
                 <Modal.Body>
 
-                    <p>Please press the "Download" button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
+                    <p>Please press the &quot;Download&quot; button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
 
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
 
@@ -268,7 +268,7 @@ export class SelectedFilesDownloadDisclaimer extends React.PureComponent {
                     { foundUnpublishedFiles ?
                         <li>
                             For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                            In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                            In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
                             Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
                         </li>
                     : null }
@@ -392,7 +392,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                 currentHrefQuery.limit = 'all';
                 var reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
                 ajax.load(reqHref, (resp)=>{
-                    var allFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(expFxn.allFilesFromExperimentSet(v, this.props.includeProcessedFiles)), []);
+                    var allFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, this.props.includeProcessedFiles)), []);
                     // Some processed files may not have a 'from_experiment' property (redundant check temp), so we put in a dummy one to be able to generate a unique selector.
                     allFiles = _.map(allFiles, function(file){
                         if (typeof file.from_experiment === 'undefined'){
@@ -405,7 +405,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                         }
                         return file;
                     });
-                    var filesToSelect = _.zip(expFxn.filesToAccessionTriples(allFiles, true), allFiles);
+                    var filesToSelect = _.zip(filesToAccessionTriples(allFiles, true), allFiles);
                     this.props.selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
                 });

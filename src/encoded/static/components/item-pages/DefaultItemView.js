@@ -6,7 +6,6 @@ import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { content_views } from './../globals';
 import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
     FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
@@ -284,11 +283,6 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
 }
-
-content_views.register(DefaultItemView, 'Item');
-
-
-
 
 
 
