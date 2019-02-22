@@ -1,18 +1,18 @@
 """Load collections and determine the order."""
-from past.builtins import basestring
-import json
+import mimetypes
 import structlog
 import os.path
 import boto3
-import os
-from datetime import datetime
-from dcicutils.beanstalk_utils import get_beanstalk_real_url
-from pyramid.paster import get_app
-from pyramid.view import view_config
 import magic
-import mimetypes
-from PIL import Image
+import json
+import os
+from dcicutils.beanstalk_utils import get_beanstalk_real_url
+from past.builtins import basestring
+from pyramid.view import view_config
+from pyramid.paster import get_app
+from datetime import datetime
 from base64 import b64encode
+from PIL import Image
 
 text = type(u'')
 logger = structlog.getLogger('encoded')
@@ -32,7 +32,8 @@ ORDER = [
     'experiment_type',
     'biosource',
     'biosample',
-    'workflow'
+    'workflow',
+    'vendor'
 ]
 
 IS_ATTACHMENT = [
@@ -44,10 +45,18 @@ IS_ATTACHMENT = [
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
     '''
+    expected input data
+
+    {'local_dir': inserts folder on your computer
+     'fdn_dir': inserts folder under encoded
+     'store': if not local_dir or fdn_dir, use the dictionary
+     'overwrite' (Bool): overwrite if existing data
+     'itype': (list or str): only pick some types from the source
+     'config_uri': user supplied configuration file}
+
     post can contain 2 different styles of data
-    1) reference to a folder in tests/data/, with keyword local_dir
-       not sure if that is ever used
-    2) json content in form of {'item_type': [items], 'item_type2': [items]}
+    1) reference to a folder
+    2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     '''
     # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
@@ -63,18 +72,27 @@ def load_data_view(context, request):
         '@type': ['result'],
     }
     from pkg_resources import resource_filename
+    store = request.json.get('store', {})
+    fdn_dir = request.json.get('fdn_dir')
     local_dir = request.json.get('local_dir')
-    if local_dir:
-        local_inserts = resource_filename('encoded', 'tests/data/' + local_dir + '/')
-        res = load_all(testapp, local_inserts, [])
+    overwrite = request.json.get('overwrite', False)
+    itype = request.json.get('itype', None)
+
+    if fdn_dir:
+        fdn_inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
+        res = load_all(testapp, fdn_inserts, None, overwrite=overwrite, itype=itype)
+    elif local_dir:
+        res = load_all(testapp, local_dir, None, overwrite=overwrite, itype=itype)
+    elif store:
+        res = load_all(testapp, store, None, overwrite=overwrite, itype=itype, from_json=True)
     else:
-        res = load_all(testapp, request.json, [], from_json=True)
+        res = 'No uploadable content found!'
 
     # Expect res to be empty if load_all is success?
     if res:
         request.response.status = 422
         result['status'] = 'error'
-        result['@graph'] = res
+        result['@graph'] = str(res)
     return result
 
 
@@ -143,13 +161,15 @@ def attachment(path):
 def format_for_attachment(json_data, docsdir):
     for field in IS_ATTACHMENT:
         if field in json_data:
-            if not isinstance(json_data[field], str):
+            if isinstance(json_data[field], dict):
+                pass
+            elif isinstance(json_data[field], str):
+                path = find_doc(docsdir, json_data[field])
+                json_data[field] = attachment(path)
+            else:
                 # malformatted attachment
                 del json_data[field]
                 logger.error('Removing {} form {}, expecting path'.format(field, json_data['uuid']))
-            else:
-                path = find_doc(docsdir, json_data[field])
-                json_data[field] = attachment(path)
     return json_data
 
 
@@ -165,8 +185,6 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
     """
     # Collect Items
-    print('----------')
-    print(inserts)
     store = {}
     if from_json:
         store = inserts
@@ -176,7 +194,6 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
             inserts += '/'
         files = [i for i in os.listdir(inserts) if i.endswith('.json')]
         for a_file in files:
-            print(a_file)
             item_type = a_file.split('/')[-1].replace(".json", "")
             with open(inserts + a_file) as f:
                 store[item_type] = json.loads(f.read())
@@ -192,6 +209,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         logger.error('No items found in %s %s', inserts, item_type)
         return
     # order Items
+
     all_types = list(store.keys())
     for ref_item in reversed(ORDER):
         if ref_item in all_types:
@@ -202,7 +220,6 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     # run step1 - if item does not exist, post with minimal metadata
     second_round_items = {}
     for a_type in all_types:
-        print(a_type, 'posting')
         # this conversion of schema name to object type works for all existing schemas at the moment
         obj_type = "".join([i.title() for i in a_type.split('_')])
         # minimal schema
@@ -217,8 +234,6 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         posted = 0
         patched = 0
         skip_exist = 0
-        post_error = 0
-        patch_error = 0
         for an_item in store[a_type]:
             try:
                 testapp.get('/'+an_item['uuid'], status=200)
@@ -234,20 +249,18 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
             post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
             post_first = format_for_attachment(post_first, docsdir)
             try:
-                testapp.post_json('/'+a_type, post_first, status=201)
+                res = testapp.post_json('/'+a_type, post_first)
+                assert res.status_code == 201
                 posted += 1
             except Exception as e:
-                res = testapp.post_json('/'+a_type, post_first)
-                logger.error(str(trim(e)) + '\n' + str(res.json))
-                post_error += 1
-
+                logger.error(str(trim(e)))
+                return e
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in remove_existing_items]
-        logger.info('{} 1st: {} items posted and {} items errored, {} items exists.'.format(a_type, posted, post_error, skip_exist))
-        logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items[a_type]))))
+        logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
+        logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
 
     # Round II - patch the rest of the metadata
     for a_type in all_types:
-        print(a_type, 'patching')
         obj_type = "".join([i.title() for i in a_type.split('_')])
         if not second_round_items[a_type]:
             logger.info('{} 2nd: no items to patch'.format(a_type))
@@ -255,14 +268,13 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         for an_item in second_round_items[a_type]:
             an_item = format_for_attachment(an_item, docsdir)
             try:
-                testapp.patch_json('/'+an_item['uuid'], an_item, status=200)
+                res = testapp.patch_json('/'+an_item['uuid'], an_item)
+                assert res.status_code == 200
                 patched += 1
             except Exception as e:
-                res = testapp.patch_json('/'+an_item['uuid'], an_item, status=200)
-                logger.error(trim(str(e)) + '\n' + str(res.json))
-                break
-                patch_error += 1
-        logger.info('{} 2nd: {} items patched and {} items errored.'.format(a_type, patched, patch_error))
+                logger.error(trim(str(e)))
+                return e
+        logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 
 
 def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
@@ -329,7 +341,8 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False,  overwrite=True):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
+              clear_tables=False, overwrite=False):
     '''
     This function will take the inserts folder as input, and place them to the given environment.
     args:
@@ -381,15 +394,15 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     store_keys(app, access_key_loc, keys)
 
 
-def load_test_data(app, access_key_loc=None, clear_tables=False):
+def load_test_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load inserts and master-inserts
     """
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-              clear_tables=clear_tables)
+              clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_local_data(app, access_key_loc=None, clear_tables=False):
+def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load temp-local-inserts. If not present, load inserts and master-inserts
     """
@@ -402,34 +415,39 @@ def load_local_data(app, access_key_loc=None, clear_tables=False):
 
     if use_temp_local:
         load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
-                  clear_tables=clear_tables, use_master_inserts=False)
+                  clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
     else:
         load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-                  clear_tables=clear_tables)
+                  clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_prod_data(app, access_key_loc=None, clear_tables=False):
+def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load master-inserts
     """
     load_data(app, access_key_loc, indir='master-inserts',
-              clear_tables=clear_tables)
+              clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_ontology_terms(app, post_json=None, patch_json=None,):
+def load_ontology_terms(app, post_json=None, patch_json=None):
     from webtest import TestApp
     from webtest.app import AppError
+    # change the data format from list to store
+    if post_json:
+        post_json = {'ontology_term': post_json}
+    if patch_json:
+        patch_json = {'ontology_term': patch_json}
+
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
 
-    docsdir = []
     if post_json:
-        load_all(testapp, post_json, docsdir, itype='ontology_term')
+        load_all(testapp, post_json, None, itype='ontology_term')
     if patch_json:
-        load_all(testapp, patch_json, docsdir, itype='ontology_term', phase='patch_ontology')
+        load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True)
 
     # now keep track of the last time we loaded these suckers
     data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
