@@ -97,6 +97,7 @@ def test_fixtures2(minitestdata2, testapp):
 def test_order_complete(app, conn):
     from .datafixtures import ORDER
     from webtest import TestApp
+    ORDER = ORDER + ['access_key']
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
