@@ -108,8 +108,10 @@ def trim(value):
 
 
 def find_doc(docsdir, filename):
-    """smth."""
+    """tries to find the file, if not returns false."""
     path = None
+    if not docsdir:
+        return
     for dirpath in docsdir:
         candidate = os.path.join(dirpath, filename)
         if not os.path.exists(candidate):
@@ -119,7 +121,7 @@ def find_doc(docsdir, filename):
             raise ValueError(msg)
         path = candidate
     if path is None:
-        raise ValueError('File not found: %s' % filename)
+        return
     return path
 
 
@@ -165,7 +167,11 @@ def format_for_attachment(json_data, docsdir):
                 pass
             elif isinstance(json_data[field], str):
                 path = find_doc(docsdir, json_data[field])
-                json_data[field] = attachment(path)
+                if not path:
+                    del json_data[field]
+                    logger.error('Removing {} form {}, expecting path'.format(field, json_data['uuid']))
+                else:
+                    json_data[field] = attachment(path)
             else:
                 # malformatted attachment
                 del json_data[field]
@@ -184,6 +190,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
     """
+    if docsdir is None:
+        docsdir = []
     # Collect Items
     store = {}
     if from_json:
@@ -229,6 +237,9 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         # some schemas did not include aliases
         if 'aliases' not in ids:
             ids.append('aliases')
+        # file format is required for files, but its usability depends this field
+        if a_type == 'file_format':
+            req_fields.append('valid_item_types')
         first_fields = list(set(req_fields+ids))
         remove_existing_items = []
         posted = 0
