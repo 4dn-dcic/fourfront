@@ -25,9 +25,9 @@ def main():
         description="Load Ontology Term Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--post-file', default=resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_post.json'),
+    parser.add_argument('--post-file',
                         help="File containing terms to to POST - set to None if only PATCH is wanted")
-    parser.add_argument('--patch-file', default=resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_patch.json'),
+    parser.add_argument('--patch-file',
                         help="File containing terms to to PATCH - set to None if only POST is wanted")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
