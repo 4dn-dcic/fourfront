@@ -121,10 +121,16 @@
             "type": "string",
             "linkTo": "Protocol"
         },
-        "references": {
+        "reference_pubs": {
             "title": "Reference Publications",
             "description": "Reference publication(s) for the experiment type",
-            "type": "string"
+            "type": "array",
+            "items": {
+                "title": "Publication",
+                "description": "Publication metadata",
+                "type": "string",
+                "linkTo": "Publication"
+            }
         }
     },
     "facets": {
