@@ -14,6 +14,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
@@ -95,7 +96,7 @@
                 "RNA-DNA Multi-way Interactions",
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
-                "Time-Lapse"
+                "Single Particle Tracking"
             ]
         },
         "other_tags": {
@@ -130,11 +131,11 @@
         "experiment_category": {
             "title": "Experiment Category"
         },
-        "assay_classification": {
-            "title": "Assay Classification"
+        "assay_subclass_short": {
+            "title": "Assay Type"
         },
-        "assay_subclassification": {
-            "title": "Assay Subclassification"
+        "tags": {
+            "title": "More Categories"
         }
     },
     "columns": {
