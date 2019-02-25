@@ -446,8 +446,8 @@ h1.page-title + .page-subtitle {
 }
 
 /** Margin Classes, inspired by Swiss github-pages/jekyll template **/
-$margin-util-sizes: 0, 1, 2, 3, 4, 5, 6, 7, 8;  // * 10px
-$margin-util-sizes-mini: 1, 2, 3, 5, 7, 8; 		// * 1px
+$margin-util-sizes: 0, 1, 2, 3, 4, 5, 6, 7, 8;  		// * 10px
+$margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 
 @each $util-size in $margin-util-sizes {
 	.mb-#{$util-size},
@@ -586,7 +586,7 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 
 /************** MORE BUTTON STYLES ***********/
 
-// Light gray BG, more prominent button style than btn-default
+/* Light gray BG, more prominent button style than btn-default */
 .btn.btn-secondary {
   @include button-variant(#000, #e4e4e4, rgba(0,0,0,0.125));
   &:active, &:focus {
@@ -594,7 +594,7 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
   }
 }
 
-// Moving caret to always right position
+/* Moving caret to always right position */
 .dropdown-toggle.btn {
 	position: relative;
 	padding-right: 24px;
@@ -632,6 +632,11 @@ div.dropdown.btn-group {
 .shift-down-1 {
 	position: relative;
 	top: 1px;
+}
+
+/* Override sizing of btn-sm button re: our font */
+.btn.btn-sm {
+	padding-bottom: 4px;
 }
 
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/

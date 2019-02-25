@@ -167,8 +167,6 @@ class FacetTermsList extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.handleOpenToggleClick = this.handleOpenToggleClick.bind(this);
         this.handleExpandListToggleClick = this.handleExpandListToggleClick.bind(this);
         this.renderTerms = this.renderTerms.bind(this);
@@ -179,21 +177,17 @@ class FacetTermsList extends React.Component {
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        // We might want to change defaultFacetOpen right after mount, so let us re-do getInitialState.
+    componentDidUpdate(pastProps, pastState){
         if (
             (
-                nextProps.mounted && !this.props.mounted &&
-                typeof nextProps.defaultFacetOpen === 'boolean' && nextProps.defaultFacetOpen !== this.props.defaultFacetOpen
+                !pastProps.mounted && this.props.mounted &&
+                typeof this.props.defaultFacetOpen === 'boolean' && this.props.defaultFacetOpen !== pastProps.defaultFacetOpen
             ) || (
-                nextProps.defaultFacetOpen === true && !this.props.defaultFacetOpen && !this.state.facetOpen
+                this.props.defaultFacetOpen === true && !pastProps.defaultFacetOpen && !this.state.facetOpen
             )
         ){
             this.setState({ 'facetOpen' : true });
         }
-    }
-
-    componentDidUpdate(pastProps, pastState){
         if (pastState.facetOpen !== this.state.facetOpen){
             ReactTooltip.rebuild();
         }

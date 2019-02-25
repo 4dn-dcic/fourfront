@@ -104,8 +104,28 @@ export class NavigationBar extends React.PureComponent {
         }
     }
 
+    /**
+     * @todo Refactor into `getDerivedStateFromProps` or other approach.
+     */
+    componentWillReceiveProps(nextProps){
+        var closeMobileMenuWhenChangeIn = ['href', 'session'],
+            len = closeMobileMenuWhenChangeIn.length,
+            i, propName;
+
+        for (i = 0; i < len; i++){
+            propName = closeMobileMenuWhenChangeIn[i];
+            if (nextProps[propName] !== this.props[propName]){
+                this.closeMobileMenu();
+                break;
+            }
+        }
+    }
+
     closeMobileMenu(){
-        if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
+        this.setState( ({ mobileDropdownOpen }) => {
+            if (!mobileDropdownOpen) return null;
+            return { 'mobileDropdownOpen' : false };
+        });
     }
 
     /**
@@ -200,7 +220,7 @@ export class NavigationBar extends React.PureComponent {
                                 <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
                                     setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
                             </Nav>
-                            <UserActionDropdownMenu closeMobileMenu={this.closeMobileMenu} {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
+                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
                             <SearchBar href={href} currentAction={currentAction} />
                         </Navbar.Collapse>
                     </Navbar>

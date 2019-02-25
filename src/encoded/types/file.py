@@ -66,8 +66,8 @@ file_workflow_run_embeds = [
     'workflow_run_inputs.output_files.value.file_format',
     'workflow_run_inputs.output_files.value.uuid',
     'workflow_run_inputs.output_files.value.accession',
-    'workflow_run_inputs.output_quality_metrics.name',
-    'workflow_run_inputs.output_quality_metrics.value.uuid'
+    'workflow_run_inputs.output_files.value_qc.url',
+    'workflow_run_inputs.output_files.value_qc.overall_quality_status'
 ]
 
 file_workflow_run_embeds_processed = file_workflow_run_embeds + [e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds]
@@ -247,7 +247,8 @@ class File(Item):
         'experiments.digestion_enzyme.name',
         'file_format.file_format',
         'related_files.relationship_type',
-        'related_files.file.accession'
+        'related_files.file.accession',
+        'quality_metric.display_title'
     ]
     name_key = 'accession'
     rev = {
@@ -716,7 +717,12 @@ class FileFastq(File):
         "quality_metric.Total Sequences",
         "quality_metric.Sequence length",
         "quality_metric.url",
-        "badges.badge.*"
+        "badges.badge.title",
+        "badges.badge.commendation",
+        "badges.badge.warning",
+        "badges.badge.badge_classification",
+        "badges.badge.description",
+        "badges.message"
     ]
     aggregated_items = {
         "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
@@ -797,7 +803,11 @@ class FileProcessed(File):
         }
     })
     def workflow_run_inputs(self, request):
-        return self.rev_link_atids(request, "workflow_run_inputs")
+        # switch this calc prop off for some processed files, i.e. control exp files
+        if not self.properties.get('disable_wfr_inputs'):
+            return self.rev_link_atids(request, "workflow_run_inputs")
+        else:
+            return []
 
     @calculated_property(schema={
         "title": "Output of Workflow Runs",
@@ -1376,7 +1386,7 @@ def validate_extra_file_format(context, request):
             try:
                 off_uuid = ok_format_item.get('uuid')
             except AttributeError:
-                raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid')
+                raise  Exception("FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid'))
             valid_ext_formats.append(off_uuid)
     seen_ext_formats = []
     # formats = request.registry['collections']['FileFormat']

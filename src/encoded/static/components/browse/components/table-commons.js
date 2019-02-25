@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
@@ -38,7 +39,7 @@ export function defaultColumnBlockRenderFxn(result, columnDefinition, props, wid
         }));
     }
 
-    var value = object.getNestedProperty(result, columnDefinition.field);
+    var value = object.getNestedProperty(result, columnDefinition.field, true);
     if (!value) value = null;
     if (Array.isArray(value)){ // getNestedProperty may return a multidimensional array, # of dimennsions depending on how many child arrays were encountered in original result obj.
         value = filterAndUniq(_.map(value, function(v){
@@ -104,12 +105,13 @@ export const defaultColumnExtensionMap = {
         'widthMap' : {'lg' : 280, 'md' : 250, 'sm' : 200},
         'minColumnWidth' : 90,
         'order' : -100,
-        'render' : function(result, columnDefinition, props, width, popLink = false){
+        'render' : function renderDisplayTitleColumn(result, columnDefinition, props, width, popLink = false){
             var title = object.itemUtil.getTitleStringFromContext(result),
                 link = object.itemUtil.atId(result),
                 tooltip,
                 hasPhoto = false;
 
+            /** Registers a list click event for Google Analytics then performs navigation. */
             function handleClick(evt){
                 var tableType = navigate.isBrowseHref(props.href) ? 'browse' : (navigate.isSearchHref(props.href) ? 'search' : 'other');
                 if (tableType === 'browse' || tableType === 'search'){
@@ -128,9 +130,10 @@ export const defaultColumnExtensionMap = {
             }
 
             if (title && (title.length > 20 || width < 100)) tooltip = title;
-            if (link){
+            if (link){ // This should be the case always
                 title = <a key="title" href={link || '#'} children={title} onClick={handleClick} />;
                 if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
+                    // Specific case for User items. May be removed or more cases added, if needed.
                     hasPhoto = true;
                     title = (
                         <span key="title">
@@ -308,8 +311,9 @@ export const defaultColumnExtensionMap = {
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
         'render' : function(result, columnDefinition, props, width){
-            var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')).join('; ');
-            var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field'))[0];
+            // We have arrays here because experiments_in_set is array.
+            var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value', true)).join('; ');
+            var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field', true))[0];
             if (cat_value === 'No value' || !cat_value){
                 return null;
             }
@@ -320,8 +324,51 @@ export const defaultColumnExtensionMap = {
                 </div>
             );
         }
+    },
+    'workflow.title' : {
+        'title' : "Workflow",
+        'render' : function(result, columnDefinition, props, width){
+            if (!result.workflow || !result.workflow.title) return null;
+            var title = result.workflow.title,
+                link = object.itemUtil.atId(result.workflow);
+
+            if (link){
+                return <a href={link}>{ title }</a>;
+            } else {
+                return title;
+            }
+        }
     }
 };
+
+
+/**
+ * Should handle and fail cases where context and columns object reference values
+ * have changed, but not contents. User-selected columns should be preserved upon faceting
+ * or similar filtering, but be updated when search type changes.
+ *
+ * Used as equality checker for `columnsToColumnDefinitions` `columns` param memoization as well.
+ *
+ * @param {Object.<Object>} cols1 Previous object of columns, to be passed in from a lifecycle method.
+ * @param {Object.<Object>} cols2 Next object of columns, to be passed in from a lifecycle method.
+ *
+ * @returns {boolean} If context columns have changed, which should be about same as if type has changed.
+ */
+export function haveContextColumnsChanged(cols1, cols2){
+    if (cols1 === cols2) return false;
+    if (cols1 && !cols2) return true;
+    if (!cols1 && cols2) return true;
+    var pKeys       = _.keys(cols1),
+        pKeysLen    = pKeys.length,
+        nKeys       = _.keys(cols2),
+        i;
+
+    if (pKeysLen !== nKeys.length) return true;
+    for (i = 0; i < pKeysLen; i++){
+        if (pKeys[i] !== nKeys[i]) return true;
+    }
+    return false;
+}
 
 
 /**
@@ -333,7 +380,7 @@ export const defaultColumnExtensionMap = {
  * @param {Object} defaultWidthMap          Map of responsive grid states (lg, md, sm) to pixel number sizes.
  * @returns {Object[]}                      List of objects containing keys 'title', 'field', 'widthMap', and 'render'.
  */
-export function columnsToColumnDefinitions(columns, columnDefinitionMap, defaultWidthMap = DEFAULT_WIDTH_MAP){
+export const columnsToColumnDefinitions = memoize(function(columns, columnDefinitionMap, defaultWidthMap = DEFAULT_WIDTH_MAP){
     var uninishedColumnDefinitions = _.map(
         _.pairs(columns),
         function([field, columnProperties]){
@@ -356,10 +403,10 @@ export function columnsToColumnDefinitions(columns, columnDefinitionMap, default
     });
 
     return _.sortBy(uninishedColumnDefinitions, 'order');
-}
+});
 
 
-export function defaultHiddenColumnMapFromColumns(columns){
+export const defaultHiddenColumnMapFromColumns = memoize(function(columns){
     var hiddenColMap = {};
     _.forEach(_.pairs(columns), function([ field, columnDefinition ]){
         if (columnDefinition.default_hidden){
@@ -369,7 +416,10 @@ export function defaultHiddenColumnMapFromColumns(columns){
         }
     });
     return hiddenColMap;
-}
+}, function(newArgs, lastArgs){
+    // We allow different object references to be considered equal as long as their values are equal.
+    return !haveContextColumnsChanged(lastArgs[0], newArgs[0]);
+});
 
 
 export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){

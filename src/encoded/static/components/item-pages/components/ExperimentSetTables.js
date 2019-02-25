@@ -13,11 +13,11 @@ export class ExperimentSetTables extends React.Component {
     static propTypes = {
         'loading' : PropTypes.bool,
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
     
     static defaultProps = {
         'title' : <span>In Experiment Sets</span>
-    }
+    };
 
     render(){
         var { loading, title, windowWidth } = this.props,
@@ -38,7 +38,7 @@ export class ExperimentSetTables extends React.Component {
         }
         
         return (
-            <div className="file-part-of-experiment-sets-container" ref="experimentSetsContainer">
+            <div className="file-part-of-experiment-sets-container">
                 <h3 className="tab-section-title">{ title }</h3>
                 <ItemPageTable
                     results={experiment_sets}

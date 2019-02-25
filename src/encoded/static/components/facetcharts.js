@@ -3,8 +3,9 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import { expFxn, Filters, ajax, console, layout, isServerSide, navigate } from './util';
+import { expFxn, Filters, ajax, console, layout, isServerSide, navigate, analytics } from './util';
 import * as vizUtil from './viz/utilities';
+import ChartDetailCursor from './viz/ChartDetailCursor';
 import { ChartDataController } from './viz/chart-data-controller';
 import * as BarPlot from './viz/BarPlot';
 
@@ -129,6 +130,66 @@ export class FacetCharts extends React.PureComponent {
         return props.views[0]; // Default
     }
 
+    /** Defines buttons/actions to be shown in onHover popover. */
+    cursorDetailActions(){
+        var { href, browseBaseState } = this.props,
+            isBrowseHref = navigate.isBrowseHref(href),
+            currExpSetFilters = Filters.currentExpSetFilters();
+        return [
+            {
+                'title' : isBrowseHref ? 'Explore' : 'Browse',
+                'function' : function(cursorProps, mouseEvt){
+                    var baseParams = navigate.getBrowseBaseParams(browseBaseState),
+                        browseBaseHref = navigate.getBrowseBaseHref(baseParams);
+
+                    // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
+                    var currentExpSetFilters = browseBaseState === 'all' ? {} : Filters.currentExpSetFilters();
+
+                    var newExpSetFilters = _.reduce(cursorProps.path, function(expSetFilters, node){
+                        // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
+                        if (expSetFilters && expSetFilters[node.field] && expSetFilters[node.field].has(node.term)){
+                            return expSetFilters;
+                        }
+                        return Filters.changeFilter(node.field, node.term, expSetFilters, null, true);// Existing expSetFilters, if null they're retrieved from Redux store, only return new expSetFilters vs saving them == set to TRUE
+                    }, currentExpSetFilters);
+
+                    // Register 'Set Filter' event for each field:term pair (node) of selected Bar Section.
+                    _.forEach(cursorProps.path, function(node){
+                        analytics.event('BarPlot', 'Set Filter', {
+                            'eventLabel'        : analytics.eventLabelFromChartNode(node, false),                         // 'New' filter logged here.
+                            'field'             : node.field,
+                            'term'              : node.term,
+                            'currentFilters'    : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()), // 'Existing' filters, or filters at time of action, go here.
+                        });
+                    });
+
+                    Filters.saveChangedFilters(newExpSetFilters, browseBaseHref, () => {
+                        // Scroll to top of browse page container after navigation is complete.
+                        setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
+                    });
+                },
+                'disabled' : function(cursorProps){
+                    if (currExpSetFilters && typeof currExpSetFilters === 'object'){
+                        if (
+                            Array.isArray(cursorProps.path) &&
+                            (cursorProps.path[0] && cursorProps.path[0].field) &&
+                            currExpSetFilters[cursorProps.path[0].field] instanceof Set &&
+                            currExpSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
+                            (
+                                !cursorProps.path[1] || (
+                                    cursorProps.path[1].field &&
+                                    currExpSetFilters[cursorProps.path[1].field] instanceof Set &&
+                                    currExpSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
+                                )
+                            )
+                        ) return true;
+                    }
+                    return false;
+                }
+            }
+        ];
+    }
+
     /**
      * @private
      * @returns {JSX.Element} Area with BarPlot chart, wrapped by `ChartDataController.Provider` instance.
@@ -143,6 +204,7 @@ export class FacetCharts extends React.PureComponent {
         if (debug) console.log('WILL SHOW FACETCHARTS', show, this.props.href);
 
         var gridState   = layout.responsiveGridState(windowWidth || null),
+            cursorDetailActions = this.cursorDetailActions(),
             height      = show === 'small' ? 300 : 450,
             width;
 
@@ -171,8 +233,8 @@ export class FacetCharts extends React.PureComponent {
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartDataController.Provider id="barplot1">
-                    <BarPlot.UIControlsWrapper legend chartHeight={height} {...{ href, windowWidth }} expSetFilters={Filters.currentExpSetFilters()}>
-                        <BarPlot.Chart {...{ width, height, schemas, windowWidth }} ref="barplotChart" />
+                    <BarPlot.UIControlsWrapper legend chartHeight={height} {...{ href, windowWidth, cursorDetailActions }} expSetFilters={Filters.currentExpSetFilters()}>
+                        <BarPlot.Chart {...{ width, height, schemas, windowWidth, href, cursorDetailActions }} />
                     </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
             </div>

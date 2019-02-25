@@ -163,6 +163,8 @@ def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
 @pytest.mark.performance
 def test_load_and_index_perf_data(testapp, indexer_testapp):
     '''
+    ~~ CURRENTLY NOT WORKING ~~
+
     PERFORMANCE TESTING
     Loads all the perf-testing data and then indexes it
     Prints time for both

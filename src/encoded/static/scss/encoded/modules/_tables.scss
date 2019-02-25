@@ -1960,14 +1960,20 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							cursor: pointer;
 							font-size: 1.25rem;
 						}
+
 						.has-type-title, &.has-type-title {
 							.icon-container {
 								padding-top: 8px;
+								@media screen and (max-width: $screen-sm-max){
+									padding-top: 2px;
+								}
 							}
 						}
+
 						.title-container {
 							padding-right: 0;
 						}
+
 						@include search-result-toggle-open-button-container;
 						&.open {
 							@include search-result-toggle-open-button-container-open;

@@ -31,7 +31,7 @@ class Badge(Item):
         "type": "string",
     })
     def commendation(self):
-        if self.properties.get('badge_classification') == 'KUDOS':
+        if self.properties.get('badge_classification') == 'Commendation':
             return self.properties.get('title')
         return
 
@@ -41,7 +41,7 @@ class Badge(Item):
         "type": "string",
     })
     def warning(self):
-        if self.properties.get('badge_classification') == 'WARNING':
+        if self.properties.get('badge_classification') == 'Warning':
             return self.properties.get('title')
         return
 

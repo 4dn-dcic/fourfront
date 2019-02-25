@@ -54,13 +54,3 @@ def test_keys_conflict(testapp):
     assert(conflict.status_code == 409)
     conflicted = testapp.get(url).json['@graph']
     assert(len(posted) == len(conflicted))
-
-
-@pytest.mark.slow
-def test_keys_templated(workbook, session):
-    from snovault.storage import Key
-    keys = [(key.name, key.value) for key in session.query(Key).all()]
-    assert keys
-    for name, value in keys:
-        assert '{' not in name
-        assert '{' not in value

@@ -112,21 +112,6 @@ ALLOW_ANY_USER_ADD = [
 ] + ALLOW_EVERYONE_VIEW
 
 
-def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
-    """filter out status that shouldn't be visible.
-    Also convert path to str as functions like rev_links return uuids"""
-    if include is not None:
-        return [
-            path for path in paths
-            if traverse(request.root, str(path))['context'].__json__(request).get('status') in include
-        ]
-    else:
-        return [
-            path for path in paths
-            if traverse(request.root, str(path))['context'].__json__(request).get('status') not in exclude
-        ]
-
-
 def get_item_if_you_can(request, value, itype=None):
     """
     Return the @@object view of an item from a number of different sources
@@ -292,7 +277,6 @@ def item_edit(context, request, render=None):
 
 class Item(snovault.Item):
     """smth."""
-
     AbstractCollection = AbstractCollection
     Collection = Collection
     STATUS_ACL = {
@@ -320,6 +304,9 @@ class Item(snovault.Item):
         # experiment sets
         'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
     }
+
+    # Items of these statuses are filtered out from rev links
+    filtered_rev_statuses = ('deleted', 'replaced')
 
     # Default embed list for all 4DN Items
     embedded_list = static_content_embed_list
@@ -575,7 +562,7 @@ class Item(snovault.Item):
         """
         conn = request.registry[CONNECTION]
         return [request.resource_path(conn[uuid]) for uuid in
-                paths_filtered_by_status(request, self.get_rev_links(request, rev_name))]
+                self.get_filtered_rev_links(request, rev_name)]
 
 
 class SharedItem(Item):

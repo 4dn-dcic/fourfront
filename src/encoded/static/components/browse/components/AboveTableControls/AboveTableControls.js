@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
+import memoize from 'memoize-one';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import { Button, Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
@@ -24,10 +25,39 @@ import { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedF
  */
 export class AboveTableControls extends React.Component {
 
+    static computeFileTypeFilters = memoize(function(fileTypeFilters, selectedFiles){
+        // Remove from fileTypeFilters if no newly selected files don't have filtered-in fileType.
+        var fileTypeBucketsNew  = SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles),
+            newTypes            = _.keys(fileTypeBucketsNew),
+            typesToRemove       = [],
+            nextFilters         = null;
+
+        for (var i = 0; i < fileTypeFilters.length ; i++){
+            if (newTypes.indexOf(fileTypeFilters[i]) === -1){
+                typesToRemove.push(fileTypeFilters[i]);
+            }
+        }
+        if (typesToRemove.length > 0){
+            nextFilters = _.difference(fileTypeFilters, typesToRemove);
+        }
+        return nextFilters || fileTypeFilters;
+    });
+
     static defaultProps = {
         'showSelectedFileCount' : false,
         'showTotalResults'      : false,
         'includeProcessedFiles' : true
+    };
+
+    static getDerivedStateFromProps(props, state){
+        var newState = {
+            'fileTypeFilters' : AboveTableControls.computeFileTypeFilters(state.fileTypeFilters, props.selectedFiles)
+        };
+
+        if (state.open === 'filterFilesBy' && _.keys(props.selectedFiles).length === 0){
+            newState.open = newState.reallyOpen = false;
+        }
+        return newState;
     }
 
     constructor(props){
@@ -46,61 +76,13 @@ export class AboveTableControls extends React.Component {
          * @type {Object}
          * @property {boolean} state.open - Whether panel is open.
          * @property {boolean} state.reallyOpen - Extra check for if open, will remain true until 'closing' transition is complete.
-         * @property {string} state.layout - One of "normal" or "wide". If wide, then DOM is adjusted so that table is full width. Eventually will move this functionality out of here and into BodyElement in App js.
          * @property {string[]} state.fileTypeFilters - List of file_type_detailed strings that we filter selected files down to.
-         * @property {string} state.gridState - Set and cached from layout.responsiveGridState. Set to 'lg' initially to render server-side at full width until mount since is most common case for users.
          */
         this.state = {
             'open' : false,
             'reallyOpen' : false,
-            'layout' : 'normal',
-            'fileTypeFilters' : [],
-            'gridState' : 'lg'
+            'fileTypeFilters' : []
         };
-    }
-
-    componentDidMount(){
-        this.setState({ 'gridState' : layout.responsiveGridState(this.props.windowWidth || null) });
-    }
-
-    componentWillReceiveProps(nextProps){
-        var newState = {};
-
-        // Remove from fileTypeFilters if no newly selected files don't have filtered-in fileType.
-        var fileTypeFilters     = this.state.fileTypeFilters,
-            fileTypeBucketsNew  = SelectedFilesFilterByContent.filesToFileTypeBuckets(nextProps.selectedFiles),
-            newTypes            = _.keys(fileTypeBucketsNew),
-            typesToRemove       = [];
-
-        for (var i = 0; i < fileTypeFilters.length ; i++){
-            if (newTypes.indexOf(fileTypeFilters[i]) === -1){
-                typesToRemove.push(fileTypeFilters[i]);
-            }
-        }
-        if (typesToRemove.length > 0){
-            newState.fileTypeFilters = _.difference(fileTypeFilters, typesToRemove);
-        }
-
-        // Set open=false if currently is 'filterFilesBy' && no selected files.
-
-        if (this.state.open === 'filterFilesBy' && _.keys(nextProps.selectedFiles).length === 0){
-            newState.open = false;
-        }
-
-        // If windowWidth or windowHeight has changed, update own layout style state if we're on 'full screen'-ish view -
-        if (this.state.layout === 'wide' && typeof nextProps.windowWidth === 'number' && nextProps.windowWidth !== this.props.windowWidth){
-            if (nextProps.windowWidth < 1200){
-                newState.layout = 'normal';
-            }
-        }
-
-        if (nextProps.windowWidth && nextProps.windowWidth !== this.props.windowWidth){
-            newState.gridState = layout.responsiveGridState(nextProps.windowWidth);
-        }
-
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -196,7 +178,7 @@ export class AboveTableControls extends React.Component {
                         {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount', 'resetSelectedFiles',
                             'includeFileSets', 'includeProcessedFiles')}
                         subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')} currentFileTypeFilters={this.state.fileTypeFilters}
-                        setFileTypeFilters={this.setFileTypeFilters} currentOpenPanel={this.state.open} gridState={this.state.gridState} />
+                        setFileTypeFilters={this.setFileTypeFilters} currentOpenPanel={this.state.open} />
                 </ChartDataController.Provider>
             );
         }
@@ -239,13 +221,15 @@ export class AboveTableControls extends React.Component {
     }
 
     rightButtons(){
-        var { open, gridState } = this.state,
+        var { open } = this.state,
             { isFullscreen } = this.props;
 
         return (
             <div className="pull-right right-buttons">
                 <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
-                    <i className="icon icon-gear icon-fw"/>{['lg', 'md'].indexOf(gridState) > -1 ? <span>Columns</span> : null }<i className="icon icon-fw icon-angle-down"/>
+                    <i className="icon icon-gear icon-fw"/>
+                    <span className="hidden-xs hidden-sm">Columns</span>
+                    <i className="icon icon-fw icon-angle-down"/>
                 </Button>
                 <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (!isFullscreen ? '' : ' expanded')}
                     onClick={this.handleLayoutToggle} data-tip={(!isFullscreen ? 'Expand' : 'Collapse') + " table width"}>

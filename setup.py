@@ -13,7 +13,7 @@ requires = [
     'dcicutils',
     'Pillow',
     'PyBrowserID',
-    'SQLAlchemy>=1.0.0b1',
+    'SQLAlchemy>=1.2.16',
     'WSGIProxy2',
     'WebTest',
     'botocore',
@@ -33,6 +33,7 @@ requires = [
     'pyramid',
     'pyramid_localroles',
     'pyramid_multiauth',
+    'pyramid_retry',
     'pyramid_tm',
     'python-magic',
     'pytz',
@@ -111,8 +112,8 @@ setup(
         clone-beanstalk = encoded.commands.clone_beanstalk_env:main
         rm-beanstalk = encoded.commands.rm_beanstalk_env:main
         create-mapping-on-deploy = encoded.commands.create_mapping_on_deploy:main
-
-        upgrade-test-inserts = encoded.commands.upgrade_test_inserts:main
+        update-inserts-from-server = encoded.commands.update_inserts_from_server:main
+        run-upgrade-on-inserts = encoded.commands.run_upgrader_on_inserts:main
 
         [paste.app_factory]
         main = encoded:main

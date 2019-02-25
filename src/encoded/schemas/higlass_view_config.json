@@ -10,6 +10,7 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/tags" },
         { "$ref": "user_content.json#/properties" }
     ],
     "properties": {
@@ -51,7 +52,7 @@
                     "items" : {
                         "type" : "string"
                     },
-                    "default": ["https://higlass.io/api/v1"]
+                    "default": ["https://higlass.4dnucleome.org/api/v1"]
                 },
                 "locationLocks" : {
                     "type" : "object",
@@ -97,26 +98,26 @@
                             },
                             "autocompleteSource" : {
                                 "type" : "string",
-                                "default" : "/api/v1/suggest/?d=P0PLbQMwTYGy-5uPIQid7A&"
+                                "default" : ""
                             },
                             "genomePositionSearchBox" : {
                                 "type" : "object",
                                 "properties" : {
                                     "autocompleteId" : {
                                         "type" : "string",
-                                        "default" : "P0PLbQMwTYGy-5uPIQid7A"
+                                        "default" : ""
                                     },
                                     "autocompleteServer" : {
                                         "type" : "string",
-                                        "default" : "https://higlass.io/api/v1"
+                                        "default" : "https://higlass.4dnucleome.org/api/v1"
                                     },
                                     "chromInfoId" : {
                                         "type" : "string",
-                                        "default" : "hg38"
+                                        "default" : ""
                                     },
                                     "chromInfoServer" : {
                                         "type" : "string",
-                                        "default" : "https://higlass.io/api/v1"
+                                        "default" : "https://higlass.4dnucleome.org/api/v1"
                                     },
                                     "visible" : {
                                         "type" : "boolean",
@@ -208,7 +209,7 @@
                                                 },
                                                 "server" : {
                                                     "type" : "string",
-                                                    "default" : "https://higlass.io/api/v1"
+                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
                                                 },
                                                 "tilesetUid" : {
                                                     "type" : "string"
@@ -322,7 +323,7 @@
                                                 },
                                                 "server" : {
                                                     "type" : "string",
-                                                    "default" : "https://higlass.io/api/v1"
+                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
                                                 },
                                                 "tilesetUid" : {
                                                     "type" : "string"
@@ -436,7 +437,7 @@
                                                 },
                                                 "server" : {
                                                     "type" : "string",
-                                                    "default" : "https://higlass.io/api/v1"
+                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
                                                 },
                                                 "tilesetUid" : {
                                                     "type" : "string"
@@ -550,7 +551,7 @@
                                                 },
                                                 "server" : {
                                                     "type" : "string",
-                                                    "default" : "https://higlass.io/api/v1"
+                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
                                                 },
                                                 "tilesetUid" : {
                                                     "type" : "string"

@@ -185,18 +185,6 @@
                 "sm" : 120
             }
         },
-        "lab.display_title" : {
-            "title" : "Lab"
-        },
-        "dataset_label": {
-            "title": "Dataset"
-        },
-        "condition": {
-            "title": "Condition"
-        },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
-            "title" : "Organism"
-        },
         "experiments_in_set.biosample.biosource_summary": {
             "title" : "Biosample",
             "widthMap" : {
@@ -205,8 +193,18 @@
                 "sm" : 120
             }
         },
+        "dataset_label": {
+            "title": "Dataset"
+        },
+        "condition": {
+            "title": "Condition"
+        },
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title" : "Organism",
+            "default_hidden": true
         },
         "experiments_in_set.biosample.modifications.display_title": {
             "title" : "Modifications",
@@ -215,6 +213,9 @@
         "experiments_in_set.biosample.treatments.display_title": {
             "title" : "Treatments",
             "default_hidden" : true
+        },
+        "lab.display_title" : {
+            "title" : "Lab"
         },
         "public_release": {
             "title" : "Public Release",

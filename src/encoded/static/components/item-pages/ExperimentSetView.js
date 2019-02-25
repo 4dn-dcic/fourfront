@@ -116,7 +116,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tabs.push(FileViewGraphSection.getTabObject(
                     _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
                     this.state,
-                    this.handleToggleAllRuns
+                    this.handleToggleAllRuns,
+                    width
                 ));
             }
         }
@@ -273,6 +274,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     constructor(props){
         super(props);
         this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions.bind(this), 100);
+
+        this.higlassContainerRef = React.createRef();
     }
 
     componentDidUpdate(pastProps){
@@ -285,12 +288,9 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
      * This is required because HiGlass doesn't always update all of own tracks' widths (always updates header, tho)
      */
     correctHiGlassTrackDimensions(){
-        var hiGlassContainer = this.refs && this.refs.adjustableRow && this.refs.adjustableRow.refs && this.refs.adjustableRow.refs.hiGlassContainer;
-        var internalHiGlassComponent = hiGlassContainer && hiGlassContainer.getHiGlassComponent();
-        if (hiGlassContainer && !internalHiGlassComponent) {
+        var internalHiGlassComponent = this.higlassContainerRef.current && this.higlassContainerRef.current.getHiGlassComponent();
+        if (!internalHiGlassComponent) {
             console.warn('Internal HiGlass Component not accessible.');
-            return;
-        } else if (!hiGlassContainer) {
             return;
         }
         setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
@@ -333,10 +333,10 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref="hiGlassContainer" />;
+                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />;
                     }
                 }}
-                rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} ref="adjustableRow" />
+                rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
         );
     }
 }

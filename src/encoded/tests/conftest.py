@@ -43,7 +43,7 @@ _app_settings = {
     'production': True,
     'pyramid.debug_authorization': True,
     'postgresql.statement_timeout': 20,
-    'tm.attempts': 3,
+    'retry.attempts': 3,
     'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
     # some file specific stuff for testing
     'file_upload_bucket': 'test-wfout-bucket',
@@ -156,28 +156,6 @@ def upgrader(registry):
 def root(registry):
     from snovault import ROOT
     return registry[ROOT]
-
-
-@pytest.mark.fixture_cost(500)
-@pytest.yield_fixture(scope='session')
-def workbook(conn, app, app_settings):
-    tx = conn.begin_nested()
-    try:
-        from webtest import TestApp
-        environ = {
-            'HTTP_ACCEPT': 'application/json',
-            'REMOTE_USER': 'TEST',
-        }
-        testapp = TestApp(app, environ)
-
-        from ..loadxl import load_all
-        from pkg_resources import resource_filename
-        load_all(testapp, resource_filename('encoded', 'tests/data/master-inserts/'), []) # Master Inserts
-        load_all(testapp, resource_filename('encoded', 'tests/data/inserts/'), [resource_filename('encoded', 'tests/data/documents/')]) # Test Inserts
-
-        yield
-    finally:
-        tx.rollback()
 
 
 @fixture

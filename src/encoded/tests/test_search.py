@@ -1,7 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
-from encoded.commands.upgrade_test_inserts import get_inserts
+from encoded.commands.run_upgrader_on_inserts import get_inserts
 import json
 import time
 pytestmark = [pytest.mark.working, pytest.mark.schema]
@@ -447,11 +447,11 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
                 index_view_res = es.get(index=item_type, doc_type=item_type,
                                         id=item_res['uuid'])['_source']
                 # make sure that the linked_uuids match the embedded data
-                assert 'linked_uuids' in index_view_res
+                assert 'linked_uuids_embedded' in index_view_res
                 assert 'embedded' in index_view_res
                 found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
                 # all found uuids must be within the linked_uuids
-                assert found_uuids <= set(index_view_res['linked_uuids'])
+                assert found_uuids <= set([link['uuid'] for link in index_view_res['linked_uuids_embedded']])
                 # if uuids_rev_linking to me, make sure they show up in @@links
                 if len(index_view_res.get('uuids_rev_linked_to_me', [])) > 0:
                     links_res = testapp.get('/' + item_res['uuid'] + '/@@links', status=200)

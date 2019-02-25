@@ -607,6 +607,19 @@ def workflow_run_json(testapp, lab, award, workflow_bam):
 
 
 @pytest.fixture
+def workflow_run_awsem_json(testapp, lab, award, workflow_bam):
+    return {'run_platform': 'AWSEM',
+            'parameters': [],
+            'workflow': workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'award': award['@id'],
+            'awsem_job_id': '1235',
+            'lab': lab['@id'],
+            'run_status': 'started',
+            }
+
+
+@pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
     item = {
         "description": "GM12878 prepared for Hi-C",
@@ -639,7 +652,6 @@ def workflow_bam(testapp, lab, award):
     item = {
         'title': "test workflow",
         'name': "test_workflow",
-        'workflow_type': "Hi-C data analysis",
         'award': award['@id'],
         'lab': lab['@id']
     }
@@ -818,3 +830,13 @@ def oterm(uberon_ont):
 @pytest.fixture
 def lung_oterm(oterm, testapp):
     return testapp.post_json('/ontology_term', oterm).json['@graph'][0]
+
+
+@pytest.fixture
+def quality_metric_fastqc(testapp, award, lab):
+    item =  {
+        "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/quality_metric_fastqc', item).json['@graph'][0]

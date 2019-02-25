@@ -925,11 +925,13 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
+              clear_tables=False, use_master_inserts=True):
     '''
     generic load data function
     indir for inserts should be relative to tests/data/
     docsdir is relative to tests/data and defaults to no docs dir
+    if use_master_inserts is True, 'master-inserts' are loaded along with indir
     '''
     if clear_tables:
         from snovault import DBSESSION
@@ -955,7 +957,8 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts':  # Always load up master_inserts
+    # load master-inserts unless argument specifies not to
+    if indir != 'master-inserts' and use_master_inserts:
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
 
@@ -974,28 +977,41 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
 
 
 def load_test_data(app, access_key_loc=None, clear_tables=False):
+    """
+    Load inserts and master-inserts
+    """
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
               clear_tables=clear_tables)
 
 
+def load_local_data(app, access_key_loc=None, clear_tables=False):
+    """
+    Load temp-local-inserts. If not present, load inserts and master-inserts
+    """
+    from pkg_resources import resource_filename
+    # if we have any json files in temp-local-inserts, use those
+    chk_dir = resource_filename('encoded', 'tests/data/temp-local-inserts')
+    use_temp_local = False
+    for (dirpath, dirnames, filenames) in os.walk(chk_dir):
+        use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
+
+    if use_temp_local:
+        load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
+                  clear_tables=clear_tables, use_master_inserts=False)
+    else:
+        load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                  clear_tables=clear_tables)
+
+
 def load_prod_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='prod-inserts',
+    """
+    Load master-inserts
+    """
+    load_data(app, access_key_loc, indir='master-inserts',
               clear_tables=clear_tables)
 
 
-def load_jin_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='jin_inserts',
-              clear_tables=clear_tables)
-
-def load_wfr_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
-              clear_tables=clear_tables)
-
-
-def load_ontology_terms(app,
-                        post_json='tests/data/ontology-term-inserts/ontology_post.json',
-                        patch_json='tests/data/ontology-term-inserts/ontology_patch.json',):
-
+def load_ontology_terms(app, post_json=None, patch_json=None,):
     from webtest import TestApp
     from webtest.app import AppError
     environ = {
@@ -1004,15 +1020,14 @@ def load_ontology_terms(app,
     }
     testapp = TestApp(app, environ)
 
-    from pkg_resources import resource_filename
-    posts = resource_filename('encoded', post_json)
-    patches = resource_filename('encoded',patch_json)
     docsdir = []
-    load_all(testapp, posts, docsdir, itype='ontology_term')
-    load_all(testapp, patches, docsdir, itype='ontology_term', phase='patch_ontology')
+    if post_json:
+        load_all(testapp, post_json, docsdir, itype='ontology_term')
+    if patch_json:
+        load_all(testapp, patch_json, docsdir, itype='ontology_term', phase='patch_ontology')
 
     # now keep track of the last time we loaded these suckers
-    data = {"name" : "ffsysinfo", "ontology_updated":datetime.today().isoformat()}
+    data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
     try:
         testapp.post_json("/sysinfo", data)
     except AppError:

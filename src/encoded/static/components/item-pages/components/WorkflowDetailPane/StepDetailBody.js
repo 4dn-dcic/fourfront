@@ -95,6 +95,15 @@ export class StepDetailBody extends React.Component {
         );
     }
 
+    /**
+     * This prints out the contents of `Step.meta.analysis_step_types` under the tile
+     * of "Purposes". `analysis_step_types` is filled manually in Workflow inserts/data,
+     * however for Provenance graphs, this property might be filled in from other places,
+     * such as WorkflowRun/Workflow `category`, because in Provenance graphs, each Workflow
+     * is analagous to an "Analysis Step".
+     *
+     * @returns {JSX.Element} Column box with 'Purposes'.
+     */
     purposesBox(){
         var step        = this.props.step,
             purposeList = step.analysis_step_types,
