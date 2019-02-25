@@ -68,6 +68,7 @@
             "title": "Assay Classification",
             "description": "Classification of assay type",
             "type": "string",
+            "lookup": 110,
             "suggested_enum": [
                 "Linear DNA Enrichment",
                 "3C via Ligation",
@@ -81,6 +82,7 @@
             "title": "Assay Sub-classification",
             "description": "Sub-classification of assay based on what is measured",
             "type": "string",
+            "lookup": 120,
             "suggested_enum": [
                 "Replication Timing",
                 "Proximity to Organelle",
@@ -102,7 +104,7 @@
             "title": "Tags",
             "description": "Additional categories for characterizing this experiment type",
             "type": "array",
-            "lookup": 50,
+            "lookup": 150,
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",
@@ -120,18 +122,21 @@
             "title": "Raw Files",
             "description": "The type of raw files typically associated with the experiment type in the portal",
             "type": "string",
+            "lookup": 160,
             "suggested_enum": ["Reads (fastq) provided by lab"]
         },
         "sop": {
             "title": "SOP",
             "description": "Approved SOP for the experiment type",
             "type": "string",
+            "lookup": 170,
             "linkTo": "Protocol"
         },
         "reference_pubs": {
             "title": "Reference Publications",
             "description": "Reference publication(s) for the experiment type",
             "type": "array",
+            "lookup": 180,
             "items": {
                 "title": "Publication",
                 "description": "Publication metadata",
