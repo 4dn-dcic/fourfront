@@ -97,5 +97,23 @@
         "assay_subclassification": "DNA Binding",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "f27b17cd-544a-3a3b-abc3-17a544544b3c"
+    },
+    {
+        "title": "MC-Hi-C",
+        "experiment_category": "Sequencing",
+        "assay_classification": "3C via Ligation",
+        "assay_subclassification": "DNA-DNA Multi-way Interactions",
+        "raw_file_types": "Reads (fastq) provided by lab",
+        "uuid": "f17b17cd-544a-3a3b-def3-17a544987b3c",
+        "other_tags": ["DNA-DNA", "Multi-contact"]
+    },
+    {
+        "title": "DNA SPRITE",
+        "experiment_category": "Sequencing",
+        "assay_classification": "Ligation-free Multi-fragment 3C",
+        "assay_subclassification": "DNA-DNA Multi-way Interactions",
+        "raw_file_types": "Reads (fastq) provided by lab",
+        "uuid": "a17e17cd-544a-3a3b-fed3-17a666544b3c",
+        "other_tags": ["DNA-DNA", "Multi-contact"]
     }
 ]
