@@ -67,6 +67,7 @@ describe('Deployment/CI Search View Tests', function () {
         it('"All Items" option works, takes us to search page', function(){
             cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                 .get('form.navbar-search-form-container ul.dropdown-menu li:not(.active) a').click().end()
+                .get('form.navbar-search-form-container').submit().end()
                 .get('#page-title-container span.title').should('have.text', 'Search').end()
                 .location('search').should('not.include', 'award.project=4DN')
                 .should('include', 'q=mouse').end()
@@ -81,15 +82,16 @@ describe('Deployment/CI Search View Tests', function () {
             });
         });
 
-        it('date_created:[* TO 2018-01-01] returns 3 =< x < all results.', function(){
-            cy.window().screenshot('Before text search "date_created:[* TO 2018-01-01]"').end().searchPageTotalResultCount().then((origTotalResults)=>{
-                cy.get('input[name="q"]').focus().clear().type('date_created:[* TO 2018-01-01]').wait(10).end()
+        it('Wildcard query string returns all results.', function(){
+            cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
+                cy.get('input[name="q"]').focus().clear().type('*').wait(10).end()
                     .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                     .get('form.navbar-search-form-container ul.dropdown-menu li:last-child a').click().end() // Select 'All Items'
-                    //.get('form.navbar-search-form-container').submit().end()
-                    .location('search').should('include', '2018-01-01').wait(300).end()
+                    .get('form.navbar-search-form-container').submit().end()
+                    // handle url encoding
+                    .location('search').should('include', '%2A').wait(300).end()
                     .get('#slow-load-container').should('not.have.class', 'visible').end()
-                    .searchPageTotalResultCount().should('be.greaterThan', 2).should('be.lessThan', origTotalResults).end().window().screenshot('After text search "date_created:[* TO 2018-01-01]"').end();
+                    .searchPageTotalResultCount().should('be.greaterThan', 1).should('equal', origTotalResults).end().window().screenshot('After text search "*"').end();
             });
         });
 

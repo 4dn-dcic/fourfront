@@ -3,11 +3,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse } from 'react-bootstrap';
+import { Button, Collapse, MenuItem, ButtonToolbar, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import Alerts from './../alerts';
 import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility, navigate } from './../util';
-import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList } from './components';
+import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList, CollapsibleItemViewButtonToolbar } from './components';
+import { LinkToSelector } from './../forms/components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import JSONTree from 'react-json-tree';
 
@@ -16,20 +17,13 @@ export default class HiGlassViewConfigView extends DefaultItemView {
     getTabViewContents(){
 
         var initTabs    = [],
-            context     = this.props.context,
             windowWidth = this.props.windowWidth,
-            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth));
+            width       = this.getTabViewWidth();
 
-        //initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
-        //initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
-
-        // return initTabs.concat(this.getCommonTabs()); // We don't want attribution or detail view for this Item... for now.
 
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
 
-        initTabs.push(ItemDetailList.getTabObject(context, this.props.schemas));
-
-        return initTabs;
+        return initTabs.concat(this.getCommonTabs());
     }
 
 }
@@ -59,27 +53,63 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     constructor(props){
         super(props);
         this.fullscreenButton = this.fullscreenButton.bind(this);
-        this.saveButtons = this.saveButtons.bind(this);
+        this.saveButton = this.saveButton.bind(this);
+        this.cloneButton = this.cloneButton.bind(this);
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
-        this.handleSaveAs = _.throttle(this.handleSaveAs.bind(this), 3000, { 'trailing' : false });
-        this.handleShare = this.handleShare.bind(this);
+        this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
+        this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
+        this.handleStatusChange = this.handleStatusChange.bind(this);
+        this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
+        this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
+        /**
+         * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
+         * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
+         * @property {Object} originalViewConfig    Not currently used, but might eventually be used to compare against state.viewConfig to inform whether to enable save btn or not.
+         * @property {boolean} saveLoading          True if AJAX request is en route to save Item.
+         * @property {boolean} cloneLoading         True if AJAX request is en route to clone Item.
+         * @property {boolean} releaseLoading       True if AJAX request is en route to change Item status.
+         * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
+         */
         this.state = {
-            'viewConfig' : props.viewConfig, // TODO: Maybe remove, because apparently it gets modified in-place by HiGlassComponent.
-            'originalViewConfig' : null, //object.deepClone(props.viewConfig)
-            'saveLoading' : false,
-            'saveAsLoading' : false,
-            'releaseLoading' : false
+            'viewConfig'            : props.viewConfig,
+            'genome_assembly'       : (props.context && props.context.genome_assembly) || null,
+            'originalViewConfig'    : null, //object.deepClone(props.viewConfig)
+            'saveLoading'           : false,
+            'cloneLoading'          : false,
+            'releaseLoading'        : false,
+            'addFileLoading'        : false
         };
+
+        this.higlassRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
+        var nextState = {};
+
         if (nextProps.viewConfig !== this.props.viewConfig){
-            this.setState({
-                'originalViewConfig' : null //object.deepClone(nextProps.viewConfig)
+            _.extend(nextState, {
+                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
+                'viewConfig' : nextProps.viewConfig,
+                'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
+        } else if (nextProps.href !== this.props.href){
+            // If component is still same instance, then is likely that we're changing
+            // the URI hash as a consequence of changing tabs.
+            // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
+            var hgc                 = this.getHiGlassComponent(),
+                currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+                currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+            currentViewConf && _.extend(nextState, {
+                'viewConfig' : currentViewConf
+            });
+        }
+
+        if (_.keys(nextState).length > 0){
+            this.setState(nextState);
         }
     }
 
@@ -87,42 +117,46 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (this.props.isFullscreen !== pastProps.isFullscreen){
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
-        if (this.state.originalViewConfig === null && pastState.originalViewConfig){
-            var hgc = this.getHiGlassComponent();
-            if (hgc){
-                this.setState({
-                    'originalViewConfigString' : hgc.api.exportAsViewConfString()
-                });
-            }
-        }
+
+        // The following is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
+        //
+        // if (this.state.originalViewConfig === null && pastState.originalViewConfig){
+        //    var hgc = this.getHiGlassComponent();
+        //    if (hgc){
+        //        this.setState({
+        //            'originalViewConfigString' : hgc.api.exportAsViewConfString()
+        //        });
+        //    }
+        // }
     }
 
-    componentDidMount(){
-        // Hacky... we need to wait for HGC to load up and resize itself and such...
-        var initOriginalViewConfState = () => {
-            var hgc = this.getHiGlassComponent();
-            if (hgc){
-                setTimeout(()=>{
-                    this.setState({
-                        'originalViewConfigString' : hgc.api.exportAsViewConfString()
-                    });
-                }, 2000);
-            } else {
-                setTimeout(initOriginalViewConfState, 200);
-            }
-        };
-
-        initOriginalViewConfState();
-    }
+    // This is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
+    // componentDidMount(){
+    //     // Hacky... we need to wait for HGC to load up and resize itself and such...
+    //     var initOriginalViewConfState = () => {
+    //         var hgc = this.getHiGlassComponent();
+    //         if (hgc){
+    //             setTimeout(()=>{
+    //                 this.setState({
+    //                     'originalViewConfigString' : hgc.api.exportAsViewConfString()
+    //                 });
+    //             }, 2000);
+    //         } else {
+    //             setTimeout(initOriginalViewConfState, 200);
+    //         }
+    //     };
+    //
+    //     initOriginalViewConfState();
+    // }
 
     havePermissionToEdit(){
-        return !!(_.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
+        return !!(this.props.session && _.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
     }
 
     /**
-    * Update the current higlass viewconfig for the user, based on the current data.
-    * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
-    * @returns {void}
+     * Update the current higlass viewconfig for the user, based on the current data.
+     * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
+     * @returns {void}
     */
     handleSave(evt){
         evt.preventDefault();
@@ -140,6 +174,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
+        // We're updating this object's view conf and the genome assembly.
+        var payload = {
+            'viewconfig' : currentViewConf
+        };
+
+        if (this.state.genome_assembly){
+            // If we always include this and its null, then we get validation error because
+            // is not of type string. It must be explictly excluded, not just set to null
+            // or undefined.
+            payload.genome_assembly = this.state.genome_assembly;
+        }
+
         this.setState({ 'saveLoading' : true }, ()=>{
             ajax.load(
                 this.props.href,
@@ -148,7 +194,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     Alerts.queue({
                         'title' : "Saved " + this.props.context.title,
-                        'message' : "",
+                        'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
                     this.setState({ 'saveLoading' : false });
@@ -163,8 +209,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     });
                     this.setState({ 'saveLoading' : false });
                 },
-                // We're only updating this object's view conf.
-                JSON.stringify({ 'viewconfig' : currentViewConf })
+                JSON.stringify(payload)
             );
         });
     }
@@ -173,10 +218,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     * Create a new higlass viewconfig for the user, based on the current data.
     * @returns {void}
     */
-    handleSaveAs(evt){
+    handleClone(evt){
         evt.preventDefault();
 
-        var hgc                 = this.getHiGlassComponent(),
+        var { context }         = this.props,
+            hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
             currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
 
@@ -185,64 +231,103 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         // Generate a new title and description based on the current display.
-        var userDetails = JWT.getUserDetails();
-        let userFirstName = "unknown";
+        var userDetails     = JWT.getUserDetails(),
+            userUUID        = (userDetails && userDetails.uuid) || null,
+            userFirstName   = "Unknown";
+
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        const viewConfTitle = this.props.context.display_title + " - " + userFirstName + "'s copy";
-        const viewConfDesc = this.props.context.description;
+        var viewConfTitleAppendStr  = " - " + userFirstName + "'s copy",
+            viewConfDesc            = context.description,
+            viewConfTitle           = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
 
-        // Try to PUT a new viewconf.
+        // Check if our title already has " - user's copy" substring and if so,
+        // increment an appended counter instead of re-adding the substring.
+        if (context.display_title.indexOf(viewConfTitleAppendStr) > -1){
+            var regexCheck      = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d+\\)'),
+                regexMatches    = context.display_title.match(regexCheck);
+
+            if (regexMatches && regexMatches.length === 2) {
+                // regexMatches[0] ==> " - user's copy (int)"
+                // regexMatches[1] ==> " - user's copy"
+                var copyCount = parseInt(
+                    regexMatches[0].replace(regexMatches[1], '')
+                        .trim()
+                        .replace('(', '')
+                        .replace(')', '')
+                );
+
+                copyCount++;
+                viewConfTitle = (
+                    context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
+                    + viewConfTitleAppendStr + ' (' + copyCount + ')'  // Add new count
+                );
+            } else {
+                // Our title already has " - user's copy" substring, but not an " (int)"
+                viewConfTitle = context.display_title + ' (2)';
+            }
+        }
+
+        var fallbackCallback = (errResp, xhr) => {
+            // Error callback
+            Alerts.queue({
+                'title' : "Failed to save display.",
+                'message' : "Sorry, can you try to save again?",
+                'style' : 'danger'
+            });
+            this.setState({ 'cloneLoading' : false });
+        };
+
+        var payload = {
+            'title'          : viewConfTitle,
+            'description'    : viewConfDesc,
+            'viewconfig'     : currentViewConf,
+            // We don't include other properties and let them come from schema default values.
+            // For example, default status is 'draft', which will be used.
+            // Lab and award do not carry over as current user might be from different lab.
+        };
+
+        if (this.state.genome_assembly){
+            payload.genome_assembly = this.state.genome_assembly;
+        }
+
+        // Try to POST/PUT a new viewconf.
         this.setState(
-            { 'saveAsLoading' : true },
-            ()=>{
+            { 'cloneLoading' : true },
+            () => {
                 ajax.load(
                     '/higlass-view-configs/',
-                    (resp)=>{ // We're likely to get a status code of 201 - Created.
-                        this.setState({ 'saveLoading' : false }, ()=>{
-                            const newHref = object.itemUtil.atId(resp['@graph'][0]);
-                            const navFunction = this.props.navigate || navigate;
+                    (resp) => { // We're likely to get a status code of 201 - Created.
+                        this.setState({ 'cloneLoading' : false }, ()=>{
+                            const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
 
                             // Redirect the user to the new Higlass display.
-                            navFunction(newHref, { }, (resp)=>{
+                            navigate(newItemHref, {}, (resp)=>{
+                                // Show alert on new Item page
                                 Alerts.queue({
-                                    'title' : "Saved " + viewConfTitle,
-                                    'message' : "Saved new display.",
-                                    'style' : 'success'
+                                    'title'     : "Saved " + viewConfTitle,
+                                    'message'   : "Saved new display.",
+                                    'style'     : 'success'
                                 });
                             });
                         });
                     },
                     'POST',
-                    (resp)=>{
-                        // Error callback
-                        Alerts.queue({
-                            'title' : "Failed to save display.",
-                            'message' : "Sorry, can you try to save again?",
-                            'style' : 'danger'
-                        });
-                        this.setState({ 'saveAsLoading' : false });
-                    },
-                    JSON.stringify({
-                        'title' : viewConfTitle,
-                        'description' : viewConfDesc,
-                        'viewconfig' : currentViewConf
-                    })
+                    fallbackCallback,
+                    JSON.stringify(payload)
                 );
             }
         );
+
     }
 
-
     /**
-    * Copies current URL to clipbard.
-    * Sets the higlass display status to released if it isn't already.
+    * Update the current Viewconf to add a new view with the file with the given uuid.
     * @returns {void}
     */
-    handleShare(evt){
-        evt.preventDefault();
-
-        var hgc                 = this.getHiGlassComponent(),
+    addFileToHiglass(fileAtID) {
+        var { context }         = this.props,
+            hgc                 = this.getHiGlassComponent(),
             currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
             currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
 
@@ -250,25 +335,105 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('Could not get current view configuration.');
         }
 
-        const viewConfTitle = this.props.context.title;
-        var copyHrefToClip = function(props, alertTitle) {
-            // Alert the user the URL has been copied.
-            Alerts.queue({
-                'title' : alertTitle,
-                'message' : "Copied HiGlass URL to clipboard.",
-                'style' : 'success'
-            });
+        // Read the url of the higlass viewconfig and store the genome assembly.
+        ajax.load(
+            this.props.href,
+            (resp)=>{
+                if(resp.success) {
+                    this.setState({ 'genome_assembly' : resp.genome_assembly });
+                }
+            },
+            'GET'
+        );
 
-            object.CopyWrapper.copyToClipboard(
-                props.href,
-                ()=>{ },
-                ()=>{ },
-            );
+        // Get the x and y scales of the first view.
+        let firstViewLocationAndZoom = [null, null, null];
+        if (currentViewConf.views && currentViewConf.views.length > 0)
+        {
+            const firstViewUid = currentViewConf.views[0].uid;
+
+            const xScale = hgc.xScales[firstViewUid];
+            const yScale = hgc.yScales[firstViewUid];
+
+            // Transform the first view's location and zoom levels.
+            const xCenter = xScale.invert((xScale.range()[0] + xScale.range()[1]) / 2);
+            const yCenter = yScale.invert((yScale.range()[0] + yScale.range()[1]) / 2);
+            const k = xScale.invert(1) - xScale.invert(0);
+
+            firstViewLocationAndZoom = [xCenter, yCenter, k];
+        }
+
+        var payload = {
+            'higlass_viewconfig': currentViewConf,
+            'genome_assembly': this.state.genome_assembly,
+            'files' : [fileAtID],
+            'firstViewLocationAndZoom': firstViewLocationAndZoom
         };
 
+        // If it failed, show the error in the popup window.
+        var fallbackCallback = (errResp, xhr) => {
+            // Error callback
+            Alerts.queue({
+                'title' : "Failed to add file.",
+                'message' : errResp.errors,
+                'style' : 'danger'
+            });
+            this.setState({ 'addFileLoading' : false });
+        };
+
+        // Make an AJAX call to add the file.
+        this.setState(
+            { addFileLoading : true },
+            () => {
+                ajax.load(
+                    "/add_files_to_higlass_viewconf/",
+                    (resp) => {
+                        let stateChange = { 'addFileLoading' : false };
+                        if (resp.success) {
+                            // Update the genome assembly and view config.
+                            if (resp.new_genome_assembly) {
+                                stateChange["genome_assembly"] = resp.new_genome_assembly;
+                            }
+                            stateChange["viewConfig"] = resp.new_viewconfig;
+                        }
+
+                        this.setState(stateChange, ()=>{
+                            // If it failed, return an error message.
+                            if (!resp.success) {
+                                return fallbackCallback(resp);
+                            }
+
+                            // Show alert indicating success
+                            Alerts.queue({
+                                'title'     : "Added file",
+                                'message'   : "Added new file to Higlass display.",
+                                'style'     : 'success'
+                            });
+                        });
+                    },
+                    'POST',
+                    fallbackCallback,
+                    JSON.stringify(payload)
+                );
+            }
+        );
+    }
+
+    /**
+    * Copies current URL to clipbard.
+    * Sets the higlass display status to released if it isn't already.
+    *
+    * @returns {void}
+    */
+    handleStatusChange(statusToSet = 'released', evt){
+        evt.preventDefault();
+
+        var { context, href }   = this.props,
+            hgc                 = this.getHiGlassComponent(),
+            viewConfTitle       = context.title || context.display_title;
+
         // If the view config has already been released, just copy the URL to the clipboard and return.
-        if (this.props.context.status === "released") {
-            copyHrefToClip(this.props,  "Copied URL for " + viewConfTitle);
+        if (context.status === statusToSet) {
             return;
         }
 
@@ -281,26 +446,33 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             { 'releaseLoading' : true },
             ()=>{
                 ajax.load(
-                    this.props.href,
+                    href,
                     (resp)=>{
                         // Success! Generate an alert telling the user it's successful
-                        copyHrefToClip(this.props, "Released " + viewConfTitle);
                         this.setState({ 'releaseLoading' : false });
+                        Alerts.queue({
+                            'title'     : "Updated Status for " + viewConfTitle,
+                            'message'   : (
+                                <p className="mb-02">
+                                    Changed Display status to <b>{ statusToSet }</b>.
+                                    It may take some time for this edit to take effect.
+                                </p>
+                            ),
+                            'style'     : 'info'
+                        });
                     },
                     'PATCH',
                     (resp)=>{
                         // Error callback
-                        Alerts.queue({
-                            'title' : "Failed to release display.",
-                            'message' : "Sorry, can you try to share again?",
-                            'style' : 'danger'
-                        });
-
                         this.setState({ 'releaseLoading' : false });
+                        Alerts.queue({
+                            'title'     : "Failed to release display.",
+                            'message'   : "Sorry, can you try to share again?",
+                            'style'     : 'danger'
+                        });
                     },
                     JSON.stringify({
-                        'viewconfig' : currentViewConf,
-                        'status': 'released',
+                        'status' : statusToSet
                     })
                 );
             }
@@ -308,48 +480,109 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     getHiGlassComponent(){
-        return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
+        return (this.higlassRef && this.higlassRef.current && this.higlassRef.current.getHiGlassComponent()) || null;
     }
 
-    saveButtons(){
+    statusChangeButton(){
         var { session, context } = this.props,
-            { saveLoading, saveAsLoading, releaseLoading } = this.state;
+            { saveLoading, cloneLoading, releaseLoading } = this.state,
+            editPermission = this.havePermissionToEdit();
+
+        if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
+
+        var btnProps  = {
+            'onSelect'      : this.handleStatusChange,
+            //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
+            'bsStyle'       : context.status === 'released' ? 'default' : 'info',
+            'disabled'      : releaseLoading,
+            'key'           : 'statuschangebtn',
+            'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
+            'title'         : (
+                    <React.Fragment>
+                        <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'id-badge')}/>&nbsp; Manage
+                    </React.Fragment>
+                ),
+            'pullRight'     : true
+        };
+
+        return (
+            <DropdownButton {...btnProps}>
+                <StatusMenuItem eventKey="released" context={context}>Visible by Everyone</StatusMenuItem>
+                <StatusMenuItem eventKey="released to project" context={context}>Visible by Network</StatusMenuItem>
+                <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
+                <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
+                <MenuItem divider />
+                {/* These statuses currently not available.
+                <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
+                <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
+                */}
+                <StatusMenuItem eventKey="deleted" context={context}>Delete</StatusMenuItem>
+            </DropdownButton>
+        );
+    }
+
+    saveButton(){
+        var { session, context } = this.props,
+            { saveLoading } = this.state,
+            tooltip = "Save the current view shown below to this display";
 
         if (!session) return null;
 
-        var editPermission  = this.havePermissionToEdit(),
-            sharePermission = (context.status === 'released' || editPermission);
+        var editPermission  = this.havePermissionToEdit();
 
         return (
-            <div className="text-right inline-block">
-                <div className="inline-block" key="savebtn">
-                    <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success">
-                        <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
-                    </Button>
-                </div>&nbsp;
-                <div className="inline-block" key="saveasbtn">
-                    <Button onClick={this.handleSaveAs} disabled={saveAsLoading} bsStyle="success">
-                        <i className={"icon icon-fw icon-" + (saveAsLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save As...
-                    </Button>
-                </div>&nbsp;
-                <div className="inline-block" key="clonebtn">
-                    <Button onClick={this.handleShare} disabled={!sharePermission || releaseLoading} bsStyle="info" data-tip={context.status === 'released' ? 'Copy link to clipboard' : 'Release display to public and copy link to clipboard.'}>
-                        <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'share-alt')}/>&nbsp; Share
-                    </Button>
-                </div>&nbsp;
-            </div>
+            <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success" key="savebtn" data-tip={tooltip}>
+                <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
+            </Button>
         );
+    }
+
+    cloneButton(){
+        var { session } = this.props,
+            { cloneLoading } = this.state,
+            tooltip = "Create your own new HiGlass Display based off of this one";
+
+        if (!session) return null;
+
+        return (
+            <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="clonebtn" data-tip={tooltip}>
+                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'clone')}/>&nbsp; Clone
+            </Button>
+        );
+    }
+
+    copyURLButton(){
+        var gridState   = layout.responsiveGridState(this.props.windowWidth),
+            isMobile    = gridState !== 'lg',
+            valToCopy   = this.props.href;
+        return (
+            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement={Button} value={valToCopy}>
+                <i className="icon icon-fw icon-copy"/>{ isMobile ?
+                    <React.Fragment>
+                        &nbsp;&nbsp; Copy URL
+                    </React.Fragment>
+                : null }
+            </object.CopyWrapper>
+        );
+    }
+
+    /**
+     * Is used to call {function} `props.toggleFullScreen` which is passed down from app.js BodyElement.
+     * Calls it in a setTimeout because HiGlassComponent may hang JS/UI thread as it refits/calculates itself
+     * in response to new `width` and `height` props passed to it.
+     */
+    handleFullscreenToggle(){
+        var { isFullscreen, toggleFullScreen } = this.props;
+        setTimeout(toggleFullScreen, 0, !isFullscreen);
     }
 
     fullscreenButton(){
         var { isFullscreen, toggleFullScreen } = this.props;
-        if( typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
+        if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
-                <div className="inline-block for-state-fullscreenViewEnabled" key="toggle-fullscreen">
-                    <Button onClick={toggleFullScreen} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                        <i className={"icon icon-fw icon-" + (!isFullscreen ? 'arrows-alt' : 'crop')}/>
-                    </Button>
-                </div>
+                <Button onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
+                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
+                </Button>
             );
         }
         return null;
@@ -370,37 +603,46 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     render(){
-        var { isFullscreen, windowWidth, windowHeight, width } = this.props;
+        var { isFullscreen, windowWidth, windowHeight, width } = this.props,
+            { addFileLoading, genome_assembly } = this.state;
 
-        /*
-        if (hgc){
-            var currentViewConfStr = hgc.api.exportAsViewConfString();
-            console.log(
-                'ViewConf from HiGlassComponent',
-                this.state.originalViewConfigString === currentViewConfStr,
-                currentViewConfStr,
-                '\n\n\n',
-                this.state.originalViewConfigString
-            );
+        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
+
+        // Setting the height of the HiGlass Component follows one of these rules:
+        // - If it's Fullscreen it should almost take up the entire window.
+        // - Set to a fixed height.
+        var hiGlassComponentHeight;
+        if (isFullscreen) {
+            hiGlassComponentHeight = windowHeight -120;
         }
-        */
+        else {
+            hiGlassComponentHeight = 600;
+        }
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
-                    <span>HiGlass Browser</span>
-                    <div className="inner-panel constant-panel pull-right tabview-title-controls-container">
-                        { this.saveButtons() }
-                        { this.fullscreenButton() }
-                    </div>
+                    <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
+                        className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
+                    <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
+                        return (
+                            <span>
+                                <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
+                            </span>
+                        );
+                    }}>
+                        {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
+                        { this.saveButton() }
+                        { this.cloneButton() }
+                        { this.statusChangeButton() }
+                    </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
-                        <HiGlassPlainContainer {..._.omit(this.props, 'context')}
-                            width={isFullscreen ? windowWidth : width + 20 }
-                            height={isFullscreen ? windowHeight -120 : 500}
-                            ref="higlass" />
+                        <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
+                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={this.state.viewConfig}
+                            ref={this.higlassRef} />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>
@@ -408,6 +650,87 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 }
+
+/**
+ * This Component has a button and a text input and a button.
+ * You will type a file uuid into the field and click the button to accept.
+ */
+class AddFileButton extends React.PureComponent {
+
+    static propTypes = {
+        'onClick' : PropTypes.func.isRequired,
+        'loading' : PropTypes.bool.isRequired
+    };
+
+    constructor(props){
+        super(props);
+        this.receiveFile            = this.receiveFile.bind(this);
+        this.setIsSelecting         = _.throttle(this.toggleIsSelecting.bind(this, true), 3000, { 'trailing' : false });
+        this.unsetIsSelecting       = this.toggleIsSelecting.bind(this, false);
+        this.toggleIsSelecting      = this.toggleIsSelecting.bind(this);
+        this.state = {
+            'isSelecting' : false
+        };
+    }
+
+    toggleIsSelecting(isSelecting){
+        this.setState(function(currState){
+            if (typeof isSelecting !== 'boolean') isSelecting = !currState.isSelecting;
+            if (isSelecting === currState.isSelecting) return null;
+            return { isSelecting };
+        });
+    }
+
+    receiveFile(fileAtID, fileContext) {
+
+        // Is it blank? Do nothing.
+        if (!fileAtID) {
+            return;
+        }
+
+        this.setState({ 'isSelecting' : false }, ()=>{
+            // Invoke the object callback function, using the text input.
+            this.props.onClick(fileAtID);
+        });
+    }
+
+    render(){
+        var { loading, genome_assembly } = this.props,
+            { isSelecting } = this.state,
+            tooltip         = "Search for a file and add it to the display.",
+            dropMessage     = "Drop a File here.",
+            searchURL       = (
+                '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value'
+                + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
+            );
+
+        return (
+            <React.Fragment>
+                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}
+                    {..._.pick(this.props, 'className', 'style')}>
+                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add Data
+                </Button>
+                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+            </React.Fragment>
+        );
+    }
+}
+
+class StatusMenuItem extends React.PureComponent {
+    render(){
+        var { eventKey, context, children } = this.props,
+            active = context.status === eventKey;
+
+        children = (
+            <span className={active ? "text-500" : null}>
+                <i className="item-status-indicator-dot" data-status={eventKey} />&nbsp;  { children }
+            </span>
+        );
+
+        return <MenuItem {..._.omit(this.props, 'context')} active={active} children={children} />;
+    }
+}
+
 
 /**
  * Dont use. Was testing stuff. Not fun UX. Details tab is nicer.

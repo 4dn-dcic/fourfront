@@ -10,10 +10,7 @@ from pyramid.security import (
     Deny,
     Everyone,
 )
-from .base import (
-    Item,
-    paths_filtered_by_status
-)
+from .base import Item
 from snovault import (
     CONNECTION,
     calculated_property,
@@ -26,7 +23,12 @@ from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
+from dcicutils.s3_utils import s3Utils
+import requests
+import logging
 
+logging.getLogger('boto3').setLevel(logging.INFO)
+log = logging.getLogger(__name__)
 
 ONLY_ADMIN_VIEW_DETAILS = [
     (Allow, 'group.admin', ['view', 'view_details', 'edit']),
@@ -139,6 +141,29 @@ class User(Item):
             }
         # sort alphabetically by title
         properties['subscriptions'] = sorted(list(curr_subs_dict.values()), key= lambda v:v['title'])
+
+        # if we are on webprod/webprod2, make sure there is an account for the
+        # user that reflects any email changes
+        ff_env = self.registry.settings.get('env.name')
+        # compare previous and updated emails, respectively
+        try:
+            prev_email = self.properties.get('email')
+        except KeyError:  # if new user, previous properties do not exist
+            prev_email = None
+        new_email = properties.get('email')
+        update_email = new_email if prev_email != new_email else None
+        if ff_env is not None and update_email is not None and 'webprod' in ff_env:
+            s3Obj = s3Utils(env='data')
+            jh_key = s3Obj.get_jupyterhub_key()
+            jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', update_email])
+            jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
+            try:
+                res = requests.post(jh_endpoint, headers=jh_headers)
+            except Exception as jh_exc:
+                log.warning('Error posting user %s to JupyterHub' % update_email,
+                            error=str(jh_exc))
+            else:
+                log.info('Updating user %s on JupyterHub. Result: %s' % (update_email, res.text))
         super(User, self)._update(properties, sheets)
 
 
@@ -189,12 +214,11 @@ def user_add(context, request):
 
             import transaction
             transaction.commit()
-
     return result
 
 
 @calculated_property(context=User, category='user_action')
-def impersonate(request):
+def impersonate(context, request):
     """smth."""
     # This is assuming the user_action calculated properties
     # will only be fetched from the current_user view,
@@ -203,7 +227,7 @@ def impersonate(request):
         return {
             'id': 'impersonate',
             'title': 'Impersonate User…',
-            'href': '/#!impersonate-user',
+            'href': request.resource_path(context) + '?currentAction=impersonate-user',
         }
 
 

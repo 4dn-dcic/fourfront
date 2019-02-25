@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import moment from 'moment';
 import { Modal, ButtonGroup, Checkbox, Button } from 'react-bootstrap';
-import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
+import { expFxn, Schemas, DateUtility, ajax, JWT, typedefs, layout } from './../../../util';
 import { windowHref } from './../../../globals';
 import * as vizUtil from './../../../viz/utilities';
 import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
@@ -35,20 +36,11 @@ export class SelectedFilesOverview extends React.Component {
 export class SelectedFilesDownloadButton extends React.PureComponent {
 
     /**
-     * @type {Object}
-     * @constant
-     * @property {string} [gridState="lg"] - This should be passed in from parent `AboveTableControls` after mount. Default is set for server-side render + initial hydration.
-     */
-    static defaultProps = {
-        'gridState' : 'lg'
-    };
-
-    /**
      * @constant
      * @ignore
      */
     static propTypes = {
-        'gridState' : PropTypes.string.isRequired
+        'windowWidth' : PropTypes.number.isRequired
     };
 
     constructor(props){
@@ -191,7 +183,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles, gridState } = this.props,
+        var { selectedFiles, selectedFilesUniqueCount, subSelectedFiles } = this.props,
             selectedFilesCountIncludingDuplicates   = _.keys(selectedFiles).length,
             subSelectedFilesCount                   = _.keys(subSelectedFiles).length,
             disabled                                = selectedFilesUniqueCount === 0,
@@ -208,18 +200,18 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
             tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
         }
 
-        var innerBtnTitle  = (
-            ['lg', 'md'].indexOf(gridState) > -1 ? (
-                <span>Download { countToShow }<span className="text-400"> Selected Files</span></span>
-            ) : (
-                <span>{ countToShow }</span>
-            )
+        var innerBtnTitle = (
+            <span>
+                <span className="hidden-xs hidden-sm">Download </span>
+                { countToShow }
+                <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
+            </span>
         );
 
         return (
             <React.Fragment>
                 <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
-                    <i className="icon icon-download icon-fw"/> { innerBtnTitle }
+                    <i className="icon icon-download icon-fw shift-down-1"/> { innerBtnTitle }
                 </Button>
                 { this.renderModal(subSelectedFiles) }
             </React.Fragment>
@@ -428,7 +420,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         if (typeof isAllSelected === 'undefined') isAllSelected = this.isAllSelected();
         return (
             <span>
-                <i className={"icon icon-fw icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'))}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span>
+                <i className={"icon icon-fw shift-down-1 icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'))}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span>
             </span>
         );
     }
@@ -494,19 +486,28 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         return (
             <Button
                 key={'button-to-select-files-for' + fileType} {...SelectedFilesFilterByContent.fileFormatButtonProps}
-                onClick={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}
-            >
-                {button_text_prefix}{ title } files <small>({ files.length })</small>
+                onClick={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}>
+                { button_text_prefix }{ title } files <small>({ files.length })</small>
             </Button>
         );
     }
 
     static renderBucketCheckbox(fileType, title, clickHandler, files, button_text_prefix, fileTypeFilters){
-        var selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
+        var selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1,
+            filesLength = files.length,
+            tip = (
+                (selected ? 'Remove ' : 'Include ')
+                + filesLength + ' ' + title + ' files' +
+                (selected ? ' from ' : ' to ') + 'selection.'
+            );
         return (
-            <Checkbox key={fileType} checked={selected} onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null} className="text-ellipsis-container">
-                { button_text_prefix }{ title } <sub>({ files.length })</sub>
-            </Checkbox>
+            <div className="col-sm-6 col-lg-3 file-type-checkbox" key={fileType} data-tip={tip}>
+                <Checkbox key={fileType} checked={selected}
+                    onChange={clickHandler ? clickHandler.bind(clickHandler, fileType) : null}
+                    className={"text-ellipsis-container" + (selected ? ' is-active' : '')}>
+                    { button_text_prefix }{ title } <sub>({ filesLength })</sub>
+                </Checkbox>
+            </div>
         );
     }
 
@@ -537,13 +538,14 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
     }
 
     renderFileFormatButtonsSelected(){
-        if (!this.props.selectedFiles) return null;
+        var { selectedFiles, currentFileTypeFilters } = this.props;
+        if (!selectedFiles) return null;
         return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(
-            SelectedFilesFilterByContent.filesToFileTypeBuckets(this.props.selectedFiles),
+            SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles),
             '',
             this.onClick,
             SelectedFilesFilterByContent.renderBucketCheckbox,
-            this.props.currentFileTypeFilters
+            currentFileTypeFilters
         );
     }
 
@@ -562,9 +564,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
 
     render(){
         return wrapInAboveTablePanel(
-            <div className="row" children={_.map(this.renderFileFormatButtonsSelected(), function(jsxButton, i){
-                return <div className="col-sm-6 col-lg-3 file-type-checkbox" key={jsxButton.key || i}>{ jsxButton }</div>;
-            })}/>,
+            <div className="row" children={this.renderFileFormatButtonsSelected()}/>,
             <span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>,
             'file-type-selector-panel',
             this.props.closeButtonClickHandler
@@ -584,19 +584,19 @@ export class SelectedFilesFilterByButton extends React.Component {
     }
 
     render(){
-        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel, gridState } = this.props,
+        var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel } = this.props,
             isDisabled              = !selectedFiles || _.keys(selectedFiles).length === 0,
-            currentFiltersLength    = currentFileTypeFilters.length,
-            smallerSize             = ['lg', 'md'].indexOf(gridState) > -1;
+            currentFiltersLength    = currentFileTypeFilters.length;
 
         return (
             <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'}>
-                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/> {
-                    currentFiltersLength > 0 ? <span className="text-500">{ currentFiltersLength } </span> : (
-                        smallerSize ? 'All ' : null
+                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
+                {
+                    currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
+                        <span className="hidden-xs hidden-sm">All </span>
                     )
                 }
-                { smallerSize ? <span className="text-400">File Type{ currentFiltersLength === 1 ? '' : 's' }&nbsp;&nbsp;</span> : null }
+                <span className="text-400 hidden-xs hidden-sm">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>
                 <i className="icon icon-angle-down icon-fw"/>
             </Button>
         );
@@ -605,7 +605,7 @@ export class SelectedFilesFilterByButton extends React.Component {
 
 export class SelectedFilesControls extends React.PureComponent {
 
-    static filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters){
+    static filterSelectedFilesByFileTypeFilters = memoize(function(selectedFiles, fileTypeFilters){
         if (Array.isArray(fileTypeFilters) && fileTypeFilters.length === 0) return selectedFiles;
         return _.object(
             _.filter(
@@ -616,7 +616,7 @@ export class SelectedFilesControls extends React.PureComponent {
                 }
             )
         );
-    }
+    });
 
     render(){
         var barPlotData = (this.props.barplot_data_filtered || this.props.barplot_data_unfiltered),
@@ -628,12 +628,12 @@ export class SelectedFilesControls extends React.PureComponent {
         return (
             <div>
                 <SelectAllFilesButton {..._.pick(this.props, 'href', 'selectedFilesUniqueCount', 'selectedFiles', 'selectFile',
-                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles', 'gridState')} totalFilesCount={totalFilesCount} />
+                    'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles')} totalFilesCount={totalFilesCount} />
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
                         <SelectedFilesFilterByButton {..._.pick(this.props, 'setFileTypeFilters', 'currentFileTypeFilters',
                             'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
-                            'currentOpenPanel', 'gridState' )} totalFilesCount={totalFilesCount} />
+                            'currentOpenPanel' )} totalFilesCount={totalFilesCount} />
                         <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                     </ButtonGroup>
                 </div>

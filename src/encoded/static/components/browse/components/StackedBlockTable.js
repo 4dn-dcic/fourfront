@@ -50,7 +50,7 @@ export class StackedBlockNameLabel extends React.Component {
         if (subtitle !== null) fullClassName += ' has-subtitle';
 
         return (
-            <div className={fullClassName} ref="labelContainerElement">
+            <div className={fullClassName} key="label">
                 { titleElement() }
                 { subtitleElement.call(this) }
             </div>
@@ -854,40 +854,33 @@ export class FileEntryBlock extends React.PureComponent {
     }
 
     /**
-    * Add a link to an external site for some file types.
+    * Add a link to an external JuiceBox site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+    * @param {string} host              - The host part of the current url
     *
     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
     */
-    renderExternalLink(){
-        var { file } = this.props,
-            fileFormat              = fileUtil.getFileFormatStr(file),
-            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
-                (fileFormat && fileFormat === 'hic')
-                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )),
-            externalLinkButton      = null;
-
-        if (fileIsHic) {
+    renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host){
+        var externalLinkButton = null;
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
             // Make an external juicebox link.
             var onClick = function(evt){
 
                 // If we're on the server side, there is no need to make an external link.
                 if (isServerSide()) return null;
 
-                // Get the protocol and host from storage before adding the juicebox link.
-                var currentPageUrlBase = store && store.getState().href,
-                    hrefParts = url.parse(currentPageUrlBase),
-                    host = hrefParts.protocol + '//' + hrefParts.host,
-                    targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
-
+                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
                 var win = window.open(targetLocation, '_blank');
                 win.focus();
             };
 
             // Build the juicebox button
             externalLinkButton = (
-                <Button key="external-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                    <i className="icon icon-fw icon-external-link text-smaller"/>
+                <Button key="juicebox-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
+                    J<i className="icon icon-fw icon-external-link text-smaller"/>
                 </Button>
             );
         }
@@ -896,11 +889,87 @@ export class FileEntryBlock extends React.PureComponent {
         return externalLinkButton;
     }
 
+    /**
+    * Add a link to WashU Epigenome site for some file types.
+    * @param {string} fileHref          - URL path used to access the file
+    * @param {boolean} fileIsHic        - If true the file format is HiC
+    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+    * @param {string} host              - The host part of the current url
+    * @param {string} genome_assembly   - The file's genome assembly
+    *
+    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+    */
+    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
+        var externalLinkButton = null;
+
+        // We may need to map the genome assembly to Epigenome's assemblies.
+        const assemblyMap = {
+            'GRCh38' : 'hg38',
+            'GRCm38' : 'mm10'
+        };
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+            return null;
+        }
+
+        // Do not show the link if the file cannot be viewed by the public.
+        if (fileIsHic && fileIsPublic) {
+            // Make an external juicebox link.
+            var onClick = function(evt){
+
+                // If we're on the server side, there is no need to make an external link.
+                if (isServerSide()) return null;
+
+                const epiGenomeMapping = assemblyMap[genome_assembly];
+                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
+
+                var win = window.open(targetLocation, '_blank');
+                win.focus();
+            };
+
+            // Build the Epigenome button
+            externalLinkButton = (
+                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button mr-05" data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick}>
+                    E<i className="icon icon-fw icon-external-link text-smaller"/>
+                </Button>
+            );
+        }
+
+        // Return the External link.
+        return externalLinkButton;
+    }
+
+    renderExternalButtons(){
+        if (!this.props.file) return;
+        var { file } = this.props,
+            fileFormat              = fileUtil.getFileFormatStr(file),
+            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
+                (fileFormat && fileFormat === 'hic')
+                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+            )),
+            externalLinkButton      = null,
+            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+            fileIsPublic = (file.status === 'archived' || file.status === 'released'),
+            fileHref = file.href,
+            currentPageUrlBase = store && store.getState().href,
+            hrefParts = url.parse(currentPageUrlBase),
+            host = hrefParts.protocol + '//' + hrefParts.host;
+
+        return (
+            <React.Fragment>
+                {this.renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host)}
+                {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
+            </React.Fragment>
+        );
+    }
+
     renderName(){
         var { file, colWidthStyles } = this.props;
         return <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
             style={colWidthStyles ? colWidthStyles.file : null} children={[
-                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(), this.renderExternalLink()
+                this.renderLabel(), this.renderCheckBox(), this.renderNameInnerTitle(),
+                this.renderExternalButtons(),
             ]} />;
     }
 
@@ -973,13 +1042,15 @@ export class StackedBlockTable extends React.Component {
 
 
         this.cache = {
-            oddExpRow : true
+            'oddExpRow' : true
         };
-        var initialState = {
-            columnWidths : null, // set on componentDidMount via updateColumnWidths
-            mounted : false
+
+        this.state = {
+            'columnWidths' : null, // set on componentDidMount via updateColumnWidths
+            'mounted' : false
         };
-        this.state = initialState;
+
+        this.headerRef = React.createRef();
     }
 
     componentDidMount(){
@@ -1009,31 +1080,29 @@ export class StackedBlockTable extends React.Component {
     }
 
     getColumnWidths(){
-        if (
-            typeof this.props.width !== 'number' && (
-                !this.refs.header || (this.refs.header && this.refs.header.clientWidth === 0)
-            )
-        ){
+        var { width } = this.props,
+            headerElem = this.headerRef.current;
+
+        if (typeof this.props.width !== 'number' && (!headerElem || headerElem.clientWidth === 0)){
             return this.getOriginalColumnWidths();
         }
 
-        var origColumnWidths = this.getOriginalColumnWidths();
-
-        var availableWidth = this.props.width || this.refs.header.offsetWidth || 960; // 960 = fallback for tests
-        var totalOrigColsWidth = this.totalColumnsWidth(origColumnWidths);//_.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
+        var origColumnWidths    = this.getOriginalColumnWidths(),
+            availableWidth      = width || headerElem.offsetWidth || 960, // 960 = fallback for tests
+            totalOrigColsWidth  = this.totalColumnsWidth(origColumnWidths);//_.reduce(origColumnWidths, function(m,v){ return m + v; }, 0);
 
         if (totalOrigColsWidth > availableWidth){
             return origColumnWidths;
         }
 
-        var scale = (availableWidth / totalOrigColsWidth) || 1;
-        var newColWidths = origColumnWidths.map(function(c){
-            return Math.floor(c * scale);
-        });
+        var scale               = (availableWidth / totalOrigColsWidth) || 1,
+            newColWidths        = origColumnWidths.map(function(c){
+                return Math.floor(c * scale);
+            }),
+            totalNewColsWidth   = _.reduce(newColWidths, function(m,v){ return m + v; }, 0),
+            remainder           = availableWidth - totalNewColsWidth;
 
         // Adjust first column by few px to fit perfectly.
-        var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v; }, 0);
-        var remainder = availableWidth - totalNewColsWidth;
         newColWidths[0] += Math.floor(remainder - 0.5);
 
         return newColWidths;
@@ -1067,27 +1136,27 @@ export class StackedBlockTable extends React.Component {
      * @returns {void} - Nothing.
      */
     handleFileCheckboxChange(accessionTripleString, fileObj){
-        if (!this.props.selectedFiles || !this.props.selectFile || !this.props.unselectFile) return null;
+        var { selectedFiles, selectFile, unselectFile } = this.props,
+            willSelect, isMultiples;
 
-        var willSelect;
-        var isMultiples;
+        if (!selectedFiles || !selectFile || !unselectFile) return null;
 
         if (Array.isArray(accessionTripleString)){
             isMultiples = true;
-            willSelect = (typeof this.props.selectedFiles[accessionTripleString[0]] === 'undefined');
+            willSelect = typeof selectedFiles[accessionTripleString[0]] === 'undefined';
         } else {
             isMultiples = false;
-            willSelect = (typeof this.props.selectedFiles[accessionTripleString] === 'undefined');
+            willSelect = typeof selectedFiles[accessionTripleString] === 'undefined';
         }
 
         if (willSelect){
             if (isMultiples){
-                this.props.selectFile(_.zip(accessionTripleString, fileObj));
+                selectFile(_.zip(accessionTripleString, fileObj));
             } else {
-                this.props.selectFile(accessionTripleString, fileObj);
+                selectFile(accessionTripleString, fileObj);
             }
         } else {
-            this.props.unselectFile(accessionTripleString);
+            unselectFile(accessionTripleString);
         }
     }
 
@@ -1157,14 +1226,10 @@ export class StackedBlockTable extends React.Component {
                     !children ?
                     <h6 className="text-center text-400"><em>No Results</em></h6>
                     :
-                    <div className="headers expset-headers" ref="header" children={columnHeaders.map(renderHeaderItem)}/>
+                    <div className="headers expset-headers" ref={this.headerRef} children={columnHeaders.map(renderHeaderItem)}/>
                 }
                 { children ? <div className="body clearfix" children={this.adjustedChildren()} /> : null }
             </div>
         );
     }
-
-
-
-
 }

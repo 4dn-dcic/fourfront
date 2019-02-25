@@ -16,14 +16,14 @@ import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './footer';
 import * as store from '../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO } from './util';
+import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './facetcharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
-import ChartDetailCursor from './viz/ChartDetailCursor';
 import PageTitle from './PageTitle';
-import { NavigateOpts } from './util/navigate';
+
+var { NavigateOpts } = typedefs;
 
 
 
@@ -72,23 +72,6 @@ const portal = {
         // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
-
-
-// See https://github.com/facebook/react/issues/2323
-class Title extends React.Component {
-
-    componentDidMount() {
-        var node = document.querySelector('title');
-        if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
-            node.setAttribute('data-reactid', this._rootNodeID);
-        }
-    }
-
-    render() {
-        return <title {...this.props}>{this.props.children}</title>;
-    }
-
-}
 
 
 /**
@@ -321,7 +304,10 @@ export default class App extends React.Component {
         var { href, context } = this.props;
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics( analytics.getTrackingId(href), context );
+        analytics.initializeGoogleAnalytics(
+            analytics.getTrackingId(href),
+            context
+        );
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
@@ -485,23 +471,7 @@ export default class App extends React.Component {
      */
     listActionsFor(category) {
         if (category === 'context') {
-            var context = this.props.context;
-            var name = this.currentAction();
-            var context_actions = [];
-            Array.prototype.push.apply(context_actions, context.actions || []);
-
-            if (!name && context.default_page) {
-                context = context.default_page;
-                var actions = context.actions || [];
-                for (var i = 0; i < actions.length; i++) {
-                    var action = actions[i];
-                    if (action.href[0] == '#') {
-                        action.href = context['@id'] + action.href;
-                    }
-                    context_actions.push(action);
-                }
-            }
-            return context_actions;
+            return (this.props.context && this.props.context.actions) || [];
         }
         if (category === 'user_section') {
             return portal.user_section;
@@ -519,16 +489,24 @@ export default class App extends React.Component {
      * Calculates current action, if any, from URL hash.
      *
      * @public
+     * @param {string} [href] - Href to get current action from. Optional.
      * @returns {!string} Current action if any, or null.
      */
-    currentAction() {
-        var href_url = url.parse(this.props.href);
-        var hash = href_url.hash || '';
-        var name;
-        if (hash.slice(0, 2) === '#!') {
-            name = hash.slice(2);
+    currentAction(href) {
+        if (!href) href = this.props.href;
+        var hrefUrl     = url.parse(href, true),
+            hrefQuery   = hrefUrl.query || {},
+            hrefAction  = hrefQuery.currentAction || null;
+
+        // Handle list of values, e.g. if `currentAction=selection&currentAction=selection&currentAction=edit` or something is in URL.
+        // We should __not__ get an array here and is glitch, but if so, lets fallback and choose _1st_ non-null item.
+        if (Array.isArray(hrefAction)){
+            console.error("Received unexpected list for `currentAction` URI param", hrefAction);
+            hrefAction = _.filter(hrefAction);
+            hrefAction = (hrefAction.length > 0 ? hrefAction[0] : null);
         }
-        return name || null;
+
+        return hrefAction;
     }
 
     /**
@@ -613,19 +591,21 @@ export default class App extends React.Component {
         if (this.historyEnabled) {
             event.preventDefault();
 
-            var navOpts      = {},
-                hrefParts    = url.parse(href),
+            var hrefParts    = url.parse(href),
                 pHrefParts   = url.parse(this.props.href),
                 hrefHash     = hrefParts.hash,
+                samePath     = pHrefParts.path === hrefParts.path,
+                navOpts      = {
+                    // Same pathname & search but maybe different hash. Don't add history entry etc.
+                    'replace'           : samePath,
+                    'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
+                    'dontScrollToTop'   : samePath
+                },
                 targetOffset = target.getAttribute('data-target-offset'),
                 noCache      = target.getAttribute('data-no-cache');
 
             // Don't cache requests to user profile.
             if (noCache) navOpts.cache = false;
-
-            if ((!hrefParts.path || hrefParts.path === pHrefParts.path) && hrefParts.hash !== pHrefParts.hash){
-                navOpts.skipRequest = navOpts.dontScrollToTop = true;
-            }
 
             navigate(href, navOpts, function(){
 
@@ -637,10 +617,6 @@ export default class App extends React.Component {
                     setTimeout(layout.animateScrollTo.bind(null, hrefHash, 750, targetOffset), 100);
                 }
             });
-
-            if (this.refs && this.refs.navigation){
-                this.refs.navigation.closeMobileMenu();
-            }
 
             if (target && target.blur) target.blur();
         }
@@ -672,7 +648,7 @@ export default class App extends React.Component {
             currentAction   = this.currentAction(),
             navOptions      = {
                 'replace'       : actionUrlParts.pathname == hrefParts.pathname,
-                'skipRequest'   : target.getAttribute('data-skiprequest')
+                'skipRequest'   : !!(target.getAttribute('data-skiprequest'))
             };
 
         if (target.getAttribute('data-removeempty')) {
@@ -687,11 +663,17 @@ export default class App extends React.Component {
             ).join('&');
         }
 
+        // If we're submitting search form in selection mode, preserve selection mode at next URL.
+        if (currentAction === 'selection'){
+            if (search && search.indexOf('currentAction=selection') === -1){
+                search += '&currentAction=selection';
+            } else if (!search) {
+                search = 'currentAction=selection';
+            }
+        }
+
         // Append form name:vals as stringified URI params (`search`).
         if (search) href += '?' + search;
-
-        // If we're submitting search form in selection mode, preserve selection mode at next URL.
-        if (currentAction === 'selection') href += '#!' + currentAction;
 
         if (this.historyEnabled) {
             event.preventDefault();
@@ -814,9 +796,11 @@ export default class App extends React.Component {
      */
     updateUserInfo(callback = null){
         // get user actions (a function of log in) from local storage
-        var userActions = [];
-        var session = false;
-        var userInfo = JWT.getUserInfo();
+        var userActions = [],
+            session     = false,
+            userInfo    = JWT.getUserInfo(),
+            stateChange = {};
+
         if (userInfo){
             userActions = userInfo.user_actions;
             var currentToken = JWT.get(); // We definitively use Cookies for JWT. It can be unset by response headers from back-end.
@@ -826,9 +810,12 @@ export default class App extends React.Component {
             }
         }
 
-        var stateChange = {};
-        if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
-        if (session !== this.state.session) stateChange.session = session;
+        if (!_.isEqual(userActions, this.state.user_actions)) {
+            stateChange.user_actions = userActions;
+        }
+        if (session !== this.state.session) {
+            stateChange.session = session;
+        }
 
         if (Object.keys(stateChange).length > 0){
             this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
@@ -905,22 +892,21 @@ export default class App extends React.Component {
      * @param {string} [href=null] - Href we are navigating to (in case of navigate, confirmNavigation) or have just navigated to (in case of popState event).
      * @returns {boolean}
      */
-    stayOnSubmissionsPage(href = null) {
+    stayOnSubmissionsPage(nextHref = null) {
         // can override state in options
         // override with replace, which occurs on back button navigation
-        if(this.state.isSubmitting){
-            if (typeof href === 'string'){
-                if (href.indexOf('#!edit') > -1 || href.indexOf('#!create') > -1 || href.indexOf('#!clone') > -1){
-                    // Cancel out if we are "returning" to edit or create (submissions page) href.
-                    return false;
-                }
+        if (this.state.isSubmitting){
+            var nextAction = this.currentAction(nextHref);
+            if (nextAction && ['edit', 'create', 'clone'].indexOf(nextAction) > -1){
+                // Cancel out if we are "returning" to edit or create (submissions page) href.
+                return false;
             }
             var msg = 'Leaving will cause all unsubmitted work to be lost. Are you sure you want to proceed?';
-            if(confirm(msg)){
+            if (confirm(msg)){
                 // we are no longer submitting
                 this.setIsSubmitting(false);
                 return false;
-            }else{
+            } else {
                 // stay
                 return true;
             }
@@ -938,9 +924,6 @@ export default class App extends React.Component {
      * @private
      * @param {string} href                 URI we're attempting to navigate to.
      * @param {NavigateOpts} [options={}]   Options for the navigation request.
-     * @param {boolean} options.replace     If true, browser history entry is replaced, not added.
-     * @param {boolean} options.skipRequest If true, request is skipped but browser URI and history is updated.
-     * @param {boolean} options.inPlace     If true, will re-load page even if is at same URL. Also won't scroll to top of page.
      * @param {function} [callback=null]    Optional callback, accepting response JSON as first argument.
      * @param {function} [fallbackCallback=null] - Optional callback to be called in case request fails.
      * @param {Object} [includeReduxDispatch={}] - Optional extra data to save to Redux store along with the next response.
@@ -993,9 +976,19 @@ export default class App extends React.Component {
 
             if (options.skipRequest) {
                 if (options.replace) {
-                    window.history.replaceState(this.props.context, '', href + fragment);
+                    try {
+                        window.history.replaceState(this.props.context, '', href + fragment);
+                    } catch (exc) {
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
+                        window.history.replaceState(null, '', href + fragment);
+                    }
                 } else {
-                    window.history.pushState(this.props.context, '', href + fragment);
+                    try {
+                        window.history.pushState(this.props.context, '', href + fragment);
+                    } catch (exc) {
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
+                        window.history.pushState(null, '', href + fragment);
+                    }
                 }
                 var stuffToDispatch = _.clone(includeReduxDispatch);
                 if (!options.skipUpdateHref) {
@@ -1154,14 +1147,14 @@ export default class App extends React.Component {
                     try {
                         window.history.replaceState(err, '', href + fragment);
                     } catch (exc) {
-                        // Might fail due to too large data
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
                         window.history.replaceState(null, '', href + fragment);
                     }
                 } else {
                     try {
                         window.history.pushState(err, '', href + fragment);
                     } catch (exc) {
-                        // Might fail due to too large data
+                        console.warn('Data too big, saving null to browser history in place of props.context.');
                         window.history.pushState(null, '', href + fragment);
                     }
                 }
@@ -1200,14 +1193,14 @@ export default class App extends React.Component {
             try {
                 window.history.replaceState(data, '', dispatch_dict.href);
             } catch (exc) {
-                // Might fail due to too large data
+                console.warn('Data too big, saving null to browser history in place of props.context.');
                 window.history.replaceState(null, '', dispatch_dict.href);
             }
         } else {
             try {
                 window.history.pushState(data, '', dispatch_dict.href);
             } catch (exc) {
-                // Might fail due to too large data
+                console.warn('Data too big, saving null to browser history in place of props.context.');
                 window.history.pushState(null, '', dispatch_dict.href);
             }
         }
@@ -1269,14 +1262,8 @@ export default class App extends React.Component {
             href_url        = url.parse(canonical),
             routeList       = href_url.pathname.split("/"),
             routeLeaf       = routeList[routeList.length - 1],
-            key             = context && context['@id'] && context['@id'].split('?')[0], // Switching between collections may leave component in place
-            currentAction   = this.currentAction();
-
-        var content, title, status; // Rendered values
-
-        if (!currentAction && context.default_page) {
-            context = context.default_page;
-        }
+            currentAction   = this.currentAction(),
+            status;
 
         // `canonical` is meant to refer to the definitive URI for current resource.
         // For example, https://data.4dnucleome.org/some-item, http://data.4dnucleome.org/some-item, http://www.data.4dnucleome.org/some-item
@@ -1295,6 +1282,7 @@ export default class App extends React.Component {
         // check error status
 
         var isPlannedSubmissionsPage = href_url.pathname.indexOf('/planned-submissions') > -1; // TEMP EXTRA CHECK WHILE STATIC_PAGES RETURN 404 (vs 403)
+
         if (context.code && (context.code === 403 || (isPlannedSubmissionsPage && context.code === 404))){
             if (isPlannedSubmissionsPage){
                 status = 'forbidden';
@@ -1312,60 +1300,7 @@ export default class App extends React.Component {
             status = 'forbidden'; // attempting to view submissions but it's not in users actions
         }
 
-        // Object of common props passed to all content_views.
-        var commonContentViewProps = {
-            'context'           : context,
-            'schemas'           : this.state.schemas,
-            'session'           : this.state.session,
-            'href'              : this.props.href,
-            'navigate'          : this.navigate,
-            'key'               : key,
-            'uploads'           : this.state.uploads,
-            'updateUploads'     : this.updateUploads,
-            'listActionsFor'    : this.listActionsFor,
-            'updateUserInfo'    : this.updateUserInfo,
-            'browseBaseState'   : this.props.browseBaseState,
-            'currentAction'     : currentAction,
-            'setIsSubmitting'   : this.setIsSubmitting
-        };
 
-        if (canonical === "about:blank"){   // first case is fallback
-            title = portal.portal_title;
-            content = null;
-        } else if (status) {                // error catching
-            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
-            title = 'Error';
-        } else if (context) {               // What should occur (success)
-
-            var ContentView = globals.content_views.lookup(context, currentAction);
-
-            // Set browser window title.
-            title = object.itemUtil.getTitleStringFromContext(context);
-            if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
-            } else {
-                title = portal.portal_title;
-            }
-
-            if (!ContentView){ // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
-                title = 'Error';
-            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-
-                var contextActionNames = _.filter(_.pluck(this.listActionsFor('context'), 'name'));
-                // see if desired actions is not allowed for current user
-                if (!_.contains(contextActionNames, currentAction)){
-                    content = <ErrorPage status="forbidden" />;
-                    title = 'Action not permitted';
-                }
-            }
-
-            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
-                content = <ContentView {...commonContentViewProps} />;
-            }
-        } else {
-            throw new Error('No context is available. Some error somewhere.');
-        }
         // Google does not update the content of 301 redirected pages
         // We technically should never hit this condition as we redirect http to https, however leaving in
         // as not 100% certain.
@@ -1377,14 +1312,20 @@ export default class App extends React.Component {
 
         var isLoading = this.props.contextRequest && this.props.contextRequest.xhr && this.props.contextRequest.xhr.readyState < 4,
             baseDomain = (href_url.protocol || '') + '//' + href_url.host,
-            bodyElementProps = _.extend({}, this.state, this.props, {
-                baseDomain, isLoading,
+            bodyElementProps = _.extend({}, this.state, this.props, { // Complete set of own props, own state, + extras.
+                canonical,
+                baseDomain,
+                isLoading,
+                currentAction,
+                status,
+                routeLeaf,
+                'updateUploads'  : this.updateUploads,
                 'updateUserInfo' : this.updateUserInfo,
                 'listActionsFor' : this.listActionsFor,
+                'setIsSubmitting': this.setIsSubmitting,
                 'onBodyClick'    : this.handleClick,
                 'onBodySubmit'   : this.handleSubmit,
-                'hrefParts'      : href_url,
-                'children'       : content
+                'hrefParts'      : href_url
             });
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
@@ -1397,7 +1338,7 @@ export default class App extends React.Component {
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
-                    <Title>{title}</Title>
+                    <HTMLTitle {...{ context, currentAction, canonical, status }} listActionsFor={this.listActionsFor} />
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
@@ -1405,19 +1346,121 @@ export default class App extends React.Component {
                     }}/>
                     <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
-                    <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
-                    <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
+                    <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" />
                     <SEO.CurrentContext context={context} hrefParts={href_url} baseDomain={baseDomain} />
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <script async type="application/javascript" src="//www.google-analytics.com/analytics.js" />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
-                <BodyElement {...bodyElementProps} />
+                <React.StrictMode>
+                    <BodyElement {...bodyElementProps} />
+                </React.StrictMode>
             </html>
         );
     }
+}
 
+/**
+ * Renders out the <title> element in the <head> area of the
+ * HTML document.
+ */
+class HTMLTitle extends React.PureComponent {
+
+    componentDidMount() {
+        // See https://github.com/facebook/react/issues/2323
+        var node = document.querySelector('title');
+        if (node && this._rootNodeID && !node.getAttribute('data-reactid')) {
+            node.setAttribute('data-reactid', this._rootNodeID);
+        }
+    }
+
+    render() {
+        var { canonical, currentAction, context, listActionsFor, status } = this.props,
+            title;
+
+        if (canonical === "about:blank"){   // first case is fallback
+            title = portal.portal_title;
+        } else if (status) {                // error catching
+            title = 'Error';
+        } else if (context) {               // What should occur (success)
+
+            var ContentView = globals.content_views.lookup(context, currentAction);
+
+            // Set browser window title.
+            title = object.itemUtil.getTitleStringFromContext(context);
+
+            if (title && title != 'Home') {
+                title = title + ' – ' + portal.portal_title;
+            } else {
+                title = portal.portal_title;
+            }
+
+            if (!ContentView){ // Handle the case where context is not loaded correctly
+                title = 'Error';
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
+
+                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    title = 'Action not permitted';
+                }
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
+        }
+
+        return <title>{ title }</title>;
+    }
+
+}
+
+class ContentRenderer extends React.PureComponent {
+    render(){
+        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf } = this.props,
+            contextAtID     = object.itemUtil.atId(context),
+            key             = contextAtID && contextAtID.split('?')[0], // Switching between collections may leave component in place
+            content; // Output
+
+
+        // Object of common props passed to all content_views.
+        var commonContentViewProps = _.pick(this.props,
+            // Props from App:
+            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'listActionsFor',
+            'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
+            // Props from BodyElement:
+            'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
+            'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen'
+        );
+
+        if (canonical === "about:blank"){   // first case is fallback
+            content = null;
+        } else if (status) {                // error catching
+            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
+        } else if (context) {               // What should occur (success)
+
+            var ContentView = globals.content_views.lookup(context, currentAction);
+
+            if (!ContentView){ // Handle the case where context is not loaded correctly
+                content = <ErrorPage status={null}/>;
+            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
+
+                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                // see if desired actions is not allowed for current user
+                if (!_.contains(contextActionNames, currentAction)){
+                    content = <ErrorPage status="forbidden" />;
+                }
+            }
+
+            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
+                content = <ContentView key={key} {...commonContentViewProps} />;
+            }
+        } else {
+            throw new Error('No context is available. Some error somewhere.');
+        }
+
+        return content;
+    }
 }
 
 /**
@@ -1433,13 +1476,26 @@ export default class App extends React.Component {
  */
 class BodyElement extends React.PureComponent {
 
+    static getDerivedStateFromProps(props, state){
+        var stateChange = { 'lastHref' : props.href };
+        // Unset full screen if moving away to different pathname.
+        if (state.isFullscreen && stateChange.lastHref !== state.lastHref){
+            var currParts = url.parse(state.lastHref),
+                nextParts = url.parse(stateChange.lastHref);
+
+            if (currParts.pathname !== nextParts.pathname){
+                stateChange.isFullscreen = false;
+            }
+        }
+        return stateChange;
+    }
+
     /**
      * Instantiates the BodyElement component, binds functions.
      */
     constructor(props){
         super(props);
         this.onResize = _.debounce(this.onResize.bind(this), 300);
-        this.onTooltipAfterHide = this.onTooltipAfterHide.bind(this);
         this.setupScrollHandler = this.setupScrollHandler.bind(this);
 
         this.registerWindowOnResizeHandler = this.registerWindowOnResizeHandler.bind(this);
@@ -1467,7 +1523,11 @@ class BodyElement extends React.PureComponent {
             'classList'             : [],
             'hasError'              : false,
             'errorInfo'             : null,
-            'isFullscreen'          : false
+            'isFullscreen'          : false,
+            // Because componentWillReceiveProps is deprecated in favor of (static) getDerivedStateFromProps,
+            // we ironically must now clone href in state to be able to do comparisons...
+            // See: https://stackoverflow.com/questions/49723019/compare-with-previous-props-in-getderivedstatefromprops
+            'lastHref'              : props.href
         };
 
         /**
@@ -1480,6 +1540,12 @@ class BodyElement extends React.PureComponent {
          * @private
          */
         this.resizeHandlers = [];
+
+        /**
+         * Reference to ReactTooltip component instance.
+         * Used to unset the `top` and `left` positions after hover out.
+         */
+        this.tooltipRef = React.createRef();
     }
 
     /**
@@ -1493,6 +1559,13 @@ class BodyElement extends React.PureComponent {
         this.setupScrollHandler();
         window.addEventListener('resize', this.onResize);
         this.onResize();
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.href !== this.props.href){
+            // Remove tooltip if still lingering from previous page
+            this.tooltipRef && this.tooltipRef.current && this.tooltipRef.current.hideTooltip();
+        }
     }
 
     /**
@@ -1734,28 +1807,6 @@ class BodyElement extends React.PureComponent {
         setTimeout(this.throttledScrollHandler, 100, null);
     }
 
-    /**
-     * Is executed after ReactTooltip is hidden e.g. via moving cursor away from an element.
-     * Used to unset lingering style.left and style.top property values which may interfere with placement
-     * of the next visible tooltip.
-     *
-     * @private
-     * @returns {void}
-     */
-    onTooltipAfterHide(){
-        var _tooltip = this.refs && this.refs.tooltipComponent,
-            domElem = ReactDOM.findDOMNode(_tooltip);
-        if (!domElem) {
-            console.error("Cant find this.refs.tooltipComponent in BodyElement component.");
-            return;
-        }
-        requestAnimationFrame(function(){
-            // Grab tip & unset style.left and style.top using same method tooltip does internally.
-            domElem.style.left = null;
-            domElem.style.top = null;
-        });
-    }
-
     toggleFullScreen(isFullscreen, callback){
         if (typeof isFullscreen === 'boolean'){
             this.setState({ isFullscreen }, callback);
@@ -1789,9 +1840,8 @@ class BodyElement extends React.PureComponent {
      */
     render(){
         var {
-                onBodyClick, onBodySubmit, context, alerts,
-                currentAction, hrefParts, isLoading, slowLoad,
-                children
+                onBodyClick, onBodySubmit, context, alerts, canonical,
+                currentAction, hrefParts, isLoading, slowLoad
             } = this.props,
             { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state,
             appClass = slowLoad ? 'communicating' : 'done',
@@ -1829,9 +1879,9 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight }} ref="navigation"
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo', 'listActionsFor')}/>
+                                    'context', 'updateUserInfo', 'listActionsFor')} />
 
                             <div id="pre-content-placeholder"/>
 
@@ -1839,15 +1889,14 @@ class BodyElement extends React.PureComponent {
                                 windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas')}{...{ windowWidth, windowHeight, navigate }} />
+                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
+                                    {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <div className="container" id="content">
-                                { React.cloneElement(children, {
-                                    windowWidth, windowHeight, registerWindowOnResizeHandler, registerWindowOnScrollHandler,
-                                    addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen
-                                }) }
-                            </div>
+                            <ContentErrorBoundary canonical={canonical}>
+                                <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
+                            </ContentErrorBoundary>
 
                             <div id="layout-footer"/>
                         </div>
@@ -1855,18 +1904,19 @@ class BodyElement extends React.PureComponent {
                     </div>
                 </div>
 
-                <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={this.onTooltipAfterHide} globalEventOff="click" />
-
-                <ChartDetailCursor {..._.pick(this.props, 'href', 'schemas')}
-                    verticalAlign="center" /* cursor position relative to popover */
-                    //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
-                />
+                <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 
             </body>
         );
     }
 
 }
+
+
+
+
+
+
 
 class ContentErrorBoundary extends React.Component {
 
@@ -1883,7 +1933,10 @@ class ContentErrorBoundary extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { 'hasError' : false, 'errorInfo' : null };
+        this.state = {
+            'hasError' : false,
+            'errorInfo' : null
+        };
     }
 
     componentDidCatch(err, info){
@@ -1895,8 +1948,8 @@ class ContentErrorBoundary extends React.Component {
     /**
      * Unsets the error state if we navigate to a different view/href .. which normally should be different ContentView.
      */
-    componentWillReceiveProps(nextProps){
-        if (nextProps.href !== this.props.href){
+    componentDidUpdate(nextProps){
+        if (nextProps.canonical !== this.props.canonical){
             this.setState(function(currState){
                 if (currState.hasError) {
                     return {

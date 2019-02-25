@@ -28,10 +28,10 @@ export const itemTypeHierarchy = {
         'ExperimentMic', 'ExperimentRepliseq', 'ExperimentSeq', 'ExperimentTsaseq'
     ],
     'ExperimentSet': [
-        'ExperimentSet', 'ExperimentSetReplicate'
+        'ExperimentSetReplicate'
     ],
     'File': [
-        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy'
+        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy', 'FileVistrack'
     ],
     'FileSet': [
         'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
@@ -51,6 +51,9 @@ export const itemTypeHierarchy = {
     ],
     'MicroscopeSetting' : [
         'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
+    ],
+    'UserContent' : [
+        'StaticSection', 'HiglassViewConfig' //, 'JupyterNotebook'
     ]
 };
 

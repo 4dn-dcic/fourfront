@@ -3,17 +3,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Fade } from 'react-bootstrap';
+import { Fade, Button } from 'react-bootstrap';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../../util';
 import { FlexibleDescriptionBox } from './../FlexibleDescriptionBox';
 import { SimpleFilesTable } from './../SimpleFilesTable';
 import { ItemDetailList } from './../ItemDetailList';
 import { ExperimentSetTablesLoaded } from './../ExperimentSetTables';
 import { ViewMetricButton, MetricsView } from './FileDetailBodyMetricsView';
+import { WorkflowNodeElement } from './../WorkflowNodeElement';
 
 
 
-export class FileDetailBody extends React.Component {
+
+export class FileDetailBody extends React.PureComponent {
 
     static propTypes = {
         'node' : PropTypes.object.isRequired,
@@ -22,165 +24,84 @@ export class FileDetailBody extends React.Component {
         'minHeight' : PropTypes.number,
         'keyTitleDescriptionMap' : PropTypes.object,
         'windowWidth' : PropTypes.number.isRequired
-    }
-
-    static defaultProps = {
-        'canDownloadStatuses' : fileUtil.FileDownloadButtonAuto.defaultProps.canDownloadStatuses
-    }
-
-    constructor(props){
-        super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.maybeLoadFile = this.maybeLoadFile.bind(this);
-        this.state = {
-            file : this.props.file
-        };
-    }
-
-    componentDidMount(){
-        this.maybeLoadFile();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.file !== this.props.file) {
-            this.setState({ file : nextProps.file }, this.maybeLoadFile.bind(this, nextProps.file));
-        }
-    }
-
-    maybeLoadFile(file = this.state.file){
-        var hrefToRequest = null,
-            node = this.props.node;
-
-        if (typeof file === 'string') { // If we have a UUID instead of a complete file object.
-            if (file === 'Forbidden' || file.length === 0) return false;
-            if (file.charAt(0) === '/') hrefToRequest = file; // Handle @ids just in case.
-            else hrefToRequest = '/' + file + '/';
-        } else if (file && typeof file === 'object' && !Array.isArray(file)){ // If we have file object but has little info. TODO: REMOVE
-            if (!fileUtil.isFileDataComplete(file)) hrefToRequest = object.itemUtil.atId(file);
-        } else if (Array.isArray(file) && node && node.meta && node.meta.workflow){ // If we have a group of files
-            hrefToRequest = node.meta.workflow;
-            if (object.isUUID(hrefToRequest)){
-                hrefToRequest = '/workflows/' + hrefToRequest + '/';
-            } else if (hrefToRequest.charAt(0) !== '/') {
-                hrefToRequest = '/' + hrefToRequest;
-            }
-        }
-
-        if (typeof hrefToRequest === 'string') { // Our file is not embedded. Is a UUID.
-            ajax.load(hrefToRequest, (res)=>{
-                if (res && typeof res === 'object'){
-                    this.setState({ file : res });
-                }
-            }, 'GET', (r) => {
-                if (r && r.code && r.code === 403){ // No view permissions
-                    this.setState({ file : 'Forbidden' });
-                } else {
-                    this.setState({ file : null });
-                }
-                
-            });
-            return true;
-        }
-        return false;
-    }
+    };
 
     doesDescriptionOrNotesExist(){
         var file = this.props.file;
         return !!(file.description || file.notes || false);
     }
 
-    canDownload(fileObj = this.state.file){
-        if (fileObj && !Array.isArray(fileObj) && typeof fileObj !== 'string' && this.props.canDownloadStatuses.indexOf(fileObj.status) > -1){
-            return true;
-        }
-        return false;
-    }
-
     fileTitleBox(){
-        var node = this.props.node;
-        var file = this.state.file;
-        var fileTitle;
-        var fileTitleFormatted;
-        var colClassName = "col-sm-6 col-lg-4";
-        //if (typeof file === 'object' && file && !fileUtil.isFileDataComplete(file) && !Array.isArray(file)) {}
-        if (Array.isArray(this.props.file)) { // Some sort of group
+        var { node, file } = this.props,
+            fileTitle, fileTitleFormatted, statusIndicator;
+
+        if (Array.isArray(file)) { // Some sort of group (of files)
             fileTitle = 'Workflow';
-            if (typeof file !== 'string' && file && file.display_title) fileTitle = file.display_title;
+            if (typeof file !== 'string' && file && file.display_title){
+                fileTitle = file.display_title;
+            }
             if (typeof node.meta.workflow === 'string'){
                 fileTitleFormatted = <a href={node.meta.workflow}>{ fileTitle }</a>;
             } else {
                 fileTitleFormatted = fileTitle;
             }
-        } else if (typeof file === 'string') {
-            if (file === 'Forbidden'){
-                if (this.props.file && typeof this.props.file !== 'string'){
-                    fileTitle = object.itemUtil.getTitleStringFromContext(this.props.file);
-                    var fileAtID = object.atIdFromObject(this.props.file);
-                    fileTitleFormatted = fileAtID ? <a href={fileAtID}>{ fileTitle }</a> : fileTitle;
-                } else {
-                    fileTitleFormatted = <span className="text-300">Not Available</span>;
-                }
-            } else {
-                fileTitle = null;
-                fileTitleFormatted = <small><i className="icon icon-circle-o-notch icon-spin icon-fw"/></small>;
-            }
-        } else {
+        } else { // Single File
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
-            if (!this.doesDescriptionOrNotesExist()){
-                colClassName = "col-sm-6 col-lg-6";
-            }
             fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="inline-block">{ fileTitle }</a>;
+            statusIndicator = file.status && (
+                <i className="item-status-indicator-dot" data-status={ file.status && file.status.toLowerCase() }
+                    data-tip={"Status - " + file.status} />
+            );
         }
-        if (typeof fileTitle !== 'string' || fileTitle.length < (this.doesDescriptionOrNotesExist() ? 25 : 35)){
+        if (typeof fileTitle !== 'string' || fileTitle.length < 35){
             fileTitle = null;
         }
         return (
-            <div className={colClassName + " file-title box"}>
+            <div className="col-sm-6 col-lg-8 file-title box">
                 <div className="text-600">
                     {
                         node.nodeType === 'output' ? 'Generated' :
                             node.nodeType === 'input' ? 'Used' :
                                 null
                     } {
-                        Array.isArray(this.props.file) ?
-                            this.props.file.length + ' total files from' + (file && file.display_title ? ' Workflow' : '')
+                        Array.isArray(file) ?
+                            file.length + ' total files from' + (file && file.display_title ? ' Workflow' : '')
                             :
-                            'File'
+                            WorkflowNodeElement.isNodeQCMetric(node) ? 'Report' : 'File'
                     }
                 </div>
-                <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>{ fileTitleFormatted }</h3>
+                <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>
+                    { statusIndicator } { fileTitleFormatted }
+                </h3>
             </div>
         );
     }
 
     downloadLinkBox(){
-        var { node, windowWidth } = this.props,
-            file         = this.state.file,
-            gridSize     = layout.responsiveGridState(windowWidth),
-            title        = <span>Download</span>,
-            disabled     = (!file.href && !file.url) || !this.canDownload(),
-            content      = <fileUtil.FileDownloadButton {...{ title, disabled }} href={file.href || file.url} filename={file.filename} />,
-            colClassName = this.doesDescriptionOrNotesExist() ? "col-sm-6 col-lg-4" : "col-sm-6 col-lg-6";
-    
-        //if (gridSize === 'sm' || gridSize === 'xs') return null;
+        var { node, file } = this.props, content;
 
-        //if ((!file.href && !file.url)) return <div className="col-sm-4 col-lg-4 box">&nbsp;</div>;
+        if (WorkflowNodeElement.isNodeQCMetric(node)){
+            content = <ViewMetricButton {...{ node, file }}/>;
+        } else {
+            content = <fileUtil.FileDownloadButtonAuto result={file} />;
+        }
 
         return (
-            <div className={colClassName + " right box buttons-container"}>
-                <ViewMetricButton {...{ node, file }}/> { content }
+            <div className="col-sm-6 col-lg-4 right box buttons-container">
+                { content }
             </div>
         );
     }
 
     descriptionBox(){
-        var windowWidth = this.props.windowWidth,
-            file = this.state.file,
-            gridSize = layout.responsiveGridState(windowWidth || null);
+        var { file, windowWidth } = this.props,
+            gridSize = layout.responsiveGridState(windowWidth),
+            lgColSize = (file && file.quality_metric && file.quality_metric.display_title && '8') || '12';
 
-        if (!this.doesDescriptionOrNotesExist() || typeof file === 'string' || !fileUtil.isFileDataComplete(file)) return null;
+        if (!this.doesDescriptionOrNotesExist()) return null;
+
         return (
-            <div className="col-xs-12 col-lg-4 box">
+            <div className={"col-xs-12 col-lg-" + lgColSize + " box"}>
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
                 <div className="description-box-container">
                     <FlexibleDescriptionBox
@@ -196,40 +117,44 @@ export class FileDetailBody extends React.Component {
         );
     }
 
-    iframeBox(){
-        var file = this.state.file;
-        var node = this.props.node;
-        if (!node.meta || !node.meta.run_data || node.meta.run_data.type !== 'quality_metric') return null; // IFrames only for quality metrics.
-        if (typeof file.url !== 'string') return null;
+    qcBox(){
+        var { file, node } = this.props,
+            qc, qcLink;
+
+        if (!file || Array.isArray(file)){
+            return null;
+        }
+
+        qc = file && file.quality_metric;
+        qcLink = qc && (qc.url || object.itemUtil.atId(qc));
+
+        if (!qcLink) return null;
 
         return (
-            <div className="row">
-                <div className="col-sm-12">
-                    <hr/>
-                    <iframe src={file.url} width="100%" height="400"/>
-                </div>
+            <div className="col-sm-6 col-lg-4 right box buttons-container">
+                <ViewMetricButton file={qc} defaultBtnClassName="btn-secondary" data-tip="View the Quality Control Metrics for this File" />
             </div>
         );
+
     }
 
     /**
      * @todo Figure out if can use state.file always in place of props.file here.
      */
     render(){
-        var { node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
-            file = this.state.file,
-            body;
+        var { file, node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
+            body, description, attachedQCBtn;
 
         if (!file){
             return null;
         }
 
-        if (Array.isArray(this.props.file) && typeof this.props.file[0] === 'object' && object.atIdFromObject(this.props.file[0])) {
+        if (Array.isArray(file) && typeof file[0] === 'object' && object.atIdFromObject(file[0])) {
             // Case: Group of Files
             var columns = _.clone(SimpleFilesTable.defaultProps.columns);
             delete columns.file_type;
-            columns.status = 'Status';
-            body = <SimpleFilesTable results={this.props.file} columns={columns} hideTypeTitle />;
+            columns.status = { 'title' : 'Status' };
+            body = <SimpleFilesTable results={file} columns={columns} hideTypeTitle />;
         } else if (typeof file === 'string'/* || !fileUtil.isFileDataComplete(this.state.file)*/){
             // Case: Loading or Forbidden
             if (file === 'Forbidden'){
@@ -244,7 +169,7 @@ export class FileDetailBody extends React.Component {
             } else {
                 body = null;
             }
-        } else if (MetricsView.isNodeQCMetric(node)){
+        } else if (WorkflowNodeElement.isNodeQCMetric(node)){
             // Case: QC Metric
             var metrics = object.listFromTips(object.tipsFromSchema(schemas, file))
                 .filter(function(m){
@@ -255,39 +180,36 @@ export class FileDetailBody extends React.Component {
                 })
                 .map((m)=>{
                     return _.extend(m, {
-                        'result' : this.state.file[m.key]
+                        'result' : file[m.key]
                     });
                 });
 
             body = <MetricsView metrics={metrics} />;
         } else {
             // Default Case: Single (Pre-)Loaded File
-            var fileLoaded = fileUtil.isFileDataComplete(this.state.file);
             var table = null;
-            if ( this.state.file && (Array.isArray(this.state.file.experiments) || Array.isArray(this.state.file.experiment_sets)) ){
-                var setsByKey = expFxn.experimentSetsFromFile(this.state.file);
-                if (setsByKey && _.keys(setsByKey).length > 0){
-                    table = <ExperimentSetTablesLoaded experimentSetObject={setsByKey} windowWidth={windowWidth} />;
+            if ( file && (Array.isArray(file.experiments) || Array.isArray(file.experiment_sets)) ){
+                var setUrls = expFxn.experimentSetsFromFile(file, 'ids');
+                if (setUrls && setUrls.length > 0){
+                    table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} windowWidth={windowWidth} />;
                 }
             }
             body = (
-                <Fade in={fileLoaded} appear>
-                    { fileLoaded ?
-                        <div>
-                            { table }
-                            { table ? <br/> : null }
-                            <h3 className="tab-section-title">
-                                <span>Details</span>
-                            </h3>
-                            <hr className="tab-section-title-horiz-divider"/>
-                            <ItemDetailList context={file} schemas={schemas}
-                                minHeight={minHeight} keyTitleDescriptionMap={keyTitleDescriptionMap} />
-                        </div>
-                    : <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div> }
-                </Fade>
+                <div>
+                    { table }
+                    { table ? <br/> : null }
+                    <h3 className="tab-section-title">
+                        <span>Details</span>
+                    </h3>
+                    <hr className="tab-section-title-horiz-divider"/>
+                    <ItemDetailList context={file} schemas={schemas}
+                        minHeight={minHeight} keyTitleDescriptionMap={keyTitleDescriptionMap} />
+                </div>
             );
         }
 
+        description = this.descriptionBox(),
+        attachedQCBtn = this.qcBox();
 
         return (
             <div>
@@ -295,8 +217,15 @@ export class FileDetailBody extends React.Component {
                     <div className="row">
                         { this.fileTitleBox() }
                         { this.downloadLinkBox() }
-                        { this.descriptionBox() }
                     </div>
+                    { (description || attachedQCBtn) && <React.Fragment>
+                            <hr/>
+                            <div className="row">
+                                { description }
+                                { attachedQCBtn }
+                            </div>
+                        </React.Fragment>
+                    }
                 </div>
                 <hr/>
                 { body }

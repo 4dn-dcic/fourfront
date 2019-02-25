@@ -124,12 +124,13 @@ export class FourfrontLogo extends React.PureComponent {
         'hoverDelayUntilTransform'  : 400,
         'title'                     : "Data Portal"
     };
-    
+
     constructor(props){
         super(props);
         this.setHoverStateOnDoTiming = _.throttle(this.setHoverStateOnDoTiming.bind(this), 1000);
         this.setHoverStateOn    = this.setHoverStateOn.bind(this);
         this.setHoverStateOff   = this.setHoverStateOff.bind(this);
+        this.svgRef             = React.createRef();
     }
 
     setHoverStateOn(e){
@@ -138,7 +139,7 @@ export class FourfrontLogo extends React.PureComponent {
 
     setHoverStateOnDoTiming(e){
         var { circlePathDefinitionHover, textTransformHover, fgCircleTransformHover, hoverDelayUntilTransform } = this.props;
-        var svg = d3.select(this.refs.svg);
+        var svg = d3.select(this.svgRef.current);
 
         // CSS styles controlled via stylesheets
 
@@ -164,7 +165,7 @@ export class FourfrontLogo extends React.PureComponent {
 
     setHoverStateOff(e){
         this.setState({ 'hover' : false }, ()=>{
-            var svg = d3.select(this.refs.svg);
+            var svg = d3.select(this.svgRef.current);
             svg.select(".fourfront-logo-background-circle")
                 .interrupt()
                 .transition()
@@ -207,7 +208,7 @@ export class FourfrontLogo extends React.PureComponent {
             <Navbar.Brand>
                 <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
                     <span className="img-container">
-                        <svg id={id} ref="svg" viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
+                        <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
                             { this.renderDefs() }
                             <path d={circlePathDefinitionOrig} className="fourfront-logo-background-circle" />
                             <text transform={textTransformOrig} className="fourfront-logo-text">4DN</text>

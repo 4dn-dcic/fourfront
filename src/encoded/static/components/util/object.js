@@ -2,13 +2,18 @@
 
 import _ from 'underscore';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+import parseDOM from 'html-dom-parser/lib/html-to-dom-server';
+import domToReact from 'html-react-parser/lib/dom-to-react';
+import patchedConsoleInstance from './patched-console';
 import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
 import { isServerSide } from './misc';
 import url from 'url';
 
+var console = patchedConsoleInstance;
 
 /**
  * Convert a link_id, if one exists on param 'object', to an '@id' link.
@@ -222,6 +227,41 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
     }
 }
 
+/**
+ * Extends _child properties_ of first argument object with properties from subsequent objects.
+ * All arguments MUST be objects with objects as children.
+ */
+export function extendChildren(){
+    var args    = Array.from(arguments),
+        argsLen = args.length;
+
+    if (args.length < 2) return args[0];
+
+    var hostObj = args[0] || {}, // Allow null to be first arg, because why not.
+        allKeys = Array.from(
+            _.reduce(args.slice(1), function(m, obj){
+                _.forEach(_.keys(obj), function(k){
+                    m.add(k);
+                });
+                return m;
+            }, new Set())
+        );
+
+    _.forEach(allKeys, function(childProperty){
+        for (var objIndex = 0; objIndex < argsLen; objIndex++){
+            var currObjToCopyFrom = args[objIndex];
+            if (typeof currObjToCopyFrom[childProperty] !== 'undefined'){
+                if (typeof hostObj[childProperty] === 'undefined'){
+                    hostObj[childProperty] = {};
+                }
+                _.extend(hostObj[childProperty], currObjToCopyFrom[childProperty]);
+            }
+        }
+    });
+
+    return hostObj;
+}
+
 
 /**
  * Deep-clone a given object using JSON stringify/parse.
@@ -235,6 +275,59 @@ export function deepClone(obj){
 }
 
 
+
+export function htmlToJSX(htmlString){
+    var nodes, result,
+        // Theoretically, esp in modern browsers, almost any tag/element name can be used to create a <div>.
+        // So we allow them in our HTML, but exclude elements/tags with numbers, special characters, etc.
+        // Except for hardcoded exceptions defined here in someTags.
+        someTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+
+    try {
+        nodes = parseDOM(htmlString, { decodeEntities: true, lowerCaseAttributeNames: false });
+    } catch (e) {
+        console.error('HTML parsing error', e);
+        return <div className="error">Parsing Error. Check your markup.</div>;
+    }
+
+    /**
+     * Filters out nodes and node children recursively if detect an invalid tag name.
+     * Also removes any <script> tags.
+     */
+    function filterNodes(nodeList){
+        return _.filter(
+            _.map(nodeList, function(n){
+                if (n.type === 'tag'){
+                    if (someTags.has(n.name)) return n;
+
+                    // Exclude scripts due to security vulnerability potential.
+                    if (n.name === 'script') return null;
+
+                    // Filter out nonsensical tags which will likely break React, e.g. <hr?>
+                    var match = n.name.match(/[\W\s\d]/);
+                    if (match && (match.length > 1 || match[0] !== '/')){
+                        return null;
+                    }
+
+                    // Recurse on children
+                    if (Array.isArray(n.children)) {
+                        n = _.extend({}, n, { 'children' : filterNodes(n.children) });
+                    }
+                }
+                return n;
+            })
+        );
+    }
+
+    try {
+        result = domToReact(filterNodes(nodes));
+    } catch (e) {
+        console.error('HTML parsing error', e);
+        return <div className="error">Parsing Error. Check your markup.</div>;
+    }
+
+    return result;
+}
 
 
 
@@ -278,22 +371,6 @@ let randomIdIncrement = 0;
 
 export function randomId() {
     return 'random-id-' + ++randomIdIncrement;
-}
-
-
-export function isEqual(obj1, obj2){
-    var ob1Keys = _.keys(obj1).sort();
-    var obj2Keys = _.keys(obj2).sort();
-    if (ob1Keys.length !== obj2Keys.length) return false;
-    var len = ob1Keys.length;
-    var i;
-    for (i = 0; i < len; i++){
-        if (ob1Keys[i] !== obj2Keys[i]) return false;
-    }
-    for (i = 0; i < len; i++){
-        if (obj1[ob1Keys[i]] !== obj2[ob1Keys[i]]) return false;
-    }
-    return true;
 }
 
 /**
@@ -405,13 +482,16 @@ export class TooltipInfoIconContainerAuto extends React.Component {
  * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
  * @prop {string|React.Component} [wrapperElement='div'] - Element type to wrap props.children in, if any.
  */
-export class CopyWrapper extends React.Component {
+export class CopyWrapper extends React.PureComponent {
 
     static defaultProps = {
         'wrapperElement' : 'div',
         'className' : null,
         'flash' : true,
-        'iconProps' : {}
+        'iconProps' : {},
+        'includeIcon' : true,
+        'flashActiveTransform' : 'scale3d(1.2, 1.2, 1.2) translate3d(0, 0, 0)',
+        'flashInactiveTransform' : 'translate3d(0, 0, 0)'
     }
 
     static copyToClipboard(value, successCallback = null, failCallback = null){
@@ -452,6 +532,8 @@ export class CopyWrapper extends React.Component {
         super(props);
         this.flashEffect = this.flashEffect.bind(this);
         if (typeof props.mounted !== 'boolean') this.state = { 'mounted' : false };
+
+        this.wrapperRef = React.createRef();
     }
 
     componentDidMount(){
@@ -464,10 +546,21 @@ export class CopyWrapper extends React.Component {
     }
 
     flashEffect(){
-        if (!this.props.flash || !this.refs || !this.refs.wrapper) return null;
-        this.refs.wrapper.style.transform = 'scale3d(1.2, 1.2, 1.2) translate3d(10%, 0, 0)';
+        var wrapper = this.wrapperRef.current;
+        if (!this.props.flash || !wrapper) return null;
+
+        if (typeof this.props.wrapperElement === 'function'){
+            // Means we have a React component vs a React/JSX element.
+            // This approach will be deprecated soon so we should look into forwarding refs
+            // ... I think
+            wrapper = ReactDOM.findDOMNode(wrapper);
+        }
+
+        if (!wrapper) return null;
+
+        wrapper.style.transform = this.props.flashActiveTransform;
         setTimeout(()=>{
-            this.refs.wrapper.style.transform = 'translate3d(0, 0, 0)';
+            wrapper.style.transform = this.props.flashInactiveTransform;
         }, 100);
     }
 
@@ -477,33 +570,38 @@ export class CopyWrapper extends React.Component {
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps } = this.props;
+        var { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
         if (!value) return null;
         var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
-        function copy(){
-            return CopyWrapper.copyToClipboard(value, function(v){
+        var copy = (e) => {
+            return CopyWrapper.copyToClipboard(value, (v)=>{
                 this.onCopy();
                 analytics.event('CopyWrapper', 'Copy', {
                     'eventLabel' : 'Value',
                     'name' : v
                 });
-            }, function(v){
+            }, (v)=>{
                 analytics.event('CopyWrapper', 'ERROR', {
                     'eventLabel' : 'Unable to copy value',
                     'name' : v
                 });
             });
-        }
+        };
 
         var elemsToWrap = [];
-        if (children)               elemsToWrap.push(children);
-        if (children && isMounted)  elemsToWrap.push(' ');
-        if (isMounted)              elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy clickable" title="Copy to clipboard" onClick={copy} />);
+        if (children)                   elemsToWrap.push(children);
+        if (children && isMounted)      elemsToWrap.push(' ');
+        if (isMounted && includeIcon)   elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy" title="Copy to clipboard" />);
 
         var wrapperProps = _.extend(
-            { 'ref' : 'wrapper', 'style' : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' }, 'className' : 'copy-wrapper ' + this.props.className || '' },
-            _.omit(this.props, 'refs', 'children', 'style', 'value', 'onCopy', 'flash', 'wrapperElement', 'mounted', 'iconProps')
+            {
+                'ref'       : this.wrapperRef,
+                'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
+                'className' : 'clickable copy-wrapper ' + className || '',
+                'onClick'   : copy
+            },
+            _.omit(this.props, 'children', 'style', 'value', 'onCopy', 'mounted', ..._.keys(CopyWrapper.defaultProps))
         );
 
         return React.createElement(wrapperElement, wrapperProps, elemsToWrap);

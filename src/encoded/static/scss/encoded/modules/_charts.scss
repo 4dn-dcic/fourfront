@@ -441,7 +441,8 @@
     }
 
     .chart-bar {
-        transition: transform .75s ease-out, opacity .5s, width .75s ease-out, height .75s ease-out;
+        transition: transform .75s ease-out, opacity .75s ease-out, width .75s ease-out, height .75s ease-out;
+        opacity: 1;
         position: absolute;
         transform: translate3d(0,0,0);
         //outline-offset: 5px;
@@ -492,6 +493,7 @@
                 box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
                 //outline-color: transparent !important;
             }
+
         }
 
         &.highlight {
@@ -502,14 +504,18 @@
             }
         }
 
-        &:hover,
-        &.selected {
-
+        &.barplot-transition-enter {
+            opacity: 0;
+            height: 0px !important;
         }
 
-        > rect {
-            fill-opacity: 1;
-            transition : fill-opacity .5s;
+        &.barplot-transition-enter-done {
+            opacity: 1;
+        }
+
+        &.barplot-transition-exit {
+            opacity: 0;
+            height: 0px !important;
         }
 
     }
@@ -1201,7 +1207,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
     position: absolute;
     transition: top .5s ease-out, left .5s ease-out, width .5s ease-out, opacity .5s ease-out;
     transform: translate3d(0,0,0);
-    cursor: pointer;
+
+    &:not(.disabled){
+        cursor: pointer;
+    }
 
     > .inner {
 
@@ -1223,6 +1232,55 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 margin-right: 5px;
                 margin-left: 1px;
             }
+
+            /** Present on I/O file nodes which have a quality_metric available **/
+            .qc-present-node-marker {
+                position: absolute;
+                width: 24px;
+                height: 24px;
+                padding: 3px 6px;
+                border-radius: 50%;
+                font-size: 0.75rem;
+                top: -15px;
+                right: -7px;
+                background-color: #e07e05;
+                color: #fff;
+                box-shadow: 0 0px 0px -2px #000;
+                transition: background-color .5s ease-out, box-shadow .5s ease-out;
+
+                &.clickable:hover,
+                &.clickable:active {
+                    text-decoration: none;
+                }
+
+                &.clickable:hover {
+                    background-color: darken($color: #e07e05, $amount: 10)
+                }
+
+                &.status-error {
+                    background-color: #e00505;
+                    &.clickable:hover {
+                        background-color: darken($color: #e00505, $amount: 10)
+                    }
+                }
+
+                &.status-warning {
+                    background-color: #e05605;
+                    &.clickable:hover {
+                        background-color: darken($color: #e05605, $amount: 10)
+                    }
+                }
+
+                &.status-passing {
+                    background-color: #69a705;
+                    &.clickable:hover {
+                        background-color: darken($color: #69a705, $amount: 10)
+                    }
+                }
+
+                
+            }
+
         }
 
         .above-node-title ,
@@ -1236,7 +1294,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
             font-size: 75%;
             line-height: 12px;
             background: rgba(255,255,255,0.95);
-            
         }
 
         .above-node-title {
@@ -1254,28 +1311,24 @@ $workflow-node-color-type-global-context: #ffb3b3;
         }
     }
 
+    /** COMMON styles for when node is selected _or_ related **/
     &[data-node-selected="true"],
     &[data-node-related="true"],
     &:hover {
         > .inner {
-            .above-node-title {
-                transform: translate3d(0px,-6px,0);
-            }
-            .below-node-title {
-                transform: translate3d(0px,6px,0);
-                .lighter {
-                    opacity: 1;
-                }
-            }
-        }
-    }
+            .node-visible-element {
 
-    &.disabled {
-        opacity : 0.33;
-        &.node-type-input,
-        &.node-type-output {
-            &:before {
-                background-color: $workflow-node-color-disabled;
+                .above-node-title {
+                    transform: translate3d(0px,-6px,0);
+                }
+
+                .below-node-title {
+                    transform: translate3d(0px,6px,0);
+                    .lighter {
+                        opacity: 1;
+                    }
+                }
+
             }
         }
     }
@@ -1387,26 +1440,30 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         transform: translateY(1px);
                     }
                 }
+
+                /** Unlike the _common_ style transform, this also offsets +/- 6px horizontally due to I/O node shape **/
+                .above-node-title {
+                    transform: translate3d(-6px,0px,0);
+                }
+                .below-node-title {
+                    transform: translate3d(6px,0px,0);
+                }
+
             }
 
-            .above-node-title {
-                transform: translate3d(-6px,0px,0);
-            }
-            .below-node-title {
-                transform: translate3d(6px,0px,0);
-            }
-            
         }
 
         &[data-node-selected="true"],
         &[data-node-related="true"],
         &:hover {
             > .inner {
-                .above-node-title {
-                    transform: translate3d(-6px,-6px,0);
-                }
-                .below-node-title {
-                    transform: translate3d(6px,5px,0);
+                .node-visible-element {
+                    .above-node-title {
+                        transform: translate3d(-6px,-6px,0);
+                    }
+                    .below-node-title {
+                        transform: translate3d(6px,5px,0);
+                    }
                 }
             }
         }
@@ -1416,11 +1473,20 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 outline-color: #ddd;
             }
         }
+
         &[data-node-selected="true"]:not(.disabled){
             &:before {
                 outline-color: #000;
             }
+            > .inner .node-visible-element {
+                .qc-present-node-marker:hover {
+                    //background-color: #000;
+                    //background-color: darken($color: #e07e05, $amount: 10%);
+                    box-shadow: 0 3px 2px -2px #000;
+                }
+            }
         }
+
         &[data-node-related="true"]:not(.disabled):not([data-node-selected="true"]){
             &:before {
                 outline-color: rgba(0,0,0,0.55);
@@ -1512,6 +1578,32 @@ $workflow-node-color-type-global-context: #ffb3b3;
             content: "\f141";
         }
     }
+
+    &.disabled,
+    &.disabled.workflow-node-transition-enter-done {
+        opacity : 0.33;
+        &.node-type-input,
+        &.node-type-output {
+            &:before {
+                background-color: $workflow-node-color-disabled;
+            }
+        }
+    }
+
+
+    /** Transitions **/
+
+    opacity: 0;
+
+    &.workflow-node-transition-entering,
+    &.workflow-node-transition-enter {
+        opacity: 0;
+    }
+
+    &.workflow-node-transition-enter-done {
+        opacity: 1;
+    }
+
 }
 
 @mixin workflow-edge-layer {
@@ -1533,12 +1625,16 @@ $workflow-node-color-type-global-context: #ffb3b3;
         fill: none;
         stroke-width: 1px;
         stroke-width: 1.5px;
-        transition: stroke-width .3s, opacity .5s .25s ease-out;
+        transition: opacity .5s ease-out, stroke-dashoffset 2s .5s ease-out;
+        opacity: 1;
 
+        /*
         &:hover {
             stroke: #000;
             stroke-width: 2px;
         }
+        */
+
         &.disabled:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
             stroke-width: 1px;
             //stroke: #bbb;
@@ -1549,10 +1645,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
             stroke: #000;
         }
         &[data-edge-related="true"]:not([data-edge-selected="true"]){
-            stroke-width: 3px;
+            stroke-width: 2px;
             stroke: #000;
+            stroke-dasharray: 10, 5;
             //stroke: rgba(0,0,0,0.75);
         }
+
     }
 }
 
@@ -1568,11 +1666,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
         .state-container {
 
             &[data-is-node-selected="true"] {
-                .nodes-layer-wrapper .nodes-layer .node:not([data-node-selected="true"]):not([data-node-in-selection-path="true"]) {
+                /* Fade out nodes not in selection path */
+                .nodes-layer-wrapper .nodes-layer .node:not([data-node-selected="true"]):not([data-node-in-selection-path="true"]):not([data-node-related="true"]) {
                     opacity: 0.15;
                 }
                 .edges-layer-wrapper .edges-layer path.edge-path:not([data-edge-selected="true"]):not([data-edge-related="true"]) {
-                    opacity: 0.15;
+                    opacity: 0.15 !important;
                 }
             }
 
@@ -1586,6 +1685,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 overflow: hidden;
                 position: relative;
                 transition: height .5s ease-out;
+
+                &.height-decreasing {
+                    transition: height .5s .5s ease-out;
+                }
 
                 .nodes-layer-wrapper,
                 .edges-layer-wrapper {
@@ -1668,7 +1771,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
 .tabview-title-controls-container {
     font-size: 1rem;
     margin-bottom: 8px;
-    padding-top: 10px;
     padding-left: 5px;
     float: right;
     padding-top: 17px;
@@ -1678,71 +1780,55 @@ $workflow-node-color-type-global-context: #ffb3b3;
         @include button-no-focus-outline;
     }
 
-    > .inner-panel {
-        float: left;
-        > div.inline-block {
-            vertical-align: middle;
-            line-height: 20px;
-            height: 34px;
-            
-            
-            
-            button#rowspacingtype-select {
-                min-width: 120px;
-            }
+    > .toolbar-wrapper > .btn-toolbar {
+        > .btn-group {
+            float: none;
         }
+    }
 
-        &:not(.constant-panel) {
-            > div.inline-block {
-
-                &.checkbox-container {
-                    padding: 8px 12px 6px 0;
-                    vertical-align: middle;
-                    font-size: 0.9rem;
-                    @include user-select(none);
-                    div.checkbox {
-                        margin: 0;
-                        input[type="checkbox"]{
-                            margin-top: 3px;
-                        }
-                        &.disabled{
-                            color: #999;
-                        }
-                    }
-                }
-
-                @media screen and (max-width: $screen-md-max){
-                    display: block;
-                    &.checkbox-container {
-                        padding-top: 5px;
-                        padding-bottom: 5px;
-                        height: auto;
-                    }
-                }
-            }
+    .checkbox-container {
+        margin-right: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+        display: block;
+        padding-top: 7px;
+        padding-bottom: 5px;
+        font-size: 0.9rem;
+        @include user-select(none);
+        &.disabled{
+            color: #999;
         }
+    }
 
-        &.constant-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
-        }
+    button#rowspacingtype-select {
+        min-width: 120px;
     }
     
     @media screen and (min-width: $screen-lg-min){
-        
-        > .inner-panel {
-            > div.inline-block {
-                display: table-cell;
-                padding-left: 3px;
-            }
+
+        .checkbox-container {
+            float: left;
         }
+
     }
     @media screen and (max-width: $screen-md-max){
-        float: left;
         > .inner-panel:first-child {
-            padding-right: 10px;
+            min-width: 200px;
+            padding-left: 10px;
+            padding-bottom: 12px;
+            > hr {
+                margin-top: 12px;
+                margin-bottom: 0;
+            }
+            > .mobile-size-elem {
+                > .dropdown.btn-group,
+                > .dropdown.btn-group > button.btn,
+                > button.btn {
+                    width: 100%;
+                    text-align: left;
+                }
+            }
         }
     }
 }
@@ -2129,6 +2215,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 transform-origin: 0 0;
                 transform: rotate(-45deg);
                 width: 20px;
+                font-weight: 600;
+                color: #111;
             }
         }
         //border-bottom: 1px solid #eee;
@@ -2139,7 +2227,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         .stacked-block {
             @include planned-submitted-cell-styles;
             display: inline-block;
-            background-color: #707070;
+            // background-color: #707070;
             text-align: center;
             border: 1px solid transparent;
             color: #fff;
@@ -2187,15 +2275,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
             //margin-top: -1px;
         }
 
-        &.may-collapse {
-            > .row > .label-section > h4 > span {
-                cursor: pointer;
-            }
-
-           
-
-        }
-
         &:not(.open):not(:first-child):not(.depth-0),
         &:not(.open):not(:first-child):not(.depth-0) + &:not(.open):not(:first-child):not(.depth-0) {
             > .row > .list-section > .blocks-container {
@@ -2209,29 +2288,58 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
 
-        .label-section > h4 {
-            margin-top: 0px;
-            margin-bottom: 2px;
-        }
-
-        &.no-grouping-property-titles {
-            .label-section > h4 {
-                margin-top: 13px;
+        .label-section > .label-container {
+            position: relative;
+            > h4 {
+                margin-top: 0px;
+                margin-bottom: 2px;
+                text-align: right;
+                width: 100%;
+                padding-left: 25px;
+                font-size: 1rem;
+                font-weight: 600;
             }
         }
 
-        .label-section > small {
+        &.may-collapse {
+            > .row > .label-section > .label-container {
+                > h4 {
+                    cursor: pointer;
+                    i.icon.icon-minus,
+                    i.icon.icon-plus {
+                        position: absolute;
+                        left: 0;
+                    }
+                }
+            }
+        }
+
+        &.no-grouping-property-titles {
+            .label-section {
+                > .label-container {
+                    display: flex !important;
+                    align-items: center;
+                    > h4 {
+                        /* margin-top: 13px; */
+                        margin-top: 0px;
+                        margin-bottom: 0px;
+                    }
+                }
+            }
+        }
+
+        .label-section > .label-container > small {
             color: #777;
             vertical-align: top;
         }
 
         @media screen and (min-width: $screen-md-min){
-            .label-section > small {
+            .label-section > .label-container > small {
                 color: #ddd;
                 transition: color .33s;
             }
             &:hover > .row {
-                > .label-section > small {
+                > .label-section > .label-container > small {
                     color: #333;
                 }
             }
@@ -2239,7 +2347,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
         &.depth-0 {
             margin-bottom: 0px;
-            //> .row > .label-section > h4 {
+            //> .row > .label-section > .label-container > h4 {
             //    margin-top: 3px;
             //}
 
@@ -2259,6 +2367,20 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
 
+            &:not(.open):not(.with-duplicate-headers):first-child {
+                > .row > .list-section {
+                    > .blocks-container {
+                        border-top: 1px solid transparent;
+                    }
+                }
+            }
+
+            &:not(.row-index-0) {
+                > .row > .label-section > .label-container {
+                    border-top: 1px dotted #eee;
+                }
+            }
+
             @media screen and (min-width: $screen-sm-min){
                 &.open > .row > .list-section.has-header,
                 &:first-child > .row > .list-section.has-header {
@@ -2275,7 +2397,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         height: 10px;
                     }
                 }
-                > .row > .label-section > h4 {
+                > .row > .label-section > .label-container > h4 { 
                     padding-top: 10px;
                     margin-bottom: 0;
                 }
@@ -2326,15 +2448,18 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
 
             > .row > .label-section {
-                > h4 {
-                    font-size: 1rem;
-                    i.icon.icon-fw {
-                        min-width: 20px;
+                > .label-container {
+                    > h4 {
+                        font-size: 1rem;
+                        font-weight: 400;
+                        i.icon.icon-fw {
+                            min-width: 20px;
+                        }
                     }
-                }
-                > small {
-                    display: inline-block;
-                    padding-top: 4px;
+                    > small {
+                        display: inline-block;
+                        padding-top: 4px;
+                    }
                 }
             }
 
@@ -2450,7 +2575,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
         }
-
+        
+        /* Disabled as we now align text to right
         @media screen and (min-width: $screen-sm-min){
             @for $i from 1 through 5 {
                 &.depth-#{$i} {
@@ -2460,6 +2586,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
         }
+        */
 
     }
 

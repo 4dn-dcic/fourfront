@@ -99,28 +99,6 @@ def test_vendor_name_updates_on_patch(testapp, vendor_data):
 
 
 @pytest.fixture
-def badge_data(lab, award):
-    return {"title": "Test BaDGe Title", 'lab': lab['@id'], 'award': award['@id']}
-
-
-def test_badge_update_name_no_caps(testapp, badge_data):
-    res = testapp.post_json('/badge', badge_data, status=201)
-    assert res.json['@graph'][0]['badge_name'] == "test-badge-title"
-
-
-def test_badge_update_name_no_punctuation_or_space(testapp, badge_data):
-    badge_data['title'] = "Test, = Badge!  # -title?"
-    res = testapp.post_json('/badge', badge_data, status=201)
-    assert res.json['@graph'][0]['badge_name'] == "test-badge-title"
-
-
-def test_badge_name_updates_on_patch(testapp, badge_data):
-    res1 = testapp.post_json('/badge', badge_data, status=201)
-    res2 = testapp.patch_json(res1.json['@graph'][0]['@id'], {'title': 'WaHoo'}, status=200)
-    assert res2.json['@graph'][0]['badge_name'] == "wahoo"
-
-
-@pytest.fixture
 def vendor_data_alias(lab, award):
     return {"title": "Wrong Alias Biochemical",
             'lab': lab['@id'],

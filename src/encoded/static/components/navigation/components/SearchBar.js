@@ -8,7 +8,7 @@ import { MenuItem, Checkbox, DropdownButton, Fade, Collapse } from 'react-bootst
 import { console, navigate, Filters } from './../../util';
 
 
-export class SearchBar extends React.Component{
+export class SearchBar extends React.PureComponent{
 
     static renderHiddenInputsForURIQuery(query){
         return _.flatten(_.map(
@@ -27,19 +27,19 @@ export class SearchBar extends React.Component{
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.toggleSearchAllItems = this.toggleSearchAllItems.bind(this);
-        this.onSearchInputChange = this.onSearchInputChange.bind(this);
-        this.onResetSearch = this.onResetSearch.bind(this);
-        this.onSearchInputBlur = this.onSearchInputBlur.bind(this);
+        this.toggleSearchAllItems   = this.toggleSearchAllItems.bind(this);
+        this.onSearchInputChange    = this.onSearchInputChange.bind(this);
+        this.onResetSearch          = this.onResetSearch.bind(this);
+        this.onSearchInputBlur      = this.onSearchInputBlur.bind(this);
         this.selectItemTypeDropdown = this.selectItemTypeDropdown.bind(this);
+
         var initialQuery = '';
         if (props.href){
             initialQuery = Filters.searchQueryStringFromHref(props.href) || '';
         }
         this.state = {
-            'searchAllItems' : props.href && navigate.isSearchHref(props.href),
-            'typedSearchQuery' : initialQuery
+            'searchAllItems'    : props.href && navigate.isSearchHref(props.href),
+            'typedSearchQuery'  : initialQuery
         };
     }
 
@@ -56,9 +56,23 @@ export class SearchBar extends React.Component{
         return (typedSearchQuery && typeof typedSearchQuery === 'string' && typedSearchQuery.length > 0) || false;
     }
 
+    getCurrentResultsSearchQuery(hrefParts){
+        if (!hrefParts){
+            hrefParts = url.parse(this.props.href, true);
+        }
+        return (hrefParts && hrefParts.query && hrefParts.query.q) || null;
+    }
+
     toggleSearchAllItems(willSearchAllItems = !this.state.searchAllItems){
-        this.setState({ 'searchAllItems' : willSearchAllItems }, ()=>{
-            this.refs && this.refs.form && this.refs.form.dispatchEvent(new Event('submit', { bubbles : true }) );
+        this.setState(function({ searchAllItems }){
+            if (typeof willSearchAllItems === 'boolean'){
+                if (willSearchAllItems === searchAllItems){
+                    return null;
+                }
+                return { 'searchAllItems' : willSearchAllItems };
+            } else {
+                return { 'searchAllItems' : !searchAllItems };
+            }
         });
     }
 
@@ -90,23 +104,19 @@ export class SearchBar extends React.Component{
         );
     }
 
-    selectItemTypeDropdown(inProp = false){
-        if (this.props.currentAction === 'selection') return null;
+    selectItemTypeDropdown(visible = false){
+        var { currentAction } = this.props,
+            { searchAllItems } = this.state;
+        if (currentAction === 'selection') return null;
         return (
-            <Fade in={inProp} appear>
-                <DropdownButton
-                    id="search-item-type-selector"
-                    bsSize="sm"
-                    pullRight
-                    onSelect={(eventKey, evt)=>{
-                        this.toggleSearchAllItems(eventKey === 'all' ? true : false);
-                    }}
-                    title={this.state.searchAllItems ? 'All Items' : 'Experiment Sets'}
-                >
-                    <MenuItem eventKey='sets' data-key="sets" active={!this.state.searchAllItems}>
+            <Fade in={visible} appear>
+                <DropdownButton id="search-item-type-selector" bsSize="sm" pullRight
+                    onSelect={(eventKey, evt)=>{ this.toggleSearchAllItems(eventKey === 'all' ? true : false); }}
+                    title={searchAllItems ? 'All Items' : 'Experiment Sets'}>
+                    <MenuItem eventKey='sets' data-key="sets" active={!searchAllItems}>
                         Experiment Sets
                     </MenuItem>
-                    <MenuItem eventKey='all' data-key="all" active={this.state.searchAllItems}>
+                    <MenuItem eventKey='all' data-key="all" active={searchAllItems}>
                         All Items (advanced)
                     </MenuItem>
                 </DropdownButton>
@@ -115,17 +125,31 @@ export class SearchBar extends React.Component{
     }
 
     render() {
-        var { searchAllItems, typedSearchQuery } = this.state,
-            hrefParts           = url.parse(this.props.href, true),
+        var { href, currentAction } = this.props,
+            { searchAllItems, typedSearchQuery } = this.state,
+            hrefParts           = url.parse(href, true),
             searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '',
-            resetIconButton     = searchQueryFromHref ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null,
+            searchTypeFromHref  = (hrefParts && hrefParts.query && hrefParts.query.type) || '',
+            showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery) && (
+                (searchTypeFromHref === 'Item' && searchAllItems) || (searchTypeFromHref === 'ExperimentSetReplicate' && !searchAllItems)
+            ),
+            resetIconButton     = (
+                showingCurrentQuery ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null
+            ),
+            searchIconButton    = (
+                showingCurrentQuery ? null : (
+                    <button type="submit" className="search-icon-button">
+                        <i className="icon icon-fw icon-search"/>
+                    </button>
+                )
+            ),
             searchBoxHasInput   = this.hasInput(),
             query               = {}, // Don't preserve facets.
             browseBaseParams    = navigate.getBrowseBaseParams();
 
-        if (this.props.currentAction === 'selection'){
+        if (currentAction === 'selection'){
             _.extend(query, _.omit(hrefParts.query || {}, 'q')); // Preserve facets (except 'q'), incl type facet.
-        } else if (searchAllItems && this.props.currentAction !== 'selection') {
+        } else if (searchAllItems && currentAction !== 'selection') {
             _.extend(query, { 'type' : 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else {
             _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
@@ -133,15 +157,13 @@ export class SearchBar extends React.Component{
 
         return (
             <form className={"navbar-search-form-container navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
-                action={searchAllItems ? "/search/" : "/browse/" } method="GET" ref="form">
+                action={searchAllItems ? "/search/" : "/browse/" } method="GET">
                 { this.selectItemTypeDropdown(!!(searchBoxHasInput || searchQueryFromHref)) }
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
-                    ref="q" name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
-                { resetIconButton }
+                    name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                 { SearchBar.renderHiddenInputsForURIQuery(query) }
-                <button type="submit" className="search-icon-button">
-                    <i className="icon icon-fw icon-search"/>
-                </button>
+                { resetIconButton }
+                { searchIconButton }
             </form>
         );
     }

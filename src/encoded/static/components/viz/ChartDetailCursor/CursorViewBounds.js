@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
@@ -30,11 +31,11 @@ import { console, isServerSide, Filters, layout, analytics } from './../../util'
  * @class CursorViewBounds
  * @extends {React.Component}
  */
-export default class CursorViewBounds extends React.Component {
+export default class CursorViewBounds extends React.PureComponent {
 
     /**
      * Check if 'node' is currently selected.
-     * 
+     *
      * @public
      * @param {Object} node - A 'node' containing at least 'field', 'term', and 'parent' if applicable.
      * @param {string} selectedTerm - Currently selected subdivision field term.
@@ -55,12 +56,10 @@ export default class CursorViewBounds extends React.Component {
         'highlightTerm' : false,
         // Return an object with 'x', 'y'.
         'clickCoordsFxn' : function(node, containerPosition, boundsHeight, isOnRightSide){
-
             return {
                 x : containerPosition.left,
                 y : containerPosition.top + boundsHeight,
             };
-
         }
     };
 
@@ -82,6 +81,9 @@ export default class CursorViewBounds extends React.Component {
             'hoverTerm' : null,
             'hoverParentTerm' : null
         };
+
+        this.boundsContainerRef = React.createRef();
+        this.cursorRef = React.createRef();
     }
 
     /**
@@ -95,30 +97,34 @@ export default class CursorViewBounds extends React.Component {
      * @param {Object} pastState - Previous state of this component.
      */
     componentDidUpdate(pastProps, pastState){
-        if (pastState.selectedTerm !== this.state.selectedTerm){
+
+        if (pastProps.href !== this.props.href){
+            this.cursorRef.current.reset(true);
+        } else if (pastState.selectedTerm !== this.state.selectedTerm){
             
             // If we now have a selected bar section, enable click listener.
             // Otherwise, disable it.
             // And set ChartDetailCursor to be 'stickied'. This is the only place where the ChartDetailCursor state should be updated.
             if (typeof this.state.selectedTerm === 'string'){
-                ChartDetailCursor.update({ 'sticky' : true });
-                setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
-                setTimeout(window.addEventListener, 100, 'mousemove', this.handleMouseMoveToUnsticky);
-                //window.addEventListener('click', this.handleClickAnywhere);
+                this.cursorRef.current.update({ 'sticky' : true });
+                setTimeout(()=>{
+                    window.addEventListener('click', this.handleClickAnywhere);
+                    window.addEventListener('mousemove', this.handleMouseMoveToUnsticky);
+                }, 100);
             } else {
                 window.removeEventListener('click', this.handleClickAnywhere);
                 window.removeEventListener('mousemove', this.handleMouseMoveToUnsticky);
                 if (!this.state.hoverTerm){
-                    ChartDetailCursor.reset();
+                    this.cursorRef.current.reset(true);
                 } else {
-                    ChartDetailCursor.update({ 'sticky' : false });
+                    this.cursorRef.current.update({ 'sticky' : false });
                 }
             }
 
         }
     }
 
-    updateDetailCursorFromNode(node, overrideSticky = false, cursorId = 'default'){
+    updateDetailCursorFromNode(node, overrideSticky = false){
         var newCursorDetailState = {
             'path' : [],
             'includeTitleDescendentPrefix' : false,
@@ -130,24 +136,26 @@ export default class CursorViewBounds extends React.Component {
             newCursorDetailState.primaryCount = this.props.aggregateType;
         }
         newCursorDetailState.path.push(node);
-        ChartDetailCursor.update(newCursorDetailState, cursorId, null, overrideSticky);
+        this.cursorRef.current.update(newCursorDetailState, null, overrideSticky);
     }
 
     handleMouseMoveToUnsticky(evt){
-        if (this.refs && this.refs.container){
+        var container = this.boundsContainerRef && this.boundsContainerRef.current,
+            cursorContainerMargin = this.props.cursorContainerMargin;
 
-            var containerOffset = layout.getElementOffset(this.refs.container);
-            var marginTop   = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.top) || this.props.cursorContainerMargin || 0,
-                marginBottom= (this.props.cursorContainerMargin && this.props.cursorContainerMargin.bottom) || marginTop || 0,
-                marginLeft  = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.left) || marginTop || 0,
-                marginRight = (this.props.cursorContainerMargin && this.props.cursorContainerMargin.right) || marginLeft || 0;
+        if (container){
 
+            var containerOffset = layout.getElementOffset(container),
+                marginTop       = (cursorContainerMargin && cursorContainerMargin.top)    || cursorContainerMargin || 0,
+                marginBottom    = (cursorContainerMargin && cursorContainerMargin.bottom) || marginTop             || 0,
+                marginLeft      = (cursorContainerMargin && cursorContainerMargin.left)   || marginTop             || 0,
+                marginRight     = (cursorContainerMargin && cursorContainerMargin.right)  || marginLeft            || 0;
 
             if (
                 (evt.pageY || evt.clientY) < containerOffset.top - marginTop ||
-                (evt.pageY || evt.clientY) > containerOffset.top + this.refs.container.clientHeight + marginBottom ||
+                (evt.pageY || evt.clientY) > containerOffset.top + container.clientHeight + marginBottom ||
                 (evt.pageX || evt.clientX) < containerOffset.left - marginLeft ||
-                (evt.pageX || evt.clientX) > containerOffset.left + this.refs.container.clientWidth + marginRight
+                (evt.pageX || evt.clientX) > containerOffset.left + container.clientWidth + marginRight
             ){
                 this.setState({
                     'selectedParentTerm' : null,
@@ -229,7 +237,7 @@ export default class CursorViewBounds extends React.Component {
         });
 
         if (!ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
-            ChartDetailCursor.reset(false);
+            this.cursorRef.current.reset(false);
         }
     }
 
@@ -243,35 +251,36 @@ export default class CursorViewBounds extends React.Component {
                 'selectedParentTerm' : null
             });
         } else {
+            var { styleOptions, windowWidth, clickCoordsFxn, eventCategory } = this.props;
+
             // Manually adjust popover position if a different bar section is already selected.
             if (this.state.selectedTerm) {
 
-                var containerPos = layout.getElementOffset(this.refs.container);
-                var bottomOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.bottom) || 0;
-                var leftOffset = (this.props.styleOptions && this.props.styleOptions.offset && this.props.styleOptions.offset.left) || 0;
+                var container       = this.boundsContainerRef && this.boundsContainerRef.current,
+                    containerPos    = layout.getElementOffset(container),
+                    bottomOffset    = (styleOptions && styleOptions.offset && styleOptions.offset.bottom) || 0,
+                    leftOffset      = (styleOptions && styleOptions.offset && styleOptions.offset.left) || 0,
+                    containerWidth;
 
                 //var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
 
                 // Try to use window width.
-                var containerWidth;
-                if (!isServerSide() && window && window.innerWidth){
-                    containerWidth = window.clientWidth || window.innerWidth;
+                if (!isServerSide() && typeof windowWidth === 'number'){
+                    containerWidth = windowWidth;
                 } else {
-                    containerWidth = this.refs.container.clientWidth;
+                    containerWidth = container.clientWidth;
                 }
 
-                var isPopoverOnRightSide = (evt.pageX || evt.clientX) > (containerWidth / 2);
-
-                var coords = this.props.clickCoordsFxn(node, containerPos, this.refs.container.clientHeight, isPopoverOnRightSide);
+                var isPopoverOnRightSide = (evt.pageX || evt.clientX) > (containerWidth / 2),
+                    coords  = clickCoordsFxn(node, containerPos, container.clientHeight, isPopoverOnRightSide);
 
                 // Manually update popover coords then update its contents
-                ChartDetailCursor.setCoords({
-                    x : coords.x,
-                    y : coords.y,
-                    onRightSide : isPopoverOnRightSide
-                }, this.updateDetailCursorFromNode.bind(this, node, true, 'default'));
-
+                this.cursorRef.current.setCoords(
+                    _.extend({ 'onRightSide' : isPopoverOnRightSide }, coords),
+                    this.updateDetailCursorFromNode.bind(this, node, true)
+                );
             }
+
             // Set new selected bar part.
             this.setState({
                 'selectedTerm' : node.term || null,
@@ -291,19 +300,17 @@ export default class CursorViewBounds extends React.Component {
     }
 
     render(){
+
         return (
-            <div className="popover-bounds-container" ref="container" style={{ height: this.props.height, width : this.props.width }}>
-            {
-                React.cloneElement(this.props.children, _.extend({}, _.omit(this.props, 'children'), {
-                    selectedTerm : this.state.selectedTerm,
-                    selectedParentTerm : this.state.selectedParentTerm,
-                    hoverTerm : this.state.hoverTerm,
-                    hoverParentTerm : this.state.hoverParentTerm,
-                    onNodeMouseEnter : this.onNodeMouseEnter,
-                    onNodeMouseLeave : this.onNodeMouseLeave,
-                    onNodeClick : this.onNodeClick
-                }))
-            }
+            <div className="popover-bounds-container" ref={this.boundsContainerRef} style={_.pick(this.props, 'width', 'height')}>
+                {
+                    React.cloneElement(this.props.children, _.extend(
+                        _.omit(this.props, 'children'),
+                        _.pick(this.state, 'selectedTerm', 'selectedParentTerm', 'hoverTerm', 'hoverParentTerm'),
+                        _.pick(this, 'onNodeMouseEnter', 'onNodeMouseLeave', 'onNodeClick')
+                    ))
+                }
+                <ChartDetailCursor {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'schemas')} ref={this.cursorRef} />
             </div>
         );
     }

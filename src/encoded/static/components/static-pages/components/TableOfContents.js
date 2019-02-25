@@ -12,10 +12,10 @@ import { isServerSide, console, navigate, object } from './../../util';
 class TableEntry extends React.Component {
 
     static getChildHeaders(content, maxHeaderDepth, currentDepth){
-        if (!TableOfContents.isContentJSX(content)) return [];
-        return content.props.children.filter((child,i,a) =>
-            TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && child.props.type === 'h' + (currentDepth + 1)
-        );
+        if (!TableOfContents.isContentJSX(content) || !content.props || !content.props.children) return [];
+        return _.filter(content.props.children, function(child,i,a){
+            return TableOfContents.isHeaderComponent(child, maxHeaderDepth || 6) && (child.props.type === 'h' + (currentDepth + 1));
+        });
     }
 
     static defaultProps = {
@@ -770,9 +770,15 @@ export class MarkdownHeading extends React.PureComponent {
 
 export class HeaderWithLink extends React.PureComponent {
 
-    handleLinkClick(id, e){
+    constructor(props){
+        super(props);
+        this.handleLinkClick = this.handleLinkClick.bind(this);
+    }
+
+    handleLinkClick(e){
         if (!(!isServerSide() && typeof window !== 'undefined' && document)) return null;
-        var itemAtID;
+        var id = this.props.link || this.props.id,
+            itemAtID;
         if (this.props.context) itemAtID = object.itemUtil.atId(this.props.context);
         else itemAtID = window.location.pathname;
 
@@ -788,7 +794,7 @@ export class HeaderWithLink extends React.PureComponent {
         if (!this.props.id && !this.props.link) throw new Error('HeaderWithLink needs a link or ID attribute/prop.');
         return React.createElement(this.props.type || 'h2', _.omit(this.props, 'type', 'children', 'link', 'context'), [
             this.props.children,
-            <i key="icon-link" className="icon icon-fw icon-link" onClick={this.handleLinkClick.bind(this, this.props.link || this.props.id)} title="Copy link to clipboard"/>
+            <i key="icon-link" className="icon icon-fw icon-link" onClick={this.handleLinkClick} title="Copy link to clipboard"/>
         ]);
     }
 }

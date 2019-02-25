@@ -13,7 +13,7 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
@@ -35,7 +35,8 @@
             "title": "File Format",
             "type": "string",
             "permission": "import_items",
-            "uniqueKey": true
+            "uniqueKey": true,
+            "description": "Format or extension of this File."
         },
         "standard_file_extension": {
             "title": "Standard File Extension",

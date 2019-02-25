@@ -22,10 +22,11 @@
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/static_headers" }
+        { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "properties": {
         "schema_version": {

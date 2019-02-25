@@ -12,7 +12,8 @@
       "biosample_quantity_units": ["biosample_quantity"]
     },
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "properties": {
         "status": {

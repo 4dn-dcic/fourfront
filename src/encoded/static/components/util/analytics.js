@@ -26,6 +26,15 @@ const defaultOptions = {
 
 let state = null;
 
+/** Calls `ga`, ensuring it is present on window. */
+function ga2(){
+    try {
+        return window.ga.apply(window.ga, Array.from(arguments));
+    } catch (e) {
+        console.error('Could not track event. Fine if this is a test.', e, Array.from(arguments));
+    }
+}
+
 
 /**
  * Initialize Google Analytics tracking. Call this from app.js on initial mount perhaps.
@@ -63,11 +72,11 @@ export function initializeGoogleAnalytics(trackingID = null, context = {}, optio
 
     state = _.clone(options);
 
-    ga('create', trackingID, 'auto');
+    ga2('create', trackingID, 'auto');
     console.info("Initialized google analytics.");
     
     if (options.enhancedEcommercePlugin){
-        ga('require', 'ec');
+        ga2('require', 'ec');
         console.info("Initialized google analytics : Enhanced ECommerce Plugin");
     }
 
@@ -198,8 +207,8 @@ export function registerPageView(href = null, context = {}){
             //    pageViewObject[GADimensionMap.currentFilters] = productObj[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(currentExpSetFilters);
             //}
 
-            ga('ec:addProduct', productObj);
-            ga('ec:setAction', 'detail', productObj);
+            ga2('ec:addProduct', productObj);
+            ga2('ec:setAction', 'detail', productObj);
             return productObj;
         }
     }
@@ -214,12 +223,12 @@ export function registerPageView(href = null, context = {}){
     }
 
     lastRegisteredPageViewRealPathNameAndSearch = parts.pathname + parts.search;
-    ga('set', 'page', href);    // Set it as current page
+    ga2('set', 'page', href);    // Set it as current page
     registerProductView();
     pageViewObject.hitCallback = function(){
         console.info('Successfuly sent pageview event.', href, pageViewObject);
     }
-    ga('send', 'pageview', pageViewObject);
+    ga2('send', 'pageview', pageViewObject);
     return true;
 }
 
@@ -271,7 +280,7 @@ export function event(category, action, fields = {}){
         console.info('Successfuly sent UI event.', eventObj);
     }
 
-    setTimeout(function(){ ga('send', eventObj); }, 0);
+    setTimeout(function(){ ga2('send', eventObj); }, 0);
 }
 
 
@@ -295,8 +304,8 @@ export function productClick(item, extraData = {}, callback = null){
         'name' : pObj.name || pObj.id,
     };
 
-    ga('ec:addProduct', _.omit(pObj, 'list'));
-    ga('ec:setAction', 'click',  _.pick(pObj, 'list'));
+    ga2('ec:addProduct', _.omit(pObj, 'list'));
+    ga2('ec:setAction', 'click',  _.pick(pObj, 'list'));
 
     // Convert internal dimension names to Google Analytics ones.
     _.forEach(_.pairs(eventObj), function([key, value]){
@@ -311,7 +320,7 @@ export function productClick(item, extraData = {}, callback = null){
         Filters.currentExpSetFilters(null, pObj.list.indexOf('Search Results') > -1 ? 'item_search' : null)
     );
 
-    ga('send', eventObj);
+    ga2('send', eventObj);
     return true;
 }
 
@@ -327,7 +336,7 @@ export function exception(message, fatal = false){
         'exFatal'       : fatal
     };
     excObj.hitCallback = function(){ console.info('Successfully sent exception', excObj); }
-    ga('send', excObj);
+    ga2('send', excObj);
     return true;
 }
 
@@ -391,7 +400,7 @@ export function getTrackingId(href = null){
 export function getGoogleAnalyticsTrackingData(key = null){
     var allData = null;
     try {
-        allData = ga.getAll()[0].b.data.values;
+        allData = window.ga.getAll()[0].b.data.values;
     } catch (e){
         console.error('Could not get data from current GA tracker.');
         return null;
@@ -453,7 +462,7 @@ function impressionListOfItems(itemList, href, listName = null, context = null){
         commonProductObj.list = 'Browse Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
     } else if (navigate.isSearchHref(href)){
-        commonProductObj.list = (href.hash && href.hash.indexOf('selection')) > -1 ? 'Selection Search Results' : 'Search Results';
+        commonProductObj.list = (href.search && href.search.indexOf('currentAction=selection')) > -1 ? 'Selection Search Results' : 'Search Results';
         filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
     } else {
         commonProductObj.list = 'Collection Results';
@@ -465,7 +474,7 @@ function impressionListOfItems(itemList, href, listName = null, context = null){
     console.info("Will impression " + itemList.length + ' items.');
     return _.map(itemList, function(item, i){
         var pObj = _.extend(createProductObjectFromItem(item), commonProductObj, { 'position' : from + i + 1 });
-        ga('ec:addImpression', pObj);
+        ga2('ec:addImpression', pObj);
         return pObj;
     });
 }

@@ -1165,12 +1165,31 @@ $small-label-accession-font-size : 0.75rem;
 	@include search-result-column-and-header-block;
 	&[data-field="display_title"],
 	&[data-field="@type"],
-	&[data-field="lab.display_title"] {
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"],
+	&[data-field="status"] {
 		> .inner {
 			text-align: left;
 		}
 	}
-	&[data-field="lab.display_title"]{
+	&[data-field="@type"] {
+        i.icon-filter.clickable {
+            opacity: 0.3;
+            &:hover {
+                opacity: 0.7;
+            }
+        }
+	}
+	&[data-field="status"] {
+		> .inner {
+			i.item-status-indicator-dot {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
+		}
+	}
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"]{
 		i.user-icon {
 			cursor: help;
 			margin-right: 5px;
@@ -1765,7 +1784,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	margin-top: 7px;
 
 	.search-result-config-panel {
-		margin-top: 7px;
+		padding-top: 7px;
 		> .inner {
 			padding: 0 0;
 			border-top: 1px solid #ddd;
@@ -1778,6 +1797,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				padding-bottom: 5px;
 				//padding-left: 10px;
 				//padding-right: 10px;
+
 				> div > .checkbox {
 					margin: 0;
 					margin-bottom: 10px;
@@ -1788,6 +1808,8 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					padding-left: 32px;
 					background: #f9f9f9;
 					border-radius: 2px;
+					border: 1px solid transparent;
+					user-select: none;
 					label {
 						display: inline-block;
 						margin: 0;
@@ -1798,7 +1820,12 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					&:hover {
 						background-color: #f5f5f5;
 					}
+					&.is-active {
+						background-color: #eef4f5;
+						border-color: #22656d;
+					}
 				}
+
 			}
 			.panel-title {
 				padding-bottom: 13px;
@@ -1826,15 +1853,28 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 	}
 
-	button {
+	button.btn,
+	a.btn {
 		transition: opacity .5s, background-color .5s, box-shadow .25s, color .5s;
 		box-shadow: none;
 		&:focus, &:active, &.active, &.active:focus, &:active:focus {
 			outline: none;
 		}
-		i.icon {
-			position: relative;
-			top: 1px;
+		i.icon:first-child + span {
+			margin-left: 5px;
+		}
+		i.icon.icon-angle-down,
+		i.icon.icon-angle-up {
+			margin-left: 5px;
+		}
+		&.btn-xs {
+			i.icon:first-child + span {
+				margin-left: 3px;
+			}
+			i.icon.icon-angle-down,
+			i.icon.icon-angle-up {
+				margin-left: 3px;
+			}
 		}
 	}
 
@@ -1845,7 +1885,6 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 	.box {
 		min-height: 33px;
-		line-height: 33px;
 		&.selection-buttons {
 			margin-right: 7px;
 		}
@@ -1921,14 +1960,20 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							cursor: pointer;
 							font-size: 1.25rem;
 						}
+
 						.has-type-title, &.has-type-title {
 							.icon-container {
 								padding-top: 8px;
+								@media screen and (max-width: $screen-sm-max){
+									padding-top: 2px;
+								}
 							}
 						}
+
 						.title-container {
 							padding-right: 0;
 						}
+
 						@include search-result-toggle-open-button-container;
 						&.open {
 							@include search-result-toggle-open-button-container-open;

@@ -4,6 +4,7 @@ import React from 'react';
 import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
+import queryString from 'query-string';
 import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
 import moment from 'moment';
 import { s3UploadFile } from '../util/aws';
@@ -1030,58 +1031,53 @@ export default class SubmissionView extends React.PureComponent{
 
 
         var submitProcess = function(me_data){ // me_data = current user fields
-            if(!me_data || !me_data.submits_for || me_data.submits_for.length == 0){
-                console.error('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
+
+            if(!me_data){
+                console.error('Could not get user account info.');
                 keyValid[inKey] = 2;
                 this.setState(stateToSet);
                 return;
             }
-            // use first lab for now
-            var submits_for = me_data.submits_for[0];
-            lab = object.atIdFromObject(submits_for);
-            ajax.promise(lab).then(lab_data => {
-                if(!lab || !lab_data.awards || lab_data.awards.length == 0){
-                    console.error('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
-                    keyValid[inKey] = 2;
-                    this.setState(stateToSet);
-                    return;
-                }
-                // should we really always use the first award?
-                award = lab_data.awards[0];
+
+
+            var submitProcessContd = (userLab = null, userAward = null) => {
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 // this should only be done on the primary object
-                if(this.state.edit && inKey === 0 && propContext.award && propContext.lab){
+                if (this.state.edit && inKey === 0 && propContext.award && propContext.lab){
                     if(currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.atIdFromObject(propContext.award);
+                        finalizedContext.award = object.itemUtil.atId(propContext.award);
                     }
                     if(currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = object.atIdFromObject(propContext.lab);
+                        finalizedContext.lab = object.itemUtil.atId(propContext.lab);
                     }
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
                     if(me_data.groups && _.contains(me_data.groups, 'admin')){
                         if(propContext.submitted_by){
-                            finalizedContext.submitted_by = object.atIdFromObject(propContext.submitted_by);
+                            finalizedContext.submitted_by = object.itemUtil.atId(propContext.submitted_by);
                         }else{
                             // use current user
-                            finalizedContext.submitted_by = object.atIdFromObject(me_data);
+                            finalizedContext.submitted_by = object.itemUtil.atId(me_data);
                         }
                     }
-                }else{ // use info of person creating/cloning unless values present
-                    if(currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.atIdFromObject(award);
+                } else if (userLab && userAward) { // use info of person creating/cloning unless values present
+                    if (currSchema.properties.award && !('award' in finalizedContext)){
+                        finalizedContext.award = object.itemUtil.atId(userAward);
                     }
-                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = lab;
+                    if (currSchema.properties.lab && !('lab' in finalizedContext)){
+                        finalizedContext.lab = object.itemUtil.atId(userLab);
                     }
                 }
+
                 // if testing validation, use check_only=True (see /types/base.py)
-                var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType;
-                var actionMethod = 'POST';
+                var destination = test ? '/' + currType + '/?check_only=True' : '/' + currType,
+                    actionMethod = 'POST';
+
                 // used to keep track of fields to delete with PATCH for edit/round two
                 // comma-separated string
                 var deleteFields;
+
                 // change actionMethod and destination based on edit/round two
                 if(!test){
                     if (this.state.roundTwo){
@@ -1230,7 +1226,20 @@ export default class SubmissionView extends React.PureComponent{
                     }
                 });
 
-            });
+            };
+
+
+            if (me_data && Array.isArray(me_data.submits_for) && me_data.submits_for.length > 0){
+                // use first lab for now
+                ajax.promise(object.itemUtil.atId(me_data.submits_for[0])).then(myLab => {
+                    // use first award for now
+                    var myAward = (myLab && Array.isArray(myLab.awards) && myLab.awards.length > 0 && myLab.awards[0]) || null;
+                    submitProcessContd(myLab, myAward);
+                });
+            } else {
+                submitProcessContd();
+            }
+
         }.bind(this);
 
         if (this.state.currentSubmittingUser){
@@ -1310,12 +1319,20 @@ export default class SubmissionView extends React.PureComponent{
         });
     }
 
-    /** Navigate to version of same page we're on, minus the '#!<action> hash. */
+    /** Navigate to version of same page we're on, minus the `currentAction` URI parameter. */
     cancelCreatePrimaryObject = (skipAskToLeave = false) => {
         var leaveFunc = () =>{
             // Navigate out.
-            var parts = url.parse(this.props.href);
-            this.props.navigate(parts.path, { skipRequest : true });
+            var parts = url.parse(this.props.href, true),
+                modifiedQuery = _.omit(parts.query, 'currentAction'),
+                modifiedSearch = queryString.stringify(modifiedQuery),
+                nextURI;
+
+            parts.query = modifiedQuery;
+            parts.search = (modifiedSearch.length > 0 ? '?' : '') + modifiedSearch;
+            nextURI = url.format(parts);
+
+            this.props.navigate(nextURI, { skipRequest : true });
         };
 
         if (skipAskToLeave === true){
@@ -1362,7 +1379,9 @@ export default class SubmissionView extends React.PureComponent{
                     show={showAliasModal} {..._.pick(this.state, 'creatingAlias', 'creatingType', 'creatingAliasMessage', 'currKey', 'creatingIdx', 'currentSubmittingUser')}
                     handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
                 />
-                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject} actionButtons={[this.generateCancelButton(), this.generateValidationButton(), this.generateSubmitButton()]} />
+                <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}>
+                    { this.generateCancelButton() }{ this.generateValidationButton() }{ this.generateSubmitButton() }
+                </WarningBanner>
                 <DetailTitleBanner
                     hierarchy={this.state.keyHierarchy} setSubmissionState={this.setSubmissionState}
                     {..._.pick(this.state, 'keyContext', 'keyTypes', 'keyDisplay', 'currKey', 'fullScreen')}
@@ -1408,7 +1427,7 @@ class WarningBanner extends React.PureComponent {
                         Please note: your work will be lost if you navigate away from, refresh or close this page while submitting. The submission process is under active development and features may change.
                     </div>
                     <div className="col-md-5 col-lg-4">
-                        <div className="action-buttons-container text-right" children={this.props.actionButtons} />
+                        <div className="action-buttons-container text-right" children={this.props.children} />
                     </div>
                 </div>
             </div>

@@ -3,14 +3,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { Collapse } from 'react-bootstrap';
+import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 import { content_views } from './../globals';
 import Alerts from './../alerts';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
     FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
 import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
-import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
+import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
 
 var { TabObject, Item } = typedefs;
 
@@ -41,7 +42,6 @@ export default class DefaultItemView extends React.PureComponent {
         this.getTabViewWidth = this.getTabViewWidth.bind(this);
         this.setTabViewKey = this.setTabViewKey.bind(this);
         this.itemHeader = this.itemHeader.bind(this);
-        this.render = this.render.bind(this);
 
         /**
          * Empty state object. May be extended by sub-classes.
@@ -50,6 +50,8 @@ export default class DefaultItemView extends React.PureComponent {
          * @type {Object}
          */
         this.state = {};
+
+        this.tabbedViewRef = React.createRef();
     }
 
     /**
@@ -114,10 +116,11 @@ export default class DefaultItemView extends React.PureComponent {
             { context, schemas, windowWidth } = this.props;
     
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(context));
+            returnArr.push(AttributionTabView.getTabObject(this.props));
         }
-        returnArr.push(ItemDetailList.getTabObject(context, schemas));
-        returnArr.push(AuditTabView.getTabObject(context));
+
+        returnArr.push(ItemDetailList.getTabObject(this.props));
+        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 
@@ -131,22 +134,23 @@ export default class DefaultItemView extends React.PureComponent {
      */
     getDefaultTabs(context = this.props.context){
         var returnArr = [];
-        returnArr.push(ItemDetailList.getTabObject(context, this.props.schemas));
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub) returnArr.push(AttributionTabView.getTabObject(context));
-        returnArr.push(AuditTabView.getTabObject(context));
+        returnArr.push(ItemDetailList.getTabObject(this.props));
+        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+            returnArr.push(AttributionTabView.getTabObject(this.props));
+        }
+        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 
     /**
-     * Returns a list of common tab definitions - `AttributionTabView`, `ItemDetailList`, & `AuditTabView`.
-     * DO NOT EXTEND
+     * Calculated width of tabview pane.
+     * Alias of `layout.gridContainerWidth(this.props.windowWidth)`.
      *
-     * @protected
      * @returns {void}
      */
     getTabViewWidth(){
-        var width = (!isServerSide() && this.refs && this.refs.tabViewContainer && this.refs.tabViewContainer.offsetWidth) || null;
-        if (typeof width === 'number' && width) width -= 20;
+        var windowWidth = this.props.windowWidth,
+            width = layout.gridContainerWidth(windowWidth);
         return width;
     }
 
@@ -159,14 +163,15 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {void}
      */
     setTabViewKey(nextKey){
-        if (this.refs.tabbedView && typeof this.refs.tabbedView.setActiveKey === 'function'){
+        var tabbedView = this.tabbedViewRef.current;
+        if (tabbedView && typeof tabbedView.setActiveKey === 'function'){
             try {
-                this.refs.tabbedView.setActiveKey(nextKey);
+                tabbedView.setActiveKey(nextKey);
             } catch (e) {
                 console.warn('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
             }
         } else {
-            console.error('Cannot access refs.tabbedView.setActiveKey()');
+            console.error('Cannot access tabbedView.setActiveKey()');
         }
     }
 
@@ -240,7 +245,10 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element}
      */
     tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} key="tabbedView" {..._.pick(this.props, 'windowWidth', 'windowHeight')} />;
+        return (
+            <TabbedView {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
+                contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView" />
+        );
     }
 
     /**
@@ -267,7 +275,7 @@ export default class DefaultItemView extends React.PureComponent {
                 { this.itemMidSection() }
 
                 <div className="row">
-                    <div className="col-xs-12 col-md-12 tab-view-container" ref="tabViewContainer" children={this.tabbedView()} />
+                    <div className="col-xs-12 col-md-12 tab-view-container" children={this.tabbedView()} />
                 </div>
                 <br/>
                 { this.itemFooter() }
@@ -314,78 +322,6 @@ export function statusClass(status, htmlClass) {
 
 
 /**
- * A collapsible panel that is meant to be shown near top of Item views.
- * Is meant to display a grid of Item properties, rendered out via `OverViewBodyItem`s.
- * However the component may be extended to display other things, e.g. as `ExpandableStaticHeader` does.
- */
-export class OverviewHeadingContainer extends React.Component {
-
-    static propTypes = {
-        'onFinishOpen' : PropTypes.func,
-        'onStartOpen' : PropTypes.func,
-        'onFinishClose' : PropTypes.func,
-        'onStartClose' : PropTypes.func
-    }
-
-    static defaultProps = {
-        'className'     : 'with-background mb-3 mt-1',
-        'defaultOpen'   : true,
-        'titleElement'  : 'h4',
-        'title'         : 'Properties',
-        'prependTitleIcon' : false,
-        'prependTitleIconFxn' : function(open, props){
-            return <i className={"expand-icon icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>;
-        }
-    }
-
-    constructor(props){
-        super(props);
-        this.toggle = _.throttle(this.toggle.bind(this), 500);
-        this.renderInner = this.renderInner.bind(this);
-        this.renderInnerBody = this.renderInnerBody.bind(this);
-        this.state = { 'open' : props.defaultOpen };
-    }
-
-    toggle(){
-        this.setState({ 'open' : !this.state.open });
-    }
-
-    renderTitle(){
-        var { title, prependTitleIcon, prependTitleIconFxn } = this.props, open = this.state.open;
-        return (
-            <span>
-                { prependTitleIcon && prependTitleIconFxn ? prependTitleIconFxn(open, this.props) : null }
-                { title } &nbsp;<i className={"icon icon-angle-right" + (open ? ' icon-rotate-90' : '')}/>
-            </span>
-        );
-    }
-
-    renderInner(){
-        return (
-            <div className="inner">
-                <hr className="tab-section-title-horiz-divider"/>
-                { this.renderInnerBody() }
-            </div>
-        );
-    }
-
-    renderInnerBody(){
-        return <div className="row overview-blocks" children={this.props.children}/>;
-    }
-
-    render(){
-        var { title, titleElement, titleClassName, className, onStartOpen, onStartClose, onFinishClose, onFinishOpen } = this.props;
-        var open = this.state.open;
-        return (
-            <div className={"overview-blocks-header" + (open ? ' is-open' : ' is-closed') + (typeof className === 'string' ? ' ' + className : '')}>
-                { title && titleElement ? React.createElement(titleElement, { 'className' : 'tab-section-title clickable with-accent' + (titleClassName ? ' ' + titleClassName : ''), 'onClick' : this.toggle }, this.renderTitle()) : null }
-                <Collapse in={open} onEnter={onStartOpen} onEntered={onFinishOpen} onExit={onStartClose} onExited={onFinishClose} children={this.renderInner()} />
-            </div>
-        );
-    }
-}
-
-/**
  * Renders out a list of ExpandableStaticHeader components to represent
  * `context.static_headers`.
  */
@@ -393,14 +329,28 @@ export class StaticHeadersArea extends React.PureComponent {
 
     render(){
         var context = this.props.context,
-            headersToShow = _.filter(context.static_headers || [], function(s){ return s.content; }); // Only sections with a content (incl check for permissions).
+            headersFromStaticContent = _.pluck(_.filter(
+                context.static_content || [],
+                function(s){ return s.location === 'header'; }
+            ), 'content'),
+            headersToShow = _.uniq(_.filter(
+                headersFromStaticContent.concat(context.static_headers || []),
+                function(s){
+                    if (!s || s.error) return false; // No view permission(s)
+                    if (s.content || s.viewconfig) return true;
+                    return false; // Shouldn't happen
+                }
+            ), false, object.itemUtil.atId);
 
         if (!headersToShow || headersToShow.length === 0) return null;
+
         return (
             <div className="static-headers-area">
                 { _.map(headersToShow, (section, i) =>
-                    <ExpandableStaticHeader title={section.title || 'Informational Notice ' + (i + 1)} content={section.content}
-                        defaultOpen={section.options && section.options.default_open} key={section.name || i} index={i}
+                    <ExpandableStaticHeader
+                        title={section.title || 'Informational Notice ' + (i + 1)}
+                        context={section}
+                        defaultOpen={(section.options && section.options.default_open) || false} key={section.name || i} index={i}
                         titleIcon={section.options && section.options.title_icon} />
                 )}
                 <hr />
@@ -410,32 +360,6 @@ export class StaticHeadersArea extends React.PureComponent {
 
 }
 
-
-export class ExpandableStaticHeader extends OverviewHeadingContainer {
-
-    static propTypes = {
-        'section' : PropTypes.object.isRequired
-    }
-
-    static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
-        'className' : 'with-background mb-1 mt-1',
-        'title'     : "Information",
-        'prependTitleIconFxn' : function(open, props){
-            if (!props.titleIcon) return null;
-            return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
-        },
-        'prependTitleIcon' : true
-    })
-
-    renderInnerBody(){
-        return (
-            <div className="static-section-header pt-1 clearfix">
-                <BasicStaticSectionBody {..._.pick(this.props, 'content', 'filetype')} />
-            </div>
-        );
-    }
-
-}
 
 
 export class EmbeddedItemWithAttachment extends React.Component {

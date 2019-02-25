@@ -6,15 +6,14 @@ import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import * as globals from './../globals';
 import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement, SimpleFilesTableLoaded, Publications } from './components';
-import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ItemPageTable } from './../browse/components';
-import { browseTableConstantColumnDefinitions } from './../browse/BrowseView';
+import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
+    SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
+import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { RowSpacingTypeDropdown } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
 
 
 export default class ExperimentView extends WorkflowRunTracingView {
@@ -181,12 +180,11 @@ class ExperimentSetsViewOverview extends React.Component {
     }
 
     render(){
-        var { context, width, windowWidth } = this.props, experimentSetObject = null;
+        var { context, width, windowWidth } = this.props,
+            experimentSetUrls = _.map(context.experiment_sets || [], object.atIdFromObject);
 
-        experimentSetObject = _.object(_.zip(_.map(context.experiment_sets, object.atIdFromObject), context.experiment_sets));
-
-        if (experimentSetObject && _.keys(experimentSetObject).length > 0){
-            return <ExperimentSetTablesLoaded {...{ experimentSetObject, width, windowWidth }} defaultOpenIndices={[0]} />;
+        if (experimentSetUrls.length > 0){
+            return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} />;
         }
 
         return null;
@@ -262,9 +260,9 @@ class OverviewHeadingMic extends React.Component {
 
 export class RawFilesTableSection extends React.Component {
     render(){
-        var files = this.props.files;
-        var columns = _.clone(SimpleFilesTableLoaded.defaultProps.columns);
-        var columnDefinitionOverrideMap = _.clone(SimpleFilesTableLoaded.defaultProps.columnDefinitionOverrideMap);
+        var files       = this.props.files,
+            fileUrls    = _.map(files, object.itemUtil.atId),
+            columns     = _.clone(SimpleFilesTable.defaultProps.columns);
 
         columns['related_files'] = {
             'title' : 'Relations',
@@ -293,8 +291,7 @@ export class RawFilesTableSection extends React.Component {
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
                 </h3>
-                <SimpleFilesTableLoaded {..._.pick(this.props, 'files', 'schemas', 'width')}
-                    columns={columns} columnDefinitionOverrideMap={columnDefinitionOverrideMap} />
+                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} columns={columns} fileUrls={fileUrls} />
             </div>
         );
     }
@@ -302,13 +299,14 @@ export class RawFilesTableSection extends React.Component {
 
 export class ProcessedFilesTableSection extends React.Component {
     render(){
-        var files = this.props.files;
+        var files       = this.props.files,
+            fileUrls    = _.map(files, object.itemUtil.atId);
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
                 </h3>
-                <SimpleFilesTableLoaded {..._.pick(this.props, 'files', 'schemas', 'width')} />
+                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} fileUrls={fileUrls} />
             </div>
         );
     }

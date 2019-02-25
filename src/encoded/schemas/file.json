@@ -7,16 +7,14 @@
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
-    "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
-    ],
+    "mixinFacets" : [],
     "properties": {
         "accession": {
             "accessionType": "FI"
         },
         "description": {
             "title": "Description",
-            "description": "A plain text description of the task.",
+            "description": "A plain text description of the file.",
             "type": "string",
             "lookup": 10,
             "formInput": "textarea"
@@ -54,7 +52,8 @@
                 "raw file",
                 "processed file",
                 "ancillary file",
-                "other file"
+                "other file",
+                "visualization"
             ]
         },
         "md5sum": {
@@ -198,7 +197,8 @@
                 "released",
                 "released to project",
                 "archived to project",
-                "to be uploaded by workflow"
+                "to be uploaded by workflow",
+                "restricted"
             ]
         },
         "quality_metric": {
@@ -207,9 +207,60 @@
             "description": "The associated QC reports",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "linkTo": "QualityMetric"
+        },
+        "override_lab_name": {
+            "description": "The lab that did the experiment if not the attributed Lab from whence this file",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_experiment_type": {
+            "description": "The type of experiment to which this file is associated",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_biosource_name": {
+            "description": "The name of the cell line or tissue sample for this track",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_assay_info": {
+            "description": "Information that helps distinguish the assay eg. ChIP-seq target or repliseq phase",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_replicate_info": {
+            "description": "Information on which replicate this file belongs",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_experiment_bucket": {
+            "description": "Where does a file sit in an experiment or set",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
         }
     },
     "facets": {
+        "lab.display_title": {
+            "title": "Lab",
+            "disabled" : true
+        },
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
+        "track_and_facet_info.assay_info" : {
+            "title" : "Assay Details",
+            "description" : "Details of the experiment to which this file belongs"
+        },
+        "track_and_facet_info.biosource_name" : {
+            "title" : "Biosource"
+        },
         "file_type" : {
             "title" : "File Type",
             "descripton" : "Type or categorization of this file."
@@ -218,24 +269,8 @@
             "title" : "File Format",
             "description" : "Format of the file, i.e. the file extension."
         },
-        "experiments.experiment_type" : {
-            "title" : "Experiment Type",
-            "description" : "Type of experiment to which this file belongs"
-        },
-        "experiments.biosample.biosource.individual.organism.name" : {
-            "title" : "Organism"
-        },
-        "experiments.biosample.biosource.biosource_type" : {
-            "title" : "Biosource Type"
-        },
-        "experiments.biosample.biosource_summary" : {
-            "title" : "Biosource"
-        },
-        "experiments.digestion_enzyme.name" : {
-            "title" : "Enzyme"
-        },
-        "lab.display_title": {
-            "title": "Lab"
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
         },
         "file_size" : {
             "title" : "File Size",
@@ -264,20 +299,41 @@
         }
     },
     "columns": {
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Experiment Type",
+            "description" : "Type of experiment to which this file belongs"
+        },
+        "track_and_facet_info.assay_info" : {
+            "title" : "Assay Details",
+            "description" : "Details of the experiment to which this file belongs"
+        },
+        "track_and_facet_info.biosource_name" : {
+            "title" : "Biosource"
+        },
         "file_type" : {
             "title" : "File Type"
         },
-        "file_format": {
+        "file_format.file_format": {
             "title" : "File Format"
         },
-        "experiments.display_title": {
-            "title": "Experiments"
+        "track_and_facet_info.experiment_bucket": {
+            "title": "In experiment as"
         },
-        "experiments.biosample.biosource.display_title": {
-            "title": "Biosource"
+        "track_and_facet_info.replicate_info": {
+            "title": "Replicate info"
+        },
+        "track_and_facet_info.lab_name": {
+            "title": "Generating Lab"
         },
         "file_size" : {
-            "title" : "File Size"
+            "title" : "File Size",
+            "default_hiddent": true
+        },
+        "date_created": {
+            "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "default_hidden" : true
         }
     }
 }

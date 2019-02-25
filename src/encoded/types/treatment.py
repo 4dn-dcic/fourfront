@@ -8,7 +8,8 @@ from snovault import (
 # from pyramid.security import Authenticated
 from .base import (
     Item,
-    ALLOW_SUBMITTER_ADD
+    ALLOW_SUBMITTER_ADD,
+    lab_award_attribution_embed_list
 )
 
 
@@ -24,7 +25,7 @@ class Treatment(Item):
 
     base_types = ['Treatment'] + Item.base_types
     schema = load_schema('encoded:schemas/treatment.json')
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
 
 @collection(
@@ -81,8 +82,8 @@ class TreatmentAgent(Treatment):
         "type": "string"
     })
     def display_title(self, request, treatment_type=None, chemical=None,
-                      duration=None, duration_units=None, concentration=None,
-                      concentration_units=None, temperature=None):
+                      biological_agent=None, duration=None, duration_units=None,
+                      concentration=None, concentration_units=None, temperature=None):
         d_t = []
         conditions = ""
         if concentration and concentration_units:
@@ -98,6 +99,8 @@ class TreatmentAgent(Treatment):
 
         if chemical:
             dis_tit = chemical + " treatment" + conditions
+        elif biological_agent:
+            dis_tit = biological_agent + " treatment" + conditions
         elif treatment_type == 'Other':
             dis_tit = "Other treatment" + conditions
         else:
@@ -116,8 +119,7 @@ class TreatmentRnai(Treatment):
 
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
-    embedded_list = [
-        'award.project',
+    embedded_list = Treatment.embedded_list + [
         'rnai_vendor.name',
         'rnai_constructs.designed_to_target',
         'target.target_summary'

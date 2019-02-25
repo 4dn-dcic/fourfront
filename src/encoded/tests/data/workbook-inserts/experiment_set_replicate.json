@@ -14,6 +14,7 @@
         "award": "1U01CA200059-02",
         "status": "in review by lab",
         "accession": "4DNESAAAAAA1",
+        "badges": [{"badge": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"}],
         "processed_files": ["4DNFIAAAAAA4", "4DNFIAAAAAA5"]
     }
 ]

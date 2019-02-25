@@ -9,11 +9,12 @@ import { console, object } from './../../../util';
 class AnalysisStepSoftwareDetailRow extends React.Component {
 
     softwareUsedBox(){
-        var soft = this.props.software;
+        var soft    = this.props.software,
+            inner   = null;
 
-        var renderLink = function(s, idx=0){
-            var link = object.atIdFromObject(s);
-            var title;
+        function renderLink(s, idx=0){
+            var link = object.atIdFromObject(s),
+                title;
             if (typeof s.name === 'string' && s.version){
                 title = s.name + ' v' + s.version;
             } else if (s.title) {
@@ -21,10 +22,8 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
             } else {
                 title = link;
             }
-            return <span>{ idx > 0 ? ', ' : '' }<a href={link} key={idx}>{ title }</a></span>;
-        };
-
-        var inner = null;
+            return <span key={link || idx}>{ idx > 0 ? ', ' : '' }<a href={link} key={idx}>{ title }</a></span>;
+        }
         
         if (!soft){
             inner = <em>N/A</em>;
@@ -80,9 +79,9 @@ class AnalysisStepSoftwareDetailRow extends React.Component {
 export class StepDetailBody extends React.Component {
 
     stepTitleBox(){
-        var { step, context, node } = this.props;
-        var titleString = step.display_title || step.name || node.name;
-        var stepHref = object.atIdFromObject(step) || null;
+        var { step, context, node } = this.props,
+            titleString = step.display_title || step.name || node.name,
+            stepHref    = object.atIdFromObject(step) || null;
 
         return (
             <div className="col-sm-6 box">
@@ -96,14 +95,26 @@ export class StepDetailBody extends React.Component {
         );
     }
 
+    /**
+     * This prints out the contents of `Step.meta.analysis_step_types` under the tile
+     * of "Purposes". `analysis_step_types` is filled manually in Workflow inserts/data,
+     * however for Provenance graphs, this property might be filled in from other places,
+     * such as WorkflowRun/Workflow `category`, because in Provenance graphs, each Workflow
+     * is analagous to an "Analysis Step".
+     *
+     * @returns {JSX.Element} Column box with 'Purposes'.
+     */
     purposesBox(){
-        var step = this.props.step;
-        var purposeList = step.analysis_step_types;
+        var step        = this.props.step,
+            purposeList = step.analysis_step_types,
+            elementType = 'h5';
+
         if (!Array.isArray(purposeList)){
             return <div className="col-sm-6 box"/>;
         }
-        var elementType = 'h5';
-        if (purposeList.length  === 1) elementType = 'h4';
+
+        if (purposeList.length === 1) elementType = 'h4';
+
         return(
             <div className="col-sm-6 box">
                 <span className="text-600">Purpose{ purposeList.length > 1 ? 's' : '' }</span>
@@ -115,25 +126,22 @@ export class StepDetailBody extends React.Component {
     }
 
     render(){
-        var { node, step } = this.props; // this.props.step === this.props.node.meta
-
-        var self_software_used = step.software_used || null;
-        if (typeof self_software_used === 'string' && self_software_used.charAt(0) !== '/' && object.isUUID(self_software_used)){
-            self_software_used = '/software/' + self_software_used;
-        }
+        var { node, step } = this.props, // this.props.step === this.props.node.meta
+            softwareUsed = step.software_used || null;
 
         return(
             <div style={{ minHeight : this.props.minHeight }}>
                 <div className="information">
                     <div className="row">
-
                         { this.stepTitleBox() }
                         { this.purposesBox() }
-
                     </div>
-                    { self_software_used ? <hr/> : null }
-                    { self_software_used ? <AnalysisStepSoftwareDetailRow software={self_software_used}/> : null }
-                    
+                    { softwareUsed ?
+                        <React.Fragment>
+                            <hr/>
+                            <AnalysisStepSoftwareDetailRow software={softwareUsed}/>
+                        </React.Fragment>
+                    : null }
                 </div>
                 <hr/>
             </div>

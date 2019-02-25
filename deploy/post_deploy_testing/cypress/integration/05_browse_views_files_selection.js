@@ -35,6 +35,47 @@ describe('Browse Views - Files Selection', function () {
 
         });
 
+        it("Can add column for date_created to results table", function(){
+            // First we must add the column to the view
+            // Open column selector panel
+            cy.get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
+                // Check the 'Date Created' checkbox
+                .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]')
+                .scrollIntoView().click({ 'force' : true }).end()
+                // Perform check for initial expected condition (sort by date_created -- descending)
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
+                .should('have.class', 'active')
+                .within(()=>{
+                    cy.get('i').should('have.class', 'icon-sort-desc');
+                }).end()
+                // Close columns panel
+                .get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end();
+        });
+
+        it('Can press button at right to scroll to right side of search results table', function(){
+            cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button' : 0, 'force' : true })
+                .wait(4000) // Simulate holding down for 4 seconds.
+                .get('#content div.shadow-border-layer div.edge-scroll-button.right-edge').trigger('mouseup', { 'force' : true }) // Might become invisible
+                .end();
+        });
+
+        it('Can change to sort by date_sorted -- ascending', function(){
+            cy.scrollTo(0, 500)
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
+                .scrollIntoView()
+                .click({ 'force' : true })
+                .should('have.class', 'active')
+                .within(()=>{
+                    cy.get('i').should('have.class', 'icon-sort-asc');
+                }).end();
+        });
+
+        it('Can press button at left to scroll to right side of search results table', function(){
+            cy.get('#content div.shadow-border-layer div.edge-scroll-button.left-edge:not(.faded-out)').trigger('mousedown', { 'button' : 0, 'force' : true  })
+                .wait(4000) // Simulate holding down for 4 seconds.
+                .get('#content div.shadow-border-layer div.edge-scroll-button.left-edge').trigger('mouseup', { 'force' : true }) // Might become invisible
+                .end();
+        });
 
         it('"Select All Files" button works & becomes "Deselect All" after.', function(){
 

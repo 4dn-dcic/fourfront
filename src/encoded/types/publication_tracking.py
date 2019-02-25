@@ -6,8 +6,8 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
-    # paths_filtered_by_status,
+    Item,
+    lab_award_attribution_embed_list
 )
 
 
@@ -23,4 +23,4 @@ class PublicationTracking(Item):
 
     item_type = 'publication_tracking'
     schema = load_schema('encoded:schemas/publication_tracking.json')
-    embedded_list = ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list

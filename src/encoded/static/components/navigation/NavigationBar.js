@@ -104,8 +104,28 @@ export class NavigationBar extends React.PureComponent {
         }
     }
 
+    /**
+     * @todo Refactor into `getDerivedStateFromProps` or other approach.
+     */
+    componentWillReceiveProps(nextProps){
+        var closeMobileMenuWhenChangeIn = ['href', 'session'],
+            len = closeMobileMenuWhenChangeIn.length,
+            i, propName;
+
+        for (i = 0; i < len; i++){
+            propName = closeMobileMenuWhenChangeIn[i];
+            if (nextProps[propName] !== this.props[propName]){
+                this.closeMobileMenu();
+                break;
+            }
+        }
+    }
+
     closeMobileMenu(){
-        if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
+        this.setState( ({ mobileDropdownOpen }) => {
+            if (!mobileDropdownOpen) return null;
+            return { 'mobileDropdownOpen' : false };
+        });
     }
 
     /**
@@ -164,11 +184,12 @@ export class NavigationBar extends React.PureComponent {
 
     render() {
         var { testWarning, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state,
-            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight } = this.props,
+            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight, isFullscreen } = this.props,
+            testWarningVisible = testWarning & !isFullscreen, // Hidden on full screen mode.
             navClassName        = (
                 "navbar-container" +
-                (testWarning ?      ' test-warning-visible' : '') +
-                (openDropdown ?     ' big-menu-open' : '')
+                (testWarningVisible ? ' test-warning-visible' : '') +
+                (openDropdown ? ' big-menu-open' : '')
             ),
             primaryActions      = listActionsFor('global_sections'),
             browseMenuItemOpts  = _.findWhere(primaryActions, { 'id' : 'browse-menu-item' }),
@@ -178,7 +199,7 @@ export class NavigationBar extends React.PureComponent {
             <div className={navClassName}>
                 { inclBigMenu ? <div className="big-dropdown-menu-background" onClick={this.resetOpenDropdownID} /> : null }
                 <div id="top-nav" className="navbar-fixed-top">
-                    <TestWarning visible={testWarning} setHidden={this.hideTestWarning} href={href} />
+                    <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
                         this.setState({ 'mobileDropdownOpen' : open });
                     }} expanded={mobileDropdownOpen}>
@@ -199,7 +220,7 @@ export class NavigationBar extends React.PureComponent {
                                 <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
                                     setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
                             </Nav>
-                            <UserActionDropdownMenu closeMobileMenu={this.closeMobileMenu} {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
+                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
                             <SearchBar href={href} currentAction={currentAction} />
                         </Navbar.Collapse>
                     </Navbar>

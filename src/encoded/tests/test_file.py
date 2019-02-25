@@ -94,6 +94,20 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
+def test_restricted_no_download(testapp, fastq_json):
+    # check that initial download works
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    download_link = resobj['href']
+    testapp.get(download_link, status=307)
+    # fail download of restricted file (although with a 200 status?)
+    testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
+    testapp.get(download_link, status=403)
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+
+
 def test_extra_files_stuff(testapp, proc_file_json, file_formats):
     extra_files = [{'file_format': 'pairs_px2'}]
     proc_file_json['extra_files'] = extra_files
@@ -392,6 +406,84 @@ def mcool_file_json(award, experiment, lab, file_formats):
     }
     return item
 
+@pytest.fixture
+def bedGraph_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bg').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bedGraph.gz',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def bigwig_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bw').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bw',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def bigbed_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bigbed').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bb',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def bed_beddb_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('bed').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.bed.gz',
+        'status': 'uploaded',
+        'extra_files' : [
+            {
+                "file_format" : file_formats.get('beddb').get('uuid'),
+                "file_size" :12345678,
+                "md5sum": "00000000000000000000000000000002"
+            },
+        ]
+    }
+    return item
+
+@pytest.fixture
+def beddb_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('beddb').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.beddb',
+        'status': 'uploaded',
+    }
+    return item
+
+@pytest.fixture
+def chromsizes_file_json(award, experiment, lab, file_formats):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('chromsizes').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.chrom.sizes',
+        'status': 'uploaded',
+    }
+    return item
 
 @pytest.fixture
 def mcool_file(testapp, mcool_file_json):
@@ -526,11 +618,41 @@ def test_workflowrun_input_rev_link(testapp, fastq_json, workflow_run_json):
     assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
 
 
+def test_workflowrun_input_rev_link_pf(testapp, proc_file_json, workflow_run_awsem_json):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    workflow_run_awsem_json['input_files'] = [{'workflow_argument_name': 'test_inp', 'value': res['@id']}]
+    workflow_run_awsem_json['output_files'] = [{'workflow_argument_name': 'test_out', 'value': res['@id']}]
+    res2 = testapp.post_json('/workflow_run_awsem', workflow_run_awsem_json).json['@graph'][0]
+    new_file = testapp.get(res['@id']).json
+    assert new_file['workflow_run_inputs'][0]['@id'] == res2['@id']
+    assert new_file['workflow_run_outputs'][0]['@id'] == res2['@id']
+
+
+def test_workflowrun_input_rev_link_pf_disabled_at_post(testapp, proc_file_json, workflow_run_awsem_json):
+    proc_file_json['disable_wfr_inputs'] = True
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    workflow_run_awsem_json['input_files'] = [{'workflow_argument_name': 'test_inp', 'value': res['@id']}]
+    workflow_run_awsem_json['output_files'] = [{'workflow_argument_name': 'test_out', 'value': res['@id']}]
+    res2 = testapp.post_json('/workflow_run_awsem', workflow_run_awsem_json).json['@graph'][0]
+    new_file = testapp.get(res['@id']).json
+    assert new_file['workflow_run_outputs'][0]['@id'] == res2['@id']
+    assert new_file.get('workflow_run_inputs') == []
+
+
+def test_workflowrun_input_rev_link_pf_disabled_at_patch(testapp, proc_file_json, workflow_run_awsem_json):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    workflow_run_awsem_json['input_files'] = [{'workflow_argument_name': 'test_inp', 'value': res['@id']}]
+    workflow_run_awsem_json['output_files'] = [{'workflow_argument_name': 'test_out', 'value': res['@id']}]
+    res2 = testapp.post_json('/workflow_run_awsem', workflow_run_awsem_json).json['@graph'][0]
+    new_file = testapp.patch_json(res['@id'], {'disable_wfr_inputs': True}, status=200).json['@graph'][0]
+    assert new_file['workflow_run_outputs'][0] == res2['@id']
+    assert new_file.get('workflow_run_inputs') == []
+
+
 def test_experiment_rev_link_on_files(testapp, fastq_json, experiment_data):
     res = testapp.post_json('/file_fastq', fastq_json, status=201).json['@graph'][0]
     experiment_data['files'] = [res['@id']]
     res2 = testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
-
     new_file = testapp.get(res['@id']).json
     assert new_file['experiments'][0]['@id'] == res2['@id']
 
@@ -850,3 +972,339 @@ def test_file_format_patch_works_if_no_filename(testapp, file_formats, award, la
     patch_data = {"file_format": file_formats.get('bam').get('uuid')}
     res2 = testapp.patch_json('/files-processed/' + resobj['uuid'], patch_data, status=200)
     assert not res2.json.get('errors')
+
+
+def test_file_generate_track_title_fp_all_present(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'override_experiment_type': 'DNase Hi-C',
+        'override_lab_name': 'Test Lab',
+        'file_type': 'normalized counts',
+        'override_assay_info': 'PARK1',
+        'override_biosource_name': 'GM12878',
+        'override_replicate_info': 'Biorep 1, Techrep 1',
+        'override_experiment_bucket': 'processed file',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'normalized counts for GM12878 DNase Hi-C PARK1'
+
+
+def test_file_generate_track_title_fp_all_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['@id'],
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') is None
+
+
+def test_file_generate_track_title_fp_most_missing(testapp, file_formats, award, lab):
+    pf_file_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['@id'],
+        'override_experiment_type': 'DNase Hi-C',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-processed', pf_file_meta, status=201)
+    pf = res1.json.get('@graph')[0]
+    assert pf.get('track_and_facet_info', {}).get('track_title') == 'unspecified type for unknown sample DNase Hi-C'
+
+
+def test_file_generate_track_title_fvis(testapp, file_formats, award, lab, GM12878_biosource):
+    vistrack_meta = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'override_experiment_type': 'DNase Hi-C',
+        'lab': lab['@id'],
+        'file_type': 'fold change over control',
+        'override_lab_name': 'Some Dude, Somewhere',
+        'override_assay_info': 'PARK1',
+        'biosource': GM12878_biosource['@id'],
+        'override_replicate_info': 'bio1 tec1',
+        'higlass_uid': 'test_hg_uid'
+    }
+    res1 = testapp.post_json('/files-vistrack', vistrack_meta)
+    vt = res1.json.get('@graph')[0]
+    assert vt.get('track_and_facet_info', {}).get('track_title') == 'fold change over control for GM12878 DNase Hi-C PARK1'
+
+
+@pytest.fixture
+def custom_experiment_set_data(lab, award):
+    return {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test experiment set',
+        'experimentset_type': 'custom',
+        'status': 'in review by lab'
+    }
+
+
+def test_track_and_file_facet_info_no_link_to_exp_or_eset(testapp, proc_file_json):
+    res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    assert 'track_and_facet_info' not in res
+
+
+def test_track_and_file_facet_info_file_link_to_multi_expts(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt1 = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    expt2 = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    assert pfile['@id'] in expt1['processed_files']
+    assert pfile['@id'] in expt2['processed_files']
+    res = testapp.get(pfile['@id']).json
+    assert 'track_and_facet_info' not in res
+
+
+def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_bucket'] == 'processed file'
+    assert tf_info['assay_info'] == 'MboI'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_opfbucket(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['other_processed_files'] = [{'title': 'some other files', 'type': 'supplementary', 'files': [pfile['@id']]}]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_bucket'] == 'some other files'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_pf_and_opf_buckets(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    experiment_data['other_processed_files'] = [{'title': 'some other files', 'type': 'supplementary', 'files': [pfile['@id']]}]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_bucket'] == 'processed file'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_w_rep(
+        testapp, proc_file_json, experiment_data, rep_set_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
+    testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_w_rep_and_custom_eset(
+        testapp, proc_file_json, experiment_data, rep_set_data, custom_experiment_set_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
+    testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
+    custom_experiment_set_data['experiments_in_set'] = [expt['@id']]
+    testapp.post_json('/experiment_set', custom_experiment_set_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['experiment_type'] = 'RNA-seq'
+    experiment_data['processed_files'] = [pfile['@id']]
+    del experiment_data['digestion_enzyme']
+    testapp.post_json('/experiment_seq', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'RNA-seq'
+    assert 'assay_info' not in tf_info
+    assert 'replicate_info' not in tf_info
+
+
+def test_track_and_file_facet_info_file_link_to_expt_biosample_cell(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['biosource_name'] == 'GM12878'
+
+
+def test_track_and_file_facet_info_file_link_to_expt_biosample_tissue(
+        testapp, proc_file_json, experiment_data, tissue_biosample):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['biosample'] = tissue_biosample['@id']
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['biosource_name'] == 'lung'
+
+
+def test_track_and_file_facet_info_file_fastq_link_to_expt(
+        testapp, file_fastq, experiment_data):
+    experiment_data['files'] = [file_fastq['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(file_fastq['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_bucket'] == 'raw file'
+
+
+def test_track_and_file_facet_info_file_link_to_multi_repsets(
+        testapp, proc_file_json, rep_set_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    rep_set_data['processed_files'] = [pfile['@id']]
+    repset1 = testapp.post_json('/experiment_set_replicate', rep_set_data, status=201).json['@graph'][0]
+    repset2 = testapp.post_json('/experiment_set_replicate', rep_set_data, status=201).json['@graph'][0]
+    assert pfile['@id'] in repset1['processed_files']
+    assert pfile['@id'] in repset2['processed_files']
+    res = testapp.get(pfile['@id']).json
+    assert 'track_and_facet_info' not in res
+
+
+def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
+        testapp, proc_file_json, rep_set_data, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    rep_set_data['processed_files'] = [pfile['@id']]
+    rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
+    testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_bucket'] == 'processed file'
+    assert tf_info['assay_info'] == 'MboI'
+    assert tf_info['biosource_name'] == 'GM12878'
+    assert tf_info['replicate_info'] == 'unreplicated'
+
+
+def test_track_and_file_facet_info_file_link_to_repset_w_multi_expt_and_opf(
+        testapp, proc_file_json, rep_set_data, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    del proc_file_json['accession']
+    del proc_file_json['md5sum']
+    opf = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    expt1 = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    expt2 = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    rep_set_data['other_processed_files'] = [{'title': 'some other files', 'type': 'supplementary', 'files': [opf['@id'], pfile['@id']]}]
+    rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt1['@id']},
+                                      {'bio_rep_no': 1, 'tec_rep_no': 2, 'replicate_exp': expt2['@id']}]
+    testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_bucket'] == 'some other files'
+    assert tf_info['replicate_info'] == 'merged replicates'
+
+
+def test_track_and_file_facet_info_file_w_all_override_fields(
+        testapp, proc_file_json, experiment_data):
+    overrides = {
+        'override_lab_name': 'awesome lab',
+        'override_experiment_type': 'TRIP',
+        'override_biosource_name': 'some cell',
+        'override_assay_info': 'cold',
+        'override_replicate_info': 'replicated lots',
+        'override_experiment_bucket': 'important files'
+    }
+    proc_file_json.update(overrides)
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    tf_info = pfile.get('track_and_facet_info')
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
+        assert tf_info[tf] == v
+    # make sure it doesn't change
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info2 = res.get('track_and_facet_info')
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
+        assert tf_info2[tf] == v
+
+
+def test_track_and_file_facet_info_file_vistrack_w_all_override_fields(
+        testapp, proc_file_json, experiment_data, file_formats):
+    overrides = {
+        'override_lab_name': 'awesome lab',
+        'override_experiment_type': 'TRIP',
+        'override_assay_info': 'cold',
+        'override_replicate_info': 'replicated lots',
+        'override_experiment_bucket': 'important files'
+    }
+    proc_file_json.update(overrides)
+    proc_file_json['file_format'] = file_formats.get('bw').get('uuid')
+    proc_file_json['filename'] = 'test.bw'
+    pfile = testapp.post_json('/file_vistrack', proc_file_json, status=201).json['@graph'][0]
+    tf_info = pfile.get('track_and_facet_info')
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
+        assert tf_info[tf] == v
+
+
+def test_track_and_file_facet_info_file_w_some_override_fields(
+        testapp, proc_file_json, experiment_data):
+    overrides = {
+        'override_experiment_type': 'TRIP',
+        'override_biosource_name': 'some cell',
+        'override_assay_info': 'cold',
+        'override_replicate_info': 'replicated lots',
+    }
+    proc_file_json.update(overrides)
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    tf_info = pfile.get('track_and_facet_info')
+    assert len(tf_info) == 5  # lab will get calculated since expt_type exists
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
+        assert tf_info[tf] == v
+    # make sure it doesn't change
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info2 = res.get('track_and_facet_info')
+    for k, v in overrides.items():
+        tf = k.replace('override_', '', 1)
+        assert tf_info2[tf] == v
+    assert tf_info2['experiment_type'] == 'TRIP'
+    assert tf_info2['lab_name'] == 'ENCODE lab'
+    assert tf_info2['experiment_bucket'] == 'processed file'
+
+
+def test_track_and_file_facet_info_file_patch_override_fields(
+        testapp, proc_file_json, experiment_data):
+    pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
+    experiment_data['processed_files'] = [pfile['@id']]
+    testapp.post_json('/experiment_hi_c', experiment_data, status=201)
+    res = testapp.get(pfile['@id']).json
+    tf_info = res.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'micro-C'
+    # make sure it does change
+    testapp.patch_json(pfile['@id'], {'override_experiment_type': 'new type'}, status=200)
+    res2 = testapp.get(pfile['@id']).json
+    tf_info = res2.get('track_and_facet_info')
+    assert tf_info['experiment_type'] == 'new type'

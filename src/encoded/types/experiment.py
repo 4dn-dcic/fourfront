@@ -9,7 +9,6 @@ from snovault import (
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    paths_filtered_by_status,
     ALLOW_SUBMITTER_ADD,
     lab_award_attribution_embed_list
 )
@@ -50,9 +49,18 @@ class Experiment(Item):
     schema = load_schema('encoded:schemas/experiment.json')
     name_key = 'accession'
     rev = {
-        'experiment_sets': ('ExperimentSet', 'experiments_in_set'),
+        'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
-    embedded_list = lab_award_attribution_embed_list + [
+    aggregated_items = {
+        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+    }
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        "badges.badge.title",
+        "badges.badge.commendation",
+        "badges.badge.warning",
+        "badges.badge.badge_classification",
+        "badges.badge.description",
+        "badges.message",
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
@@ -75,11 +83,16 @@ class Experiment(Item):
         "biosample.biosource.tissue.slim_terms",
         "biosample.biosource.tissue.synonyms",
         "biosample.biosource.individual.organism.name",
-        'biosample.modifications.modification_type',
-        'biosample.modifications.display_title',
-        'biosample.treatments.treatment_type',
-        'biosample.treatments.display_title',
-        'biosample.badges.*',
+        "biosample.modifications.modification_type",
+        "biosample.modifications.display_title",
+        "biosample.treatments.treatment_type",
+        "biosample.treatments.display_title",
+        "biosample.badges.badge.title",
+        "biosample.badges.badge.commendation",
+        "biosample.badges.badge.warning",
+        "biosample.badges.badge.badge_classification",
+        "biosample.badges.badge.description",
+        "biosample.badges.message",
 
         "files.href",
         "files.accession",
@@ -89,7 +102,12 @@ class Experiment(Item):
         "files.file_format",
         "files.file_classification",
         "files.paired_end",
-        'files.badges.*',
+        "files.badges.badge.title",
+        "files.badges.badge.commendation",
+        "files.badges.badge.warning",
+        "files.badges.badge.badge_classification",
+        "files.badges.badge.description",
+        "files.badges.message",
 
         "processed_files.href",
         "processed_files.accession",

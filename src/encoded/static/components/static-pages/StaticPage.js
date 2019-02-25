@@ -5,10 +5,14 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import { compiler } from 'markdown-to-jsx';
+import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
-import { CSVMatrixView, TableOfContents, MarkdownHeading, placeholders, HeaderWithLink } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, BasicUserContentBody, EmbeddedHiglassActions } from './components';
 import * as globals from './../globals';
+import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
+import { replaceString as replacePlaceholderString } from './placeholders';
+
 
 
 /**
@@ -19,20 +23,44 @@ import { layout, console, object, isServerSide } from './../util';
  */
 export function parseSectionsContent(context = this.props.context){
 
+    var markdownCompilerOptions = {
+        // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
+        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+            return [type, {
+                'component' : MarkdownHeading,
+                'props'     : { 'type' : type }
+            }];
+        }))
+    };
+
     function parse(section){
-        if (section.filetype === 'md'){ // If Markdown, we convert 'section.content' to JSX elements.
-            var content = compiler(section.content, {
-                'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
-                    return [type, {
-                        'component' : MarkdownHeading,
-                        'props'     : { 'type' : type }
-                    }];
-                }))
+
+        if (Array.isArray(section['@type']) && section['@type'].indexOf('StaticSection') > -1){
+            // StaticSection Parsing
+            if (section.filetype === 'md' && typeof section.content === 'string'){
+                section =  _.extend({}, section, {
+                    'content' : compiler(section.content, markdownCompilerOptions)
+                });
+            } else if (section.filetype === 'html' && typeof section.content === 'string'){
+                section =  _.extend({}, section, {
+                    'content' : object.htmlToJSX(section.content)
+                });
+            } // else: retain plaintext or HTML representation
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
+            // HiglassViewConfig Parsing
+            if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
+            section =  _.extend({}, section, {
+                'content' : (
+                    <React.Fragment>
+                        <EmbeddedHiglassActions context={section} style={{ marginTop : -10 }} />
+                        <HiGlassPlainContainer viewConfig={section.viewconfig} mountDelay={4000} />
+                    </React.Fragment>
+                )
             });
-            section =  _.extend({}, section, { 'content' : content });
+        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
+            // TODO
         }
-        // TODO: other parsing stuff based on other filetypes.
-        // Else: return the plaintext representation.
+
         return section;
     }
 
@@ -41,7 +69,7 @@ export function parseSectionsContent(context = this.props.context){
     return _.extend(
         {}, context, {
             'content' : _.map(
-                _.filter(context.content || [], function(section){ return section && section.content && !section.error; }),
+                _.filter(context.content || [], function(section){ return section && (section.content || section.viewconfig) && !section.error; }),
                 parse
             )
         });
@@ -169,54 +197,104 @@ export class StaticEntry extends React.PureComponent {
         'content'   : null,
         'entryType' : 'help',
         'className' : null
-    }
+    };
 
     constructor(props){
         super(props);
-        this.replacePlaceholder = this.replacePlaceholder.bind(this);
         this.renderEntryContent = this.renderEntryContent.bind(this);
-        this.render = this.render.bind(this);
+        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 1000);
+        var options = (props.section && props.section.options) || {};
+        this.state = {
+            'open' : options.default_open,
+            'closing' : false
+        };
     }
 
-    replacePlaceholder(placeholderString){
-        if (placeholderString === '<SlideCarousel/>'){
-            return (<placeholders.SlideCarousel />);
-        }
-        return placeholderString;
+    componentWillReceiveProps(nextProps){
+        if (nextProps.sectionName === this.props.sectionName) return;
+        var options = (nextProps.section && nextProps.section.options) || {};
+        this.setState({
+            //'isCollapsible' : options.collapsible,
+            'open' : options.default_open,
+            'closing' : false
+        });
     }
 
     renderEntryContent(baseClassName){
-        var content  = (this.props.content && this.props.content.content)  || null;
+        var { section } = this.props,
+            content     = (section && section.content) || null,
+            options     = (section && section.options) || {},
+            filetype    = (section && section.filetype) || null; // Only set on StaticSection; not HiglassViewConfig or other Item types.
+
         if (!content) return null;
 
-        var filetype = this.props.content.filetype || null;
-        var placeholder = false;
-
         if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            placeholder = true;
-            content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
+            content = replacePlaceholderString(
+                content.slice(12).trim().replace(/\s/g,''), // Remove all whitespace to help reduce any typo errors.
+                _.omit(this.props, 'className', 'section', 'content')
+            );
         }
 
-        var className ="section-content" + (baseClassName? ' ' + baseClassName : '');
+        var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
 
         if (filetype === 'csv'){
-            return <CSVMatrixView csv={content} options={this.props.content.options} />;
-        } else if (placeholder || (filetype === 'md')){
-            content = correctRelativeLinks(content, this.props.context);
-            //console.log(this.props.section, content, this.props.context);
-            return <div className={className}>{ content }</div>;
+            // Special case
+            return <CSVMatrixView csv={content} options={options} />;
         } else {
-            return <div className={className} dangerouslySetInnerHTML={{__html: content }}></div>;
+            // Common case - markdown, plaintext, etc.
+            return <div className={className}>{ content }</div>;
         }
     }
 
+    toggleOpen(open, e){
+        this.setState(function(currState){
+            if (typeof open !== 'boolean'){
+                open = !currState.open;
+            }
+            var closing = !open && currState.open;
+            return { open, closing };
+        }, ()=>{
+            setTimeout(()=>{
+                this.setState(function(currState){
+                    if (!currState.open && currState.closing){
+                        return { 'closing' : false };
+                    }
+                    return null;
+                });
+            }, 500);
+        });
+    }
+
     render(){
-        var { content, entryType, sectionName, className } = this.props;
-        var id = TableOfContents.elementIDFromSectionName(sectionName);
+        var { section, entryType, sectionName, className, context } = this.props,
+            { open, closing } = this.state,
+            id              = TableOfContents.elementIDFromSectionName(sectionName),
+            options         = (section && section.options) || {},
+            outerClassName  = entryType + "-entry static-section-entry";
+
+        if (options.collapsible){
+            outerClassName += ' can-collapse ' + (open ? 'open' : 'closed');
+            return (
+                <div className={outerClassName} id={id}>
+                    { section && section.title ?
+                        <HeaderWithLink className={"section-title can-collapse " + (open ? 'open' : 'closed')} link={id} context={context} onClick={this.toggleOpen}>
+                            <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus')}/>&nbsp;&nbsp;
+                            { section.title }
+                        </HeaderWithLink>
+                    : null }
+                    <Collapse in={open}>
+                        <div className="inner">
+                            { (open || closing) ? this.renderEntryContent(className) : null }
+                        </div>
+                    </Collapse>
+                </div>
+            );
+        }
+
         return (
-            <div className={entryType + "-entry static-section-entry"} id={id}>
-                { content && content.title ?
-                    <HeaderWithLink className="section-title" link={id} context={this.props.context}>{ content.title }</HeaderWithLink>
+            <div className={outerClassName} id={id}>
+                { section && section.title ?
+                    <HeaderWithLink className="section-title" link={id} context={context}>{ section.title }</HeaderWithLink>
                 : null }
                 { this.renderEntryContent(className) }
             </div>
@@ -236,12 +314,17 @@ export default class StaticPage extends React.PureComponent {
 
     static Wrapper = Wrapper
 
-    static renderSections(renderMethod, parsedContent){
+    static renderSections(renderMethod, parsedContent, props){
         if (!parsedContent || !parsedContent.content || !Array.isArray(parsedContent.content)){
             console.error('No content defined for page', parsedContent);
             return null;
         }
-        return _.map(parsedContent.content, function(section){ return renderMethod(section.id || section.name, section, parsedContent); });
+        return _.map(
+            parsedContent.content,
+            function(section){
+                return renderMethod(section.id || section.name, section, props);
+            }
+        );
     }
 
     static defaultProps = {
@@ -262,8 +345,18 @@ export default class StaticPage extends React.PureComponent {
                 }
             }
         },
-        'entryRenderFxn' : function(sectionName, content, context){
-            return <StaticEntry key={sectionName} sectionName={sectionName} content={content} context={context} />;
+
+        /**
+         * Default function for rendering out parsed section(s) content.
+         *
+         * @param {string} sectionName - Unique identifier of the section. Use to navigate to via '#<sectionName>' in URL.
+         * @param {{ content : string|JSX.Element }} section - Object with parsed content, title, etc.
+         * @param {Object} props - Collection of props passed down from BodyElement.
+         */
+        'entryRenderFxn' : function(sectionName, section, props){
+            return (
+                <StaticEntry {...props} key={sectionName} sectionName={sectionName} section={section} />
+            );
         }
     };
 
@@ -319,7 +412,7 @@ export default class StaticPage extends React.PureComponent {
                 {..._.pick(this.props, 'navigate', 'windowWidth', 'registerWindowOnScrollHandler', 'href')}
                 key="page-wrapper" title={parsedContent.title}
                 tableOfContents={tableOfContents} context={parsedContent}
-                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent)} />
+                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent, this.props)} />
         );
     }
 }

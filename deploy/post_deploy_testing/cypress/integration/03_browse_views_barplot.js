@@ -37,10 +37,9 @@ describe('Browse Views - Redirection & Visualization', function () {
             cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 99);
         });
 
-        it('"/browse/?q=public_release:[* TO 2017-10-31]" redirects to correct URL, includes 35 < x < 50 results.', function(){
-            cy.visit('/browse/?q=public_release:[* TO 2017-10-31]').end()
-                .location('search').should('include', 'award.project=4DN').should('include', 'q=public_release').should('include', '2017-10-31').end()
-                .get('input[name="q"]').should('have.value', 'public_release:[* TO 2017-10-31]')
+        it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 35 < x < 50 results.', function(){
+            cy.visit('/browse/?public_release.to=2017-10-31').end()
+                .location('search').should('include', 'award.project=4DN').should('include', 'public_release.to=2017-10-31').end()
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 35).should('be.lessThan', 50);
         });
@@ -183,8 +182,8 @@ describe('Browse Views - Redirection & Visualization', function () {
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-0').click().wait(100).end()
                     .get('#select-barplot-field-0 + ul.dropdown-menu').within(($ul)=>{
-                        return cy.contains('Biosource Type').click().wait(100);
-                    }).end()
+                        return cy.contains('Biosource Type').click();
+                    }).end().wait(1000)
                     .getQuickInfoBarCounts().then((nextCounts)=>{
                         expect(nextCounts.experiment_sets).to.equal(initialCounts.experiment_sets);
                         expect(nextCounts.experiments).to.equal(initialCounts.experiments);
@@ -214,7 +213,7 @@ describe('Browse Views - Redirection & Visualization', function () {
 
 
         it('Counts persist on setting groupBy --> "Status"', function(){
-            cy.getQuickInfoBarCounts().then((initialCounts)=>{
+            cy.window().scrollTo('top').end().getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
                     .get('#select-barplot-field-1 + ul.dropdown-menu').within(($ul)=>{
                         return cy.contains('Status').click().wait(100);

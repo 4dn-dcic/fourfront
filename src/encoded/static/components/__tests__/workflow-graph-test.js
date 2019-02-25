@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
+import WorkflowRunView from './../item-pages/WorkflowRunView';
 
 jest.autoMockOff();
 
@@ -11,12 +11,14 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
+jest.mock('./../util/navigate');
+
 describe('Testing Workflow Graph', function() {
-    var ItemView, context, schemas, Wrapper, WorkflowRunView, testWorkflowInstance, sinon, server;
+    var context, schemas, testWorkflowInstance, sinon, server;
 
     function getShowParamsCheckBox(){
         var showParamsBox = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'checkbox-container for-state-showParameters')[0];
-        showParamsBox = showParamsBox.childNodes[0].childNodes[0].childNodes[0]; // Get down to checkbox element.
+        showParamsBox = showParamsBox.childNodes[0].childNodes[0]; // Get down to checkbox element.
         return showParamsBox;
     }
 
@@ -30,30 +32,20 @@ describe('Testing Workflow Graph', function() {
     });
 
     beforeEach(function() {
-        // Our own deps
-        WorkflowRunView = require('./../item-pages/WorkflowRunView').WorkflowRunView;
 
         // Get test Data
         context = require('./../testdata/workflow_run/awsem-partc').default;
         schemas = require('../testdata/schemas');
 
-        // Setup
-        Wrapper = createReactClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
-        // If we do not unset checkHrefForSelectedNode, checkWindowLocationHref, and onNodeClick -- graph will try to append '#nodeID' to document.location and use href to inform selected node state. Document location and href are not supported by test suite/lib so we must disable this.
-        testWorkflowInstance = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <WorkflowRunView schemas={schemas} context={context} checkHrefForSelectedNode={false} checkWindowLocationHref={false} onNodeClick={null} />
-            </Wrapper>
-        );
+        var viewProps = {
+            schemas, context,
+            'onNodeClick' : null,
+            'windowWidth' : 1200,
+            'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
+        };
 
+        testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
         jest.runAllTimers();
-
     });
 
     it('Given no extra configuration, it has the correct number of nodes & edges, and proper step names', function() {
@@ -85,7 +77,7 @@ describe('Testing Workflow Graph', function() {
 
         // Should be unchecked, initially.
         expect(showParamsBox.checked).toBe(false);
-        
+
         // Double check 8 original nodes.
         var nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
         expect(nodes.length).toBe(8);
@@ -119,7 +111,7 @@ describe('Testing Workflow Graph', function() {
 
         // Should be unchecked, initially.
         expect(showParamsBox.checked).toBe(false);
-        
+
         // Double check 8 original nodes.
         var nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
         expect(nodes.length).toBe(8);
@@ -149,7 +141,7 @@ describe('Testing Workflow Graph', function() {
 
         var stepNodeToClickName = 'add_hic_normvector_to_mcool'; // Lets click on the node w/ this name.
         var stepNodeToClick = _.find(stepNodes, function(n){ return n.getAttribute('data-node-key') === stepNodeToClickName; });
-        
+
         expect(stepNodeToClickName).toEqual(stepNodeToClick.getAttribute('data-node-key')); // Double check
         console.log("Will test clicking on step node in test-data WorkflowRun graph:", stepNodeToClick.getAttribute('data-node-key')); // Should === stepNodeToClickName
 
@@ -211,4 +203,68 @@ describe('Testing Workflow Graph', function() {
 
     });
 
+});
+
+describe('Find nodes from other columns', function() {
+    var context, schemas, testWorkflowInstance, sinon, server;
+
+    function getShowReferenceFilesCheckBox(testInstance = testWorkflowInstance){
+        // Returns the checkbox element responsible for toggling the Reference Files on the graph.
+        var showReferenceFilesBox = TestUtils.scryRenderedDOMComponentsWithClass(testInstance, 'checkbox-container for-state-showReferenceFiles')[0];
+        showReferenceFilesBox = showReferenceFilesBox.childNodes[0].childNodes[0]; // Get down to checkbox element.
+        return showReferenceFilesBox;
+    }
+
+    beforeAll(function(){
+        sinon = require('sinon');
+        server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
+    });
+
+    afterAll(function(){
+        server.restore();
+    });
+
+    beforeEach(function() {
+
+        // Make a workflow run with at least 5 graph columns (including arrows.) The node in column 4 refers to a chromsize file whose node is already in column 0.
+        context = require('./../testdata/workflow_run/awsem-node-dupe-check').default;
+        schemas = require('../testdata/schemas');
+
+        var viewProps = {
+            schemas, context,
+            'onNodeClick' : null,
+            'windowWidth' : 1200,
+            'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
+        };
+
+        testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
+        jest.runAllTimers();
+    });
+
+    it('Should match Nodes with previous columns', function() {
+        // Graph generation must look for all of the previous columns for existing nodes, not just the direct ancestors.
+
+        // Now visit the graph.
+        var showReferenceFilesCheckBox = getShowReferenceFilesCheckBox();
+
+        // Should be unchecked, initially.
+        expect(showReferenceFilesCheckBox.checked).toBe(false);
+
+        // Toggle the checkbox input
+        TestUtils.Simulate.change(showReferenceFilesCheckBox);
+        jest.runAllTimers();
+
+        // You should only see 2 nodes in column 0: The input file and the chromsize file.
+        let nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+
+        let column0Nodes = _.filter(nodes, function(n){
+            return n.getAttribute('data-node-column') === '0';
+        });
+
+        expect(column0Nodes.length).toEqual(2);
+
+        // There should be 11 edges in total.
+        var edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+        expect(edges.length).toEqual(11);
+    });
 });

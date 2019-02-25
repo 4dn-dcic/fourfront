@@ -41,7 +41,7 @@ $navbar-transition-easing: ease-out;
                 border-color $navbar-transition-length */;
 
             body.scrolled-past-top &,
-            body.is-full-screen .navbar-container & {
+            body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) .navbar-container & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
                 //border-color: #d4d4d4;

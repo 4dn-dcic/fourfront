@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import { console, Schemas, fileUtil, object } from './../../util';
 import _ from 'underscore';
 import { requestAnimationFrame } from './../../viz/utilities';
+import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
 
 
 
-export class WorkflowNodeElement extends React.Component {
+export class WorkflowNodeElement extends React.PureComponent {
 
     static propTypes = {
         'node' : PropTypes.object.isRequired,
@@ -17,7 +18,7 @@ export class WorkflowNodeElement extends React.Component {
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
         'columnWidth' : PropTypes.number
-    }
+    };
 
     static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
 
@@ -31,6 +32,15 @@ export class WorkflowNodeElement extends React.Component {
 
     static isNodeGroup(node){
         return ((node.nodeType || '').indexOf('group') > -1);
+    }
+
+    static isNodeQCMetric(node){
+        if (node.ioType === 'qc') return true;
+        if (node.ioType === 'report') return true;
+        if (node.meta && node.meta.type === 'QC') return true;
+        if (node.meta && node.meta.type === 'report') return true;
+        if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
+        return false;
     }
 
     static doesRunDataExist(node){
@@ -73,7 +83,7 @@ export class WorkflowNodeElement extends React.Component {
             else if (typeof ioType === 'undefined'){
                 iconClass = 'question';
             } else if (typeof ioType === 'string') {
-                if (ioType === 'qc' || ioType === 'QC') {
+                if (WorkflowNodeElement.isNodeQCMetric(node)) {
                     iconClass = 'check-square-o';
                 } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
                     iconClass = 'wrench';
@@ -167,28 +177,19 @@ export class WorkflowNodeElement extends React.Component {
         return output; 
     }
 
-    containerStyle(){
-        if (this.props.node.nodeType === 'input' || this.props.node.nodeType === 'output'){
-            return {
-                width : (this.props.columnWidth || 100),
-                opacity : 0 // We change this to one post-mount.
-            };
-        }
-    }
-
     aboveNodeTitle(){
 
-        var node                = this.props.node,
+        var { node, title, columnWidth } = this.props,
             fileFormat          = node.meta && node.meta.file_format, // Is a linkTo FileFormat Item (if not null)
-            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title);
-
-        var elemProps = {
-            'style' : { 'maxWidth' : this.props.columnWidth },
-            'className' : "text-ellipsis-container above-node-title"
-        };
+            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title),
+            elemProps = {
+                'style'         : { 'maxWidth' : columnWidth },
+                'className'     : "text-ellipsis-container above-node-title",
+                'key'           : 'above-node-title'
+            };
 
         if (node.nodeType === 'input-group'){
-            return <div {...elemProps}>{ this.props.title }</div>;
+            return <div {...elemProps}>{ title }</div>;
         }
 
         // If WorkflowRun & Workflow w/ steps w/ name
@@ -217,20 +218,27 @@ export class WorkflowNodeElement extends React.Component {
             //}
             if (fileFormat) return <div {...elemProps}>{ fileFormatAsString }</div>;
             elemProps.className += ' mono-text';
-            return <div {...elemProps}>{ this.props.title }</div>;
+            return <div {...elemProps}>{ title }</div>;
         }
 
-        if ( // If Analysis Step
-            node.nodeType === 'step' && node.meta.uuid &&
-            Array.isArray(node.meta.analysis_step_types) &&
-            node.meta.analysis_step_types.length > 0
-        ){
-            return <div {...elemProps}>{  node.meta.analysis_step_types.map(Schemas.Term.capitalize).join(', ') }</div>;
+        // If Analysis Step
+        if (node.nodeType === 'step' && node.meta.uuid){
+            if (node.meta.uuid && Array.isArray(node.meta.analysis_step_types) && node.meta.analysis_step_types.length > 0){
+                return <div {...elemProps}>{  _.map(node.meta.analysis_step_types, Schemas.Term.capitalize).join(', ') }</div>;
+            }
+            if (node.meta.workflow && Array.isArray(node.meta.workflow.experiment_types) && node.meta.workflow.experiment_types.length > 0){
+                return <div {...elemProps}>{  _.map(node.meta.workflow.experiment_types, Schemas.Term.capitalize).join(', ') }</div>;
+            }
         }
 
         // If IO Arg w/o file but w/ format
         if ((node.nodeType === 'input' || node.nodeType === 'output') && fileFormat){
             return <div {...elemProps}>{ fileFormatAsString }</div>;
+        }
+
+        // QC Report
+        if (node.ioType === 'qc') {
+            return <div {...elemProps}>Quality Control Metric</div>;
         }
 
         // Default-ish for IO node
@@ -243,12 +251,12 @@ export class WorkflowNodeElement extends React.Component {
     }
 
     belowNodeTitle(){
-        var elemProps = {
-            'style'     : { 'maxWidth' : this.props.columnWidth },
-            'className' : "text-ellipsis-container below-node-title"
-        };
-
-        var node = this.props.node;
+        var { node, columnWidth } = this.props,
+            elemProps = {
+                'style'     : { 'maxWidth' : columnWidth },
+                'className' : "text-ellipsis-container below-node-title",
+                'key'       : 'below-node-title'
+            };
 
         /*
         if (node.meta && typeof node.meta.argument_type === 'string') {
@@ -264,9 +272,19 @@ export class WorkflowNodeElement extends React.Component {
         // STEPS -  SOFTWARE USED
         function softwareTitle(s, i){
             if (typeof s.name === 'string' && typeof s.version === 'string'){
-                return [ i > 0 ? ', ' : null , s.name, ' ', <span className="lighter">v{ s.version }</span>];
+                return (
+                    <React.Fragment key={object.itemUtil.atId(s) || i}>
+                        { i > 0 ? ', ' : null }
+                        { s.name } <span className="lighter">v{ s.version }</span>
+                    </React.Fragment>
+                );
             }
-            return [i > 0 ? ', ' : null, s.title || s.display_title];
+            return (
+                <React.Fragment key={object.itemUtil.atId(s) || i}>
+                    { i > 0 ? ', ' : null }
+                    { s.title || s.display_title }
+                </React.Fragment>
+            );
         }
 
         if (node.nodeType === 'step' && node.meta && Array.isArray(node.meta.software_used) && node.meta.software_used.length > 0 && node.meta.software_used[0].title){
@@ -296,10 +314,12 @@ export class WorkflowNodeElement extends React.Component {
             var files = node.meta.run_data.file;
             if (Array.isArray(files)){
                 var len = files.length - 1;
-                return <span className="node-name">
-                    { this.icon() }
-                    <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
-                </span>;
+                return (
+                    <span className="node-name">
+                        { this.icon() }
+                        <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
+                    </span>
+                );
             }
         }
 
@@ -322,19 +342,60 @@ export class WorkflowNodeElement extends React.Component {
         // Fallback / Default - use node.name
         return <span className="node-name">{ this.icon() }{ node.title || node.name }</span>;
     }
-    
-    render(){
-        var nodeTitle = <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html>{ this.nodeTitle() }</div>;
 
+    /**
+     * Return a JSX element to be shown at top of right of file node
+     * to indicate that a quality metric is present on said file.
+     *
+     * We can return a <a href={object.itemUtil.atId(qc)}>...</a> element, but
+     * seems having a link on node would be bit unexpected if clicked accidentally.
+     */
+    qcMarker(){
+        var { node, selected } = this.props,
+            file, qc, qcStatus, markerProps;
+
+        if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
+            return null;
+        }
+
+        file     = node.meta.run_data.file,
+        qc       = file && file.quality_metric;
+
+        if (!qc) return null;
+
+        qcStatus = qc.overall_quality_status && qc.overall_quality_status.toLowerCase();
+        markerProps = {
+            'className' : "qc-present-node-marker",
+            'data-tip'  : "This file has a quality control metric associated with it.",
+            'children'  : "QC",
+            'key'       : 'qc-marker'
+        };
+
+        if (qcStatus){
+            if (qcStatus === 'pass')       markerProps.className += ' status-passing';
+            else if (qcStatus === 'warn')  markerProps.className += ' status-warning';
+            else if (qcStatus === 'error') markerProps.className += ' status-error';
+        }
+
+        if (selected && qc.url){
+            markerProps.className += ' clickable';
+            return <a href={qc.url} target="_blank" {...markerProps} onClick={function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                ViewMetricButton.openChildWindow(qc.url);
+            }} />;
+        }
+
+        return <div {...markerProps} />;
+    }
+
+    render(){
         return (
-            <div className="node-visible-element" style={this.containerStyle()} ref={(r)=>{
-                if (r){
-                    requestAnimationFrame(()=>{
-                        r.style.opacity = "1";
-                    });
-                }
-            }}>
-                { nodeTitle }
+            <div className="node-visible-element" key="outer">
+                <div className="innermost" data-tip={this.tooltip()} data-place="top" data-html key="node-title">
+                    { this.nodeTitle() }
+                </div>
+                { this.qcMarker() }
                 { this.belowNodeTitle() }
                 { this.aboveNodeTitle() }
             </div>

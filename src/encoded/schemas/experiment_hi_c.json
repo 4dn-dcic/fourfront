@@ -25,12 +25,13 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/supplementary_files" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [
         { "$ref": "experiment.json#/facets"},
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "mixinColumns": [
         { "$ref": "experiment.json#/columns"}
@@ -56,7 +57,8 @@
                 "cryomilling TCC",
                 "single cell Hi-C",
                 "sci-Hi-C",
-                "MC-3C"
+                "MC-3C",
+                "MC-Hi-C"
             ]
         },
         "crosslinking_method": {

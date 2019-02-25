@@ -97,7 +97,9 @@
     "notes": "reference genome chrom.sizes for mm10, autosomes and sex chromosomes only",
     "filename": "mm10.mainonly.chrom.sizes",
     "lab": "4dn-dcic-lab",
-    "award": "1U01CA200059-01"
+    "award": "1U01CA200059-01",
+    "higlass_uid": "PrCRKXgmTK6VzH6HZpAFVA",
+    "genome_assembly": "GRCm38"
  },
  {
      "accession":"4DNFIO67APA1",
@@ -122,5 +124,47 @@
      "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fafa",
      "status": "uploaded",
      "filename": "test_fasta2.fasta.gz"
+ },
+ {
+    "uuid": "9c78392f-d183-418f-8cbb-eafe544b9de0",
+    "description": "This file is used to see the annotations in higlass",
+    "filename": "gene-annotations-hg38.beddb",
+    "file_classification": "ancillary file",
+    "higlass_uid": "XGrAqZupQb2h5Pjiarf8PA",
+    "award": "1U01CA200059-01",
+    "status": "released",
+    "file_format": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
+    "tags": [
+        "higlass_reference"
+    ],
+    "accession": "4DNFIWG6CQQA",
+    "file_size": 11776000,
+    "lab": "4dn-dcic-lab",
+    "submitted_by": "4dndcic@gmail.com",
+    "genome_assembly": "GRCh38",
+    "aliases": [
+        "4dn-dcic-lab:higlass_annotation_hg38"
+    ]
+ },
+ {
+   "uuid": "4a6d10ee-2edb-4402-a98f-0edb1d58f5e0",
+   "description": "Full chromosome sizes file for the human genome reference GRCh38",
+   "file_classification": "ancillary file",
+   "aliases": [
+     "4dn-dcic-lab:GRCh38_chromsizes_full"
+   ],
+   "accession": "4DNFIZJB62D1",
+   "filename": "GRCh38.full.chrom.sizes",
+   "higlass_uid": "JXbq7f-GTeq3FJy_ilIomQ",
+   "award": "1U01CA200059-01",
+   "status": "released",
+   "file_format": "d13d06cf-218e-4f61-55f0-93f226248b2c",
+   "tags": [
+     "higlass_reference"
+   ],
+   "file_size": 11686,
+   "lab": "4dn-dcic-lab",
+   "submitted_by": "4dndcic@gmail.com",
+   "genome_assembly": "GRCh38"
  }
 ]

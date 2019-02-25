@@ -9,9 +9,9 @@ import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
-    AttributionTabView, SimpleFilesTable, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow } from './components';
-import { OverViewBodyItem, OverviewHeadingContainer } from './DefaultItemView';
-import { WorkflowRunTracingView, FileViewGraphSection } from './WorkflowRunTracingView';
+    AttributionTabView, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem } from './DefaultItemView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { requestAnimationFrame } from './../viz/utilities';
 
@@ -104,7 +104,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0 && Array.isArray(rawFiles) && rawFiles.length > 0){
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
-                key : 'experiments',
+                key : 'raw-files',
                 content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} {...this.state} />
             });
         }
@@ -116,7 +116,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tabs.push(FileViewGraphSection.getTabObject(
                     _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
                     this.state,
-                    this.handleToggleAllRuns
+                    this.handleToggleAllRuns,
+                    width
                 ));
             }
         }
@@ -125,7 +126,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
-                key : 'other-processed-files',
+                key : 'supplementary-files',
                 content : <OtherProcessedFilesStackedTableSection {...commonProps} {...this.state} />
             });
         }
@@ -149,10 +150,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     <i className="expand-icon icon icon-th-list" />
                 } />
         );
-    }
-
-    tabbedView(){
-        return <TabbedView contents={this.getTabViewContents} />;
     }
 }
 
@@ -277,6 +274,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     constructor(props){
         super(props);
         this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions.bind(this), 100);
+
+        this.higlassContainerRef = React.createRef();
     }
 
     componentDidUpdate(pastProps){
@@ -289,12 +288,9 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
      * This is required because HiGlass doesn't always update all of own tracks' widths (always updates header, tho)
      */
     correctHiGlassTrackDimensions(){
-        var hiGlassContainer = this.refs && this.refs.adjustableRow && this.refs.adjustableRow.refs && this.refs.adjustableRow.refs.hiGlassContainer;
-        var internalHiGlassComponent = hiGlassContainer && hiGlassContainer.getHiGlassComponent();
-        if (hiGlassContainer && !internalHiGlassComponent) {
+        var internalHiGlassComponent = this.higlassContainerRef.current && this.higlassContainerRef.current.getHiGlassComponent();
+        if (!internalHiGlassComponent) {
             console.warn('Internal HiGlass Component not accessible.');
-            return;
-        } else if (!hiGlassContainer) {
             return;
         }
         setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
@@ -337,10 +333,10 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 25, minOpenHeight), maxOpenHeight)} ref="hiGlassContainer" />;
+                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />;
                     }
                 }}
-                rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} ref="adjustableRow" />
+                rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
         );
     }
 }
@@ -367,8 +363,15 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             collapsibleAndCollapsed = tb.leftPanelCollapsed && typeof tb.resetDivider === 'function';
 
         if (file && file.higlass_uid && (
-            (fileFormat && (fileFormat === 'mcool' || fileFormat === 'bw' || fileFormat === 'bg'))
-            || (file.file_type_detailed && (file.file_type_detailed.indexOf('(mcool)') > -1 || file.file_type_detailed.indexOf('(bw)') > -1 || file.file_type_detailed.indexOf('(bg)') > -1))
+            (fileFormat && ['mcool', 'bg', 'bw', 'bed', 'beddb'].indexOf(fileFormat))
+            || (file.file_type_detailed && (
+                file.file_type_detailed.indexOf('(mcool)')  > -1 ||
+                file.file_type_detailed.indexOf('(bw)')     > -1 ||
+                file.file_type_detailed.indexOf('(bg)')     > -1 ||
+                file.file_type_detailed.indexOf('(bed)')    > -1 ||
+                file.file_type_detailed.indexOf('(bigbed)') > -1 ||
+                file.file_type_detailed.indexOf('(beddb)')  > -1
+            ))
         )){
 
             var onDragStart = function(evt){
@@ -540,9 +543,13 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
             return [firstMcoolFile]; // 1 MCOOL file, if present
         }
 
+        /**
+         * @todo Maybe rename this function to be 'is 1d horizontal track file' as has evolved since original form.
+         */
         function isValidBWVizFile(f){
-            var fileFormat = fileUtil.getFileFormatStr(f);
-            return (fileFormat === 'bg' || fileFormat === 'bw') && f.higlass_uid;
+            var fileFormat   = fileUtil.getFileFormatStr(f),
+                horizTrackFormats = ['bg', 'bw', 'bed', 'bigbed', 'beddb'];
+            return f.higlass_uid && horizTrackFormats.indexOf(fileFormat) > -1;
         }
 
         var bigwigFiles = _.filter(files || [], isValidBWVizFile);

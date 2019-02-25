@@ -11,25 +11,12 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/modified" }
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "user_content.json#/properties" }
     ],
     "properties": {
         "schema_version": {
             "default": "2"
-        },
-        "name": {
-            "title": "Unique Identifier",
-            "description": "Unique name or ID of this section.",
-            "comment" : "If used as a page section, ideally should be page path with slashes converted to dots, plus hash ('#'), plus unique CSS-compatible identifier (for HTML element ID), e.g. 'help.faq#how_do_i_setup_account'. If is a Search Info Header, should be URL-compatible so can request e.g. search-info-header.WorkflowRun --> '/static-section/search-info-header.WorkflowRun'.",
-            "type": "string",
-            "uniqueKey": "static_section:name",
-            "lookup" : 1
-        },
-        "title": {
-            "title": "Title",
-            "description": "Title for the section. Optional.",
-            "type": "string",
-            "lookup" : 5
         },
         "body":{
             "title": "Raw Body",
@@ -55,32 +42,15 @@
                 "Page Section",
                 "Announcement",
                 "Search Info Header",
-                "Item Page Header"
+                "Item Page Header",
+                "Home Page Slide"
             ],
             "lookup" : 10
-        },
-        "status": {
-            "title": "Status",
-            "type": "string",
-            "default": "released",
-            "enum" : [
-                "released",
-                "released to project",
-                "draft",
-                "deleted"
-            ],
-            "lookup" : 20
-        },
-        "description": {
-            "title": "Description",
-            "type": "string",
-            "formInput" : "textarea",
-            "lookup" : 21
         },
         "options": {
             "title": "Options",
             "type": "object",
-            "description": "Options for section display. Currently only applicable for .CSVs",
+            "description": "Options for section display.",
             "properties" : {
                 "filetype" : {
                     "title" : "File Type",
@@ -108,6 +78,18 @@
                     "description": "Icon to be showed next to title in selected places.",
                     "type" : "string",
                     "lookup" : 5
+                },
+                "link" : {
+                    "title" : "Link/URI",
+                    "description": "Another link with which this resource is associated with or should redirect to.",
+                    "type" : "string",
+                    "lookup" : 6
+                },
+                "image" : {
+                    "title" : "Preview Image",
+                    "description": "Image or screenshot URL for this Item to use as a preview.",
+                    "type" : "string",
+                    "lookup" : 7
                 },
                 "startCell" : {
                     "type" : "array",
@@ -166,13 +148,6 @@
                 }
             },
             "lookup" : 25
-        },
-        "award": {
-            "title": "Grant",
-            "description": "Grant associated with the submission.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "type": "string",
-            "linkTo": "Award"
         }
         
     },

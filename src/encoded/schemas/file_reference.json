@@ -19,12 +19,11 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [
-        { "$ref": "file.json#/facets"},
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "file.json#/facets"}
     ],
     "mixinColumns": [
         { "$ref": "file.json#/columns"}
@@ -36,12 +35,6 @@
         "higlass_uid": {
             "title": "Higlass UID",
             "type": "string"
-        },
-        "file_format": {
-            "title": "File Format",
-            "type": "string",
-            "linkTo": "FileFormat",
-            "ff_flag": "filter:valid_item_types"
         },
         "file_type": {
             "title": "File Type",

@@ -99,23 +99,25 @@ export default class CursorComponent extends React.Component {
     constructor(props){
         super(props);
         this.visibilityMargin = this.visibilityMargin.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.getHoverComponentDimensions = this.getHoverComponentDimensions.bind(this);
         this.getCursorContainmentDimensions = this.getCursorContainmentDimensions.bind(this);
         this.isVisible = this.isVisible.bind(this);
         this._onMouseMove = _.throttle(this._onMouseMove.bind(this), 50, { trailing: false });
         this._handleClick = this._handleClick.bind(this);
 
-        this.portalElement = null;
         this.state = {
-            x       : 0,
-            y       : 0,
-            offsetX : -1,
-            offsetY : -1,
-            mounted : false
+            'x'       : 0,
+            'y'       : 0,
+            'offsetX' : -1,
+            'offsetY' : -1,
+            'mounted' : false
         };
+
+        // Reference to a DOM element in body that can hold absolutely-positioned overlays.
+        this.overlaysRoot = null;
+
+        // Will hold a literal DOM element reference which is appended to overlaysRoot.
+        this.portalElement = null;
     }
 
 
@@ -137,62 +139,38 @@ export default class CursorComponent extends React.Component {
     componentDidMount() {
         if (isServerSide()) return null;
         if (this.props.debug) console.log('Mounted CursorComponent');
+
+        this.overlaysRoot = this.overlaysRoot || document.getElementById('overlays-root') || document.body;
+        if (!this.overlaysRoot){
+            throw new Error('No overlay root element to add cursor component to.');
+        }
+
         if (!this.portalElement) {
             this.portalElement = document.createElement('div');
             if (this.portalElement.classList){
                 this.portalElement.classList.add('cursor-component-root');
             }
-            document.body.appendChild(this.portalElement);
+            this.overlaysRoot.appendChild(this.portalElement);
         }
-        document.addEventListener('mousemove', this._onMouseMove);
+
+        window.addEventListener('mousemove', this._onMouseMove);
         this.setState({ 'mounted' : true });
     }
 
     componentWillUnmount() {
         if (this.props.debug) console.log('Will unmount CursorComponent');
-        document.removeEventListener('mousemove', this._onMouseMove);
+        window.removeEventListener('mousemove', this._onMouseMove);
 
-        vizUtil.requestAnimationFrame(()=>{
-            document.body.removeChild(this.portalElement);
-            this.portalElement = null;
-        });
+        this.overlaysRoot.removeChild(this.portalElement);
+        this.portalElement = null;
 
         this.setState({ 'mounted' : false });   
     }
 
-    componentDidUpdate() {
-        if (!this.state.mounted || !this.portalElement) return;
-        vizUtil.requestAnimationFrame(()=>{
-            if (!this.state.mounted || !this.portalElement) return;
-            //console.log('Updated CursorComponent', this.state);
-            var hoverComponentDimensions = this.getHoverComponentDimensions();
-            var isVisible = this.isVisible();
-
-            var state = _.clone(this.state);
-            if (typeof this.props.xCoordOverride === 'number') state.x = this.props.xCoordOverride;
-
-            ReactDOM.render(React.createElement(CursorContent, _.extend({
-                width: hoverComponentDimensions.width,
-                height : hoverComponentDimensions.height,
-                isVisible : isVisible,
-                cursorOffset: this.props.cursorOffset,
-                pointerStyle: this.props.pointerStyle,
-                onClick: this._handleClick,
-                className : this.props.className,
-                onMouseLeave : this.props.onMouseLeave,
-                style : this.props.style,
-                children : this.props.children,
-                sticky : this.props.sticky,
-                schemas : this.props.schemas
-            }, state)), this.portalElement);
-
-        });
-    }
-
     getHoverComponentDimensions(){
         return {
-            'width'  : ((this.props.style && this.props.style.width)  || this.props.width ) || (this.refs && this.refs.base && this.refs.base.clientWidth ),
-            'height' : ((this.props.style && this.props.style.height) || this.props.height) || (this.refs && this.refs.base && this.refs.base.clientHeight)
+            'width'  : (this.props.style && this.props.style.width)  || this.props.width,
+            'height' : (this.props.style && this.props.style.height) || this.props.height
         };
     }
 
@@ -224,10 +202,11 @@ export default class CursorComponent extends React.Component {
     }
 
     _onMouseMove(e){
-
         if (this.props.sticky) return;
 
-        var offset = layout.getElementOffset(this.props.containingElement || this.refs.base) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
+        var { containingElement, offsetLeft, offsetRight } = this.props;
+
+        var offset = layout.getElementOffset(this.props.containingElement) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
@@ -264,6 +243,21 @@ export default class CursorComponent extends React.Component {
     }
 
     render(){
-        return null;
+        if (!this.state.mounted || !this.portalElement) return null;
+
+        var isVisible                   = this.isVisible(),
+            hoverComponentDimensions    = this.getHoverComponentDimensions(),
+            passedProps = _.extend(
+                _.pick(this.props, 'sticky', 'schemas', 'children', 'style', 'className', 'onMouseLeave', 'pointerStyle', 'cursorOffset'),
+                _.pick(hoverComponentDimensions, 'width', 'height'),
+                { isVisible, 'onClick' : this._handleClick },
+                this.state
+            );
+
+        if (typeof this.props.xCoordOverride === 'number'){
+            passedProps.x = this.props.xCoordOverride;
+        }
+
+        return ReactDOM.createPortal(<CursorContent {...passedProps} />, this.portalElement);
     }
 }
