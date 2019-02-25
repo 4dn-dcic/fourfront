@@ -6,7 +6,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
-        "tags": "DNA-DNA"
+        "other_tags": ["DNA-DNA"]
     },
     {
         "title": "Dilution Hi-C",
@@ -15,7 +15,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "b17b17cd-544a-3a3b-abc3-17a544544b3c",
-        "tags": "DNA-DNA"
+        "other_tags": ["DNA-DNA"]
     },
     {
         "title": "ATAC-seq",
@@ -40,7 +40,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions of Enriched Regions",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "e17b17cd-544a-3a3b-abc3-17a544544b3c",
-        "tags": "DNA-DNA"
+        "other_tags": ["DNA-DNA"]
     },
     {
         "title": "PLAC-seq",
@@ -49,7 +49,7 @@
         "assay_subclassification": "DNA-DNA Pairwise Interactions of Enriched Regions",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "f17b17cd-544a-3a3b-abc3-17a544544b3c",
-        "tags": "DNA-DNA"
+        "other_tags": ["DNA-DNA"]
     },
     {
         "title": "DamID-seq",
