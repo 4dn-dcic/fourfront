@@ -4,9 +4,8 @@
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
-    "required": ["ID"],
-    "identifyingProperties": ["uuid", "ID"],
+    "required": ["award", "lab", "ID"],
+    "identifyingProperties": ["uuid"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -33,7 +32,6 @@
             "description": "PMID or doi for the publication.",
             "type": "string",
             "lookup": 20,
-            "uniqueKey":  "publication:ID",
             "pattern": "^PMID:[0-9]+$|^doi:10\\.[0-9]{4}[\\d\\S\\:\\.]+$",
             "comment": "Please provide either in the form of PMID:12345678 or doi:10.1234/abc123"
         },

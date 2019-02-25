@@ -11,6 +11,9 @@ from pyramid.httpexceptions import ( # 301-307 redirect code response
     HTTPSeeOther,
     HTTPTemporaryRedirect
 )
+from pyramid.view import (
+    view_config,
+)
 from snovault import (
     collection,
     load_schema,
@@ -20,6 +23,7 @@ from snovault import (
 from encoded.search import get_iterable_search_results
 from .base import (
     Item,
+    collection_add,
     item_edit,
     ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
 )
@@ -27,6 +31,11 @@ from .user_content import (
     StaticSection
 )
 from snovault.resource_views import item_view_page
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_put,
+    validate_item_content_patch
+)
 
 
 def get_pyramid_http_exception_for_redirect_code(code):
@@ -140,7 +149,7 @@ def is_static_page(info, request):
         return False
 
     request.set_property(lambda x: generate_page_tree(x, page_name), name='_static_page_tree', reify=True)
-    request.set_property(lambda x: request.registry[CONNECTION].storage.get_by_unique_key('page:name', page_name), name='_static_page_model', reify=True)
+    request.set_property(lambda x: request.registry[CONNECTION].storage.get_by_json('name', page_name, 'page'), name='_static_page_model', reify=True)
 
     if request._static_page_model:
         return True
@@ -161,6 +170,7 @@ def includeme(config):
 
 @collection(
     name='pages',
+    lookup_key='name',
     properties={
         'title': 'Pages',
         'description': 'Static Pages for the Portal',
@@ -180,9 +190,41 @@ for field in ['display_title', 'name', 'description', 'content.name']:
     Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
 
 
+#### Must add validators for add/edit since 'name' path is now lookup_key, not unique_key
+
+def validate_unique_page_name(context, request):
+    '''validator to ensure page 'name' lookup_key is unique
+    '''
+    data = request.json
+    # name is required; validate_item_content_post/put/patch will handle missing field
+    if 'name' in data:
+        lookup_res = request.registry[CONNECTION].storage.get_by_json('name', data['name'], 'page')
+        if lookup_res:
+            # check_only + POST happens on GUI edit; we cannot confirm if found
+            # item is the same item. Let the PATCH take care of validation
+            if request.method == 'POST' and request.params.get('check_only', False):
+                return
+            # editing an item will cause it to find itself. That's okay
+            if hasattr(context, 'uuid') and getattr(lookup_res, 'uuid', None) == context.uuid:
+                return
+            error_msg = ("page %s already exists with name '%s'. This field must be unique"
+                         % (lookup_res.uuid, data['name']))
+            request.errors.add('body', ['name'],  error_msg)
+            return
 
 
+@view_config(context=Page.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_unique_page_name])
+def page_add(context, request, render=None):
+    return collection_add(context, request, render)
 
+
+@view_config(context=Page, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_unique_page_name])
+@view_config(context=Page, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_unique_page_name])
+def page_edit(context, request, render=None):
+    return item_edit(context, request, render)
 
 
 #### Static Page Routing/Endpoint
