@@ -45,7 +45,7 @@ class ExperimentType(Item):
             "DNA-DNA Multi-way Interactions of Selected Loci": "3/4/5-C (multi-contact)",
             "DNA-DNA Pairwise Interactions of Enriched Regions": "Enrichment Hi-C",
             "DNA-DNA Pairwise Interactions of Selected Loci": "3/4/5-C",
-            "ligation-free Multi-fragment 3C": "Ligation-free 3C",
+            "Ligation-free Multi-fragment 3C": "Ligation-free 3C",
             "Transcription": "RNA-seq",
             "RNA-DNA Pairwise Interactions": "RNA-DNA HiC",
             "Fixed Sample DNA Localization": "DNA FISH",
