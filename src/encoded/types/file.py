@@ -1386,7 +1386,7 @@ def validate_extra_file_format(context, request):
             try:
                 off_uuid = ok_format_item.get('uuid')
             except AttributeError:
-                raise "FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid')
+                raise  Exception("FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid'))
             valid_ext_formats.append(off_uuid)
     seen_ext_formats = []
     # formats = request.registry['collections']['FileFormat']

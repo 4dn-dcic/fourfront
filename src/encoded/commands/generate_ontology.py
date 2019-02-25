@@ -691,9 +691,7 @@ def parse_args(args):
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
     parser.add_argument('--outdir',
-                        default='tests/data/ontology-term-inserts/',
-                        help="the directory (relative to src/encoded)  for the output files default is.  \
-                        Default is tests/data/ontology-term-inserts/")
+                        help="the directory (relative to src/encoded) for output files")
     parser.add_argument('--s3upload',
                         default=False,
                         action='store_true',
@@ -755,6 +753,7 @@ def main():
     s3_patchfile = 'ontology_patch.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
+    print('Writing to %s' % outdir)
 
     postfile = outdir + s3_postfile
     patchfile = outdir + s3_patchfile
