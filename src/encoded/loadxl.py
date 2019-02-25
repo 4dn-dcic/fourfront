@@ -23,7 +23,7 @@ def includeme(config):
     config.add_route('load_data', '/load_data')
     config.scan(__name__)
 
-# order of items references in 'required' field in schemas
+# order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
     'user',
     'award',
