@@ -122,6 +122,7 @@
                         "title": "Status",
                         "type": "string",
                         "exclude_from": ["submit4dn"],
+                        "default": "uploading",
                         "enum" : [
                             "uploading",
                             "uploaded",

@@ -77,19 +77,16 @@
         "institute_label": {
             "title": "Institute label",
             "description": "An abbreviation for the institute the lab is associated with.",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "institute_name": {
             "title": "Institute",
             "description": "The name for the institute the lab is associated with.",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "address1": {
             "title": "Address line 1",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "address2": {
             "title": "Address line 2",
@@ -97,44 +94,37 @@
         },
         "city": {
             "title": "City",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "state": {
             "title": "State/Province/Region",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "country": {
             "title": "Country",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "postal_code": {
             "title": "ZIP/Postal code",
             "type": "string",
-            "default": "",
             "format": "postal-code"
         },
         "fax": {
             "title": "Fax number",
             "description":"A fax number for the lab (with country code).",
             "type": "string",
-            "default": "",
             "format": "phone"
         },
         "phone1": {
             "title": "Primary phone number",
             "description": "The lab's primary phone number (with country code).",
             "type": "string",
-            "default": "",
             "format": "phone"
         },
         "phone2": {
             "title": "Alternate phone number",
             "description": "The lab's alternative phone number (with country code).",
             "type": "string",
-            "default": "",
             "format": "phone"
         },
         "url": {
