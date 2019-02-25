@@ -287,6 +287,8 @@ class Publication(Item, ItemWithAttachment):
             return len(exp_sets_prod_in_pub)
 
 
+#### Add validator to ensure ID field is unique
+
 def validate_unique_pub_id(context, request):
     '''validator to ensure publication 'ID' field is unique
     '''
@@ -307,8 +309,6 @@ def validate_unique_pub_id(context, request):
             request.errors.add('body', ['ID'],  error_msg)
             return
 
-
-#### Add validator to ensure ID field is unique
 
 @view_config(context=Publication.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_unique_pub_id])
