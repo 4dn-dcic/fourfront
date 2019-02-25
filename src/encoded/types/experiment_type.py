@@ -45,17 +45,17 @@ class ExperimentType(Item):
             "DNA-DNA Multi-way Interactions of Selected Loci": "3/4/5-C (multi-contact)",
             "DNA-DNA Pairwise Interactions of Enriched Regions": "Enrichment Hi-C",
             "DNA-DNA Pairwise Interactions of Selected Loci": "3/4/5-C",
-            "ligation-free multi-fragment 3C": "ligation-free 3C",
+            "ligation-free Multi-fragment 3C": "Ligation-free 3C",
             "Transcription": "RNA-seq",
             "RNA-DNA Pairwise Interactions": "RNA-DNA HiC",
             "Fixed Sample DNA Localization": "DNA FISH",
             "Fixed Sample RNA Localization": "RNA FISH",
             "Single Particle Tracking": "SPT"
         }
-        if assay_subclassification in subclass_dict:
-            return subclass_dict[assay_subclassification]
-        elif assay_classification in subclass_dict:
+        if assay_classification in subclass_dict:
             return subclass_dict[assay_classification]
+        elif assay_subclassification in subclass_dict:
+            return subclass_dict[assay_subclassification]
         else:
             return assay_subclassification
 
