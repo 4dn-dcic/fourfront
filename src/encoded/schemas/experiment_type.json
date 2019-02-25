@@ -14,7 +14,6 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/static_embeds" },
-        { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
@@ -100,13 +99,21 @@
             ]
         },
         "other_tags": {
-            "title": "Other Tags",
-            "description": "Other tags that categorize or describe the experiment type",
+            "title": "Tags",
+            "description": "Additional categories for characterizing this experiment type",
             "type": "array",
+            "lookup": 50,
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",
-                "type":  "string"
+                "type":  "string",
+                "suggested_enum": [
+                    "DNA-DNA",
+                    "RNA-DNA",
+                    "DNA-Protein",
+                    "Single Cell",
+                    "Multi-contact"
+                ]
             }
         },
         "raw_file_types": {
@@ -140,8 +147,8 @@
         "assay_subclass_short": {
             "title": "Assay Type"
         },
-        "tags": {
-            "title": "More Categories"
+        "other_tags": {
+            "title": "Additional Categories"
         }
     },
     "columns": {
