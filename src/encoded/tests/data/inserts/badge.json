@@ -4,11 +4,15 @@
         "badge_classification": "Commendation",
         "description": "Given for exemplary data sets",
         "badge_icon": "&#xf2cd;",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "uuid": "ddd03a23-49e5-4c33-afab-9ec90d65faf3"
     },
     {
         "title": "Shower",
         "badge_classification": "Warning",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "uuid": "dee03a23-49e5-4c33-afab-9ec90d65faf3"
     }
 ]

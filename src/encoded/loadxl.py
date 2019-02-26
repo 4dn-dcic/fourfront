@@ -15,8 +15,7 @@ from base64 import b64encode
 from PIL import Image
 
 text = type(u'')
-logger = structlog.getLogger('encoded')
-
+logger = structlog.getLogger(__name__)
 
 def includeme(config):
     # provide an endpoint to do bulk uploading that just uses loadxl
@@ -29,9 +28,11 @@ ORDER = [
     'award',
     'lab',
     'file_format',
+    'ontology_term',  # validate_biosource_cell_line requires term_name
     # 'experiment_type',
     'biosource',
     'biosample',
+    'organism',  # allow the 'default' linkTo in individuals work
     'workflow',
     'vendor'
 ]
@@ -182,6 +183,7 @@ def format_for_attachment(json_data, docsdir):
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
     """convert data to store format dictionary (same format expected from from_json=True),
     assume main function is to load reasonable number of inserts from a folder
+
     args:
         testapp
         inserts : either a folder, or a dictionary in the store format
@@ -189,6 +191,9 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         overwrite (bool)   : if the database contains the item already, skip or patch
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
+
+    returns:
+        None if successful, otherwise an Exception
     """
     if docsdir is None:
         docsdir = []
@@ -241,13 +246,14 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         if a_type == 'file_format':
             req_fields.append('valid_item_types')
         first_fields = list(set(req_fields+ids))
-        remove_existing_items = []
+        skip_existing_items = set()
         posted = 0
         patched = 0
         skip_exist = 0
         for an_item in store[a_type]:
             try:
-                testapp.get('/'+an_item['uuid'], status=200)
+                # 301 because @id is the existing item path, not uuid
+                testapp.get('/'+an_item['uuid'], status=[200, 301])
                 exists = True
             except:
                 exists = False
@@ -255,7 +261,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
             if exists:
                 skip_exist += 1
                 if not overwrite:
-                    remove_existing_items.append(an_item['uuid'])
+                    skip_existing_items.add(an_item['uuid'])
                 continue
             post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
             post_first = format_for_attachment(post_first, docsdir)
@@ -264,9 +270,10 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 assert res.status_code == 201
                 posted += 1
             except Exception as e:
-                logger.error(str(trim(e)))
+                logger.error('load_all: could not POST item', error=trim(str(e)),
+                              uuid=post_first.get('uuid'), item_type=obj_type)
                 return e
-        second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in remove_existing_items]
+        second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
         logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
 
@@ -283,7 +290,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 assert res.status_code == 200
                 patched += 1
             except Exception as e:
-                logger.error(trim(str(e)))
+                logger.error('load_all: could not PATCH item', error=trim(str(e)),
+                              uuid=an_item.get('uuid'), item_type=obj_type)
                 return e
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 
@@ -389,7 +397,9 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
     from pkg_resources import resource_filename
     if indir != 'master-inserts':  # Always load up master_inserts
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
-        load_all(testapp, master_inserts, [])
+        master_res = load_all(testapp, master_inserts, [])
+        if master_res:  # None if successful
+            logger.error('load_data: failed to load from%s' % master_inserts, error=master_res)
 
     if not indir.endswith('/'):
         indir += '/'
@@ -400,7 +410,9 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
         if not docsdir.endswith('/'):
             docsdir += '/'
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
-    load_all(testapp, inserts, docsdir, overwrite=overwrite)
+    res = load_all(testapp, inserts, docsdir, overwrite=overwrite)
+    if res:  # None if successful
+        logger.error('load_data: failed to load from %s' % docsdir, error=res)
     keys = generate_access_key(testapp, access_key_loc)
     store_keys(app, access_key_loc, keys)
 
@@ -456,9 +468,14 @@ def load_ontology_terms(app, post_json=None, patch_json=None):
     testapp = TestApp(app, environ)
 
     if post_json:
-        load_all(testapp, post_json, None, itype='ontology_term')
+        post_res = load_all(testapp, post_json, None, itype='ontology_term')
+        if post_res:  # None if successful
+            logger.error('load_ontology_terms: failed to POST', error=post_res)
+
     if patch_json:
-        load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True)
+        patch_res = load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True)
+        if patch_res:  # None if successful
+            logger.error('load_ontology_terms: failed to PATCH', error=patch_res)
 
     # now keep track of the last time we loaded these suckers
     data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}

@@ -19,11 +19,9 @@
             "default": "1"
         },
         "lab": {
-            "default": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
             "permission": "import_items"
         },
         "award": {
-            "default": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
             "permission": "import_items"
         },
         "status": {
