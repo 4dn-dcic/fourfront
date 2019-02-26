@@ -28,59 +28,6 @@ class BioFeature(Item):
     ]
 
     @calculated_property(schema={
-        "title": "Species",
-        "description": "The organism common name",
-        "type": "string"
-    })
-    def organism_name(self, request):
-        props = self.properties
-        if 'override_organism_name' in props:
-            return props.get('override_organism_name')
-
-        # get info on organisms in database
-        dborgs = self.registry.get('collections').get('Organism').values()
-        taxid2name = {}
-        genome2name = {}
-        for dorg in dborgs:
-            oprops = dorg.properties
-            name = oprops.get('name')
-            taxid2name[oprops.get('taxon_id')] = name
-            if 'genome_assembly' in oprops:
-                genome2name[oprops.get('genome_assembly')] = name
-
-        organisms = set()
-        # first see if we can get any info from genes
-        genes = props.get('relevant_genes', [])
-        for g in genes:
-            gene = get_item_if_you_can(request, g)
-            if gene is not None:
-                orgn = gene.get('organism')
-                if orgn is None:
-                    organisms.add(orgn)
-                else:
-                    if orgn.endswith('/'):
-                        orgn = orgn[:-1]
-                    for tid, name in taxid2name.items():
-                        if orgn.endswith(tid):
-                            organisms.add(name)
-                            break
-
-        # now check for genomic regions
-        regions = props.get('genome_location', [])
-        for r in regions:
-            region = get_item_if_you_can(request, r)
-            if region is not None:
-                assembly = region.get('genome_assembly')  # required
-                if assembly in genome2name:
-                    organisms.add(genome2name[assembly])
-        if organisms:
-            if len(organisms) > 1:
-                return 'multiple organisms'
-            oname = organisms.pop()
-            if oname:
-                return oname
-
-    @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
         "type": "string"
@@ -106,7 +53,7 @@ class BioFeature(Item):
         modstr = ''
         orgstr = ''
         # see if there is an organism_name
-        oname = self.organism_name(request)
+        oname = props.get('organism_name')
         if oname and oname != 'human':
             orgstr = oname
 

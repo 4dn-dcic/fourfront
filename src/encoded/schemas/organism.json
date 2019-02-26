@@ -43,14 +43,13 @@
             "description": "A short unique name for the organism (e.g. 'mouse' or 'human').",
             "type": "string",
             "lookup": 20,
-            "pattern": "^[a-z0-9\\-]+$"
+            "pattern": "^[ a-z0-9\\-]+$"
         },
         "scientific_name": {
             "title": "Binomial name",
             "description": "The genus species for the organism (e.g. 'Mus musculus').",
             "type": "string",
-            "lookup": 30,
-            "default": ""
+            "lookup": 30
         },
         "taxon_id": {
             "title": "Taxon ID",
