@@ -1199,7 +1199,7 @@ def add_2d_file(views, new_content, viewconfig_info):
                 views[0]["tracks"]["center"][0]["contents"].append(contents)
         # Resize 1d tracks.
         views, error = resize_1d_tracks(views)
-        return views, ""
+        return views, error
 
     # If there is central content, then we need to make a new view.
     # Stop if there are already 6 views.
