@@ -171,12 +171,12 @@ def so_ont(testapp):
 
 
 @pytest.fixture
-def gene_term(testapp, so_ont, cell_line_term):
-    import pdb; pdb.set_trace()
+def gene_term(testapp, so_ont):
     gterm = {
         'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
-        'term_id': 'SO:0000704'}
-    return testapp.post('/ontology_term', gterm).json['@graph'][0]
+        'term_id': 'SO:0000704', 'term_name': 'gene',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
 @pytest.fixture
