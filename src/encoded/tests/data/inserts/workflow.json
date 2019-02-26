@@ -11145,5 +11145,115 @@
         ],
         "title": "Merging and sorting gzipped bed v1",
         "uuid": "2b10e472-065e-43ed-992c-fccad6417b65"
+    },
+    {
+        "accession": "4DNWBTMVLM17",
+        "app_name": "bedtomultivec",
+        "app_version": "v1",
+        "arguments": [
+            {
+                "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "argument_type": "Input file",
+                "workflow_argument_name": "bedfile"
+            },
+            {
+                "argument_format": "dba26778-f40a-4561-a552-65539702ded4",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rows_info"
+            },
+            {
+                "argument_format": "92537561-4c02-440e-a51f-22b4b08b6918",
+                "argument_type": "Output to-be-extra-input file",
+                "workflow_argument_name": "multivec_file"
+            },
+
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "assembly"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "resolution"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "num_rows"
+
+            }
+
+        ],
+
+        "award": "1U01CA200059-01",
+        "category": ["format conversion"],
+        "cwl_child_filenames": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtomultivec/v1/cwl/",
+        "cwl_main_filename": "bedtomultivec.cwl",
+        "cwl_pointer": "",
+        "description": "Converting bed to multivec",
+        "docker_image_name": "4dn-dcic/docker-4dn-bedtomultivec",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "bedtomultivec",
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "bedfile",
+                        "source": [
+                            {
+                                "name": "bedfile"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "dba26778-f40a-4561-a552-65539702ded4",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rows_info",
+                        "source": [
+                            {
+                                "name": "rows_info"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "file format conversion"
+                    ],
+                    "software_used": [
+                       "/softwares/5de38570-68bf-4545-98b6-d7d51ae08db9/"
+                    ]
+                },
+                "name": "bedtomultivec",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "92537561-4c02-440e-a51f-22b4b08b6918",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "multivec_file",
+                        "target": [
+                            {
+                                "name": "multivec_file"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "Converting bed to multivec v1",
+        "uuid": "7b69a0ce-3bc8-4f85-bb34-8a42cecb9b9c"
     }
 ]
