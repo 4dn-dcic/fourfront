@@ -923,7 +923,7 @@ def add_1d_file(views, new_track, genome_assembly):
             view["tracks"]["top"].insert(0, new_track_to_add)
 
     views, error = resize_1d_tracks(views)
-    return views, ""
+    return views, error
 
 def resize_1d_tracks(views):
     """ For each view, resize the top 1D tracks (excluding gene-annotation and chromosome)
@@ -1235,7 +1235,7 @@ def add_2d_file(views, new_content, viewconfig_info):
 
     # Resize 1d tracks.
     views, error = resize_1d_tracks(views)
-    return views, ""
+    return views, error
 
 def create_2d_content(file, viewtype):
     """ Generates a 2D track.
