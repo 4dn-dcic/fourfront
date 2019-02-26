@@ -22,6 +22,8 @@ The `bin/dev-servers` command, required as part of the boot-up process (see the 
 
 This temporary PostgreSQL database exists in the filesystem in your Unix-based system's `/tmp/snovault/pgdata` folder - which may be connected to as the hostname. The database created is named 'postgres', with an admin user also named 'postgres', and also should be accessible via localhost port 5432. No password is required.
 
+By default, insert test data defined in Fourfront is loaded into the local database. See the [inserts](../src/encoded/tests/data/README.md) documentation for more information.
+
 Backup & Loading of Production Database
 =======================================
 
@@ -41,7 +43,7 @@ Make sure your EB CLI is working and you've been able to SSH into an EC2 instanc
 
 Once you have your prerequisites, do the following:
 
-1. In a dedicated Terminal window, create an SSH tunnel via _eb ssh_ command to the public RDS database. The command will look like: 
+1. In a dedicated Terminal window, create an SSH tunnel via _eb ssh_ command to the public RDS database. The command will look like:
 ```eb ssh -n 1 --custom "ssh -i /Users/alex/.ssh/4dn-encode.pem -L 5999:fourfront-webprod.co3gwj7b7tpq.us-east-1.rds.amazonaws.com:5432"```.
  By using the '-L' argument, you create a tunnel from your local port 5999 to a remote host:port on the EC2 instance you're connecting to. Replace path to your 4dn-encode private key and host:port of remote RDS accordingly. *N.B.* We need to use `eb ssh` rather than plain `ssh` because `eb ssh` tells Amazon to temporarily open port 22 (for SSHing) which would otherwise remain closed for security reasons.
 
@@ -52,7 +54,7 @@ Once you have your prerequisites, do the following:
  4. It is important to set the right backup options. Your filename isn't important but should make sense -- suggested format is YYYY-MM-DD-ENVNAME-I.sql, e.g. '2017-07-19-fourfrontwebprod-2.sql'. The following options are important (spread across both tabs)
      - Select "Plain Text" for format.
      - For encoding, select SQL_ASCII or similar. Your luck with UTF-8 may vary.
-     
+
      - Under "Dump Options" tab, ensure the following are set to "Yes":
        - Pre-Data
        - Post-Data
@@ -62,11 +64,11 @@ Once you have your prerequisites, do the following:
        - "With OIDs"
        - (Optional) "Use INSERT Commands"
        - Other options may be left on default or adjusted to your needs.
-    
+
     ![Initial Options](https://i.gyazo.com/c9a68e09361991e04ed7b3be38147a02.png)
     ![Initial Options](https://i.gyazo.com/4bec46071b30e6ad12d7db12dbef1d66.png)
-       
-    
+
+
 5. Click "Backup". PgAdmin should pop up a little box on bottom right of their GUI showing time elapsed and then a success or error message. This should take about 30 seconds (or longer) as of 2017-07-06.
 ![https://i.gyazo.com/8947db89fe2739a5729d54cfce10958d.png](https://i.gyazo.com/8947db89fe2739a5729d54cfce10958d.png)
 
@@ -97,6 +99,6 @@ If want to import into your local, there are a few extra steps needed, and a few
 Afterthoughts
 =============
 
-In lieu of PgAdmin, may use the command-line `pg_dump` tool to connect to production database (over SSH tunnel) and save output to SQL file. Ensure the same configuration (ASCII, no compression, CREATE/DROP DATABASE command, ...) is set as for PgAdmin when running it. 
+In lieu of PgAdmin, may use the command-line `pg_dump` tool to connect to production database (over SSH tunnel) and save output to SQL file. Ensure the same configuration (ASCII, no compression, CREATE/DROP DATABASE command, ...) is set as for PgAdmin when running it.
 
 Eventually, creating a shell or Python script to automate backup (and potentially import) may become a task, wherein the backup script could then perhaps be run on a scheduled basis.

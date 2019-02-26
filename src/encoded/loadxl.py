@@ -927,11 +927,13 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
                           SSECustomerAlgorithm='AES256')
 
 
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tables=False):
+def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
+              clear_tables=False, use_master_inserts=True):
     '''
     generic load data function
     indir for inserts should be relative to tests/data/
     docsdir is relative to tests/data and defaults to no docs dir
+    if use_master_inserts is True, 'master-inserts' are loaded along with indir
     '''
     if clear_tables:
         from snovault import DBSESSION
@@ -957,7 +959,8 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts':  # Always load up master_inserts
+    # load master-inserts unless argument specifies not to
+    if indir != 'master-inserts' and use_master_inserts:
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         load_all(testapp, master_inserts, [])
 
@@ -976,22 +979,37 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None, clear_tab
 
 
 def load_test_data(app, access_key_loc=None, clear_tables=False):
+    """
+    Load inserts and master-inserts
+    """
     load_data(app, access_key_loc, docsdir='documents', indir='inserts',
               clear_tables=clear_tables)
 
 
+def load_local_data(app, access_key_loc=None, clear_tables=False):
+    """
+    Load temp-local-inserts. If not present, load inserts and master-inserts
+    """
+    from pkg_resources import resource_filename
+    # if we have any json files in temp-local-inserts, use those
+    chk_dir = resource_filename('encoded', 'tests/data/temp-local-inserts')
+    use_temp_local = False
+    for (dirpath, dirnames, filenames) in os.walk(chk_dir):
+        use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
+
+    if use_temp_local:
+        load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
+                  clear_tables=clear_tables, use_master_inserts=False)
+    else:
+        load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                  clear_tables=clear_tables)
+
+
 def load_prod_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='prod-inserts',
-              clear_tables=clear_tables)
-
-
-def load_jin_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='jin_inserts',
-              clear_tables=clear_tables)
-
-
-def load_wfr_data(app, access_key_loc=None, clear_tables=False):
-    load_data(app, access_key_loc, indir='wfr-grouping-inserts',
+    """
+    Load master-inserts
+    """
+    load_data(app, access_key_loc, indir='master-inserts',
               clear_tables=clear_tables)
 
 
