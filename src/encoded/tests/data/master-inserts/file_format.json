@@ -118,7 +118,7 @@
     {
         "file_format": "bed",
         "standard_file_extension": "bed.gz",
-        "extrafile_formats": ["76dc8c06-67d8-487b-8fc8-d841752a0b60"],
+        "extrafile_formats": ["76dc8c06-67d8-487b-8fc8-d841752a0b60","92537561-4c02-440e-a51f-22b4b08b6918"],
         "description": "Bed format",
         "uuid": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
         "lab": "4dn-dcic-lab",
