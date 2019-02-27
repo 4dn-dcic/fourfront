@@ -29,7 +29,11 @@ ORDER = [
     'lab',
     'file_format',
     'ontology_term',  # validate_biosource_cell_line requires term_name
+<<<<<<< HEAD
     'experiment_type',
+=======
+    # 'experiment_type',
+>>>>>>> experiment_type
     'biosource',
     'biosample',
     'organism',  # allow the 'default' linkTo in individuals work

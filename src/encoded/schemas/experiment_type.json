@@ -4,8 +4,8 @@
     "id": "/profiles/experiment_type.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title"],
-    "identifyingProperties": ["experiment_name", "uuid", "aliases"],
+    "required": ["title", "lab", "award"],
+    "identifyingProperties": ["experiment_name", "uuid"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -13,20 +13,12 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/static_headers" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
-        },
-        "lab": {
-            "default": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-            "permission": "import_items"
-        },
-        "award": {
-            "default": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
-            "permission": "import_items"
         },
         "status": {
             "title": "Status",
@@ -53,7 +45,7 @@
         },
         "controlled_term": {
             "title": "Ontology Term",
-            "description": "EFO ontology term that matches this experiment type",
+            "description": "Ontology term that matches this experiment type",
             "type": "string",
             "linkTo": "OntologyTerm"
         },
@@ -64,124 +56,107 @@
             "enum": ["Sequencing", "Microscopy"],
             "lookup": 100
         },
-        "experiment_subcategory": {
-            "title": "Experiment Subcategory",
-            "description": "Sequencing or microscopy subcategory of the experiment type",
+        "assay_classification": {
+            "title": "Assay Classification",
+            "description": "Classification of assay type",
             "type": "string",
-            "enum": [
-                "1D DNA Enrichment",
-                "3C Ligation-based Assays",
-                "3C Unligated Multi-contact Assays",
-                "Single Cell Assays",
-                "RNA Enrichment",
-                "DNA-RNA Interactions",
-                "Nucleic Acid Labeling",
-                "Live-cell Time-lapse Imaging"
+            "lookup": 110,
+            "suggested_enum": [
+                "Linear DNA Enrichment",
+                "3C via Ligation",
+                "Ligation-free Multi-fragment 3C",
+                "RNA Quantification",
+                "RNA-DNA Proximity Capture",
+                "Fluorescence Localization"
             ]
         },
-        "grouping": {
-            "title": "Experiment Type Grouping",
-            "description": "Grouping of related experiment types within a subcategory",
+        "assay_subclassification": {
+            "title": "Assay Sub-classification",
+            "description": "Sub-classification of assay based on what is measured",
             "type": "string",
-            "enum": [
+            "lookup": 120,
+            "suggested_enum": [
                 "Replication Timing",
                 "Proximity to Organelle",
                 "DNA Binding",
                 "Open Chromatin",
-                "Minimum-bias Genome-wide Proximity Assays",
-                "Targeted Genome-wide Proximity Assays",
-                "Selected Region Proximity Assays",
-                "SPRITE",
-                "GAM",
-                "Single Cell HiC",
-                "RNA-seq",
-                "DNA-RNA Interactions",
-                "DNA FISH",
-                "RNA FISH"
+                "DNA-DNA Pairwise Interactions",
+                "DNA-DNA Pairwise Interactions - Single Cell",
+                "DNA-DNA Multi-way Interactions",
+                "DNA-DNA Multi-way Interactions of Selected Loci",
+                "DNA-DNA Pairwise Interactions of Enriched Regions",
+                "DNA-DNA Pairwise Interactions of Selected Loci",
+                "RNA-DNA Multi-way Interactions",
+                "Fixed Sample DNA Localization",
+                "Fixed Sample RNA Localization",
+                "Single Particle Tracking"
             ]
         },
         "other_tags": {
-            "title": "Other Tags",
-            "description": "Other tags that categorize or describe the experiment type",
+            "title": "Tags",
+            "description": "Additional categories for characterizing this experiment type",
             "type": "array",
+            "lookup": 150,
             "items": {
                 "title": "Tag",
                 "description": "A tag for the item.",
-                "type":  "string"
+                "type":  "string",
+                "suggested_enum": [
+                    "DNA-DNA",
+                    "RNA-DNA",
+                    "DNA-Protein",
+                    "Single Cell",
+                    "Multi-contact"
+                ]
             }
         },
-        "raw_files": {
+        "raw_file_types": {
             "title": "Raw Files",
             "description": "The type of raw files typically associated with the experiment type in the portal",
             "type": "string",
-            "enum": ["Reads (fastq) provided by lab"]
+            "lookup": 160,
+            "suggested_enum": ["Reads (fastq) provided by lab"]
         },
-        "processed_files": {
-            "title": "Processed Files",
-            "description": "The type of processed files typically associated with the experiment type in the portal",
+        "sop": {
+            "title": "SOP",
+            "description": "Approved SOP for the experiment type",
             "type": "string",
-            "linkTo": "StaticSection"
+            "lookup": 170,
+            "linkTo": "Protocol"
         },
-        "data_analysis": {
-            "title": "Data Analysis",
-            "description": "Static sections that contain information about relevant workflows",
-            "type": "array",
-            "items": {
-                "title": "Static Section",
-                "description": "Static section describing workflow",
-                "type": "string",
-                "linkTo": "StaticSection"
-            }
-        },
-        "assay_description": {
-            "title": "Assay Description",
-            "description": "Static section to be included on experiments of this type, detailing purpose/summary",
-            "type": "string",
-            "linkTo": "StaticSection"
-        },
-        "static_headers": {
-            "title": "Static Headers",
-            "description": "DON'T SUBMIT, auto-generated.",
-            "type": "array",
-            "exclude_from": ["submit4dn", "FFedit-create"]
-        },
-        "protocol": {
-            "title": "Protocol",
-            "description": "Protocol(s) that have been approved for the experiment type",
-            "type": "array",
-            "items": {
-                "title": "Protocol",
-                "description": "Protocol metadata.",
-                "type": "string",
-                "linkTo": "Protocol"
-            }
-        },
-        "references": {
+        "reference_pubs": {
             "title": "Reference Publications",
             "description": "Reference publication(s) for the experiment type",
-            "type": "string"
+            "type": "array",
+            "lookup": 180,
+            "items": {
+                "title": "Publication",
+                "description": "Publication metadata",
+                "type": "string",
+                "linkTo": "Publication"
+            }
         }
     },
     "facets": {
         "experiment_category": {
             "title": "Experiment Category"
         },
-        "experiment_subcategory": {
-            "title": "Experiment Subcategory"
+        "assay_subclass_short": {
+            "title": "Assay Type"
         },
-        "grouping": {
-            "title": "Experiment Type Grouping"
+        "other_tags": {
+            "title": "Additional Categories"
         }
     },
     "columns": {
         "experiment_category": {
             "title": "Experiment Category"
         },
-        "experiment_subcategory": {
-            "title": "Experiment Subcategory"
+        "assay_classification": {
+            "title": "Assay Classification"
         },
-        "grouping": {
-            "title": "Experiment Type Grouping"
+        "assay_subclassification": {
+            "title": "Assay Subclassification"
         }
     }
 }

@@ -3,7 +3,7 @@
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault import (
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
     CONNECTION
@@ -94,42 +94,6 @@ class Enzyme(Item):
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
     embedded_list = Item.embedded_list + ['enzyme_source.title']
-
-
-@collection(
-    name='experiment-types',
-    unique_key='experiment_type:experiment_name',
-    properties={
-        'title': 'Experiment Types',
-        'description': 'Listing of experiment types for 4DN items',
-    })
-class ExperimentType(Item):
-    """The ExperimentType class that descrbes an experiment type that can be associated with an experiment."""
-
-    item_type = 'experiment_type'
-    schema = load_schema('encoded:schemas/experiment_type.json')
-    name_key = 'experiment_name'
-
-    embedded_list = [
-        "static_headers.content",
-        "static_headers.title",
-        "static_headers.filetype",
-        "static_headers.section_type",
-        "static_headers.options.default_open",
-        "static_headers.options.title_icon"
-        ]
-
-    def _update(self, properties, sheets=None):
-        # set name based on what is entered into title
-        properties['experiment_name'] = set_namekey_from_title(properties)
-
-        static_keys = ['processed_files', 'assay_description', 'data_analysis']
-        if len([properties[key] for key in static_keys if properties.get(key)]) > 0:
-            headers = [properties.get('assay_description'), properties.get('processed_files')]
-            headers += properties.get('data_analysis', [])
-            properties['static_headers'] = [header for header in headers if header]
-
-        super(ExperimentType, self)._update(properties, sheets)
 
 
 @collection(
