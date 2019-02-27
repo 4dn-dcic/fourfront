@@ -4,7 +4,7 @@ from snovault.schema_utils import load_schema
 from snovault.fourfront_utils import crawl_schema
 import re
 
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 SCHEMA_FILES = [
     f for f in resource_listdir('encoded', 'schemas')

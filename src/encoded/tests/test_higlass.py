@@ -1,6 +1,6 @@
 import pytest
 from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json, beddb_file_json, chromsizes_file_json
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 # Test Higlass display endpoints.
 
@@ -495,6 +495,15 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_jso
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
+    # The new top track should not be very tall, since there is a 2D file in the center.
+    bedGraph_track = [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ][0]
+    assert_true(
+        bedGraph_track["height"] < 100,
+        "1D file is too big: height should be less than 100, got {actual} instead.".format(
+            actual=bedGraph_track["height"],
+        )
+    )
+
 def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
 
@@ -533,6 +542,17 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 1)
 
+    # The new top track should be tall, since there are no other tracks. But not too tall.
+    assert_true(
+        new_higlass_json["views"][0]["tracks"]["top"][0]["height"] >= 100 and new_higlass_json["views"][0]["tracks"]["top"][0]["height"] < 600,
+        "1D file is wrong size: height should be at least 100 and less than 600, got {actual} instead.".format(
+            actual=new_higlass_json["views"][0]["tracks"]["top"][0]["height"],
+        )
+    )
+
+    # Make sure there is a label.
+    assert_true(new_higlass_json["views"][0]["tracks"]["top"][0]["options"]["labelPosition"] != "hidden")
+
     # Add another bedGraph file. Make sure the bedGraphs are stacked atop each other.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
@@ -544,6 +564,16 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
 
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 2)
+
+    # The new top tracks should be very tall, since there are no other tracks.
+    bedGraph_tracks = [ t for t in new_higlass_json["views"][0]["tracks"]["top"] if "-divergent-bar" in t["type"] ]
+    for t in bedGraph_tracks:
+        assert_true(
+            t["height"] >= 100,
+            "1D file is too small: height should be at least 100, got {actual} instead.".format(
+                actual=t["height"],
+            )
+        )
 
 def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
