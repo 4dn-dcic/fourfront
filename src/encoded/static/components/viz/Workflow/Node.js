@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import { console } from './../../util';
 import { requestAnimationFrame } from './../utilities';
 import _ from 'underscore';
@@ -9,7 +10,7 @@ import { Fade } from 'react-bootstrap';
 import { traceNodePathAndRun } from './parsing-functions';
 
 
-export class DefaultNodeElement extends React.Component {
+export class DefaultNodeElement extends React.PureComponent {
 
     static propTypes = {
         'node' : PropTypes.object,
@@ -18,7 +19,7 @@ export class DefaultNodeElement extends React.Component {
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
         'columnWidth' : PropTypes.number
     }
-    
+
     icon(){
         var iconClass;
         if (this.props.node.type === 'input' || this.props.node.type === 'output'){
@@ -104,6 +105,9 @@ export default class Node extends React.PureComponent {
     static isSelected(currentNode, selectedNode){
         if (!selectedNode) return false;
         if (selectedNode === currentNode) return true;
+        /* 
+        // We shouldn't need the below and can just rely on a simple reference comparison
+        // Keeping around for now/reference.
         if (typeof selectedNode.name === 'string' && typeof currentNode.name === 'string') {
             if (selectedNode.name === currentNode.name){
                 // Case: IO node (which would have add'l self-generated ID to ensure uniqueness)
@@ -115,6 +119,7 @@ export default class Node extends React.PureComponent {
             }
             return false;
         }
+        */
         return false;
     }
 
@@ -146,39 +151,31 @@ export default class Node extends React.PureComponent {
         return false;
     }
 
+    /**
+     * Returns list of common step nodes that input/output nodes
+     * are both input into.
+     */
+    static findCommonStepNodesInputInto(){
+        var nodes = Array.from(arguments),
+            nodeInputOfLists = _.filter(_.pluck(nodes, 'inputOf'), function(ioList){ return Array.isArray(ioList) && ioList.length > 0; });
+
+        if (nodeInputOfLists.length !== nodes.length) return false;
+        return _.intersection(...nodeInputOfLists);
+    }
+
+    static isInputOfSameStep(){ return Node.findCommonStepNodesInputInto(...arguments).length > 0; }
+
     static isRelated(currentNode, selectedNode) {
 
         if (!selectedNode) return false;
 
-        if (Node.isFromSameWorkflowType(currentNode, selectedNode)) return true;
-
-        if (selectedNode.name && currentNode.name) {
-            if (selectedNode.name === currentNode.name || _.any((currentNode.meta.source || []).concat(currentNode.meta.target || []), function(s){ return s.name === selectedNode.name; })) {
-                // Make sure target.step == selectedNode.inputOf.name
-                var i;
-                if (currentNode.nodeType === 'input' || currentNode.nodeType === 'output'){
-                    if (((Array.isArray(selectedNode.inputOf) && selectedNode.inputOf[0] && selectedNode.inputOf[0].name) || 'a') === ((Array.isArray(currentNode.inputOf) && currentNode.inputOf[0] && currentNode.inputOf[0].name) || 'b')) return true;
-                    if (Array.isArray(selectedNode.inputOf) && Array.isArray(currentNode.meta.target)){
-                        for (i = 0; i < currentNode.meta.target.length; i++){
-                            if (selectedNode.inputOf[0] && currentNode.meta.target[i].step === selectedNode.inputOf[0].name) {
-                                return true;
-                            }
-                        }
-                    }
-                    // Check related workflow
-                    
-
-                }
-                if (currentNode.nodeType === 'output'){
-                    if (((selectedNode.outputOf && selectedNode.outputOf.name) || 'a') === ((currentNode.outputOf && currentNode.outputOf.name) || 'b')) return true;
-                    if (selectedNode.outputOf !== 'undefined' && Array.isArray(currentNode.meta.source)){
-                        for (i = 0; i < currentNode.meta.source.length; i++){
-                            if (typeof selectedNode.outputOf !== 'undefined' && currentNode.meta.source[i].step === selectedNode.outputOf.name) {
-                                return true;
-                            }
-                        }
-                    }
-                }
+        // Ensure that an argument name (as appears on a step input/output arg) matches selectedNode name.
+        if (selectedNode.name === currentNode.name || _.any((currentNode._source || []).concat(currentNode._target || []), function(s){ return s.name === selectedNode.name; })) {
+            if (currentNode.nodeType === 'input' || currentNode.nodeType === 'output') { // An output node may be an input of another node.
+                return Node.isInputOfSameStep(currentNode, selectedNode);
+            }
+            if (currentNode.nodeType === 'input-group') {
+                return Node.isInputOfSameStep(currentNode, selectedNode) && Node.isFromSameWorkflowType(currentNode, selectedNode);
             }
         }
         return false;
@@ -198,89 +195,62 @@ export default class Node extends React.PureComponent {
                 return true;
             }
         }
-        /*
-        if (Array.isArray(currentNode.meta.source) && Array.isArray(selectedNode.meta.source)){
-            if (
-                _.intersection(
-                    _.pluck(_.filter(currentNode.meta.source, function(s){ return (typeof s.workflow === 'string'); }), 'workflow'),
-                    _.pluck(_.filter(selectedNode.meta.source, function(s){ return (typeof s.workflow === 'string'); }), 'workflow')
-                ).length > 0
-            ) return true;
-        }
-        */
+        return false;
     }
 
     constructor(props){
         super(props);
-        this.updateNodeElementData = this.updateNodeElementData.bind(this);
-        this.render = this.render.bind(this);
-        this.isSelected = this.isSelected.bind(this);
+        // Own memoized variants. Binding unnecessary most likely.
+        this.isInSelectionPath  = memoize(Node.isInSelectionPath.bind(this));
+        this.isRelated          = memoize(Node.isRelated.bind(this));
+        this.isDisabled         = memoize(this.isDisabled.bind(this));
     }
 
+    /** Scrolls the scrollable element to the current context node, if any. */
     componentDidMount(){
-        if (
-            this.props.isCurrentContext
-            && (this.props.countInActiveContext === 1 || (this.props.countInActiveContext > 1 && this.props.lastActiveContextNode === this.props.node))
-            && this.props.scrollContainerWrapperElement
-        ){
-            var scrollWrapper = this.props.scrollContainerWrapperElement;
-            var scrollLeft = scrollWrapper.scrollLeft;
-            var containerWidth = scrollWrapper.offsetWidth || scrollWrapper.clientWidth;
+        var { 
+            countInActiveContext, lastActiveContextNode,
+            node, scrollContainerWrapperElement, columnWidth, columnSpacing
+        } = this.props,
+            sw = scrollContainerWrapperElement;
 
-            var nodeXEnd = this.props.node.x + this.props.columnWidth + this.props.columnSpacing;
+        if (
+            node.isCurrentContext && sw &&
+            (countInActiveContext === 1 || (countInActiveContext > 1 && lastActiveContextNode === node))
+        ){
+            var scrollLeft = sw.scrollLeft,
+                containerWidth = sw.offsetWidth || sw.clientWidth,
+                nodeXEnd = node.x + columnWidth + columnSpacing;
 
             if (nodeXEnd > (containerWidth + scrollLeft)){
-                scrollWrapper.scrollLeft = (nodeXEnd - containerWidth);
+                sw.scrollLeft = (nodeXEnd - containerWidth);
             }
         }
-        this.updateNodeElementData();
     }
 
-    componentDidUpdate(prevProps){
-        if (this.props.node !== prevProps.node){
-            this.updateNodeElementData();
+    isDisabled(node, isNodeDisabled){
+        if (typeof isNodeDisabled === 'function'){
+            return isNodeDisabled(node);
         }
-    }
-
-    updateNodeElementData(props = this.props){
-        if (this.refs && this.refs.nodeOuterElem){
-            this.refs.nodeOuterElem.nodeData = {
-                'node' : props.node,
-                'reactInstance' : this
-            };
+        if (typeof isNodeDisabled === 'boolean'){
+            return isNodeDisabled;
         }
-    }
-
-    isSelected(){ return Node.isSelected(this.props.node, this.props.selectedNode); }
-    isRelated() { return Node.isRelated(this.props.node, this.props.selectedNode); }
-
-    isInSelectionPath(){
-        if (!this.props.selectedNode) return false;
-        return Node.isInSelectionPath(this.props.node, this.props.selectedNode);
+        return false;
     }
 
     render(){
-        var node             = this.props.node,
-            disabled         = typeof node.disabled !== 'undefined' ? node.disabled : null,
+        var { node, isNodeDisabled, className, columnWidth, renderNodeElement, selectedNode } = this.props,
+            disabled         = typeof node.disabled !== 'undefined' ? node.disabled : this.isDisabled(node, isNodeDisabled),
             isCurrentContext = typeof node.isCurrentContext !== 'undefined' ? node.isCurrentContext : null,
-            classNameList    = ["node", "node-type-" + node.nodeType];
+            classNameList    = ["node", "node-type-" + node.nodeType],
+            selected         = (!disabled && Node.isSelected(node, selectedNode)) || false,
+            related          = (!disabled && this.isRelated(node, selectedNode)) || false,
+            inSelectionPath  = selected || (!disabled && this.isInSelectionPath(node, selectedNode)) || false;
 
-        if (disabled === null && typeof this.props.isNodeDisabled === 'function'){
-            disabled = this.props.isNodeDisabled(node);
-        }
-
-        if (isCurrentContext === null && typeof this.props.isNodeCurrentContext === 'function'){
-            isCurrentContext = this.props.isNodeCurrentContext(node);
-        }
-
-        var selected = this.isSelected() || false;
-        var related = this.isRelated() || false;
-        var inSelectionPath = selected || this.isInSelectionPath();
-
-        if      (disabled)                                   classNameList.push('disabled');
-        if      (isCurrentContext)                           classNameList.push('current-context');
-        if      (typeof this.props.className === 'function') classNameList.push(this.props.className(node));
-        else if (typeof this.props.className === 'string'  ) classNameList.push(this.props.className);
+        if      (disabled)                        classNameList.push('disabled');
+        if      (isCurrentContext)                classNameList.push('current-context');
+        if      (typeof className === 'function') classNameList.push(className(node));
+        else if (typeof className === 'string'  ) classNameList.push(className);
 
         var visibleNodeProps = _.extend(
             _.omit(this.props, 'children', 'onMouseEnter', 'onMouseLeave', 'onClick', 'className', 'nodeElement'),
@@ -288,26 +258,18 @@ export default class Node extends React.PureComponent {
         );
 
         return (
-            <div
-                className={classNameList.join(' ')}
-                data-node-key={node.id || node.name}
-                data-node-type={node.nodeType}
-                data-node-global={node.meta && node.meta.global === true}
-                data-node-selected={selected}
-                data-node-in-selection-path={inSelectionPath}
-                data-node-related={related}
-                data-node-type-detail={node.ioType && node.ioType.toLowerCase()}
-                data-node-column={node.column}
-                style={{
-                    'top' : node.y,
-                    'left' : node.x,
-                    'width' : this.props.columnWidth || 100,
-                    'zIndex' : 2 + (node.indexInColumn || 0)
-                }}
-                ref="nodeOuterElem"
-            >
-                <div className="inner" children={this.props.renderNodeElement(node, visibleNodeProps)}
-                    onMouseEnter={this.props.onMouseEnter} onMouseLeave={this.props.onMouseLeave} onClick={disabled ? null : this.props.onClick} />
+            <div className={classNameList.join(' ')} data-node-key={node.id || node.name}
+                data-node-type={node.nodeType} data-node-global={node.meta && node.meta.global === true}
+                data-node-selected={selected} data-node-in-selection-path={inSelectionPath}
+                data-node-related={related} data-node-type-detail={node.ioType && node.ioType.toLowerCase()}
+                data-node-column={node.column} style={{
+                    'top'       : node.y,
+                    'left'      : node.x,
+                    'width'     : columnWidth || 100,
+                    'zIndex'    : 2 + (node.indexInColumn || 0)
+                }}>
+                <div className="inner" children={renderNodeElement(node, visibleNodeProps)}
+                    {..._.pick(this.props, 'onMouseEnter', 'onMouseLeave')} onClick={disabled ? null : this.props.onClick} />
             </div>
         );
     }

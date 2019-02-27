@@ -7,13 +7,12 @@ import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
     ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
-    WorkflowNodeElement, CollapsibleItemViewButtonToolbar
+    WorkflowNodeElement, CollapsibleItemViewButtonToolbar, WorkflowGraphSectionControls
 } from './components';
 import DefaultItemView from './DefaultItemView';
 import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
-import { DropdownButton, MenuItem, Checkbox, Button, Collapse, ButtonToolbar } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 
 
@@ -66,7 +65,9 @@ export function commonGraphPropsFromProps(props){
     };
 
     if (props.isFullscreen) {
-        graphProps.width = props.windowWidth;
+        graphProps.width = props.windowWidth - 40;
+    } else if (props.width){
+        graphProps.width = props.width;
     }
 
     return graphProps;
@@ -104,11 +105,12 @@ export default class WorkflowView extends DefaultItemView {
     getTabViewContents(){
 
         var { context, windowHeight } = this.props,
+            width   = this.getTabViewWidth(),
             tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
                 {
                     tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
                     key : 'graph',
-                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} />
+                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} width={width} />
                 }
             ];
 
@@ -124,168 +126,23 @@ export default class WorkflowView extends DefaultItemView {
     }
 
     typeInfo(){
-        return { 'title' : this.props.context.workflow_type, description : 'Type of Workflow' };
+        var context = this.props.context,
+            categories = Array.isArray(context.categories) && context.categories.length > 0 && context.categories;
+        if (!categories) return null;
+        return {
+            'title'         : categories.join(', '),
+            'description'   : (categories.length === 1 ? 'Workflow Category' : 'Workflow Categories')
+        };
     }
 
 }
 
 
-export class WorkflowGraphSectionControls extends React.Component {
-
-    static analysisStepsSet(context){
-        if (!Array.isArray(context.steps)) return false;
-        if (context.steps.length === 0) return false;
-        return true;
-    }
-
-    static keyTitleMap = {
-        'detail'    : 'Analysis Steps',
-        'basic'     : 'Basic Inputs & Outputs',
-        'cwl'       : 'CWL Graph'
-    }
-
-    chartTypeDropdown(){
-        var detail = WorkflowGraphSectionControls.analysisStepsSet(this.props.context) ? (
-            <MenuItem eventKey='detail' active={this.props.showChartType === 'detail'}>
-                Analysis Steps
-            </MenuItem>
-        ) : null;
-    
-        var basic = (
-            <MenuItem eventKey='basic' active={this.props.showChartType === 'basic'}>
-                Basic Inputs & Outputs
-            </MenuItem>
-        );
-
-        return (
-            <DropdownButton id="detail-granularity-selector" key="chart-type"
-                className="for-state-showChart" pullRight
-                onSelect={this.props.onChangeShowChartType}
-                title={WorkflowGraphSectionControls.keyTitleMap[this.props.showChartType]}>
-                { basic }{ detail }
-            </DropdownButton>
-        );
-    }
-
-    rowSpacingTypeDropdown(){
-        if (typeof this.props.rowSpacingType !== 'string' || typeof this.props.onChangeRowSpacingType !== 'function') {
-            return null;
-        }
-        return (
-            <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType} key="row-spacing-type"/>
-        );
-    }
-
-    fullScreenButton(){
-        var { fullscreenViewEnabled, onToggleFullScreenView } = this.props;
-        if( typeof fullscreenViewEnabled === 'boolean' && typeof onToggleFullScreenView === 'function'){
-            return (
-                <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled"
-                    data-tip={!fullscreenViewEnabled ? 'Expand to full screen' : null} key="full-screen-btn">
-                    <i className={"icon icon-fw icon-" + (!fullscreenViewEnabled ? 'expand' : 'compress')}/>
-                </Button>
-            );
-        }
-        return null;
-    }
-
-    parametersCheckbox(){
-        if (typeof this.props.showParameters !== 'boolean' || typeof this.props.onToggleShowParameters !== 'function'){
-            return null;
-        }
-        return (
-            <Checkbox checked={this.props.showParameters} onChange={this.props.onToggleShowParameters}
-                className="checkbox-container for-state-showParameters" key="params-checkbox">
-                Show Parameters
-            </Checkbox>
-        );
-    }
-
-    referenceFilesCheckbox(){
-        if (typeof this.props.showReferenceFiles !== 'boolean' || typeof this.props.onToggleReferenceFiles !== 'function') return null;
-        return (
-            <Checkbox checked={this.props.showReferenceFiles} onChange={this.props.onToggleReferenceFiles} key="ref-files-checkbox"
-                disabled={this.props.isReferenceFilesCheckboxDisabled} className="checkbox-container for-state-showReferenceFiles">
-                Show Reference Files
-            </Checkbox>
-        );
-    }
-
-    /**
-     * @param {...JSX.Element} element - Element(s) to wrap in controls wrapper.
-     * @returns {JSX.Element} Workflow Controls Element.
-     */
-    wrapper(){
-        return (
-            <CollapsibleItemViewButtonToolbar
-                children={[...arguments]}
-                constantButtons={this.fullScreenButton()}
-                windowWidth={this.props.windowWidth} />
-        );
-    }
-
-    render(){
-        return this.wrapper(this.referenceFilesCheckbox(), this.parametersCheckbox(), this.chartTypeDropdown(), this.rowSpacingTypeDropdown());
-    }
-}
-
-
-export class RowSpacingTypeDropdown extends React.Component {
-    
-    static propTypes = {
-        'onSelect' : PropTypes.func.isRequired,
-        'currentKey' : Graph.propTypes.rowSpacingType,
-    }
-
-    static rowSpacingTypeTitleMap = {
-        'stacked' : 'Stack Nodes',
-        'compact' : 'Center Nodes',
-        'wide' : 'Spread Nodes'
-    }
-
-    render(){
-
-        var currentKey = this.props.currentKey;
-
-        var stacked = (
-            <MenuItem eventKey='stacked' active={currentKey === 'stacked'}>
-                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['stacked'] }
-            </MenuItem>
-        );
-    
-        var compact = (
-            <MenuItem eventKey='compact' active={currentKey === 'compact'}>
-                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['compact'] }
-            </MenuItem>
-        );
-
-        var spread = (
-            <MenuItem eventKey='wide' active={currentKey === 'wide'}>
-                { RowSpacingTypeDropdown.rowSpacingTypeTitleMap['wide'] }
-            </MenuItem>
-        );
-    
-    
-        return (
-            <DropdownButton id={this.props.id || "rowspacingtype-select"}
-                pullRight onSelect={this.props.onSelect} title={RowSpacingTypeDropdown.rowSpacingTypeTitleMap[currentKey]}>
-                { stacked }{ compact }{ spread }
-            </DropdownButton>
-        );
-    }
-
-}
-
-
-
-
-export class WorkflowGraphSection extends React.Component {
+export class WorkflowGraphSection extends React.PureComponent {
 
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.basicGraph = this.basicGraph.bind(this);
-        this.detailGraph = this.detailGraph.bind(this);
         this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
         this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
@@ -293,7 +150,6 @@ export class WorkflowGraphSection extends React.Component {
         this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
         this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
         this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
-        this.render = this.render.bind(this);
         this.state = _.extend({
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
@@ -321,53 +177,52 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     commonGraphProps(){
-        var graphData = this.parseAnalysisSteps();
+        var { showParameters, showReferenceFiles, rowSpacingType } = this.state,
+            graphData = this.parseAnalysisSteps();
         
         // Filter out legend items which aren't relevant for this context.
         var keepItems = ['Input File', 'Output File', 'Input Reference File'];
-        if (this.state.showParameters){
+        if (showParameters){
             keepItems.push('Input Parameter');
         }
-        if (this.state.showReferenceFiles){
+        if (showReferenceFiles){
             keepItems.push('Input Reference File');
         }
         keepItems.push('Intermediate File');
-        var legendItems = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems);
-        var commonGraphProps = commonGraphPropsFromProps(_.extend({ 'legendItems' : legendItems }, this.props));
 
-        return _.extend(commonGraphProps, this.parseAnalysisSteps(), {'rowSpacingType' : this.state.rowSpacingType });
-    }
+        var legendItems         = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems),
+            commonGraphProps    = commonGraphPropsFromProps(_.extend({ legendItems }, this.props));
 
-    basicGraph(){
-        if (!Array.isArray(this.props.context.steps)) return null;
-        return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={this.props.mounted && this.refs.container ? (this.refs.container.offsetWidth - 180) / 3 : 180} />;
+        return _.extend(commonGraphProps, this.parseAnalysisSteps(), { rowSpacingType });
     }
-
-    detailGraph(){
-        if (!Array.isArray(this.props.context.steps)) return null;
-        return <Graph { ...this.commonGraphProps() } />;
-    }
-    
 
     onToggleShowParameters(){
-        this.setState({ 'showParameters' : !this.state.showParameters });
+        this.setState(function({ showParameters }){
+            return { 'showParameters' : !showParameters };
+        });
     }
 
     onToggleReferenceFiles(){
-        this.setState({ 'showReferenceFiles' : !this.state.showReferenceFiles });
+        this.setState(function({ showReferenceFiles }){
+            return { 'showReferenceFiles' : !showReferenceFiles };
+        });
     }
 
     onChangeRowSpacingType(eventKey, evt){
         requestAnimationFrame(()=>{
-            if (eventKey === this.state.rowSpacingType) return;
-            this.setState({ 'rowSpacingType' : eventKey });
+            this.setState(function({ rowSpacingType }){
+                if (eventKey === rowSpacingType) return null;
+                return { 'rowSpacingType' : eventKey };
+            });
         });
     }
 
     onChangeShowChartType(eventKey, evt){
         requestAnimationFrame(()=>{
-            if (eventKey === this.state.showChart) return;
-            this.setState({ 'showChart' : eventKey });
+            this.setState(function({ showChart }){
+                if (eventKey === showChart) return null;
+                return { 'showChart' : eventKey };
+            });
         });
     }
 
@@ -376,23 +231,32 @@ export class WorkflowGraphSection extends React.Component {
     }
 
     body(){
-        /* if (this.state.showChart === 'cwl') return this.cwlGraph(); */
-        if (this.state.showChart === 'detail') return this.detailGraph();
-        if (this.state.showChart === 'basic') return this.basicGraph();
-        return null;
+        var { context, mounted, width } = this.props,
+            { showChart } = this.state;
+
+        if (!Array.isArray(context.steps)) return null;
+
+        if (showChart === 'basic') {
+            return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 180) / 3 : 180} />;
+        } else if (showChart === 'detail') {
+            return <Graph { ...this.commonGraphProps() } />;
+        } else {
+            throw new Error('No valid chart type set to be displayed.');
+        }
     }
 
     render(){
         var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
             { isFullscreen } = this.props;
+
         return (
-            <div ref="container" className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls
-                        {..._.pick(this.props, 'context', 'href', 'windowWidth')}
+                        {..._.pick(this.props, 'context', 'href', 'windowWidth', 'isFullscreen')}
                         showChartType={showChart} rowSpacingType={rowSpacingType} showParameters={showParameters}
-                        showReferenceFiles={showReferenceFiles} fullscreenViewEnabled={isFullscreen}
+                        showReferenceFiles={showReferenceFiles}
                         onChangeShowChartType={this.onChangeShowChartType}
                         onChangeRowSpacingType={this.onChangeRowSpacingType}
                         onToggleShowParameters={this.onToggleShowParameters}

@@ -1,6 +1,30 @@
 import pytest
 import copy
 
+ORDER = [
+    'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
+    'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
+    'genomic_region', 'target', 'imaging_path', 'publication',
+    'publication_tracking', 'document', 'image', 'vendor', 'construct',
+    'modification', 'protocol', 'sop_map', 'biosample_cell_culture',
+    'individual_human', 'individual_mouse', 'individual_fly',
+    'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
+    'treatment_agent', 'biosample', 'quality_metric_fastqc',
+    'quality_metric_bamqc', 'quality_metric_pairsqc',
+    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq',
+    'quality_metric_atacseq', 'microscope_setting_d1', 'microscope_setting_d2',
+    'microscope_setting_a1', 'microscope_setting_a2', 'file_fastq',
+    'file_processed', 'file_reference', 'file_calibration', 'file_microscopy',
+    'file_set', 'file_set_calibration', 'file_set_microscope_qc',
+    'file_vistrack', 'experiment_hi_c', 'experiment_capture_c',
+    'experiment_repliseq', 'experiment_atacseq', 'experiment_chiapet',
+    'experiment_damid', 'experiment_seq', 'experiment_tsaseq',
+    'experiment_mic', 'experiment_set', 'experiment_set_replicate',
+    'data_release_update', 'software', 'analysis_step', 'workflow',
+    'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
+    'sysinfo', 'tracking_item', 'quality_metric_flag',
+    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
+]
 
 @pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
@@ -391,7 +415,9 @@ def file_formats(testapp, lab, award):
         'pairsam_px2': {'standard_file_extension': 'sam.pairs.gz.px2',
                         "valid_item_types": ["FileProcessed"]},
         'bai': {'standard_file_extension': 'bam.bai',
-                "valid_item_types": ["FileProcessed"]}
+                "valid_item_types": ["FileProcessed"]},
+        'beddb' : {"standard_file_extension": "beddb",
+                "valid_item_types": ["FileProcessed", "FileReference"]},
     }
     format_info = {
         'fastq': {'standard_file_extension': 'fastq.gz',
@@ -418,6 +444,11 @@ def file_formats(testapp, lab, award):
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
         'bg': {'standard_file_extension': 'bedGraph.gz',
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
+        'bigbed': {'standard_file_extension': 'bb',
+               "valid_item_types": ["FileProcessed", "FileReference"]},
+        'bed' : {"standard_file_extension": "bed.gz",
+                "extrafile_formats": ['beddb'],
+                "valid_item_types": ["FileProcessed", "FileReference"]}
     }
 
     for eff, info in ef_format_info.items():
@@ -610,6 +641,19 @@ def workflow_run_json(testapp, lab, award, workflow_bam):
 
 
 @pytest.fixture
+def workflow_run_awsem_json(testapp, lab, award, workflow_bam):
+    return {'run_platform': 'AWSEM',
+            'parameters': [],
+            'workflow': workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'award': award['@id'],
+            'awsem_job_id': '1235',
+            'lab': lab['@id'],
+            'run_status': 'started',
+            }
+
+
+@pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
     item = {
         "description": "GM12878 prepared for Hi-C",
@@ -642,7 +686,6 @@ def workflow_bam(testapp, lab, award):
     item = {
         'title': "test workflow",
         'name': "test_workflow",
-        'workflow_type': "Hi-C data analysis",
         'award': award['@id'],
         'lab': lab['@id']
     }
@@ -821,3 +864,13 @@ def oterm(uberon_ont):
 @pytest.fixture
 def lung_oterm(oterm, testapp):
     return testapp.post_json('/ontology_term', oterm).json['@graph'][0]
+
+
+@pytest.fixture
+def quality_metric_fastqc(testapp, award, lab):
+    item =  {
+        "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/quality_metric_fastqc', item).json['@graph'][0]

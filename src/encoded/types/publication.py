@@ -19,57 +19,79 @@ from encoded.types.experiment_set import invalidate_linked_items
 ################################################
 
 
+def find_best_date(date_data):
+    date = None
+    a2d = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+           'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
+    if 'DP' in date_data:
+        ymd = [d.strip() for d in date_data['DP'].split(' ')]
+        if not ymd or len(ymd[0]) != 4:  # problem with the year
+            pass
+        else:
+            date = ymd.pop(0)
+            if ymd:
+                mm = a2d.get(ymd.pop(0))
+                if mm:
+                    date += '-{}'.format(mm)
+                    if ymd:
+                        dd = ymd.pop(0)
+                        if len(dd) <= 2:
+                            date += '-{}'.format(dd.zfill(2))
+            return date
+    if 'DEP' in date_data:
+        date = date_data['DEP']
+        if len(date) != 8:
+            date = None
+    if not date and 'DA' in date_data:
+        date = date_data['DA']
+    if date:
+        datestr = date[:4]+"-"+date[4:6]+"-"+date[6:8]
+        if len(datestr) == 10:
+            return datestr
+    return None
+
+
 def fetch_pubmed(PMID):
     "Takes the number part of PMID and returns title, abstract and authors"
-    title = ''
-    abstract = ''
-    author_list = []
-    authors = ''
-    date = ''
-    journal = ''
+
+    field2prop = {'TI': 'title', 'AB': 'abstract', 'DP': 'date_published',
+                  'DEP': 'date_published', 'DA': 'date_published', 'JT': 'journal',
+                  'AU': 'authors', 'CN': 'authors'}
+    pub_data = {v: None for v in field2prop.values()}
+    pub_data['authors'] = []
+    pub_data['date_published'] = {}
     NIHe = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
     NIHw = "https://www.ncbi.nlm.nih.gov/pubmed/"
     url = NIHw + PMID
+    pub_data['url'] = url
     www = "{NIH}efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(NIH=NIHe, id=PMID)
     # try fetching data 5 times
     for count in range(5):
         resp = requests.get(www)
         if resp.status_code == 200:
             break
+        if resp.status_code == 429:
+            time.sleep(5)
+            continue
         if count == 4:
-            return
+            return {}
     # parse the text to get the fields
     r = resp.text
     full_text = r.replace('\n      ', ' ')
-    data_list = [a.split('-', 1) for a in full_text.split('\n') if a != '']
-    for key_pb, data_pb in data_list:
-        key_pb = key_pb.strip()
-        # grab title
-        if key_pb == 'TI':
-            title = data_pb.strip()
-        # grab the abstract
-        if key_pb == 'AB':
-            abstract = data_pb.strip()
-        # grab the date added
-        if key_pb == 'DEP':
-            date_flat = data_pb.strip()
-            date = date_flat[:4]+"-"+date_flat[4:6]+"-"+date_flat[6:8]
-        # if date not set by DEP yet, assign from DA in case DEP does not exist
-        if date == "":
-            if key_pb == 'DA':
-                date_flat = data_pb.strip()
-                date = date_flat[:4]+"-"+date_flat[4:6]+"-"+date_flat[6:8]
-        # get journal name
-        if key_pb == 'JT':
-            journal = data_pb.strip()
-        # accumulate authors
-        if key_pb == 'AU':
-            author_list.append(data_pb.strip())
-        # add consortiums to author list
-        if key_pb == 'CN':
-            author_list.append(data_pb.strip())
-        authors = author_list
-    return title, abstract, authors, url, date, journal
+    for line in full_text.split('\n'):
+        if line.strip():
+            key, val = [a.strip() for a in line.split('-', 1)]
+            if key in field2prop:
+                if key in ['DP', 'DEP', 'DA']:
+                    pub_data[field2prop[key]][key] = val
+                elif key in ['AU', 'CN']:
+                    pub_data[field2prop[key]].append(val)
+                else:
+                    pub_data[field2prop[key]] = val
+    # deal with date
+    if pub_data['date_published']:  # there is some date data
+        pub_data['date_published'] = find_best_date(pub_data['date_published'])
+    return {k: v for k, v in pub_data.items() if v is not None}
 
 
 class BioRxivExtractor(HTMLParser):
@@ -77,8 +99,8 @@ class BioRxivExtractor(HTMLParser):
         HTMLParser.__init__(self)
         self.title = ''
         self.abstract = ''
-        self.author_list = []
-        self.date = ''
+        self.authors = []
+        self.date_published = ''
 
     def handle_starttag(self, tag, attrs):
         attr = ''
@@ -89,18 +111,14 @@ class BioRxivExtractor(HTMLParser):
             if attr.get('name') == "DC.Description":
                 self.abstract = attr.get('content')
             if attr.get('name') == "DC.Contributor":
-                self.author_list.append(attr.get('content'))
+                self.authors.append(attr.get('content'))
             if attr.get('name') == "DC.Date":
-                self.date = attr.get('content')
+                self.date_published = attr.get('content')
 
 
 def fetch_biorxiv(url):
     """Takes Url, uses the BioRxivExtractor class and returns title abstract authors url"""
-    title = ''
-    abstract = ''
-    authors = ''
-    date = ''
-    journal = "bioRxiv"
+    parserfields = ['title', 'abstract', 'authors', 'date_published']
     # try fetching data 5 times and return empty if fails
     for count in range(5):
         r = requests.get(url)
@@ -111,11 +129,10 @@ def fetch_biorxiv(url):
     resp = r.text.encode('utf-8').decode('ascii', 'ignore')
     parser = BioRxivExtractor()
     parser.feed(resp)
-    title = parser.title
-    abstract = parser.abstract
-    date = parser.date
-    authors = parser.author_list
-    return title, abstract, authors, url, date, journal
+    pub_data = {f: getattr(parser, f) for f in parserfields if hasattr(parser, f)}
+    pub_data['url'] = url
+    pub_data['journal'] = 'bioRxiv'
+    return pub_data
 
 
 def map_doi_pmid(doi):
@@ -184,47 +201,34 @@ class Publication(Item, ItemWithAttachment):
             prev_date_published = None
         new_date_published = properties.get('date_published')
         self.upgrade_properties()
-        title = ''
-        abstract = ''
-        authors = []
-        url = ''
-        date = ''
-        journal = ''
+        pub_data = {}
         p_id = properties['ID']
         # parse if id is from pubmed
         try:
             if p_id.startswith('PMID'):
                 pubmed_id = p_id[5:]
-                title, abstract, authors, url, date, journal = fetch_pubmed(pubmed_id)
+                pub_data = fetch_pubmed(pubmed_id)
             # if id is doi, first check if it maps to pubmed id, else see where it goes
             elif p_id.startswith('doi'):
                 doi_id = p_id[4:]
-                if map_doi_pmid(doi_id):
-                    pubmed_id = map_doi_pmid(doi_id)
-                    title, abstract, authors, url, date, journal = fetch_pubmed(pubmed_id)
+                pubmed_id = map_doi_pmid(doi_id)
+                if pubmed_id:
+                    pub_data = fetch_pubmed(pubmed_id)
                 # if it goes to biorxiv fetch from biorxiv
-                elif map_doi_biox(doi_id):
-                    biox_url = map_doi_biox(doi_id)
-                    title, abstract, authors, url, date, journal = fetch_biorxiv(biox_url)
                 else:
-                    pass
+                    biox_url = map_doi_biox(doi_id)
+                    if biox_url:
+                        pub_data = fetch_biorxiv(biox_url)
+                    else:
+                        pass
         except:
             pass
-        if title:
-            properties['title'] = title
-        if abstract:
-            properties['abstract'] = abstract
-        if authors:
-            properties['authors'] = authors
-        if url:
-            properties['url'] = url
-        if journal:
-            properties['journal'] = journal
+        if pub_data:
+            for k, v in pub_data.items():
+                properties[k] = v
         # allow override of date_published
         if new_date_published is not None and prev_date_published != new_date_published:
             properties['date_published'] = new_date_published
-        elif new_date_published is None and date:
-            properties['date_published'] = date
 
         super(Publication, self)._update(properties, sheets)
         return

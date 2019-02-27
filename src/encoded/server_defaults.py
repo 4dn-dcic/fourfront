@@ -1,6 +1,5 @@
 from datetime import datetime
 from jsonschema_serialize_fork import NO_DEFAULT
-from pyramid.security import effective_principals
 from pyramid.threadlocal import get_current_request
 from string import (
     digits,
@@ -28,8 +27,7 @@ def includeme(config):
 @server_default
 def userid(instance, subschema):
     request = get_current_request()
-    principals = effective_principals(request)
-    for principal in principals:
+    for principal in request.effective_principals:
         if principal.startswith('userid.'):
             return principal[7:]
     return NO_DEFAULT

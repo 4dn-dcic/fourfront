@@ -227,6 +227,41 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
     }
 }
 
+/**
+ * Extends _child properties_ of first argument object with properties from subsequent objects.
+ * All arguments MUST be objects with objects as children.
+ */
+export function extendChildren(){
+    var args    = Array.from(arguments),
+        argsLen = args.length;
+
+    if (args.length < 2) return args[0];
+
+    var hostObj = args[0] || {}, // Allow null to be first arg, because why not.
+        allKeys = Array.from(
+            _.reduce(args.slice(1), function(m, obj){
+                _.forEach(_.keys(obj), function(k){
+                    m.add(k);
+                });
+                return m;
+            }, new Set())
+        );
+
+    _.forEach(allKeys, function(childProperty){
+        for (var objIndex = 0; objIndex < argsLen; objIndex++){
+            var currObjToCopyFrom = args[objIndex];
+            if (typeof currObjToCopyFrom[childProperty] !== 'undefined'){
+                if (typeof hostObj[childProperty] === 'undefined'){
+                    hostObj[childProperty] = {};
+                }
+                _.extend(hostObj[childProperty], currObjToCopyFrom[childProperty]);
+            }
+        }
+    });
+
+    return hostObj;
+}
+
 
 /**
  * Deep-clone a given object using JSON stringify/parse.
@@ -338,22 +373,6 @@ export function randomId() {
     return 'random-id-' + ++randomIdIncrement;
 }
 
-
-export function isEqual(obj1, obj2){
-    var ob1Keys = _.keys(obj1).sort();
-    var obj2Keys = _.keys(obj2).sort();
-    if (ob1Keys.length !== obj2Keys.length) return false;
-    var len = ob1Keys.length;
-    var i;
-    for (i = 0; i < len; i++){
-        if (ob1Keys[i] !== obj2Keys[i]) return false;
-    }
-    for (i = 0; i < len; i++){
-        if (obj1[ob1Keys[i]] !== obj2[ob1Keys[i]]) return false;
-    }
-    return true;
-}
-
 /**
  * Assert that param passed in & returned is in UUID format.
  * 
@@ -463,7 +482,7 @@ export class TooltipInfoIconContainerAuto extends React.Component {
  * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
  * @prop {string|React.Component} [wrapperElement='div'] - Element type to wrap props.children in, if any.
  */
-export class CopyWrapper extends React.Component {
+export class CopyWrapper extends React.PureComponent {
 
     static defaultProps = {
         'wrapperElement' : 'div',
@@ -513,6 +532,8 @@ export class CopyWrapper extends React.Component {
         super(props);
         this.flashEffect = this.flashEffect.bind(this);
         if (typeof props.mounted !== 'boolean') this.state = { 'mounted' : false };
+
+        this.wrapperRef = React.createRef();
     }
 
     componentDidMount(){
@@ -525,11 +546,13 @@ export class CopyWrapper extends React.Component {
     }
 
     flashEffect(){
-        var wrapper = this.refs.wrapper;
-        if (!this.props.flash || !this.refs || !wrapper) return null;
+        var wrapper = this.wrapperRef.current;
+        if (!this.props.flash || !wrapper) return null;
 
         if (typeof this.props.wrapperElement === 'function'){
             // Means we have a React component vs a React/JSX element.
+            // This approach will be deprecated soon so we should look into forwarding refs
+            // ... I think
             wrapper = ReactDOM.findDOMNode(wrapper);
         }
 
@@ -547,7 +570,7 @@ export class CopyWrapper extends React.Component {
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps, includeIcon } = this.props;
+        var { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
         if (!value) return null;
         var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
@@ -573,9 +596,9 @@ export class CopyWrapper extends React.Component {
 
         var wrapperProps = _.extend(
             {
-                'ref'       : 'wrapper',
+                'ref'       : this.wrapperRef,
                 'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
-                'className' : 'clickable copy-wrapper ' + this.props.className || '',
+                'className' : 'clickable copy-wrapper ' + className || '',
                 'onClick'   : copy
             },
             _.omit(this.props, 'children', 'style', 'value', 'onCopy', 'mounted', ..._.keys(CopyWrapper.defaultProps))

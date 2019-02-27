@@ -15,26 +15,19 @@ import Alerts from './../../alerts';
 export class LoginMenuItem extends React.Component {
 
     static propTypes = {
-        updateUserInfo      : PropTypes.func.isRequired,
-        session             : PropTypes.bool.isRequired,
-        closeMobileMenu     : PropTypes.func.isRequired,
-        href                : PropTypes.string.isRequired
-    }
+        'updateUserInfo'      : PropTypes.func.isRequired,
+        'session'             : PropTypes.bool.isRequired,
+        'href'                : PropTypes.string.isRequired
+    };
 
     constructor(props){
         super(props);
-        this.componentWillMount = this.componentWillMount.bind(this);
         this.showLock           = this.showLock.bind(this);
         this.logout             = this.logout.bind(this);
-        this.handleAuth0Login   = this.handleAuth0Login.bind(this);
-        this.render             = this.render.bind(this);
+        this.loginCallback      = this.loginCallback.bind(this);
     }
 
-    componentWillMount () {
-        if (isServerSide()) {
-            return;
-        }
-
+    componentDidMount () {
         // Login / logout actions must be deferred until Auth0 is ready.
         // TODO: these should be read in from base and production.ini
         this.lock = new Auth0Lock(
@@ -44,7 +37,10 @@ export class LoginMenuItem extends React.Component {
                     sso: false,
                     redirect: false,
                     responseType: 'token',
-                    params: {scope: 'openid email', prompt: 'select_account'}
+                    params: {
+                        scope: 'openid email',
+                        prompt: 'select_account'
+                    }
                 },
                 socialButtonStyle: 'big',
                 languageDictionary: { title: "Log in" },
@@ -52,7 +48,7 @@ export class LoginMenuItem extends React.Component {
                 allowedConnections: ['github', 'google-oauth2']
             }
         );
-        this.lock.on("authenticated", this.handleAuth0Login);
+        this.lock.on("authenticated", this.loginCallback);
     }
 
     showLock(eventKey, e) {
@@ -60,39 +56,45 @@ export class LoginMenuItem extends React.Component {
     }
 
     logout(eventKey, e) {
+        var { session, updateUserInfo, setIsLoadingIcon } = this.props;
+
+        // Removes both idToken (cookie) and userInfo (localStorage)
         JWT.remove();
-        console.log('Logging out');
-        if (!this.props.session) return;
-        if (typeof this.props.closeMobileMenu === 'function') this.props.closeMobileMenu();
 
-        this.props.setIsLoadingIcon(true);
-        ajax.fetch('/logout?redirect=false')
-        .then(data => {
-            if(typeof document !== 'undefined'){
+        if (!session) return;
 
-                // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
-                document.dispatchEvent(new MouseEvent('click'));
+        // Refetch page context without our old JWT to hide any forbidden content.
+        updateUserInfo();
+        navigate('', {'inPlace':true});
 
-                this.props.updateUserInfo();
-                this.props.setIsLoadingIcon(false);
-                navigate('', {'inPlace':true});
-            }
-        });
+        if (typeof document !== 'undefined'){
+            // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
+            document.dispatchEvent(new MouseEvent('click'));
+        }
+
+        // This is not needed and has been removed.
+        // We can replace later on with explicit _browser_ navigation to hms-dbmi.auth0.com/v2/logout
+        // in order to log out of affiliated services (SSO) (?).
+        // ajax.fetch('/logout?redirect=false').then(data => { });
     }
 
-    handleAuth0Login(authResult, retrying){
-        // First stage: we just have gotten JWT from Auth0 but have not auth'd it against it our own system to see if is a valid user account or some random person who just logged into their Google account.
+    loginCallback(authResult, retrying){
+        var { setIsLoadingIcon, href, updateUserInfo } = this.props;
+
+        // First stage: we just have gotten JWT from the Auth0 widget but have not auth'd it against it our own system
+        // to see if this is a valid user account or some random person who just logged into their Google account.
         var idToken = authResult.idToken; //JWT
         if (!idToken) return;
 
         JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
 
-        navigate('', {'inPlace':true}); // Refresh the content of our page now that we have a JWT stored as a cookie! It will return same page but with any auth'd page actions.
+        // Refresh the content/context of our page now that we have a JWT stored as a cookie!
+        // It will return same page but with any auth'd page actions.
+        navigate('', {'inPlace':true});
 
-        this.props.setIsLoadingIcon(true);
+        setIsLoadingIcon(true);
+
         this.lock.hide();
-
-        if (typeof this.props.closeMobileMenu === 'function') this.props.closeMobileMenu();
 
         // Second stage: get this valid OAuth account (Google or w/e) auth'd from our end.
         Promise.race([
@@ -111,11 +113,11 @@ export class LoginMenuItem extends React.Component {
         })
         .then((r) => {
             JWT.saveUserInfoLocalStorage(r);
-            this.props.updateUserInfo();
+            updateUserInfo();
             Alerts.deQueue(Alerts.LoggedOut);
             console.info('Login completed');
-            this.props.setIsLoadingIcon(false);
-            if (this.props.href && this.props.href.indexOf('/error/login-failed') !== -1){
+            setIsLoadingIcon(false);
+            if (href && href.indexOf('/error/login-failed') !== -1){
                 navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
             }
 
@@ -123,6 +125,8 @@ export class LoginMenuItem extends React.Component {
             var profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
             var isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
             if (profileURL && !isAdmin){
+                // Register an analytics event for UI login.
+                // This is used to segment public vs internal audience in Analytics dashboards.
                 ajax.load(profileURL, (profile)=>{
                     analytics.event('Authentication', 'UILogin', {
                         'eventLabel' : (profile.lab && object.itemUtil.atId(profile.lab)) || 'No Lab'
@@ -136,7 +140,7 @@ export class LoginMenuItem extends React.Component {
             console.error("Error during login: ", error.description);
             console.log(error);
 
-            this.props.setIsLoadingIcon(false);
+            setIsLoadingIcon(false);
 
             if (!error.code && error.type === 'timed-out'){
                 Alerts.queue(Alerts.LoginFailed);

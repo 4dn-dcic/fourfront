@@ -17,7 +17,7 @@ from urllib.parse import (
 )
 from .search import (
     iter_search_results,
-    list_visible_columns_for_schemas,
+    build_table_columns,
     get_iterable_search_results,
     make_search_subreq
 )
@@ -692,7 +692,7 @@ def report_download(context, request):
     request.GET['limit'] = 'all'
 
     schemas = [request.registry[TYPES][types[0]].schema]
-    columns = list_visible_columns_for_schemas(request, schemas)
+    columns = build_table_columns(request, schemas)
     header = [column.get('title') or field for field, column in columns.items()]
 
     def generate_rows():

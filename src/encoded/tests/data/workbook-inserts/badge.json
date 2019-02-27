@@ -1,0 +1,44 @@
+[
+    {
+        "title": "Gold Biosample",
+        "badge_name": "gold-biosample",
+        "award": "1U01CA200059-02",
+        "schema_version": "1",
+        "foursight_checks": [
+            "good_biosamples"
+        ],
+        "badge_classification": "Commendation",
+        "lab": "test-4dn-lab",
+        "description": "Gold biosample",
+        "uuid": "6c2b7409-4478-4e15-aabc-1a0df6b883e9",
+        "status": "released"
+    },
+    {
+        "title": "Tier1 Metadata Missing",
+        "badge_name": "tier1-metadata-missing",
+        "award": "1U01CA200059-02",
+        "schema_version": "1",
+        "foursight_checks": [
+            "tier1_metadata_present"
+        ],
+        "badge_classification": "Warning",
+        "lab": "test-4dn-lab",
+        "description": "Tier 1 biosample missing required metadata",
+        "status": "released",
+        "uuid": "e39777c6-8fe4-4424-bac1-40406342e026"
+    },
+    {
+        "title": "Replicate Numbers",
+        "badge_name": "replicate-numbers",
+        "award": "1U01CA200059-02",
+        "schema_version": "1",
+        "foursight_checks": [
+            "repsets_have_bio_reps"
+        ],
+        "badge_classification": "Warning",
+        "lab": "test-4dn-lab",
+        "description": "Issues with replicate numbers",
+        "status": "released",
+        "uuid": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"
+    }
+]

@@ -1,16 +1,39 @@
 [
     {
-        "description": "The goals of the 4D Nucleome (4DN) Data Coordination and Integration Center (DCIC) are to collect, store, curate, display, and analyze data generated in the 4DN Network. We have assembled a team of investigators with a strong track record in analysis of chromatin interaction data, image processing and three-dimensional data visualization, integrative analysis of genomic and epigenomic data, data portal development, large-scale computing, and development of secure and flexible cloud technologies. In Aim 1, we will develop efficient submission pipelines for data and metadata from 4DN data production groups. We will define data/metadata requirements and quality metrics in conjunction with the production groups and ensure that high-quality, well- annotated data become available to the wider scientific community in a timely manner. In Aim 2, we will develop a user-friendly data portal for the broad scientific community. This portal will provide an easy-to-navigate interface for accessing raw and intermediate data files, allow for programmatic access via APIs, and will incorporate novel analysis and visualization tools developed by DCIC as well as other Network members. For computing and storage scalability and cost-effectiveness, significant efforts will be devoted to development and deployment of cloud-based technology. We will conduct tutorials and workshops to facilitate the use of 4DN data and tools by external investigators. In Aim 3, we will coordinate and assist in conducting integrative analysis of the multiple data types. These efforts will examine key questions in higher-order chromatin organization using both sequence and image data, and the tools and algorithms developed here will be incorporated into the data portal for use by other investigators. These three aims will ensure that the data generated in 4DN will have maximal impact for the scientific community.",
-        "end_date": "2020-08-31",
-        "name": "1U01CA200059-01",
-        "pi": "4dndcic@gmail.com",
-        "project": "4DN",
         "start_date": "2015-09-07",
-        "status": "current",
+        "schema_version": "1",
         "title": "4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER",
-        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "description": "DCIC: The goals of the 4D Nucleome (4DN) Data Coordination and Integration Center (DCIC) are to collect, store, curate, display, and analyze data generated in the 4DN Network. We have assembled a team of investigators with a strong track record in analysis of chromatin interaction data, image processing and three-dimensional data visualization, integrative analysis of genomic and epigenomic data, data portal development, large-scale computing, and development of secure and flexible cloud technologies. In Aim 1, we will develop efficient submission pipelines for data and metadata from 4DN data production groups. We will define data/metadata requirements and quality metrics in conjunction with the production groups and ensure that high-quality, well- annotated data become available to the wider scientific community in a timely manner. In Aim 2, we will develop a user-friendly data portal for the broad scientific community. This portal will provide an easy-to-navigate interface for accessing raw and intermediate data files, allow for programmatic access via APIs, and will incorporate novel analysis and visualization tools developed by DCIC as well as other Network members. For computing and storage scalability and cost-effectiveness, significant efforts will be devoted to development and deployment of cloud-based technology. We will conduct tutorials and workshops to facilitate the use of 4DN data and tools by external investigators. In Aim 3, we will coordinate and assist in conducting integrative analysis of the multiple data types. These efforts will examine key questions in higher-order chromatin organization using both sequence and image data, and the tools and algorithms developed here will be incorporated into the data portal for use by other investigators. These three aims will ensure that the data generated in 4DN will have maximal impact for the scientific community.",
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
         "viewing_group": "4DN",
-        "center" : "4DN Center"
+        "end_date": "2020-08-31",
+        "date_created": "2017-04-07T19:56:09.579997+00:00",
+        "last_modified": {
+            "date_modified": "2018-12-17T17:38:21.037623+00:00",
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267227777"
+        },
+        "project": "4DN",
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "name": "1U01CA200059-01",
+        "status": "current",
+        "pi": "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "schema_version": "1",
+        "title": "EXTERNAL AWARD",
+        "uuid": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "center": "External",
+        "description": "Funding source is from outside 4DN.",
+        "status": "current",
+        "date_created": "2018-06-01T15:15:46.265832+00:00",
+        "last_modified": {
+            "date_modified": "2018-06-01T18:17:07.283047+00:00",
+            "modified_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+        },
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "name": "external-award",
+        "project": "External",
+        "viewing_group": "Not 4DN"
     }
 ]

@@ -4,9 +4,8 @@
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
-    "required": ["ID"],
-    "identifyingProperties": ["uuid", "ID"],
+    "required": ["award", "lab", "ID"],
+    "identifyingProperties": ["uuid", "ID", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },

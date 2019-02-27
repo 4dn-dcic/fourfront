@@ -38,12 +38,17 @@ describe('Testing RawFilesStackedTable', function() {
             //"210a7047-37cc-406d-8246-62fbe3400fc3" : true
         };
 
-        RawFilesStackedTableWrapper = createReactClass({
+        class RawFilesStackedTableWrapper extends React.Component {
 
-            render: function() {
+            constructor(props){
+                super(props);
+                this.ref = React.createRef();
+            }
+
+            render() {
                 return (
                     <div>
-                        <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref="controller">
+                        <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref={this.ref}>
                             <RawFilesStackedTable
                                 experimentArray={context.experiments_in_set}
                                 experimentSetAccession={context.accession}
@@ -55,7 +60,7 @@ describe('Testing RawFilesStackedTable', function() {
                     </div>
                 );
             }
-        });
+        }
 
         testRawFilesStackedTable = TestUtils.renderIntoDocument(<RawFilesStackedTableWrapper/>);
 
@@ -225,12 +230,12 @@ describe('Testing RawFilesStackedTable', function() {
         }
 
         // Ensure we have 5 initially selected file pairs in parentController state (from test def beforeEach)
-        expect(_.keys(initiallySelectedFiles).length).toEqual(_.keys(testRawFilesStackedTable.refs.controller.state.selectedFiles).length);
+        expect(_.keys(initiallySelectedFiles).length).toEqual(_.keys(testRawFilesStackedTable.ref.current.state.selectedFiles).length);
 
         // Check that the selected file pairs / files in state match checkboxes that are selected.
         function selectedFilesMatchSelectedCheckboxes(stateKeys){
             
-            if (!stateKeys) stateKeys = _.keys(testRawFilesStackedTable.refs.controller.state.selectedFiles).sort();
+            if (!stateKeys) stateKeys = _.keys(testRawFilesStackedTable.ref.current.state.selectedFiles).sort();
 
             var fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
             if (fileKeys.length !== stateKeys.length) return false;
@@ -253,7 +258,7 @@ describe('Testing RawFilesStackedTable', function() {
         expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
 
         // Check some checkboxes RANDOMLYish and compare again.
-        var originalSelectedFiles = _.clone(testRawFilesStackedTable.refs.controller.state.selectedFiles); // copy orig set
+        var originalSelectedFiles = _.clone(testRawFilesStackedTable.ref.current.state.selectedFiles); // copy orig set
         clickRandomFilePairCheckboxes();
         // Ensure our state has changed in response to edits/clicks.
         expect(
@@ -270,7 +275,7 @@ describe('Testing RawFilesStackedTable', function() {
         }
 
         console.log("Initially selected files:\n", SelectedFilesController.objectToCompleteList(originalSelectedFiles));
-        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testRawFilesStackedTable.refs.controller.state.selectedFiles));
+        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testRawFilesStackedTable.ref.current.state.selectedFiles));
 
     });
 

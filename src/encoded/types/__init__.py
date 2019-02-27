@@ -12,7 +12,6 @@ from snovault import (
 from .base import (
     Item,
     set_namekey_from_title
-    # paths_filtered_by_status,
 )
 
 
@@ -34,27 +33,6 @@ class AnalysisStep(Item):
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded_list = Item.embedded_list + ['software_used.*', 'qa_stats_generated.*']
-
-
-@collection(
-    name='badges',
-    unique_key='badge:badge_name',
-    properties={
-        'title': 'Badges',
-        'description': 'Listing of badges for 4DN items',
-    })
-class Badge(Item):
-    """The Badge class that descrbes a badge that can be associated with an item."""
-
-    item_type = 'badge'
-    schema = load_schema('encoded:schemas/badge.json')
-    name_key = 'badge_name'
-
-    def _update(self, properties, sheets=None):
-        # set name based on what is entered into title
-        properties['badge_name'] = set_namekey_from_title(properties)
-
-        super(Badge, self)._update(properties, sheets)
 
 
 @collection(

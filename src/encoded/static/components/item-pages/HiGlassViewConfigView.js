@@ -18,7 +18,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
         var initTabs    = [],
             windowWidth = this.props.windowWidth,
-            width       = (!isServerSide() && layout.gridContainerWidth(windowWidth));
+            width       = this.getTabViewWidth();
 
 
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
@@ -61,6 +61,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
+        this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
 
         /**
@@ -81,17 +82,34 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false
         };
+
+        this.higlassRef = React.createRef();
     }
 
     componentWillReceiveProps(nextProps){
-        // TODO: Improve, use var = nextState and conditionally set if have been updated,
-        // then setState(nextState) if keys.length > 0.
+        var nextState = {};
+
         if (nextProps.viewConfig !== this.props.viewConfig){
-            this.setState({
-                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig)
+            _.extend(nextState, {
+                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
                 'viewConfig' : nextProps.viewConfig,
                 'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
+        } else if (nextProps.href !== this.props.href){
+            // If component is still same instance, then is likely that we're changing
+            // the URI hash as a consequence of changing tabs.
+            // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
+            var hgc                 = this.getHiGlassComponent(),
+                currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
+                currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+            currentViewConf && _.extend(nextState, {
+                'viewConfig' : currentViewConf
+            });
+        }
+
+        if (_.keys(nextState).length > 0){
+            this.setState(nextState);
         }
     }
 
@@ -462,7 +480,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     getHiGlassComponent(){
-        return (this.refs && this.refs.higlass && this.refs.higlass.refs && this.refs.higlass.refs.hiGlassComponent) || null;
+        return (this.higlassRef && this.higlassRef.current && this.higlassRef.current.getHiGlassComponent()) || null;
     }
 
     statusChangeButton(){
@@ -548,11 +566,21 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
+    /**
+     * Is used to call {function} `props.toggleFullScreen` which is passed down from app.js BodyElement.
+     * Calls it in a setTimeout because HiGlassComponent may hang JS/UI thread as it refits/calculates itself
+     * in response to new `width` and `height` props passed to it.
+     */
+    handleFullscreenToggle(){
+        var { isFullscreen, toggleFullScreen } = this.props;
+        setTimeout(toggleFullScreen, 0, !isFullscreen);
+    }
+
     fullscreenButton(){
         var { isFullscreen, toggleFullScreen } = this.props;
-        if( typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
+        if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
-                <Button onClick={toggleFullScreen} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
+                <Button onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </Button>
             );
@@ -613,10 +641,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth}
-                            height={hiGlassComponentHeight}
-                            viewConfig={this.state.viewConfig}
-                            ref="higlass" />
+                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={this.state.viewConfig}
+                            ref={this.higlassRef} />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>

@@ -26,7 +26,8 @@
         { "$ref": "mixins.json#/static_embeds" }
     ],
     "mixinFacets" : [
-        { "$ref": "mixins.json#/facets_common" }
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
     ],
     "properties": {
         "schema_version": {
@@ -166,20 +167,45 @@
         "experimentset_type": {
             "title": "Set Type"
         },
+        "number_of_experiments" : {
+            "title" : "# of Experiments",
+            "colTitle" : "Exps",
+            "default_hidden" : true
+        },
+        "number_of_files" : {
+            "title" : "# of Files",
+            "colTitle" : "Files",
+            "description" : "Total number of files contained in an Experiment Set.",
+            "default_hidden" : true
+        },
+        "experiments_in_set.experiment_type" : {
+            "title" : "Experiment Type",
+            "widthMap" : {
+                "lg" : 140,
+                "md" : 140,
+                "sm" : 120
+            }
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title" : "Biosample",
+            "widthMap" : {
+                "lg" : 140,
+                "md" : 140,
+                "sm" : 120
+            }
+        },
         "dataset_label": {
             "title": "Dataset"
         },
         "condition": {
             "title": "Condition"
         },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
-            "title" : "Organism"
-        },
-        "experiments_in_set.biosample.biosource_summary": {
-            "title": "Sample"
-        },
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title" : "Organism",
+            "default_hidden": true
         },
         "experiments_in_set.biosample.modifications.display_title": {
             "title" : "Modifications",
@@ -189,8 +215,15 @@
             "title" : "Treatments",
             "default_hidden" : true
         },
+        "lab.display_title" : {
+            "title" : "Lab"
+        },
         "public_release": {
             "title" : "Public Release",
+            "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "title" : "Last Modified",
             "default_hidden" : true
         }
     }

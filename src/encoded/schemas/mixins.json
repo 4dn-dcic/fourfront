@@ -484,6 +484,12 @@
                             "type": "string",
                             "linkTo": "FileProcessed"
                         }
+                    },
+                    "higlass_view_config": {
+                        "title": "Higlass View Config",
+                        "type": "string",
+                        "linkTo": "HiglassViewConfig",
+                        "exclude_from": ["submit4dn"]
                     }
                 }
             }
@@ -614,6 +620,16 @@
         },
         "lab.display_title": {
             "title": "Lab"
+        }
+    },
+    "facets_aggregated_badges" : {
+        "aggregated_items.badges.item.badge.commendation": {
+            "title": "Commendations",
+            "order": 997
+        },
+        "aggregated_items.badges.item.badge.warning": {
+            "title": "Warnings",
+            "order": 998
         }
     }
 
