@@ -1,5 +1,5 @@
 import pytest
-from ..loadxl import ORDER
+from .datafixtures import ORDER
 
 pytestmark = pytest.mark.working
 
