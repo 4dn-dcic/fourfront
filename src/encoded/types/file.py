@@ -1098,7 +1098,7 @@ def download(context, request):
         user_props = {'error': str(e)}
     tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
                        'user_uuid': user_props.get('details', {}).get('uuid', 'anonymous'),
-                       'request_path': request.path_info}
+                       'request_path': request.path_info, 'request_headers': str(dict(request.headers))}
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:

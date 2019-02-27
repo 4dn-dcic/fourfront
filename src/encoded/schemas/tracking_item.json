@@ -82,6 +82,10 @@
                 "is_visualization": {
                     "title": "Is Visualization",
                     "type": "boolean"
+                },
+                "request_headers": {
+                    "title": "Request Headers",
+                    "type": "string"
                 }
             }
         },
