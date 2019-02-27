@@ -1,7 +1,7 @@
 import pytest
 import requests
 import os
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 from encoded.authentication import get_jwt
 
 
@@ -277,4 +277,3 @@ def test_impersonate_user(anontestapp, admin, submitter):
      res.json['id_token']}
     res2 = anontestapp.get('/users/', headers=headers)
     assert '@id' in res2.json['@graph'][0]
-

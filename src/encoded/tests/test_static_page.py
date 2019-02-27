@@ -2,7 +2,7 @@ import pytest
 import time
 from .features.conftest import app_settings, app
 
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.indexing, pytest.mark.working]
 
 
 @pytest.fixture(scope='module')

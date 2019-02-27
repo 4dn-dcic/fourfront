@@ -1,6 +1,6 @@
 import pytest
 from encoded.types.publication import find_best_date
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture

@@ -4,7 +4,7 @@ import json
 from unittest import mock
 from pkg_resources import resource_filename
 
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_gen_access_keys(testapp, admin):

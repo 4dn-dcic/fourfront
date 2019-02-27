@@ -1,5 +1,5 @@
 import pytest
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.yield_fixture(scope='session')
@@ -121,5 +121,3 @@ def test_order_complete(app, conn):
 
     assert missing_types == []
     assert extra_types == []
-
-

@@ -1,6 +1,6 @@
 from pytest import fixture
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 def test_server_defaults(admin, anontestapp):
     email = admin['email']
