@@ -3,7 +3,7 @@ from encoded.types.file import FileFastq, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
 import os
 import boto3
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):

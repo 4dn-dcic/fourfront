@@ -1,7 +1,7 @@
 import unittest
 from pyramid.testing import DummyRequest
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 class TestNamespacedAuthenticationPolicy(unittest.TestCase):
