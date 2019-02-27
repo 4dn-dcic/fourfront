@@ -4,7 +4,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "additionalProperties": false,
     "identifyingProperties": ["badge_name", "uuid", "aliases"],
-    "required": ["title"],
+    "required": ["title", "lab", "award"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
@@ -19,11 +19,9 @@
             "default": "1"
         },
         "lab": {
-            "default": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
             "permission": "import_items"
         },
         "award": {
-            "default": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
             "permission": "import_items"
         },
         "status": {
