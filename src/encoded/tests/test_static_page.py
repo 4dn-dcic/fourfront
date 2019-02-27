@@ -106,3 +106,15 @@ def test_get_help_page_no_access(anonhtmltestapp, testapp, help_page_restricted)
     help_page_url = "/" + help_page_restricted['name']
     anonhtmltestapp.get(help_page_url, status=403)
     testapp.get(help_page_url, status=200)
+
+
+def test_page_unique_name(testapp, help_page, help_page_deleted):
+    # POST again with same name and expect validation error
+    new_page = {'name': help_page['name']}
+    res = testapp.post_json('/page', new_page, status=422)
+    expected_val_err = "%s already exists with name '%s'" % (help_page['uuid'], new_page['name'])
+    assert expected_val_err in res.json['errors'][0]['description']
+
+    # also test PATCH of an existing page with another name
+    res = testapp.patch_json(help_page_deleted['@id'], {'name': new_page['name']}, status=422)
+    assert expected_val_err in res.json['errors'][0]['description']
