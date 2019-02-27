@@ -345,3 +345,19 @@ def test_patch_delete_fields_required(content, testapp):
     res = testapp.patch_json(url + "?delete_fields=required", {}, status=422)
     assert res.json['description'] == "Failed validation"
     assert res.json['errors'][0]['description'] == "'required' is a required property"
+
+
+def test_name_key_validation(link_targets, testapp):
+    # name_key
+    target_data = {'name': 'one#name'}
+    res = testapp.post_json('/testing-link-targets/', target_data, status=422)
+    assert res.json['description'] == 'Failed validation'
+    res_error = res.json['errors'][0]
+    assert "Forbidden character(s) {'#'}" in res_error['description']
+
+    # unique_key
+    source_data = {'name': 'two@*name', 'target': targets[0]['uuid']}
+    res = testapp.post_json('/testing-link-sources/', source_data, status=422)
+    assert res.json['description'] == 'Failed validation'
+    res_error = res.json['errors'][0]
+    assert "Forbidden character(s) {'*'}" in res_error['description']
