@@ -24,6 +24,7 @@ def minitestdata(app, conn):
     tx.rollback()
 
 
+
 @pytest.yield_fixture(scope='session')
 def minitestdata2(app, conn):
     tx = conn.begin_nested()
@@ -91,3 +92,34 @@ def test_fixtures2(minitestdata2, testapp):
     res = testapp.get('/organisms/')
     items = res.json['@graph']
     assert len(items) == 1
+
+
+def test_order_complete(app, conn):
+    from .datafixtures import ORDER
+    from webtest import TestApp
+    ORDER = ORDER + ['access_key']
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+    master_types = []
+    profiles = testapp.get('/profiles/?frame=raw').json
+    for a_type in profiles:
+        if profiles[a_type].get('id'):
+            schema_name = profiles[a_type]['id'].split('/')[-1][:-5]
+            master_types.append(schema_name)
+    print(ORDER)
+    print(master_types)
+    print(len(ORDER))
+    print(len(master_types))
+
+    missing_types = [i for i in master_types if i not in ORDER]
+    extra_types = [i for i in ORDER if i not in master_types]
+    print(missing_types)
+    print(extra_types)
+
+    assert missing_types == []
+    assert extra_types == []
+
+
