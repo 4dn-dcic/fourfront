@@ -11,18 +11,13 @@
         "table-of-contents": {
             "enabled": false
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-    
-
-
-
     {
         "name": "help/analysis/file-formats",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000000",
         "title": "File Formats",
-        "description" : "Documentation and information about the file formats which we support.",
+        "description": "Documentation and information about the file formats which we support.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-overview",
             "help.analysis.file-formats.fastq",
@@ -35,14 +30,14 @@
             "enabled": true,
             "header-depth": 4
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
     {
         "name": "help/analysis/hi-c-pipeline",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000001",
         "title": "Hi-C Pipeline",
-        "description" : "Documentation and information about file transformation and analysis pipelines.",
+        "description": "Documentation and information about file transformation and analysis pipelines.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-overview",
             "help.analysis.hi-c-pipeline.alignment",
@@ -53,14 +48,14 @@
             "enabled": true,
             "header-depth": 4
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
     {
         "name": "help/analysis/reference-files",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000002",
         "title": "Reference Files",
-        "description" : "How to define and supply reference files for use by pipelines.",
+        "description": "How to define and supply reference files for use by pipelines.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-0",
             "help.analysis.reference-files.human-genome-bwa",
@@ -71,27 +66,27 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
     {
         "name": "help/analysis/cwl-docker",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000003",
         "title": "CWL + Docker",
-        "description" : "Information about the Common Workflow Language definitions (CWLs) and Docker Images used in our pipelines.",
+        "description": "Information about the Common Workflow Language definitions (CWLs) and Docker Images used in our pipelines.",
         "content": [
             "9a0afb37-2605-4c0c-9a12-4a28882583a8"
         ],
         "table-of-contents": {
             "enabled": true
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "help/analysis/tibanna",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000004",
         "title": "Tibanna",
-        "description" : "Documentation for the software which runs and manages our pipelines.",
+        "description": "Documentation for the software which runs and manages our pipelines.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-overview",
             "reusable-dummy-sections.lorem-ipsum-0",
@@ -101,28 +96,25 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
-
     {
         "name": "help/data-processing-pipelines",
         "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
         "content": [],
-        "redirect" : {
-            "target" : "/help/analysis/cwl-docker",
-            "enabled" : true,
-            "code" : 307
+        "redirect": {
+            "target": "/help/analysis/cwl-docker",
+            "enabled": true,
+            "code": 307
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
     {
         "name": "help/analysis",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000000",
         "title": "Analysis",
-        "description" : "Documentation for performing analyses.",
+        "description": "Documentation for performing analyses.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff000000",
             "f0f0f0f0-0000-0000-0000-ffffff000001",
@@ -130,13 +122,8 @@
             "f0f0f0f0-0000-0000-0000-ffffff000003",
             "f0f0f0f0-0000-0000-0000-ffffff000004"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
-
-
     {
         "name": "help/user-guide/data-organization",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff011000",
@@ -150,7 +137,7 @@
             "enabled": true,
             "header-depth": 4
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "help/user-guide/account-creation",
@@ -162,7 +149,7 @@
         "table-of-contents": {
             "enabled": true
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "help/user-guide/biosample-metadata",
@@ -175,7 +162,7 @@
             "enabled": true,
             "header-depth": 4
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "help/user-guide/rest-api",
@@ -188,24 +175,21 @@
             "enabled": true,
             "header-depth": 4
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
     {
         "name": "help/user-guide",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000001",
         "title": "User Guide",
-        "description" : "Documentation for users of the 4DN Data Portal.",
+        "description": "Documentation for users of the 4DN Data Portal.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff011000",
             "5153c902-a0d2-4246-9b41-cea7a1c91f52",
             "3c999ac4-1727-4aac-96f5-61ae701a4006",
             "cb2dda1c-a53f-4ec5-bf94-8a866ca836fb"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
     {
         "name": "help/submitter-guide/getting-started",
         "uuid": "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
@@ -217,7 +201,7 @@
             "enabled": true,
             "header-depth": 4
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "help/submitter-guide/web-submission",
@@ -230,7 +214,7 @@
             "enabled": true,
             "header-depth": 4
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "help/submitter-guide/spreadsheet",
@@ -244,23 +228,20 @@
             "enabled": true,
             "header-depth": 3
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
     {
         "name": "help/submitter-guide",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000002",
         "title": "Submitter Guide",
-        "description" : "Documentation for users submitting experiments to the 4DN Data Portal.",
+        "description": "Documentation for users submitting experiments to the 4DN Data Portal.",
         "children": [
             "6292facf-9eb4-451e-8d05-2e56e1bd7cbe",
             "251d6d2b-4ed0-4fbe-b8b1-eaa49569187b",
             "4f115e02-5291-436d-92e8-617af96355df"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-    
-
     {
         "name": "help/protocols/experiment-types",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff010000",
@@ -287,25 +268,19 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
-
-
     {
         "name": "help/protocols",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000003",
         "title": "Protocols",
-        "description" : "Protocol definitions and guides.",
+        "description": "Protocol definitions and guides.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff010000"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
-
     {
         "name": "help/dcic-processes-protocols/data-sharing",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff020000",
@@ -319,8 +294,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
     {
         "name": "help/dcic-processes-protocols/freeze-policy",
@@ -335,24 +310,20 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
-
     {
         "name": "help/dcic-processes-protocols",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000004",
         "title": "Processes and Protocols",
-        "description" : "Processes and Protocols for the 4DN DCIC.",
+        "description": "Processes and Protocols for the 4DN DCIC.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff020000",
             "f0f0f0f0-0000-0000-0000-ffffff020001"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
     {
         "name": "help/visualization/higlass",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff030000",
@@ -366,8 +337,8 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
     {
         "name": "help/visualization/hipiler",
@@ -382,28 +353,25 @@
         "table-of-contents": {
             "enabled": true
         },
-        "status" : "draft",
-        "schema_version" : "3"
+        "status": "draft",
+        "schema_version": "3"
     },
-
     {
         "name": "help/visualization",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000005",
         "title": "Visualization",
-        "description" : "Guides for visualizing files and other data using the 4DN Data Portal.",
+        "description": "Guides for visualizing files and other data using the 4DN Data Portal.",
         "children": [
             "f0f0f0f0-0000-0000-0000-ffffff030000",
             "f0f0f0f0-0000-0000-0000-ffffff030001"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
     {
         "name": "help",
         "uuid": "311d0f4f-56ee-4450-8cbb-780c10229284",
         "title": "Help Section",
-        "description" : "Documentation for using the 4DN Data Portal",
+        "description": "Documentation for using the 4DN Data Portal",
         "children": [
             "f0f0f0f0-0000-0000-0000-aaaaaa000001",
             "f0f0f0f0-0000-0000-0000-aaaaaa000000",
@@ -412,19 +380,11 @@
             "f0f0f0f0-0000-0000-0000-aaaaaa000004",
             "f0f0f0f0-0000-0000-0000-aaaaaa000005"
         ],
-        "content" : [
+        "content": [
             "reusable-dummy-sections.lorem-ipsum-overview"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
-
-
-
-
-
     {
         "name": "error/login-failed",
         "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",
@@ -432,7 +392,7 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b021"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "joint-analysis-data-plans",
@@ -445,19 +405,19 @@
             "442c8aa0-dc6c-43d7-814a-854af460b028",
             "442c8aa0-dc6c-43d7-814a-854af460b029"
         ],
-        "redirect" : {
-            "target" : "/joint-analysis",
-            "enabled" : true,
-            "code" : 307
+        "redirect": {
+            "target": "/joint-analysis",
+            "enabled": true,
+            "code": 307
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "planned-submissions",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b0",
         "title": "Planned Data Submission",
         "content": [],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "joint-analysis-plans",
@@ -466,12 +426,12 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b025"
         ],
-        "redirect" : {
-            "target" : "/joint-analysis",
-            "enabled" : true,
-            "code" : 307
+        "redirect": {
+            "target": "/joint-analysis",
+            "enabled": true,
+            "code": 307
         },
-        "schema_version" : "3"
+        "schema_version": "3"
     },
     {
         "name": "joint-analysis",
@@ -483,11 +443,8 @@
             "joint-analysis-data-plans.release-updates",
             "joint-analysis-data-plans.higlass"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
     {
         "name": "privacy-policy",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-9991d90560b0",
@@ -495,26 +452,20 @@
         "content": [
             "442c8aa0-dc6c-43d7-814a-854af460b051"
         ],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
     {
         "name": "release-updates",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-4137666660b0",
         "title": "Release Updates",
         "content": [],
-        "schema_version" : "3"
+        "schema_version": "3"
     },
-
-
-
     {
         "name": "statistics",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff040000",
         "title": "Portal Statistics (BETA)",
         "content": [],
-        "schema_version" : "3"
+        "schema_version": "3"
     }
 ]

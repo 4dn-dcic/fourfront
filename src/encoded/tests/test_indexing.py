@@ -177,7 +177,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
     from os import listdir
     from os.path import isfile, join
-    from encoded import loadxl
+    import json
     from unittest import mock
     from timeit import default_timer as timer
     from pkg_resources import resource_filename
@@ -190,7 +190,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     test_inserts = []
     for insert in inserts:
         type_name = insert.split('.')[0]
-        json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
+        json_inserts[type_name] = json.loads(open(insert_dir + insert).read())
         # pluck a few uuids for testing
         if type_name in test_types:
             test_inserts.append({'type_name': type_name, 'data': json_inserts[type_name][0]})
@@ -199,7 +199,9 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     start = timer()
     with mock.patch('encoded.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
-        res = testapp.post_json('/load_data', json_inserts, status=200)
+        data = {'store': json_inserts}
+        res = testapp.post_json('/load_data', data,  # status=200
+                                )
         assert res.json['status'] == 'success'
     stop_insert = timer()
     print("PERFORMANCE: Time to load data is %s" % (stop_insert - start))

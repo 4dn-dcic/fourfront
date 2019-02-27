@@ -1,17 +1,17 @@
 from snovault import (
     upgrade_step,
 )
+import json
 from encoded.schema_formats import is_uuid
-from encoded.loadxl import read_single_sheet
 from pkg_resources import resource_filename
 
 
-
 def generate_content_map_for_page_1_2_upgrader():
-    return {
-        insert_item['name'] : insert_item.get('content', [])
-        for insert_item in read_single_sheet(resource_filename('encoded', 'tests/data/master-inserts/'), 'page')
-    }
+    folder_name = resource_filename('encoded', 'tests/data/master-inserts/')
+    f_name = folder_name + 'page.json'
+    with open(f_name) as f:
+        pages = json.loads(f.read())
+    return {insert_item['name']: insert_item.get('content', []) for insert_item in pages}
 
 
 @upgrade_step('page', '1', '2')

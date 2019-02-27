@@ -153,7 +153,7 @@ def configure_dbsession(config, clear_data=False):
     config.registry[DBSESSION] = DBSession
 
 
-def load_workbook(app, workbook_filename, docsdir, test=False):
+def load_workbook(app, workbook_filename, docsdir):
     from .loadxl import load_all
     from webtest import TestApp
     environ = {
@@ -161,7 +161,7 @@ def load_workbook(app, workbook_filename, docsdir, test=False):
         'REMOTE_USER': 'IMPORT',
     }
     testapp = TestApp(app, environ)
-    load_all(testapp, workbook_filename, docsdir, test=test)
+    load_all(testapp, workbook_filename, docsdir)
 
 
 def json_from_path(path, default=None):
@@ -350,7 +350,7 @@ def main(global_config, **local_config):
     if docsdir is not None:
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
     if workbook_filename:
-        load_workbook(app, workbook_filename, docsdir, test=load_test_only)
+        load_workbook(app, workbook_filename, docsdir)
 
 
     return app
