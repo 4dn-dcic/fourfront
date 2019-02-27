@@ -62,20 +62,20 @@ def posted_help_page_section(testapp, help_page_section_json):
     time.sleep(5)
     return res.json['@graph'][0]
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page(testapp, posted_help_page_section, help_page_json):
     res = testapp.post_json('/pages/', help_page_json, status=201)
     time.sleep(5)
     return res.json['@graph'][0]
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
     res = testapp.post_json('/pages/', help_page_json_draft, status=201)
     return res.json['@graph'][0]
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page_restricted(testapp, posted_help_page_section, help_page_json_deleted):
     res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
     return res.json['@graph'][0]
