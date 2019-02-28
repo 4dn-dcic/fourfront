@@ -4,7 +4,7 @@ import pytest
 from encoded.commands.run_upgrader_on_inserts import get_inserts
 import json
 import time
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing]
+pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.settwo]
 
 
 ### IMPORTANT

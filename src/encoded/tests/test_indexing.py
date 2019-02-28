@@ -7,7 +7,7 @@ import pytest
 from encoded.verifier import verify_item
 from pyramid.paster import get_appsettings
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing]
+pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.settwo]
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']

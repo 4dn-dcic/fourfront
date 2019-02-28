@@ -3,7 +3,7 @@ import time
 from .features.conftest import app_settings, app
 from webtest import AppError
 
-pytestmark = [pytest.mark.indexing, pytest.mark.working]
+pytestmark = [pytest.mark.indexing, pytest.mark.working, pytest.mark.settwo]
 
 
 @pytest.fixture(scope='module')
