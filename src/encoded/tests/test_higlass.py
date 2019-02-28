@@ -497,9 +497,8 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_jso
 
     # The new top track should not be very tall, since there is a 2D file in the center.
     bedGraph_track = [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ][0]
-    number_height = float(bedGraph_track["height"])
     assert_true(
-        number_height < 100,
+        bedGraph_track["height"] < 100,
         "1D file is too big: height should be less than 100, got {actual} instead.".format(
             actual=bedGraph_track["height"],
         )
@@ -543,16 +542,11 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 1)
 
-    # Make sure the height is a string and not an integer.
-    assert_true(isinstance(new_higlass_json["views"][0]["tracks"]["top"][0]["height"], str), "Not a string")
-
-    number_height = float(new_higlass_json["views"][0]["tracks"]["top"][0]["height"])
-
     # The new top track should be tall, since there are no other tracks. But not too tall.
     assert_true(
-        number_height >= 100 and number_height < 600,
+        new_higlass_json["views"][0]["tracks"]["top"][0]["height"] >= 100 and new_higlass_json["views"][0]["tracks"]["top"][0]["height"] < 600,
         "1D file is wrong size: height should be at least 100 and less than 600, got {actual} instead.".format(
-            actual=number_height,
+            actual=new_higlass_json["views"][0]["tracks"]["top"][0]["height"],
         )
     )
 
@@ -574,11 +568,10 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     # The new top tracks should be very tall, since there are no other tracks.
     bedGraph_tracks = [ t for t in new_higlass_json["views"][0]["tracks"]["top"] if "-divergent-bar" in t["type"] ]
     for t in bedGraph_tracks:
-        number_height = float(t["height"])
         assert_true(
-            number_height >= 100,
+            t["height"] >= 100,
             "1D file is too small: height should be at least 100, got {actual} instead.".format(
-                actual=number_height,
+                actual=t["height"],
             )
         )
 
