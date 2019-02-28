@@ -3,7 +3,7 @@
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault import (
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
     CONNECTION
