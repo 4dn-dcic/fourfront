@@ -5,10 +5,10 @@ from snovault import (
 from collections import defaultdict
 
 
-@audit_checker(
-    'Experiment',
-    frame=['files', 'files.files']
-)
+# @audit_checker(
+#     'Experiment',
+#     frame=['files', 'files.files']
+# )
 def audit_experiments_have_raw_files(value, system):
     '''
     experiments should have associated raw files whose status is one of
