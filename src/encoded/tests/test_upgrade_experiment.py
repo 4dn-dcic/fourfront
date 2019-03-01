@@ -8,7 +8,8 @@ def experiment_repliseq_1(award, lab):
         "schema_version": '1',
         "award": award['@id'],
         "lab": lab['@id'],
-        "experiment_type": "repliseq"
+        "experiment_type": "repliseq",
+        "total_fractions_in_exp": 2
     }
 
 
@@ -42,7 +43,8 @@ def experiment_repliseq_2(award, lab):
         "lab": lab['@id'],
         "experiment_type": "Repli-seq",
         "antibody": "ENCAB1234567",
-        "antibody_lot_id": "1234"
+        "antibody_lot_id": "1234",
+        "total_fractions_in_exp": 16
     }
 
 
@@ -78,11 +80,18 @@ def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
     assert 'LaminB' in value['notes']
 
 
-def test_experiment_repliseq_update_type(app, experiment_repliseq_1):
+def test_experiment_repliseq_2stage_update_type(app, experiment_repliseq_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_repliseq', experiment_repliseq_1, current_version='1', target_version='4')
     assert value['schema_version'] == '4'
-    assert value['experiment_type'] == '/experiment-types/repliseq/'
+    assert value['experiment_type'] == '/experiment-types/2stage-repliseq/'
+
+
+def test_experiment_repliseq_multi_update_type(app, experiment_repliseq_2):
+    migrator = app.registry['upgrader']
+    value = migrator.upgrade('experiment_repliseq', experiment_repliseq_2, current_version='2', target_version='4')
+    assert value['schema_version'] == '4'
+    assert value['experiment_type'] == '/experiment-types/multistage-repliseq/'
 
 
 def test_experiment_chiapet_update_type(app, experiment_chiapet_1):
