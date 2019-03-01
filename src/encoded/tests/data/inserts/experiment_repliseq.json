@@ -2,7 +2,7 @@
     {
         "accession":"4DNEXO67AXE1",
         "status": "in review by lab",
-        "experiment_type": "c27b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "c12b17cd-354a-3a7b-abc3-17a544544b3c",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragment_size_range": "200-500",
         "average_fragment_size": 300,
@@ -26,7 +26,7 @@
     {
         "accession":"4DNEX34DAX2S",
         "status": "in review by lab",
-        "experiment_type": "c27b17cd-544a-3a3b-abc3-17a544544b3c",
+        "experiment_type": "c12b17cd-354a-3a7b-abc3-17a544544b3c",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragment_size_range": "200-500",
         "average_fragment_size": 300,
