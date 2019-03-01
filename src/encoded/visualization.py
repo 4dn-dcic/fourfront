@@ -1439,7 +1439,7 @@ def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
         base_view_y = (base_initial_y_domain[0] + base_initial_y_domain[1]) / 2.0
 
         # The zoom level just needs to be the same.
-        base_view_zoom = (base_initial_x_domain[1] - base_initial_x_domain[1]) / 1000.0
+        base_view_zoom = 1
 
     # Set the location and zoom locks.
     for lock_name in ("locationLocks", "zoomLocks"):
