@@ -88,8 +88,13 @@ def experiment_seq_2_3(value, system):
 def experiment_1_2(value, system):
     types_list = [
         'ATAC-seq', 'CUT&RUN', 'capture Hi-C', 'ChIA-PET', 'ChIP-seq', 'DAM-ID seq',
-        'dilution Hi-C', 'DNA-paint', 'in situ Hi-C', 'PLAC-seq', 'Repli-seq', 'TSA-seq'
-        ]
+        'dilution Hi-C', 'DNA-paint', 'in situ Hi-C', 'PLAC-seq', 'TSA-seq'
+    ]
     if value.get('experiment_type') in types_list:
         exptype = value['experiment_type'].replace('-', '').replace('&', '').replace(' ', '-')
         value['experiment_type'] = '/experiment-types/' + exptype.lower() + '/'
+    elif value.get('experiment_type') == 'Repli-seq':
+        if value.get('total_fractions_in_exp') == 2:
+            value['experiment_type'] = '/experiment-types/2stage-repliseq/'
+        elif value.get('total_fractions_in_exp') > 2:
+            value['experiment_type'] = '/experiment-types/multistage-repliseq/'
