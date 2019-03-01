@@ -542,6 +542,8 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 1)
 
+    assert_true(isinstance(new_higlass_json["views"][0]["tracks"]["top"][0]["height"], int), "Not an integer")
+
     # The new top track should be tall, since there are no other tracks. But not too tall.
     assert_true(
         new_higlass_json["views"][0]["tracks"]["top"][0]["height"] >= 100 and new_higlass_json["views"][0]["tracks"]["top"][0]["height"] < 600,

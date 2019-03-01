@@ -980,7 +980,7 @@ def resize_1d_tracks(views):
         for track in top_tracks:
             # If it's too tall or too short, set it to the fixed height.
             if "height" not in track or track["height"] > height_per_track or track["height"] < height_per_track * 0.8:
-                track["height"] = height_per_track
+                track["height"] = int(height_per_track)
     return views, ""
 
 def add_beddb_file(views, file, genome_assembly, viewconfig_info):
