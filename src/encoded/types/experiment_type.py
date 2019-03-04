@@ -67,7 +67,7 @@ class ExperimentType(Item):
     })
     def other_protocols(self, request, sop=None):
         protocol_paths = self.rev_link_atids(request, 'additional_protocols')
-        protocols = [request.embed('/', path, '@@object') for path in protocol_paths if path != sop]
+        protocols = [path for path in protocol_paths if path != sop]
         if protocols:
             return protocols
 
