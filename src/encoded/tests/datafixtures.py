@@ -4,7 +4,7 @@ import copy
 ORDER = [
     'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
     'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
-    'genomic_region', 'target', 'imaging_path', 'publication',
+    'genomic_region', 'target', 'imaging_path', 'publication', 'experiment_type',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'protocol', 'sop_map', 'biosample_cell_culture',
     'individual_human', 'individual_mouse', 'individual_fly',
@@ -351,13 +351,47 @@ def experiment_type_hic(testapp, lab, award):
     }
     return testapp.post_json('/experiment_type', data).json['@graph'][0]
 
+
+@pytest.fixture
+def experiment_type_capc(testapp, lab, award):
+    data = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'title': 'Capture Hi-C',
+        'status': 'released'
+    }
+    return testapp.post_json('/experiment_type', data).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment_type_rnaseq(testapp, lab, award):
+    data = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'title': 'RNA-seq',
+        'status': 'released'
+    }
+    return testapp.post_json('/experiment_type', data).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment_type_fish(testapp, lab, award):
+    data = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'title': 'DNA FISH',
+        'status': 'released'
+    }
+    return testapp.post_json('/experiment_type', data).json['@graph'][0]
+
+
 @pytest.fixture
 def experiment_project_release(testapp, lab, award, human_biosample):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': '/experiment-types/microc/',
         'status': 'released to project'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]

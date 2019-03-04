@@ -14,22 +14,22 @@ def file_data(lab, award, file_formats):
 
 
 @pytest.fixture
-def expt_data(lab, award, human_biosample):
+def expt_data(lab, award, human_biosample, experiment_type_hic):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'in situ Hi-C'
+        'experiment_type': experiment_type_hic['@id']
     }
 
 
 @pytest.fixture
-def mic_data(lab, award, human_biosample):
+def mic_data(lab, award, human_biosample, experiment_type_fish):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'DNA FISH'
+        'experiment_type': experiment_type_fish['@id']
     }
 
 
@@ -77,8 +77,8 @@ def test_audit_experiments_have_raw_files_no_files(testapp, expt_data):
     assert any('Raw files are absent' in error['detail'] for error in errors)
 
 
-def test_audit_experiments_have_raw_files_no_files_cap_c(testapp, expt_data):
-    expt_data['experiment_type'] = 'capture Hi-C'
+def test_audit_experiments_have_raw_files_no_files_cap_c(testapp, expt_data, experiment_type_capc):
+    expt_data['experiment_type'] = experiment_type_capc['@id']
     expt = testapp.post_json('/experiment_capture_c', expt_data).json['@graph'][0]
     res = testapp.get(expt['@id'] + '/@@audit-self')
     errors = res.json['audit']

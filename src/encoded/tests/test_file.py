@@ -238,7 +238,7 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
     testapp.patch_json(two_experiment_replicate_set['@id'],
                        {'other_processed_files': [{'title': 'Test', 'files': [resobj['@id']]}]})
     # hard-coded for convenience; should match experiment_data in datafixtures
-    expected_exp_type = 'micro-C'
+    expected_exp_type = '/experiment-types/in-situ-hic/'
     s3 = boto3.client('s3')
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
                   Body=str.encode('12346789abcd'))
@@ -1074,7 +1074,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['experiment_bucket'] == 'processed file'
     assert tf_info['assay_info'] == 'MboI'
 
@@ -1086,7 +1086,7 @@ def test_track_and_file_facet_info_file_link_to_expt_opfbucket(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['experiment_bucket'] == 'some other files'
 
 
@@ -1098,7 +1098,7 @@ def test_track_and_file_facet_info_file_link_to_expt_pf_and_opf_buckets(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['experiment_bucket'] == 'processed file'
 
 
@@ -1111,7 +1111,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep(
     testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
 
 
@@ -1126,32 +1126,32 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep_and_custom_eset(
     testapp.post_json('/experiment_set', custom_experiment_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
 
 
 def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
-        testapp, proc_file_json, experiment_data):
+        testapp, proc_file_json, experiment_data, experiment_type_rnaseq):
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    experiment_data['experiment_type'] = 'RNA-seq'
+    experiment_data['experiment_type'] = experiment_type_rnaseq['@id']
     experiment_data['processed_files'] = [pfile['@id']]
     del experiment_data['digestion_enzyme']
     testapp.post_json('/experiment_seq', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'RNA-seq'
+    assert tf_info['experiment_type'] == '/experiment-types/rnaseq/'
     assert 'assay_info' not in tf_info
     assert 'replicate_info' not in tf_info
 
 
 def test_track_and_file_facet_info_file_link_to_expt_biosample_cell(
-        testapp, proc_file_json, experiment_data):
+        testapp, proc_file_json, experiment_data, experiment_type_hic):
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
     experiment_data['processed_files'] = [pfile['@id']]
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['biosource_name'] == 'GM12878'
 
 
@@ -1163,7 +1163,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_tissue(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['biosource_name'] == 'lung'
 
 
@@ -1197,7 +1197,7 @@ def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
     testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     assert tf_info['experiment_bucket'] == 'processed file'
     assert tf_info['assay_info'] == 'MboI'
     assert tf_info['biosource_name'] == 'GM12878'
@@ -1302,7 +1302,7 @@ def test_track_and_file_facet_info_file_patch_override_fields(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == '/experiment-types/in-situ-hic/'
     # make sure it does change
     testapp.patch_json(pfile['@id'], {'override_experiment_type': 'new type'}, status=200)
     res2 = testapp.get(pfile['@id']).json
