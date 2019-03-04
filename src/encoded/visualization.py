@@ -883,18 +883,8 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
         "uid": uuid.uuid4(),
     }
 
-    # Add the color range options. A list of 256 strings, each containing an integer.
-    for index in range(256):
-        red = int(index * 252 / 255)
-        green = int(index * 253 / 255)
-        blue = int((index * 188 / 255) + 3)
-        new_track_base["options"]["colorRange"].append(
-            "rgba({r},{g},{b},1)".format(
-                r=red,
-                g=green,
-                b=blue,
-            )
-        )
+    # Add a color range for the track. It uses blue colors.
+    new_track_base["options"]["colorRange"]=["rgba(150,150,255,1)","rgba(0,0,255,1)"]
 
     return add_1d_file(views, new_track_base, genome_assembly)
 
