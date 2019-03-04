@@ -353,6 +353,17 @@ def experiment_type_hic(testapp, lab, award):
 
 
 @pytest.fixture
+def experiment_type_microc(testapp, lab, award):
+    data = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'title': 'Micro-C',
+        'status': 'released'
+    }
+    return testapp.post_json('/experiment_type', data).json['@graph'][0]
+
+
+@pytest.fixture
 def experiment_type_capc(testapp, lab, award):
     data = {
         'lab': lab['@id'],
@@ -386,12 +397,12 @@ def experiment_type_fish(testapp, lab, award):
 
 
 @pytest.fixture
-def experiment_project_release(testapp, lab, award, human_biosample):
+def experiment_project_release(testapp, lab, award, human_biosample, experiment_type_microc):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': '/experiment-types/microc/',
+        'experiment_type': experiment_type_microc['@id'],
         'status': 'released to project'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]

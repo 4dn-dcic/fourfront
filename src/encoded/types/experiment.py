@@ -268,19 +268,21 @@ class Experiment(Item):
         return pubs
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
-    def experiment_categorizer(self, request):
+    def experiment_categorizer(self, request, experiment_type=None):
         ''' The generalish case for if there is a targeted_factor use that
             and if not use enzyme - more specific cases in specific schemas
         '''
         digestion_enzyme = self.properties.get('digestion_enzyme')
         targeted_factor = self.properties.get('targeted_factor')
-        expt_type = self.properties.get('experiment_type')
         out_dict = {
             "field": "Default",
             "value": None
         }
-        types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq', 'CUT&RUN']
-        if expt_type is not None and expt_type in types4control and not targeted_factor:
+        types4control = [
+            '/experiment-types/damidseq/', '/experiment-types/chipseq/',
+            '/experiment-types/nadseq/', '/experiment-types/cut-run/'
+        ]
+        if experiment_type is not None and experiment_type in types4control and not targeted_factor:
             out_dict['field'] = 'Target'
             out_dict['value'] = 'None (Control)'
         elif targeted_factor is not None:
