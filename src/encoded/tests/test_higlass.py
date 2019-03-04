@@ -1353,6 +1353,9 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
             assert_true("colorRange" in options)
             assert_true(len(options["colorRange"]) == 256)
 
+            assert_true("labelPosition" in options)
+            assert_true(options["labelPosition"] == "topLeft")
+
     assert_true(found_annotation_track == True)
     assert_true(found_chromosome_track == True)
     assert_true(found_data_track == True)

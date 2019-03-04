@@ -875,7 +875,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
             "coordSystem": file["genome_assembly"],
             "colorRange": [],
             "valueScaling": "linear",
-            "labelPosition": "bottomRight",
+            "labelPosition": "topLeft",
         },
         "height": 18,
         "type": "horizontal-vector-heatmap",
