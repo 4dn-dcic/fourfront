@@ -215,12 +215,12 @@ def step_run(testapp, lab, award):
 
 
 @pytest.fixture
-def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample):
+def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample, experiment_type_microc):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': '/experiment-types/microc/',
+        'experiment_type': experiment_type_microc['@id'],
         'contributing_labs': [remc_lab['@id']]
     }
 
@@ -291,9 +291,9 @@ def test_submitter_cant_post_non_lab_collection(submitter_testapp):
     return submitter_testapp.post_json('/organism', item, status=403)
 
 
-def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_biosample):
+def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_biosample, experiment_type_microc):
     experiment = {'lab': lab['@id'], 'award': award['@id'],
-                  'experiment_type': '/experiment-types/microc/', 'biosample': human_biosample['@id']}
+                  'experiment_type': experiment_type_microc['@id'], 'biosample': human_biosample['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=201)
     location = res.location
     res = submitter_testapp.get(location + '@@testing-allowed?permission=edit', status=200)
@@ -302,21 +302,21 @@ def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_b
     submitter_testapp.patch_json(location, {'description': 'My experiment'}, status=200)
 
 
-def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award):
-    experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': '/experiment-types/microc/'}
+def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award, experiment_type_microc):
+    experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': experiment_type_microc['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=422)
     assert "not in user submits_for" in res.json['errors'][0]['description']
 
 
-def test_wrangler_post_other_lab(wrangler_testapp, other_lab, award, human_biosample):
+def test_wrangler_post_other_lab(wrangler_testapp, other_lab, award, human_biosample, experiment_type_microc):
     experiment = {'lab': other_lab['@id'], 'award': award['@id'],
-                  'experiment_type': '/experiment-types/microc/', 'biosample': human_biosample['@id']}
+                  'experiment_type': experiment_type_microc['@id'], 'biosample': human_biosample['@id']}
     wrangler_testapp.post_json('/experiments-hi-c', experiment, status=201)
 
 
-def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, human_biosample):
+def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, human_biosample, experiment_type_microc):
     experiment = {'lab': lab['@id'], 'award': award['@id'],
-                  'experiment_type': '/experiment-types/microc/', 'biosample': human_biosample['@id']}
+                  'experiment_type': experiment_type_microc['@id'], 'biosample': human_biosample['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=201)
 
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
