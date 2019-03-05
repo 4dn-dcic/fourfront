@@ -64,7 +64,6 @@ class Experiment(Item):
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
-        "experiment_type.title",
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
