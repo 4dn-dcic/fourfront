@@ -3,8 +3,8 @@ import copy
 
 ORDER = [
     'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
-    'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
-    'genomic_region', 'target', 'imaging_path', 'publication',
+    'ontology', 'ontology_term', 'file_format', 'badge', 'organism', 'gene',
+    'genomic_region', 'bio_feature', 'target', 'imaging_path', 'publication',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
     'individual_human', 'individual_mouse', 'individual_fly',
