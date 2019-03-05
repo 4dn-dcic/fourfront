@@ -46,7 +46,7 @@ def sop_map_data(protocol, lab, award, experiment_type_hic):
         'lab': lab['@id'],
         'award': award['@id'],
         "associated_item_type": "ExperimentHiC",
-        "id_values": ["/experiment-types/in-situ-hic/"],
+        "id_values": ["In situ Hi-C"],
         "notes": "This is just a dummy insert not linked to true SOP protocol",
         "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": protocol['@id'],
@@ -64,7 +64,7 @@ def sop_map_data_2(lab, award):
             'lab': lab['@id'],
             'award': award['@id'],
             "associated_item_type": "ExperimentHiC",
-            "id_values": ["/experiment-types/in-situ-hic/"],
+            "id_values": ["In situ Hi-C"],
             "notes": "This is a dummy second version of map",
             "description": "Second",
         }

@@ -155,6 +155,8 @@ class Experiment(Item):
 
     def _update(self, properties, sheets=None):
         sop_coll = None
+        exp_type = self.registry['collections']['ExperimentType']
+        exp_type_title = exp_type.get(properties['experiment_type']).properties['title']
         if 'sop_mapping' in properties.keys():
             # check if the SopMap has bad Status
             sop_coll = self.registry['collections']['SopMap']
@@ -172,7 +174,7 @@ class Experiment(Item):
             if sop_coll is None:
                 sop_coll = self.registry['collections']['SopMap']
             # if sop_mapping field not present see if it should be
-            sopmap = self.find_current_sop_map(properties['experiment_type'], sop_coll)
+            sopmap = self.find_current_sop_map(exp_type_title, sop_coll)
             properties['sop_mapping'] = {}
             if sopmap is not None:
                 sop_mapping = str(sopmap.uuid)
