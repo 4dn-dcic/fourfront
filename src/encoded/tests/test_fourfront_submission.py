@@ -1,5 +1,5 @@
 import pytest
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 # test that  the right fields are in place for metadata submission on FF.
 # specifically, a valid submits_for lab and valid award

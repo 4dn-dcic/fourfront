@@ -3,7 +3,7 @@ from encoded.types.file import FileFastq, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
 import os
 import boto3
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
@@ -225,6 +225,7 @@ def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, expe
         assert dl_tracking['range_query'] is False
         assert dl_tracking['is_visualization'] is False
         assert dl_tracking['user_uuid'] == 'anonymous'
+        assert isinstance(dl_tracking['request_headers'], type(''))
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 

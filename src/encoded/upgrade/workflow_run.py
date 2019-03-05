@@ -3,6 +3,8 @@ from snovault import (
 )
 
 
+@upgrade_step('workflow_run_awsem', '1', '2')
+@upgrade_step('workflow_run_sbg', '1', '2')
 @upgrade_step('workflow_run', '1', '2')
 def workflow_run_1_2(value, system):
     '''Change input_files.format_if_extra to FileFormat'''
@@ -26,6 +28,8 @@ def workflow_run_1_2(value, system):
             value['input_files'][i]['format_if_extra'] = efuuid
 
 
+@upgrade_step('workflow_run_awsem', '2', '3')
+@upgrade_step('workflow_run_sbg', '2', '3')
 @upgrade_step('workflow_run', '2', '3')
 def workflow_run_2_3(value, system):
     if 'output_quality_metrics' in value:

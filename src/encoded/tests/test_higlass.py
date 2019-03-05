@@ -1,6 +1,6 @@
 import pytest
 from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json, beddb_file_json, chromsizes_file_json
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 # Test Higlass display endpoints.
 
@@ -171,7 +171,7 @@ def higlass_mcool_viewconf(testapp):
                                         "name":"4DNFI1TBYKV3.mcool",
                                         "options":{
                                             "backgroundColor":"#eeeeee",
-                                            "labelPosition":"bottomRight",
+                                            "labelPosition":"topLeft",
                                             "coordSystem":"GRCm38",
                                             "colorRange":[
                                                 "white",
@@ -495,6 +495,15 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_jso
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
+    # The new top track should not be very tall, since there is a 2D file in the center.
+    bedGraph_track = [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ][0]
+    assert_true(
+        bedGraph_track["height"] < 100,
+        "1D file is too big: height should be less than 100, got {actual} instead.".format(
+            actual=bedGraph_track["height"],
+        )
+    )
+
 def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
 
@@ -533,6 +542,19 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 1)
 
+    assert_true(isinstance(new_higlass_json["views"][0]["tracks"]["top"][0]["height"], int), "Not an integer")
+
+    # The new top track should be tall, since there are no other tracks. But not too tall.
+    assert_true(
+        new_higlass_json["views"][0]["tracks"]["top"][0]["height"] >= 100 and new_higlass_json["views"][0]["tracks"]["top"][0]["height"] < 600,
+        "1D file is wrong size: height should be at least 100 and less than 600, got {actual} instead.".format(
+            actual=new_higlass_json["views"][0]["tracks"]["top"][0]["height"],
+        )
+    )
+
+    # Make sure there is a label.
+    assert_true(new_higlass_json["views"][0]["tracks"]["top"][0]["options"]["labelPosition"] != "hidden")
+
     # Add another bedGraph file. Make sure the bedGraphs are stacked atop each other.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
@@ -544,6 +566,16 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
 
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 2)
+
+    # The new top tracks should be very tall, since there are no other tracks.
+    bedGraph_tracks = [ t for t in new_higlass_json["views"][0]["tracks"]["top"] if "-divergent-bar" in t["type"] ]
+    for t in bedGraph_tracks:
+        assert_true(
+            t["height"] >= 100,
+            "1D file is too small: height should be at least 100, got {actual} instead.".format(
+                actual=t["height"],
+            )
+        )
 
 def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
@@ -614,6 +646,39 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     assert_true(layout1["y"] == 0)
     assert_true(layout1["w"] == 6)
     assert_true(layout1["h"] == 12)
+
+    # mcools have locked views
+    for lock_name in ("locationLocks", "zoomLocks"):
+        locks = new_higlass_json[lock_name]
+
+        view0_uid = new_higlass_json["views"][0]["uid"]
+        view1_uid = new_higlass_json["views"][1]["uid"]
+
+        # The same lock applies to both views
+        assert_true(view0_uid in locks["locksByViewUid"])
+        assert_true(view1_uid in locks["locksByViewUid"])
+        assert_true(locks["locksByViewUid"][view0_uid] == locks["locksByViewUid"][view1_uid])
+
+        lockUuid = locks["locksByViewUid"][view0_uid]
+        # The locks have non-None values
+        for view_uid in (view0_uid, view1_uid):
+            for index, lock_value in enumerate(locks["locksDict"][lockUuid][view_uid]):
+                assert_true(lock_value != None, "{lock_name} for view  {view_uid} should not be None: {actual}".format(
+                    lock_name=lock_name,
+                    view_uid=view_uid,
+                    actual=locks["locksDict"][lockUuid][view_uid],
+                ))
+
+        # Locks should have the same values
+        assert_true(len(locks["locksDict"][lockUuid][view0_uid]) == len(locks["locksDict"][lockUuid][view1_uid]) )
+
+        for index, lock_value in enumerate(locks["locksDict"][lockUuid][view0_uid]):
+            assert_true(lock_value == locks["locksDict"][lockUuid][view0_uid][index], "{lock_name} values do not match for index {index}. Expected {lock_value}, Actual {actual}".format(
+                lock_name=lock_name,
+                lock_value=lock_value,
+                index=index,
+                actual=locks["locksDict"][lockUuid][view_uid],
+            ))
 
 def test_correct_duplicate_tracks(testapp, higlass_mcool_viewconf, mcool_file_json):
     """When creating new views, make sure the correct number of 2D tracks are copied over.
@@ -1278,13 +1343,18 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
             assert_true(track["type"] == "horizontal-vector-heatmap")
 
+            assert_true(track["height"] < 20)
+
             assert_true("options" in track)
             options = track["options"]
             assert_true("valueScaling" in options)
             assert_true(options["valueScaling"] == "linear")
 
             assert_true("colorRange" in options)
-            assert_true(len(options["colorRange"]) == 256)
+            assert_true(len(options["colorRange"]) == 2)
+
+            assert_true("labelPosition" in options)
+            assert_true(options["labelPosition"] == "topLeft")
 
     assert_true(found_annotation_track == True)
     assert_true(found_chromosome_track == True)
