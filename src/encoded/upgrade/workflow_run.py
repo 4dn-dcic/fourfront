@@ -11,19 +11,20 @@ def workflow_run_1_2(value, system):
     formats = system['registry']['collections']['FileFormat']
     input_files = value.get('input_files', [])
     for i, infile in enumerate(input_files):
-        eformat = infile.get('format_if_extra')
-        eformat_item = formats.get(eformat)
+        if 'format_if_extra' not in infile:
+            continue
+        eformat_item = formats.get(infile['format_if_extra'])
         efuuid = None
         try:
             efuuid = str(eformat_item.uuid)
         except AttributeError:
             pass
         if not efuuid:
-            del value['input_files'][i]['format_if_extra']
-            msg = ' EXTRA_FILE_FORMAT: %s NOT FOUND' % eformat
+            msg = 'EXTRA_FILE_FORMAT: %s NOT FOUND' % infile['format_if_extra']
             note = value['input_files'][i].get('notes', '')
-            msg = note + msg
+            msg = ' '.join([note, msg])
             value['input_files'][i]['notes'] = msg
+            del value['input_files'][i]['format_if_extra']
         else:
             value['input_files'][i]['format_if_extra'] = efuuid
 

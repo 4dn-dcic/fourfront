@@ -6,7 +6,7 @@ ORDER = [
     'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
     'genomic_region', 'target', 'imaging_path', 'publication', 'experiment_type',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
-    'modification', 'protocol', 'sop_map', 'biosample_cell_culture',
+    'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
     'individual_human', 'individual_mouse', 'individual_fly',
     'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
     'treatment_agent', 'biosample', 'quality_metric_fastqc',

@@ -38,13 +38,13 @@
     {
         "awards": ["Test-4DN", "1U01CA200059-01", "Test-NOT-4DN"],
         "name": "some-guys-lab",
-        "title": "Some Guy's lab",
+        "title": "Some Guys lab",
         "uuid": "811cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
     },
     {
         "awards": ["Test-4DN"],
         "name": "some-other-guys-lab",
-        "title": "Some Other Guy's lab",
+        "title": "Some Other Guys lab",
         "uuid": "812cd4fe-ebb0-4b21-a94a-d2e3a36cc9bc"
     },
     {

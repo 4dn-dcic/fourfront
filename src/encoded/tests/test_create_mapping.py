@@ -1,11 +1,15 @@
 import pytest
 from .datafixtures import ORDER
 from encoded.types.experiment import *
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 @pytest.mark.parametrize('item_type', ORDER)
 def test_create_mapping(registry, item_type):
+    """
+    This test does not actually use elasticsearch
+    Only tests the mappings generated from schemas
+    """
     from snovault.elasticsearch.create_mapping import type_mapping
     from snovault.fourfront_utils import add_default_embeds
     from snovault import TYPES
