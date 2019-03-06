@@ -361,7 +361,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
 
 
 def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
-              clear_tables=False, overwrite=False):
+              clear_tables=False, overwrite=False, use_master_inserts=True):
     '''
     This function will take the inserts folder as input, and place them to the given environment.
     args:
@@ -395,7 +395,8 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts':  # Always load up master_inserts
+    # load master-inserts by default
+    if indir != 'master-inserts' and use_master_inserts:
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         master_res = load_all(testapp, master_inserts, [])
         if master_res:  # None if successful
