@@ -91,21 +91,33 @@ export class HiGlassPlainContainer extends React.PureComponent {
             });
         };
 
-
         setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
             if (!HiGlassComponent) {
                 window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
 
+                // Load in HiGlass libraries as separate JS file due to large size.
+                // @see https://webpack.js.org/api/module-methods/#requireensure
                 require.ensure(['higlass/dist/hglib'], (require) => {
                     const hglib = require('higlass/dist/hglib');
                     HiGlassComponent = hglib.HiGlassComponent;
                     finish();
                 }, "higlass-utils-bundle");
+
+                // Alternative, newer version of above -- currently the 'magic comments' are
+                // not being picked up (?) though so the above is used to set name of JS file.
+                //import(
+                //    /* webpackChunkName: "higlass-bundle" */
+                //    'higlass/dist/hglib'
+                //).then((hglib) =>{
+                //    HiGlassComponent = hglib.HiGlassComponent;
+                //    finish();
+                //});
+
             } else {
                 finish();
             }
             
-        }, this.props.mountDelay);
+        }, this.props.mountDelay || 500);
     }
 
     correctTrackDimensions(){
@@ -200,10 +212,9 @@ export class HiGlassPlainContainer extends React.PureComponent {
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
                 <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.8/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
-                <div className="higlass-wrapper row" children={hiGlassInstance} />
+                <div className="higlass-wrapper row">{ hiGlassInstance }</div>
             </div>
         );
     }
-
 
 }
