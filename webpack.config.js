@@ -29,9 +29,7 @@ if (mode === 'production') {
 
     // tell react to use production build
     plugins.push(new webpack.DefinePlugin({
-        'process.env': {
-            'NODE_ENV': '"production"'
-        }
+        'process.env.NODE_ENV': JSON.stringify("production")
     }));
 
     // add chunkhash to chunk names for production only (it's slower)
