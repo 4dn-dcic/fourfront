@@ -5836,7 +5836,7 @@
                     "description": "Adapter removal according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/97ffd707-b673-4184-a0f6-ca1dfc324067/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/e9812671-8621-4751-a20f-ece28aa40641/"
                     ]
                 },
                 "name": "clip",
@@ -5936,7 +5936,7 @@
                     "description": "Alignment according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/5befdeda-66a8-43bc-a469-5a5e7248198e/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/e9812671-8621-4751-a20f-ece28aa40641/"
                     ]
                 },
                 "name": "align",
@@ -6008,7 +6008,7 @@
                     "description": "Filtering and sorting according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/e9812671-8621-4751-a20f-ece28aa40641/"
                     ]
                 },
                 "name": "filtersort",
@@ -6053,7 +6053,7 @@
                     "description": "PCR Duplicate removal according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/e9812671-8621-4751-a20f-ece28aa40641/"
                     ]
                 },
                 "name": "dedup",
@@ -6144,7 +6144,7 @@
                     "description": "Read aggregation according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/",
+                        "/software/e9812671-8621-4751-a20f-ece28aa40641/",
                         "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/",
                         "/software/00eda937-3149-4252-8dc9-c27de59d75ed/"
                     ]
@@ -6286,7 +6286,7 @@
                     "description": "Adapter removal according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/97ffd707-b673-4184-a0f6-ca1dfc324067/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/257fc43b-a924-46cf-b377-fb5dcaabd50b/"
                     ]
                 },
                 "name": "clip",
@@ -6386,7 +6386,7 @@
                     "description": "Alignment according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/5befdeda-66a8-43bc-a469-5a5e7248198e/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/257fc43b-a924-46cf-b377-fb5dcaabd50b/"
                     ]
                 },
                 "name": "align",
@@ -6458,7 +6458,7 @@
                     "description": "Filtering and sorting according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/257fc43b-a924-46cf-b377-fb5dcaabd50b/"
                     ]
                 },
                 "name": "filtersort",
@@ -6503,7 +6503,7 @@
                     "description": "PCR Duplicate removal according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/752e712f-4ebe-4335-a95e-53cd55a8a42f/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/"
+                        "/software/257fc43b-a924-46cf-b377-fb5dcaabd50b/"
                     ]
                 },
                 "name": "dedup",
@@ -6594,7 +6594,7 @@
                     "description": "Read aggregation according to the Repli-seq pipeline",
                     "software_used": [
                         "/software/13d47cb7-79d1-4472-8d6f-1e1263631b4e/",
-                        "/software/344ef3c8-266e-49b2-ab33-ed13d6d85915/",
+                        "/software/257fc43b-a924-46cf-b377-fb5dcaabd50b/",
                         "/software/58c2eadd-7a15-4e8c-960f-9c7022af2bfc/",
                         "/software/00eda937-3149-4252-8dc9-c27de59d75ed/"
                     ]

@@ -665,5 +665,35 @@
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "status": "released",
         "source_url": "https://github.com/higlass/clodius"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "2206392",
+        "lab": "4dn-dcic-lab",
+        "name": "repli-seq-pipeline",
+        "software_type": [
+            "aligner",
+            "filter",
+            "normalizer",
+            "smoother"
+        ],
+        "source_url": "https://github.com/4dn-dcic/repli-seq-pipeline",
+        "title": "repli-seq-pipeline_2206392",
+        "uuid": "257fc43b-a924-46cf-b377-fb5dcaabd50b"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "8584ff93",
+        "lab": "4dn-dcic-lab",
+        "name": "repli-seq-pipeline",
+        "software_type": [
+            "aligner",
+            "filter",
+            "normalizer",
+            "smoother"
+        ],
+        "source_url": "https://github.com/4dn-dcic/repli-seq-pipeline",
+        "title": "repli-seq-pipeline_8584ff93",
+        "uuid": "e9812671-8621-4751-a20f-ece28aa40641"
     }
 ]
