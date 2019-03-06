@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.working, pytest.mark.setone]
 
 
 def basic_auth(username, password):

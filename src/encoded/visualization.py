@@ -827,6 +827,7 @@ def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info):
         "options": {
             "name": get_title(file),
             "coordSystem": file["genome_assembly"],
+            "labelPosition": "topLeft",
         },
         "type": "horizontal-divergent-bar",
         "orientation": "1d-horizontal",
@@ -874,25 +875,16 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
             "coordSystem": file["genome_assembly"],
             "colorRange": [],
             "valueScaling": "linear",
+            "labelPosition": "topLeft",
         },
-        "height": 35,
+        "height": 18,
         "type": "horizontal-vector-heatmap",
         "orientation": "1d-horizontal",
         "uid": uuid.uuid4(),
     }
 
-    # Add the color range options. A list of 256 strings, each containing an integer.
-    for index in range(256):
-        red = int(index * 252 / 255)
-        green = int(index * 253 / 255)
-        blue = int((index * 188 / 255) + 3)
-        new_track_base["options"]["colorRange"].append(
-            "rgba({r},{g},{b},1)".format(
-                r=red,
-                g=green,
-                b=blue,
-            )
-        )
+    # Add a color range for the track. It uses blue colors.
+    new_track_base["options"]["colorRange"]=["rgba(150,150,255,1)","rgba(0,0,255,1)"]
 
     return add_1d_file(views, new_track_base, genome_assembly)
 
@@ -913,10 +905,78 @@ def add_1d_file(views, new_track, genome_assembly):
         # Add to the "top" tracks, after the gene annotation track but before the chromsize tracks.
         non_gene_annotation_indecies = [i for i, track in enumerate(view["tracks"]["top"]) if "gene-annotations" not in track["type"]]
 
+        new_track_to_add = deepcopy(new_track)
+
         if len(non_gene_annotation_indecies) > 0:
-            view["tracks"]["top"].insert(non_gene_annotation_indecies[-1], new_track)
+            view["tracks"]["top"].insert(non_gene_annotation_indecies[-1], new_track_to_add)
         else:
-            view["tracks"]["top"].insert(0, new_track)
+            view["tracks"]["top"].insert(0, new_track_to_add)
+
+    views, error = resize_1d_tracks(views)
+    return views, error
+
+def resize_1d_tracks(views):
+    """ For each view, resize the top 1D tracks (excluding gene-annotation and chromosome)
+    Args:
+        views(list)         : All of the views from the view config.
+
+    Returns:
+        views(list) : A list of the modified views. None if there is an error.
+        error(str) : A string explaining the error. This is None if there is no error.
+    """
+
+    for view in views:
+        view_info = get_view_content_info(view)
+
+        # Skip to the next view if there are no top tracks.
+        if not view_info["has_top_tracks"]:
+            continue
+
+        top_tracks = [ t for t in view["tracks"]["top"] if t["type"] not in ("horizontal-gene-annotations", "horizontal-chromosome-labels", "horizontal-vector-heatmap") ]
+
+        # Skip to the next view if there are no data tracks.
+        if len(top_tracks) < 1:
+            continue
+
+        gene_chromosome_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-gene-annotations", "horizontal-chromosome-labels") ]
+
+        horizontal_vector_heatmap_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-vector-heatmap") ]
+
+        # Get the height allocated for all of the top tracks.
+        remaining_height = 600
+        # If there is a central view, the top rows will have less height to work with.
+        if view_info["has_center_content"]:
+            remaining_height = 200
+
+        # Remove the height from the chromosome and gene-annotation tracks
+        for track in gene_chromosome_tracks:
+            remaining_height -= track.get("height", 50)
+
+        # Remove the height from the horizontal-vector-heatmap tracks
+        for track in horizontal_vector_heatmap_tracks:
+            remaining_height -= track.get("height", 18)
+
+        # Evenly divide the remaining height.
+        height_per_track = remaining_height / len(top_tracks)
+
+        # Set the maximum track height.
+        if view_info["has_center_content"]:
+            # We want to maximize the center track space, so cap the top track height to 35.
+            if height_per_track > 35:
+                height_per_track = 35
+        else:
+            # The height should be no more than half the height
+            if height_per_track > remaining_height / 2:
+                height_per_track = remaining_height / 2
+
+        # Minimum height is 20.
+        if height_per_track < 20:
+            height_per_track = 20
+
+        for track in top_tracks:
+            # If it's too tall or too short, set it to the fixed height.
+            if "height" not in track or track["height"] > height_per_track or track["height"] < height_per_track * 0.8:
+                track["height"] = int(height_per_track)
     return views, ""
 
 def add_beddb_file(views, file, genome_assembly, viewconfig_info):
@@ -1133,7 +1193,9 @@ def add_2d_file(views, new_content, viewconfig_info):
                 contents["type"] = "2d-chromosome-grid"
                 # The grid should be the last item to draw so it is always visible.
                 views[0]["tracks"]["center"][0]["contents"].append(contents)
-        return views, ""
+        # Resize 1d tracks.
+        views, error = resize_1d_tracks(views)
+        return views, error
 
     # If there is central content, then we need to make a new view.
     # Stop if there are already 6 views.
@@ -1166,7 +1228,10 @@ def add_2d_file(views, new_content, viewconfig_info):
     if len(views) > 1:
         for view in views:
             add_zoom_lock_if_needed(viewconfig_info["higlass_viewconfig"], view, viewconfig_info["first_view_location_and_zoom"])
-    return views, ""
+
+    # Resize 1d tracks.
+    views, error = resize_1d_tracks(views)
+    return views, error
 
 def create_2d_content(file, viewtype):
     """ Generates a 2D track.
@@ -1356,6 +1421,15 @@ def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
 
     base_initial_x_domain = view_config["views"][0]["initialXDomain"]
     base_initial_y_domain = view_config["views"][0]["initialYDomain"]
+
+    # If there is no base view zoom, calculate it based on the X domain.
+    if base_view_x == None and base_view_y == None and base_view_zoom == None:
+        # Use the Domain's midway point for the lock's x and y coordinates.
+        base_view_x = (base_initial_x_domain[0] + base_initial_x_domain[1]) / 2.0
+        base_view_y = (base_initial_y_domain[0] + base_initial_y_domain[1]) / 2.0
+
+        # The zoom level just needs to be the same.
+        base_view_zoom = 1
 
     # Set the location and zoom locks.
     for lock_name in ("locationLocks", "zoomLocks"):

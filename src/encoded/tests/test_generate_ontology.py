@@ -2,7 +2,7 @@ import os
 import pytest
 from collections import OrderedDict
 from encoded.commands import generate_ontology as go
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_parse_args_defaults():

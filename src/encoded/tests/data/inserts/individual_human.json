@@ -11,7 +11,6 @@
         "health_status": "unknown",
         "lab": "4dn-dcic-lab",
         "life_stage": "adult",
-        "organism": "human",
         "sex": "female",
         "status": "in review by lab",
         "submitted_by": "wrangler@wrangler.com",
