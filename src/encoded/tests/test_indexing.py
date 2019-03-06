@@ -5,7 +5,8 @@ elasticsearch running as subprocesses.
 """
 import pytest
 from encoded.verifier import verify_item
-from pyramid.paster import get_appsettings
+
+from .features.conftest import app_settings, app as conf_app
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
@@ -13,36 +14,13 @@ pytestmark = [pytest.mark.working, pytest.mark.indexing]
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
-    from .conftest import _app_settings
-    settings = _app_settings.copy()
-    settings['create_tables'] = True
-    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
-    settings['elasticsearch.server'] = elasticsearch_server
-    settings['sqlalchemy.url'] = postgresql_server
-    settings['collection_datastore'] = 'elasticsearch'
-    settings['item_datastore'] = 'elasticsearch'
-    settings['indexer'] = True
-    settings['indexer.processes'] = 2
-
-    # use aws auth to access elasticsearch
-    if aws_auth:
-        settings['elasticsearch.aws_auth'] = aws_auth
-    return settings
-
-
 @pytest.yield_fixture(scope='session')
-def app(app_settings):
-    from encoded import main
-    app = main({}, **app_settings)
-
-    yield app
-
-    from snovault import DBSESSION
-    DBSession = app.registry[DBSESSION]
-    # Dispose connections so postgres can tear down.
-    DBSession.bind.pool.dispose()
+def app(app_settings, use_collections=TEST_COLLECTIONS):
+    """
+    Use to pass kwargs for create_mapping to conftest app
+    """
+    for app in conf_app(app_settings, collections=use_collections, skip_indexing=True):
+        yield app
 
 
 @pytest.fixture(autouse=True)
@@ -52,6 +30,9 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
+    from .conftest import indexer_testapp
+    # index and then run create mapping to clear things out
+    indexer_testapp(app).post_json('/index', {'record': True})
     create_mapping.run(app, collections=use_collections, skip_indexing=True)
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
@@ -73,8 +54,10 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
     assert doc_count == 0
     # First post a single item so that subsequent indexing is incremental
-    res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
+    testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
+    if res.json['indexing_count'] != 1:
+        import pdb; pdb.set_trace()
     assert res.json['indexing_count'] == 1
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
