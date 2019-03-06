@@ -50,6 +50,17 @@ def test_workflow_run_upgrade_1_2_bad_file_format(workflow_run_1, registry):
     assert value['input_files'][0].get('notes') == ' EXTRA_FILE_FORMAT: pairs_px2 NOT FOUND'
 
 
+def test_workflow_run_upgrade_1_2_missing_file_format(workflow_run_1, registry):
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    del workflow_run_1['input_files'][0]['format_if_extra']
+    value = upgrader.upgrade('workflow_run', workflow_run_1, registry=registry,
+                             current_version='1', target_version='2')
+    assert value['schema_version'] == '2'
+    ef_format = value['input_files'][0].get('format_if_extra')
+    assert ef_format is None
+
+
 @pytest.fixture
 def workflow_run_2(quality_metric_fastqc, file_fastq):
     return {
