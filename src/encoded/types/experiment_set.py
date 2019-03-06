@@ -95,7 +95,7 @@ class ExperimentSet(Item):
         "publications_of_set.authors",
         "publications_of_set.date_published",
 
-        "experiments_in_set.experiment_type",
+        "experiments_in_set.experiment_type.title",
         "experiments_in_set.accession",
         "experiments_in_set.status",
         "experiments_in_set.experiment_categorizer.field",
