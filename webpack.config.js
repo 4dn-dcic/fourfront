@@ -2,8 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 const env = process.env.NODE_ENV;
 const TerserPlugin = require('terser-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const DeadCodePlugin = require('webpack-deadcode-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const PATHS = {
@@ -28,17 +26,12 @@ let devTool = 'source-map'; // Default, slowest.
 
 
 if (mode === 'production') {
+
     // tell react to use production build
     plugins.push(new webpack.DefinePlugin({
         'process.env': {
             'NODE_ENV': '"production"'
         }
-    }));
-
-    plugins.push(new DeadCodePlugin({
-        exclude: [
-            '**/*.(stories|spec).(js|jsx)'
-        ]
     }));
 
     // add chunkhash to chunk names for production only (it's slower)
@@ -126,8 +119,7 @@ module.exports = [
     {
         mode: mode,
         entry: {
-            "bundle"    : PATHS.static + '/browser',
-            //"util-aws"  : PATHS.static + '/components/util/aws',
+            "bundle"    : PATHS.static + '/browser'
         },
         target: "web",
         output: {
