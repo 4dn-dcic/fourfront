@@ -303,6 +303,14 @@
             "title" : "Experiment Type",
             "description" : "Type of experiment to which this file belongs"
         },
+        "track_and_facet_info.dataset" : {
+            "title" : "Dataset",
+            "description" : "Dataset to which this file belongs"
+        },
+        "track_and_facet_info.experiment_type" : {
+            "title" : "Condition",
+            "description" : "Condition that distinguishes this replicate set from others in the dataset"
+        },        
         "track_and_facet_info.assay_info" : {
             "title" : "Assay Details",
             "description" : "Details of the experiment to which this file belongs"
