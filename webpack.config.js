@@ -21,17 +21,12 @@ plugins.push(
     })
 );
 
+
 let chunkFilename = '[name].js';
 let devTool = 'source-map'; // Default, slowest.
 
 
 if (mode === 'production') {
-
-    // tell react to use production build
-    plugins.push(new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify("production")
-    }));
-
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
@@ -92,6 +87,18 @@ var optimization = {
 
 const webPlugins = plugins.slice(0);
 const serverPlugins = plugins.slice(0);
+
+// Inform our React code of what build we're on.
+webPlugins.push(new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify(env),
+    'SERVERSIDE' : JSON.stringify(false)
+}));
+
+serverPlugins.push(new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify(env),
+    'SERVERSIDE' : JSON.stringify(true)
+}));
+
 
 if (mode === 'development'){
     webPlugins.push(
