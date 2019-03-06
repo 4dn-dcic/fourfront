@@ -20,8 +20,8 @@ It may also be helpful to read [the documentation](../../../../docs/inserts.md) 
 You can use the `bin/update-inserts-from-server` command to update contents of any inserts directory using data from any Fourfront server. This can be used to keep important `master-inserts` up-to-date or pull in data to test locally, likely with the `inserts` or `temp-local-inserts` directory. Here are the arguments for the command:
 - **--env <FF>** environment name of Fourfront server to load from, such as `data` or `fourfront-webdev`. Default: `data`
 - **--dest <dir>**  inserts directory to write to. Default: `temp-local-inserts`
-- **--item-type <type>** item types to update. Corresponds to the name of the file in the inserts folder. Optional.
-- **--ignore-field <field>** field to skip when updating items. Default: `attachment` is ignored
+- **--item-type <type>** item types to update. Corresponds to the name of the file in the inserts folder. Optional
+- **--ignore-field <field>** field to skip when updating items. Optional
 
 There a few important to keep in mind when updating inserts:
 - Adding and committing items to `master-inserts` should be done with care, since they are loaded on all environments.

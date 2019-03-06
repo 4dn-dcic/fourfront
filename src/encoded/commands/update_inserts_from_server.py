@@ -35,8 +35,8 @@ def read_local_inserts_dir(dir, path, target_types=[]):
     if target_types:
         bad_item_types = [it for it in target_types if it not in item_types]
         if bad_item_types:
-            raise Exception('Specified item type(s) %s are not found in the inserts '
-                            'dir. Found: %s' % (bad_item_types, item_types))
+            raise Exception('update_inserts: Specified item type(s) %s are not found in '
+                            'the inserts dir. Found: %s' % (bad_item_types, item_types))
     # update item_types if user specified specific ones
     fetch_item_types = target_types if target_types else item_types
     # load current insert contents from json file
@@ -85,55 +85,58 @@ def main():
     local_inserts, item_uuids = read_local_inserts_dir(args.dest, inserts_path, args.item_type)
 
     # now find uuids and all linked from the given server
-    # ignore attachments and add workflow runs related to file_fastq/file_processed
-    if 'attachment' not in args.ignore_field:
-        use_ignore = args.ignore_field + ['attachment']
-    else:
-        use_ignore = args.ignore_field
     svr_inserts, svr_uuids = expand_es_metadata(item_uuids, ff_env=args.env,
                                                 store_frame='raw', add_pc_wfr=True,
-                                                ignore_field=use_ignore)
+                                                ignore_field=args.ignore_field)
 
     # if we are updating `inserts`, must make sure that items don't conflict
     # with those in `master-inserts`
+    skip_uuids = set()
     if args.dest == 'inserts':
         master_path = '/'.join([inserts_location, 'master-inserts'])
         master_inserts, master_uuids = read_local_inserts_dir('master-inserts', master_path)
         item_conflict_report = {}
-        del master_uuids  # for codacy
-        for item_type in master_inserts:
+        for item_type in svr_inserts:
             itype_err = []
             itype_okay = []
-            conflicting_items = [id for id in master_inserts[item_type]
-                                 if id in svr_inserts.get(item_type, {})]
+            conflicting_items = [item for item in svr_inserts[item_type] if item['uuid'] in master_uuids]
             for conflict in conflicting_items:
                 # compare inserts by loading json objects
-                svr_json = json.dumps(svr_inserts[item_type][conflict], sort_keys=True)
-                mstr_json = json.dumps(master_inserts[item_type][conflict], sort_keys=True)
+                svr_json = json.dumps(conflict, sort_keys=True)
+                mstr_json = json.dumps(master_inserts[item_type][conflict['uuid']], sort_keys=True)
                 if svr_json != mstr_json:
-                    itype_err.append(conflict)
+                    itype_err.append(conflict['uuid'])
                 else:
                     # the json is the same. Remove from the `inserts` update
-                    del svr_inserts[item_type][conflict]
-                    itype_okay.append(conflict)
+                    skip_uuids.add(conflict['uuid'])
+                    itype_okay.append(conflict['uuid'])
             item_conflict_report[item_type] = {'error': itype_err, 'okay': itype_okay}
         if any([it for it in item_conflict_report if item_conflict_report[it]['error']]):
             error_report = {it: item_conflict_report[it]['error'] for it in item_conflict_report}
-            raise Exception('Cannot update the following items in "inserts" directory,'
+            raise Exception('update_inserts: Cannot update the following items in "inserts" directory,'
                             ' since there are conflicting items with different values'
                             'in the master-inserts. Update those first. Conflicts: %s' % error_report)
         elif any([it for it in item_conflict_report if item_conflict_report[it]['okay']]):
             conflict_report = {it: item_conflict_report[it]['okay'] for it in item_conflict_report}
-            logger.warning('The following items are already in "master-inserts".'
+            logger.warning('update_inserts: The following items are already in "master-inserts".'
                            ' Will not add to "inserts". Items:' % conflict_report)
 
     # now we need to update the server inserts with contents from local inserts
     # so that existing information is not lost
     for item_type in svr_inserts:
+        # remove items specified by skip uuids
+        if skip_uuids:
+            svr_inserts[item_type] = [insrt for insrt in svr_inserts[item_type]
+                                      if insrt['uuid'] not in skip_uuids]
         for item_uuid in local_inserts.get(item_type, {}):
-            if item_uuid not in svr_uuids:
+            if item_uuid not in svr_uuids and item_uuid not in skip_uuids:
                 svr_inserts[item_type].append(local_inserts[item_type][item_uuid])
     dump_results_to_json(svr_inserts, inserts_path)
+    logger.info('update_inserts: Successfully wrote to %s' % inserts_path)
+    for item_type in svr_inserts:
+        logger.info('update_inserts: Wrote %s items to %s' %
+                    (len(svr_inserts[item_type]), item_type + '.json'))
+
 
 
 if __name__ == "__main__":
