@@ -30,6 +30,7 @@ package-lock.json
 /ontology.json
 /parts/
 /session-secret.b64
+/src/encoded/static/coverage
 /src/encoded/static/components/lib/react-infinite
 /src/encoded/static/css/bootstrap.css
 /src/encoded/static/css/responsive.css

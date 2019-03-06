@@ -180,6 +180,7 @@ module.exports = [
             'd3',
             'dagre-d3',
             '@babel/register', // avoid bundling babel transpiler, which is not used at runtime
+            { 'higlass/dist/hglib' : '{HiGlassComponent:{}}' },
             'higlass',
             'auth0-lock',
             'aws-sdk',

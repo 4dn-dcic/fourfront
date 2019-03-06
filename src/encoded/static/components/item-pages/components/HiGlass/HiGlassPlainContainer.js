@@ -118,6 +118,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             }
             
         }, this.props.mountDelay || 500);
+
     }
 
     correctTrackDimensions(){
