@@ -17,7 +17,18 @@ It may also be helpful to read [the documentation](../../../../docs/inserts.md) 
 
 ### Updating inserts from the server
 
-Currently, we are waiting to refactor loadxl before creating a strategy to update inserts from our live servers. When implemented, it will use the `bin/update-inserts-from-server` command.
+You can use the `bin/update-inserts-from-server` command to update contents of any inserts directory using data from any Fourfront server. This can be used to keep important `master-inserts` up-to-date or pull in data to test locally, likely with the `inserts` or `temp-local-inserts` directory. Here are the arguments for the command:
+- **--env <FF>** environment name of Fourfront server to load from, such as `data` or `fourfront-webdev`. Default: `data`
+- **--dest <dir>**  inserts directory to write to. Default: `temp-local-inserts`
+- **--item-type <type>** item types to update. Corresponds to the name of the file in the inserts folder. Optional.
+- **--ignore-field <field>** field to skip when updating items. Default: `attachment` is ignored
+
+There a few important to keep in mind when updating inserts:
+- Adding and committing items to `master-inserts` should be done with care, since they are loaded on all environments.
+- If targeting `inserts` directory, the update will fail if any items already exist in `master-inserts` and differ in value. Any existing items in `master-inserts` that are up-to-date with the update will not be written to `inserts` to prevent duplication.
+- For local testing, it is best to use `temp-local-inserts`, which is a directory ignored by Git.
+- The easiest way to add new inserts is to add `{"uuid": <uuid on server>}` to the item type JSON file in the desired inserts directory. This will then get replaced with the full data for the inserts when running the command.
+- If you want your local updates to inserts to persist, you MUST commit them and merge into the master Fourfront.
 
 ### inserts
 
@@ -25,7 +36,7 @@ These files contain test items that are intended to create a development environ
 - Running locally and there are NO inserts in `temp-local-inserts`
 - Running on mastertest
 
-These inserts are kept up-to-date by hand and eventually by using `bin/update-inserts-from-server`. They are not used in any tests.
+These inserts are kept up-to-date by hand and eventually by using `bin/update-inserts-from-server`. Items should NOT be in both `inserts` and `master-inserts`. These inserts are not used in any tests.
 
 ### master-inserts
 
@@ -35,7 +46,7 @@ These files contain a subset of items that are minimally linked and are crucial 
 bin/load-data production.ini --app-name app --access-key s3 --prod
 ```
 
-These inserts are loaded in a couple tests within `test_loadxl.py`, so it is important not too add an excessive number of items to them.
+Certain item types from these inserts are loaded in a couple tests within `test_loadxl.py`, so try not too add an excessive number of items to them.
 
 ### temp-local-inserts
 
