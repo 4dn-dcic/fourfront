@@ -28,6 +28,10 @@ const patchedConsoleInstance = (function(){
          */
         this.isDebugging = function(){
             // `BUILDTYPE` && `process.env.NODE_ENV` is set in webpack.config.js if running 'npm run build'
+            if (typeof BUILDTYPE === 'undefined'){
+                console.warn("BUILDTYPE var is not set - likely running uncompiled ES6 JS -or- compile-time issue.");
+                return true;
+            }
             if (BUILDTYPE === "production") {
                 return false;
             }
