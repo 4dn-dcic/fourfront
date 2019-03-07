@@ -7,6 +7,19 @@ import { Item, File, Experiment, ExperimentSet } from './typedefs';
 
 var console = patchedConsoleInstance;
 
+/**
+ * Gets file_format string from a file.
+ * Requires file_format to be embedded.
+ * Currently file_format.display_title is same as file_format.file_format, so either property is fine.
+ * This may change in the future and would require file_format.file_format to be embedded.
+ *
+ * @param {Experiment} exp - A File Item JSON
+ * @returns {string|null} Type of the experiment.
+ */
+export function getExperimentTypeStr(exp){
+    return (exp && exp.experiment_type && (exp.experiment_type.title || exp.experiment_type.display_title)) || null;
+}
+
 
 /**
  * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
@@ -275,7 +288,7 @@ export function experimentSetsFromFile(file, returnFormat = 'list'){
         }, {}),
 
         _.reduce(file.experiments || [], function(sets, exp){ // ExpSets by @id from file.experiments, with 'experiments_in_set' added.
-            
+
             var expSetsFromExp = _.reduce(exp.experiment_sets || [], function(m, expSet){
                 var id = atIdFromObject(expSet);
                 if (!id) {
@@ -289,7 +302,7 @@ export function experimentSetsFromFile(file, returnFormat = 'list'){
                 }
                 return m;
             }, {});
-    
+
             _.keys(expSetsFromExp).forEach(function(es_id){
                 if (typeof sets[es_id] !== 'undefined'){
                     sets[es_id].experiments_in_set = (sets[es_id].experiments_in_set || []).concat(expSetsFromExp[es_id].experiments_in_set);
@@ -297,9 +310,9 @@ export function experimentSetsFromFile(file, returnFormat = 'list'){
                     sets[es_id] = expSetsFromExp[es_id];
                 }
             });
-    
+
             return sets;
-    
+
         }, {})
     );
 
@@ -480,7 +493,7 @@ export function findUnpairedFiles(files_in_experiment){
             unpairedFiles.push(file);
             return unpairedFiles;
         }
-        
+
         if (pairedEnd > 1 && Array.isArray(file.related_files) && file.related_files.length > 0){
             var uniqueIDField = null;
             if (_.all(file.related_files, function(rf){ return rf.file && typeof rf.file.uuid === 'string'; }) && _.all(files_in_experiment, function(f){ return typeof f.uuid === 'string'; })){
@@ -605,10 +618,10 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
 }
 
 /**
- * Combine file pairs and unpaired files into one array. 
+ * Combine file pairs and unpaired files into one array.
  * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
  * Can always _.flatten() this or map out first file per pair.
- * 
+ *
  * @param {ExperimentSet} experiment_set - Experiment Set
  * @returns {File[]|File[][]} For example, [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */

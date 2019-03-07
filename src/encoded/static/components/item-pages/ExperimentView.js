@@ -49,7 +49,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         }
 
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0) {
-            
+
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
@@ -113,7 +113,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
      */
     typeInfo(){
-        return { 'title' : this.props.context.experiment_type || null, 'description' : "Type of Experiment" };
+        return { 'title' : expFxn.getExperimentTypeStr(this.props.context) || null, 'description' : "Type of Experiment" };
     }
 
     /**
@@ -246,7 +246,7 @@ class OverviewHeadingMic extends React.Component {
                 <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
                 <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                 <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
-                
+
                 <OverViewBodyItem {...commonProps} property='imaging_paths' fallbackTitle="Imaging Paths"
                     wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement='div' listWrapperElement='div' singleItemClassName="block"
                     titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
@@ -285,7 +285,7 @@ export class RawFilesTableSection extends React.Component {
                 'minColumnWidth' : 30
             };
         }
-        
+
         return (
             <div className="raw-files-table-section">
                 <h3 className="tab-section-title">
