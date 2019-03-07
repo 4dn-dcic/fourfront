@@ -10,7 +10,8 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_bio1"],
-        "status": "in review by lab"
+        "status": "in review by lab",
+        "organism_name": "human"
     },
     {
         "description": "A protein feature",
@@ -21,7 +22,8 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_bio2"],
-        "status": "in review by lab"
+        "status": "in review by lab",
+        "organism_name": "human"
     },
     {
         "description": "A TAD feature",
@@ -32,6 +34,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_bio3"],
-        "status": "in review by lab"
+        "status": "in review by lab",
+        "organism_name": "mouse"
     }
 ]
