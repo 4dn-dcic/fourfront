@@ -75,10 +75,10 @@ var optimization = {
         //})
         new TerserPlugin({
             parallel: true,
+            sourceMap: true,
             terserOptions:{
                 compress: true,
-                mangle: true,
-                sourceMap: true
+                mangle: true
             }
         })
     ]
