@@ -116,7 +116,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             } else {
                 finish();
             }
-            
+
         }, this.props.mountDelay || 500);
 
     }

@@ -132,7 +132,7 @@ export default class SubmissionView extends React.PureComponent{
      * The main functionality of this is to wait for schemas if they're not
      * available on componentDidMount.
      */
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         if (this.props.schemas !== nextProps.schemas){
             if (this.state.currKey === null){
                 this.initializePrincipal(nextProps.context, nextProps.schemas);
@@ -153,13 +153,15 @@ export default class SubmissionView extends React.PureComponent{
      * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = object.deepClone(this.state.keyContext);
-        var validCopy = object.deepClone(this.state.keyValid);
-        contextCopy[objKey] = newContext;
-        validCopy[objKey] = this.findValidationState(objKey);
-        this.setState({
-            'keyContext': contextCopy,
-            'keyValid': validCopy
+        this.setState(({ keyContext, keyValid }) => {
+            var contextCopy = object.deepClone(keyContext),
+                validCopy   = object.deepClone(keyValid);
+            contextCopy[objKey] = newContext;
+            validCopy[objKey] = this.findValidationState(objKey);
+            return {
+                'keyContext': contextCopy,
+                'keyValid': validCopy
+            };
         }, ReactTooltip.rebuild);
     }
 
@@ -1160,8 +1162,8 @@ export default class SubmissionView extends React.PureComponent{
                                         this.updateUpload(upload_manager);
                                     }
                                 }, "aws-utils-bundle");
-                                
-                            }else{
+
+                            } else {
                                 // state cleanup for this key
                                 this.finishRoundTwo();
                                 this.setState(stateToSet);
