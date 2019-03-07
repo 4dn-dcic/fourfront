@@ -56,8 +56,6 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     # First post a single item so that subsequent indexing is incremental
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
-    if res.json['indexing_count'] != 1:
-        import pdb; pdb.set_trace()
     assert res.json['indexing_count'] == 1
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
