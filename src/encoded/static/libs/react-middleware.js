@@ -94,4 +94,4 @@ var render = function (Component, body, res) {
 
 export function build(Component) {
     return transformResponse(render.bind(render, Component));
-};
+}

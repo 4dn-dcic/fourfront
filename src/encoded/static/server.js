@@ -2,23 +2,22 @@
 
 /* jshint strict: false */
 
-if (BUILDTYPE === undefined) {
-    console.log("Warning - BUILDTYPE is not defined");
-    require("@babel/register")({
-        only: ['src/encoded/static'],
-    });
-} else {
-    require('source-map-support').install();
-}
+import 'source-map-support/register';
+import App from './components';
+import { HTTPStream } from 'subprocess-middleware';
+import { build as buildRendererFxn } from './libs/react-middleware';
 
-require('./libs/react-patches');
+const argv = process.argv.slice(2);
+const debug = (argv[0] === '--debug');
 
-var argv = process.argv.slice(2);
-var debug = (argv[0] === '--debug');
+const appRendererFxn = buildRendererFxn(App);
+const http_stream = HTTPStream({
+    "app"            : appRendererFxn,
+    "captureConsole" : !debug
+});
 
-var appRendererFxn = require('./libs/react-middleware').build(require('./components').default);
-var http_stream = require('subprocess-middleware').HTTPStream({app: appRendererFxn, captureConsole: !debug});
 http_stream.pipe(process.stdout);
+
 if (debug) {
     var value = argv[1] || '{}';
     if (value.slice(0, 5) === 'file:') {

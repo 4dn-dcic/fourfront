@@ -37,8 +37,6 @@ export class LocalizedTime extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.state = {
             moment : props.momentDate ? props.momentDate :
                 props.timestamp ? moment.utc(props.timestamp) : moment.utc(),
@@ -118,7 +116,7 @@ export function preset(formatType = 'date-md', dateTimeSeparator = " "){
         return time(formatType);
     }
     return null;
-};
+}
 
 /**
  * Presets for date/time output formats for 4DN.
@@ -132,7 +130,7 @@ export function preset(formatType = 'date-md', dateTimeSeparator = " "){
  */
 export function format(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
     return display(moment.utc(timestamp), formatType, dateTimeSeparator, localize, customOutputFormat);
-};
+}
 
 export function display(momentObj, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
     var outputFormat;
@@ -146,7 +144,7 @@ export function display(momentObj, formatType = 'date-md', dateTimeSeparator = "
     }
 
     return momentObj.format(outputFormat);
-};
+}
 
 /**
  * This function is meant to accept a UTC/GMT date string
@@ -179,4 +177,4 @@ export function formatPublicationDate(utcDate, includeMonth = true, includeDay =
         return monthString + ' ' + yearString;
     }
     return yearString;
-};
+}

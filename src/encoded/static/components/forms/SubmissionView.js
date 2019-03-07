@@ -1688,7 +1688,6 @@ class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.modifyNewContext = this.modifyNewContext.bind(this);
         this.initiateField = this.initiateField.bind(this);
         this.selectCancel = this.selectCancel.bind(this);
@@ -1710,7 +1709,7 @@ class IndividualObjectView extends React.Component{
     }
 
     /** Fade the JSX rendered by this and scroll to top when this.props.currKey changes. */
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         // scroll to top if worked-on object changes
         if(this.props.currKey !== nextProps.currKey){
             //setTimeout(layout.animateScrollTo(0), 100);

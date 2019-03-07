@@ -63,7 +63,6 @@ export class SortController extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.sortBy = this.sortBy.bind(this);
         this.changePage = _.throttle(this.changePage.bind(this), 250);
         this.changeLimit = _.throttle(this.changeLimit.bind(this), 250);
@@ -82,7 +81,7 @@ export class SortController extends React.Component {
         );
     }
 
-    componentWillReceiveProps(newProps){
+    UNSAFE_componentWillReceiveProps(newProps){
         var newState = {};
 
         // Update page re: href.

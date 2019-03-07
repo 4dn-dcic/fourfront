@@ -31,8 +31,6 @@ export default class HealthView extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.getCounts = _.throttle(this.getCounts.bind(this), 1000);
         this.state = {
             'db_es_total' : "loading...",

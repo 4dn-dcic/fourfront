@@ -17,10 +17,8 @@ export class ActiveFiltersBar extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.updateHoverNodes = _.throttle(this.updateHoverNodes.bind(this), 200);
         this.renderCrumbs = this.renderCrumbs.bind(this);
-        this.render = this.render.bind(this);
     }
 
     componentDidMount(){

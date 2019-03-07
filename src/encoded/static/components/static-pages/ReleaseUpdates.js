@@ -21,7 +21,6 @@ export default class ReleaseUpdates extends React.Component {
             'updateTag': null,
             'updateParam': null
         };
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.loadSection = this.loadSection.bind(this);
         this.loadUpdates = this.loadUpdates.bind(this);
         this.viewUpdates = this.viewUpdates.bind(this);
@@ -163,7 +162,9 @@ class SingleUpdate extends React.Component {
     }
 
     toggle(){
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function({ open }){
+            return { "open" : !open };
+        });
     }
 
     buildItem(item){

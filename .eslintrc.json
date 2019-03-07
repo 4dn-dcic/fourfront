@@ -11,7 +11,8 @@
         "react/button-has-type" : "error",
         "react/no-access-state-in-setstate" : "error",
         "react/no-direct-mutation-state" : "error",
-        "react/prop-types": [1, { "skipUndeclared" : true }]
+        "react/prop-types": [1, { "skipUndeclared" : true }],
+        "react/no-children-prop" : 1
     },
     "env": {
         "es6": true,

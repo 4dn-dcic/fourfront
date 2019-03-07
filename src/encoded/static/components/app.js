@@ -206,9 +206,6 @@ export default class App extends React.Component {
      */
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUpdate = this.componentWillUpdate.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
