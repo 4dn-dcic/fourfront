@@ -303,9 +303,9 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 assert res.status_code == 201
                 posted += 1
             except Exception as e:
-                logger.error('load_all: could not POST item', error=trim(str(e)),
-                             uuid=post_first.get('uuid'), item_type=obj_type)
                 print(LoadErrorMessage)
+                print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
+                      a_type, str(first_fields), str(e)))
                 return e
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
@@ -324,9 +324,9 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 assert res.status_code == 200
                 patched += 1
             except Exception as e:
-                logger.error('load_all: could not PATCH item', error=trim(str(e)),
-                             uuid=an_item.get('uuid'), item_type=obj_type)
                 print(LoadErrorMessage)
+                print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
+                      a_type, str(an_item), str(e)))
                 return e
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 
