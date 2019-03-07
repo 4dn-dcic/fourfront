@@ -63,7 +63,7 @@ export default class QuickInfoBar extends React.PureComponent {
 
     static getDerivedStateFromProps(props, state){
         var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null);
-        var show = state.show && expSetFilters && _.keys(expSetFilters).length > 0;
+        var show = state.show && expSetFilters && _.keys(expSetFilters).length > 0 && state.show;
         return { expSetFilters, show };
     }
 
