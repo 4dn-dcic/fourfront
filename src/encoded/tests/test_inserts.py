@@ -7,10 +7,17 @@ def test_check_wf_links():
     workflow_inserts = list(get_inserts('inserts', 'workflow'))
     software_inserts = list(get_inserts('inserts', 'software'))
     fileformat_inserts = list(get_inserts('master-inserts', 'file_format'))
-    check_wf_links(workflow_inserts, software_inserts, fileformat_inserts)
+    errs = check_wf_links(workflow_inserts, software_inserts, fileformat_inserts)
+    if errs:
+        print('\n'.join(errs))
+    assert errs == []
 
 
 def check_wf_links(workflow_inserts, software_inserts, fileformat_inserts):
+    """
+    Return a list of string errors found for easy tracking of fixes
+    """
+    errors = []
     # get all sf inserts uuid
     all_sf = []
     for sf in software_inserts:
@@ -32,27 +39,24 @@ def check_wf_links(workflow_inserts, software_inserts, fileformat_inserts):
                 for sf in st['meta']['software_used']:
                     parsed_sf = parse_software_uuid(sf)
                     if parsed_sf not in all_sf:
-                        print('Could not find software %s from workflow %s' % (parsed_sf, wf['uuid']))
-                    assert parsed_sf in all_sf
+                        errors.append('Could not find software %s from workflow %s' % (parsed_sf, wf['uuid']))
         # compare file format
         # file format in arguments
         for arg in wf.get('arguments', []):
             if 'argument_format' in arg:
                 if arg['argument_format'] not in all_ff:
-                    print('Could not find file_format %s from workflow %s' % (arg['argument_format'], wf['uuid']))
-                assert arg['argument_format'] in all_ff
+                    errors.append('Could not find file_format %s from workflow %s' % (arg['argument_format'], wf['uuid']))
         # file format in step input/output
         for st in wf.get('steps', []):
             for ip in st.get('inputs', []):
                 if 'file_format' in ip.get('meta', {}):
                     if ip['meta']['file_format'] not in all_ff:
-                        print('Could not find file_format %s from workflow %s' % (ip['meta']['file_format'], wf['uuid']))
-                    assert ip['meta']['file_format'] in all_ff
+                        errors.append('Could not find file_format %s from workflow %s' % (ip['meta']['file_format'], wf['uuid']))
             for op in st.get('outputs', []):
                 if 'file_format' in op.get('meta', {}):
                     if op['meta']['file_format'] not in all_ff:
-                        print('Could not find file_format %s from workflow %s' % (op['meta']['file_format'], wf['uuid']))
-                    assert op['meta']['file_format'] in all_ff
+                        errors.append('Could not find file_format %s from workflow %s' % (op['meta']['file_format'], wf['uuid']))
+    return errors
 
 
 def parse_software_uuid(s):
