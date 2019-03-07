@@ -34,18 +34,22 @@ class Modification(Item):
         "description": "Modification name including type and target.",
         "type": "string",
     })
-    def modification_name(self, request, modification_type=None,
+    def modification_name(self, request,
                           genomic_change=None, target_of_mod=None):
-        if not modification_type:
-            return "None"
+        props = self.properties
+        if 'override_modification_name' in props:
+            return props.get('override_modification_name')
 
-        mod_name = modification_type
+        mod_name = props.get('modification_type')
+        genomic_change = props.get('genomic_change')
+        target_of_mod = props.get('target_of_mod')
         if genomic_change:
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
             target = request.embed(target_of_mod, '@@object')
             mod_name = mod_name + " for " + target['target_summary']
         return mod_name
+        # TODO: will remove modification_name_short and deal with BioFeature name
 
     @calculated_property(schema={
         "title": "Modification name short",

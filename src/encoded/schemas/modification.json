@@ -118,6 +118,10 @@
             "type": "string",
             "lookup": 90,
             "linkTo": "Vendor"
+        },
+        "override_modification_name": {
+            "description": "A curated modification name that will override the calculated property",
+            "type": "string"
         }
     },
     "facets": {
