@@ -108,7 +108,7 @@ export class WFRStepDetailBody extends React.Component {
 
     componentDidUpdate(pastProps){
         if ((pastProps.step && pastProps.step['@id']) !== (this.props.step && this.props.step['@id'])) {
-            this.setState({ "wfr" : this.props.step['@id'].step['@id'] }, this.maybeLoadWFR.bind(this, this.props.step['@id']));
+            this.setState({ "wfr" : this.props.step['@id'] }, this.maybeLoadWFR.bind(this, this.props.step['@id']));
         }
     }
 
