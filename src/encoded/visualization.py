@@ -876,6 +876,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
             "colorRange": [],
             "valueScaling": "linear",
             "labelPosition": "topLeft",
+            "heatmapValueScaling": "log",
         },
         "height": 18,
         "type": "horizontal-vector-heatmap",
@@ -883,8 +884,143 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
         "uid": uuid.uuid4(),
     }
 
-    # Add a color range for the track. It uses blue colors.
-    new_track_base["options"]["colorRange"]=["rgba(150,150,255,1)","rgba(0,0,255,1)"]
+    def get_color_by_index(color_index, known_colors):
+        """Use linear interpolation to get a color for the given index.
+        Assumes indecies and values are between 0 and 255.
+
+        Args:
+            color_index(integer): The index we want to get the color for.
+            known_colors(dict): A dictionary containing index to value mappings.
+                If indecies are missing, we'll use linear interpolation to guess
+                the value.
+
+        Returns:
+            An integer noting the value.
+        """
+
+        # If the color_index is in known_colors, return that value
+        if color_index in known_colors:
+            return known_colors[color_index]
+
+        # We need to linearly interpolate using 2 known values the value is between.
+        # Sort all of the indecies, adding 0 and 255 if they don't exist.
+        known_color_indecies = [k for k in known_colors.keys()]
+        if 0 not in known_color_indecies:
+            known_color_indecies.append(0)
+        if 255 not in known_color_indecies:
+            known_color_indecies.append(255)
+        known_color_indecies = sorted(known_color_indecies)
+
+        # Get the two nearest indecies the color_index is inbetween.
+        lower_bound_index = known_color_indecies[0]
+        upper_bound_index = known_color_indecies[-1]
+
+        for index in known_color_indecies:
+            if index >= color_index:
+                upper_bound_index = index
+                break
+            else:
+                lower_bound_index = index
+
+        # Get the values for the two bounding indecies. Assume 0:0 and 255:255 if they are not provided.
+        lower_value = known_colors.get(lower_bound_index, 0)
+        upper_value = known_colors.get(upper_bound_index, 255)
+
+        # Begin linear interpolation. First, calculate the slope.
+        slope = (upper_value - lower_value) / (upper_bound_index - lower_bound_index)
+
+        # Use the lower bound to discover the offset.
+        offset = lower_value - (lower_bound_index * slope)
+
+        # With the slope and the offset, we can calculate the expected value.
+        interpolated_color = (slope * color_index) + offset
+        return int(interpolated_color)
+
+    # Add the color values for an RGB display. Add known values here and we will linearly interpolate everything else.
+    color_range_by_colorOrig = {
+        "red": {
+            0:0,
+            63:77,
+            127:180,
+            191:252,
+            255:252,
+        },
+        "green": {
+            0:0,
+            63:17,
+            127:53,
+            191:133,
+            255:253,
+        },
+        "blue": {
+            0:3,
+            63:123,
+            127:122,
+            191:96,
+            255:191,
+        },
+    }
+
+    color_range_by_color_purple = {
+        "red": {
+            0:0,
+            64:150,
+            255:200,
+        },
+        "green": {
+            0:0,
+            64:136,
+            255:182,
+        },
+        "blue": {
+            0:0,
+            64:164,
+            255:219,
+        },
+    }
+
+    color_range_by_colorBurak = {
+        "red": {
+            0:150,
+            255:0,
+        },
+        "green": {
+            0:150,
+            255:0,
+        },
+        "blue": {
+            0:255,
+            128:150,
+            255:255,
+        },
+    }
+
+    color_range_by_color = {
+        "red": {
+            0:0,
+            255:64,
+        },
+        "green": {
+            0:0,
+            255:64,
+        },
+        "blue": {
+            0:255,
+            255:96,
+        },
+    }
+
+    # HiGlass expects a list of 256 strings, each containing an integer.
+    for index in range(256):
+        # Get derived colors.
+        colors = { color : get_color_by_index(index, color_range_by_color[color]) for color in color_range_by_color.keys()}
+        new_track_base["options"]["colorRange"].append(
+            "rgba({r},{g},{b},1)".format(
+                r=colors["red"],
+                g=colors["green"],
+                b=colors["blue"],
+            )
+        )
 
     return add_1d_file(views, new_track_base, genome_assembly)
 
