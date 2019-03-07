@@ -1,8 +1,11 @@
 from encoded.commands.run_upgrader_on_inserts import get_inserts
-workflow_inserts = list(get_inserts('inserts', 'workflow'))
-software_inserts = list(get_inserts('inserts', 'software'))
-fileformat_inserts = list(get_inserts('master-inserts', 'file_format'))
 
+def test_check_wf_links():
+    workflow_inserts = list(get_inserts('inserts', 'workflow'))
+    software_inserts = list(get_inserts('inserts', 'software'))
+    fileformat_inserts = list(get_inserts('master-inserts', 'file_format'))
+    check_wf_links(workflow_inserts, software_inserts, fileformat_inserts)
+   
 
 def check_wf_links(workflow_inserts, software_inserts, fileformat_inserts):
     # get all sf inserts uuid
