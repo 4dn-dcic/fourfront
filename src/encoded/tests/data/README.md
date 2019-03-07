@@ -22,6 +22,7 @@ You can use the `bin/update-inserts-from-server` command to update contents of a
 - **--dest <dir>**  inserts directory to write to. Default: `temp-local-inserts`
 - **--item-type <type>** item types to update. Corresponds to the name of the file in the inserts folder. Optional
 - **--ignore-field <field>** field to skip when updating items. Optional
+- **--from-search <query>** string query that is passed to `dcicutils.ff_utils.search_metdata` to find uuids to add to the target inserts directory
 
 There a few important to keep in mind when updating inserts:
 - Adding and committing items to `master-inserts` should be done with care, since they are loaded on all environments.

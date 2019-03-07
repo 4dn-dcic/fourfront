@@ -4,7 +4,7 @@ import argparse
 import json
 from os import walk
 # use ff_utils to find inserts and write data
-from dcicutils.ff_utils import expand_es_metadata, dump_results_to_json
+from dcicutils.ff_utils import search_metadata, expand_es_metadata, dump_results_to_json
 # use this function to read inserts
 from .run_upgrader_on_inserts import get_inserts
 
@@ -70,6 +70,7 @@ def main():
                         help="item type, e.g. file_fastq. Defaults to all types")
     parser.add_argument('--ignore-field', action='append', default=[],
                         help='field name to ignore when running expand_es_metadata')
+    parser.add_argument('--from-search', help='query passed to search_metadata to find uuids')
 
     args = parser.parse_args()
     # this will work since bin/ commands are run from root FF directory
@@ -83,6 +84,17 @@ def main():
     inserts_path = '/'.join([inserts_location, args.dest])
 
     local_inserts, item_uuids = read_local_inserts_dir(args.dest, inserts_path, args.item_type)
+
+    # add uuids from the input search result, if present
+    if args.from_search:
+        use_search = args.from_search
+        # get frame=object search results to keep response small
+        if 'frame=' not in use_search:
+            use_search += '&frame=object'
+        search_res = search_metadata(use_search, ff_env=args.env)
+        search_uuids = [item['uuid'] for item in search_res]
+        logger.info('update_inserts: Will update using %s items from search' % len(search_uuids))
+        item_uuids = list(set(item_uuids + search_uuids))
 
     # now find uuids and all linked from the given server
     svr_inserts, svr_uuids = expand_es_metadata(item_uuids, ff_env=args.env,
