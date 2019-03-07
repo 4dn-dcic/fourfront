@@ -2,6 +2,7 @@ import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 from encoded.commands.run_upgrader_on_inserts import get_inserts
 
+
 def test_check_wf_links():
     workflow_inserts = list(get_inserts('inserts', 'workflow'))
     software_inserts = list(get_inserts('inserts', 'software'))
