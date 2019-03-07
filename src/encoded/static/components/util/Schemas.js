@@ -197,7 +197,7 @@ export const Field = {
         'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',
         'experiments_in_set.lab.title' : 'Lab',
-        'experiments_in_set.experiment_type' : 'Experiment Type',
+        'experiments_in_set.experiment_type.title' : 'Experiment Type',
         'experimentset_type' : 'Set Type',
         'link_id' : "Link",
         'display_title' : "Title"

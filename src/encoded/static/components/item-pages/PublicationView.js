@@ -281,7 +281,7 @@ class PublicationExperimentSets extends React.PureComponent {
         var { windowWidth, context } = this.props,
             { totalCount } = this.state,
             requestHref = (
-                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type&publications_of_set.uuid=" + context.uuid
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.title&publications_of_set.uuid=" + context.uuid
             ),
             title = 'Experiment Sets Published';
 
@@ -302,4 +302,3 @@ class PublicationExperimentSets extends React.PureComponent {
     }
 
 }
-

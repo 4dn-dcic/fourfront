@@ -240,7 +240,7 @@ export class GroupByController extends React.PureComponent {
             'award.project'                      : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span>,
             'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
             //'status'                             : <span><i className="icon icon-fw icon-circle"/>&nbsp; <span className="text-600">Current</span> Status</span>,
-            'experiments_in_set.experiment_type' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+            'experiments_in_set.experiment_type.title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
         },
         'initialGroupBy' : 'award.center_title'
     }
@@ -1199,4 +1199,3 @@ export class AreaChartContainer extends React.Component {
         );
     }
 }
-

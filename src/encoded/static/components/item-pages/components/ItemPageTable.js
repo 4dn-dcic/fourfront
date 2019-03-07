@@ -43,7 +43,7 @@ export class ItemPageTable extends React.Component {
                         link            = object.itemUtil.atId(result),
                         isAnAccession   = false,
                         tooltip;
-    
+
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
 
                     if (link){ // Link instead of plaintext
@@ -76,7 +76,7 @@ export class ItemPageTable extends React.Component {
         'columns' : {
             "display_title" : { "title" : "Title" },
             "number_of_experiments" : { "title" : "Exps" },
-            "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
+            "experiments_in_set.experiment_type.title": { "title" : "Experiment Type" },
             "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
             "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
@@ -117,7 +117,7 @@ export class ItemPageTable extends React.Component {
 
         return (
             <div className="item-page-table-container clearfix">
-                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
+                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ?
                     <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
                 : null }
                 { _.map(results, (result, rowIndex)=>{
@@ -128,7 +128,7 @@ export class ItemPageTable extends React.Component {
                                 (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
                                 || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
                             } />
-                    );     
+                    );
                 }) }
             </div>
         );
@@ -377,9 +377,9 @@ export class ItemPageTableSearchLoaderPageController extends React.Component {
 /**
  * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.
  * This will be the component to handle it (convert this.item_uris to one /search/ URI, override componentDidMount etc.)
- * 
+ *
  * Could then automatically detect in ItemPageLoader if length of @ids requested is > 20 or some random number, and auto use this component instead.
- * 
+ *
  * @export
  * @class ItemPageTableBatchLoader
  * @extends {ItemPageTableLoader}

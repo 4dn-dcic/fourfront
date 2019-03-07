@@ -484,14 +484,14 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
     # We should get back same count as from search results here.
     res = testapp.post_json('/bar_plot_aggregations', {
         "search_query_params" : { "type" : ['ExperimentSetReplicate'] },
-        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type", "award.project"]
+        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type.title", "award.project"]
     }).json
 
     # Our total count for experiment_sets should match # of exp_set_replicate inserts.abs
 
     assert (res['total']['experiment_sets'] == count_exp_set_test_inserts) or (res['total']['experiment_sets'] == search_result_count)
 
-    assert res['field'] == 'experiments_in_set.experiment_type' # top level field
+    assert res['field'] == 'experiments_in_set.experiment_type.title' # top level field
 
     assert isinstance(res['terms'], dict) is True
 

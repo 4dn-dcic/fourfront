@@ -14,7 +14,7 @@ export class ExperimentSetTables extends React.Component {
         'loading' : PropTypes.bool,
         'windowWidth' : PropTypes.number.isRequired
     };
-    
+
     static defaultProps = {
         'title' : <span>In Experiment Sets</span>
     };
@@ -36,7 +36,7 @@ export class ExperimentSetTables extends React.Component {
                 </div>
             );
         }
-        
+
         return (
             <div className="file-part-of-experiment-sets-container">
                 <h3 className="tab-section-title">{ title }</h3>
@@ -50,7 +50,7 @@ export class ExperimentSetTables extends React.Component {
                     columns={{
                         "display_title" : { "title" : "Title" },
                         "number_of_experiments" : { "title" : "Exps" },
-                        "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
+                        "experiments_in_set.experiment_type.title": { "title" : "Experiment Type" },
                         "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
                         "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
                         "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]

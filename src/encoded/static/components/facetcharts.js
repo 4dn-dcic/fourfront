@@ -13,7 +13,7 @@ import * as BarPlot from './viz/BarPlot';
 /**
  * @callback showFunc
  * @param {string} path - Path of current page or view, derived from 'href' prop on FacetCharts component.
- * @return {string|boolean} - The type of view to display ('full', 'small') or bool. 
+ * @return {string|boolean} - The type of view to display ('full', 'small') or bool.
  */
 
 /**
@@ -42,7 +42,7 @@ export class FacetCharts extends React.PureComponent {
         },
         'views' : ['small', 'large'],
         'initialFields' : [
-            'experiments_in_set.experiment_type',
+            'experiments_in_set.experiment_type.title',
             'experiments_in_set.biosample.biosource.individual.organism.name'
         ]
     };
@@ -107,7 +107,7 @@ export class FacetCharts extends React.PureComponent {
 
     /**
      * Given `this.props`, determines if element is currently meant to be invisible (false) or a certain layout ({string}).
-     * 
+     *
      * @instance
      * @private
      * @param {Object} [props=this.props] - Representation of current or next props for this component.

@@ -75,7 +75,7 @@ export default class StatisticsPageView extends StaticPage {
             _.extend(groupByOptions, {
                 'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
                 'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
-                'experiments_in_set.experiment_type' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+                'experiments_in_set.experiment_type.title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
             }),
             initialGroupBy = 'award.center_title';
         }
