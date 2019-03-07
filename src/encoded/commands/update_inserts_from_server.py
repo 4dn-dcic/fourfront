@@ -127,11 +127,11 @@ def main():
             error_report = {it: item_conflict_report[it]['error'] for it in item_conflict_report}
             raise Exception('update_inserts: Cannot update the following items in "inserts" directory,'
                             ' since there are conflicting items with different values'
-                            'in the master-inserts. Update those first. Conflicts: %s' % error_report)
+                            'in the master-inserts. Update those first. Conflicts:\n%s' % json.dumps(error_report, indent=4))
         elif any([it for it in item_conflict_report if item_conflict_report[it]['okay']]):
             conflict_report = {it: item_conflict_report[it]['okay'] for it in item_conflict_report}
             logger.warning('update_inserts: The following items are already in "master-inserts".'
-                           ' Will not add to "inserts". Items:' % conflict_report)
+                           ' Will not add to "inserts". Items:\n%s' % json.dumps(conflict_report, indent=4))
 
     # now we need to update the server inserts with contents from local inserts
     # so that existing information is not lost
