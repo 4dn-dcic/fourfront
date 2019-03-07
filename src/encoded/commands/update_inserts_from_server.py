@@ -125,9 +125,10 @@ def main():
             item_conflict_report[item_type] = {'error': itype_err, 'okay': itype_okay}
         if any([it for it in item_conflict_report if item_conflict_report[it]['error']]):
             error_report = {it: item_conflict_report[it]['error'] for it in item_conflict_report}
-            raise Exception('update_inserts: Cannot update the following items in "inserts" directory,'
+            logger.error('update_inserts: Cannot update the following items in "inserts" directory,'
                             ' since there are conflicting items with different values'
                             'in the master-inserts. Update those first. Conflicts:\n%s' % json.dumps(error_report, indent=4))
+            raise Exception('Cannot load inserts as there are conflicting items in `master-inserts`')
         elif any([it for it in item_conflict_report if item_conflict_report[it]['okay']]):
             conflict_report = {it: item_conflict_report[it]['okay'] for it in item_conflict_report}
             logger.warning('update_inserts: The following items are already in "master-inserts".'
