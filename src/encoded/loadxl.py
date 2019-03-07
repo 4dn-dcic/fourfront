@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Load collections and determine the order."""
 import mimetypes
 import structlog
@@ -180,6 +181,38 @@ def format_for_attachment(json_data, docsdir):
     return json_data
 
 
+LoadErrorMessage = """#   ██▓     ▒█████   ▄▄▄      ▓█████▄  ██▓ ███▄    █   ▄████
+#  ▓██▒    ▒██▒  ██▒▒████▄    ▒██▀ ██▌▓██▒ ██ ▀█   █  ██▒ ▀█▒
+#  ▒██░    ▒██░  ██▒▒██  ▀█▄  ░██   █▌▒██▒▓██  ▀█ ██▒▒██░▄▄▄░
+#  ▒██░    ▒██   ██░░██▄▄▄▄██ ░▓█▄   ▌░██░▓██▒  ▐▌██▒░▓█  ██▓
+#  ░██████▒░ ████▓▒░ ▓█   ▓██▒░▒████▓ ░██░▒██░   ▓██░░▒▓███▀▒
+#  ░ ▒░▓  ░░ ▒░▒░▒░  ▒▒   ▓▒█░ ▒▒▓  ▒ ░▓  ░ ▒░   ▒ ▒  ░▒   ▒
+#  ░ ░ ▒  ░  ░ ▒ ▒░   ▒   ▒▒ ░ ░ ▒  ▒  ▒ ░░ ░░   ░ ▒░  ░   ░
+#    ░ ░   ░ ░ ░ ▒    ░   ▒    ░ ░  ░  ▒ ░   ░   ░ ░ ░ ░   ░
+#      ░  ░    ░ ░        ░  ░   ░     ░           ░       ░
+#                              ░
+#   ██▓ ███▄    █   ██████ ▓█████  ██▀███  ▄▄▄█████▓  ██████
+#  ▓██▒ ██ ▀█   █ ▒██    ▒ ▓█   ▀ ▓██ ▒ ██▒▓  ██▒ ▓▒▒██    ▒
+#  ▒██▒▓██  ▀█ ██▒░ ▓██▄   ▒███   ▓██ ░▄█ ▒▒ ▓██░ ▒░░ ▓██▄
+#  ░██░▓██▒  ▐▌██▒  ▒   ██▒▒▓█  ▄ ▒██▀▀█▄  ░ ▓██▓ ░   ▒   ██▒
+#  ░██░▒██░   ▓██░▒██████▒▒░▒████▒░██▓ ▒██▒  ▒██▒ ░ ▒██████▒▒
+#  ░▓  ░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░░░ ▒░ ░░ ▒▓ ░▒▓░  ▒ ░░   ▒ ▒▓▒ ▒ ░
+#   ▒ ░░ ░░   ░ ▒░░ ░▒  ░ ░ ░ ░  ░  ░▒ ░ ▒░    ░    ░ ░▒  ░ ░
+#   ▒ ░   ░   ░ ░ ░  ░  ░     ░     ░░   ░   ░      ░  ░  ░
+#   ░           ░       ░     ░  ░   ░                    ░
+#
+#    █████▒▄▄▄       ██▓ ██▓    ▓█████ ▓█████▄
+#  ▓██   ▒▒████▄    ▓██▒▓██▒    ▓█   ▀ ▒██▀ ██▌
+#  ▒████ ░▒██  ▀█▄  ▒██▒▒██░    ▒███   ░██   █▌
+#  ░▓█▒  ░░██▄▄▄▄██ ░██░▒██░    ▒▓█  ▄ ░▓█▄   ▌
+#  ░▒█░    ▓█   ▓██▒░██░░██████▒░▒████▒░▒████▓
+#   ▒ ░    ▒▒   ▓▒█░░▓  ░ ▒░▓  ░░░ ▒░ ░ ▒▒▓  ▒
+#   ░       ▒   ▒▒ ░ ▒ ░░ ░ ▒  ░ ░ ░  ░ ░ ▒  ▒
+#   ░ ░     ░   ▒    ▒ ░  ░ ░      ░    ░ ░  ░
+#               ░  ░ ░      ░  ░   ░  ░   ░
+#                                       ░                    """
+
+
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
     """convert data to store format dictionary (same format expected from from_json=True),
     assume main function is to load reasonable number of inserts from a folder
@@ -271,7 +304,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 posted += 1
             except Exception as e:
                 logger.error('load_all: could not POST item', error=trim(str(e)),
-                              uuid=post_first.get('uuid'), item_type=obj_type)
+                             uuid=post_first.get('uuid'), item_type=obj_type)
+                print(LoadErrorMessage)
                 return e
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
@@ -291,7 +325,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 patched += 1
             except Exception as e:
                 logger.error('load_all: could not PATCH item', error=trim(str(e)),
-                              uuid=an_item.get('uuid'), item_type=obj_type)
+                             uuid=an_item.get('uuid'), item_type=obj_type)
+                print(LoadErrorMessage)
                 return e
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 
