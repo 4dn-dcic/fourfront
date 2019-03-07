@@ -8,12 +8,10 @@ import { Item, File, Experiment, ExperimentSet } from './typedefs';
 var console = patchedConsoleInstance;
 
 /**
- * Gets file_format string from a file.
- * Requires file_format to be embedded.
- * Currently file_format.display_title is same as file_format.file_format, so either property is fine.
- * This may change in the future and would require file_format.file_format to be embedded.
+ * Gets experiment_type string from an experiment.
+ * Requires experiment_type.title to be embedded.
  *
- * @param {Experiment} exp - A File Item JSON
+ * @param {Experiment} exp - An Experiment Item JSON
  * @returns {string|null} Type of the experiment.
  */
 export function getExperimentTypeStr(exp){
