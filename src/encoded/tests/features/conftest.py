@@ -11,17 +11,49 @@ def external_tx():
 
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
-    from .. import test_indexing
-    return test_indexing.app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth)
+    from ..conftest import _app_settings
+    settings = _app_settings.copy()
+    settings['create_tables'] = True
+    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    settings['elasticsearch.server'] = elasticsearch_server
+    settings['sqlalchemy.url'] = postgresql_server
+    settings['collection_datastore'] = 'elasticsearch'
+    settings['item_datastore'] = 'elasticsearch'
+    settings['indexer'] = True
+    settings['indexer.processes'] = 2
+
+    # use aws auth to access elasticsearch
+    if aws_auth:
+        settings['elasticsearch.aws_auth'] = aws_auth
+    return settings
 
 
 @pytest.yield_fixture(scope='session')
-def app(app_settings):
-    from .. import test_indexing
+def app(app_settings, **kwargs):
+    """
+    Pass all kwargs onto create_mapping
+    """
+    from encoded import main
     from snovault.elasticsearch import create_mapping
-    for app in test_indexing.app(app_settings):
-        create_mapping.run(app)
-        yield app
+    app = main({}, **app_settings)
+    create_mapping.run(app, **kwargs)
+
+    yield app
+
+    from snovault import DBSESSION
+    DBSession = app.registry[DBSESSION]
+    # Dispose connections so postgres can tear down.
+    DBSession.bind.pool.dispose()
+
+
+@pytest.fixture(autouse=True)
+def teardown(app):
+    """
+    Alternative to ..test_indexing.teardown
+    Simply call /index to clear out the indexing queue after each test
+    """
+    from ..conftest import indexer_testapp
+    indexer_testapp(app).post_json('/index', {'record': True})
 
 
 @pytest.mark.fixture_cost(500)
