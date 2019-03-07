@@ -1374,9 +1374,6 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-
-        console.log('are we server-side?', SERVERSIDE);
-
         var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
             title;
 

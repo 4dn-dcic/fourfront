@@ -71,7 +71,6 @@ describe("Server rendering", function () {
     });
 
     beforeEach(function () {
-        require('../../libs/react-patches');
         App = require('..').default;
         store = require('../../store');
         // test dispatching some values to store
