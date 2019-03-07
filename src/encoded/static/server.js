@@ -2,9 +2,10 @@
 
 /* jshint strict: false */
 
-if (process.env.NODE_ENV === undefined) {
+if (BUILDTYPE === undefined) {
+    console.log("Warning - BUILDTYPE is not defined");
     require("@babel/register")({
-      only: ['src/encoded/static'],
+        only: ['src/encoded/static'],
     });
 } else {
     require('source-map-support').install();

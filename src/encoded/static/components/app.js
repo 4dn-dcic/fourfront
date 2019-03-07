@@ -369,7 +369,8 @@ export default class App extends React.Component {
                 'message' : (
                     <div>
                         <p className="mb-0">
-                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank" className="text-500">Google Chrome</a>
+                            or <a href="https://www.mozilla.org/en-US/firefox/" rel="noopener noreferrer" target="_blank" className="text-500">Mozilla Firefox</a> are
                             the recommended browser(s) for using the 4DN Data Portal.
                         </p>
                         <p className="mb-0">
@@ -419,7 +420,7 @@ export default class App extends React.Component {
     }
 
     /** @ignore */
-    componentWillUpdate(nextProps, nextState){
+    UNSAFE_componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
         }
@@ -1376,6 +1377,9 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
+
+        console.log('are we server-side?', SERVERSIDE);
+
         var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
             title;
 

@@ -89,14 +89,17 @@ const webPlugins = plugins.slice(0);
 const serverPlugins = plugins.slice(0);
 
 // Inform our React code of what build we're on.
+// This works via a find-replace.
 webPlugins.push(new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(env),
-    'SERVERSIDE' : JSON.stringify(false)
+    'SERVERSIDE' : JSON.stringify(false),
+    'BUILDTYPE' : JSON.stringify(env)
 }));
 
 serverPlugins.push(new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(env),
-    'SERVERSIDE' : JSON.stringify(true)
+    'SERVERSIDE' : JSON.stringify(true),
+    'BUILDTYPE' : JSON.stringify(env)
 }));
 
 
