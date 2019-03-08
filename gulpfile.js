@@ -14,8 +14,8 @@ var setQuick = (done) => {
     done();
 };
 
-var setQuickUglified = (done) => {
-    process.env.NODE_ENV = 'quick-uglified';
+var setDevelopment = (done) => {
+    process.env.NODE_ENV = 'development';
     done();
 };
 
@@ -45,16 +45,14 @@ var watch = () => {
 };
 
 
-const devSlow       = gulp.series(doWebpack, watch);
+const devSlow       = gulp.series(setDevelopment, doWebpack, watch);
 const devQuick      = gulp.series(setQuick, doWebpack, watch);
-const devUglified   = gulp.series(setQuickUglified, doWebpack, watch);
 const build         = gulp.series(setProduction, doWebpack);
 const buildQuick    = gulp.series(setQuick, doWebpack);
 
 gulp.task('dev', devSlow);
 gulp.task('default', devQuick);
 gulp.task('dev-quick', devQuick);
-gulp.task('dev-uglified', devUglified);
 gulp.task('build', build);
 gulp.task('build-quick', buildQuick);
 

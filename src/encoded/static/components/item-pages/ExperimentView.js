@@ -4,16 +4,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
-import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
+import { console, object, Schemas } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
-import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
 
 export default class ExperimentView extends WorkflowRunTracingView {
@@ -130,7 +126,6 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
 }
 
-globals.content_views.register(ExperimentView, 'Experiment'); // This function registers the "ExperimentView" class as the "view" for the "Experiment" @type (and sub-types, unless overriden).
 
 
 export class ExperimentMicView extends ExperimentView {
@@ -141,8 +136,6 @@ export class ExperimentMicView extends ExperimentView {
         ];
     }
 }
-
-globals.content_views.register(ExperimentMicView, 'ExperimentMic'); // This function registers the "ExperimentMicView" class as the "view" for the "ExperimentMic" @type.
 
 
 

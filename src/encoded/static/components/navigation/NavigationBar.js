@@ -49,8 +49,6 @@ export class NavigationBar extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.loadHelpMenuTree = this.loadHelpMenuTree.bind(this);
