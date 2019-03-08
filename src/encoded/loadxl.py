@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Load collections and determine the order."""
 import mimetypes
 import structlog
@@ -89,8 +90,8 @@ def load_data_view(context, request):
     else:
         res = 'No uploadable content found!'
 
-    # Expect res to be empty if load_all is success?
-    if res:
+    if res:  # None if load_all is successful
+        print(LOAD_ERROR_MESSAGE)
         request.response.status = 422
         result['status'] = 'error'
         result['@graph'] = str(res)
@@ -178,6 +179,38 @@ def format_for_attachment(json_data, docsdir):
                 del json_data[field]
                 logger.error('Removing {} form {}, expecting path'.format(field, json_data['uuid']))
     return json_data
+
+
+LOAD_ERROR_MESSAGE = """#   ██▓     ▒█████   ▄▄▄      ▓█████▄  ██▓ ███▄    █   ▄████
+#  ▓██▒    ▒██▒  ██▒▒████▄    ▒██▀ ██▌▓██▒ ██ ▀█   █  ██▒ ▀█▒
+#  ▒██░    ▒██░  ██▒▒██  ▀█▄  ░██   █▌▒██▒▓██  ▀█ ██▒▒██░▄▄▄░
+#  ▒██░    ▒██   ██░░██▄▄▄▄██ ░▓█▄   ▌░██░▓██▒  ▐▌██▒░▓█  ██▓
+#  ░██████▒░ ████▓▒░ ▓█   ▓██▒░▒████▓ ░██░▒██░   ▓██░░▒▓███▀▒
+#  ░ ▒░▓  ░░ ▒░▒░▒░  ▒▒   ▓▒█░ ▒▒▓  ▒ ░▓  ░ ▒░   ▒ ▒  ░▒   ▒
+#  ░ ░ ▒  ░  ░ ▒ ▒░   ▒   ▒▒ ░ ░ ▒  ▒  ▒ ░░ ░░   ░ ▒░  ░   ░
+#    ░ ░   ░ ░ ░ ▒    ░   ▒    ░ ░  ░  ▒ ░   ░   ░ ░ ░ ░   ░
+#      ░  ░    ░ ░        ░  ░   ░     ░           ░       ░
+#                              ░
+#   ██▓ ███▄    █   ██████ ▓█████  ██▀███  ▄▄▄█████▓  ██████
+#  ▓██▒ ██ ▀█   █ ▒██    ▒ ▓█   ▀ ▓██ ▒ ██▒▓  ██▒ ▓▒▒██    ▒
+#  ▒██▒▓██  ▀█ ██▒░ ▓██▄   ▒███   ▓██ ░▄█ ▒▒ ▓██░ ▒░░ ▓██▄
+#  ░██░▓██▒  ▐▌██▒  ▒   ██▒▒▓█  ▄ ▒██▀▀█▄  ░ ▓██▓ ░   ▒   ██▒
+#  ░██░▒██░   ▓██░▒██████▒▒░▒████▒░██▓ ▒██▒  ▒██▒ ░ ▒██████▒▒
+#  ░▓  ░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░░░ ▒░ ░░ ▒▓ ░▒▓░  ▒ ░░   ▒ ▒▓▒ ▒ ░
+#   ▒ ░░ ░░   ░ ▒░░ ░▒  ░ ░ ░ ░  ░  ░▒ ░ ▒░    ░    ░ ░▒  ░ ░
+#   ▒ ░   ░   ░ ░ ░  ░  ░     ░     ░░   ░   ░      ░  ░  ░
+#   ░           ░       ░     ░  ░   ░                    ░
+#
+#    █████▒▄▄▄       ██▓ ██▓    ▓█████ ▓█████▄
+#  ▓██   ▒▒████▄    ▓██▒▓██▒    ▓█   ▀ ▒██▀ ██▌
+#  ▒████ ░▒██  ▀█▄  ▒██▒▒██░    ▒███   ░██   █▌
+#  ░▓█▒  ░░██▄▄▄▄██ ░██░▒██░    ▒▓█  ▄ ░▓█▄   ▌
+#  ░▒█░    ▓█   ▓██▒░██░░██████▒░▒████▒░▒████▓
+#   ▒ ░    ▒▒   ▓▒█░░▓  ░ ▒░▓  ░░░ ▒░ ░ ▒▒▓  ▒
+#   ░       ▒   ▒▒ ░ ▒ ░░ ░ ▒  ░ ░ ░  ░ ░ ▒  ▒
+#   ░ ░     ░   ▒    ▒ ░  ░ ░      ░    ░ ░  ░
+#               ░  ░ ░      ░  ░   ░  ░   ░
+#                                       ░                    """
 
 
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
@@ -270,8 +303,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 assert res.status_code == 201
                 posted += 1
             except Exception as e:
-                logger.error('load_all: could not POST item', error=trim(str(e)),
-                              uuid=post_first.get('uuid'), item_type=obj_type)
+                print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
+                      a_type, str(first_fields), str(e)))
                 return e
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
@@ -290,8 +323,8 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 assert res.status_code == 200
                 patched += 1
             except Exception as e:
-                logger.error('load_all: could not PATCH item', error=trim(str(e)),
-                              uuid=an_item.get('uuid'), item_type=obj_type)
+                print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
+                      a_type, str(an_item), str(e)))
                 return e
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 
@@ -399,7 +432,9 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         master_res = load_all(testapp, master_inserts, [])
         if master_res:  # None if successful
-            logger.error('load_data: failed to load from%s' % master_inserts, error=master_res)
+            print(LOAD_ERROR_MESSAGE)
+            logger.error('load_data: failed to load from %s' % master_inserts, error=master_res)
+            return master_res
 
     if not indir.endswith('/'):
         indir += '/'
@@ -412,22 +447,31 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
     res = load_all(testapp, inserts, docsdir, overwrite=overwrite)
     if res:  # None if successful
+        print(LOAD_ERROR_MESSAGE)
         logger.error('load_data: failed to load from %s' % docsdir, error=res)
+        return res
     keys = generate_access_key(testapp, access_key_loc)
     store_keys(app, access_key_loc, keys)
+    return None  # unnecessary, but makes it more clear that no error was encountered
 
 
 def load_test_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load inserts and master-inserts
+
+    Returns:
+        None if successful, otherwise Exception encountered
     """
-    load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-              clear_tables=clear_tables, overwrite=overwrite)
+    return load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                     clear_tables=clear_tables, overwrite=overwrite)
 
 
 def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load temp-local-inserts. If not present, load inserts and master-inserts
+
+    Returns:
+        None if successful, otherwise Exception encountered
     """
     from pkg_resources import resource_filename
     # if we have any json files in temp-local-inserts, use those
@@ -437,19 +481,22 @@ def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=Fals
         use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
 
     if use_temp_local:
-        load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
-                  clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
+        return load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
+                         clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
     else:
-        load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-                  clear_tables=clear_tables, overwrite=overwrite)
+        return load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                         clear_tables=clear_tables, overwrite=overwrite)
 
 
 def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load master-inserts
+
+    Returns:
+        None if successful, otherwise Exception encountered
     """
-    load_data(app, access_key_loc, indir='master-inserts',
-              clear_tables=clear_tables, overwrite=overwrite)
+    return load_data(app, access_key_loc, indir='master-inserts',
+                     clear_tables=clear_tables, overwrite=overwrite)
 
 
 def load_ontology_terms(app, post_json=None, patch_json=None):

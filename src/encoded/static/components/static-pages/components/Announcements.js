@@ -60,7 +60,7 @@ class AnnouncementsLoaded extends React.Component {
 
     static defaultProps = {
         'searchURL' : '/search/?type=StaticSection&section_type=Announcement&sort=-date_created'
-    }
+    };
 
     constructor(props){
         super(props);
@@ -112,7 +112,7 @@ class AnnouncementsLoaded extends React.Component {
 
 /**
  * Component which shows currents announcements.
- * 
+ *
  * @prop {string} className - Outer <div> element's className
  * @prop {string} id - Outer <div> element's id attribute.
  */

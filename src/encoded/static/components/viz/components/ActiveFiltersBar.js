@@ -66,7 +66,6 @@ export class ActiveFiltersBar extends React.Component {
                         <div className="field-label">{ facetFieldTitle }</div>
                     </div>
                 );
-                
             });
         } else return null;
     }
@@ -105,21 +104,19 @@ class Container extends React.Component {
     }
 }
 
-class RegularCrumb extends React.Component {
+class RegularCrumb extends React.PureComponent {
     render(){
-        var node = this.props.node;
+        var { node, color, expSetFilters } = this.props;
         return (
-            <span 
-                className="chart-crumb no-highlight-color"
+            <span className="chart-crumb no-highlight-color"
                 data-term={node.data.term ? node.data.term : null}
-                style={{ backgroundColor : this.props.color }}
-            >
+                style={{ backgroundColor : color }}>
                 { node.data.name }
                 <span className="icon-container" onClick={()=>{
-                    Filters.changeFilter( node.data.field, node.data.term, this.props.expSetFilters );
+                    Filters.changeFilter( node.data.field, node.data.term, expSetFilters );
                     analytics.event('QuickInfoBar', 'Unset Filter', {
                         'eventLabel' : analytics.eventLabelFromChartNode(node.data),
-                        'dimension1' : analytics.getStringifiedCurrentFilters(this.props.expSetFilters)
+                        'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
                     });
                 }}>
                     <i className="icon icon-times"/>

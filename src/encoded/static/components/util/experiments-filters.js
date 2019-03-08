@@ -7,8 +7,6 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import moment from 'moment';
-import * as ajax from './ajax';
-import * as object from './object';
 import * as Schemas from './Schemas';
 import { navigate } from './navigate';
 
@@ -37,7 +35,7 @@ export const currentExpSetFilters = contextFiltersToExpSetFilters;
 
 /**
  * If the given term is selected, return the href for the term from context.filters.
- * 
+ *
  * @param {string} term - Term for which existence of active filter is checked.
  * @param {string} field - Field for which filter is checked.
  * @param {{ 'field' : string, 'term' : string, 'remove' : string }[]} filters - Filters as supplied by context.filters in API response.
@@ -108,7 +106,7 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
                     }
                 }
             });
-            
+
             retHref = '?' + queryString.stringify(commonQs);
             if (includePathName) {
                 retHref += partsFrom.pathname;
@@ -291,7 +289,7 @@ export function determineIfTermFacetSelected(term, facet, props){
     /*
     var field = facet.field || null,
         fromFilter, fromFilterTerm, toFilter, toFilterTerm;
-    
+
     if (facet.aggregation_type === 'date_histogram'){
         // Instead of checking presense of filters here, we find earliest from and latest to and see if are within range.
 
@@ -444,7 +442,7 @@ export const NON_FILTER_URL_PARAMS = [
 /**
  * Convert back-end-supplied 'context.filters' array of filter objects into commonly-used 'expSetFilters' structure.
  * Replaces now-removed 'hrefToFilters' function and copy of expSetFilters passed down from Redux store.
- * 
+ *
  * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
  * @param {string} [browseBaseState] - Supply 'only_4dn' or 'all' to control which URI query params are filtered out. If 'search' is supplied, none are excluded.
  * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
@@ -493,7 +491,7 @@ export function expSetFiltersToJSON(expSetFilters){
 /**
  * Compare two versions of 'expSetFilters' structure to check if they are equal.
  * Used by ChartDataController.
- * 
+ *
  * @param {Object} expSetFiltersA - 1st set of filters, object with facet/field as keys and Sets of terms as values.
  * @param {Object} expSetFiltersB - 2nd set of filters, same as param expSetFiltersA.
  * @returns {boolean} true if equal.

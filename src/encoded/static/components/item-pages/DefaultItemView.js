@@ -65,10 +65,16 @@ export default class DefaultItemView extends React.PureComponent {
         if (!href) return;
 
         var hrefParts = url.parse(href, true),
-            redirected_from = hrefParts.query && hrefParts.query.redirected_from,
-            redirected_from_accession = redirected_from && _.filter(redirected_from.split('/'))[1];
+            redirected_from = hrefParts.query && hrefParts.query.redirected_from;
+
+        if (Array.isArray(redirected_from)){
+            redirected_from = redirected_from[0];
+        }
+
+        var redirected_from_accession = redirected_from && _.filter(redirected_from.split('/'))[1];
 
         if (typeof redirected_from_accession !== 'string' || redirected_from_accession.slice(0,3) !== '4DN') redirected_from_accession = null; // Unset if not in form of accession.
+
         if (redirected_from_accession && context.accession && Array.isArray(context.alternate_accessions) && context.alternate_accessions.indexOf(redirected_from_accession) > -1){
             // Find @id of our redirected_from item.
             ajax.load('/search/?type=Item&field=@id&field=uuid&field=accession&status=replaced&accession=' + redirected_from_accession, (r)=>{
