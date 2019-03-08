@@ -7,11 +7,9 @@ import { stringify } from 'query-string';
 import { Button, DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import url from 'url';
-import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
-import { requestAnimationFrame } from './../viz/utilities';
+import { console, navigate, ajax, analytics, DateUtility } from './../util';
 import { StatsViewController, StatsChartViewBase, GroupByController, GroupByDropdown, GroupOfCharts,
     AreaChart, AreaChartContainer, loadingIcon, errorIcon, HorizontalD3ScaleLegend } from './../viz/AreaChart';
-import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import * as d3 from 'd3';
 import moment from 'moment';
@@ -170,12 +168,6 @@ export default class StatisticsPageView extends StaticPage {
         );
     }
 }
-
-globals.content_views.register(StatisticsPageView, 'StatisticsPage');
-
-
-
-
 
 
 

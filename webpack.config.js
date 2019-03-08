@@ -1,77 +1,135 @@
-var path = require('path');
-var webpack = require('webpack');
-var env = process.env.NODE_ENV;
+const path = require('path');
+const webpack = require('webpack');
+const env = process.env.NODE_ENV;
+const TerserPlugin = require('terser-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-var PATHS = {
-    static: path.resolve(__dirname, 'src/encoded/static'),
-    build: path.resolve(__dirname, 'src/encoded/static/build'),
+const PATHS = {
+    "static": path.resolve(__dirname, 'src/encoded/static'),
+    "build" : path.resolve(__dirname, 'src/encoded/static/build'),
 };
 
-var plugins = [];
-// don't include momentjs locales (large)
-plugins.push(new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]));
-var chunkFilename = '[name].js';
-var devTool = 'source-map'; // Default, slowest.
+const mode = (env === 'production' ? 'production' : 'development');
 
-if (env === 'production') {
-    // tell react to use production build
-    plugins.push(new webpack.DefinePlugin({
-        'process.env': {
-            'NODE_ENV': '"production"'
-        }
-    }));
-    // uglify code for production
-    plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true, compress: { warnings: false}}));
+const plugins = [];
+
+// don't include momentjs locales (large)
+plugins.push(
+    new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/
+    })
+);
+
+
+let chunkFilename = '[name].js';
+let devTool = 'source-map'; // Default, slowest.
+
+
+if (mode === 'production') {
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
 } else if (env === 'quick') {
     devTool = 'eval'; // Fastest
-} else if (env === 'quick-uglified') {
-    // Uglify JS for dev as well on task 'npm run dev-uglified' -
-    // slightly slower but reduces invariant violations where
-    // client-side render != server-side reason (*perhaps* allowing clientside JS to exec faster)
-    // set 'beautify : true' to get nicer output (whitespace, linebreaks) for debugging.
-    plugins.push(new webpack.optimize.UglifyJsPlugin({compress: false, mangle: false, minimize: false, sourceMap: true}));
-    devTool = 'source-map';
+} else if (env === 'development') {
+    devTool = 'inline-source-map';
 }
 
-var preLoaders = [
+
+var rules = [
     // Strip @jsx pragma in react-forms, which makes babel abort
     {
         test: /\.js$/,
-        loader: 'string-replace',
+        loader: 'string-replace-loader',
+        enforce: 'pre',
         query: {
             search: '@jsx',
             replace: 'jsx',
         }
-    }
-];
-
-var loaders = [
+    },
     // add babel to load .js files as ES6 and transpile JSX
     {
         test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
         ],
-        loader: 'babel',
-    },
-    {
-        test: /\.json$/,
-        loader: 'json',
+        use: [
+            {
+                loader: 'babel-loader'
+            }
+        ]
     }
 ];
 
 var resolve = {
-    extensions : ["", ".webpack.js", ".web.js", ".js", ".json", '.jsx']
+    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx']
 };
+
+var optimization = {
+    minimize: mode === "production",
+    minimizer: [
+        //new UglifyJsPlugin({
+        //    parallel: true,
+        //    sourceMap: true
+        //})
+        new TerserPlugin({
+            parallel: true,
+            sourceMap: true,
+            terserOptions:{
+                compress: true,
+                mangle: true
+            }
+        })
+    ]
+};
+
+
+const webPlugins = plugins.slice(0);
+const serverPlugins = plugins.slice(0);
+
+// Inform our React code of what build we're on.
+// This works via a find-replace.
+webPlugins.push(new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify(env),
+    'SERVERSIDE' : JSON.stringify(false),
+    'BUILDTYPE' : JSON.stringify(env)
+}));
+
+serverPlugins.push(new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify(env),
+    'SERVERSIDE' : JSON.stringify(true),
+    'BUILDTYPE' : JSON.stringify(env)
+}));
+
+
+if (mode === 'development'){
+    webPlugins.push(
+        new BundleAnalyzerPlugin({
+            "analyzerMode" : "static",
+            "openAnalyzer" : false,
+            "logLevel" : "warn",
+            "reportFilename" : "report-web-bundle.html"
+        })
+    );
+    serverPlugins.push(
+        new BundleAnalyzerPlugin({
+            "analyzerMode" : "static",
+            "openAnalyzer" : false,
+            "logLevel" : "warn",
+            "reportFilename" : "report-server-renderer.html"
+        })
+    );
+}
 
 module.exports = [
     // for browser
     {
-        context: PATHS.static,
-        entry: {bundle: './browser'},
+        mode: mode,
+        entry: {
+            "bundle"    : PATHS.static + '/browser'
+        },
+        target: "web",
         output: {
             path: PATHS.build,
             publicPath: '/static/build/',
@@ -79,6 +137,10 @@ module.exports = [
                                             // this library, https://www.npmjs.com/package/chunkhash-replace-webpack-plugin, to replace the <script> tag's src attribute.
                                             // For now, to prevent caching JS, we append a timestamp to JS request.
             chunkFilename: chunkFilename,
+
+            libraryTarget: "umd",
+            library: "App",
+            umdNamedDefine: true
         },
         // https://github.com/hapijs/joi/issues/665
         // stub modules on client side depended on by joi (a dependency of jwt)
@@ -91,20 +153,20 @@ module.exports = [
             {'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}'}
         ],
         module: {
-            preLoaders: preLoaders,
-            loaders: loaders,
+            rules: rules
         },
+        optimization: optimization,
         resolve : resolve,
         resolveLoader : resolve,
         devtool: devTool,
-        plugins: plugins,
-        debug: env !== 'production'
+        plugins: webPlugins
     },
     // for server-side rendering
     ///*
     {
+        mode: mode,
         entry: {
-            renderer: './src/encoded/static/server.js',
+            renderer: PATHS.static + '/server',
         },
         target: 'node',
         // make sure compiled modules can use original __dirname
@@ -117,25 +179,29 @@ module.exports = [
             'brace/theme/solarized_light',
             'd3',
             'dagre-d3',
-            'babel-core/register', // avoid bundling babel transpiler, which is not used at runtime
+            '@babel/register', // avoid bundling babel transpiler, which is not used at runtime
+            { 'higlass/dist/hglib' : '{HiGlassComponent:{}}' },
             'higlass',
-            'auth0-lock'
+            'auth0-lock',
+            'aws-sdk',
+            'src/encoded/static/components/utils/aws'
         ],
         output: {
             path: PATHS.build,
             filename: '[name].js',
-            libraryTarget: 'commonjs2',
+            libraryTarget: 'umd',
             chunkFilename: chunkFilename,
         },
         module: {
-            preLoaders: preLoaders,
-            loaders: loaders,
+            rules: rules.concat([
+                { parser: { requireEnsure: false } }
+            ])
         },
+        optimization: optimization,
         resolve : resolve,
         resolveLoader : resolve,
         devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
-        plugins: plugins,
-        debug: false // See devtool comment.
+        plugins: serverPlugins
     }
     //*/
 ];

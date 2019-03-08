@@ -45,7 +45,8 @@ describe('Testing Workflow Graph', function() {
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
-        jest.runAllTimers();
+        jest.useRealTimers();
+        //jest.runAllTimers();
     });
 
     it('Given no extra configuration, it has the correct number of nodes & edges, and proper step names', function() {
@@ -71,6 +72,8 @@ describe('Testing Workflow Graph', function() {
 
     });
 
+
+
     it('Clicking on "Show Parameters" adds some extra parameter nodes', function() {
 
         var showParamsBox = getShowParamsCheckBox();
@@ -84,7 +87,6 @@ describe('Testing Workflow Graph', function() {
 
         // Toggle the checkbox input
         TestUtils.Simulate.change(showParamsBox);
-        jest.runAllTimers();
 
         // Should now have 1 more node & edge (param)
         nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
@@ -95,12 +97,21 @@ describe('Testing Workflow Graph', function() {
 
         // Toggle the checkbox input again, to go back to 8 nodes.
         TestUtils.Simulate.change(showParamsBox);
-        jest.runAllTimers();
 
-        nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
-        edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
-        expect(nodes.length).toBe(8);
-        expect(edges.length).toBe(7);
+        setTimeout(()=>{
+
+            // Should be unchecked again.
+            expect(showParamsBox.checked).toBe(false);
+
+            nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+            edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+            expect(nodes.length).toBe(8);
+            expect(edges.length).toBe(7);
+            done();
+
+        }, 1000);
+
+        
 
 
     });
@@ -118,7 +129,7 @@ describe('Testing Workflow Graph', function() {
 
         // Toggle the checkbox input
         TestUtils.Simulate.change(showParamsBox);
-        jest.runAllTimers();
+        //jest.runOnlyPendingTimers();
 
         // Should now have 1 more node & edge (param)
         nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
@@ -148,7 +159,7 @@ describe('Testing Workflow Graph', function() {
 
         // CLICK IT CLICK IT NOW
         TestUtils.Simulate.click(stepNodeToClick.childNodes[0]); // click handler bound to inner div element.
-        jest.runAllTimers();
+        //jest.runOnlyPendingTimers();
 
         // Ensure our node is now selected.
         expect(stepNodeToClick.getAttribute('data-node-selected')).toEqual('true');
@@ -179,7 +190,7 @@ describe('Testing Workflow Graph', function() {
 
         // CLICK IT CLICK IT NOW!
         TestUtils.Simulate.click(outMcoolNodeToClick.childNodes[0]); // click handler bound to inner div element.
-        jest.runAllTimers();
+        //jest.runOnlyPendingTimers();
 
         // Ensure our node -IS- selected.
         expect(outMcoolNodeToClick.getAttribute('data-node-selected')).toEqual('true');
@@ -238,6 +249,7 @@ describe('Find nodes from other columns', function() {
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
+        jest.useFakeTimers();
         jest.runAllTimers();
     });
 
@@ -252,7 +264,7 @@ describe('Find nodes from other columns', function() {
 
         // Toggle the checkbox input
         TestUtils.Simulate.change(showReferenceFilesCheckBox);
-        jest.runAllTimers();
+        jest.runOnlyPendingTimers();
 
         // You should only see 2 nodes in column 0: The input file and the chromsize file.
         let nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');

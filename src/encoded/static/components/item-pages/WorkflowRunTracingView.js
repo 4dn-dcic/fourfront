@@ -39,7 +39,6 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
         var steps = _testing_data || null;
         this.state = {
