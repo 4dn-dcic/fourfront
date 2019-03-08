@@ -4,7 +4,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "required": ["name"],
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "aliases", "name"],
+    "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
@@ -33,7 +33,6 @@
             "title": "Path Name",
             "comment": "Unique route/pathname of this page.",
             "type": "string",
-            "uniqueKey": "page:name",
             "lookup" : 40
         },
         "title": {

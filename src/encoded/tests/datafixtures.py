@@ -1,6 +1,30 @@
 import pytest
 import copy
 
+ORDER = [
+    'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
+    'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
+    'genomic_region', 'target', 'imaging_path', 'publication',
+    'publication_tracking', 'document', 'image', 'vendor', 'construct',
+    'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
+    'individual_human', 'individual_mouse', 'individual_fly',
+    'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
+    'treatment_agent', 'biosample', 'quality_metric_fastqc',
+    'quality_metric_bamqc', 'quality_metric_pairsqc',
+    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq',
+    'quality_metric_atacseq', 'microscope_setting_d1', 'microscope_setting_d2',
+    'microscope_setting_a1', 'microscope_setting_a2', 'file_fastq',
+    'file_processed', 'file_reference', 'file_calibration', 'file_microscopy',
+    'file_set', 'file_set_calibration', 'file_set_microscope_qc',
+    'file_vistrack', 'experiment_hi_c', 'experiment_capture_c',
+    'experiment_repliseq', 'experiment_atacseq', 'experiment_chiapet',
+    'experiment_damid', 'experiment_seq', 'experiment_tsaseq',
+    'experiment_mic', 'experiment_set', 'experiment_set_replicate',
+    'data_release_update', 'software', 'analysis_step', 'workflow',
+    'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
+    'sysinfo', 'tracking_item', 'quality_metric_flag',
+    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
+]
 
 @pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
@@ -830,3 +854,13 @@ def oterm(uberon_ont):
 @pytest.fixture
 def lung_oterm(oterm, testapp):
     return testapp.post_json('/ontology_term', oterm).json['@graph'][0]
+
+
+@pytest.fixture
+def quality_metric_fastqc(testapp, award, lab):
+    item =  {
+        "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/quality_metric_fastqc', item).json['@graph'][0]

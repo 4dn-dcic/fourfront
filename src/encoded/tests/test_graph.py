@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 def test_graph_dot(testapp):
     res = testapp.get('/profiles/graph.dot', status=200)

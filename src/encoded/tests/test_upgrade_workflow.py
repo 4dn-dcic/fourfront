@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 @pytest.fixture
@@ -561,3 +561,32 @@ def test_workflow_upgrade_4_5(
             fformat = meta.get('file_format')
             if fformat:
                 assert fformat in format_uuids
+
+
+@pytest.fixture
+def workflow_5(software, award, lab):
+    return{
+        "schema_version": '2',
+        "award": award['@id'],
+        "lab": lab['@id'],
+        "title": "some workflow",
+        "name": "some workflow",
+        "workflow_type": "Other",
+        "data_types": ["Hi-C"],
+        "category": "alignment",
+        "steps": [{ "meta": { "software_used" : software['@id'] } }]
+    }
+
+
+def test_workflow_upgrade_5_6(
+        workflow_5, registry):
+    from snovault import UPGRADER
+    upgrader = registry[UPGRADER]
+    value = upgrader.upgrade('workflow', workflow_5, registry=registry,
+                             current_version='5', target_version='6')
+    assert value['schema_version'] == '6'
+    assert 'workflow_type' not in value
+    assert 'category' in value
+    assert isinstance(value['category'], list)
+    assert 'experiment_types' in value
+    assert 'data_types' not in value

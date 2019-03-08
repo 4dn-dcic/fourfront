@@ -321,16 +321,19 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         def try_match_input_with_workflow_run_output_to_generate_source(workflow_run, in_file):
             sources_for_in_file = [] # We only are looking for 1 source, but might re-use for trace_future later
             for out_file_wrapper in workflow_run.get('output_files', []):
-                out_file = out_file_wrapper.get('value') or out_file_wrapper.get('value_qc')
+                out_file = out_file_wrapper.get('value') or out_file_wrapper.get('value_qc') or None
+                if out_file is None:
+                    # This can occur if there is WorkflowRun with an output but no output `value` linkedTo from it
+                    continue
                 if out_file['uuid'] == in_file.get('uuid', 'b'):
                     step_uuid = workflow_run['uuid']
                     if step_uuid:
                         step_uuids.add( (step_uuid, in_file['uuid']) )
                     sources_for_in_file.append({
-                        "name" : out_file_wrapper.get('workflow_argument_name'),
-                        "step" : workflow_run['@id'],
-                        "for_file" : in_file['@id'],
-                        "workflow" : workflow_run['workflow']['@id']
+                        "name"      : out_file_wrapper.get('workflow_argument_name'),
+                        "step"      : workflow_run['@id'],
+                        "for_file"  : in_file['@id'],
+                        "workflow"  : workflow_run['workflow']['@id']
                     })
             return sources_for_in_file
 
@@ -396,7 +399,12 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
         else:
             for step_uuid, in_file_uuid in step_uuids:
                 next_params = ( step_uuid, get_model_obj(in_file_uuid), depth + 1 )
-                steps_to_process_stack.append(( step_uuid, get_model_obj(in_file_uuid), depth + 1 ))
+                # Potentially temporary check to skip further tracing of files which we don't
+                # have WFR inputs for.
+                next_file_model_obj = get_model_obj(in_file_uuid)
+                if next_file_model_obj.get('disable_wfr_inputs'):
+                    continue
+                steps_to_process_stack.append(( step_uuid, next_file_model_obj, depth + 1 ))
 
         return sources
 
@@ -418,6 +426,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                         for target_workflow_run_uuid in runs_current_file_goes_to:
                             if isinstance(target_workflow_run_uuid, dict): # Case if current_file_model_object is embedded representation
                                 target_workflow_run_uuid = target_workflow_run_uuid['uuid']
+                            # Slight Optimization - skip creating target conntections to steps/wfrs which we have not (yet) encountered
+                            if uuidCacheTracedHistory.get(target_workflow_run_uuid) is None:
+                                continue
                             target_workflow_run_model_obj = get_model_obj(target_workflow_run_uuid)
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model_obj.get('input_files', []))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():

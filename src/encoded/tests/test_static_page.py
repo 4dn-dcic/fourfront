@@ -1,8 +1,9 @@
 import pytest
 import time
-from .features.conftest import app_settings, app
+from .features.conftest import app_settings, app, teardown
+from webtest import AppError
 
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.indexing, pytest.mark.working]
 
 
 @pytest.fixture(scope='module')
@@ -20,6 +21,7 @@ def help_page_json():
         "name": "help/user-guide/rest-api",
         "title": "The REST-API",
         "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
+        "uuid": "a2aa8bb9-9dd9-4c80-bdb6-2349b7a3540d",
         "table-of-contents": {
             "enabled": True,
             "header-depth": 4,
@@ -33,6 +35,7 @@ def help_page_json_draft():
         "name": "help/user-guide/rest-api-draft",
         "title": "The REST-API",
         "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
+        "uuid": "a2aa8bb9-9dd9-4c80-bdb6-2349b7a3540c",
         "table-of-contents": {
             "enabled": True,
             "header-depth": 4,
@@ -47,6 +50,7 @@ def help_page_json_deleted():
         "name": "help/user-guide/rest-api-deleted",
         "title": "The REST-API",
         "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
+        "uuid": "a2aa8bb9-9dd9-4c80-bdb6-2349b7a3540a",
         "table-of-contents": {
             "enabled": True,
             "header-depth": 4,
@@ -59,26 +63,40 @@ def help_page_json_deleted():
 @pytest.fixture(scope='module')
 def posted_help_page_section(testapp, help_page_section_json):
     res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
-    time.sleep(5)
     return res.json['@graph'][0]
 
-@pytest.fixture
+
+@pytest.fixture(scope='module')
 def help_page(testapp, posted_help_page_section, help_page_json):
-    res = testapp.post_json('/pages/', help_page_json, status=201)
-    time.sleep(5)
-    return res.json['@graph'][0]
+    try:
+        res = testapp.post_json('/pages/', help_page_json, status=201)
+        val = res.json['@graph'][0]
+    except AppError:
+        res = testapp.get('/' + help_page_json['uuid'], status=301).follow()
+        val = res.json
+    return val
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
-    res = testapp.post_json('/pages/', help_page_json_draft, status=201)
-    return res.json['@graph'][0]
+    try:
+        res = testapp.post_json('/pages/', help_page_json_draft, status=201)
+        val = res.json['@graph'][0]
+    except AppError:
+        res = testapp.get('/' + help_page_json_draft['uuid'], status=301).follow()
+        val = res.json
+    return val
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def help_page_restricted(testapp, posted_help_page_section, help_page_json_deleted):
-    res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
-    return res.json['@graph'][0]
+    try:
+        res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
+        val = res.json['@graph'][0]
+    except AppError:
+        res = testapp.get('/' + help_page_json_deleted['uuid'], status=301).follow()
+        val = res.json
+    return val
 
 
 def test_get_help_page(testapp, help_page):
@@ -106,3 +124,15 @@ def test_get_help_page_no_access(anonhtmltestapp, testapp, help_page_restricted)
     help_page_url = "/" + help_page_restricted['name']
     anonhtmltestapp.get(help_page_url, status=403)
     testapp.get(help_page_url, status=200)
+
+
+def test_page_unique_name(testapp, help_page, help_page_deleted):
+    # POST again with same name and expect validation error
+    new_page = {'name': help_page['name']}
+    res = testapp.post_json('/page', new_page, status=422)
+    expected_val_err = "%s already exists with name '%s'" % (help_page['uuid'], new_page['name'])
+    assert expected_val_err in res.json['errors'][0]['description']
+
+    # also test PATCH of an existing page with another name
+    res = testapp.patch_json(help_page_deleted['@id'], {'name': new_page['name']}, status=422)
+    assert expected_val_err in res.json['errors'][0]['description']

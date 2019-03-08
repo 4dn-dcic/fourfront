@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 from rdflib import RDFS, BNode, URIRef
 from encoded.commands import owltools as ot
 
