@@ -3,10 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import moment from 'moment';
-import * as globals from './../globals';
 import { Button, Collapse } from 'react-bootstrap';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
+import { console, object, DateUtility } from './../util';
 import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
@@ -31,8 +29,6 @@ export default class PublicationView extends DefaultItemView {
     }
 
 }
-
-globals.content_views.register(PublicationView, 'Publication');
 
 
 

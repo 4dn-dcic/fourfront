@@ -60,12 +60,10 @@ class AnnouncementsLoaded extends React.Component {
 
     static defaultProps = {
         'searchURL' : '/search/?type=StaticSection&section_type=Announcement&sort=-date_created'
-    }
+    };
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.fetchAnnouncements = this.fetchAnnouncements.bind(this);
         this.handleAnnouncementsSearchResponse = this.handleAnnouncementsSearchResponse.bind(this);
         this.state = {
@@ -81,8 +79,8 @@ class AnnouncementsLoaded extends React.Component {
         else this.setState({ 'mounted' : true });
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.session !== this.props.session) this.fetchAnnouncements();
+    componentDidUpdate(pastProps){
+        if (pastProps.session !== this.props.session) this.fetchAnnouncements();
     }
 
     fetchAnnouncements(){
@@ -114,7 +112,7 @@ class AnnouncementsLoaded extends React.Component {
 
 /**
  * Component which shows currents announcements.
- * 
+ *
  * @prop {string} className - Outer <div> element's className
  * @prop {string} id - Outer <div> element's id attribute.
  */
@@ -135,7 +133,9 @@ export class Announcements extends React.Component {
     }
 
     toggleOpen(){
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
     }
 
     render(){

@@ -20,5 +20,5 @@
  */
 
 export { UIControlsWrapper, AggregatedLegend } from './UIControlsWrapper';
-export { ViewContainer, PopoverViewContainer, boundActions, barPlotCursorActions } from './ViewContainer';
+export { ViewContainer, PopoverViewContainer } from './ViewContainer';
 export { Chart, genChartBarDims } from './Chart';

@@ -209,7 +209,9 @@ class FacetTermsList extends React.Component {
 
     handleExpandListToggleClick(e){
         e.preventDefault();
-        this.setState({'expanded' : !this.state.expanded });
+        this.setState(function({ expanded }){
+            return {'expanded' : !expanded };
+        });
     }
 
 
@@ -570,8 +572,6 @@ export class FacetList extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.searchQueryTerms = this.searchQueryTerms.bind(this);
         this.state = {
             'mounted' : false
@@ -582,7 +582,7 @@ export class FacetList extends React.PureComponent {
         this.setState({ 'mounted' : true });
     }
 
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         if (!this.props.debug) return;
 
         if (!_.isEqual(nextProps.facets, this.props.facets)){

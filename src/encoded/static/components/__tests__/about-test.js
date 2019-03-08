@@ -30,7 +30,7 @@ describe('Testing about.js', function() {
     beforeAll(function() {
         // Get App from ../index instead of ../app to make sure prerequisite modules/components 
         // have loaded and initialized, e.g. AboutPage registered as handler for AboutPage @type in about.js.
-        App = require('../index');
+        App = require('../index').default;
         data = require('../testdata/static/aboutpage');
 
         sinon = require('sinon');
@@ -73,12 +73,13 @@ describe('Testing about.js', function() {
         expect(menuToggleButton.className.search('navbar-toggle')).toBeGreaterThan(-1);
         expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
         // Make sure 'in' is not in className, as it controls section visibility @ mobile sizes.
-        expect(menuCollapsibleSection.className.search('in')).toBe(-1); 
+        expect(menuCollapsibleSection.className.search('in')).toBe(-1);
         TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
         expect(menuToggleButton.className.search('collapsed')).toBe(-1);
         expect(menuCollapsibleSection.className.search('in')).toBeGreaterThan(-1);
         TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
-        jest.runAllTimers();
+
+        jest.runOnlyPendingTimers();
         expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
         expect(menuCollapsibleSection.className.search('in')).toBe(-1);
 

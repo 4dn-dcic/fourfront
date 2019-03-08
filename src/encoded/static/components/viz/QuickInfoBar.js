@@ -4,12 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import queryString from 'query-string';
-import * as d3 from 'd3';
-import * as vizUtil from './utilities';
-import { expFxn, Filters, console, object, isServerSide, layout, analytics, navigate } from '../util';
+import memoize from 'memoize-one';
+import { Filters, console,  analytics, navigate } from '../util';
 import { Toggle } from './../forms/components';
-import * as store from './../../store';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 import { ChartDataController } from './chart-data-controller';
 import ReactTooltip from 'react-tooltip';
@@ -53,11 +50,21 @@ export default class QuickInfoBar extends React.PureComponent {
         return { current, total };
     }
 
+    static expSetFilters = memoize(function(contextFilters){
+        return Filters.contextFiltersToExpSetFilters(contextFilters);
+    });
+
     static defaultProps = {
         'offset' : {},
         'id' : 'stats',
         'className' : null,
         'showCurrent' : true
+    };
+
+    static getDerivedStateFromProps(props, state){
+        var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null);
+        var show = state.show && expSetFilters && _.keys(expSetFilters).length > 0 && state.show;
+        return { expSetFilters, show };
     }
 
     /**
@@ -75,9 +82,6 @@ export default class QuickInfoBar extends React.PureComponent {
      */
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.isInvisible = this.isInvisible.bind(this);
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
@@ -92,21 +96,6 @@ export default class QuickInfoBar extends React.PureComponent {
             'reallyShow'            : false,
             'expSetFilters'         : Filters.contextFiltersToExpSetFilters((props.context && props.context.filters) || null)
         };
-    }
-
-    /**
-     * Updates state.show if no filters are selected.
-     */
-    componentWillReceiveProps(nextProps){
-        if (nextProps.context !== this.props.context){
-            var nextState = {
-                'expSetFilters' : Filters.contextFiltersToExpSetFilters((nextProps.context && nextProps.context.filters) || null)
-            };
-            if (!this.anyFiltersSet(nextState.expSetFilters) && this.state.show){
-                nextState.show = false;
-            }
-            this.setState(nextState);
-        }
     }
 
     /** @private */

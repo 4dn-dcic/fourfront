@@ -5,14 +5,12 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
-import * as globals from './../globals';
 import * as store from './../../store';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
+import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
-import { requestAnimationFrame } from './../viz/utilities';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FileDownloadButton } from './../util/file';
 
@@ -83,8 +81,7 @@ export default class FileView extends WorkflowRunTracingView {
 
         var initTabs = [],
             context = this.props.context,
-            width = this.getTabViewWidth(),
-            steps = this.state.steps;
+            width = this.getTabViewWidth();
 
         initTabs.push(FileViewOverview.getTabObject(this.props, width));
 
@@ -106,8 +103,6 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
 }
-
-globals.content_views.register(FileView, 'File');
 
 
 

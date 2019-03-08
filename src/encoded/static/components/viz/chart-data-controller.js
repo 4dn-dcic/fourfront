@@ -334,32 +334,34 @@ export const ChartDataController = {
             refs.browseBaseState    = reduxStoreState.browseBaseState;
             refs.contextFilters     = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
 
-            var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters, prevBrowseBaseState),
-                nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState), // We don't need to pass 'current' params, but we do for clarity of differences.
-                searchQuery = Filters.searchQueryStringFromHref(refs.href),
-                didFiltersChange = (
-                    !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
-                    (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery)
-                ) && (
-                    // if we are not on the browse page, no need to get chart info
-                    prevHref.indexOf('/browse/') !== -1 || refs.href.indexOf('/browse/') !== -1
-                );
-
-            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState && !didFiltersChange){
-                return; // Nothing relevant has changed. Exit.
-            }
-
-            // Step 1. Check if need to refetch both unfiltered & filtered data.
-            if (refs.browseBaseState !== prevBrowseBaseState){
-                setTimeout(function(){
-                    ChartDataController.sync(null, { 'searchQuery' : searchQuery });
-                }, 0);
+            if (refs.href === prevHref){
+                // Nothing relevant has changed. Exit.
                 return;
             }
 
+            var prevSearchQuery = Filters.searchQueryStringFromHref(prevHref),
+                nextSearchQuery = Filters.searchQueryStringFromHref(refs.href);
+
+            // Step 1. Check if need to refetch both unfiltered & filtered data.
+            if (refs.browseBaseState !== prevBrowseBaseState){
+                ChartDataController.sync(null, { 'searchQuery' : nextSearchQuery });
+                return;
+            }
+
+            // We treat expSetFilters as being empty if we're not on browse page --
+            // if we are not on the browse page, no need to get chart info
+            var isBrowseHrefPrev = prevHref.indexOf('/browse/') !== -1,
+                isBrowseHrefNext = refs.href.indexOf('/browse/') !== -1,
+                prevExpSetFilters = isBrowseHrefPrev ? Filters.contextFiltersToExpSetFilters(prevContextFilters,  prevBrowseBaseState ) : {},
+                nextExpSetFilters = isBrowseHrefNext ? Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState) : {},
+                didFiltersChange = (
+                    !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
+                    (prevHref && (prevSearchQuery !== nextSearchQuery))
+                );
+
             // Step 2. Check if need to refresh filtered data only.
             if (didFiltersChange) {
-                ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { searchQuery });
+                ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { 'searchQuery' : nextSearchQuery });
             }
         });
 

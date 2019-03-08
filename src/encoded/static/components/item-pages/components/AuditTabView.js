@@ -144,12 +144,6 @@ export class AuditTabView extends React.PureComponent {
         'INTERNAL_ACTION' : 'Internal Action'
     }
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-    }
-
     componentDidMount(){
         ReactTooltip.rebuild();
     }

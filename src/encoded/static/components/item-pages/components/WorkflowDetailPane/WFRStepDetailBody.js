@@ -95,11 +95,10 @@ class SoftwareDetailsForWorkflowNodeRow extends React.Component {
 export class WFRStepDetailBody extends React.Component {
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.maybeLoadWFR = this.maybeLoadWFR.bind(this);
         this.purposesBox = StepDetailBody.prototype.purposesBox.bind(this);
         this.state = {
-            wfr : (this.props.step && this.props.step['@id']) || null
+            "wfr" : (this.props.step && this.props.step['@id']) || null
         };
     }
 
@@ -107,9 +106,9 @@ export class WFRStepDetailBody extends React.Component {
         this.maybeLoadWFR();
     }
 
-    componentWillReceiveProps(nextProps){
-        if ((nextProps.step && nextProps.step['@id']) !== (this.props.step && this.props.step['@id'])) {
-            this.setState({ wfr : nextProps.step['@id'] }, this.maybeLoadWFR.bind(this, nextProps.step['@id']));
+    componentDidUpdate(pastProps){
+        if ((pastProps.step && pastProps.step['@id']) !== (this.props.step && this.props.step['@id'])) {
+            this.setState({ "wfr" : this.props.step['@id'] }, this.maybeLoadWFR.bind(this, this.props.step['@id']));
         }
     }
 

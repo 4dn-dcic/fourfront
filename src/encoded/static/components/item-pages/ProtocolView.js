@@ -1,11 +1,9 @@
 'use strict';
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import _ from 'underscore';
-import * as globals from './../globals';
 import { Button } from 'react-bootstrap';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
+import { console, object, Schemas, fileUtil, DateUtility } from './../util';
 import { FormattedInfoBlock } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
@@ -24,8 +22,6 @@ export default class ProtocolView extends DefaultItemView {
     }
 
 }
-
-globals.content_views.register(ProtocolView, 'Protocol');
 
 
 class ProtocolViewOverview extends React.Component {
