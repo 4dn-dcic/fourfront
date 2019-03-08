@@ -61,6 +61,7 @@ def includeme(config):
     config.add_route('me', '/me')
     config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
+    config.add_route('create-unauthorized-user', '/create-unauthorized-user')
     config.scan(__name__)
 
 
@@ -233,7 +234,6 @@ def get_jwt(request):
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
     '''check the auth0 assertion and remember the user'''
-
     if hasattr(request, 'user_info'):
         user_info = request.user_info
         if not user_info:
@@ -410,3 +410,50 @@ def generate_password():
     random_bytes = os.urandom(10)
     password = base64.b32encode(random_bytes).decode('ascii').rstrip('=').lower()
     return password
+
+
+@view_config(route_name='create-unauthorized-user', request_method='POST',
+             validators=[no_validate_item_content_post],
+             permission=NO_PERMISSION_REQUIRED)
+def create_unauthorized_user(request):
+    """POST an unauthorized user
+
+    Need these in request:
+    - 'g-recaptcha-response'
+    - 'first_name'
+    - 'last_name'
+    - 'pending_lab'
+    """
+    # for now, assume request.json --> run thru validator --> request.validated
+
+    email = request._auth0_authenticated  # jwt_info['email'].lower()
+
+    import pdb; pdb.set_trace()
+
+    user_props = request.validated
+    recaptcha_resp = request.validated.pop('g-recaptcha-response', None)
+
+    # fail
+    if not recaptcha_resp:
+        raise LoginDenied()
+
+    # validate recaptcha_resp
+    # https://developers.google.com/recaptcha/docs/verify
+    recaptcha_response = requests.POST.get('g-recaptcha-response')
+    url = 'https://www.google.com/recaptcha/api/siteverify'
+    values = {
+        'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+        'response': recaptcha_response
+    }
+    data = urllib.parse.urlencode(values).encode()
+    req =  urllib.request.Request(url, data=data)
+    response = urllib.request.urlopen(req)
+    result = json.loads(response.read().decode())
+
+    if result['success']:
+        form.save()
+        messages.success(request, 'New comment added with success!')
+    else:
+        messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+
+    # POST user
