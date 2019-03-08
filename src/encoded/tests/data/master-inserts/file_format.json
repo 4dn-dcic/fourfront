@@ -400,5 +400,15 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "valid_item_types": ["FileProcessed", "FileReference"]
+    },
+    {
+        "standard_file_extension": "txt.gz",
+        "status": "released",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "valid_item_types": ["FileProcessed"],
+        "file_format": "compressed_txt",
+        "uuid": "dba26778-f40a-4561-a552-65539702ded4",
+        "description": "This format is used for plain text files"
     }
 ]

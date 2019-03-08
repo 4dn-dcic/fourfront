@@ -4,10 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { console, object, ajax, navigate } from'./../util';
+import { console, object } from'./../util';
 import StaticPage, { StaticEntry, parseSectionsContent } from './StaticPage';
 import { NextPreviousPageSection } from './components';
-import * as globals from './../globals';
 
 
 export default class DirectoryPage extends React.Component {
@@ -32,7 +31,6 @@ export default class DirectoryPage extends React.Component {
 
 }
 
-globals.content_views.register(DirectoryPage, 'DirectoryPage');
 
 
 export class DirectoryBodyGrid extends React.Component {

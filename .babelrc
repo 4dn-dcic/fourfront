@@ -1,8 +1,13 @@
 {
-	"presets": ["es2015", "react"],
+	"presets": [
+		"@babel/preset-env",
+		"@babel/preset-react",
+	],
 	"plugins": [
-		"transform-object-rest-spread",
-		"syntax-class-properties",
-		"transform-class-properties"
-	]
+		"@babel/plugin-syntax-dynamic-import",
+		"@babel/plugin-proposal-object-rest-spread",
+		"@babel/plugin-proposal-class-properties",
+		"babel-plugin-minify-dead-code-elimination"
+	],
+	"comments": false
 }

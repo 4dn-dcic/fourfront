@@ -175,7 +175,7 @@ export class UserContentBodyList extends React.PureComponent {
     }
 
     render(){
-        return <div className="static-content-list" children={this.contentList()} />;
+        return <div className="static-content-list">{ this.contentList() }</div>;
     }
 
 }
@@ -199,14 +199,14 @@ export class BasicStaticSectionBody extends React.PureComponent {
         var { content, filetype, element, markdownCompilerOptions } = this.props,
             passedProps = _.omit(this.props, 'content', 'filetype', 'children', 'element', 'markdownCompilerOptions');
 
-        if (filetype === 'md'){
+        if (filetype === 'md' && typeof content === 'string'){
             return React.createElement(element, passedProps, compiler(content, markdownCompilerOptions || undefined) );
         } else if (filetype === 'html' && typeof content === 'string'){
             return React.createElement(element, passedProps, object.htmlToJSX(content));
         } else if (filetype === 'txt' && typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
             return replacePlaceholderString(content.slice(12).trim().replace(/\s/g,''));
         } else {
-            return React.createElement(element, passedProps, content );
+            return React.createElement(element, passedProps, content);
         }
     }
 
