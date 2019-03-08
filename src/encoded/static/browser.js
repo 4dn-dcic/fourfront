@@ -5,10 +5,10 @@ import React from 'react';
 import _ from 'underscore';
 import ReactDOM from 'react-dom';
 
-var App = require('./components');
+import App from './components';
 var domready = require('domready');
 import * as store from './store';
-var { Provider, connect } = require('react-redux');
+import { Provider, connect } from 'react-redux';
 import { console, JWT } from './components/util';
 import { BrowserFeat } from './components/util/layout';
 

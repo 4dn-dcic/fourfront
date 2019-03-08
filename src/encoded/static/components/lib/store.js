@@ -18,7 +18,7 @@ import { ajax } from './../util';
  * @param view - View that should be notified of changes
  * @param {string} stateKey - Name in the view's state that should be updated with the changed collection
  */
-class ItemStore {
+export class ItemStore {
 
     /** @ignore */
     constructor(items, view, stateKey) {
@@ -114,5 +114,3 @@ class ItemStore {
         });
     }
 };
-
-module.exports.ItemStore = ItemStore;
