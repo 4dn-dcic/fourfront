@@ -665,5 +665,53 @@
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "status": "released",
         "source_url": "https://github.com/higlass/clodius"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "2206392",
+        "lab": "4dn-dcic-lab",
+        "name": "repli-seq-pipeline",
+        "software_type": [
+            "aligner",
+            "filter",
+            "normalizer",
+            "smoother"
+        ],
+        "source_url": "https://github.com/4dn-dcic/repli-seq-pipeline",
+        "title": "repli-seq-pipeline_2206392",
+        "uuid": "257fc43b-a924-46cf-b377-fb5dcaabd50b"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "commit": "8584ff93",
+        "lab": "4dn-dcic-lab",
+        "name": "repli-seq-pipeline",
+        "software_type": [
+            "aligner",
+            "filter",
+            "normalizer",
+            "smoother"
+        ],
+        "source_url": "https://github.com/4dn-dcic/repli-seq-pipeline",
+        "title": "repli-seq-pipeline_8584ff93",
+        "uuid": "e9812671-8621-4751-a20f-ece28aa40641"
+    },
+    {
+        "status": "released",
+        "lab": "4dn-dcic-lab",
+        "software_type": [
+        "Tile generator for big data"
+        ],
+        "version": "0.10.2",
+        "aliases": [
+        "4dn-dcic-lab:cloudius_v0.10.2"
+        ],
+        "schema_version": "1",
+        "award": "1U01CA200059-01",
+        "name": "clodius",
+        "description": "Clodius is a tool for breaking up large data sets into smaller tiles that can subsequently be displayed using an appropriate viewer.",
+        "uuid": "5de38570-68bf-4545-98b6-d7d51ae08db9",
+        "source_url": "https://github.com/higlass/clodius",
+        "title": "clodius_0.10.2"
     }
 ]

@@ -293,7 +293,6 @@ export default class PageTitle extends React.PureComponent {
     /** @ignore */
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
 
         /**
          * @private

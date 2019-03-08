@@ -2,7 +2,7 @@ import pytest
 import datetime
 from encoded.types.experiment import ExperimentHiC
 # from snovault.storage import UUID
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 '''Has tests for both experiment.py and experiment_set.py'''
 
 

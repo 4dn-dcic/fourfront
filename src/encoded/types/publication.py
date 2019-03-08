@@ -4,15 +4,26 @@ import json
 from snovault import (
     collection,
     load_schema,
-    calculated_property
+    calculated_property,
+    CONNECTION
 )
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
+    collection_add,
+    item_edit,
     lab_award_attribution_embed_list
+)
+from pyramid.view import (
+    view_config
 )
 from html.parser import HTMLParser
 from encoded.types.experiment_set import invalidate_linked_items
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_put,
+    validate_item_content_patch
+)
 
 ################################################
 # Outside methods for online data fetch
@@ -176,7 +187,6 @@ def map_doi_biox(doi):
 
 @collection(
     name='publications',
-    unique_key='publication:ID',
     properties={
         'title': 'Publications',
         'description': 'Publication pages',
@@ -192,6 +202,9 @@ class Publication(Item, ItemWithAttachment):
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
     ]
+
+    class Collection(Item.Collection):
+        pass
 
     def _update(self, properties, sheets=None):
         # logic for determing whether to use manually-provided date_published
@@ -271,3 +284,40 @@ class Publication(Item, ItemWithAttachment):
     def number_of_experiment_sets(self, request, exp_sets_prod_in_pub=None):
         if exp_sets_prod_in_pub:
             return len(exp_sets_prod_in_pub)
+
+
+#### Add validator to ensure ID field is unique
+
+def validate_unique_pub_id(context, request):
+    '''validator to ensure publication 'ID' field is unique
+    '''
+    data = request.json
+    # ID is required; validate_item_content_post/put/patch will handle missing field
+    if 'ID' in data:
+        lookup_res = request.registry[CONNECTION].storage.get_by_json('ID', data['ID'], 'publication')
+        if lookup_res:
+            # check_only + POST happens on GUI edit; we cannot confirm if found
+            # item is the same item. Let the PATCH take care of validation
+            if request.method == 'POST' and request.params.get('check_only', False):
+                return
+            # editing an item will cause it to find itself. That's okay
+            if hasattr(context, 'uuid') and getattr(lookup_res, 'uuid', None) == context.uuid:
+                return
+            error_msg = ("publication %s already exists with ID '%s'. This field must be unique"
+                         % (lookup_res.uuid, data['ID']))
+            request.errors.add('body', ['ID'],  error_msg)
+            return
+
+
+@view_config(context=Publication.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_unique_pub_id])
+def publication_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=Publication, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_unique_pub_id])
+@view_config(context=Publication, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_unique_pub_id])
+def publication_edit(context, request, render=None):
+    return item_edit(context, request, render)

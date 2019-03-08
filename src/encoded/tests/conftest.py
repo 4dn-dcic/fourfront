@@ -158,28 +158,6 @@ def root(registry):
     return registry[ROOT]
 
 
-@pytest.mark.fixture_cost(500)
-@pytest.yield_fixture(scope='session')
-def workbook(conn, app, app_settings):
-    tx = conn.begin_nested()
-    try:
-        from webtest import TestApp
-        environ = {
-            'HTTP_ACCEPT': 'application/json',
-            'REMOTE_USER': 'TEST',
-        }
-        testapp = TestApp(app, environ)
-
-        from ..loadxl import load_all
-        from pkg_resources import resource_filename
-        load_all(testapp, resource_filename('encoded', 'tests/data/master-inserts/'), []) # Master Inserts
-        load_all(testapp, resource_filename('encoded', 'tests/data/inserts/'), [resource_filename('encoded', 'tests/data/documents/')]) # Test Inserts
-
-        yield
-    finally:
-        tx.rollback()
-
-
 @fixture
 def anonhtmltestapp(app):
     from webtest import TestApp

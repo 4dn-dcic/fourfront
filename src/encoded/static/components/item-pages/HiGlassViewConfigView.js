@@ -4,22 +4,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button, Collapse, MenuItem, ButtonToolbar, DropdownButton } from 'react-bootstrap';
-import * as globals from './../globals';
 import Alerts from './../alerts';
-import { JWT, console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility, navigate } from './../util';
+import { JWT, console, object, ajax, layout, DateUtility, navigate } from './../util';
 import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList, CollapsibleItemViewButtonToolbar } from './components';
 import { LinkToSelector } from './../forms/components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
-import JSONTree from 'react-json-tree';
 
 export default class HiGlassViewConfigView extends DefaultItemView {
 
     getTabViewContents(){
 
         var initTabs    = [],
-            windowWidth = this.props.windowWidth,
             width       = this.getTabViewWidth();
-
 
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
 
@@ -27,8 +23,6 @@ export default class HiGlassViewConfigView extends DefaultItemView {
     }
 
 }
-
-globals.content_views.register(HiGlassViewConfigView, 'HiglassViewConfig');
 
 
 

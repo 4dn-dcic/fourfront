@@ -7,7 +7,6 @@ import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import * as globals from './../globals';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
     AttributionTabView, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
@@ -153,9 +152,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 }
 
-// Register ExperimentSetView to be the view for these @types.
-globals.content_views.register(ExperimentSetView, 'ExperimentSet');
-globals.content_views.register(ExperimentSetView, 'ExperimentSetReplicate');
+
 
 class OverviewHeading extends React.PureComponent {
     render(){

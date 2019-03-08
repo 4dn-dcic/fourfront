@@ -5,7 +5,8 @@ elasticsearch running as subprocesses.
 """
 import pytest
 from encoded.verifier import verify_item
-from pyramid.paster import get_appsettings
+
+from .features.conftest import app_settings, app as conf_app
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
@@ -13,36 +14,13 @@ pytestmark = [pytest.mark.working, pytest.mark.indexing]
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
-    from .conftest import _app_settings
-    settings = _app_settings.copy()
-    settings['create_tables'] = True
-    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
-    settings['elasticsearch.server'] = elasticsearch_server
-    settings['sqlalchemy.url'] = postgresql_server
-    settings['collection_datastore'] = 'elasticsearch'
-    settings['item_datastore'] = 'elasticsearch'
-    settings['indexer'] = True
-    settings['indexer.processes'] = 2
-
-    # use aws auth to access elasticsearch
-    if aws_auth:
-        settings['elasticsearch.aws_auth'] = aws_auth
-    return settings
-
-
 @pytest.yield_fixture(scope='session')
-def app(app_settings):
-    from encoded import main
-    app = main({}, **app_settings)
-
-    yield app
-
-    from snovault import DBSESSION
-    DBSession = app.registry[DBSESSION]
-    # Dispose connections so postgres can tear down.
-    DBSession.bind.pool.dispose()
+def app(app_settings, use_collections=TEST_COLLECTIONS):
+    """
+    Use to pass kwargs for create_mapping to conftest app
+    """
+    for app in conf_app(app_settings, collections=use_collections, skip_indexing=True):
+        yield app
 
 
 @pytest.fixture(autouse=True)
@@ -52,6 +30,9 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
+    from .conftest import indexer_testapp
+    # index and then run create mapping to clear things out
+    indexer_testapp(app).post_json('/index', {'record': True})
     create_mapping.run(app, collections=use_collections, skip_indexing=True)
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
@@ -73,7 +54,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
     assert doc_count == 0
     # First post a single item so that subsequent indexing is incremental
-    res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
+    testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexing_count'] == 1
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
@@ -177,7 +158,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
     from os import listdir
     from os.path import isfile, join
-    from encoded import loadxl
+    import json
     from unittest import mock
     from timeit import default_timer as timer
     from pkg_resources import resource_filename
@@ -190,7 +171,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     test_inserts = []
     for insert in inserts:
         type_name = insert.split('.')[0]
-        json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
+        json_inserts[type_name] = json.loads(open(insert_dir + insert).read())
         # pluck a few uuids for testing
         if type_name in test_types:
             test_inserts.append({'type_name': type_name, 'data': json_inserts[type_name][0]})
@@ -199,7 +180,9 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     start = timer()
     with mock.patch('encoded.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
-        res = testapp.post_json('/load_data', json_inserts, status=200)
+        data = {'store': json_inserts}
+        res = testapp.post_json('/load_data', data,  # status=200
+                                )
         assert res.json['status'] == 'success'
     stop_insert = timer()
     print("PERFORMANCE: Time to load data is %s" % (stop_insert - start))

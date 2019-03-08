@@ -82,6 +82,10 @@
                 "is_visualization": {
                     "title": "Is Visualization",
                     "type": "boolean"
+                },
+                "request_headers": {
+                    "title": "Request Headers",
+                    "type": "string"
                 }
             }
         },
@@ -411,6 +415,12 @@
     "facets": {
         "tracking_type": {
             "title": "Tracking Type"
+        },
+        "download_tracking.user_agent": {
+            "title": "Download User Agent"
+        },
+        "download_tracking.file_format": {
+            "title": "Download File Format"
         }
     },
     "columns": {

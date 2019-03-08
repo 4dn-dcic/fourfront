@@ -1,16 +1,13 @@
 'use strict';
 
 import React from 'react';
-import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import url from 'url';
-import queryString from 'querystring';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import * as globals from './../globals';
 import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
-import * as store from './../../store';
-import { isServerSide, expFxn, Filters, navigate, object, layout, typedefs, JWT } from './../util';
+import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
+import { Filters, navigate, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
     SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
@@ -107,7 +104,10 @@ class ResultTableContainer extends React.PureComponent {
         return dimContainer && dimContainer.resetWidths();
     }
 
-    componentWillReceiveProps(nextProps){
+    /**
+     * @todo Refactor into memoized functions.
+     */
+    UNSAFE_componentWillReceiveProps(nextProps){
         var stateChange = {};
         if (nextProps.columnExtensionMap !== this.props.columnExtensionMap || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
             stateChange.colDefOverrides = this.colDefOverrides(nextProps);
@@ -172,8 +172,8 @@ class ResultTableContainer extends React.PureComponent {
                 'render' : (expSet, columnDefinition, paneProps, width) => {
                     var origTitleBlock          = defaultColumnExtensionMap.display_title.render(expSet, columnDefinition, paneProps, width),
                         newChildren             = origTitleBlock.props.children.slice(0),
-                        allFiles                = expFxn.allFilesFromExperimentSet(expSet, true),
-                        allFileAccessionTriples = expFxn.filesToAccessionTriples(allFiles, true, true),
+                        allFiles                = allFilesFromExperimentSet(expSet, true),
+                        allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true),
                         allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
 
                     allFileAccessionTriples = allFileAccessionTriples.sort();
@@ -631,5 +631,3 @@ export default class BrowseView extends React.Component {
     }
 
 }
-
-globals.content_views.register(BrowseView, 'Browse');

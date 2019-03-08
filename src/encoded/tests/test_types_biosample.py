@@ -1,6 +1,6 @@
 import pytest
 from snovault.schema_utils import load_schema
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture

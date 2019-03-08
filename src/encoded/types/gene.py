@@ -2,7 +2,6 @@
     given an entrez gene id
     most data fetched from ncbi entrez gene"""
 import requests
-import os
 import time
 from snovault import (
     collection,

@@ -32,13 +32,14 @@
             "title": "Description",
             "description": "A short description of the feature",
             "type": "string",
-            "lookup": 10,
+            "lookup": 20,
             "formInput": "textarea"
         },
         "preferred_label": {
             "title": "Preferred label",
             "description": "A provided label that can override the automatically calculated display_title - only submit if the calculated title does not work",
-            "type": "string"
+            "type": "string",
+            "lookup": 40
         },
         "feature_type": {
             "title": "Feature Type",
@@ -47,12 +48,27 @@
             "linkTo": "OntologyTerm",
             "lookup": 10
         },
+        "organism_name": {
+            "title": "Species",
+            "type": "string",
+            "description": "The organism that is the source of the BioFeature",
+            "lookup": 30,
+            "suggested_enum": [
+                "human",
+                "mouse",
+                "rat",
+                "fruit fly",
+                "roundworm",
+                "chicken",
+                "multiple organisms"
+            ]
+        },
         "genome_location": {
             "title": "Genomic Location",
             "description": "The location(s) of the feature on the genome",
             "comment": "A BioFeature can be a simple location and if so must have this field and appropriate type from SO",
             "type": "array",
-            "lookup": 10,
+            "lookup": 60,
             "items": {
                 "title": "Genomic Region",
                 "description": "Item indicating genome assembly, chromosome and coordinates of the region",
@@ -64,20 +80,20 @@
             "title": "Gene",
             "description": "Gene or Gene(s) that a feature can be linked to.",
             "type": "array",
+            "lookup": 50,
             "comment": "Usually a single ID but in some cases such as Histones that have multiple gene clusters or a region that contains more than one relevant gene can use multiple IDs",
             "items": {
                   "title": "Gene ID",
                   "description": "Entrez Gene ID",
                   "type": "string",
-                  "linkTo": "Gene",
-                  "lookup": 10
+                  "linkTo": "Gene"
             }
         },
         "cellular_structure": {
             "title": "Cellular Structure",
             "description": "If the feature is a cellular structure such as a chromosome use this field and set type to 'cellular_component'",
             "type": "string",
-            "lookup": 10,
+            "lookup": 70,
             "enum": [
                 "Cell membrane",
                 "Nucleolus",
@@ -96,6 +112,7 @@
                 "description": "A modification to the feature.",
                 "type": "object",
                 "required": ["mod_type"],
+                "lookup": 80,
                 "properties": {
                     "mod_type": {
                         "title": "Type of modification",
@@ -130,10 +147,6 @@
                     }
                 }
             }
-        },
-        "override_organism_name": {
-            "type": "string",
-            "description": "will be used as organism_name in preference to the calculated property"
         }
     },
     "facets": {

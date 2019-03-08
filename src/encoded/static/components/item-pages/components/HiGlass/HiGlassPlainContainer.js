@@ -3,9 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, ajax, console, fileUtil } from './../../../util';
+import { ajax, console } from './../../../util';
 import { requestAnimationFrame } from './../../../viz/utilities';
-import { HiGlassLocalStorage } from './HiGlassLocalStorage';
 
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
@@ -83,19 +82,43 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            if (!HiGlassComponent) {
-                window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
-                // Would ideally load non-compiled app, but requires CSS webpack loaders (see HiGlass webpack.config.js).
-                //HiGlassComponent = require('higlass/app/scripts/hglib').HiGlassComponent;
-                HiGlassComponent = require('higlass/dist/hglib').HiGlassComponent;
-            }
+
+        const finish = () => {
             this.setState(function(currState){
                 return { 'mounted' : true, 'mountCount' : currState.mountCount + 1 };
-            }, ()=>{
+            }, () => {
                 setTimeout(this.correctTrackDimensions, 500);
             });
-        }, this.props.mountDelay);
+        };
+
+        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
+            if (!HiGlassComponent) {
+                window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
+                // Load in HiGlass libraries as separate JS file due to large size.
+                // @see https://webpack.js.org/api/module-methods/#requireensure
+                require.ensure(['higlass/dist/hglib'], (require) => {
+                    const hglib = require('higlass/dist/hglib');
+                    HiGlassComponent = hglib.HiGlassComponent;
+                    finish();
+                }, "higlass-utils-bundle");
+
+                // Alternative, newer version of above -- currently the 'magic comments' are
+                // not being picked up (?) though so the above is used to set name of JS file.
+                //import(
+                //    /* webpackChunkName: "higlass-bundle" */
+                //    'higlass/dist/hglib'
+                //).then((hglib) =>{
+                //    HiGlassComponent = hglib.HiGlassComponent;
+                //    finish();
+                //});
+
+            } else {
+                finish();
+            }
+
+        }, this.props.mountDelay || 500);
+
     }
 
     correctTrackDimensions(){
@@ -190,10 +213,9 @@ export class HiGlassPlainContainer extends React.PureComponent {
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
                 <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.8/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
-                <div className="higlass-wrapper row" children={hiGlassInstance} />
+                <div className="higlass-wrapper row">{ hiGlassInstance }</div>
             </div>
         );
     }
-
 
 }

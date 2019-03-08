@@ -29,8 +29,6 @@ export default class FileMicroscopyView extends FileView {
 
 }
 
-globals.content_views.register(FileMicroscopyView, 'FileMicroscopy');
-
 
 class FileMicroscopyViewOverview extends React.Component {
 

@@ -3,9 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object } from'./../util';
-import * as plansData from './../testdata/stacked-block-matrix-list';
-import * as globals from './../globals';
+import * as plansData from '../testdata/stacked-block-matrix-list';
+import * as globals from '../globals';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual } from './components';
 
@@ -26,8 +25,7 @@ export default class PlannedSubmissionsPage extends React.Component {
         "context" : PropTypes.shape({
 
         }).isRequired
-    }
-
+    };
 
     /**
      * The render function. Renders homepage contents.
@@ -152,9 +150,3 @@ export default class PlannedSubmissionsPage extends React.Component {
     }
 
 }
-
-globals.content_views.register(PlannedSubmissionsPage, 'Planned-submissionsPage');
-
-
-
-
