@@ -3,8 +3,8 @@ import copy
 
 ORDER = [
     'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
-    'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
-    'genomic_region', 'target', 'imaging_path', 'publication', 'experiment_type',
+    'ontology', 'ontology_term', 'file_format', 'badge', 'organism', 'gene',
+    'genomic_region', 'bio_feature', 'target', 'imaging_path', 'publication',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
     'individual_human', 'individual_mouse', 'individual_fly',
@@ -190,6 +190,20 @@ def protocol(testapp, lab, award):
 
 
 @pytest.fixture
+def so_ont(testapp):
+    return testapp.post_json('/ontology', {'ontology_name': 'SO'}).json['@graph'][0]
+
+
+@pytest.fixture
+def gene_term(testapp, so_ont):
+    gterm = {
+        'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000704', 'term_name': 'gene',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
 def cell_line_term(testapp, ontology):
     item = {
         "is_slim_for": "cell",
@@ -287,6 +301,7 @@ def human_data():
         'name': 'human',
         'scientific_name': 'Homo sapiens',
         'taxon_id': '9606',
+        'genome_assembly': 'GRCh38'
     }
 
 
@@ -302,6 +317,7 @@ def mouse(testapp):
         'name': 'mouse',
         'scientific_name': 'Mus musculus',
         'taxon_id': '10090',
+        'genome_assembly': 'GRCm38'
     }
     return testapp.post_json('/organism', item).json['@graph'][0]
 
@@ -772,6 +788,40 @@ def target_w_genes(testapp, lab, award):
         'lab': lab['@id'],
     }
     return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def some_genomic_region(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCh38',
+            'chromosome': '1',
+            'start_coordinate': 17,
+            'end_coordinate': 544}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def vague_genomic_region(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCm38',
+            'chromosome': '5',
+            'start_location': 'beginning',
+            'end_location': 'centromere'}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def vague_genomic_region_w_desc(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCm38',
+            'chromosome': '5',
+            'start_location': 'beginning',
+            'end_location': 'centromere',
+            'location_description': 'gene X enhancer'}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
 
 
 @pytest.fixture
