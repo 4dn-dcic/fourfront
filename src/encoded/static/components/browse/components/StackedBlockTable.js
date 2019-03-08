@@ -1034,8 +1034,6 @@ export class StackedBlockTable extends React.Component {
         super(props);
         this.render = this.render.bind(this);
         this.getColumnWidths = this.getColumnWidths.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.colWidthStyles = this.colWidthStyles.bind(this);
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);

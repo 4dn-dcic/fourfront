@@ -33,9 +33,9 @@ var testData = [ // Use this to test list view(s) as none defined in test data.
  */
 class DetailBlock extends React.PureComponent {
 
-    defaultProps = {
+    static defaultProps = {
         'singularTitle' : 'Publication'
-    }
+    };
 
     render(){
         var { publication, singularTitle, children } = this.props;

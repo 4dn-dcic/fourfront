@@ -9,7 +9,6 @@ import _ from 'underscore';
 import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
-import { content_views } from './../globals';
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
 import { EditableField, FieldSet } from './../forms/components';
@@ -444,8 +443,6 @@ export default class UserView extends React.PureComponent {
 
 }
 
-content_views.register(UserView, 'User');
-
 
 /**
  * Renders out the contact fields for user, which are editable.
@@ -757,5 +754,3 @@ export class ImpersonateUserForm extends React.Component {
     }
 
 }
-
-content_views.register(ImpersonateUserForm, 'User', 'impersonate-user');

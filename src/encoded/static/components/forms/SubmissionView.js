@@ -1,13 +1,11 @@
 'use strict';
 
 import React from 'react';
-import * as globals from '../globals';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
-import { ajax, console, JWT, object, isServerSide, layout, Schemas } from '../util';
-import moment from 'moment';
-import { s3UploadFile } from '../util/aws';
+import { ajax, console, JWT, object, layout, Schemas } from '../util';
+//import { s3UploadFile } from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import SearchView from './../browse/SearchView';
 import ReactTooltip from 'react-tooltip';
@@ -134,7 +132,7 @@ export default class SubmissionView extends React.PureComponent{
      * The main functionality of this is to wait for schemas if they're not
      * available on componentDidMount.
      */
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         if (this.props.schemas !== nextProps.schemas){
             if (this.state.currKey === null){
                 this.initializePrincipal(nextProps.context, nextProps.schemas);
@@ -155,13 +153,15 @@ export default class SubmissionView extends React.PureComponent{
      * @param {Object} newContext - New Context/representation for this Item to be saved.
      */
     modifyKeyContext = (objKey, newContext) => {
-        var contextCopy = object.deepClone(this.state.keyContext);
-        var validCopy = object.deepClone(this.state.keyValid);
-        contextCopy[objKey] = newContext;
-        validCopy[objKey] = this.findValidationState(objKey);
-        this.setState({
-            'keyContext': contextCopy,
-            'keyValid': validCopy
+        this.setState(({ keyContext, keyValid }) => {
+            var contextCopy = object.deepClone(keyContext),
+                validCopy   = object.deepClone(keyValid);
+            contextCopy[objKey] = newContext;
+            validCopy[objKey] = this.findValidationState(objKey);
+            return {
+                'keyContext': contextCopy,
+                'keyValid': validCopy
+            };
         }, ReactTooltip.rebuild);
     }
 
@@ -1143,20 +1143,27 @@ export default class SubmissionView extends React.PureComponent{
                                 // add important info to result from finalizedContext
                                 // that is not added from /types/file.py get_upload
                                 var creds = responseData['upload_credentials'];
-                                var upload_manager = s3UploadFile(this.state.file, creds);
-                                if (upload_manager === null){
-                                    // bad upload manager. Cause an alert
-                                    alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
-                                }else{
-                                    // this will set off a chain of aync events.
-                                    // first, md5 will be calculated and then the
-                                    // file will be uploaded to s3. If all of this
-                                    // is succesful, call finishRoundTwo.
-                                    stateToSet.uploadStatus = null;
-                                    this.setState(stateToSet);
-                                    this.updateUpload(upload_manager);
-                                }
-                            }else{
+
+                                require.ensure(['../util/aws'], (require)=>{
+
+                                    var awsUtil = require('../util/aws'),
+                                        upload_manager = awsUtil.s3UploadFile(this.state.file, creds);
+
+                                    if (upload_manager === null){
+                                        // bad upload manager. Cause an alert
+                                        alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
+                                    } else {
+                                        // this will set off a chain of aync events.
+                                        // first, md5 will be calculated and then the
+                                        // file will be uploaded to s3. If all of this
+                                        // is succesful, call finishRoundTwo.
+                                        stateToSet.uploadStatus = null;
+                                        this.setState(stateToSet);
+                                        this.updateUpload(upload_manager);
+                                    }
+                                }, "aws-utils-bundle");
+
+                            } else {
                                 // state cleanup for this key
                                 this.finishRoundTwo();
                                 this.setState(stateToSet);
@@ -1679,7 +1686,6 @@ class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.modifyNewContext = this.modifyNewContext.bind(this);
         this.initiateField = this.initiateField.bind(this);
         this.selectCancel = this.selectCancel.bind(this);
@@ -1701,7 +1707,7 @@ class IndividualObjectView extends React.Component{
     }
 
     /** Fade the JSX rendered by this and scroll to top when this.props.currKey changes. */
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         // scroll to top if worked-on object changes
         if(this.props.currKey !== nextProps.currKey){
             //setTimeout(layout.animateScrollTo(0), 100);
@@ -2109,11 +2115,6 @@ class RoundTwoDetailPanel extends React.Component{
         );
     }
 }
-
-globals.content_views.register(SubmissionView, 'Item', 'edit');
-globals.content_views.register(SubmissionView, 'Item', 'create');
-globals.content_views.register(SubmissionView, 'Item', 'clone');
-globals.content_views.register(SubmissionView, 'Search', 'add');
 
 /***** MISC. FUNCIONS *****/
 

@@ -3,8 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
+import { console, object } from './../util';
 import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch, ItemPageTable } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
@@ -16,8 +15,6 @@ export default class BiosampleView extends DefaultItemView {
     getTabViewContents(){
 
         var initTabs = [],
-            context = this.props.context,
-            windowWidth = this.props.windowWidth,
             width = this.getTabViewWidth();
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
@@ -27,10 +24,6 @@ export default class BiosampleView extends DefaultItemView {
     }
 
 }
-
-globals.content_views.register(BiosampleView, 'Biosample');
-
-
 
 export class BiosourcesTable extends React.PureComponent {
 

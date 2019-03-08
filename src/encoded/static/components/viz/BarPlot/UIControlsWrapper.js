@@ -4,10 +4,10 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as vizUtil from './../utilities';
 import { Legend } from './../components';
-import { console, object, isServerSide, expFxn, Filters, Schemas, layout, analytics } from './../../util';
+import { console, Filters, Schemas, layout, analytics } from './../../util';
 import { Toggle } from './../../forms/components';
 import { boundActions } from './ViewContainer';
 
@@ -66,7 +66,6 @@ export class UIControlsWrapper extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected.bind(this);
         this.titleMap = this.titleMap.bind(this);
         this.adjustedChildChart = this.adjustedChildChart.bind(this);
@@ -78,7 +77,6 @@ export class UIControlsWrapper extends React.PureComponent {
         this.renderDropDownMenuItems = this.renderDropDownMenuItems.bind(this);
         this.handleDropDownToggle = this.handleDropDownToggle.bind(this);
         this.renderShowTypeDropdown = this.renderShowTypeDropdown.bind(this);
-        this.render = this.render.bind(this);
 
         this.state = {
             'aggregateType' : 'experiment_sets',
@@ -87,7 +85,8 @@ export class UIControlsWrapper extends React.PureComponent {
         };
     }
 
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
+        // TODO: Refactor into getDerivedStateFromProps
         if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
             (
