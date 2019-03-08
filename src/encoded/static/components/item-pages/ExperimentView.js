@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
-import { console, object, Schemas } from './../util';
+import { console, object, Schemas, expFxn } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
