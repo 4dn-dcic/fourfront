@@ -12,14 +12,14 @@ logger = structlog.getLogger(__name__)
 EPILOG = __doc__
 
 
-def read_local_inserts_dir(dir, path, target_types=[]):
+def read_local_inserts_dir(dir_name, path, target_types=[]):
     """
     Given path string path, read local inserts directory and return a
     dictionary of all inserts keyed by item type, as well as a list of all
     found uuids
 
     Args:
-        dir (str): string name of the inserts directory
+        dir_name (str): string name of the inserts directory
         path (str): string path to the inserts directory
         target_types (list): list of item types to load. Empty means all types
 
@@ -42,7 +42,7 @@ def read_local_inserts_dir(dir, path, target_types=[]):
     # load current insert contents from json file
     for item_type in item_types:
         local_inserts[item_type] = {}  # key these by uuid for now
-        for it_item in get_inserts(dir, item_type):
+        for it_item in get_inserts(dir_name, item_type):
             # only fetch items for specified fetch_item_types
             if item_type in fetch_item_types:
                 item_uuids.append(it_item['uuid'])
