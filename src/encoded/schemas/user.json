@@ -24,7 +24,7 @@
         "lab": {
             "title": "Affiliation",
             "description": "Lab user is primarily associated with.",
-            "permission": "import-items",
+            "permission": "import_items",
             "type": "string",
             "lookup": 50,
             "linkTo": "Lab"
@@ -33,7 +33,7 @@
             "title": "Submits for",
             "description": "Labs user is authorized to submit data for.",
             "type": "array",
-            "permission": "import-items",
+            "permission": "import_items",
             "lookup": 70,
             "uniqueItems": true,
             "items": {
@@ -48,7 +48,7 @@
             "type": "array",
             "lookup": 80,
             "uniqueItems": true,
-            "permission": "import-items",
+            "permission": "import_items",
             "items": {
                 "type": "string"
             }
@@ -59,7 +59,7 @@
             "type": "array",
             "lookup": 90,
             "uniqueItems": true,
-            "permission": "import-items",
+            "permission": "import_items",
             "items": {
                 "type": "string",
                 "enum": [
@@ -160,7 +160,7 @@
             "title": "Pending Lab",
             "description": "Non-linkTo identifier of a lab this user wants associate with",
             "type": "string",
-            "permission": "import-items"
+            "permission": "import_items"
         }
     },
     "boost_values": {
