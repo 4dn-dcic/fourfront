@@ -330,79 +330,49 @@ def experiment(testapp, experiment_data):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample, mboI, experiment_type_hic):
+def experiment_data(lab, award, human_biosample, mboI, exp_types):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': experiment_type_hic['@id'],
+        'experiment_type': exp_types['hic']['@id'],
         'digestion_enzyme': mboI['@id'],
         'status': 'in review by lab'
     }
 
 
 @pytest.fixture
-def experiment_type_hic(testapp, lab, award):
-    data = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'title': 'In situ Hi-C',
-        'status': 'released'
+def exp_types(testapp, lab, award):
+    experiment_types = {}
+    title_dict = {
+        'hic': 'In situ Hi-C',
+        'microc': 'Micro-C',
+        'capc': 'Capture Hi-C',
+        'rnaseq': 'RNA-seq',
+        'fish': 'DNA FISH',
+        'dnase': 'DNase Hi-C',
+        'dam': 'DamID-seq',
+        'chia': 'ChIA-PET',
+        'repliseq': '2-stage Repli-seq'
     }
-    return testapp.post_json('/experiment_type', data).json['@graph'][0]
+    for k, v in title_dict.items():
+        data = {
+            'title': v,
+            'lab': lab['@id'],
+            'award': award['@id'],
+            'status': 'released'
+        }
+        experiment_types[k] = testapp.post_json('/experiment_type', data).json['@graph'][0]
+    return experiment_types
 
 
 @pytest.fixture
-def experiment_type_microc(testapp, lab, award):
-    data = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'title': 'Micro-C',
-        'status': 'released'
-    }
-    return testapp.post_json('/experiment_type', data).json['@graph'][0]
-
-
-@pytest.fixture
-def experiment_type_capc(testapp, lab, award):
-    data = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'title': 'Capture Hi-C',
-        'status': 'released'
-    }
-    return testapp.post_json('/experiment_type', data).json['@graph'][0]
-
-
-@pytest.fixture
-def experiment_type_rnaseq(testapp, lab, award):
-    data = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'title': 'RNA-seq',
-        'status': 'released'
-    }
-    return testapp.post_json('/experiment_type', data).json['@graph'][0]
-
-
-@pytest.fixture
-def experiment_type_fish(testapp, lab, award):
-    data = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'title': 'DNA FISH',
-        'status': 'released'
-    }
-    return testapp.post_json('/experiment_type', data).json['@graph'][0]
-
-
-@pytest.fixture
-def experiment_project_release(testapp, lab, award, human_biosample, experiment_type_microc):
+def experiment_project_release(testapp, lab, award, human_biosample, exp_types):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': experiment_type_microc['@id'],
+        'experiment_type': exp_types['microc']['@id'],
         'status': 'released to project'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]

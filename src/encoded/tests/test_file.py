@@ -1132,9 +1132,9 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep_and_custom_eset(
 
 
 def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
-        testapp, proc_file_json, experiment_data, experiment_type_rnaseq):
+        testapp, proc_file_json, experiment_data, exp_types):
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    experiment_data['experiment_type'] = experiment_type_rnaseq['@id']
+    experiment_data['experiment_type'] = exp_types['rnaseq']['@id']
     experiment_data['processed_files'] = [pfile['@id']]
     del experiment_data['digestion_enzyme']
     testapp.post_json('/experiment_seq', experiment_data, status=201)
@@ -1146,7 +1146,7 @@ def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
 
 
 def test_track_and_file_facet_info_file_link_to_expt_biosample_cell(
-        testapp, proc_file_json, experiment_data, experiment_type_hic):
+        testapp, proc_file_json, experiment_data):
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
     experiment_data['processed_files'] = [pfile['@id']]
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
