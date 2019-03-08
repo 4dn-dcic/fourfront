@@ -37,6 +37,7 @@
             "lookup": 20
         },
         "experiment_name": {
+            "title": "Experiment Name",
             "description": "DON'T SUBMIT, auto-generated",
             "type": "string",
             "pattern": "^[a-z0-9\\-]+$",
