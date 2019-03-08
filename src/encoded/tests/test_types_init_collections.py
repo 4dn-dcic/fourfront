@@ -5,7 +5,7 @@ pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 @pytest.fixture
 def genomic_region_w_onlyendloc(testapp, lab, award):
     item = {
-        "genome_assembly": "assembly",
+        "genome_assembly": "dm6",
         "end_coordinate": 3,
         'award': award['@id'],
         'lab': lab['@id']
@@ -14,13 +14,15 @@ def genomic_region_w_onlyendloc(testapp, lab, award):
 
 
 @pytest.fixture
-def genomic_regions(genomic_region_w_onlyendloc, genomic_region_w_chrloc, basic_genomic_region, lab, award):
-    return {'genomic_region_w_onlyendloc': genomic_region_w_onlyendloc,
-            'genomic_region_w_chrloc': genomic_region_w_chrloc,
-            'basic_genomic_region': basic_genomic_region,
-            'award': award['@id'],
-            'lab': lab['@id']
-            }
+def dt4genomic_regions(genomic_region_w_onlyendloc, some_genomic_region, basic_genomic_region,
+                       vague_genomic_region, vague_genomic_region_w_desc):
+    return {
+        'dm6': genomic_region_w_onlyendloc,
+        'GRCh38:1:17-544': some_genomic_region,
+        'GRCh38': basic_genomic_region,
+        'GRCm38:5': vague_genomic_region,
+        'gene X enhancer': vague_genomic_region_w_desc
+    }
 
 
 @pytest.fixture
@@ -100,12 +102,13 @@ def test_vendor_name_updates_on_patch(testapp, vendor_data):
 
 @pytest.fixture
 def vendor_data_alias(lab, award):
-    return {"title": "Wrong Alias Biochemical",
-            'lab': lab['@id'],
-            'award': award['@id'],
-            'aliases': ['my_lab:this_is_correct_one',
-                        'my_lab:this/is_wrong',
-                        'my_lab:this\is_wrong_too']}
+    return {
+        'title': 'Wrong Alias Biochemical',
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'aliases': ['my_lab:this_is_correct_one',
+                    'my_lab:this/is_wrong',
+                    'my_lab:this\is_wrong_too']}
 
 
 def test_vendor_alias_wrong_format(testapp, vendor_data_alias):
@@ -119,3 +122,8 @@ def test_vendor_alias_wrong_format(testapp, vendor_data_alias):
         if an_error['name'][0] == 'aliases':
             problematic_aliases += 1
     assert problematic_aliases == 2
+
+
+def test_genomic_region_display_title(testapp, dt4genomic_regions):
+    for dt, region in dt4genomic_regions.items():
+        assert region.get('display_title') == dt
