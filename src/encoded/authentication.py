@@ -424,11 +424,27 @@ def create_unauthorized_user(request):
     - 'last_name'
     - 'pending_lab'
     """
+    import transaction
+    import uuid
     # for now, assume request.json --> run thru validator --> request.validated
 
     email = request._auth0_authenticated  # jwt_info['email'].lower()
 
+    # 1
+    # type_i = request.registry['collections']['User'].type_info
+    # from snovault.crud_views import create_item, render_item
+    # item = create_item(type_i, request, {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'hahasdfasfs@gmail.com'})
+    # rendered, item_uri = render_item(request, item, True, True)
+    # itm = type_i.factory.create(request.registry, testuuid, {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'hahasdfasfs@gmail.com'})
+    # res = request.registry[CONNECTION].create('User', testuuid)
+
+    #2
     import pdb; pdb.set_trace()
+    from snovault.embed import make_subrequest
+    subreq = make_subrequest(request, '/users', method='POST')
+    subreq.json = {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'haasdfshasasdfasfs@gmail.com'}
+    res = request.invoke_subrequest(subreq)
+    transaction.get().commit()
 
     user_props = request.validated
     recaptcha_resp = request.validated.pop('g-recaptcha-response', None)
@@ -442,18 +458,25 @@ def create_unauthorized_user(request):
     recaptcha_response = requests.POST.get('g-recaptcha-response')
     url = 'https://www.google.com/recaptcha/api/siteverify'
     values = {
-        'secret': settings.GOOGLE_RECAPTCHA_SECRET_KEY,
+        'secret': registry.settings['g.recaptcha.secret'],
         'response': recaptcha_response
     }
     data = urllib.parse.urlencode(values).encode()
-    req =  urllib.request.Request(url, data=data)
-    response = urllib.request.urlopen(req)
-    result = json.loads(response.read().decode())
+    req =  requests.post(url, data=data)
+    result = res.json()
 
     if result['success']:
-        form.save()
-        messages.success(request, 'New comment added with success!')
-    else:
-        messages.error(request, 'Invalid reCAPTCHA. Please try again.')
+        # POST user
 
-    # POST user
+        tracking_uuid = str(uuid.uuid4())
+        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
+        properties['uuid'] = tracking_uuid
+        # no validators run, so status must be set manually if we want it
+        if 'status' not in properties:
+            properties['status'] = 'in review by lab'
+        request.validated = properties
+        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
+        transaction.get().commit()
+    else:
+        # error with re-captcha
+        raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")

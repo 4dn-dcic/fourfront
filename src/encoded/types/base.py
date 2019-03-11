@@ -11,10 +11,7 @@ from pyramid.security import (
     # DENY_ALL,
     Everyone,
 )
-from pyramid.traversal import (
-    find_root,
-    traverse,
-)
+from pyramid.traversal import find_root
 import snovault
 # from ..schema_formats import is_accession
 # import snovalut default post / patch stuff so we can overwrite it in this file
