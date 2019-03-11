@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
 import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
-import { object } from './../util';
+import { object, ajax } from './../util';
 import { LinkToSelector } from './components/LinkToSelector';
 
 
@@ -104,7 +104,9 @@ export default class UserRegistrationForm extends React.PureComponent {
     onContactEmailChange(e){ this.setState({ 'value_for_contact_email' : e.target.value }); }
 
     onSelectLab(value_for_pending_lab, value_for_pending_lab_details){
-        console.log('RECEIVED -', value_for_pending_lab, value_for_pending_lab_details);
+        // TODO: If value_for_pending_lab exists but not value_for_pending_lab_details,
+        // then do AJAX request to get details.
+        // TODO: Error fallback (?)
         this.setState({ value_for_pending_lab, value_for_pending_lab_details });
     }
 
@@ -115,11 +117,30 @@ export default class UserRegistrationForm extends React.PureComponent {
         var formData = serialize(formElem, { 'hash' : true });
         console.log('DDD', formData);
         var combinedData = _.extend(formData, {
-            'email'         : this.props.email,
-            'pending_lab'   : this.state.value_for_pending_lab,
+            'email'         : this.props.email, // We don't allow user(s) to edit/override their JWT.
+            'pending_lab'   : this.state.value_for_pending_lab
+            // These will be present in serialized formData:
             //'first_name'    : this.state.value_for_first_name,
             //'last_name'     : this.state.value_for_last_name
         });
+
+        this.setState({ 'isRegistering': true, 'registrationStatus' : 'loading' }, ()=>{
+
+            ajax.load(
+                this.props.endpoint,
+                (resp) => {
+                    // TODO
+                    this.setState({ 'isRegistering': false, 'registrationStatus' : 'success' });
+                },
+                'POST',
+                (err) => {
+                    // TODO
+                },
+                combinedData
+            );
+
+        });
+
     }
 
     render(){
