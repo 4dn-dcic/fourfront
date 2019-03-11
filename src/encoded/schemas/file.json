@@ -243,6 +243,18 @@
             "type": "string",
             "permission": "import_items",
             "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_dataset": {
+            "description": "What dataset does the file belong to",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_condition": {
+            "description": "What condition distinguishes the members of a dataset",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
         }
     },
     "facets": {
