@@ -275,13 +275,13 @@
         "is_slim_for": "assay"
     },
     {
-    "is_slim_for": "organ",
-    "namespace": "http://purl.obolibrary.org/obo",
-    "source_ontology": "530016bc-8535-4448-903e-854af460b254",
-    "term_id": "UBERON:0001264",
-    "term_name": "pancreas",
-    "term_url": "http://purl.obolibrary.org/obo/UBERON_0001264",
-    "uuid": "111140bc-8535-4448-903e-854af460a233"
+        "is_slim_for": "organ",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_id": "UBERON:0001264",
+        "term_name": "pancreas",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0001264",
+        "uuid": "111140bc-8535-4448-903e-854af460a233"
     },
     {
         "is_slim_for": "organ",
@@ -740,5 +740,46 @@
         "uuid": "840525af-614c-4559-9997-23a30e288858",
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0002791"
-    }
+    },
+    {
+       "namespace": "http://purl.obolibrary.org/obo/",
+       "term_id": "SO:0000104",
+       "term_name": "polypeptide",
+       "preferred_name": "protein",
+       "uuid": "e4addd27-69e1-47d2-8ff4-a7ada5fc48a5",
+       "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+       "term_url": "http://purl.obolibrary.org/obo/SO_0000104"
+   },
+   {
+       "namespace": "http://purl.obolibrary.org/obo/",
+       "term_id": "SO:0000704",
+       "term_name": "gene",
+       "uuid": "38184c75-56ae-4ccb-b7c7-28f5a99c7f6e",
+       "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+       "term_url": "http://purl.obolibrary.org/obo/SO_0000704"
+   },
+   {
+       "namespace": "http://purl.obolibrary.org/obo/",
+       "term_id": "SO:0000673",
+       "term_name": "transcript",
+       "uuid": "e8f56a24-20ce-4e7c-9e8d-a4f409398574",
+       "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+       "term_url": "http://purl.obolibrary.org/obo/SO_0000673"
+   },
+   {
+       "namespace": "http://purl.obolibrary.org/obo/",
+       "term_id": "SO:0000001",
+       "term_name": "region",
+       "uuid": "bca12371-0380-402a-ac1f-fafe552c2cba",
+       "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+       "term_url": "http://purl.obolibrary.org/obo/SO_0000001"
+   },
+   {
+       "namespace": "http://purl.obolibrary.org/obo/",
+       "term_id": "GO:0005575",
+       "term_name": "cellular_component",
+       "uuid": "e47e2bea-bc1e-4989-881c-521fc0b33529",
+       "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+       "term_url": "http://purl.obolibrary.org/obo/GO_0005575"
+   }
 ]
