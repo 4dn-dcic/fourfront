@@ -7,6 +7,7 @@ import jwt
 from base64 import b64decode
 
 from passlib.context import CryptContext
+from urllib.parse import urlencode
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy
@@ -455,8 +456,7 @@ def create_unauthorized_user(request):
 
     # validate recaptcha_resp
     # https://developers.google.com/recaptcha/docs/verify
-    recaptcha_response = requests.POST.get('g-recaptcha-response')
-    url = 'https://www.google.com/recaptcha/api/siteverify'
+    recap_url = 'https://www.google.com/recaptcha/api/siteverify'
     values = {
         'secret': registry.settings['g.recaptcha.secret'],
         'response': recaptcha_response
