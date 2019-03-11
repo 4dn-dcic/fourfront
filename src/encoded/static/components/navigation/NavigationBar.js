@@ -105,7 +105,7 @@ export class NavigationBar extends React.PureComponent {
     /**
      * @todo Refactor into `getDerivedStateFromProps` or other approach.
      */
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         var closeMobileMenuWhenChangeIn = ['href', 'session'],
             len = closeMobileMenuWhenChangeIn.length,
             i, propName;
@@ -182,7 +182,7 @@ export class NavigationBar extends React.PureComponent {
 
     render() {
         var { testWarning, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state,
-            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight, isFullscreen } = this.props,
+            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight, isFullscreen, overlaysContainer } = this.props,
             testWarningVisible = testWarning & !isFullscreen, // Hidden on full screen mode.
             navClassName        = (
                 "navbar-container" +
@@ -218,7 +218,7 @@ export class NavigationBar extends React.PureComponent {
                                 <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
                                     setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
                             </Nav>
-                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted }} />
+                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted, overlaysContainer }} />
                             <SearchBar href={href} currentAction={currentAction} />
                         </Navbar.Collapse>
                     </Navbar>

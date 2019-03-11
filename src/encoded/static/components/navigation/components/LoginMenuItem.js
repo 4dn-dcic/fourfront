@@ -1,13 +1,16 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { MenuItem } from 'react-bootstrap';
 import Auth0Lock from 'auth0-lock';
 import * as store from './../../../store';
 import { JWT, ajax, navigate, isServerSide, analytics, object } from './../../util';
+import jwt from 'jsonwebtoken';
 import Alerts from './../../alerts';
+import { UserRegistrationModal } from './../../forms/UserRegistrationForm';
 
 
 
@@ -25,6 +28,11 @@ export class LoginMenuItem extends React.Component {
         this.showLock           = this.showLock.bind(this);
         this.logout             = this.logout.bind(this);
         this.loginCallback      = this.loginCallback.bind(this);
+        this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
+        this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
+        this.state = {
+            "userNotPresent" : false
+        };
     }
 
     componentDidMount () {
@@ -117,6 +125,7 @@ export class LoginMenuItem extends React.Component {
             Alerts.deQueue(Alerts.LoggedOut);
             console.info('Login completed');
             setIsLoadingIcon(false);
+
             if (href && href.indexOf('/error/login-failed') !== -1){
                 navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
             }
@@ -143,10 +152,14 @@ export class LoginMenuItem extends React.Component {
             setIsLoadingIcon(false);
 
             if (!error.code && error.type === 'timed-out'){
+                // Server or network error of some sort most likely.
                 Alerts.queue(Alerts.LoginFailed);
             } else if (error.code === 403) {
-                navigate('/error/login-failed');
+                // Present a registration form
+                //navigate('/error/login-failed');
+                this.setState({ 'userNotPresent' : true });
             } else {
+                // ? Fallback
                 navigate('/', ()=>{
                     setTimeout(()=>{
                         Alerts.queue(Alerts.LoginFailed);
@@ -159,16 +172,52 @@ export class LoginMenuItem extends React.Component {
 
     }
 
+    onRegistrationComplete(){
+        // TODO: perform login by calling `this.loginCallback({ idToken : JWT.get() })`
+        this.setState({ 'userNotPresent' : false });
+    }
+
+    onRegistrationCancel(){
+        // TODO:
+        this.setState({ 'userNotPresent' : false });
+    }
+
     render() {
-        if (this.props.invisible) return null;
-        if (this.props.session) return (
+        var { session } = this.props,
+            userNotPresent = this.state.userNotPresent;
+
+        // If we're already logged in, show logout button.
+        if (session) return (
             <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
                 Log Out
             </MenuItem>
         );
-        else return (
+
+        if (userNotPresent){
+            // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
+            var token = JWT.get(),
+                decodedToken = token && jwt.decode(token),
+                unverifiedEmail = decodedToken && decodedToken.email,
+                modalHeading = unverifiedEmail && (
+                    <p className="text-400 mb-2">
+                        Email <span className="text-600">{ unverifiedEmail }</span> does not exist. Please register below.
+                    </p>
+                );
+
+            console.log('TT', decodedToken);
+            return (
+                <UserRegistrationModal onComplete={this.onRegistrationComplete}
+                    onCancel={this.onRegistrationCancel} heading={modalHeading} email={unverifiedEmail} />
+            );
+            //return ReactDOM.createPortal(
+            //    <UserRegistrationModal onComplete={this.onRegistrationComplete} />,
+            //    overlaysContainer
+            //);
+        }
+
+        return (
             <MenuItem id="loginbtn" onSelect={this.showLock} className="global-entry">
-                Log In
+                Log In or Register
             </MenuItem>
         );
     }
