@@ -1052,8 +1052,11 @@ def custom_experiment_set_data(lab, award):
 
 
 def test_track_and_file_facet_info_no_link_to_exp_or_eset(testapp, proc_file_json):
+    # should only have lab_name
     res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    assert 'track_and_facet_info' not in res
+    tf_info = res.get('track_and_facet_info')
+    assert 'lab_name' in tf_info
+    assert len(tf_info) == 1
 
 
 def test_track_and_file_facet_info_file_link_to_multi_expts(
@@ -1065,7 +1068,9 @@ def test_track_and_file_facet_info_file_link_to_multi_expts(
     assert pfile['@id'] in expt1['processed_files']
     assert pfile['@id'] in expt2['processed_files']
     res = testapp.get(pfile['@id']).json
-    assert 'track_and_facet_info' not in res
+    tf_info = res.get('track_and_facet_info')
+    assert 'lab_name' in tf_info
+    assert len(tf_info) == 1
 
 
 def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
@@ -1186,7 +1191,9 @@ def test_track_and_file_facet_info_file_link_to_multi_repsets(
     assert pfile['@id'] in repset1['processed_files']
     assert pfile['@id'] in repset2['processed_files']
     res = testapp.get(pfile['@id']).json
-    assert 'track_and_facet_info' not in res
+    tf_info = res.get('track_and_facet_info')
+    assert 'lab_name' in tf_info
+    assert len(tf_info) == 1
 
 
 def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
