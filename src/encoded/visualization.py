@@ -937,76 +937,21 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
         return int(interpolated_color)
 
     # Add the color values for an RGB display. Add known values here and we will linearly interpolate everything else.
-    color_range_by_colorOrig = {
-        "red": {
-            0:0,
-            63:77,
-            127:180,
-            191:252,
-            255:252,
-        },
-        "green": {
-            0:0,
-            63:17,
-            127:53,
-            191:133,
-            255:253,
-        },
-        "blue": {
-            0:3,
-            63:123,
-            127:122,
-            191:96,
-            255:191,
-        },
-    }
-
-    color_range_by_color_purple = {
-        "red": {
-            0:0,
-            64:150,
-            255:200,
-        },
-        "green": {
-            0:0,
-            64:136,
-            255:182,
-        },
-        "blue": {
-            0:0,
-            64:164,
-            255:219,
-        },
-    }
-
-    color_range_by_colorBurak = {
-        "red": {
-            0:150,
-            255:0,
-        },
-        "green": {
-            0:150,
-            255:0,
-        },
-        "blue": {
-            0:255,
-            128:150,
-            255:255,
-        },
-    }
-
     color_range_by_color = {
         "red": {
-            0:0,
-            255:64,
+            0:99,
+            128:60,
+            255:25,
         },
         "green": {
-            0:0,
-            255:64,
+            0:20,
+            128:12,
+            255:13,
         },
         "blue": {
-            0:255,
-            255:96,
+            0:99,
+            128:60,
+            255:25,
         },
     }
 
