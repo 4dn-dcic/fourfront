@@ -148,11 +148,11 @@ def set_namekey_from_title(properties):
     name = None
     if properties.get('title'):
         exclude = set(string.punctuation.replace('-', ''))
-        name = properties['title']
-        name = re.sub(r"&", ' n ', name)
-        name = ''.join(ch for ch in name if ch not in exclude)
-        name = re.sub(r"\s+", '-', name)
-        name = name.lower()
+        name = properties['title'].replace('&', ' n ')
+        #name = re.sub(r"&", ' n ', name)
+        name = ''.join(ch if ch not in exclude and ch != ' ' else '-' for ch in name)
+        #name = re.sub(r"\s+", '-', name)
+        name = re.sub(r"[-]+", '-', name).strip('-').lower()
     return name
 
 
