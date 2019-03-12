@@ -241,15 +241,17 @@ export default class UserRegistrationForm extends React.PureComponent {
 
 
                     <Collapse in={!!(value_for_pending_lab)}>
-                        <FormGroup controlId="jobTitle" validationState={null}>
-                            <ControlLabel>
-                                Job Title
-                                { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
-                                <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
-                                <span className="text-300"> (Optional)</span>
-                            </ControlLabel>
-                            <FormControl name="job_title" type="text"/>
-                        </FormGroup>
+                        <div className="clearfix">
+                            <FormGroup controlId="jobTitle" validationState={null}>
+                                <ControlLabel>
+                                    Job Title
+                                    { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
+                                    <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
+                                    <span className="text-300"> (Optional)</span>
+                                </ControlLabel>
+                                <FormControl name="job_title" type="text"/>
+                            </FormGroup>
+                        </div>
                     </Collapse>
 
                     <FormGroup controlId="contactEmail" validationState={!isContactEmailValid ? 'error' : null}>
@@ -282,6 +284,15 @@ export default class UserRegistrationForm extends React.PureComponent {
 
 
 class LookupLabField extends React.PureComponent {
+
+    static fieldTitleColStyle = {
+        'flex' : 1,
+        'padding' : '7px 0 4px 10px',
+        'fontSize' : '1.125rem',
+        'background' : '#f4f4f4',
+        'marginRight' : 5,
+        'borderRadius' : 4
+    };
 
     static propTypes = {
         'onSelect' : PropTypes.func.isRequired,
@@ -341,9 +352,8 @@ class LookupLabField extends React.PureComponent {
 
         return (
             <React.Fragment>
-
                 <div className="flexrow ml-0 mr-0">
-                    <div style={{ 'flex' : 1, 'padding' : '7px 0 4px 10px', 'fontSize' : '1.125rem', 'background' : '#f4f4f4', 'marginRight' : 5 }}>{ currLabTitle }</div>
+                    <div style={LookupLabField.fieldTitleColStyle}>{ currLabTitle }</div>
                     <div className="field-buttons">
                         { currentLabDetails && currentLabDetails['@id'] ?
                             <Button onClick={this.props.onClear} className="mr-05">
@@ -351,7 +361,7 @@ class LookupLabField extends React.PureComponent {
                             </Button>
                         : null }
                         <Button className="btn-primary" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip}>
-                            { currentLabDetails && currentLabDetails['@id'] ? "Change" : "Select" }
+                            Select
                         </Button>
                     </div>
                 </div>
