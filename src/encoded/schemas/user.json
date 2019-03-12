@@ -182,8 +182,8 @@
             "type": "string",
             "permission": "import_items"
         },
-        "is_unauthorized": {
-            "title": "Is Unauthorized",
+        "was_unauthorized": {
+            "title": "Was Unauthorized",
             "permission": "import_items",
             "description": "Flag that is True if user was created with create-unauthorized-user endpoint",
             "type": "boolean"

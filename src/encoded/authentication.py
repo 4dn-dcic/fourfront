@@ -40,6 +40,7 @@ from snovault.validation import ValidationFailure
 from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
 from snovault.crud_views import collection_add as sno_collection_add
+from snovault.schema_utils import validate_request
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -425,34 +426,42 @@ def create_unauthorized_user(request):
     - 'last_name'
     - 'pending_lab'
     """
-    import pdb; pdb.set_trace()
-    # for now, assume request.json --> run thru validator --> request.validated
-    email = request._auth0_authenticated  # jwt_info['email'].lower()
-
-    user_props = request.json
-    recaptcha_resp = request.json.pop('g-recaptcha-response', None)
-
-    # fail
+    recaptcha_resp = request.json.get('g-recaptcha-response')
     if not recaptcha_resp:
         raise LoginDenied()
+
+    email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
+    user_props = request.json
+    if user_props.get('email') != email:
+        raise HTTPForbidden(title="Provided email %s not validated with Auth0. Try logging in again."
+                            % user_props.get('email'))
+
+    del user_props['g-recaptcha-response']
+    user_coll = request.registry['collections']['User']
+    request.remote_user = 'EMBED'  # permission = import_items
+
+    # validate the User json
+    validate_request(user_coll.type_info.schema, request, user_props)
+    if request.errors:
+        raise ValidationFailure('body')  # use errors from validate_request
 
     # validate recaptcha_resp
     # https://developers.google.com/recaptcha/docs/verify
     recap_url = 'https://www.google.com/recaptcha/api/siteverify'
     values = {
-        # 'secret': registry.settings['g.recaptcha.secret'],
-        'secret': reCaptchaSecret,
-        'response': recaptcha_response
+        'secret': request.registry.settings['g.recaptcha.secret'],
+        'response': recaptcha_resp
     }
-    data = urllib.parse.urlencode(values).encode()
-    req =  requests.post(url, data=data)
-    result = res.json()
+    data = urlencode(values).encode()
+    headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+    recap_res =  requests.get(recap_url, params=data, headers=headers).json()
 
-    if result['success']:
-        # POST user
-        user_coll = request.registry['collections']['User']
-        request.validated = {'first_name': 'Tcha', 'last_name': 'Ya', 'email': 'haasasdfashasasdfasfs@gmail.com'}
-        sno_res = sno_collection_add(user_coll, request, False)
+    if recap_res['success']:
+        sno_res = sno_collection_add(user_coll, request, False)  # POST User
+        if sno_res.get('status') == 'success':
+            return sno_res
+        else:
+            raise HTTPForbidden(title="Could not create user. Try logging in again.")
     else:
         # error with re-captcha
         raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")
