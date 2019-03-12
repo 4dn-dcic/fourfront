@@ -418,13 +418,22 @@ def generate_password():
 @view_config(route_name='create-unauthorized-user', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def create_unauthorized_user(request):
-    """POST an unauthorized user
+    """
+    Endpoint to create an unauthorized user, which will have no lab or award.
+    Requires a reCAPTCHA response, which is propogated from the front end
+    registration form. This is so the endpoint cannot be abused.
+    Given a user properties in the request body, will validate those and also
+    validate the reCAPTCHA response using the reCAPTCHA server. If all checks
+    are succesful, POST a new user
 
-    Need these in request:
-    - 'g-recaptcha-response'
-    - 'first_name'
-    - 'last_name'
-    - 'pending_lab'
+    Args:
+        request: Request object
+
+    Returns:
+        dictionary User creation response from collection_add
+
+    Raises:
+        LoginDenied, HTTPForbidden, or ValidationFailure
     """
     recaptcha_resp = request.json.get('g-recaptcha-response')
     if not recaptcha_resp:
@@ -448,11 +457,11 @@ def create_unauthorized_user(request):
     # validate recaptcha_resp
     # https://developers.google.com/recaptcha/docs/verify
     recap_url = 'https://www.google.com/recaptcha/api/siteverify'
-    values = {
+    recap_values = {
         'secret': request.registry.settings['g.recaptcha.secret'],
         'response': recaptcha_resp
     }
-    data = urlencode(values).encode()
+    data = urlencode(recap_values).encode()
     headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
     recap_res =  requests.get(recap_url, params=data, headers=headers).json()
 
