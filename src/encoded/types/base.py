@@ -147,8 +147,9 @@ def get_item_if_you_can(request, value, itype=None):
 def set_namekey_from_title(properties):
     name = None
     if properties.get('title'):
-        exclude = set(string.punctuation)
+        exclude = set(string.punctuation.replace('-', ''))
         name = properties['title']
+        name = re.sub(r"&", ' n ', name)
         name = ''.join(ch for ch in name if ch not in exclude)
         name = re.sub(r"\s+", '-', name)
         name = name.lower()
