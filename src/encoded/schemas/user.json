@@ -100,7 +100,27 @@
         "job_title": {
             "title": "Job title",
             "type": "string",
-            "lookup": 60
+            "lookup": 60,
+            "suggested_enum": [
+                "Graduate Student",
+                "Postdoc",
+                "PI",
+                "Staff",
+                "Co-I",
+                "Administrator",
+                "Program Coordinator",
+                "Senior Researcher",
+                "Researcher",
+                "Submitter",
+                "Trainee",
+                "Data Wrangler",
+                "Software Developer",
+                "Collaborator",
+                "Imaging Specialist",
+                "Data Analyst",
+                "Facility Head",
+                "Lab/Project Manager"
+            ]
         },
         "phone1": {
             "title": "Primary phone number",
