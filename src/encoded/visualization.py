@@ -1024,7 +1024,7 @@ def resize_1d_tracks(views):
         horizontal_vector_heatmap_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-vector-heatmap") ]
 
         # Get the height allocated for all of the top tracks.
-        remaining_height = 600
+        remaining_height = 565
         # If there is a central view, the top rows will have less height to work with.
         if view_info["has_center_content"]:
             remaining_height = 200
