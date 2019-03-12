@@ -54,22 +54,27 @@ export class UserActionDropdownMenu extends React.Component {
     listUserActionsAsMenuItems(){
         var { mounted, listActionsFor, href, session } = this.props,
             actions = [
-                <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer')} key="login-register-logout" setIsLoadingIcon={this.setIsLoading} />,
+                <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas')}
+                    key="login-register-logout" setIsLoadingIcon={this.setIsLoading} />,
                 // Old: actionToMenuItem({id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}, mounted, href, {"data-no-cache" : true})
             ];
 
         if (session) {
             // Account Actions
-            actions = actions.concat(_.map(listActionsFor('user'), function(action, idx){
-                return actionToMenuItem(action, mounted, href, {"data-no-cache" : true});
-            }));
+            actions = actions.concat(
+                _.map(listActionsFor('user'), function(action){
+                    return actionToMenuItem(action, mounted, href, {"data-no-cache" : true});
+                })
+            );
         }
 
         return actions;
     }
 
     render() {
-        var acctTitle = "Account", acctIcon = null, userDetails = null;
+        var acctTitle = "Account",
+            acctIcon = null,
+            userDetails = null;
 
         if (this.state.isLoading){
             acctTitle = <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
