@@ -184,7 +184,7 @@ export class LoginMenuItem extends React.Component {
     }
 
     render() {
-        var { session } = this.props,
+        var { session, schemas } = this.props,
             userNotPresent = this.state.userNotPresent;
 
         // If we're already logged in, show logout button.
@@ -207,7 +207,7 @@ export class LoginMenuItem extends React.Component {
 
             console.log('TT', decodedToken);
             return (
-                <UserRegistrationModal onComplete={this.onRegistrationComplete}
+                <UserRegistrationModal onComplete={this.onRegistrationComplete} schemas={schemas}
                     onCancel={this.onRegistrationCancel} heading={modalHeading} email={unverifiedEmail} />
             );
             //return ReactDOM.createPortal(

@@ -10,7 +10,6 @@ import domToReact from 'html-react-parser/lib/dom-to-react';
 import patchedConsoleInstance from './patched-console';
 import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
-import { isServerSide } from './misc';
 import url from 'url';
 
 var console = patchedConsoleInstance;
@@ -42,18 +41,18 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
         if (!suppressErrors) console.error("Could not get atId for Item", item);
         return null;
     }
-    
+
     var propsToInclude = elementProps && _.clone(elementProps);
 
     if (typeof propsToInclude.key === 'undefined'){
         propsToInclude.key = href;
     }
-    
+
     if (addDescriptionTip && typeof propsToInclude['data-tip'] === 'undefined' && item.description){
         propsToInclude['data-tip'] = item.description;
         propsToInclude.className = (propsToInclude.className || '') + ' inline-block';
     }
-    
+
     return (
         <a href={href} {...propsToInclude}>{ title }</a>
     );
@@ -111,7 +110,7 @@ export function listFromTips(tips){
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
     var errorMsg;
-    if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
+    if (typeof propertyName === 'string') propertyName = propertyName.split('.');
     if (!Array.isArray(propertyName)){
         errorMsg = 'Using improper propertyName "' + propertyName + '" in object.getNestedProperty.';
         console.error(errorMsg);
@@ -348,7 +347,7 @@ export function isValidAtIDFormat(value){
 /**
  * Performs a rudimentary check on an object to determine whether it is an Item.
  * Checks for presence of properties 'display_title' and '@id'.
- * 
+ *
  * @param {Object} content - Object to check.
  * @returns {boolean} Whether 'content' param is (likely to be) an Item.
  */
@@ -375,7 +374,7 @@ export function randomId() {
 
 /**
  * Assert that param passed in & returned is in UUID format.
- * 
+ *
  * @param {string} uuid - UUID string to be asserted.
  * @returns {string} Original UUID string (uuid param) if in valid form.
  * @throws Error if not in valid UUID format.
@@ -467,16 +466,14 @@ export class TooltipInfoIconContainerAuto extends React.Component {
             tooltip = (schemaProperty && schemaProperty.description) || null;
             if (!title) title = (schemaProperty && schemaProperty.title) || null;
         }
-        
-        
 
-        return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
+        return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={elementType} />;
     }
 }
 
 /**
  * Use this Component to generate a 'copy' button.
- * 
+ *
  * @prop {string} value - What to copy to clipboard upon clicking the button.
  * @prop {boolean} [flash=true] - Whether to do a 'flash' effect of the button and children wrapper on click.
  * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
@@ -628,7 +625,7 @@ export const itemUtil = {
 
     /**
      * Function to determine title for each Item object.
-     * 
+     *
      * @param {Object} props - Object containing props commonly supplied to Item page. At minimum, must have a 'context' property.
      * @returns {string} Title string to use.
      */
@@ -642,7 +639,7 @@ export const itemUtil = {
 
     /**
      * Get Item title string from a context object (JSON representation of Item).
-     * 
+     *
      * @param {Object} context - JSON representation of an Item object.
      * @returns {string} The title.
      */
@@ -663,7 +660,7 @@ export const itemUtil = {
     /**
      * Determine whether the title which is displayed is an accession or not.
      * Use for determining whether to include accession in ItemHeader.TopRow.
-     * 
+     *
      * @param {Object} context          JSON representation of an Item object.
      * @param {string} [displayTitle]   Display title of Item object. Gets it from context if not provided.
      * @returns {boolean} If title is an accession (or contains it).
@@ -678,7 +675,7 @@ export const itemUtil = {
     /**
      * Compare two arrays of Items to check if they contain the same Items, by their @id.
      * Does _NOT_ compare the fields within each Item (e.g. to detect changed or more 'complete').
-     * 
+     *
      * @param {Object[]} listA      1st list of Items to compare.
      * @param {Object[]} listB      2nd list of Items to compare.
      * @returns {boolean} True if equal.

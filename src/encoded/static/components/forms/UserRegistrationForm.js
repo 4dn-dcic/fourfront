@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
-import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup, Alert } from 'react-bootstrap';
+import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup, Alert, Collapse } from 'react-bootstrap';
 import { object, ajax } from './../util';
 import { LinkToSelector } from './components/LinkToSelector';
 
@@ -148,7 +148,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     // Else If unknown failure:
                     this.setState({'registrationStatus' : 'network-failure'});
                 },
-                combinedData
+                JSON.stringify(combinedData)
             );
 
         });
@@ -213,18 +213,18 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <div className="row">
                         <div className="col-sm-12 col-md-6">
                             <FormGroup controlId="firstName" validationState={value_for_first_name === '' ? 'error' : null}>
-                                <ControlLabel>First Name</ControlLabel>
+                                <ControlLabel>First Name <span className="text-danger">*</span></ControlLabel>
                                 <FormControl name="first_name" type="text" onChange={this.onFirstNameChange}/>
                                 <FormControl.Feedback />
-                                { !value_for_first_name ? <HelpBlock>First name cannot be blank</HelpBlock> : null }
+                                { value_for_first_name === '' ? <HelpBlock>First name cannot be blank</HelpBlock> : null }
                             </FormGroup>
                         </div>
                         <div className="col-sm-12 col-md-6">
                             <FormGroup controlId="lastName" validationState={value_for_last_name === '' ? 'error' : null}>
-                                <ControlLabel>Last Name</ControlLabel>
+                                <ControlLabel>Last Name <span className="text-danger">*</span></ControlLabel>
                                 <FormControl name="last_name" type="text" onChange={this.onLastNameChange}/>
                                 <FormControl.Feedback />
-                                { !value_for_last_name ? <HelpBlock>Last name cannot be blank</HelpBlock> : null }
+                                { value_for_last_name === '' ? <HelpBlock>Last name cannot be blank</HelpBlock> : null }
                             </FormGroup>
                         </div>
                     </div>
@@ -239,17 +239,18 @@ export default class UserRegistrationForm extends React.PureComponent {
                         <HelpBlock>Lab or Institute with which you are associated.</HelpBlock>
                     </FormGroup>
 
-                    { value_for_pending_lab ?
-                    <FormGroup controlId="jobTitle" validationState={null}>
-                        <ControlLabel>
-                            Job Title
-                            { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
-                            <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
-                            <span className="text-300"> (Optional)</span>
-                        </ControlLabel>
-                        <FormControl name="job_title" type="text"/>
-                    </FormGroup>
-                    : null }
+
+                    <Collapse in={!!(value_for_pending_lab)}>
+                        <FormGroup controlId="jobTitle" validationState={null}>
+                            <ControlLabel>
+                                Job Title
+                                { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
+                                <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
+                                <span className="text-300"> (Optional)</span>
+                            </ControlLabel>
+                            <FormControl name="job_title" type="text"/>
+                        </FormGroup>
+                    </Collapse>
 
                     <FormGroup controlId="contactEmail" validationState={!isContactEmailValid ? 'error' : null}>
                         <ControlLabel>Preferred Contact Email <span className="text-300">(Optional)</span></ControlLabel>
@@ -339,6 +340,11 @@ class LookupLabField extends React.PureComponent {
 
         return (
             <React.Fragment>
+
+                <div className="row flexrow">
+                
+                </div>
+
                 <InputGroup>
                     <InputGroup.Addon style={{ 'width' : 'auto' }}>{ currLabTitle }</InputGroup.Addon>
                     <InputGroup.Button>
