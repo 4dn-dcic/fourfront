@@ -39,6 +39,7 @@ from snovault.storage import User
 from snovault.validation import ValidationFailure
 from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
+from snovault.crud_views import collection_add as sno_collection_add
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -414,7 +415,6 @@ def generate_password():
 
 
 @view_config(route_name='create-unauthorized-user', request_method='POST',
-             validators=[no_validate_item_content_post],
              permission=NO_PERMISSION_REQUIRED)
 def create_unauthorized_user(request):
     """POST an unauthorized user
@@ -425,30 +425,12 @@ def create_unauthorized_user(request):
     - 'last_name'
     - 'pending_lab'
     """
-    import transaction
-    import uuid
+    import pdb; pdb.set_trace()
     # for now, assume request.json --> run thru validator --> request.validated
-
     email = request._auth0_authenticated  # jwt_info['email'].lower()
 
-    # 1
-    # type_i = request.registry['collections']['User'].type_info
-    # from snovault.crud_views import create_item, render_item
-    # item = create_item(type_i, request, {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'hahasdfasfs@gmail.com'})
-    # rendered, item_uri = render_item(request, item, True, True)
-    # itm = type_i.factory.create(request.registry, testuuid, {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'hahasdfasfs@gmail.com'})
-    # res = request.registry[CONNECTION].create('User', testuuid)
-
-    #2
-    import pdb; pdb.set_trace()
-    from snovault.embed import make_subrequest
-    subreq = make_subrequest(request, '/users', method='POST')
-    subreq.json = {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'haasdfshasasdfasfs@gmail.com'}
-    res = request.invoke_subrequest(subreq)
-    transaction.get().commit()
-
-    user_props = request.validated
-    recaptcha_resp = request.validated.pop('g-recaptcha-response', None)
+    user_props = request.json
+    recaptcha_resp = request.json.pop('g-recaptcha-response', None)
 
     # fail
     if not recaptcha_resp:
@@ -458,7 +440,8 @@ def create_unauthorized_user(request):
     # https://developers.google.com/recaptcha/docs/verify
     recap_url = 'https://www.google.com/recaptcha/api/siteverify'
     values = {
-        'secret': registry.settings['g.recaptcha.secret'],
+        # 'secret': registry.settings['g.recaptcha.secret'],
+        'secret': reCaptchaSecret,
         'response': recaptcha_response
     }
     data = urllib.parse.urlencode(values).encode()
@@ -467,16 +450,9 @@ def create_unauthorized_user(request):
 
     if result['success']:
         # POST user
-
-        tracking_uuid = str(uuid.uuid4())
-        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
-        properties['uuid'] = tracking_uuid
-        # no validators run, so status must be set manually if we want it
-        if 'status' not in properties:
-            properties['status'] = 'in review by lab'
-        request.validated = properties
-        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
-        transaction.get().commit()
+        user_coll = request.registry['collections']['User']
+        request.validated = {'first_name': 'Tcha', 'last_name': 'Ya', 'email': 'haasasdfashasasdfasfs@gmail.com'}
+        sno_res = sno_collection_add(user_coll, request, False)
     else:
         # error with re-captcha
         raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")
