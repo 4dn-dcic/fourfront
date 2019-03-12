@@ -289,6 +289,9 @@ def main(global_config, **local_config):
     # set auth0 keys
     settings['auth0.secret'] = os.environ.get("Auth0Secret")
     settings['auth0.client'] = os.environ.get("Auth0Client")
+    # set google reCAPTCHA keys
+    settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
+    settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY

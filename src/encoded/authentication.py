@@ -7,6 +7,7 @@ import jwt
 from base64 import b64decode
 
 from passlib.context import CryptContext
+from urllib.parse import urlencode
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy
@@ -61,6 +62,7 @@ def includeme(config):
     config.add_route('me', '/me')
     config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
+    config.add_route('create-unauthorized-user', '/create-unauthorized-user')
     config.scan(__name__)
 
 
@@ -233,7 +235,6 @@ def get_jwt(request):
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
     '''check the auth0 assertion and remember the user'''
-
     if hasattr(request, 'user_info'):
         user_info = request.user_info
         if not user_info:
@@ -410,3 +411,72 @@ def generate_password():
     random_bytes = os.urandom(10)
     password = base64.b32encode(random_bytes).decode('ascii').rstrip('=').lower()
     return password
+
+
+@view_config(route_name='create-unauthorized-user', request_method='POST',
+             validators=[no_validate_item_content_post],
+             permission=NO_PERMISSION_REQUIRED)
+def create_unauthorized_user(request):
+    """POST an unauthorized user
+
+    Need these in request:
+    - 'g-recaptcha-response'
+    - 'first_name'
+    - 'last_name'
+    - 'pending_lab'
+    """
+    import transaction
+    import uuid
+    # for now, assume request.json --> run thru validator --> request.validated
+
+    email = request._auth0_authenticated  # jwt_info['email'].lower()
+
+    # 1
+    # type_i = request.registry['collections']['User'].type_info
+    # from snovault.crud_views import create_item, render_item
+    # item = create_item(type_i, request, {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'hahasdfasfs@gmail.com'})
+    # rendered, item_uri = render_item(request, item, True, True)
+    # itm = type_i.factory.create(request.registry, testuuid, {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'hahasdfasfs@gmail.com'})
+    # res = request.registry[CONNECTION].create('User', testuuid)
+
+    #2
+    import pdb; pdb.set_trace()
+    from snovault.embed import make_subrequest
+    subreq = make_subrequest(request, '/users', method='POST')
+    subreq.json = {'first_name': 'Carl', 'last_name': 'Ya', 'email': 'haasdfshasasdfasfs@gmail.com'}
+    res = request.invoke_subrequest(subreq)
+    transaction.get().commit()
+
+    user_props = request.validated
+    recaptcha_resp = request.validated.pop('g-recaptcha-response', None)
+
+    # fail
+    if not recaptcha_resp:
+        raise LoginDenied()
+
+    # validate recaptcha_resp
+    # https://developers.google.com/recaptcha/docs/verify
+    recap_url = 'https://www.google.com/recaptcha/api/siteverify'
+    values = {
+        'secret': registry.settings['g.recaptcha.secret'],
+        'response': recaptcha_response
+    }
+    data = urllib.parse.urlencode(values).encode()
+    req =  requests.post(url, data=data)
+    result = res.json()
+
+    if result['success']:
+        # POST user
+
+        tracking_uuid = str(uuid.uuid4())
+        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
+        properties['uuid'] = tracking_uuid
+        # no validators run, so status must be set manually if we want it
+        if 'status' not in properties:
+            properties['status'] = 'in review by lab'
+        request.validated = properties
+        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
+        transaction.get().commit()
+    else:
+        # error with re-captcha
+        raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")
