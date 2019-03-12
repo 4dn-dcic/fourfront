@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
-import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
+import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup, Alert } from 'react-bootstrap';
 import { object, ajax } from './../util';
 import { LinkToSelector } from './components/LinkToSelector';
 
@@ -28,6 +28,7 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.onLastNameChange       = this.onLastNameChange.bind(this);
         this.onContactEmailChange   = this.onContactEmailChange.bind(this);
         this.onSelectLab            = this.onSelectLab.bind(this);
+        this.onClearLab             = this.onClearLab.bind(this);
 
         this.onFormSubmit           = this.onFormSubmit.bind(this);
 
@@ -37,8 +38,7 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.state = {
             'captchaResponseToken' : null,
             'captchaErrorMsg'      : null,
-            'isRegistering'        : false,
-            'registrationStatus'   : null,
+            'registrationStatus'   : 'form',
 
             // These fields are required, so we store in state
             // to be able to do some as-you-type validation
@@ -110,6 +110,14 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.setState({ value_for_pending_lab, value_for_pending_lab_details });
     }
 
+    onClearLab(e){
+        e.preventDefault();
+        this.setState({
+            'value_for_pending_lab' : null,
+            'value_for_pending_lab_details' : null
+        });
+    }
+
     onFormSubmit(evt){
         evt.preventDefault();
         evt.stopPropagation();
@@ -124,17 +132,21 @@ export default class UserRegistrationForm extends React.PureComponent {
             //'last_name'     : this.state.value_for_last_name
         });
 
-        this.setState({ 'isRegistering': true, 'registrationStatus' : 'loading' }, ()=>{
+        this.setState({'registrationStatus' : 'loading' }, ()=>{
 
             ajax.load(
                 this.props.endpoint,
                 (resp) => {
                     // TODO
-                    this.setState({ 'isRegistering': false, 'registrationStatus' : 'success' });
+                    this.setState({'registrationStatus' : 'success'});
+                    this.props.onComplete(); // <- Do request to login, then hide/unmount this component.
                 },
                 'POST',
                 (err) => {
                     // TODO
+                    // If validation failure, set / show status message, return;
+                    // Else If unknown failure:
+                    this.setState({'registrationStatus' : 'network-failure'});
                 },
                 combinedData
             );
@@ -145,7 +157,8 @@ export default class UserRegistrationForm extends React.PureComponent {
 
     render(){
         var { email, onCancel } = this.props,
-            { value_for_first_name, value_for_last_name, value_for_contact_email, value_for_pending_lab_details } = this.state,
+            { registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
+                value_for_pending_lab_details, value_for_pending_lab } = this.state,
             captchaToken        = this.state.captchaResponseToken,
             captchaError        = this.state.captchaErrorMsg,
             emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
@@ -153,16 +166,46 @@ export default class UserRegistrationForm extends React.PureComponent {
             isContactEmailValid = !contactEmail || emailValidationRegex.test(contactEmail),
             maySubmit = (
                 captchaToken && value_for_first_name && value_for_last_name
+            ),
+            errorIndicator = null,
+            loadingIndicator = null;
+
+        if (registrationStatus === 'network-failure'){
+            // TODO: Hide form in this case?
+            errorIndicator = (
+                <Alert bsStyle="danger">
+                    <span className="text-500">Failed to register new account. Please try again later.</span>
+                </Alert>
             );
+        } else if (registrationStatus === 'loading'){
+            loadingIndicator = (
+                <div style={{
+                    'position' : 'absolute',
+                    'display' : 'flex',
+                    'alignItems' : 'center',
+                    'fontSize' : '3em',
+                    'color' : 'rgba(0,0,0,0.8)',
+                    'backgroundColor' : 'rgba(255,255,255,0.85)',
+                    'left' : 0, 'right' : 0, 'bottom' : 0, 'top' : 0
+                }}>
+                    <div className="text-center">
+                        <i className="icon icon-spin icon-circle-o-notch"/>
+                    </div>
+                </div>
+            );
+        }
 
         return (
-            <div>
+            <div className="user-registration-form-container" style={{ 'position' : 'relative' }}>
+
+                { errorIndicator }
+
                 <form method="POST" name="user-registration-form" ref={this.formRef} onSubmit={this.onFormSubmit}>
 
                     <FormGroup controlId="email-address" validationState={null}>
-                        <ControlLabel>Primary E-Mail (Username)</ControlLabel>
+                        <ControlLabel>Primary E-Mail or Username</ControlLabel>
                         <h4 id="email-address" className="text-300 mt-0">
-                            { object.itemUtil.User.gravatar(email, 36, 'mm', { style : { borderRadius: '50%' } }) }&nbsp;&nbsp;
+                            { object.itemUtil.User.gravatar(email, 36, {'style' : { 'borderRadius': '50%' }}, 'mm') }&nbsp;&nbsp;
                             { email }
                         </h4>
                     </FormGroup>
@@ -189,15 +232,27 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <hr className="mt-1 mb-15" />
 
                     <FormGroup controlId="pendingLab" validationState={null}>
-                        <ControlLabel>Lab / Affiliation</ControlLabel>
+                        <ControlLabel>Lab / Affiliation <span className="text-300">(Optional)</span></ControlLabel>
                         <div>
-                            <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} />
+                            <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
                         <HelpBlock>Lab or Institute with which you are associated.</HelpBlock>
                     </FormGroup>
 
+                    { value_for_pending_lab ?
+                    <FormGroup controlId="jobTitle" validationState={null}>
+                        <ControlLabel>
+                            Job Title
+                            { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
+                            <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
+                            <span className="text-300"> (Optional)</span>
+                        </ControlLabel>
+                        <FormControl name="job_title" type="text"/>
+                    </FormGroup>
+                    : null }
+
                     <FormGroup controlId="contactEmail" validationState={!isContactEmailValid ? 'error' : null}>
-                        <ControlLabel>Preferred Contact Email</ControlLabel>
+                        <ControlLabel>Preferred Contact Email <span className="text-300">(Optional)</span></ControlLabel>
                         <FormControl name="preferred_email" type="text" onChange={this.onContactEmailChange}/>
                         <HelpBlock>
                             { isContactEmailValid ? "Preferred contact email, if different from login/primary email." : "Please enter a valid e-mail address." }
@@ -217,6 +272,9 @@ export default class UserRegistrationForm extends React.PureComponent {
                         </Button>
                     </div>
                 </form>
+
+                { loadingIndicator }
+
             </div>
         );
     }
@@ -228,6 +286,7 @@ class LookupLabField extends React.PureComponent {
 
     static propTypes = {
         'onSelect' : PropTypes.func.isRequired,
+        'onClear' : PropTypes.func.isRequired,
         'loading' : PropTypes.bool.isRequired
     };
 
@@ -271,7 +330,8 @@ class LookupLabField extends React.PureComponent {
             searchURL       = '/search/?currentAction=selection&type=Lab',
             currLabTitle    = (
                 currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
-                    <a href={object.itemUtil.atId(currentLabDetails)} target="_blank" rel="noopener noreferrer">
+                    <a href={object.itemUtil.atId(currentLabDetails)} target="_blank"
+                        rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                         { currentLabDetails.display_title }
                     </a>
                 )
@@ -279,8 +339,23 @@ class LookupLabField extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <span className="text-500" style={{ verticalAlign: 'middle' }}>{ currLabTitle }</span> &nbsp;&nbsp;
-                <Button className="btn-secondary" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip} bsSize="sm">Select</Button>
+                <InputGroup>
+                    <InputGroup.Addon style={{ 'width' : 'auto' }}>{ currLabTitle }</InputGroup.Addon>
+                    <InputGroup.Button>
+                        <Button className={currentLabDetails ? "btn-default" : "btn-primary"} onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip}>
+                            Select
+                        </Button>
+                    </InputGroup.Button>
+                    { currentLabDetails && currentLabDetails['@id'] ?
+                        <InputGroup.Button>
+                            <Button onClick={this.props.onClear}>
+                                Clear
+                            </Button>
+                        </InputGroup.Button>
+                    : null }
+                </InputGroup>
+
+                {/* <span className="text-500" style={{ verticalAlign: 'middle' }}>{ currLabTitle }</span> */}
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
             </React.Fragment>
         );

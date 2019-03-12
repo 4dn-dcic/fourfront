@@ -174,7 +174,8 @@ export class LoginMenuItem extends React.Component {
 
     onRegistrationComplete(){
         // TODO: perform login by calling `this.loginCallback({ idToken : JWT.get() })`
-        this.setState({ 'userNotPresent' : false });
+        //this.setState({ 'userNotPresent' : false });
+        this.loginCallback({ idToken : JWT.get() });
     }
 
     onRegistrationCancel(){
