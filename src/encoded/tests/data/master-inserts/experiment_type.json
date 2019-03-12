@@ -199,7 +199,7 @@
         "other_tags": ["DNA-DNA", "Multi-contact"]
     },
     {
-        "title": "sc-Hi-C",
+        "title": "single cell Hi-C",
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Pairwise Interactions - Single Cell",
