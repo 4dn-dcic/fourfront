@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import parseDOM from 'html-dom-parser/lib/html-to-dom-server';
 import domToReact from 'html-react-parser/lib/dom-to-react';
+import md5 from 'js-md5';
 import patchedConsoleInstance from './patched-console';
 import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
@@ -714,8 +715,6 @@ export const itemUtil = {
          * @returns {string} A URL.
          */
         buildGravatarURL : function(email, size=null, defaultImg='retro'){
-            var md5 = require('js-md5');
-            if (defaultImg === 'kanye') defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif'; // Easter egg-ish option.
             var url = 'https://www.gravatar.com/avatar/' + md5(email);
             url += "?d=" + defaultImg;
             if (size) url += '&s=' + size;
