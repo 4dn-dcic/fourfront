@@ -7,6 +7,7 @@ import jwt
 from base64 import b64decode
 
 from passlib.context import CryptContext
+from urllib.parse import urlencode
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy
@@ -38,6 +39,8 @@ from snovault.storage import User
 from snovault.validation import ValidationFailure
 from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
+from snovault.crud_views import collection_add as sno_collection_add
+from snovault.schema_utils import validate_request
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -61,6 +64,7 @@ def includeme(config):
     config.add_route('me', '/me')
     config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
+    config.add_route('create-unauthorized-user', '/create-unauthorized-user')
     config.scan(__name__)
 
 
@@ -233,7 +237,6 @@ def get_jwt(request):
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
     '''check the auth0 assertion and remember the user'''
-
     if hasattr(request, 'user_info'):
         user_info = request.user_info
         if not user_info:
@@ -410,3 +413,64 @@ def generate_password():
     random_bytes = os.urandom(10)
     password = base64.b32encode(random_bytes).decode('ascii').rstrip('=').lower()
     return password
+
+
+@view_config(route_name='create-unauthorized-user', request_method='POST',
+             permission=NO_PERMISSION_REQUIRED)
+def create_unauthorized_user(request):
+    """
+    Endpoint to create an unauthorized user, which will have no lab or award.
+    Requires a reCAPTCHA response, which is propogated from the front end
+    registration form. This is so the endpoint cannot be abused.
+    Given a user properties in the request body, will validate those and also
+    validate the reCAPTCHA response using the reCAPTCHA server. If all checks
+    are succesful, POST a new user
+
+    Args:
+        request: Request object
+
+    Returns:
+        dictionary User creation response from collection_add
+
+    Raises:
+        LoginDenied, HTTPForbidden, or ValidationFailure
+    """
+    recaptcha_resp = request.json.get('g-recaptcha-response')
+    if not recaptcha_resp:
+        raise LoginDenied()
+
+    email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
+    user_props = request.json
+    if user_props.get('email') != email:
+        raise HTTPForbidden(title="Provided email %s not validated with Auth0. Try logging in again."
+                            % user_props.get('email'))
+
+    del user_props['g-recaptcha-response']
+    user_coll = request.registry['collections']['User']
+    request.remote_user = 'EMBED'  # permission = import_items
+
+    # validate the User json
+    validate_request(user_coll.type_info.schema, request, user_props)
+    if request.errors:
+        raise ValidationFailure('body')  # use errors from validate_request
+
+    # validate recaptcha_resp
+    # https://developers.google.com/recaptcha/docs/verify
+    recap_url = 'https://www.google.com/recaptcha/api/siteverify'
+    recap_values = {
+        'secret': request.registry.settings['g.recaptcha.secret'],
+        'response': recaptcha_resp
+    }
+    data = urlencode(recap_values).encode()
+    headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+    recap_res =  requests.get(recap_url, params=data, headers=headers).json()
+
+    if recap_res['success']:
+        sno_res = sno_collection_add(user_coll, request, False)  # POST User
+        if sno_res.get('status') == 'success':
+            return sno_res
+        else:
+            raise HTTPForbidden(title="Could not create user. Try logging in again.")
+    else:
+        # error with re-captcha
+        raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")
