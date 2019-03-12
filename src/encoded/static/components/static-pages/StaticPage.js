@@ -8,7 +8,6 @@ import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
 import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, BasicUserContentBody, EmbeddedHiglassActions } from './components';
-import * as globals from './../globals';
 import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
 import { replaceString as replacePlaceholderString } from './placeholders';
@@ -416,6 +415,3 @@ export default class StaticPage extends React.PureComponent {
         );
     }
 }
-
-
-globals.content_views.register(StaticPage, 'StaticPage');

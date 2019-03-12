@@ -66,8 +66,6 @@ export default class SchemaView extends React.Component {
     }
 }
 
-globals.content_views.register(SchemaView, 'JSONSchema');
-
 /*
 Might need for later
 var Markdown = module.exports.Markdown = React.createClass({

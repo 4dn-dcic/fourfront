@@ -206,9 +206,6 @@ export default class App extends React.Component {
      */
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUpdate = this.componentWillUpdate.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
@@ -369,7 +366,8 @@ export default class App extends React.Component {
                 'message' : (
                     <div>
                         <p className="mb-0">
-                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank" className="text-500">Google Chrome</a>
+                            or <a href="https://www.mozilla.org/en-US/firefox/" rel="noopener noreferrer" target="_blank" className="text-500">Mozilla Firefox</a> are
                             the recommended browser(s) for using the 4DN Data Portal.
                         </p>
                         <p className="mb-0">
@@ -419,7 +417,7 @@ export default class App extends React.Component {
     }
 
     /** @ignore */
-    componentWillUpdate(nextProps, nextState){
+    UNSAFE_componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
         }
@@ -1376,7 +1374,7 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-        var { canonical, currentAction, context, listActionsFor, status } = this.props,
+        var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
             title;
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1385,7 +1383,7 @@ class HTMLTitle extends React.PureComponent {
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context, currentAction);
+            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
@@ -1417,7 +1415,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf } = this.props,
+        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props,
             contextAtID     = object.itemUtil.atId(context),
             key             = contextAtID && contextAtID.split('?')[0], // Switching between collections may leave component in place
             content; // Output
@@ -1439,7 +1437,7 @@ class ContentRenderer extends React.PureComponent {
             content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context, currentAction);
+            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
@@ -1885,8 +1883,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="pre-content-placeholder"/>
 
-                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')}
-                                windowWidth={windowWidth} />
+                            <PageTitle {...this.props} windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}

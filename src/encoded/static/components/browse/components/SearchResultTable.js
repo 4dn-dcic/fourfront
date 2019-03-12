@@ -311,7 +311,6 @@ class LoadMoreAsYouScroll extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.isMounted = this.isMounted.bind(this);
         this.getInitialFrom = this.getInitialFrom.bind(this);
         this.rebuiltHref = this.rebuiltHref.bind(this);
@@ -345,7 +344,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
         }
     }
     */
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         if (!this.state.canLoad && (nextProps.href !== this.props.href || (typeof nextProps.totalExpected === 'number' && this.props.totalExpected !== nextProps.totalExpected))){
             this.setState({ 'canLoad' : true });
         }
@@ -749,7 +748,7 @@ class DimensioningContainer extends React.PureComponent {
         innerContainerElem && innerContainerElem.removeEventListener('scroll', this.onHorizontalScroll);
     }
 
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         // Reset results on change in results, total, or href.
         if ( nextProps.href !== this.props.href || !object.itemUtil.compareResultsByID(nextProps.results, this.props.results) ){
             this.setState({
@@ -774,9 +773,11 @@ class DimensioningContainer extends React.PureComponent {
         //var responsiveGridSize = layout.responsiveGridState(props.windowWidth || null);
         this.lastResponsiveGridSize = responsiveGridSize;
         // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
-        this.setState({
-            'widths' : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, this.state.mounted, props.windowWidth),
-            'stickyHeaderTopOffset' : this.calculateStickyTopOffset(props, responsiveGridSize)
+        this.setState( ({ mounted })=>{
+            return {
+                "widths" : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, mounted, props.windowWidth),
+                "stickyHeaderTopOffset" : this.calculateStickyTopOffset(props, responsiveGridSize)
+            };
         }, () => {
             vizUtil.requestAnimationFrame(()=>{
                 // 2. Upon render into DOM, decrease col sizes.
@@ -795,20 +796,26 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
-        var openDetailPanes = _.clone(this.state.openDetailPanes);
-        if (openDetailPanes[rowKey]){
-            delete openDetailPanes[rowKey];
-        } else {
-            openDetailPanes[rowKey] = true;
-        }
-        this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
+        this.setState(function({ openDetailPanes }){
+            openDetailPanes = _.clone(openDetailPanes);
+            if (openDetailPanes[rowKey]){
+                delete openDetailPanes[rowKey];
+            } else {
+                openDetailPanes[rowKey] = true;
+            }
+            return { openDetailPanes };
+        }, cb);
     }
 
     setDetailHeight(rowKey, height, cb){
-        var openDetailPanes = _.clone(this.state.openDetailPanes);
-        if (typeof openDetailPanes[rowKey] === 'undefined') return false;
-        openDetailPanes[rowKey] = height;
-        this.setState({ 'openDetailPanes' : openDetailPanes }, cb);
+        this.setState(function({ openDetailPanes }){
+            openDetailPanes = _.clone(openDetailPanes);
+            if (typeof openDetailPanes[rowKey] === 'undefined'){
+                return null;
+            }
+            openDetailPanes[rowKey] = height;
+            return { openDetailPanes };
+        }, cb);
     }
 
     onHorizontalScroll(e){

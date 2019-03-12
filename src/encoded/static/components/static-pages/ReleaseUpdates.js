@@ -6,7 +6,6 @@ import _ from 'underscore';
 import url from 'url';
 import {  Collapse, Table } from 'react-bootstrap';
 import { console, object, ajax, JWT, analytics, isServerSide } from'./../util';
-import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import { BasicStaticSectionBody } from './components';
 
@@ -22,7 +21,6 @@ export default class ReleaseUpdates extends React.Component {
             'updateTag': null,
             'updateParam': null
         };
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.loadSection = this.loadSection.bind(this);
         this.loadUpdates = this.loadUpdates.bind(this);
         this.viewUpdates = this.viewUpdates.bind(this);
@@ -142,7 +140,6 @@ export default class ReleaseUpdates extends React.Component {
     }
 
 }
-globals.content_views.register(ReleaseUpdates, 'Release-updatesPage');
 
 
 class SingleUpdate extends React.Component {
@@ -165,7 +162,9 @@ class SingleUpdate extends React.Component {
     }
 
     toggle(){
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function({ open }){
+            return { "open" : !open };
+        });
     }
 
     buildItem(item){

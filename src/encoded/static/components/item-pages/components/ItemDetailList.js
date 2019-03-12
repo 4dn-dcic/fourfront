@@ -252,13 +252,12 @@ class SubItemTable extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.state = { mounted : false };
+        this.state = { 'mounted' : false };
     }
 
     componentDidMount(){
         vizUtil.requestAnimationFrame(()=>{
-            this.setState({ mounted : true });
+            this.setState({ 'mounted' : true });
         });
     }
 
