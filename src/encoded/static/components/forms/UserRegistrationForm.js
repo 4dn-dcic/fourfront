@@ -121,16 +121,16 @@ export default class UserRegistrationForm extends React.PureComponent {
     onFormSubmit(evt){
         evt.preventDefault();
         evt.stopPropagation();
-        var formElem = this.formRef.current;
-        var formData = serialize(formElem, { 'hash' : true });
-        console.log('DDD', formData);
-        var combinedData = _.extend(formData, {
-            'email'         : this.props.email, // We don't allow user(s) to edit/override their JWT.
-            'pending_lab'   : this.state.value_for_pending_lab
-            // These will be present in serialized formData:
-            //'first_name'    : this.state.value_for_first_name,
-            //'last_name'     : this.state.value_for_last_name
-        });
+
+        var formData = serialize(this.formRef.current, { 'hash' : true });
+
+        // Add data which is held in state but not form fields -- email & lab.
+        formData.email = this.props.email; // Email present in User's JWT. Do not allow Users to edit this.
+        if (this.state.value_for_pending_lab){ // Add pending_lab, if any.
+            formData.pending_lab = this.state.value_for_pending_lab;
+        }
+
+        console.log('Full data is', formData);
 
         this.setState({'registrationStatus' : 'loading' }, ()=>{
 
@@ -148,7 +148,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     // Else If unknown failure:
                     this.setState({'registrationStatus' : 'network-failure'});
                 },
-                JSON.stringify(combinedData)
+                JSON.stringify(formData)
             );
 
         });
@@ -229,7 +229,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                         </div>
                     </div>
 
-                    <hr className="mt-1 mb-15" />
+                    <hr className="mt-1 mb-2" />
 
                     <FormGroup controlId="pendingLab" validationState={null}>
                         <ControlLabel>Lab / Affiliation <span className="text-300">(Optional)</span></ControlLabel>
@@ -259,8 +259,6 @@ export default class UserRegistrationForm extends React.PureComponent {
                             { isContactEmailValid ? "Preferred contact email, if different from login/primary email." : "Please enter a valid e-mail address." }
                         </HelpBlock>
                     </FormGroup>
-
-                    {/* <input type="hidden" name="g-recaptcha-response" value={captchaToken} /> */}
 
                     <div className="recaptcha-container">
                         <div className="g-recaptcha" ref={this.recaptchaContainerRef} />
@@ -331,37 +329,32 @@ class LookupLabField extends React.PureComponent {
             searchURL       = '/search/?currentAction=selection&type=Lab',
             currLabTitle    = (
                 currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
-                    <a href={object.itemUtil.atId(currentLabDetails)} target="_blank"
-                        rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
-                        { currentLabDetails.display_title }
-                    </a>
+                    <React.Fragment>
+                        <a href={object.itemUtil.atId(currentLabDetails)} target="_blank" data-tip="View lab in new tab"
+                            rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
+                            { currentLabDetails.display_title }
+                        </a>
+                        &nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small"/>
+                    </React.Fragment>
                 )
             ) || 'No Lab selected';
 
         return (
             <React.Fragment>
 
-                <div className="row flexrow">
-                
-                </div>
-
-                <InputGroup>
-                    <InputGroup.Addon style={{ 'width' : 'auto' }}>{ currLabTitle }</InputGroup.Addon>
-                    <InputGroup.Button>
-                        <Button className={currentLabDetails ? "btn-default" : "btn-primary"} onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip}>
-                            Select
-                        </Button>
-                    </InputGroup.Button>
-                    { currentLabDetails && currentLabDetails['@id'] ?
-                        <InputGroup.Button>
-                            <Button onClick={this.props.onClear}>
+                <div className="flexrow ml-0 mr-0">
+                    <div style={{ 'flex' : 1, 'padding' : '7px 0 4px 10px', 'fontSize' : '1.125rem', 'background' : '#f4f4f4', 'marginRight' : 5 }}>{ currLabTitle }</div>
+                    <div className="field-buttons">
+                        { currentLabDetails && currentLabDetails['@id'] ?
+                            <Button onClick={this.props.onClear} className="mr-05">
                                 Clear
                             </Button>
-                        </InputGroup.Button>
-                    : null }
-                </InputGroup>
-
-                {/* <span className="text-500" style={{ verticalAlign: 'middle' }}>{ currLabTitle }</span> */}
+                        : null }
+                        <Button className="btn-primary" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip}>
+                            { currentLabDetails && currentLabDetails['@id'] ? "Change" : "Select" }
+                        </Button>
+                    </div>
+                </div>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
             </React.Fragment>
         );
