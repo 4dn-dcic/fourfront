@@ -52,32 +52,29 @@ export class UserActionDropdownMenu extends React.Component {
     }
 
     listUserActionsAsMenuItems(){
-        var { mounted, listActionsFor, href } = this.props;
-        return _.reduce(listActionsFor('user_section'), (actions, action) => {
-            if (action.id === "login-menu-item"){
-                actions.push( <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo')} key={action.id} setIsLoadingIcon={this.setIsLoading} /> );
-            } else if (action.id === "accountactions-menu-item"){
-                // link to registration page if logged out or account actions if logged in
-                if (!this.props.session) {
-                    actions.push(actionToMenuItem(action, mounted, href));
-                } else {
-                    // Account Actions
-                    actions = actions.concat(_.map(listActionsFor('user'), function(action, idx){
-                        return actionToMenuItem(action, mounted, href, {"data-no-cache" : true});
-                    }));
-                }
-            } else if (action.id === "contextactions-menu-item") {
-                // Context Actions
-                actions = actions.concat(_.map(listActionsFor('context'), function(action){
-                    return actionToMenuItem(_.extend( _.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> } ), mounted, href);
-                }));
-            }
-            return actions;
-        }, []);
+        var { mounted, listActionsFor, href, session } = this.props,
+            actions = [
+                <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas')}
+                    key="login-register-logout" setIsLoadingIcon={this.setIsLoading} />,
+                // Old: actionToMenuItem({id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}, mounted, href, {"data-no-cache" : true})
+            ];
+
+        if (session) {
+            // Account Actions
+            actions = actions.concat(
+                _.map(listActionsFor('user'), function(action){
+                    return actionToMenuItem(action, mounted, href, {"data-no-cache" : true});
+                })
+            );
+        }
+
+        return actions;
     }
 
     render() {
-        var acctTitle = "Account", acctIcon = null, userDetails = null;
+        var acctTitle = "Account",
+            acctIcon = null,
+            userDetails = null;
 
         if (this.state.isLoading){
             acctTitle = <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;

@@ -2389,6 +2389,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
 
             @media screen and (max-width: $screen-xs-max){
+
+                margin-bottom: 20px;
+
                 &.open > .row > .list-section.has-header,
                 &:first-child > .row > .list-section.has-header {
                     .header-for-viz {
@@ -2397,14 +2400,17 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         height: 10px;
                     }
                 }
-                > .row > .label-section > .label-container > h4 { 
-                    padding-top: 10px;
-                    margin-bottom: 0;
-                }
-                > .row > .list-section {
-                    > .blocks-container {
-                        border-top: 1px solid #eee;
+                > .row > .label-section > .label-container {
+                    border-top: none;
+                    > h4 {
+                        //padding-top: 10px;
+                        margin-bottom: 0;
                     }
+
+                }
+
+                .blocks-container .block-container-group {
+                    border-left-color: transparent;
                 }
             }
 

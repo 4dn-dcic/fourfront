@@ -115,8 +115,8 @@ $font-family-monospace      : "Source Code Pro", Consolas, monospace;
     }
     &.cellType-out-of-date {
         //background-color: rgba(162, 145, 55, 0.75) !important;
-        border: 1px solid #aaa;
-        color: #aaa;
+        border: 1px solid #bbb;
+        color: #bbb;
         &.hoverable:hover,
         &.clickable:active,
         &.clickable:focus {
@@ -217,32 +217,3 @@ blockquote {
     margin: 10px;
     text-align: center;
 }
-
-// Fourfront SVG logo
-
-svg.fourfront_logo_svg_instance {
-    > ellipse,
-    > .fourfront-logo-background-circle {
-        fill:url(#fourfront_linear_gradient);
-        //stroke:url(#fourfront_linear_gradient);
-        stroke: transparent;
-        stroke-width: 1px;
-    }
-    > text {
-        font-size: 23px;
-        fill:#fff;
-        font-family: "Mada","Work Sans",Helvetica,Arial,sans-serif;
-        font-weight: 600;
-        stroke: transparent;
-        stroke-width: 0px;
-        stroke-linejoin: round;
-        opacity: 1;
-    }
-    > .fourfront-logo-foreground-circle {
-        opacity : 0;
-        fill : transparent;
-        stroke-width : 15px;
-        stroke: rgba(0,0,0,0.2);
-    }
-}
-
