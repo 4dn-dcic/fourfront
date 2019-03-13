@@ -4,13 +4,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
-import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup, Alert, Collapse } from 'react-bootstrap';
-import { object, ajax } from './../util';
+import memoize from 'memoize-one';
+import jwt from 'jsonwebtoken';
+import Alerts from './../alerts';
+import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, Alert, Collapse } from 'react-bootstrap';
+import { console, object, ajax, JWT, analytics } from './../util';
 import { LinkToSelector } from './components/LinkToSelector';
 
 
+export const decodeJWT = memoize(function decodeJWT(jwtToken){
+    return jwtToken && jwt.decode(jwtToken);
+});
+
 
 export default class UserRegistrationForm extends React.PureComponent {
+
+    static getDerivedStateFromProps(props, state){
+        // We might lose JWT token via navigating to other windows, so we keep it cached here.
+        // We also allow new props.jwtToken to overwrite state.jwtToken, as long as new props.jwtToken
+        // is not blank.
+        return { 'jwtToken' : props.jwtToken || state.jwtToken || null };
+    }
+
+    static propTypes = {
+        'jwtToken' : PropTypes.string.isRequired,
+        'onComplete' : PropTypes.func.isRequired,
+        'endpoint' : PropTypes.string.isRequired,
+        'captchaSiteKey' : PropTypes.string
+    };
 
     static defaultProps = {
         'captchaSiteKey' : '6Lf6dZYUAAAAAEq46tu1mNp0BTCyl0-_wuJAu3nj',
@@ -36,6 +57,7 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.recaptchaContainerRef = React.createRef();
 
         this.state = {
+            'jwtToken'             : props.jwtToken, // We cache our JWT token here as it might get unset when opening lab selection window.
             'captchaResponseToken' : null,
             'captchaErrorMsg'      : null,
             'registrationStatus'   : 'form',
@@ -107,6 +129,7 @@ export default class UserRegistrationForm extends React.PureComponent {
         // TODO: If value_for_pending_lab exists but not value_for_pending_lab_details,
         // then do AJAX request to get details.
         // TODO: Error fallback (?)
+        console.log('Received lab - ', value_for_pending_lab, value_for_pending_lab_details);
         this.setState({ value_for_pending_lab, value_for_pending_lab_details });
     }
 
@@ -122,17 +145,35 @@ export default class UserRegistrationForm extends React.PureComponent {
         evt.preventDefault();
         evt.stopPropagation();
 
-        var formData = serialize(this.formRef.current, { 'hash' : true });
+        var { jwtToken, value_for_pending_lab } = this.state,
+            formData = serialize(this.formRef.current, { 'hash' : true }),
+            decodedToken = decodeJWT(jwtToken);
 
         // Add data which is held in state but not form fields -- email & lab.
-        formData.email = this.props.email; // Email present in User's JWT. Do not allow Users to edit this.
-        if (this.state.value_for_pending_lab){ // Add pending_lab, if any.
-            formData.pending_lab = this.state.value_for_pending_lab;
+        formData.email = decodedToken.email;
+        if (value_for_pending_lab){ // Add pending_lab, if any.
+            formData.pending_lab = value_for_pending_lab;
+        }
+        if ((!value_for_pending_lab && formData.job_title) || formData.job_title === "null"){
+            // Remove any potentially default vals if no pending_lab requested.
+            delete formData.job_title;
         }
 
-        console.log('Full data is', formData);
+        console.log('Full data being sent - ', formData);
 
         this.setState({'registrationStatus' : 'loading' }, ()=>{
+
+            // We may have lost our JWT, e.g. by opening a new 4DN window which unsets the cookie.
+            // So we reset our cached JWT token to our cookies/localStorage prior to making request
+            // so that it is delivered/authenticated as part of registration (required by backend/security).
+            var existingToken = JWT.get();
+            if (!existingToken){
+                if (!jwtToken){
+                    this.setState({'registrationStatus' : 'network-failure'});
+                    return;
+                }
+                JWT.save(jwtToken);
+            }
 
             ajax.load(
                 this.props.endpoint,
@@ -147,6 +188,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     // If validation failure, set / show status message, return;
                     // Else If unknown failure:
                     this.setState({'registrationStatus' : 'network-failure'});
+                    analytics.exception("Registration Error - Error on post to /create-unauthorized-user.", true);
                 },
                 JSON.stringify(formData)
             );
@@ -156,16 +198,18 @@ export default class UserRegistrationForm extends React.PureComponent {
     }
 
     render(){
-        var { email, onCancel } = this.props,
+        var { onCancel, schemas } = this.props,
             { registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
-                value_for_pending_lab_details, value_for_pending_lab } = this.state,
+                value_for_pending_lab_details, value_for_pending_lab, jwtToken } = this.state,
+            decodedToken        = decodeJWT(jwtToken),
+            email               = decodedToken.email, //UserRegistrationForm.JWTToEmail(jwtToken),
             captchaToken        = this.state.captchaResponseToken,
             captchaError        = this.state.captchaErrorMsg,
             emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             contactEmail        = value_for_contact_email && value_for_contact_email.toLowerCase(),
             isContactEmailValid = !contactEmail || emailValidationRegex.test(contactEmail),
             maySubmit = (
-                captchaToken && value_for_first_name && value_for_last_name
+                captchaToken && value_for_first_name && value_for_last_name && registrationStatus === 'form'
             ),
             errorIndicator = null,
             loadingIndicator = null;
@@ -188,10 +232,19 @@ export default class UserRegistrationForm extends React.PureComponent {
                     'backgroundColor' : 'rgba(255,255,255,0.85)',
                     'left' : 0, 'right' : 0, 'bottom' : 0, 'top' : 0
                 }}>
-                    <div className="text-center">
+                    <div className="text-center" style={{ 'width' : '100%' }}>
                         <i className="icon icon-spin icon-circle-o-notch"/>
                     </div>
                 </div>
+            );
+        } else if (registrationStatus === 'success'){
+            errorIndicator = (
+                <Alert bsStyle="success">
+                    <span className="text-500">
+                        <i className="icon icon-fw icon-circle-o-notch"/>&nbsp;&nbsp;{' '}
+                        Registered account, logging in...
+                    </span>
+                </Alert>
             );
         }
 
@@ -232,27 +285,14 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <hr className="mt-1 mb-2" />
 
                     <FormGroup controlId="pendingLab" validationState={null}>
-                        <ControlLabel>Lab / Affiliation <span className="text-300">(Optional)</span></ControlLabel>
+                        <ControlLabel>Lab / Affiliation <span className="text-300">(for 4DN members)</span></ControlLabel>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
                         <HelpBlock>Lab or Institute with which you are associated.</HelpBlock>
                     </FormGroup>
 
-
-                    <Collapse in={!!(value_for_pending_lab)}>
-                        <div className="clearfix">
-                            <FormGroup controlId="jobTitle" validationState={null}>
-                                <ControlLabel>
-                                    Job Title
-                                    { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
-                                    <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
-                                    <span className="text-300"> (Optional)</span>
-                                </ControlLabel>
-                                <FormControl name="job_title" type="text"/>
-                            </FormGroup>
-                        </div>
-                    </Collapse>
+                    <JobTitleField {...{ value_for_pending_lab, value_for_pending_lab_details, schemas }}  />
 
                     <FormGroup controlId="contactEmail" validationState={!isContactEmailValid ? 'error' : null}>
                         <ControlLabel>Preferred Contact Email <span className="text-300">(Optional)</span></ControlLabel>
@@ -262,7 +302,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                         </HelpBlock>
                     </FormGroup>
 
-                    <div className="recaptcha-container">
+                    <div className={"recaptcha-container" + (captchaError ? ' has-error' : '')}>
                         <div className="g-recaptcha" ref={this.recaptchaContainerRef} />
                         { captchaError ? <HelpBlock>{ captchaError }</HelpBlock> : null }
                     </div>
@@ -372,12 +412,62 @@ class LookupLabField extends React.PureComponent {
 }
 
 
+class JobTitleField extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.getJobTitleSchema = this.getJobTitleSchema.bind(this);
+    }
+
+    getJobTitleSchema(){
+        var schemas = this.props.schemas;
+        return (
+            schemas && schemas.User && schemas.User.properties &&
+            schemas.User.properties.job_title
+        ) || null;
+    }
+
+    render(){
+
+        var { value_for_pending_lab, value_for_pending_lab_details } = this.props,
+            fieldSchema = this.getJobTitleSchema(),
+            formControl;
+
+        if (fieldSchema && Array.isArray(fieldSchema.suggested_enum) && fieldSchema.suggested_enum.length > 0){
+            formControl = (
+                <FormControl componentClass="select" name="job_title" defaultValue="null">
+                    <option hidden disabled value="null"> -- select an option -- </option>
+                    { _.map(fieldSchema.suggested_enum, function(val){ return <option value={val} key={val}>{ val }</option>; }) }
+                </FormControl>
+            );
+        } else {
+            formControl = <FormControl name="job_title" type="text"/>;
+        }
+
+        return (
+            <Collapse in={!!(value_for_pending_lab)}>
+                <div className="clearfix">
+                    <FormGroup controlId="jobTitle" validationState={null}>
+                        <ControlLabel>
+                            Job Title
+                            { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
+                            <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
+                            <span className="text-300"> (Optional)</span>
+                        </ControlLabel>
+                        { formControl }
+                    </FormGroup>
+                </div>
+            </Collapse>
+        );
+    }
+}
+
+
 export class UserRegistrationModal extends React.PureComponent {
 
     static defaultProps = {
         "title" : "Registration",
-        "heading" : null,
-        "email" : "person@email.com"
+        "heading" : null
     };
 
     constructor(props){
@@ -399,7 +489,7 @@ export class UserRegistrationModal extends React.PureComponent {
 
                 <Modal.Body>
                     { heading }
-                    <UserRegistrationForm {..._.pick(this.props, 'email', 'onCancel')} />
+                    <UserRegistrationForm {..._.pick(this.props, 'onCancel', 'schemas', 'onComplete', 'jwtToken')} />
                 </Modal.Body>
             </Modal>
         );

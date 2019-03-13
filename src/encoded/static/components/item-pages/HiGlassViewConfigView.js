@@ -28,13 +28,12 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 export class HiGlassViewConfigTabView extends React.PureComponent {
 
-    static getTabObject(props, width, viewConfig=null){
-        viewConfig = viewConfig || props.viewsConfig || (props.context && props.context.viewconfig);
+    static getTabObject(props, width){
         return {
             'tab' : <span><i className="icon icon-fw icon-television"/> HiGlass Browser</span>,
             'key' : 'higlass',
             'disabled' : false,
-            'content' : <HiGlassViewConfigTabView {...props} width={width} viewConfig={viewConfig} />
+            'content' : <HiGlassViewConfigTabView {...props} width={width} />
         };
     }
 
@@ -68,7 +67,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
          * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
          */
         this.state = {
-            'viewConfig'            : props.viewConfig,
+            'viewConfig'            : props.context && props.context.viewconfig,
             'genome_assembly'       : (props.context && props.context.genome_assembly) || null,
             'originalViewConfig'    : null, //object.deepClone(props.viewConfig)
             'saveLoading'           : false,
@@ -80,18 +79,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.higlassRef = React.createRef();
     }
 
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         var nextState = {};
 
+        /*  Below code:
+            We no longer change viewConfig if receive new one from back-end because
+            backend will always deliver new object reference.
+
         if (nextProps.viewConfig !== this.props.viewConfig){
+            console.warn('NEW VIEWCONF!');
             _.extend(nextState, {
                 'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
                 'viewConfig' : nextProps.viewConfig,
                 'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
-        } else if (nextProps.href !== this.props.href){
+        }
+        */
+
+        // TODO: think about different (non-componentWillReceiveProps) approaches to this - perhaps simply
+        // componentDidUpdate (?) now that we don't swap out state.viewConfig with nextProps.viewConfig.
+        if ((nextProps.href !== this.props.href || nextProps.context !== this.props.context) && object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context)){
             // If component is still same instance, then is likely that we're changing
-            // the URI hash as a consequence of changing tabs.
+            // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
             // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
             var hgc                 = this.getHiGlassComponent(),
                 currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),

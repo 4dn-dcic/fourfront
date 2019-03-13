@@ -105,8 +105,8 @@
                 "Graduate Student",
                 "Postdoc",
                 "PI",
-                "Staff",
                 "Co-I",
+                "Staff",
                 "Administrator",
                 "Program Coordinator",
                 "Senior Researcher",
@@ -119,7 +119,8 @@
                 "Imaging Specialist",
                 "Data Analyst",
                 "Facility Head",
-                "Lab/Project Manager"
+                "Lab/Project Manager",
+                "Other"
             ]
         },
         "phone1": {

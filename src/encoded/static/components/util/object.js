@@ -5,6 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+import memoize from 'memoize-one';
 import parseDOM from 'html-dom-parser/lib/html-to-dom-server';
 import domToReact from 'html-react-parser/lib/dom-to-react';
 import md5 from 'js-md5';
@@ -607,6 +608,19 @@ export class CopyWrapper extends React.PureComponent {
 }
 
 
+/**
+ * md5() sometimes throws an error for some reason. Lets memoize the result and catch exceptions.
+ */
+export const saferMD5 = memoize(function(val){
+    try {
+        return md5(val);
+    } catch (e){
+        console.error(e);
+        return 'Error';
+    }
+});
+
+
 
 /**
  * Functions which are specific to Items [structure] in the 4DN/Encoded database. Some are just aliased from functions above for now for backwards compatibility.
@@ -715,7 +729,7 @@ export const itemUtil = {
          * @returns {string} A URL.
          */
         buildGravatarURL : function(email, size=null, defaultImg='retro'){
-            var url = 'https://www.gravatar.com/avatar/' + md5(email);
+            var url = 'https://www.gravatar.com/avatar/' + saferMD5(email);
             url += "?d=" + defaultImg;
             if (size) url += '&s=' + size;
             return url;

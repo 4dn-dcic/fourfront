@@ -10,7 +10,7 @@ import * as store from './../../../store';
 import { JWT, ajax, navigate, isServerSide, analytics, object } from './../../util';
 import jwt from 'jsonwebtoken';
 import Alerts from './../../alerts';
-import { UserRegistrationModal } from './../../forms/UserRegistrationForm';
+import { UserRegistrationModal, decodeJWT } from './../../forms/UserRegistrationForm';
 
 
 
@@ -20,7 +20,8 @@ export class LoginMenuItem extends React.Component {
     static propTypes = {
         'updateUserInfo'      : PropTypes.func.isRequired,
         'session'             : PropTypes.bool.isRequired,
-        'href'                : PropTypes.string.isRequired
+        'href'                : PropTypes.string.isRequired,
+        'setIsLoadingIcon'    : PropTypes.func.isRequired
     };
 
     constructor(props){
@@ -28,6 +29,7 @@ export class LoginMenuItem extends React.Component {
         this.showLock           = this.showLock.bind(this);
         this.logout             = this.logout.bind(this);
         this.loginCallback      = this.loginCallback.bind(this);
+        this.loginErrorCallback = this.loginErroCallback.bind(this);
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
         this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.state = {
@@ -52,7 +54,11 @@ export class LoginMenuItem extends React.Component {
                 },
                 socialButtonStyle: 'big',
                 languageDictionary: { title: "Log in" },
-                theme: { logo: '/static/img/4dn_logo.svg' },
+                theme: {
+                    logo: '/static/img/4dn_logo.svg',
+                    icon: '/static/img/4dn_logo.svg',
+                    primaryColor: '#009aad'
+                },
                 allowedConnections: ['github', 'google-oauth2']
             }
         );
@@ -86,7 +92,7 @@ export class LoginMenuItem extends React.Component {
         // ajax.fetch('/logout?redirect=false').then(data => { });
     }
 
-    loginCallback(authResult, retrying){
+    loginCallback(authResult, successCallback, errorCallback){
         var { setIsLoadingIcon, href, updateUserInfo } = this.props;
 
         // First stage: we just have gotten JWT from the Auth0 widget but have not auth'd it against it our own system
@@ -131,17 +137,23 @@ export class LoginMenuItem extends React.Component {
             }
 
             // Fetch user profile and use their primary lab as the eventLabel.
-            var profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
-            var isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
-            if (profileURL && !isAdmin){
+            const profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
+            const isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
+
+            if (profileURL){
                 // Register an analytics event for UI login.
                 // This is used to segment public vs internal audience in Analytics dashboards.
                 ajax.load(profileURL, (profile)=>{
-                    analytics.event('Authentication', 'UILogin', {
-                        'eventLabel' : (profile.lab && object.itemUtil.atId(profile.lab)) || 'No Lab'
-                    });
+                    if (!isAdmin){ // Exclude admins from analytics tracking
+                        analytics.event('Authentication', 'UILogin', {
+                            'eventLabel' : (profile.lab && object.itemUtil.atId(profile.lab)) || 'No Lab'
+                        });
+                    }
+                    if (typeof successCallback === 'function'){
+                        successCallback(profile);
+                    }
                 });
-            } else if (!profileURL){
+            } else {
                 throw new Error('No profile URL found in user_actions.');
             }
         }).catch((error)=>{
@@ -150,32 +162,66 @@ export class LoginMenuItem extends React.Component {
             console.log(error);
 
             setIsLoadingIcon(false);
-
-            if (!error.code && error.type === 'timed-out'){
-                // Server or network error of some sort most likely.
-                Alerts.queue(Alerts.LoginFailed);
-            } else if (error.code === 403) {
-                // Present a registration form
-                //navigate('/error/login-failed');
-                this.setState({ 'userNotPresent' : true });
-            } else {
-                // ? Fallback
-                navigate('/', ()=>{
-                    setTimeout(()=>{
-                        Alerts.queue(Alerts.LoginFailed);
-                    }, 1000);
-                });
-            }
             Alerts.deQueue(Alerts.LoggedOut);
 
+            // If is programatically called with error CB, let error CB handle everything.
+            var errorCallbackFxn = typeof errorCallback === 'function' ? errorCallback : this.loginErrorCallback;
+            errorCallbackFxn(error);
         });
 
+    }
+
+    loginErroCallback(error){
+        if (!error.code && error.type === 'timed-out'){
+            // Server or network error of some sort most likely.
+            Alerts.queue(Alerts.LoginFailed);
+        } else if (error.code === 403) {
+            // Present a registration form
+            //navigate('/error/login-failed');
+            this.setState({ 'userNotPresent' : true });
+        } else {
+            Alerts.queue(Alerts.LoginFailed);
+        }
     }
 
     onRegistrationComplete(){
         // TODO: perform login by calling `this.loginCallback({ idToken : JWT.get() })`
         //this.setState({ 'userNotPresent' : false });
-        this.loginCallback({ idToken : JWT.get() });
+        var token = JWT.get(),
+            decodedToken = decodeJWT(token);
+
+        this.loginCallback(
+            { 'idToken' : token },
+            (userProfile) => { // on success:
+                this.setState({ 'userNotPresent' : false });
+                var userDetails = JWT.getUserDetails(), // We should have this after /login
+                    userProfileURL = userProfile && object.itemUtil.atId(userProfile),
+                    userFullName = (
+                        userDetails.first_name && userDetails.last_name &&
+                        (userDetails.first_name + ' ' + userDetails.last_name)
+                    ) || null,
+                    msg = (
+                        <React.Fragment>
+                            <ul className="mb-0">
+                                <li>You are now logged in as <span className="text500">{ userFullName || decodedToken.email }</span></li>
+                                <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
+                            </ul>
+                        </React.Fragment>
+                    );
+
+                Alerts.queue({
+                    "title"     : "Registered & Logged In",
+                    "message"   : msg,
+                    "style"     : 'success',
+                    'navigateDisappearThreshold' : 1
+                });
+            },
+            (err) => {
+                this.setState({ 'userNotPresent' : false });
+                JWT.remove(); // Cleanup any remaining JWT, just in case.
+                Alerts.queue(Alerts.LoginFailed);
+            }
+        );
     }
 
     onRegistrationCancel(){
@@ -196,19 +242,18 @@ export class LoginMenuItem extends React.Component {
 
         if (userNotPresent){
             // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
-            var token = JWT.get(),
-                decodedToken = token && jwt.decode(token),
-                unverifiedEmail = decodedToken && decodedToken.email,
-                modalHeading = unverifiedEmail && (
+            var token           = JWT.get(),
+                decodedToken    = decodeJWT(token),
+                unverifiedEmail = decodedToken.email,
+                modalHeading    = unverifiedEmail && (
                     <p className="text-400 mb-2">
                         Email <span className="text-600">{ unverifiedEmail }</span> does not exist. Please register below.
                     </p>
                 );
 
-            console.log('TT', decodedToken);
             return (
-                <UserRegistrationModal onComplete={this.onRegistrationComplete} schemas={schemas}
-                    onCancel={this.onRegistrationCancel} heading={modalHeading} email={unverifiedEmail} />
+                <UserRegistrationModal onComplete={this.onRegistrationComplete} schemas={schemas} jwtToken={token}
+                    onCancel={this.onRegistrationCancel} heading={modalHeading} />
             );
             //return ReactDOM.createPortal(
             //    <UserRegistrationModal onComplete={this.onRegistrationComplete} />,
