@@ -591,7 +591,10 @@ class ProfileWorkFields extends React.Component {
         if (user.lab){
             labTitle = object.itemUtil.generateLink(user.lab);
         } else if (user.pending_lab && object.itemUtil.isAnItem(user.pending_lab)){
-            
+            // Might occur later... currently not embedded.
+            labTitle = <span>{ object.itemUtil.generateLink(user.lab) } <em>(pending)</em></span>;
+        } else if (user.pending_lab && typeof user.pending_lab === 'string'){
+            labTitle = <em>Pending Authorization</em>;
         }
 
         if (user.submits_for && user.submits_for.length > 0){
@@ -610,7 +613,7 @@ class ProfileWorkFields extends React.Component {
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
                     <div id="lab" className="col-sm-9 value text-500">
-                        { user.lab ? object.itemUtil.generateLink(user.lab) : <span className="not-set">No Labs</span> }
+                        { labTitle }
                     </div>
                 </div>
                 <div className="row field-entry job_title">
