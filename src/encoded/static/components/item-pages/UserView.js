@@ -586,15 +586,16 @@ class ProfileWorkFields extends React.Component {
         var user        = this.props.user,
             awards      = this.state.awards_list,
             submits_for = null,
-            labTitle    = <span className="not-set">No Labs</span>; // Default
+            labTitle    = <span className="not-set">No Labs</span>,
+            pendingLabText = "Will be verified in the next few business days"; // Default
 
         if (user.lab){
             labTitle = object.itemUtil.generateLink(user.lab);
         } else if (user.pending_lab && object.itemUtil.isAnItem(user.pending_lab)){
             // Might occur later... currently not embedded.
-            labTitle = <span>{ object.itemUtil.generateLink(user.lab) } <em>(pending)</em></span>;
+            labTitle = <span>{ object.itemUtil.generateLink(user.lab) } <em data-tip={pendingLabText}>(pending)</em></span>;
         } else if (user.pending_lab && typeof user.pending_lab === 'string'){
-            labTitle = <em>Pending Authorization</em>;
+            labTitle = <span className="text-400">{ pendingLabText }</span>;
         }
 
         if (user.submits_for && user.submits_for.length > 0){

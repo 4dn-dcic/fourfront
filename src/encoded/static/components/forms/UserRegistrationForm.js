@@ -179,7 +179,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                 this.props.endpoint,
                 (resp) => {
                     // TODO
-                    this.setState({'registrationStatus' : 'success'});
+                    this.setState({'registrationStatus' : 'success-loading'});
                     this.props.onComplete(); // <- Do request to login, then hide/unmount this component.
                 },
                 'POST',
@@ -198,7 +198,7 @@ export default class UserRegistrationForm extends React.PureComponent {
     }
 
     render(){
-        var { onCancel, schemas } = this.props,
+        var { schemas, heading } = this.props,
             { registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
                 value_for_pending_lab_details, value_for_pending_lab, jwtToken } = this.state,
             decodedToken        = decodeJWT(jwtToken),
@@ -221,7 +221,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <span className="text-500">Failed to register new account. Please try again later.</span>
                 </Alert>
             );
-        } else if (registrationStatus === 'loading'){
+        } else if (registrationStatus === 'loading' || registrationStatus === 'success-loading'){
             loadingIndicator = (
                 <div style={{
                     'position' : 'absolute',
@@ -237,7 +237,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     </div>
                 </div>
             );
-        } else if (registrationStatus === 'success'){
+        } else if (registrationStatus === 'success' || registrationStatus === 'success-loading'){
             errorIndicator = (
                 <Alert bsStyle="success">
                     <span className="text-500">
@@ -253,12 +253,14 @@ export default class UserRegistrationForm extends React.PureComponent {
 
                 { errorIndicator }
 
+                { heading }
+
                 <form method="POST" name="user-registration-form" ref={this.formRef} onSubmit={this.onFormSubmit}>
 
                     <FormGroup controlId="email-address" validationState={null}>
                         <ControlLabel>Primary E-Mail or Username</ControlLabel>
                         <h4 id="email-address" className="text-300 mt-0">
-                            { object.itemUtil.User.gravatar(email, 36, {'style' : { 'borderRadius': '50%' }}, 'mm') }&nbsp;&nbsp;
+                            { object.itemUtil.User.gravatar(email, 36, {'style' : { 'borderRadius': '50%', 'marginRight' : 10 }}, 'mm') }
                             { email }
                         </h4>
                     </FormGroup>
@@ -478,7 +480,7 @@ export class UserRegistrationModal extends React.PureComponent {
     }
 
     render(){
-        var { title, heading, onCancel } = this.props;
+        var { title, heading, onCancel, formHeading } = this.props;
 
         return (
             <Modal show bsSize="large" onHide={onCancel}>
@@ -488,8 +490,7 @@ export class UserRegistrationModal extends React.PureComponent {
                 </Modal.Header>
 
                 <Modal.Body>
-                    { heading }
-                    <UserRegistrationForm {..._.pick(this.props, 'onCancel', 'schemas', 'onComplete', 'jwtToken')} />
+                    <UserRegistrationForm {..._.pick(this.props, 'onCancel', 'schemas', 'onComplete', 'jwtToken')} heading={formHeading} />
                 </Modal.Body>
             </Modal>
         );

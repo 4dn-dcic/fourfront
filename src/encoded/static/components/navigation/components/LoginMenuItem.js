@@ -203,7 +203,7 @@ export class LoginMenuItem extends React.Component {
                     msg = (
                         <React.Fragment>
                             <ul className="mb-0">
-                                <li>You are now logged in as <span className="text500">{ userFullName || decodedToken.email }</span></li>
+                                <li>You are now logged in as <span className="text-500">{ userFullName }{ userFullName ? ' (' + decodedToken.email + ')' : decodedToken.email }</span>.</li>
                                 <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
                             </ul>
                         </React.Fragment>
@@ -245,15 +245,15 @@ export class LoginMenuItem extends React.Component {
             var token           = JWT.get(),
                 decodedToken    = decodeJWT(token),
                 unverifiedEmail = decodedToken.email,
-                modalHeading    = unverifiedEmail && (
-                    <p className="text-400 mb-2">
-                        Email <span className="text-600">{ unverifiedEmail }</span> does not exist. Please register below.
-                    </p>
+                formHeading    = unverifiedEmail && (
+                    <h4 className="text-400 mb-25 mt-05">
+                        No account is associated with <span className="text-600">{ unverifiedEmail }</span>. Please register below.
+                    </h4>
                 );
 
             return (
                 <UserRegistrationModal onComplete={this.onRegistrationComplete} schemas={schemas} jwtToken={token}
-                    onCancel={this.onRegistrationCancel} heading={modalHeading} />
+                    onCancel={this.onRegistrationCancel} formHeading={formHeading} />
             );
             //return ReactDOM.createPortal(
             //    <UserRegistrationModal onComplete={this.onRegistrationComplete} />,
