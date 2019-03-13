@@ -1174,7 +1174,6 @@ def download(context, request):
         raise ValueError(external.get('service'))
 
     tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
     tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
                      'status': 'in review by lab', 'tracking_type': 'download_tracking',
