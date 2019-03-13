@@ -446,6 +446,7 @@ def create_unauthorized_user(request):
                             % user_props.get('email'))
 
     del user_props['g-recaptcha-response']
+    user_props['was_unauthorized'] = True
     user_coll = request.registry['collections']['User']
     request.remote_user = 'EMBED'  # permission = import_items
 
