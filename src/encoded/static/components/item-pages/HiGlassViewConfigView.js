@@ -79,26 +79,30 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.higlassRef = React.createRef();
     }
 
+
+    /**
+     * @todo
+     * Think about different (non-componentWillReceiveProps) approaches to this - perhaps simply
+     * componentDidUpdate (?) now that we don't swap out state.viewConfig with nextProps.viewConfig.
+     * -- After cleanup.
+     */
     UNSAFE_componentWillReceiveProps(nextProps){
         var nextState = {};
 
         /*  Below code:
-            We no longer change viewConfig if receive new one from back-end because
-            backend will always deliver new object reference.
-
-        if (nextProps.viewConfig !== this.props.viewConfig){
-            console.warn('NEW VIEWCONF!');
-            _.extend(nextState, {
-                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
-                'viewConfig' : nextProps.viewConfig,
-                'genome_assembly' : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
-            });
-        }
+            We will likely adjust/remove to no longer change viewConfig if receive new one from back-end because
+            backend will always deliver new object reference. Even if same context['@id'] and context.date_modified.
         */
 
-        // TODO: think about different (non-componentWillReceiveProps) approaches to this - perhaps simply
-        // componentDidUpdate (?) now that we don't swap out state.viewConfig with nextProps.viewConfig.
-        if ((nextProps.href !== this.props.href || nextProps.context !== this.props.context) && object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context)){
+        if (nextProps.viewConfig !== this.props.viewConfig){
+            _.extend(nextState, {
+                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
+                'viewConfig'         : nextProps.viewConfig,
+                'genome_assembly'    : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
+            });
+        }
+
+        if (nextProps.href !== this.props.href && object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context)){
             // If component is still same instance, then is likely that we're changing
             // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
             // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
