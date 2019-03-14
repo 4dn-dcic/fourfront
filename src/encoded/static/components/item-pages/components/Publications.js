@@ -127,6 +127,24 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
     }
 }
 
+
+class ReferencePubBelowHeaderRow extends React.Component {
+    render(){
+        if (!this.props.reference_pubs) return null;
+        return (
+            <div className="row mb-2">
+                <div className="col-sm-12">
+                    <DetailBlock publication={this.props.reference_pubs[0]} singularTitle="Reference Publication" >
+                        <div className="more-details">
+                            <ShortAttribution publication={this.props.reference_pubs[0]} />
+                        </div>
+                    </DetailBlock>
+                </div>
+            </div>
+        );
+    }
+}
+
 /**
  * Shows publications for current Item.
  * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
@@ -139,7 +157,8 @@ export class Publications extends React.PureComponent {
 
     static DetailBlock = DetailBlock;
     static ShortAttribution = ShortAttribution;
-    static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow
+    static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow;
+    static ReferencePubBelowHeaderRow = ReferencePubBelowHeaderRow
 
     constructor(props){
         super(props);
@@ -263,4 +282,3 @@ export class Publications extends React.PureComponent {
     }
 
 }
-
