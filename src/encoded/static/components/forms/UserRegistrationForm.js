@@ -320,7 +320,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     </div>
 
                     <div className="clearfix">
-                        <Button type="submit" disabled={!(maySubmit)} className="right text-300" bsSize="lg" bsStyle="primary">
+                        <Button type="submit" disabled={!(maySubmit)} className="right text-300 btn-block mt-2" bsSize="lg" bsStyle="primary">
                             Sign Up
                         </Button>
                     </div>
