@@ -18,6 +18,7 @@ export { ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoad
 export { FilesInSetTable, FileItemRow } from './FilesInSetTable';
 export { ItemFooterRow } from './ItemFooterRow';
 export { Publications } from './Publications';
+export { Protocols } from './Protocols';
 export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { AuditTabView } from './AuditTabView';
