@@ -8,7 +8,7 @@ import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
 import * as store from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
+    HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -61,38 +61,16 @@ export default class FileView extends WorkflowRunTracingView {
 
     constructor(props){
         super(props);
-        this.validateHiGlassData = this.validateHiGlassData.bind(this);
-        if (FileView.shouldHiGlassViewExist(props.context)){
-            this.state = _.extend(this.state || {}, {
-                'validatingHiGlassTileData' : true,
-                'isValidHiGlassTileData' : false,
-                'tips' : object.tipsFromSchema(props.schemas || Schemas.get(), props.context)
-            });
-        }
     }
 
     componentDidMount(){
         super.componentDidMount();
-        this.validateHiGlassData();
     }
 
     componentWillReceiveProps(nextProps){
         if (nextProps.schemas !== this.props.schemas || nextProps.context !== this.props.context){
             this.setState({ 'tips' : object.tipsFromSchema(nextProps.schemas || Schemas.get(), nextProps.context) });
         }
-    }
-
-    /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
-    validateHiGlassData(){
-        var context = this.props.context;
-        if (!FileView.shouldHiGlassViewExist(context)) return;
-        HiGlassConfigurator.validateTilesetUid(
-            // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
-            // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
-            context.higlass_uid,
-            () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),     // Callback
-            () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })      // Fallback
-        );
     }
 
     getTabViewContents(){
@@ -106,16 +84,6 @@ export default class FileView extends WorkflowRunTracingView {
         if (FileView.shouldGraphExist(context)){
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
         }
-
-        // TODO gotta replace this, it should see if there is static content with a higlass tab
-        /*if (FileView.shouldHiGlassViewExist(context)){
-            initTabs.push(HiGlassFileTabView.getTabObject(this.props, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */
-
-        // TODO you don't need this section at all.
-        /*
-        if (hasHiglassItemInStaticContent(context)) {
-            initTabs.push(HiGlassFileTabView.getTabObject(this.props, false, true);
-        }*/
 
         return initTabs.concat(this.getCommonTabs(this.props));
     }

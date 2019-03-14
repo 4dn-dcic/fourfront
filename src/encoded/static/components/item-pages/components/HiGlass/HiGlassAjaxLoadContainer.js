@@ -61,14 +61,20 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
             placeholderStyle.height = height;
             placeholderStyle.paddingTop = (height / 2) - 40;
         }
+        else if(typeof height !== 'number'){
+            // If no height is given, assume defaults
+            placeholderStyle.height = 600;
+            placeholderStyle.paddingTop = (placeholderStyle.height / 2) - 40;
+        }
 
+        // TODO Do I need a key?
         // If we're loading, show a loading screen
         if (loading){
             return <React.Fragment><div className="text-center" style={placeholderStyle}>
                     <h3>
                         <i className="icon icon-lg icon-television"/>
                     </h3>
-                    Looking for HiGlass content, please wait...
+                    Initializing
                 </div></React.Fragment>
         }
 
