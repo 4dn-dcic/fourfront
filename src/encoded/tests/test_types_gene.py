@@ -165,13 +165,6 @@ def test_update_with_good_gene_id_post(testapp, human, rad21_ncbi, lab, award):
     assert gene.get('preferred_symbol') == gene.get('official_symbol')
 
 
-def test_update_with_bad_gene_id_post(testapp, lab, award):
-    geneid = '999999999'  # bad id
-    result = testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}, status=422).json
-    assert result.get('status') == 'error'
-    assert 'not a valid entrez geneid' in result.get('errors')[0].get('description')
-
-
 def test_update_post_with_preferred_symbol(testapp, human, rad21_ncbi, lab, award):
     geneid = '5885'  # human rad21
     gene = testapp.post_json('/gene', {'geneid': geneid, 'preferred_symbol': 'George', 'lab': lab['@id'], 'award': award['@id']}).json['@graph'][0]
