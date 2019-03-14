@@ -53,17 +53,33 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         }
     }
     render(){
-        var {higlassItem, loading} = this.state;
+        var { higlassItem, loading } = this.state;
+        var { height } = this.props;
+
+        var placeholderStyle = {};
+        if (typeof height === 'number' && height >= 140){
+            placeholderStyle.height = height;
+            placeholderStyle.paddingTop = (height / 2) - 40;
+        }
 
         // If we're loading, show a loading screen
         if (loading){
-            // Maybe could look exactly like HiglassPlainContainer loading indicator -- maybe could split out HiglassPlainContainer's 'loading indicator' markup into reusable component, idk
-            return <React.Fragment><div>LOADING</div></React.Fragment>
+            return <React.Fragment><div className="text-center" style={placeholderStyle}>
+                    <h3>
+                        <i className="icon icon-lg icon-television"/>
+                    </h3>
+                    Looking for HiGlass content, please wait...
+                </div></React.Fragment>
         }
 
         // Raise an error if there is no viewconfig
         if (!higlassItem || !higlassItem.viewconfig) {
-            return <React.Fragment><div>ERROR</div></React.Fragment> //TODO ...some..error..msg..;
+            return <React.Fragment><div className="text-center" style={placeholderStyle}>
+                    <h3>
+                        <i className="icon icon-lg icon-exclamation-triangle"/>
+                    </h3>
+                    No HiGlass content found. Please go back or try again later.
+                </div></React.Fragment>
         }
 
         // Pass the viewconfig to the HiGlassPlainContainer
