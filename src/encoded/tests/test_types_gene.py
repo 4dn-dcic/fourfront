@@ -180,3 +180,15 @@ def test_update_patch_with_preferred_symbol(testapp, human, rad21_ncbi, lab, awa
     upd = testapp.patch_json(gene['@id'], {'preferred_symbol': 'George'}).json['@graph'][0]
     assert upd.get('official_symbol') == rad21_ncbi.get('Symbol')
     assert upd.get('preferred_symbol') == 'George'
+
+
+def test_update_post_with_bogus_geneid(testapp, lab, award):
+    geneid = '999999999999'
+    missing_fields = ['official_symbol', 'preferred_symbol', 'ncbi_entrez_status',
+                      'fullname', 'organism', 'url']
+    gene = testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}).json['@graph'][0]
+    assert gene.get('geneid') == geneid
+    assert 'lab' in gene
+    assert 'award' in gene
+    for mf in missing_fields:
+        assert mf not in gene
