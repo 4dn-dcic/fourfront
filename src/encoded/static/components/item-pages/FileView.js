@@ -41,6 +41,24 @@ export default class FileView extends WorkflowRunTracingView {
         return isMcoolFile || isBWFile || isBEDDBFile || isBIGBEDFile;
     }
 
+    static hasHiglassItemInStaticContent(context){
+        // TODO better docs here
+
+        var {context} = this.props;
+
+        if (!("static_content" in context)) {
+            return false;
+        }
+
+        // Get the static_content section with tab:higlass as the location
+        const higlass_static_content_sections = _.some(context.static_content, function(section){
+            return section.location === "tab:higlass";
+        });
+
+        // Return true if any sections were found
+        return higlass_static_content_sections;
+    }
+
     constructor(props){
         super(props);
         this.validateHiGlassData = this.validateHiGlassData.bind(this);
@@ -89,9 +107,15 @@ export default class FileView extends WorkflowRunTracingView {
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
         }
 
-        if (FileView.shouldHiGlassViewExist(context)){
-            initTabs.push(HiGlassFileTabView.getTabObject(this.props, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
-        }
+        // TODO gotta replace this, it should see if there is static content with a higlass tab
+        /*if (FileView.shouldHiGlassViewExist(context)){
+            initTabs.push(HiGlassFileTabView.getTabObject(this.props, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */
+
+        // TODO you don't need this section at all.
+        /*
+        if (hasHiglassItemInStaticContent(context)) {
+            initTabs.push(HiGlassFileTabView.getTabObject(this.props, false, true);
+        }*/
 
         return initTabs.concat(this.getCommonTabs(this.props));
     }

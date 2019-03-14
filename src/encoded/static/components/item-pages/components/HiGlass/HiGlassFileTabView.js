@@ -7,6 +7,7 @@ import { console, fileUtil } from './../../../util';
 import { HiGlassContainer } from './HiGlassContainer';
 import { HiGlassPlainContainer } from './HiGlassPlainContainer';
 
+// TODO I may not need this file anymore
 
 export class HiGlassFileTabView extends React.Component {
 
