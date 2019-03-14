@@ -9,6 +9,7 @@ import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
     SimpleFilesTableLoaded, SimpleFilesTable, Publications, Protocols, OverviewHeadingContainer } from './components';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
+import { UserContentBodyList } from './../static-pages/components';
 
 
 export default class ExperimentTypeView extends DefaultItemView {
@@ -123,11 +124,20 @@ class ExperimentTypeViewOverview extends React.Component {
     }
 
     render(){
-        var { context } = this.props;
+        var { context } = this.props,
+            staticContent = _.pluck(_.filter(context.static_content || [], function(s){
+                return s.content && !s.content.error && s.location === 'tab:overview';
+            }), 'content');
 
         return (
             <div>
                 <OverViewBody result={this.props.context} schemas={this.props.schemas} />
+                { staticContent.length > 0 ? (
+                    <div className="mt-2">
+                        <hr/>
+                        <UserContentBodyList contents={staticContent} />
+                    </div>
+                ) : null }
             </div>
         );
 
