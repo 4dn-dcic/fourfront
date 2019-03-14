@@ -33,7 +33,7 @@ export class LoginMenuItem extends React.Component {
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
         this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.state = {
-            "userNotPresent" : false
+            "showRegistrationModal" : false
         };
     }
 
@@ -65,7 +65,8 @@ export class LoginMenuItem extends React.Component {
         this.lock.on("authenticated", this.loginCallback);
     }
 
-    showLock(eventKey, e) {
+    showLock(evtKey, e){
+        if (!this.lock || !this.lock.show) return; // Not yet mounted
         this.lock.show();
     }
 
@@ -178,7 +179,7 @@ export class LoginMenuItem extends React.Component {
         } else if (error.code === 403) {
             // Present a registration form
             //navigate('/error/login-failed');
-            this.setState({ 'userNotPresent' : true });
+            this.setState({ 'showRegistrationModal' : true });
         } else {
             Alerts.queue(Alerts.LoginFailed);
         }
@@ -186,14 +187,14 @@ export class LoginMenuItem extends React.Component {
 
     onRegistrationComplete(){
         // TODO: perform login by calling `this.loginCallback({ idToken : JWT.get() })`
-        //this.setState({ 'userNotPresent' : false });
+        //this.setState({ 'showRegistrationModal' : false });
         var token = JWT.get(),
             decodedToken = decodeJWT(token);
 
         this.loginCallback(
             { 'idToken' : token },
             (userProfile) => { // on success:
-                this.setState({ 'userNotPresent' : false });
+                this.setState({ 'showRegistrationModal' : false });
                 var userDetails = JWT.getUserDetails(), // We should have this after /login
                     userProfileURL = userProfile && object.itemUtil.atId(userProfile),
                     userFullName = (
@@ -217,7 +218,7 @@ export class LoginMenuItem extends React.Component {
                 });
             },
             (err) => {
-                this.setState({ 'userNotPresent' : false });
+                this.setState({ 'showRegistrationModal' : false });
                 JWT.remove(); // Cleanup any remaining JWT, just in case.
                 Alerts.queue(Alerts.LoginFailed);
             }
@@ -226,12 +227,12 @@ export class LoginMenuItem extends React.Component {
 
     onRegistrationCancel(){
         // TODO:
-        this.setState({ 'userNotPresent' : false });
+        this.setState({ 'showRegistrationModal' : false });
     }
 
     render() {
         var { session, schemas } = this.props,
-            userNotPresent = this.state.userNotPresent;
+            { showRegistrationModal, mounted } = this.state;
 
         // If we're already logged in, show logout button.
         if (session) return (
@@ -240,14 +241,20 @@ export class LoginMenuItem extends React.Component {
             </MenuItem>
         );
 
-        if (userNotPresent){
+        if (showRegistrationModal){
             // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
             var token           = JWT.get(),
                 decodedToken    = decodeJWT(token),
                 unverifiedEmail = decodedToken.email,
+                onExitLinkClick = (e) => {
+                    e.preventDefault();
+                    this.setState({ 'showRegistrationModal' : false }, this.showLock);
+                },
                 formHeading    = unverifiedEmail && (
                     <h4 className="text-400 mb-25 mt-05">
-                        No account is associated with <span className="text-600">{ unverifiedEmail }</span>. Please register below.
+                        You have never previously logged in with email <span className="text-600">{ unverifiedEmail }</span>.
+                        <br/>
+                        Please <span className="text-500">register below</span> or <a href="#" className="text-500" onClick={onExitLinkClick}>use a different email address</a> if have an existing account.
                     </h4>
                 );
 

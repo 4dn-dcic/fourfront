@@ -51,6 +51,7 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.onSelectLab            = this.onSelectLab.bind(this);
         this.onClearLab             = this.onClearLab.bind(this);
 
+        this.maySubmitForm          = this.maySubmitForm.bind(this);
         this.onFormSubmit           = this.onFormSubmit.bind(this);
 
         this.formRef = React.createRef();
@@ -146,8 +147,13 @@ export default class UserRegistrationForm extends React.PureComponent {
         evt.stopPropagation();
 
         var { jwtToken, value_for_pending_lab } = this.state,
-            formData = serialize(this.formRef.current, { 'hash' : true }),
-            decodedToken = decodeJWT(jwtToken);
+            maySubmit       = this.maySubmitForm(),
+            formData        = serialize(this.formRef.current, { 'hash' : true }),
+            decodedToken    = decodeJWT(jwtToken);
+
+        if (!maySubmit) {
+            return;
+        }
 
         // Add data which is held in state but not form fields -- email & lab.
         formData.email = decodedToken.email;
@@ -197,22 +203,26 @@ export default class UserRegistrationForm extends React.PureComponent {
 
     }
 
+    maySubmitForm(){
+        var { captchaResponseToken, value_for_first_name, value_for_last_name, registrationStatus } = this.state;
+        return (
+            captchaResponseToken && value_for_first_name && value_for_last_name && registrationStatus === 'form'
+        );
+    }
+
     render(){
         var { schemas, heading } = this.props,
             { registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
                 value_for_pending_lab_details, value_for_pending_lab, jwtToken } = this.state,
             decodedToken        = decodeJWT(jwtToken),
-            email               = decodedToken.email, //UserRegistrationForm.JWTToEmail(jwtToken),
-            captchaToken        = this.state.captchaResponseToken,
+            email               = decodedToken.email,
             captchaError        = this.state.captchaErrorMsg,
             emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             contactEmail        = value_for_contact_email && value_for_contact_email.toLowerCase(),
             isContactEmailValid = !contactEmail || emailValidationRegex.test(contactEmail),
-            maySubmit = (
-                captchaToken && value_for_first_name && value_for_last_name && registrationStatus === 'form'
-            ),
-            errorIndicator = null,
-            loadingIndicator = null;
+            maySubmit           = this.maySubmitForm(),
+            errorIndicator      = null,
+            loadingIndicator    = null;
 
         if (registrationStatus === 'network-failure'){
             // TODO: Hide form in this case?
@@ -381,28 +391,38 @@ class LookupLabField extends React.PureComponent {
             dropMessage     = "Drop a Lab here.",
             searchURL       = '/search/?currentAction=selection&type=Lab',
             currLabTitle    = (
+                isSelecting && (
+                    <div style={LookupLabField.fieldTitleColStyle}>
+                        Select a lab or drag & drop Lab Item or URL into this window.
+                    </div>
+                )
+            ) || (
                 currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
-                    <React.Fragment>
+                    <div style={LookupLabField.fieldTitleColStyle}>
                         <a href={object.itemUtil.atId(currentLabDetails)} target="_blank" data-tip="View lab in new tab"
                             rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                             { currentLabDetails.display_title }
                         </a>
                         &nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small"/>
-                    </React.Fragment>
+                    </div>
                 )
-            ) || 'No Lab selected';
+            ) || (
+                <div style={LookupLabField.fieldTitleColStyle} onClick={this.setIsSelecting} className="clickable" data-tip={tooltip}>
+                    No Lab selected
+                </div>
+            );
 
         return (
             <React.Fragment>
                 <div className="flexrow ml-0 mr-0">
-                    <div style={LookupLabField.fieldTitleColStyle}>{ currLabTitle }</div>
+                    { currLabTitle }
                     <div className="field-buttons">
                         { currentLabDetails && currentLabDetails['@id'] ?
                             <Button onClick={this.props.onClear} className="mr-05">
                                 Clear
                             </Button>
                         : null }
-                        <Button className="btn-primary" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip}>
+                        <Button className="btn-primary" onClick={this.setIsSelecting} disabled={loading || isSelecting} data-tip={tooltip}>
                             Select
                         </Button>
                     </div>
