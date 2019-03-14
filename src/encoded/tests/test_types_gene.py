@@ -165,13 +165,6 @@ def test_update_with_good_gene_id_post(testapp, human, rad21_ncbi, lab, award):
     assert gene.get('preferred_symbol') == gene.get('official_symbol')
 
 
-def test_update_with_bad_gene_id_post(testapp, lab, award):
-    geneid = '999999999'  # bad id
-    result = testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}, status=422).json
-    assert result.get('status') == 'error'
-    assert 'not a valid entrez geneid' in result.get('errors')[0].get('description')
-
-
 def test_update_post_with_preferred_symbol(testapp, human, rad21_ncbi, lab, award):
     geneid = '5885'  # human rad21
     gene = testapp.post_json('/gene', {'geneid': geneid, 'preferred_symbol': 'George', 'lab': lab['@id'], 'award': award['@id']}).json['@graph'][0]
@@ -187,3 +180,15 @@ def test_update_patch_with_preferred_symbol(testapp, human, rad21_ncbi, lab, awa
     upd = testapp.patch_json(gene['@id'], {'preferred_symbol': 'George'}).json['@graph'][0]
     assert upd.get('official_symbol') == rad21_ncbi.get('Symbol')
     assert upd.get('preferred_symbol') == 'George'
+
+
+def test_update_post_with_bogus_geneid(testapp, lab, award):
+    geneid = '999999999999'
+    missing_fields = ['official_symbol', 'preferred_symbol', 'ncbi_entrez_status',
+                      'fullname', 'organism', 'url']
+    gene = testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}).json['@graph'][0]
+    assert gene.get('geneid') == geneid
+    assert 'lab' in gene
+    assert 'award' in gene
+    for mf in missing_fields:
+        assert mf not in gene
