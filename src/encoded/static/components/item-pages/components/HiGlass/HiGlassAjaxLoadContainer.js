@@ -74,24 +74,24 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         // If we're loading, show a loading screen
         if (loading){
             return <React.Fragment><div className="text-center" style={placeholderStyle}>
-                    <h3>
-                        <i className="icon icon-lg icon-television"/>
-                    </h3>
-                    Initializing
-                </div></React.Fragment>
+                <h3>
+                    <i className="icon icon-lg icon-television"/>
+                </h3>
+                Initializing
+            </div></React.Fragment>;
         }
 
         // Raise an error if there is no viewconfig
         if (!higlassItem || !higlassItem.viewconfig) {
             return <React.Fragment><div className="text-center" style={placeholderStyle}>
-                    <h3>
-                        <i className="icon icon-lg icon-exclamation-triangle"/>
-                    </h3>
-                    No HiGlass content found. Please go back or try again later.
-                </div></React.Fragment>
+                <h3>
+                    <i className="icon icon-lg icon-exclamation-triangle"/>
+                </h3>
+                No HiGlass content found. Please go back or try again later.
+            </div></React.Fragment>;
         }
 
         // Pass the viewconfig to the HiGlassPlainContainer
-        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem')} viewConfig={higlassItem.viewconfig} />
+        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem')} viewConfig={higlassItem.viewconfig} />;
     }
 }
