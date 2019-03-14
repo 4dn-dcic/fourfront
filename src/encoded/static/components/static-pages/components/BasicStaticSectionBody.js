@@ -63,8 +63,7 @@ export class BasicUserContentBody extends React.PureComponent {
             return (
                 <React.Fragment>
                     <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    {/* <HiGlassPlainContainer viewConfig={context.viewconfig} /> TODO Use a HG ajax loader instead, here */}
-                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={_.pick(context, "@id")} /> {/* TODO One day this will be the uuid */}
+                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={_.pick(context, "@id")} />
                 </React.Fragment>
             );
         } else {

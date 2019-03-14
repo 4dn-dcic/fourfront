@@ -6,9 +6,8 @@ import _ from 'underscore';
 import { isServerSide, ajax, console, fileUtil } from './../../../util';
 import { HiGlassPlainContainer } from './HiGlassPlainContainer';
 
+/** This class will pass the HiGlass Item's viewconfig to the HiGlassPlainContainer, possibly using AJAX to get the information.*/
 export class HiGlassAjaxLoadContainer extends React.PureComponent {
-    /** This class passes
-    */
 
     constructor(props){
         super(props);
@@ -18,34 +17,38 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
             'higlassItem' : null
         }
 
-        this.doLoad = this.doLoad.bind(this);
+        this.getFullHiglassItem = this.getFullHiglassItem.bind(this);
     }
 
     componentDidMount(){
-        this.doLoad();
+        this.getFullHiglassItem();
     }
 
     componentDidUpdate(pastProps){
         // After updating the component, load the new higlass component if it changed.
         if (pastProps.higlassItem !== this.props.higlassItem){
-            this.doLoad();
+            this.getFullHiglassItem();
         }
     }
-    doLoad(){
+
+    /**
+    * Makes an AJAX call to get the Higlass viewconfig resource.
+    */
+    getFullHiglassItem(){
         var { higlassItem } = this.props;
 
         if (!higlassItem) {
             return;
         }
 
-        // If it has a viewconfig, use that
+        // If the viewconfig was loaded already, use that
         if ("viewconfig" in higlassItem) {
             this.setState({'higlassItem': higlassItem, 'loading': false});
         }
         else if ('@id' in higlassItem) {
-            // If it has an @id, set the loading flag and make an ajax call to load it.
+            // Use the @id to make an AJAX request to get the HiGlass Item.
             this.setState({ 'loading': true }, ()=>{
-                // Use the @id to get the item, then remove the loading screen
+                // Use the @id to get the item, then remove the loading message
                 ajax.load(this.props.higlassItem['@id'], (r)=>{
                     this.setState({ 'higlassItem' : r, 'loading': false });
                 });
@@ -56,6 +59,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         var { higlassItem, loading } = this.state;
         var { height } = this.props;
 
+        // Use the height to make placeholder message when loading.
         var placeholderStyle = {};
         if (typeof height === 'number' && height >= 140){
             placeholderStyle.height = height;
@@ -67,7 +71,6 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
             placeholderStyle.paddingTop = (placeholderStyle.height / 2) - 40;
         }
 
-        // TODO Do I need a key?
         // If we're loading, show a loading screen
         if (loading){
             return <React.Fragment><div className="text-center" style={placeholderStyle}>

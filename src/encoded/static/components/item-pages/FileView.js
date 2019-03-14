@@ -20,7 +20,7 @@ import { FileDownloadButton } from './../util/file';
 // import { FILE } from './../testdata/file/processed-bw';
 
 
-
+/** Container for all of the tabs on a File page. */
 export default class FileView extends WorkflowRunTracingView {
 
     /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
@@ -30,33 +30,22 @@ export default class FileView extends WorkflowRunTracingView {
         );
     }
 
-    static shouldHiGlassViewExist(context){
-        // TODO: Remove context.file_format check?
-        if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
-        var fileFormat  = fileUtil.getFileFormatStr(context),
-            isMcoolFile = fileFormat === 'mcool',
-            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg'),
-            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed'),
-            isBIGBEDFile = fileFormat === 'bigbed';
-        return isMcoolFile || isBWFile || isBEDDBFile || isBIGBEDFile;
-    }
-
+    /**
+    * Looks for static Higlass content in the context.
+    * @param {object} context
+    * @return {boolean} true if one static_content section has HiGlass viewconfs.
+    */
     static hasHiglassItemInStaticContent(context){
-        // TODO better docs here
-
         var {context} = this.props;
 
         if (!("static_content" in context)) {
             return false;
         }
 
-        // Get the static_content section with tab:higlass as the location
-        const higlass_static_content_sections = _.some(context.static_content, function(section){
+        // Look for any static_content sections with tab:higlass as the location
+        return _.some(context.static_content, function(section){
             return section.location === "tab:higlass";
         });
-
-        // Return true if any sections were found
-        return higlass_static_content_sections;
     }
 
     constructor(props){
