@@ -187,6 +187,11 @@ def test_range_download(testapp, registry, proc_file_json):
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
+    # ensure some basic fields are on the tracking items
+    for ti in tracking_items:
+        assert ti.properties['status'] == 'in review by lab'
+        assert 'schema_version' in ti.properties
+        assert 'date_created' in ti.properties
     tracked_rng_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items
                              if ti.properties.get('download_tracking', {}).get('range_query') is True]
     assert download_filename in tracked_rng_filenames
@@ -223,7 +228,6 @@ def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, expe
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
         assert dl_tracking['range_query'] is False
-        assert dl_tracking['is_visualization'] is False
         assert dl_tracking['user_uuid'] == 'anonymous'
         assert isinstance(dl_tracking['request_headers'], type(''))
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
@@ -259,7 +263,6 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
         assert dl_tracking['range_query'] is False
-        assert dl_tracking['is_visualization'] is False
         assert dl_tracking['user_uuid'] == 'anonymous'
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 

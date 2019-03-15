@@ -15,7 +15,7 @@ let alertNavigatationCountMap = {};
 
 
 /**
- * A Component and utility (via Component's 'statics' property & functions) to 
+ * A Component and utility (via Component's 'statics' property & functions) to
  * queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
  * the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
  * title for alert that was queued.

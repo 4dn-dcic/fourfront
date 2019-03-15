@@ -65,11 +65,6 @@ const portal = {
                 { id: 'about-menu-item',            title: 'About',                             url: '/about' }
             ]
         }
-    ],
-    "user_section": [
-        {id: 'login-menu-item', title: 'Log in', url: '/'},
-        {id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}
-        // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
 
@@ -464,15 +459,12 @@ export default class App extends React.Component {
      *
      * @todo Potentially remove. Or document more.
      * @public
-     * @param {string} category - Usually one of "user", "context", "user_section", "global_sections".
+     * @param {string} category - Usually one of "user", "context", "global_sections".
      * @returns {{ href: string }[]} - List of actions available for category.
      */
     listActionsFor(category) {
         if (category === 'context') {
             return (this.props.context && this.props.context.actions) || [];
-        }
-        if (category === 'user_section') {
-            return portal.user_section;
         }
         if (category === 'user') {
             if (!this.state.mounted) return [];
@@ -1544,6 +1536,16 @@ class BodyElement extends React.PureComponent {
          * Used to unset the `top` and `left` positions after hover out.
          */
         this.tooltipRef = React.createRef();
+
+        /**
+         * Reference to overlays container.
+         * Used for React.createPortal in whichever components
+         * may need to make one.
+         *
+         * Eventually, this will be used to supercede React-Bootstraps
+         * Modal Components.
+         */
+        this.overlaysContainerRef = React.createRef();
     }
 
     /**
@@ -1848,7 +1850,8 @@ class BodyElement extends React.PureComponent {
             registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
             addToBodyClassList            = this.addToBodyClassList,
             removeFromBodyClassList       = this.removeFromBodyClassList,
-            toggleFullScreen              = this.toggleFullScreen;
+            toggleFullScreen              = this.toggleFullScreen,
+            overlaysContainer             = this.overlaysContainerRef.current;
 
         if (hasError) return this.renderErrorState();
 
@@ -1877,7 +1880,7 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }}
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
                                     'context', 'updateUserInfo', 'listActionsFor')} />
 
@@ -1892,7 +1895,8 @@ class BodyElement extends React.PureComponent {
 
                             <ContentErrorBoundary canonical={canonical}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
-                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
+                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
+                                    overlaysContainer } } />
                             </ContentErrorBoundary>
 
                             <div id="layout-footer"/>
@@ -1900,6 +1904,8 @@ class BodyElement extends React.PureComponent {
                         <Footer version={context.app_version} />
                     </div>
                 </div>
+
+                <div id="overlays-container" ref={this.overlaysContainerRef}/>
 
                 <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 

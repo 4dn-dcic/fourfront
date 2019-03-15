@@ -28,7 +28,7 @@
             "description": "The url that uniquely identifies term - often purl.",
             "type": "string",
             "format": "uri",
-            "permission": "import-items",
+            "permission": "import_items",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "term_id": {
@@ -37,19 +37,19 @@
           "type": "string",
           "comment": "Must be unique in our system",
           "uniqueKey": true,
-          "permission": "import-items"
+          "permission": "import_items"
         },
         "term_name": {
           "title": "Term name",
           "description": "The current valid name for the ontology term.",
           "type": "string",
-          "permission": "import-items"
+          "permission": "import_items"
         },
         "definition": {
             "title": "Definition",
             "description": "The definition for the ontology term.",
             "type": "string",
-            "permission": "import-items",
+            "permission": "import_items",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "formInput": "textarea"
         },
@@ -57,12 +57,12 @@
           "title": "Display name",
           "description": "A preferred name (possibly shortened or simpler version) for the ontology term - can be used for submission or retrieval.",
           "type": "string",
-          "permission": "import-items"
+          "permission": "import_items"
         },
         "synonyms": {
             "title": "Synonyms",
             "description": "Synonyms for the ontology term.",
-            "permission": "import-items",
+            "permission": "import_items",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "internal_comment": "Calculated from term info - cannot be used as ID",
             "type": "array",
@@ -70,13 +70,13 @@
                 "title": "Synonym",
                 "description": "An ontology term synonym.",
                 "type":  "string",
-                "permission": "import-items"
+                "permission": "import_items"
             }
         },
         "source_ontology": {
             "title": "Ontology that this term is part of",
             "descripton": "The ontology from whence this term EFO, OBI, UBERON",
-            "permission": "import-items",
+            "permission": "import_items",
             "type": "string",
             "linkTo": "Ontology"
         },
@@ -84,12 +84,12 @@
             "title": "Term namespace",
             "description": "The namespace to which the term belongs - relevant for imported ontologies",
             "type": "string",
-            "permission": "import-items"
+            "permission": "import_items"
         },
         "parents": {
             "title": "Parent terms",
             "description": "Ontology terms that are direct parents of this term via subClassOf",
-            "permission": "import-items",
+            "permission": "import_items",
             "type": "array",
             "items": {
                 "title": "Parent",
@@ -101,7 +101,7 @@
         "slim_terms": {
             "title": "Slim terms",
             "description": "Ontology terms that are slimmed - less specific that are used in search",
-            "permission": "import-items",
+            "permission": "import_items",
             "type": "array",
             "items": {
                 "title": "Slim Term",
