@@ -5,13 +5,13 @@ from snovault import (
 from collections import defaultdict
 
 
-# @audit_checker(
-#     'experiment_set_replicate',
-#     frame=[
-#         'replicate_exps',
-#         'replicate_exps.replicate_exp',
-#     ]
-# )
+@audit_checker(
+    'experiment_set_replicate',
+    frame=[
+        'replicate_exps',
+        'replicate_exps.replicate_exp',
+    ]
+)
 def audit_replicate_sets_have_replicate_experiments(value, system):
     '''
     the experiments present in a replicate set must be consistent
@@ -85,17 +85,17 @@ def audit_replicate_sets_have_replicate_experiments(value, system):
     return
 
 
-# @audit_checker(
-#     'experiment_set_replicate',
-#     frame=[
-#         'replicate_exps',
-#         'replicate_exps.replicate_exp',
-#         'replicate_exps.replicate_exp.files',
-#         'replicate_exps.replicate_exp',
-#         'replicate_exps.replicate_exp.biosample',
-#         'replicate_exps.replicate_exp.biosample.cell_culture_details'
-#     ]
-# )
+@audit_checker(
+    'experiment_set_replicate',
+    frame=[
+        'replicate_exps',
+        'replicate_exps.replicate_exp',
+        'replicate_exps.replicate_exp.files',
+        'replicate_exps.replicate_exp',
+        'replicate_exps.replicate_exp.biosample',
+        'replicate_exps.replicate_exp.biosample.cell_culture_details'
+    ]
+)
 def audit_replicate_sets_consistency_check(value, system):
     '''
     the experiments present in a replicate set must be consistent
