@@ -134,11 +134,7 @@ class ReferencePubBelowHeaderRow extends React.Component {
         return (
             <div className="row mb-2">
                 <div className="col-sm-12">
-                    <DetailBlock publication={this.props.reference_pubs[0]} singularTitle="Reference Publication" >
-                        <div className="more-details">
-                            <ShortAttribution publication={this.props.reference_pubs[0]} />
-                        </div>
-                    </DetailBlock>
+                    <DetailBlock publication={this.props.reference_pubs[0]} singularTitle="Reference Publication" />
                 </div>
             </div>
         );
