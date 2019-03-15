@@ -565,7 +565,7 @@ def _get_uuids_for_linked(term, idmap):
     return puuids
 
 
-def add_uuids(partitioned_terms):
+def add_uuids_and_combine(partitioned_terms):
     '''adds new uuids to terms to post and existing uuids to patch terms
         this function depends on the partitioned term dictionary that
         contains keys 'post', 'patch' and 'idmap'
@@ -595,12 +595,12 @@ def add_uuids(partitioned_terms):
     try:
         post = list(newterms.values())
     except AttributeError:
-        post = None
+        post = []
     try:
         patch = list(patches.values())
     except AttributeError:
-        patch = None
-    return [post, patch]
+        patch = []
+    return post + patch
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
@@ -751,14 +751,12 @@ def main():
         and Updates Terms by generating json inserts
     '''
     args = parse_args(sys.argv[1:])  # to facilitate testing
-    s3_postfile = 'ontology_post.json'
-    s3_patchfile = 'ontology_patch.json'
+    s3_postfile = 'ontology_term.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
     print('Writing to %s' % outdir)
 
     postfile = outdir + s3_postfile
-    patchfile = outdir + s3_patchfile
 
     # fourfront connection
     connection = connect2server(args.env, args.key)
@@ -786,13 +784,12 @@ def main():
         if args.full:
             filter_unchanged = False
         partitioned_terms = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
-        terms2write = add_uuids(partitioned_terms)
+        terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False
         if args.pretty:
             pretty = True
-        write_outfile(terms2write[0], postfile, pretty)
-        write_outfile(terms2write[1], patchfile, pretty)
+        write_outfile(terms2write, postfile, pretty)
 
         if args.load:  # load em into the database
             # pyramids app
@@ -802,16 +799,13 @@ def main():
                 raise("Can't get the fourfront app - check config_uri and app_name")
 
             load_ontology_terms(app,
-                                args.outdir + s3_postfile,
-                                args.outdir + s3_patchfile)
+                                args.outdir + s3_postfile)
 
         if args.s3upload:  # upload file to s3
             s3 = s3Utils(env=args.env)
             s3.outfile_bucket = s3.system_bucket
             with open(postfile, 'rb') as postedfile:
                 s3.s3_put(obj=postedfile, key=s3_postfile)
-            with open(patchfile, 'rb') as patchedfile:
-                s3.s3_put(patchedfile, s3_patchfile)
 
 
 if __name__ == '__main__':

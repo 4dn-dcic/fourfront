@@ -25,15 +25,12 @@ def main():
         description="Load Ontology Term Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--post-file',
-                        help="File containing terms to to POST - set to None if only PATCH is wanted")
-    parser.add_argument('--patch-file',
-                        help="File containing terms to to PATCH - set to None if only POST is wanted")
+    parser.add_argument('json-file',
+                        help="File containing terms to load)
+    parser.add_argument('config_uri', help="path to configfile - development.ini or production.ini")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('config_uri', help="path to configfile")
     args = parser.parse_args()
-    post = None if args.post_file == 'None' else args.post_file
-    patch = None if args.patch_file == 'None' else args.patch_file
+    post = args.json_file
 
     # get the pyramids app
     app = get_app(args.config_uri, args.app_name)
@@ -43,7 +40,7 @@ def main():
     load_term_data = 'encoded.loadxl:load_ontology_terms'
     print("****** load test data is %s" % (load_term_data))
     load_term_data = DottedNameResolver().resolve(load_term_data)
-    load_term_data(app, post, patch)
+    load_term_data(app, post)
     end = datetime.now()
     print("FINISHED - START: ", str(start), "\tEND: ", str(end))
 
