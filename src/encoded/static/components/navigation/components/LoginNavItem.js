@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { MenuItem, NavItem } from 'react-bootstrap';
+import { NavItem } from 'react-bootstrap';
 import Auth0Lock from 'auth0-lock';
 import { JWT, ajax, navigate, isServerSide, analytics, object, layout } from './../../util';
 import Alerts from './../../alerts';
@@ -13,7 +13,7 @@ import { UserRegistrationModal, decodeJWT } from './../../forms/UserRegistration
 
 
 /** Component that contains auth0 functions */
-export class LoginMenuItem extends React.Component {
+export class LoginNavItem extends React.Component {
 
     static propTypes = {
         'updateUserInfo'      : PropTypes.func.isRequired,
@@ -23,7 +23,7 @@ export class LoginMenuItem extends React.Component {
 
     constructor(props){
         super(props);
-        this.showLock           = this.showLock.bind(this);
+        this.showLock           = _.throttle(this.showLock.bind(this), 1000, { trailing: false });
         this.loginCallback      = this.loginCallback.bind(this);
         this.loginErrorCallback = this.loginErroCallback.bind(this);
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
@@ -178,19 +178,17 @@ export class LoginMenuItem extends React.Component {
                         (userDetails.first_name + ' ' + userDetails.last_name)
                     ) || null,
                     msg = (
-                        <React.Fragment>
-                            <ul className="mb-0">
-                                <li>You are now logged in as <span className="text-500">{ userFullName }{ userFullName ? ' (' + decodedToken.email + ')' : decodedToken.email }</span>.</li>
-                                <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
-                            </ul>
-                        </React.Fragment>
+                        <ul className="mb-0">
+                            <li>You are now logged in as <span className="text-500">{ userFullName }{ userFullName ? ' (' + decodedToken.email + ')' : decodedToken.email }</span>.</li>
+                            <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
+                        </ul>
                     );
 
                 Alerts.queue({
                     "title"     : "Registered & Logged In",
                     "message"   : msg,
                     "style"     : 'success',
-                    'navigateDisappearThreshold' : 1
+                    'navigateDisappearThreshold' : 2
                 });
             },
             (err) => {

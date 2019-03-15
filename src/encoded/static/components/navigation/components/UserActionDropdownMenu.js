@@ -7,7 +7,7 @@ import url from 'url';
 import { Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './../../util';
 import * as store from './../../../store';
-import { LoginMenuItem } from './LoginMenuItem';
+import { LoginNavItem } from './LoginNavItem';
 
 
 /**
@@ -35,11 +35,14 @@ export class UserActionDropdownMenu extends React.Component {
     constructor(props){
         super(props);
         this.performLogout = this.performLogout.bind(this);
-        //this.setIsLoading = this.setIsLoading.bind(this);
         this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
         this.state = { 'isLoading' : false };
     }
 
+    /**
+     * Removes JWT from cookies, as well as userInfo from localStorage
+     * and then refreshes current view/href via navigate fxn.
+     */
     performLogout(eventKey, e){
         var { session, updateUserInfo } = this.props;
 
@@ -57,20 +60,6 @@ export class UserActionDropdownMenu extends React.Component {
             document.dispatchEvent(new MouseEvent('click'));
         }
     }
-
-    /*
-    setIsLoading(isLoading = null){
-        this.setState(function(currState){
-            if (typeof isLoading === 'boolean' && isLoading === currState.isLoading){
-                return null;
-            }
-            if (isLoading === null){
-                isLoading = !currState.isLoading;
-            }
-            return { isLoading };
-        });
-    }
-    */
 
     /** Shown for logged in users. */
     listUserActionsAsMenuItems(){
@@ -106,7 +95,7 @@ export class UserActionDropdownMenu extends React.Component {
                 </NavDropdown>
             );
         } else {
-            acctBtn = <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')} key="login-register" id="user_account_nav_button" />;
+            acctBtn = <LoginNavItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')} key="login-register" id="user_account_nav_button" />;
         }
 
         return <Nav className="navbar-acct" pullRight>{ acctBtn }</Nav>;
