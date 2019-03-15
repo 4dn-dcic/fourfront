@@ -133,8 +133,8 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 });
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
-    cy.get("#user_actions_dropdown").click().wait(100).end()
-        .get('#logoutbtn').click().end().get('#user_actions_dropdown').should('contain', 'Account').wait(300).end()
+    cy.get("#user_account_nav_button").click().wait(100).end()
+        .get('#logoutbtn').click().end().get('#user_account_nav_button').should('contain', 'Account').wait(300).end()
         .get('#slow-load-container').should('not.have.class', 'visible').end();
 });
 
