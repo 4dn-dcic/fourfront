@@ -144,12 +144,6 @@ export class AuditTabView extends React.PureComponent {
         'INTERNAL_ACTION' : 'Internal Action'
     }
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-    }
-
     componentDidMount(){
         ReactTooltip.rebuild();
     }
@@ -177,16 +171,15 @@ export class AuditTabView extends React.PureComponent {
 }
 
 
-class AuditLevelGrouping extends React.Component {
+class AuditLevelGrouping extends React.PureComponent {
 
     static propTypes = {
         'level' : PropTypes.oneOf(['ERROR', 'WARNING', 'INTERNAL_ACTION']),
         'title' : PropTypes.string
-    }
+    };
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.iconClass = this.iconClass.bind(this);
     }
 
@@ -198,9 +191,8 @@ class AuditLevelGrouping extends React.Component {
     }
 
     render(){
-
-        var level = this.props.level;
-        var auditsForLevel = this.props.audits[level] || this.props.audits;
+        var { level, audits, title, categoriesDefaultOpen } = this.props,
+            auditsForLevel = audits[level] || audits;
 
         if (!Array.isArray(auditsForLevel) || auditsForLevel.length === 0) return null;
 
@@ -214,7 +206,7 @@ class AuditLevelGrouping extends React.Component {
                     <div className="col-sm-2 col-md-1">
                         <h3 className="text-left">
                             {/*<span className="text-400">{ audits[level].length }</span> */}<i
-                                data-tip={auditsForLevel.length + ' ' + this.props.title + (auditsForLevel.length > 1 ? 's' : '')}
+                                data-tip={auditsForLevel.length + ' ' + title + (auditsForLevel.length > 1 ? 's' : '')}
                                 data-place="right"
                                 className={"icon icon-fw icon-" + this.iconClass()}
                             />
@@ -228,7 +220,7 @@ class AuditLevelGrouping extends React.Component {
                             level={level}
                             key={audits[0].category}
                             audits={audits}
-                            defaultOpen={this.props.categoriesDefaultOpen}
+                            defaultOpen={categoriesDefaultOpen}
                         />
                     )}
                     </div>
@@ -240,29 +232,36 @@ class AuditLevelGrouping extends React.Component {
 
 }
 
-class AuditCategoryGrouping extends React.Component {
+class AuditCategoryGrouping extends React.PureComponent {
 
     static propTypes = {
         level : PropTypes.oneOf(['ERROR', 'NOT_COMPLIANT', 'WARNING', 'INTERNAL_ACTION', 'INFO', 'DEBUG', 'NOT_SET']),
-        audits : PropTypes.array
+        audits : PropTypes.array,
+        defaultOpen : PropTypes.bool,
     }
 
     static defaultProps = {
-        defaultOpen : true
+        'defaultOpen' : true
     }
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.auditItemsList = this.auditItemsList.bind(this);
+        this.toggleOpen = this.toggleOpen.bind(this);
         this.state = {
             'open' : props.defaultOpen
         };
     }
 
+    toggleOpen(){
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
+    }
+
     auditItemsList(){
         if (!this.state.open) return null;
-        return this.props.audits.map((aud, i) =>
+        return _.map(this.props.audits, (aud, i) =>
             <AuditItem
                 audit={aud}
                 key={i}
@@ -277,7 +276,7 @@ class AuditCategoryGrouping extends React.Component {
         return (
             <div className="audit-grouping" key={audits[0].category}>
                 <h4 className="text-400 audit-category">
-                    <i className={"toggle-open icon icon-fw icon-" + (this.state.open ? 'minus' : 'plus')} onClick={()=>{ this.setState({ 'open' : !this.state.open }); }} />
+                    <i className={"toggle-open icon icon-fw icon-" + (this.state.open ? 'minus' : 'plus')} onClick={this.toggleOpen} />
                     <span className="text-500 inline-block text-right" style={{ minWidth : 20 }}>
                         { audits.length }
                     </span> { audits[0].category }
@@ -293,20 +292,15 @@ class AuditCategoryGrouping extends React.Component {
 class AuditItem extends React.Component {
 
     static propTypes = {
-        level : PropTypes.oneOf(['ERROR', 'NOT_COMPLIANT', 'WARNING', 'INTERNAL_ACTION', 'INFO', 'DEBUG', 'NOT_SET'])
-    }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
+        "level" : PropTypes.oneOf(['ERROR', 'NOT_COMPLIANT', 'WARNING', 'INTERNAL_ACTION', 'INFO', 'DEBUG', 'NOT_SET'])
+    };
 
     render(){
-        var audit = this.props.audit;
-        var details = audit.detail.split('\n').filter(function(a){ return a !== '' && a; }); // Split newlines into sep. paragraphs.
+        var { audit, showCategory } = this.props,
+            details = audit.detail.split('\n').filter(function(a){ return a !== '' && a; }); // Split newlines into sep. paragraphs.
 
         var categoryTitle;
-        if (this.props.showCategory){
+        if (showCategory){
             categoryTitle = (
                 <div className="col-xs-12 col-sm-12 audit-category">
                     <span>

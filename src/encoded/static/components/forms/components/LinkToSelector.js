@@ -417,6 +417,14 @@ export class WindowDropReceiver extends React.PureComponent {
     }
 
     receiveData(itemAtID, itemContext){
+        if (typeof itemContext === 'string' && itemContext){
+            try {
+                itemContext = JSON.parse(itemContext);
+            } catch (e) {
+                console.warn("Could not parse itemContext into JS data.");
+                console.error(e);
+            }
+        }
         this.props.onSelect(itemAtID, itemContext);
     }
 

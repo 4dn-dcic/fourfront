@@ -2,7 +2,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { content_views } from './../globals';
 import _ from 'underscore';
 import { 
     ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
@@ -10,7 +9,7 @@ import {
     WorkflowNodeElement, CollapsibleItemViewButtonToolbar, WorkflowGraphSectionControls
 } from './components';
 import DefaultItemView from './DefaultItemView';
-import { console, object, DateUtility, Schemas, isServerSide, navigate, layout } from './../util';
+import { console, DateUtility, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import ReactTooltip from 'react-tooltip';
@@ -274,5 +273,3 @@ export class WorkflowGraphSection extends React.PureComponent {
 
 }
 
-
-content_views.register(WorkflowView, 'Workflow');

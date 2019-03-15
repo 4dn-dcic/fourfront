@@ -11,10 +11,7 @@ from pyramid.security import (
     # DENY_ALL,
     Everyone,
 )
-from pyramid.traversal import (
-    find_root,
-    traverse,
-)
+from pyramid.traversal import find_root
 import snovault
 # from ..schema_formats import is_accession
 # import snovalut default post / patch stuff so we can overwrite it in this file
@@ -147,11 +144,10 @@ def get_item_if_you_can(request, value, itype=None):
 def set_namekey_from_title(properties):
     name = None
     if properties.get('title'):
-        exclude = set(string.punctuation)
-        name = properties['title']
-        name = ''.join(ch for ch in name if ch not in exclude)
-        name = re.sub(r"\s+", '-', name)
-        name = name.lower()
+        exclude = set(string.punctuation.replace('-', ''))
+        name = properties['title'].replace('&', ' n ')
+        name = ''.join(ch if ch not in exclude and ch != ' ' else '-' for ch in name)
+        name = re.sub(r"[-]+", '-', name).strip('-').lower()
     return name
 
 

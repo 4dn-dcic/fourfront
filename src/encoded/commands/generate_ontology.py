@@ -24,7 +24,8 @@ from encoded.commands.owltools import (
 from dcicutils.ff_utils import (
     get_authentication_with_server,
     get_metadata,
-    search_metadata
+    search_metadata,
+    unified_authentication
 )
 from dcicutils.s3_utils import s3Utils
 import mimetypes
@@ -417,7 +418,7 @@ def connect2server(env=None, key=None):
        Also handles keyfiles stored in s3'''
     if key == 's3':
         assert env
-        key = ff_utils.unified_auth(env)
+        key = unified_authentication(None, env)
 
     if all([v in key for v in ['key', 'secret', 'server']]):
         import ast
@@ -691,7 +692,8 @@ def parse_args(args):
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
     parser.add_argument('--outdir',
-                        help="the directory (relative to src/encoded) for output files")
+                        help="the directory (relative to src/encoded) for output files",
+                        default='/')
     parser.add_argument('--s3upload',
                         default=False,
                         action='store_true',
@@ -713,11 +715,11 @@ def parse_args(args):
                         help="The environment to use i.e. data, webdev, mastertest.\
                         Default is 'data')")
     parser.add_argument('--key',
-                        default=None,
+                        default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
+    parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
     return parser.parse_args(args)
 

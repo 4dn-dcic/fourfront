@@ -4,7 +4,6 @@ var React = require('react');
 var _ = require('underscore');
 import Matrix from './../lib/matrix-viz';
 var { Fade } = require('react-bootstrap');
-var d3 = require('d3');
 var vizUtil = require('./../viz/utilities');
 var { layout, console, isServerSide } = require('./../util');
 var ReactTooltip = require('react-tooltip');
@@ -186,15 +185,12 @@ export class MatrixContainer extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.registerPostUpdateFxn = this.registerPostUpdateFxn.bind(this);
         this.runPostUpdateFxns = this.runPostUpdateFxns.bind(this);
         this.maxGridWidth = this.maxGridWidth.bind(this);
         this.cellSize = this.cellSize.bind(this);
         this.cellStyle = this.cellStyle.bind(this);
         this.body = this.body.bind(this);
-        this.render = this.render.bind(this);
     }
 
     componentDidMount(){
@@ -327,9 +323,6 @@ export default class MatrixView extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUnmount = this.componentWillUnmount.bind(this);
         this.getContainerWidth = this.getContainerWidth.bind(this);
         this.handleResize = _.debounce(this.handleResize.bind(this), 300);
         this.state = {

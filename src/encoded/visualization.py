@@ -827,7 +827,7 @@ def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info):
         "options": {
             "name": get_title(file),
             "coordSystem": file["genome_assembly"],
-            "labelPosition": "bottomRight",
+            "labelPosition": "topLeft",
         },
         "type": "horizontal-divergent-bar",
         "orientation": "1d-horizontal",
@@ -875,24 +875,95 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
             "coordSystem": file["genome_assembly"],
             "colorRange": [],
             "valueScaling": "linear",
-            "labelPosition": "bottomRight",
+            "labelPosition": "topLeft",
+            "heatmapValueScaling": "log",
         },
-        "height": 35,
+        "height": 18,
         "type": "horizontal-vector-heatmap",
         "orientation": "1d-horizontal",
         "uid": uuid.uuid4(),
     }
 
-    # Add the color range options. A list of 256 strings, each containing an integer.
+    def get_color_by_index(color_index, known_colors):
+        """Use linear interpolation to get a color for the given index.
+        Assumes indecies and values are between 0 and 255.
+
+        Args:
+            color_index(integer): The index we want to get the color for.
+            known_colors(dict): A dictionary containing index to value mappings.
+                If indecies are missing, we'll use linear interpolation to guess
+                the value.
+
+        Returns:
+            An integer noting the value.
+        """
+
+        # If the color_index is in known_colors, return that value
+        if color_index in known_colors:
+            return known_colors[color_index]
+
+        # We need to linearly interpolate using 2 known values the value is between.
+        # Sort all of the indecies, adding 0 and 255 if they don't exist.
+        known_color_indecies = [k for k in known_colors.keys()]
+        if 0 not in known_color_indecies:
+            known_color_indecies.append(0)
+        if 255 not in known_color_indecies:
+            known_color_indecies.append(255)
+        known_color_indecies = sorted(known_color_indecies)
+
+        # Get the two nearest indecies the color_index is inbetween.
+        lower_bound_index = known_color_indecies[0]
+        upper_bound_index = known_color_indecies[-1]
+
+        for index in known_color_indecies:
+            if index >= color_index:
+                upper_bound_index = index
+                break
+            else:
+                lower_bound_index = index
+
+        # Get the values for the two bounding indecies. Assume 0:0 and 255:255 if they are not provided.
+        lower_value = known_colors.get(lower_bound_index, 0)
+        upper_value = known_colors.get(upper_bound_index, 255)
+
+        # Begin linear interpolation. First, calculate the slope.
+        slope = (upper_value - lower_value) / (upper_bound_index - lower_bound_index)
+
+        # Use the lower bound to discover the offset.
+        offset = lower_value - (lower_bound_index * slope)
+
+        # With the slope and the offset, we can calculate the expected value.
+        interpolated_color = (slope * color_index) + offset
+        return int(interpolated_color)
+
+    # Add the color values for an RGB display. Add known values here and we will linearly interpolate everything else.
+    color_range_by_color = {
+        "red": {
+            0:99,
+            128:60,
+            255:25,
+        },
+        "green": {
+            0:20,
+            128:12,
+            255:13,
+        },
+        "blue": {
+            0:99,
+            128:60,
+            255:25,
+        },
+    }
+
+    # HiGlass expects a list of 256 strings, each containing an integer.
     for index in range(256):
-        red = int(index * 252 / 255)
-        green = int(index * 253 / 255)
-        blue = int((index * 188 / 255) + 3)
+        # Get derived colors.
+        colors = { color : get_color_by_index(index, color_range_by_color[color]) for color in color_range_by_color.keys()}
         new_track_base["options"]["colorRange"].append(
             "rgba({r},{g},{b},1)".format(
-                r=red,
-                g=green,
-                b=blue,
+                r=colors["red"],
+                g=colors["green"],
+                b=colors["blue"],
             )
         )
 
@@ -942,7 +1013,7 @@ def resize_1d_tracks(views):
         if not view_info["has_top_tracks"]:
             continue
 
-        top_tracks = [ t for t in view["tracks"]["top"] if t["type"] not in ("horizontal-gene-annotations", "horizontal-chromosome-labels") ]
+        top_tracks = [ t for t in view["tracks"]["top"] if t["type"] not in ("horizontal-gene-annotations", "horizontal-chromosome-labels", "horizontal-vector-heatmap") ]
 
         # Skip to the next view if there are no data tracks.
         if len(top_tracks) < 1:
@@ -950,8 +1021,10 @@ def resize_1d_tracks(views):
 
         gene_chromosome_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-gene-annotations", "horizontal-chromosome-labels") ]
 
+        horizontal_vector_heatmap_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-vector-heatmap") ]
+
         # Get the height allocated for all of the top tracks.
-        remaining_height = 600
+        remaining_height = 565
         # If there is a central view, the top rows will have less height to work with.
         if view_info["has_center_content"]:
             remaining_height = 200
@@ -959,6 +1032,10 @@ def resize_1d_tracks(views):
         # Remove the height from the chromosome and gene-annotation tracks
         for track in gene_chromosome_tracks:
             remaining_height -= track.get("height", 50)
+
+        # Remove the height from the horizontal-vector-heatmap tracks
+        for track in horizontal_vector_heatmap_tracks:
+            remaining_height -= track.get("height", 18)
 
         # Evenly divide the remaining height.
         height_per_track = remaining_height / len(top_tracks)
@@ -980,7 +1057,7 @@ def resize_1d_tracks(views):
         for track in top_tracks:
             # If it's too tall or too short, set it to the fixed height.
             if "height" not in track or track["height"] > height_per_track or track["height"] < height_per_track * 0.8:
-                track["height"] = height_per_track
+                track["height"] = int(height_per_track)
     return views, ""
 
 def add_beddb_file(views, file, genome_assembly, viewconfig_info):
@@ -1425,6 +1502,15 @@ def add_zoom_lock_if_needed(view_config, view, scales_and_center_k):
 
     base_initial_x_domain = view_config["views"][0]["initialXDomain"]
     base_initial_y_domain = view_config["views"][0]["initialYDomain"]
+
+    # If there is no base view zoom, calculate it based on the X domain.
+    if base_view_x == None and base_view_y == None and base_view_zoom == None:
+        # Use the Domain's midway point for the lock's x and y coordinates.
+        base_view_x = (base_initial_x_domain[0] + base_initial_x_domain[1]) / 2.0
+        base_view_y = (base_initial_y_domain[0] + base_initial_y_domain[1]) / 2.0
+
+        # The zoom level just needs to be the same.
+        base_view_zoom = 1
 
     # Set the location and zoom locks.
     for lock_name in ("locationLocks", "zoomLocks"):

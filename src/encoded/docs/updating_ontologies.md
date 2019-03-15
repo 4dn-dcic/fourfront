@@ -1,49 +1,44 @@
 Updating ontologies
 =========================
 
-This document describes how to update the ontology versions used for searching and validation in the encoded application, ```ontology.json``` .
+This document describes how to update the ontology_terms in fourfront with the latest ontology obtained from the maintainers.
 
 Ontologies used
----------------- 
+----------------
 
 * [Uber anatomy ontology (Uberon)]
-* [Cell Ontology (CL)]
 * [Experimental Factor Ontology (EFO)]
 * [Ontology for Biomedical Investigations (OBI)]
+* [Sequence Ontology (SO)]
 
-How to update the ontology versions
----------------- 
+Ontology files that are used are obtained using the value in the download_url field of the Ontology item in the database.
 
-1. Ontology files to use:
-	
-	* Uberon and CL: composite-metazoan.owl  from [Uberon download]
-	* EFO: EFO_inferred.owl from [EFO src tree]
-	* OBI: obi.owl [OBI releases], identify the most recent release at time of generating ```ontology.json```
+How to update ontology terms
+----------------
 
-2. Run generate-ontology, an example is: 
 
-	$ bin/generate-ontology --uberon-url=http://berkeleybop.org/ontologies/uberon/composite-metazoan.owl --efo-url=http://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/EFO_inferred.owl?format=raw --obi-url=http://svn.code.sf.net/p/obi/code/releases/<<<<USE THE MOST RECENT DATE HERE>>>>/obi.owl
+* The script generate_ontology.py, located in the encoded/commands directory, will generate json to load to run use
 
-3. Rename the ```ontology.json``` to one with the date that it was generated:
+	`$ bin/generate-ontology`
 
-	$ cp ontology.json ontology-YYYY-MM-DD.json
+	* default is to run on data and generate output for all ontologies in the database
+	* `bin/generate-ontology --help` for script options or look at `def parse_args` in script code
 
-4. Load new ontology file into the encoded-build/ontology directory on S3
 
-	$ aws s3 cp ontology-2015-02-01.json s3://encoded-build/ontology
+* Unless the '--full' option is used 2 files are generated:
+	`ontology_patch.json` contains json to patch or update existing terms
+	`ontology_post.json` contains json for new ontology terms that don't currently exist in the database
 
-5.  Update the ontology version in the [buildout.cfg]:
+	* --full will generate a full set of terms for the specified ontologies that can be used to load into a 'fresh' database
 
-	curl -o ontology.json https://s3-us-west-1.amazonaws.com/encoded-build/ontology ontology-YYYY-MM-DD.json
 
-6.  Update THIS document (step 2) with the obi.owl release date
+* To load ontology term updates into fourfront use the script load_ontology_terms.py located in encoded/commands
 
+	`$ bin/load-ontology-terms production.ini --app-name app --post-file 'path/to/post.json' --patch_file 'path/to/patch.json'`
+
+	* `bin/load-ontology-terms --help` or parser setup in script `main` for options
 
 [Uber anatomy ontology (Uberon)]: http://uberon.org/
-[Cell Ontology (CL)]: http://cellontology.org/
+[Sequence Ontology (SO)]: http://www.sequenceontology.org/
 [Experimental Factor Ontology (EFO)]: http://www.ebi.ac.uk/efo
 [Ontology for Biomedical Investigations (OBI)]: http://obi-ontology.org/
-[Uberon download]: http://berkeleybop.org/ontologies/uberon/
-[EFO src tree]: https://sourceforge.net/p/efo/code/HEAD/tree/trunk/src/efoinowl/InferredEFOOWLview/
-[OBI releases]: http://svn.code.sf.net/p/obi/code/releases/
-[buildout.cfg]: ../../../buildout.cfg

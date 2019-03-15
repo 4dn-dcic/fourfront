@@ -3,8 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
+import { console, object, Schemas } from './../util';
 import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch, ItemPageTable } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
@@ -16,8 +15,6 @@ export default class BiosampleView extends DefaultItemView {
     getTabViewContents(){
 
         var initTabs = [],
-            context = this.props.context,
-            windowWidth = this.props.windowWidth,
             width = this.getTabViewWidth();
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
@@ -27,10 +24,6 @@ export default class BiosampleView extends DefaultItemView {
     }
 
 }
-
-globals.content_views.register(BiosampleView, 'Biosample');
-
-
 
 export class BiosourcesTable extends React.PureComponent {
 
@@ -183,7 +176,7 @@ class CellCultureInfoBody extends React.Component {
                         <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='morphology_image' fallbackTitle="Morphology Image" singleItemClassName="block" wrapInColumn titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_image_attachment} />
 
                         <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_duration' fallbackTitle="Total Days in Culture" wrapInColumn />
- 
+
                         <OverViewBodyItem result={cell_culture} tips={tipsForCellCulture} property='culture_start_date' fallbackTitle="Culture Start Date" wrapInColumn titleRenderFxn={OverViewBodyItem.titleRenderPresets.local_date_time} />
 
                     </div>
@@ -196,7 +189,7 @@ class CellCultureInfoBody extends React.Component {
 }
 
 class BiosourceInfoBody extends React.Component {
-    
+
     render(){
         var result = this.props.result;
         var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
@@ -220,7 +213,7 @@ class BiosourceInfoBody extends React.Component {
                         <OverViewBodyItem result={result} tips={tips} property='biosource' fallbackTitle="Biosource" wrapInColumn />
 
                         <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='biosource_type' fallbackTitle="Biosource Type" wrapInColumn />
-                        
+
                         <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='cell_line' fallbackTitle="Cell Line Name" wrapInColumn hideIfNoValue />
 
                         <OverViewBodyItem result={biosource} tips={tipsForBiosource} property='individual' fallbackTitle="Individual" wrapInColumn titleRenderFxn={function(field, val){

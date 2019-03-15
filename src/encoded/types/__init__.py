@@ -2,11 +2,14 @@
 
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
+from snovault.schema_utils import validate_request
+from snovault.validation import ValidationFailure
 from snovault import (
     calculated_property,
     collection,
     load_schema,
-    CONNECTION
+    CONNECTION,
+    COLLECTIONS
 )
 # from pyramid.traversal import find_root
 from .base import (
@@ -127,10 +130,29 @@ class GenomicRegion(Item):
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
 
+    def display_title(self, request):
+        ''' If you have full genome coordinates use those, otherwise use a
+            location description (which should be provided if not coordinates)
+            with default just being genome assembly (required)
+        '''
+        props = self.properties
+        value = None
+        if props.get('location_description') and not (
+                props.get('start_coordinate') or props.get('end_coordinate')):
+            value = props['location_description']
+        else:
+            value = props.get('genome_assembly')
+            if props.get('chromosome'):
+                value += (':' + props['chromosome'])
+            if props.get('start_coordinate') and props.get('end_coordinate'):
+                value += ':' + str(props['start_coordinate']) + '-' + str(props['end_coordinate'])
+        return value
+
 
 @collection(
     name='organisms',
-    unique_key='organism:name',
+    unique_key='organism:taxon_id',
+    lookup_key='name',
     properties={
         'title': 'Organisms',
         'description': 'Listing of all registered organisms',
@@ -140,7 +162,7 @@ class Organism(Item):
 
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
-    name_key = 'name'
+    name_key = 'taxon_id'
 
     def display_title(self):
         if self.properties.get('scientific_name'):  # Defaults to "" so check if falsy not if is None
@@ -206,29 +228,44 @@ class TrackingItem(Item):
     embedded_list = []
 
     @classmethod
-    def create_and_commit(cls, request, properties, render=False):
+    def create_and_commit(cls, request, properties, clean_headers=False):
         """
         Create a TrackingItem with a given request and properties, committing
         it directly to the DB. This works by manually committing the
         transaction, which may cause issues if this function is called as
         part of another POST. For this reason, this function should be used to
         track GET requests -- otherwise, use the standard POST method.
-        Skips validators.
-        Setting render to True/None may cause permission issues
+        If validator issues are hit, will not create the item but log to error
+
+        Args:
+            request: current request object
+            properties (dict): TrackingItem properties to post
+            clean_headers(bool): If True, remove 'Location' header created by POST
+
+        Returns:
+            dict response from snovault.crud_views.collection_add
+
+        Raises:
+            ValidationFailure if TrackingItem cannot be validated
         """
         import transaction
-        import uuid
-        tracking_uuid = str(uuid.uuid4())
-        model = request.registry[CONNECTION].create(cls.__name__, tracking_uuid)
-        properties['uuid'] = tracking_uuid
-        # no validators run, so status must be set manually if we want it
-        if 'status' not in properties:
-            properties['status'] = 'in review by lab'
-        request.validated = properties
-        res = sno_collection_add(TrackingItem(request.registry, model), request, render)
+        collection = request.registry[COLLECTIONS]['TrackingItem']
+        # set remote_user to standarize permissions
+        prior_remote = request.remote_user
+        request.remote_user = 'EMBED'
+        # remove any missing attributes from DownloadTracking
+        properties['download_tracking'] = {k: v for k, v in properties.get('download_tracking', {}).items()
+                                           if v is not None}
+        validate_request(collection.type_info.schema, request, properties)
+        if request.errors:  # from validate_request
+            request.remote_user = prior_remote
+            raise ValidationFailure('body')  # use errors from validate_request
+        ti_res = sno_collection_add(collection, request, False)  # render=False
         transaction.get().commit()
-        del request.response.headers['Location']
-        return res
+        if clean_headers and 'Location' in request.response.headers:
+            del request.response.headers['Location']
+        request.remote_user = prior_remote
+        return ti_res
 
     def display_title(self):
         date_created = self.properties.get('date_created', '')[:10]

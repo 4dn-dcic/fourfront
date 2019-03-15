@@ -5,14 +5,14 @@ import React from 'react';
 import _ from 'underscore';
 import ReactDOM from 'react-dom';
 
-var App = require('./components');
+import App from './components';
 var domready = require('domready');
 import * as store from './store';
-var { Provider, connect } = require('react-redux');
+import { Provider, connect } from 'react-redux';
 import { console, JWT } from './components/util';
 import { BrowserFeat } from './components/util/layout';
 
-/** 
+/**
  * Unset JWT/auth and reload page if missing user info which should be paired with otherwise valid JWT token.
  * If user_info valid (exists), update localStorage w/ server-provider user_details (through props).
  * If no user_details provided, assume not logged in and unset JWT, then continue.
@@ -37,7 +37,7 @@ function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
             window.location.reload();
             return true; // TODO maybe: Show an 'error, please wait' + App.authenticateUser (try to make static).
         }
-        // Re: other session data - JWT token (stored as cookie) will match session as was used to auth server-side. 
+        // Re: other session data - JWT token (stored as cookie) will match session as was used to auth server-side.
         // user_actions will be left over in localStorage from initial login request (doesn't expire)
     } else {
         // Unset all user info otherwise (assume not signed in)
@@ -84,5 +84,5 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         window.app = app;
         window.React = React;
     });
-    
+
 }

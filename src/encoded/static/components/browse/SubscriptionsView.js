@@ -3,8 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
-import * as globals from './../globals';
-import { ajax, console, object, isServerSide, DateUtility } from './../util';
+import { ajax, DateUtility } from './../util';
 
 /**
  * @typedef {Object} Subscription
@@ -19,7 +18,7 @@ var Subscription;
  * Container component for the submissions page. Fetches the user info and
  * coordinates individual subscriptions.
  */
-export class SubscriptionView extends React.Component {
+export default class SubscriptionsView extends React.Component {
 
     constructor(props){
         super(props);
@@ -116,7 +115,7 @@ class SubscriptionEntry extends React.Component{
         this.changePage = _.throttle(this.changePage, 250);
         var is_open = false;
         // user submissions default to open
-        if(this.props.title == 'My submissions'){
+        if (this.props.title == 'My submissions'){
             is_open = true;
         }
         this.state = {
@@ -144,7 +143,9 @@ class SubscriptionEntry extends React.Component{
         if(!this.state.data){
             this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
         }
-        this.setState({'open':!this.state.open});
+        this.setState(function({ open }){
+            return {'open': !open };
+        });
     }
 
     loadSubscriptionData = (url, page, type) => {
@@ -342,5 +343,3 @@ class SubscriptionEntry extends React.Component{
         );
     }
 }
-
-globals.content_views.register(SubscriptionView, 'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)

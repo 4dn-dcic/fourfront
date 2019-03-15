@@ -112,14 +112,8 @@ $navbar-transition-easing: ease-out;
                     padding-top: 10px;
                     transition: padding $navbar-transition-length, transform $navbar-transition-length;
                     body.scrolled-past-top & {
-                        padding-top: 6px;
-                        padding-bottom: 6px;
-                    }
-                    > text.fourfront-logo-text {
-                        transition: letter-spacing 1s, opacity .7s, stroke .7s, stroke-width .7s, fill .7s;
-                    }
-                    .fourfront-logo-foreground-circle {
-                        transition: opacity 1.2s;
+                        padding-top: 6px !important;
+                        padding-bottom: 6px !important;
                     }
                 }
             }

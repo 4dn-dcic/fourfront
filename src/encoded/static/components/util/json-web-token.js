@@ -213,6 +213,9 @@ export function saveUserInfo(user_info){
  * @returns {{ removedCookie: boolean, removedLocalStorage: boolean }} - Removal results
  */
 export function remove(source = 'all'){
+
+    console.warn("REMOVING JWT!!");
+
     if (source === 'any' || source === '*') source = 'all';
 
     var removedCookie = false,

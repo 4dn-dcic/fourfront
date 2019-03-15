@@ -8,6 +8,10 @@
  * @return {boolean} - True if processing on serverside.
  */
 export function isServerSide(){
+    if (typeof SERVERSIDE === 'boolean'){
+        return SERVERSIDE;
+    }
+    // Fallback
     if (typeof window === 'undefined' || !window || !window.document || !window.document.createElement){
         return true;
     }
