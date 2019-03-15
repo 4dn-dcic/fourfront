@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { FacetList } from './FacetList';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock, FileEntryBlockPairColumn } from './StackedBlockTable';
 import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
@@ -50,6 +51,42 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     }
 
+    /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
+    static staticColumnHeaders(columnHeaders, experimentSetType){
+        return _.map(RawFilesStackedTable.builtInHeaders(experimentSetType), function(staticCol){
+            return _.extend(
+                _.clone(staticCol),
+                _.findWhere(columnHeaders, { 'title' : staticCol.title }) || {}
+            );
+        });
+    }
+
+    /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
+    static customColumnHeaders(columnHeaders, experimentSetType){
+        return _.filter(columnHeaders, function(col){
+            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(experimentSetType), 'title'), col.title);
+        });
+    }
+
+    static metricColumnHeaders(showMetricColumns, experimentArray){
+        // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
+        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || ProcessedFilesQCStackedTable.filterFiles(
+            expFxn.allFilesFromExperiments(experimentArray, false, false, true), true
+        ) ? true : false;
+
+        if (!showMetricColumns) return null;
+
+        return [
+            { 'columnClass': 'file-detail', 'title': 'Total Sequences', 'initialWidth': 110, 'field' : "quality_metric.Total Sequences" }
+        ];
+    }
+
+    static columnHeaders = memoize(function(columnHeaders, experimentSetType, showMetricColumns, experimentArray){
+        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSetType) || [])
+            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSetType) || [])
+            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentArray) || []);
+    });
+
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
         'experimentArray'           : PropTypes.array,
@@ -66,7 +103,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         })).isRequired,
         'keepCounts'                : PropTypes.bool, // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.),
         'collapseLongLists'         : PropTypes.bool
-    }
+    };
 
     static defaultProps = {
         'keepCounts'    : false,
@@ -80,13 +117,10 @@ export class RawFilesStackedTable extends React.PureComponent {
         ],
         'collapseLongLists' : true,
         'showMetricColumns' : null
-    }
+    };
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.staticColumnHeaders = this.staticColumnHeaders.bind(this);
-        this.customColumnHeaders = this.customColumnHeaders.bind(this);
         this.columnHeaders = this.columnHeaders.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
@@ -99,52 +133,14 @@ export class RawFilesStackedTable extends React.PureComponent {
         };
         this.state = {
             'columnWidths'    : null, // set on componentDidMount via updateColumnWidths
-            'mounted'         : false,
-            'columnHeaders'   : this.columnHeaders(props)
+            'mounted'         : false
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        var keysToCheckForNewColumnHeaders = ['showMetricColumns', 'columnHeader', 'experimentSetType', 'experimentArray'], i;
-        for (i = 0; i < keysToCheckForNewColumnHeaders.length; i++){
-            if (nextProps[keysToCheckForNewColumnHeaders[i]] !== this.props[keysToCheckForNewColumnHeaders[i]]){
-                this.setState({ 'columnHeaders' : this.columnHeaders(nextProps) });
-            }
-        }
-    }
-
-
-    /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
-    staticColumnHeaders(props = this.props){
-        return _.map(RawFilesStackedTable.builtInHeaders(props.experimentSetType), (staticCol) => {
-            return _.extend(
-                _.clone(staticCol),
-                _.findWhere(props.columnHeaders, { 'title' : staticCol.title }) || {}
-            );
-        });
-    }
-
-    /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
-    customColumnHeaders(props = this.props){
-        return _.filter(props.columnHeaders, (col) => {
-            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(props.experimentSetType), 'title'), col.title);
-        });
-    }
-
-    metricColumnHeaders(props = this.props){
-        if (typeof props.showMetricColumns === 'boolean' && !props.showMetricColumns) return null;
-        var showMetricColumns = (typeof props.showMetricColumns === 'boolean' && props.showMetricColumns) || ProcessedFilesQCStackedTable.filterFiles(
-            expFxn.allFilesFromExperiments(props.experimentArray, false, false, true), true
-        ) ? true : false;
-        if (!showMetricColumns) return null;
-        return [
-            { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" }
-        ];
-    }
-
     /* Combined top row of headers */
-    columnHeaders(props = this.props){
-        return (this.staticColumnHeaders(props) || []).concat(this.customColumnHeaders(props) || []).concat(this.metricColumnHeaders(props) || []);
+    columnHeaders(){
+        const { columnHeaders, experimentSetType, showMetricColumns, experimentArray } = this.props;
+        return RawFilesStackedTable.columnHeaders(columnHeaders, experimentSetType, showMetricColumns, experimentArray);
     }
 
 
@@ -321,12 +317,13 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     render(){
+        var { experimentSetType, experimentArray } = this.props;
         return (
             <StackedBlockTable {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'experimentSetAccession', 'collapseLongLists', 'width')}
-                columnHeaders={this.state.columnHeaders} className="expset-raw-files" fadeIn
-                children={!Array.isArray(this.props.experimentArray) ? null :
-                    this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
-                        this.renderers[this.props.experimentSetType]() : this.renderers.default()
+                columnHeaders={this.columnHeaders()} className="expset-raw-files" fadeIn
+                children={!Array.isArray(experimentArray) ? null :
+                    experimentSetType && typeof this.renderers[experimentSetType] === 'function' ?
+                        this.renderers[experimentSetType]() : this.renderers.default()
                 } />
         );
     }
@@ -364,14 +361,21 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         };
     }
 
-    componentWillReceiveProps(nextProps){
+    /**
+     * @todo
+     * Create _memoized_ static function(s) for `filesGroupedByExperimentOrGlobal` & `renderExperimentBlocks` which
+     * will accept individual required props as parameters and then have instance methods pluck out the params
+     * from props and feed them to static counterparts.
+     */
+    UNSAFE_componentWillReceiveProps(nextProps){
         if (nextProps.files !== this.props.files){
             var filesGroupedByExperimentOrGlobal = this.filesGroupedByExperimentOrGlobal(nextProps);
             this.setState({ 'renderedExperimentBlocks' : this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal) });
         }
     }
 
-    componentWillUpdate(nextProps, nextState){
+    /** @todo Refactor & test */
+    UNSAFE_componentWillUpdate(nextProps, nextState){
         this.oddExpRow = false;
     }
 
@@ -495,12 +499,12 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
      * @param {boolean} [checkAny=false]        Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
      * @returns {Item[]|true} Filtered list of files or boolean for "any", depending on `checkAny` param.
      */
-    static filterFiles(files, checkAny=false){
+    static filterFiles = memoize(function(files, checkAny=false){
         var func = checkAny ? _.any : _.filter;
         return func(files.slice(0), function(f){
             return f.quality_metric && f.quality_metric.overall_quality_status;
         });
-    }
+    });
 
     /**
      * Converts file + field (param) into a human-readable percentage.

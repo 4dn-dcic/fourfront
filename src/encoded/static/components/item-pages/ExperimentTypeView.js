@@ -3,12 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import { console, object, Schemas } from './../util';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    SimpleFilesTableLoaded, SimpleFilesTable, Publications, Protocols, OverviewHeadingContainer } from './components';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
+import { Publications, Protocols } from './components';
 import { UserContentBodyList } from './../static-pages/components';
 
 
@@ -42,12 +39,15 @@ export default class ExperimentTypeView extends DefaultItemView {
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
-        return [
-            <Publications.ReferencePubBelowHeaderRow reference_pubs={this.props.context.reference_pubs} />,
-            <Protocols.SopBelowHeaderRow sop={this.props.context.sop} />
-        ];
+        var context = this.props.context || {};
+        return (
+            <React.Fragment>
+                <Publications.ReferencePubBelowHeaderRow reference_pubs={context.reference_pubs} />,
+                <Protocols.SopBelowHeaderRow sop={context.sop} />
+            </React.Fragment>
+        );
     }
-    
+
 }
 
 

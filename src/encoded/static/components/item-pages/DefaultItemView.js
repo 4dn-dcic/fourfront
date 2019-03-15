@@ -119,7 +119,7 @@ export default class DefaultItemView extends React.PureComponent {
     getCommonTabs(props = this.props){
         var returnArr = [],
             { context, schemas, windowWidth } = this.props;
-    
+
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
@@ -237,10 +237,12 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element[]} By default, `Publications.ProducedInPublicationBelowHeaderRow` and `StaticHeaderArea` component instances.
      */
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow {...this.props} produced_in_pub={this.props.context.produced_in_pub} key="publication-info" />,
-            <StaticHeadersArea context={this.props.context} key="static-headers-area" />
-        ];
+        return (
+            <React.Fragment>
+                <Publications.ProducedInPublicationBelowHeaderRow {...this.props} produced_in_pub={this.props.context.produced_in_pub} key="publication-info" />
+                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
+            </React.Fragment>
+        );
     }
 
     /**
@@ -372,15 +374,13 @@ export class EmbeddedItemWithAttachment extends React.Component {
     filename(){
         return (this.props.item && this.props.item.attachment && this.props.item.attachment.download) || object.itemUtil.getTitleStringFromContext(this.props.item) || null;
     }
-    
+
     render(){
         var { item, index } = this.props,
             linkToItem = object.itemUtil.atId(item),
             isInArray = typeof index === 'number';
 
         if (!item || !linkToItem) return null;
-
-        var itemTitle = object.itemUtil.getTitleStringFromContext(item);
 
         var viewAttachmentButton = null;
         var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
@@ -389,7 +389,7 @@ export class EmbeddedItemWithAttachment extends React.Component {
                 <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={this.filename()} href={linkToItem + item.attachment.href} disabled={!haveAttachment} className='text-ellipsis-container btn-block' />
             );
         }
-        
+
         return (
             <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToItem}>
                 <div className="row">
@@ -435,7 +435,7 @@ export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment 
 
         var imageElem = <a href={linkToItem} className="image-wrapper"><img className="embedded-item-image" src={linkToItem + item.attachment.href} /></a>;
         var captionText = (item.attachment && item.attachment.caption) || this.filename();
-        
+
         return (
             <div className={"embedded-item-with-attachment is-image" + (isInArray ? ' in-array' : '')} key={linkToItem}>
                 <div className="inner">{ imageElem }{ this.caption() }</div>
@@ -563,11 +563,11 @@ export class OverViewBodyItem extends React.Component {
     }
 
     render(){
-        var { 
+        var {
             result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, propertyForLabel,
             listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName, singleItemClassName
         } = this.props;
-        
+
         function fallbackify(val){
             if (!property) return titleRenderFxn(property, result, true, addDescriptionTipForLinkTos, null, 'div', result);
             return val || fallbackValue || 'None';
