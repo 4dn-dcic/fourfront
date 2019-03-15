@@ -7,25 +7,10 @@ import ReactTooltip from 'react-tooltip';
 import { console, DateUtility, object } from './../../util';
 import { FormattedInfoWrapper, WrappedListBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 
-/*
-var testData = [ // Use this to test list view(s) as none defined in test data.
-    { 'link_id' : '~something~here~1', 'display_title' : "Sample Publicstion One which involces this experiment set and other things" },
-    { 'link_id' : '~something~here~2', 'display_title' : "Something else wich references this set and has data and many words" },
-    { 'link_id' : '~something~here~3', 'display_title' : "Hello 1123" },
-    { 'link_id' : '~something~here~4', 'display_title' : "Hello 11234 sdfsfd asfsdf asfgsdg sdfsdg sadfsdg sdgdsg" },
-    { 'link_id' : '~something~here~5', 'display_title' : "Hello 112345" },
-    { 'link_id' : '~something~here~6', 'display_title' : "Hello 1123456 123456" }
-];
-*/
-
 
 
 /**
  * Display a FormattedInfoBlock-style block with custom detail (defined via props.children).
- *
- * @memberof module:item-pages/components.Publications
- * @class DetailBlock
- * @extends {React.Component}
  *
  * @prop {string} singularTitle         - Title to show in top left of block. 'S' gets added to end of title if more than 1 item.
  * @prop {Object} publication           - Publication whose link and display_title to display.
@@ -114,32 +99,17 @@ class ProducedInPublicationBelowHeaderRow extends React.Component {
     render(){
         if (!this.props.produced_in_pub) return null;
         return (
-            <div className="row mb-2">
-                <div className="col-sm-12">
-                    <DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
-                        <div className="more-details">
-                            <ShortAttribution publication={this.props.produced_in_pub} />
-                        </div>
-                    </DetailBlock>
-                </div>
+            <div className="mb-2">
+                <DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
+                    <div className="more-details">
+                        <ShortAttribution publication={this.props.produced_in_pub} />
+                    </div>
+                </DetailBlock>
             </div>
         );
     }
 }
 
-
-class ReferencePubBelowHeaderRow extends React.Component {
-    render(){
-        if (!this.props.reference_pubs) return null;
-        return (
-            <div className="row mb-2">
-                <div className="col-sm-12">
-                    <DetailBlock publication={this.props.reference_pubs[0]} singularTitle="Reference Publication" />
-                </div>
-            </div>
-        );
-    }
-}
 
 /**
  * Shows publications for current Item.
@@ -154,14 +124,13 @@ export class Publications extends React.PureComponent {
     static DetailBlock = DetailBlock;
     static ShortAttribution = ShortAttribution;
     static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow;
-    static ReferencePubBelowHeaderRow = ReferencePubBelowHeaderRow
 
     constructor(props){
         super(props);
         this.shortAbstract = this.shortAbstract.bind(this);
         this.toggleAbstractIcon = this.toggleAbstractIcon.bind(this);
         this.detailRows = this.detailRows.bind(this);
-        this.render = this.render.bind(this);
+        this.onToggleAbstractIconClick = this.onToggleAbstractIconClick.bind(this);
         this.state = {
             'abstractCollapsed' : true
         };
@@ -188,19 +157,20 @@ export class Publications extends React.PureComponent {
         }
     }
 
+    onToggleAbstractIconClick(e){
+        this.setState(function({ abstractCollapsed }){
+            return { 'abstractCollapsed' : !abstractCollapsed };
+        });
+    }
+
     toggleAbstractIcon(publication = this.props.context.produced_in_pub){
         if (!publication || !publication.abstract) return null;
         if (publication && publication.abstract && publication.abstract.length <= 240){
             return null;
         }
         return (
-            <i
-                className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
-                data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'}
-                onClick={(e)=>{
-                    this.setState({ abstractCollapsed : !this.state.abstractCollapsed });
-                }}
-            />
+            <i className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
+                data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'} onClick={this.onToggleAbstractIconClick} />
         );
     }
 
@@ -247,11 +217,18 @@ export class Publications extends React.PureComponent {
     }
 
     render(){
-        var context = this.props.context;
-        var usedInPublications = [];
-        if (Array.isArray(context.publications_of_set) && context.publications_of_set.length > 0){
-            usedInPublications = context.publications_of_set.filter(function(pub){
-                if (pub.link_id && context.produced_in_pub && context.produced_in_pub.link_id && pub.link_id === context.produced_in_pub.link_id){
+        var context = this.props.context,
+            producedInPubID = (context.produced_in_pub && object.itemUtil.atId(context.produced_in_pub)) || null,
+            usedInPublications;
+
+        if (!Array.isArray(context.publications_of_set) || context.publications_of_set.length === 0){
+            usedInPublications = [];
+        } else if (!producedInPubID){
+            usedInPublications = context.publications_of_set;
+        } else {
+            usedInPublications = _.filter(context.publications_of_set, function(pub){
+                var pubID = object.itemUtil.atId(pub);
+                if (pubID && pubID === producedInPubID){
                     return false;
                 }
                 return true;
