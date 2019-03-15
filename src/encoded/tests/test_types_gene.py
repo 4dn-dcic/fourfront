@@ -192,3 +192,8 @@ def test_update_post_with_bogus_geneid(testapp, lab, award):
     assert 'award' in gene
     for mf in missing_fields:
         assert mf not in gene
+
+
+def test_invalid_geneid(testapp, lab, award):
+    geneid = '99999999999999'
+    testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}, status=422)
