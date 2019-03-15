@@ -19,7 +19,7 @@ def main():
     print(str(start))
     logging.basicConfig()
     # Loading app will have configured from config file. Reconfigure here:
-    logging.getLogger('encoded').setLevel(logging.DEBUG)
+    logging.getLogger('encoded').setLevel(logging.WARN)
 
     parser = argparse.ArgumentParser(
         description="Load Ontology Term Data", epilog=EPILOG,
@@ -32,7 +32,6 @@ def main():
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
     args = parser.parse_args()
-
     post = None if args.post_file == 'None' else args.post_file
     patch = None if args.patch_file == 'None' else args.patch_file
 

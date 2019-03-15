@@ -500,14 +500,18 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False
                      clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_ontology_terms(app, post_json=None, patch_json=None):
+def load_ontology_terms(app, post_file=None, patch_file=None):
     from webtest import TestApp
     from webtest.app import AppError
-    # change the data format from list to store
-    if post_json:
-        post_json = {'ontology_term': post_json}
-    if patch_json:
-        patch_json = {'ontology_term': patch_json}
+    post_json = {}
+    patch_json = {}
+    # read in json files and create store
+    if post_file:
+        with open(post_file) as post:
+            post_json['ontology_term'] = json.loads(post.read())
+    if patch_file:
+        with open(patch_file) as patch:
+            patch_json['ontology_term'] = json.loads(patch.read())
 
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -516,15 +520,19 @@ def load_ontology_terms(app, post_json=None, patch_json=None):
     testapp = TestApp(app, environ)
 
     if post_json:
-        post_res = load_all(testapp, post_json, None, itype='ontology_term')
+        logger.warning('posting ontology terms')
+        post_res = load_all(testapp, post_json, None, itype='ontology_term', from_json=True)
         if post_res:  # None if successful
             logger.error('load_ontology_terms: failed to POST', error=post_res)
-
+        else:
+            logger.warning('done posting terms')
     if patch_json:
-        patch_res = load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True)
+        logger.warning('patching ontology terms')
+        patch_res = load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True, from_json=True)
         if patch_res:  # None if successful
             logger.error('load_ontology_terms: failed to PATCH', error=patch_res)
-
+        else:
+            logger.warning('done patching terms')
     # now keep track of the last time we loaded these suckers
     data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
     try:
