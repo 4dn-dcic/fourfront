@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { isServerSide, ajax, console, fileUtil } from './../../../util';
-import { HiGlassPlainContainer } from './HiGlassPlainContainer';
+import { HiGlassPlainContainer, HiGlassLoadingIndicator } from './HiGlassPlainContainer';
 
 /** This class will pass the HiGlass Item's viewconfig to the HiGlassPlainContainer, possibly using AJAX to get the information.*/
 export class HiGlassAjaxLoadContainer extends React.PureComponent {
@@ -12,22 +12,28 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
     constructor(props){
         super(props);
 
+        this.getFullHiglassItem = this.getFullHiglassItem.bind(this);
+
         this.state = {
             'loading': false,
-            'higlassItem' : null
+            'higlassItem' : (props.higlassItem && props.higlassItem.viewconfig) ? props.higlassItem : null
         };
-
-        this.getFullHiglassItem = this.getFullHiglassItem.bind(this);
     }
 
     componentDidMount(){
-        this.getFullHiglassItem();
+        if (!this.state.higlassItem) {
+            this.getFullHiglassItem();
+        }
     }
 
     componentDidUpdate(pastProps){
         // After updating the component, load the new higlass component if it changed.
         if (pastProps.higlassItem !== this.props.higlassItem){
-            this.getFullHiglassItem();
+            if (this.props.hiGlassItem.viewconfig){
+                this.setState({ higlassItem : this.props.higlassItem });
+            } else {
+                this.getFullHiglassItem();
+            }
         }
     }
 
@@ -60,35 +66,19 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         var { height } = this.props;
 
         // Use the height to make placeholder message when loading.
-        var placeholderStyle = {};
-        if (typeof height === 'number' && height >= 140){
-            placeholderStyle.height = height;
-            placeholderStyle.paddingTop = (height / 2) - 40;
-        }
-        else if(typeof height !== 'number'){
-            // If no height is given, assume defaults
-            placeholderStyle.height = 600;
+        var placeholderStyle = { "height" : height || 600 };
+        if (placeholderStyle.height >= 140) {
             placeholderStyle.paddingTop = (placeholderStyle.height / 2) - 40;
         }
 
         // If we're loading, show a loading screen
         if (loading){
-            return <React.Fragment><div className="text-center" style={placeholderStyle}>
-                <h3>
-                    <i className="icon icon-lg icon-television"/>
-                </h3>
-                Initializing
-            </div></React.Fragment>;
+            return <div className="text-center" style={placeholderStyle}><HiGlassLoadingIndicator title="Loading" /></div>;
         }
 
         // Raise an error if there is no viewconfig
         if (!higlassItem || !higlassItem.viewconfig) {
-            return <React.Fragment><div className="text-center" style={placeholderStyle}>
-                <h3>
-                    <i className="icon icon-lg icon-exclamation-triangle"/>
-                </h3>
-                No HiGlass content found. Please go back or try again later.
-            </div></React.Fragment>;
+            return <div className="text-center" style={placeholderStyle}><HiGlassLoadingIndicator icon="exclamation-triangle" title="No HiGlass content found. Please go back or try again later." /></div>;
         }
 
         // Pass the viewconfig to the HiGlassPlainContainer

@@ -63,7 +63,7 @@ export class BasicUserContentBody extends React.PureComponent {
             return (
                 <React.Fragment>
                     <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={_.pick(context, "@id")} />
+                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} />
                 </React.Fragment>
             );
         } else {
