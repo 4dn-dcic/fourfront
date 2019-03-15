@@ -27,7 +27,7 @@
             "description": "NCBI Entrez GeneID of official nomenclature approved gene.",
             "comment": "An gene (object) needs to have an Entrez GeneID and needs to be approved by (i.e. have an ID and gene symbol from) offical nomenclature such as HGNC, MGI, FlyBase, WormBase.",
             "type": "string",
-            "pattern": "^[1-9][0-9]*$",
+            "pattern": "^[1-9][0-9]{,8}$",
             "uniqueKey": true
         },
         "ncbi_entrez_status": {
