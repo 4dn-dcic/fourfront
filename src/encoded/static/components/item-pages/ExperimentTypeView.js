@@ -37,14 +37,26 @@ export default class ExperimentTypeView extends DefaultItemView {
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
-        var context = this.props.context || {};
+        var context = this.props.context || {},
+            pubsLen = (Array.isArray(context.reference_pubs) && context.reference_pubs.length) || 0,
+            publicationArea;
+
+        if (pubsLen === 1){
+            publicationArea = (
+                <Publications.PublicationBelowHeaderRow singularTitle="Reference Publication"
+                    publication={context.reference_pubs[0]} outerClassName={context.sop ? null : 'mb-2'}/>
+            );
+        } else if (pubsLen > 1){
+            publicationArea = (
+                <div className={context.sop ? null : 'mb-2'}>
+                    <WrappedCollapsibleList items={context.reference_pubs} singularTitle="Reference Publication" itemClassName="publication" />
+                </div>
+            );
+        }
+
         return (
             <React.Fragment>
-                { context.reference_pubs ?
-                    <div className={context.sop ? null : 'mb-2'}>
-                        <WrappedCollapsibleList items={context.reference_pubs} singularTitle="Reference Publication" itemClassName="publication" />
-                    </div>
-                : null }
+                { publicationArea }
                 <SOPBelowHeaderRow sop={context.sop} />
             </React.Fragment>
         );

@@ -26,7 +26,8 @@ class DetailBlock extends React.PureComponent {
         var { publication, singularTitle, children } = this.props;
         if (typeof publication !== 'object' || !publication) return null;
 
-        var title =  publication.display_title;
+        var title = publication.display_title,
+            url = object.itemUtil.atId(publication);
 
         if (publication.short_attribution && title.indexOf(publication.short_attribution + ' ') > -1){
             // Short Attribution is added to display_title on back-end; clear it off here since we craft our own attribution string manually.
@@ -36,9 +37,9 @@ class DetailBlock extends React.PureComponent {
         return (
             <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
                 <h5 className="block-title">
-                    <a href={object.atIdFromObject(publication)}>{ title }</a>
+                    <a href={url}>{ title }</a>
                 </h5>
-                <div className="details" children={children} />
+                <div className="details">{ children }</div>
             </FormattedInfoWrapper>
         );
     }
@@ -95,14 +96,21 @@ class ShortAttribution extends React.PureComponent {
 }
 
 
-class ProducedInPublicationBelowHeaderRow extends React.Component {
+class PublicationBelowHeaderRow extends React.Component {
+
+    static defaultProps = {
+        'singularTitle' : "Source Publication",
+        'outerClassName' : "mb-2"
+    };
+
     render(){
-        if (!this.props.produced_in_pub) return null;
+        var { publication, singularTitle, outerClassName } = this.props;
+        if (!publication) return null;
         return (
-            <div className="mb-2">
-                <DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
+            <div className={outerClassName}>
+                <DetailBlock publication={publication} singularTitle={singularTitle} >
                     <div className="more-details">
-                        <ShortAttribution publication={this.props.produced_in_pub} />
+                        <ShortAttribution publication={publication} />
                     </div>
                 </DetailBlock>
             </div>
@@ -123,7 +131,7 @@ export class Publications extends React.PureComponent {
 
     static DetailBlock = DetailBlock;
     static ShortAttribution = ShortAttribution;
-    static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow;
+    static PublicationBelowHeaderRow = PublicationBelowHeaderRow;
 
     constructor(props){
         super(props);

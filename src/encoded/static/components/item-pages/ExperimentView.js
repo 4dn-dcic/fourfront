@@ -120,7 +120,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
     itemMidSection(){
         return (
             <React.Fragment>
-                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
                 <OverviewHeading context={this.props.context} />
             </React.Fragment>
         );
@@ -135,7 +135,7 @@ export class ExperimentMicView extends ExperimentView {
     itemMidSection(){
         return (
             <React.Fragment>
-                <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
                 <OverviewHeadingMic context={this.props.context} />
             </React.Fragment>
         );
