@@ -233,7 +233,7 @@ export class LoginNavItem extends React.Component {
                 },
                 formHeading    = unverifiedEmail && (
                     <h4 className="text-400 mb-25 mt-05">
-                        You have never previously logged in with email <span className="text-600">{ unverifiedEmail }</span>.
+                        You have never logged in as <span className="text-600">{ unverifiedEmail }</span> before.
                         <br/>
                         Please <span className="text-500">register below</span> or <a href="#" className="text-500" onClick={onExitLinkClick}>use a different email address</a> if have an existing account.
                     </h4>
