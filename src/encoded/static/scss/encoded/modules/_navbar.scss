@@ -753,32 +753,42 @@ $navbar-transition-easing: ease-out;
 // User Actions Dropwdown
 
 .navbar-acct {
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: $screen-sm-min) {
         margin-left: 10px;
         margin-right: 0px; // Align w/ right-most container edge.
     }
 }
 
-#user_actions_dropdown {
-    max-width: 115px;
-    //width: 115px;
-    min-width: 65px;
+#user_account_nav_button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 25px;
-    > span.caret {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        margin-top: -3px;
+
+    .is-dropdown & {
+
+        &.dropdown-toggle {
+            padding-right: 25px;
+        }
+
+        > span.caret {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            margin-top: -3px;
+        }
+
     }
+
+    // screen-md size:
+    max-width: 145px;
+    min-width: 80px;
+
     @media screen and (min-width: $screen-lg-min) {
-        max-width: 150px;
-        min-width: 115px;
+        max-width: 210px;
+        min-width: 120px;
     }
     @media screen and (max-width: $screen-sm-max) {
-        max-width: 150px;
+        max-width: 200px;
         //width: 150px;
     }
     @media screen and (max-width: $screen-xs-max) {

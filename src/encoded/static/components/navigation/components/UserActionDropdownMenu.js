@@ -7,7 +7,7 @@ import url from 'url';
 import { Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './../../util';
 import * as store from './../../../store';
-import { LoginMenuItem } from './LoginMenuItem';
+import { LoginNavItem } from './LoginNavItem';
 
 
 /**
@@ -34,67 +34,71 @@ export class UserActionDropdownMenu extends React.Component {
 
     constructor(props){
         super(props);
-        this.setIsLoading = this.setIsLoading.bind(this);
+        this.performLogout = this.performLogout.bind(this);
         this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
         this.state = { 'isLoading' : false };
     }
 
-    setIsLoading(isLoading = null){
-        this.setState(function(currState){
-            if (typeof isLoading === 'boolean' && isLoading === currState.isLoading){
-                return null;
-            }
-            if (isLoading === null){
-                isLoading = !currState.isLoading;
-            }
-            return { isLoading };
-        });
+    /**
+     * Removes JWT from cookies, as well as userInfo from localStorage
+     * and then refreshes current view/href via navigate fxn.
+     */
+    performLogout(eventKey, e){
+        var { session, updateUserInfo } = this.props;
+
+        // Removes both idToken (cookie) and userInfo (localStorage)
+        JWT.remove();
+
+        if (!session) return;
+
+        // Refetch page context without our old JWT to hide any forbidden content.
+        updateUserInfo();
+        navigate('', {'inPlace':true});
+
+        if (typeof document !== 'undefined'){
+            // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
+            document.dispatchEvent(new MouseEvent('click'));
+        }
     }
 
+    /** Shown for logged in users. */
     listUserActionsAsMenuItems(){
-        var { mounted, listActionsFor, href, session } = this.props,
-            actions = [
-                <LoginMenuItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas')}
-                    key="login-register-logout" setIsLoadingIcon={this.setIsLoading} />,
-                // Old: actionToMenuItem({id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}, mounted, href, {"data-no-cache" : true})
-            ];
+        var { mounted, listActionsFor, href } = this.props;
 
-        if (session) {
-            // Account Actions
-            actions = actions.concat(
-                _.map(listActionsFor('user'), function(action){
-                    return actionToMenuItem(action, mounted, href, {"data-no-cache" : true});
-                })
-            );
-        }
+        var actions = _.map(listActionsFor('user'), function(action){
+            return actionToMenuItem(action, mounted, href, {"data-no-cache" : true});
+        });
+
+        actions.push(
+            <MenuItem id="logoutbtn" onSelect={this.performLogout} className="global-entry">
+                Log Out
+            </MenuItem>
+        );
 
         return actions;
     }
 
     render() {
-        var acctTitle = "Account",
-            acctIcon = null,
-            userDetails = null;
+        const session = this.props.session;
+        let acctBtn = null;
 
-        if (this.state.isLoading){
-            acctTitle = <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>;
-        } else if (this.props.session){
-            userDetails = JWT.getUserDetails();
-            if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) acctTitle = userDetails.first_name;
-            if (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1){
-                acctIcon = object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm');
-            } else acctIcon = <i title="Signed In" className="account-icon icon icon-user" />;
+        if (session){
+            var userDetails = JWT.getUserDetails(),
+                acctTitle = (userDetails && userDetails.first_name) || "Account",
+                acctIcon = (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1 && (
+                    object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm')
+                )) || <i className="account-icon icon icon-user-o" />;
+            acctBtn = (
+                <NavDropdown className={'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')}
+                    title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} id="user_account_nav_button" label="context">
+                    { this.listUserActionsAsMenuItems() }
+                </NavDropdown>
+            );
         } else {
-            acctIcon = <i className="account-icon icon icon-user-o" />;
+            acctBtn = <LoginNavItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')} key="login-register" id="user_account_nav_button" />;
         }
 
-        return (
-            <Nav className="navbar-acct" pullRight>
-                <NavDropdown
-                    className={'user-account-item' + (this.props.session ? ' is-logged-in' : '') + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')} title={<span>{ acctIcon }{ acctTitle }</span>}
-                    id="user_actions_dropdown" label="context" children={this.listUserActionsAsMenuItems()} />
-            </Nav>
-        );
+        return <Nav className="navbar-acct" pullRight>{ acctBtn }</Nav>;
     }
 }
 
