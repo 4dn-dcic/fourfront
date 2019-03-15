@@ -187,6 +187,11 @@ def test_range_download(testapp, registry, proc_file_json):
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
+    # ensure some basic fields are on the tracking items
+    for ti in tracking_items:
+        assert ti.properties['status'] == 'in review by lab'
+        assert 'schema_version' in ti.properties
+        assert 'date_created' in ti.properties
     tracked_rng_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items
                              if ti.properties.get('download_tracking', {}).get('range_query') is True]
     assert download_filename in tracked_rng_filenames
