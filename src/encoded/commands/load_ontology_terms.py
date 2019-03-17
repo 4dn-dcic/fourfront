@@ -25,8 +25,7 @@ def main():
         description="Load Ontology Term Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('json-file',
-                        help="File containing terms to load)
+    parser.add_argument('json_file', help="File containing terms to load")
     parser.add_argument('config_uri', help="path to configfile - development.ini or production.ini")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     args = parser.parse_args()
