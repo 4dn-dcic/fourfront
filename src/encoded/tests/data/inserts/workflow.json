@@ -12125,11 +12125,6 @@
                 "argument_format": "mcool",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "mcool"
-            },
-            {
-                "argument_format": "normvector_juicerformat",
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "cooler_normvector"
             }
         ],
         "award": "1U01CA200059-01",
@@ -12344,7 +12339,7 @@
                     ],
                     "description": "Merged Pairs file is processed using Cooler",
                     "software_used": [
-                        "/software/b43e5d6d-f1a6-4713-9b48-8f5c060dad6c/"
+                        "/software/9d4d8c31-9711-4345-8a84-d61fc4f7806a/"
                     ]
                 },
                 "name": "cooler",
@@ -12596,7 +12591,7 @@
                     ],
                     "description": "Cooler file is converted to mcool",
                     "software_used": [
-                        "/software/b43e5d6d-f1a6-4713-9b48-8f5c060dad6c/"
+                        "/software/9d4d8c31-9711-4345-8a84-d61fc4f7806a/"
                     ]
                 },
                 "name": "cool2mcool",
@@ -12657,7 +12652,7 @@
                     ],
                     "description": "HiC normalization vector is added to mcooler",
                     "software_used": [
-                        "/software/c1c772a8-5d1c-4481-8ab7-30729f3f6cb2/"
+                        "/software/61fc6148-5ccf-41da-a9cc-757a807f9372/"
                     ]
                 },
                 "name": "add-hic-normvector-to-mcool",
