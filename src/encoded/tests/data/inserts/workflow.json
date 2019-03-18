@@ -12139,8 +12139,7 @@
             "cooler.cwl",
             "pairs2hic.cwl",
             "cool2mcool.cwl",
-            "add-hic-normvector-to-mcool.cwl",
-            "extract-mcool-normvector-for-juicebox.cwl"
+            "add-hic-normvector-to-mcool.cwl"
         ],
         "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-hic/v43/cwl/",
         "cwl_directory_url_draft3": "",
@@ -12684,6 +12683,7 @@
         "uuid": "23bd6d73-4190-496d-837c-21bcdb3802ed",
         "accession": "4DNWF2YBHXQM",
         "previous_version": "/workflows/c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
-        "version_upgrade_log": "Hic2cool extract-norm MT chromosome handling bug fixed. Cooler convergence failure now doesn't throw error (store NaN instead). Nore, Nonorm, Norenonorm variants are now merged."
+        "version_upgrade_log": "Hic2cool extract-norm MT chromosome handling bug fixed. Cooler convergence failure now doesn't throw error (store NaN instead). Nore, Nonorm, Norenonorm variants are now merged.",
+        "aliases": ["4dn-dcic-lab:wf-hi-c-processing-pairs-0.2.7"]
     }
 ]
