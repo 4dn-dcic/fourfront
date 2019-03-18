@@ -372,7 +372,7 @@ def get_slim_terms(connection):
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
     slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
-    search_suffix = 'search/?type=OntologyTerm&limit=all&is_slim_for='
+    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
         try:
@@ -384,11 +384,17 @@ def get_slim_terms(connection):
     return slim_terms
 
 
-def get_existing_ontology_terms(connection):
+def get_existing_ontology_terms(connection, ontologies=None):
     '''Retrieves all existing ontology terms from the db
     '''
-    search_suffix = 'search/?type=OntologyTerm&limit=all'
-    return search_metadata(search_suffix, connection)
+    ont_list = ''
+    if ontologies is not None:
+        for o in ontologies:
+            ouuid = o.get('uuid')
+            ont_list += '&source_ontology.uuid={}'.format(ouuid)
+    search_suffix = 'search/?type=OntologyTerm' + ont_list
+    db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
+    return {t['term_id']: t for t in db_terms}
 
 
 def get_ontologies(connection, ont_list):
@@ -397,7 +403,7 @@ def get_ontologies(connection, ont_list):
     '''
     ontologies = []
     if ont_list == 'all':
-        ontologies = search_metadata('search/?type=Ontology&limit=all', connection)
+        ontologies = search_metadata('search/?type=Ontology', connection)
     else:
         ontologies = [get_metadata('ontologys/' + ontology, connection) for ontology in ont_list]
     # removing item not found cases with reporting
@@ -661,23 +667,11 @@ def write_outfile(terms, filename, pretty=False):
         write to file by default as a json list or if pretty
         then same with indents and newlines
     '''
-    indent = None
-    lenterms = len(terms)
     with open(filename, 'w') as outfile:
         if pretty:
-            indent = 4
-            outfile.write('[\n')
+            json.dump(terms, outfile, indent=4)
         else:
-            outfile.write('[')
-        for i, term in enumerate(terms):
-            json.dump(term, outfile, indent=indent)
-            if i != lenterms - 1:
-                outfile.write(',')
-            if pretty:
-                outfile.write('\n')
-        outfile.write(']')
-        if pretty:
-            outfile.write('\n')
+            json.dump(terms, outfile)
 
 
 def parse_args(args):
@@ -765,8 +759,10 @@ def main():
         if o['ontology_name'].startswith('4DN'):
             ontologies.pop(i)
     slim_terms = get_slim_terms(connection)
-    db_terms = get_existing_ontology_terms(connection)
-    db_terms = {t['term_id']: t for t in db_terms}
+    from_ontologies = None
+    if (args.ontologies != 'all'):
+        from_ontologies = ontologies
+    db_terms = get_existing_ontology_terms(connection, from_ontologies)
     terms = {}
 
     for ontology in ontologies:

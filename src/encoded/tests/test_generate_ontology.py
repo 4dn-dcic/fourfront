@@ -893,10 +893,11 @@ def test_write_outfile_pretty(simple_terms):
 
 
 def test_write_outfile_notpretty(simple_terms):
+    # import pdb; pdb.set_trace()
     print(simple_terms)
     import json
     filename = 'tmp_test_file'
-    go.write_outfile(simple_terms.values(), filename)
+    go.write_outfile(list(simple_terms.values()), filename)
     with open(filename, 'r') as infile:
         for l in infile:
             result = json.loads(l)
