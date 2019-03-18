@@ -1070,11 +1070,10 @@ def valid_uuid(uid):
     return True
 
 
-def test_add_uuids(partitioned_terms):
-    result = go.add_uuids(partitioned_terms)
-    assert len(result) == 2
-    news = result[0]
-    for t in news:
+def test_add_uuids_and_combine(partitioned_terms):
+    result = go.add_uuids_and_combine(partitioned_terms)
+    assert len(result) == 4
+    for t in result:
         assert 'uuid' in t
         assert valid_uuid(t['uuid'])
         if t['term_id'] == 't1':
@@ -1085,20 +1084,9 @@ def test_add_uuids(partitioned_terms):
             for p in t['parents']:
                 assert valid_uuid(p)
     assert t1uuid == t3puuid
-    patch = result[1][0]
-    assert valid_uuid(patch['uuid'])
-    assert valid_uuid(patch['parents'][0])
 
 
-def test_add_uuids_no_post(partitioned_terms):
-    del partitioned_terms['post']
-    result = go.add_uuids(partitioned_terms)
-    assert len(result) == 2
-    assert result[0] is None
-
-
-def test_add_uuids_no_patch(partitioned_terms):
-    del partitioned_terms['patch']
-    result = go.add_uuids(partitioned_terms)
-    assert len(result) == 2
-    assert result[1] is None
+def test_add_uuids_and_combine_no_terms():
+    partitioned_terms = {'post': [], 'patch': [], 'idmap': {}}
+    result = go.add_uuids_and_combine(partitioned_terms)
+    assert not result
