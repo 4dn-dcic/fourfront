@@ -12147,9 +12147,9 @@
         "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-hic/v43/cwl/",
         "cwl_main_filename": "hi-c-processing-pairs.cwl",
         "experiment_types": [
-            "Hi-C"
+            "Hi-C", "DNase Hi-C", "micro-C", "Capture Hi-C", "ChIA-PET"
         ],
-        "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 4 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format 3) Multiresolution mcool file and 4) normalization vector of mcool files for visualization in juicebox.",
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 3 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format and 3) Multiresolution mcool file.",
         "docker_image_name": "duplexa/4dn-hic:v43",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
