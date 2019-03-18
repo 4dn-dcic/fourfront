@@ -19,8 +19,12 @@ export function getIconForCustomTab(tabName){
     switch(tabName){
         case 'summary':
         case 'overview':
-        case 'experiment-summaries':
+        case 'experiment_summaries':
             return 'file-text';
+        case 'data_processing':
+            return 'area-chart';
+        case 'processed_files':
+            return 'microchip';
         case 'higlass':
         case 'higlass_displays':
             return 'television';
@@ -246,7 +250,7 @@ export class TabbedView extends React.PureComponent {
             console.log('Already on tab', hash);
             return false;
         }
-    
+
         this.setActiveKey(foundContent.key); // Same as `hash`
         return true;
     }
@@ -313,4 +317,3 @@ class TabPlaceHolder extends React.PureComponent {
         );
     }
 }
-
