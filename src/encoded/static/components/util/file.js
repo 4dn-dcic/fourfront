@@ -35,7 +35,7 @@ export function getFileFormatStr(file){
 export function isFileDataComplete(file){
     if (!file || typeof file !== 'object') throw new Error('File param is not an object.');
     if (isServerSide() || !window || !document){
-        return true; // For tests, primarily. 
+        return true; // For tests, primarily.
     }
     if (typeof file.status !== 'string') {
         return false;
@@ -130,7 +130,7 @@ export class FileDownloadButtonAuto extends React.PureComponent {
 }
 
 export class ViewFileButton extends React.Component {
-    
+
     static defaultProps = {
         'className' : "text-ellipsis-container mb-1",
         'target' : "_blank",
@@ -140,7 +140,7 @@ export class ViewFileButton extends React.Component {
         'title' : null,
         'mimeType' : null,
         'size' : null
-    }
+    };
 
     render(){
         var { filename, href, target, title, mimeType, size } = this.props;
@@ -250,7 +250,7 @@ function readChunked(file, chunkCallback, endCallback) {
 /**
  * Adapted from http://stackoverflow.com/questions/39112096
  * Takes a file object and optional callback progress function
- * 
+ *
  * @param {File} file - Instance of a File class (subclass of Blob).
  * @param {function} cbProgress - Callback function on progress change. Accepts a 0-1 float value.
  * @returns {Promise} AJAX Promise object.
