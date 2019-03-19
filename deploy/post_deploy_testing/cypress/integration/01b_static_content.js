@@ -1,33 +1,45 @@
 
-describe('Post-Deployment Static Page & Content Tests', function () {
+describe('Static Page & Content Tests', function () {
 
+    before(function(){
+        cy.visit('/');
+    });
 
-    it.skip('Every help page has links which return success status codes', function(){
+    it('Every help page has links which return success status codes - SAMPLING', function(){
 
-        cy.get('#sHelp').click().then(()=>{
-            cy.get('ul[aria-labelledby="sHelp"] li a').then((listItems)=>{
+        cy.get('#help-menu-item').click().then(()=>{
+
+            // Get all links to _level 2_ static pages. Exclude directory pages for now. Do directory pages in later test.
+            cy.get('.big-dropdown-menu.is-open a.level-2-title').then((listItems)=>{
+
                 console.log(listItems);
+                const listItemsTotalCount = listItems.length;
 
-                expect(listItems).to.have.length.above(2); // At least 3 help pages in dropdown.
+                expect(listItemsTotalCount).to.be.above(2); // At least 3 help pages in dropdown.
 
-                cy.get('#page-title-container span.title').should('have.text', 'About').then((title)=>{
+                // To avoid running on every single page x multiple network requests, lets create a random
+                // sampling of 5 list item indices to visit.
+                var itemIndicesToVisit = Cypress._.sampleSize(Cypress._.range(listItemsTotalCount), 5);
+
+                // We're starting on homepage, initial title -
+                cy.get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').then((title)=>{
 
                     let prevTitle = title.text();
                     let count = 0;
 
-                    function doVisit(listItem){
+                    function doVisit(){
 
                         function finish(titleText){
                             count++;
                             Cypress.log({
-                                'name' : "Help Page " + count + '/' + listItems.length,
+                                'name' : "Help Page " + count + '/' + listItemsTotalCount,
                                 'message' : 'Visited page with title "' + titleText + '".'
                             });
-                            if (count < listItems.length){
-                                cy.get('#sHelp').click().wait(100).then(()=>{
-                                    cy.get('ul[aria-labelledby="sHelp"] li:nth-child(' + (count + 1) + ') a').click().then((nextListItem)=>{
-                                        doVisit(nextListItem);
-                                    });
+
+                            if (itemIndicesToVisit.length > 0){
+                                var nextIndexToVisit = itemIndicesToVisit.shift();
+                                cy.get('#help-menu-item').click().wait(100).then(()=>{
+                                    cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(doVisit);
                                 });
                             }
                         }
@@ -36,7 +48,7 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                             expect(titleText).to.have.length.above(0);
                             prevTitle = titleText;
 
-                            cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"])').each(($linkElem)=>{
+                            cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"]):not([href*=".gov"])').each(($linkElem)=>{
                                 const linkHref = $linkElem.attr('href');
                                 console.log($linkElem.attr('href'));
                                 cy.request(linkHref);
@@ -46,8 +58,10 @@ describe('Post-Deployment Static Page & Content Tests', function () {
 
                         });
                     }
-                    listItems[0].click();
-                    doVisit(listItems[count]);
+
+                    const firstItemIndexToVisit = itemIndicesToVisit.shift();
+                    listItems[firstItemIndexToVisit].click();
+                    doVisit();
 
                 });
 
@@ -55,5 +69,8 @@ describe('Post-Deployment Static Page & Content Tests', function () {
         });
 
     });
+
+    // TODO:
+    // test which visits directory page(s) maybe.
 
 });
