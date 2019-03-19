@@ -51,13 +51,14 @@ def load_data_view(context, request):
 
     {'local_dir': inserts folder on your computer
      'fdn_dir': inserts folder under encoded
+     'in_file': file containing list of inserts for single item type
      'store': if not local_dir or fdn_dir, use the dictionary
      'overwrite' (Bool): overwrite if existing data
-     'itype': (list or str): only pick some types from the source
+     'itype': (list or str): only pick some types from the source or specify type in in_file
      'config_uri': user supplied configuration file}
 
     post can contain 2 different styles of data
-    1) reference to a folder
+    1) reference to a folder or file
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     '''
@@ -77,16 +78,23 @@ def load_data_view(context, request):
     store = request.json.get('store', {})
     fdn_dir = request.json.get('fdn_dir')
     local_dir = request.json.get('local_dir')
+    in_file = request.json.get('in_file')
     overwrite = request.json.get('overwrite', False)
     itype = request.json.get('itype', None)
-
+    inserts = None
+    from_json = False
     if fdn_dir:
-        fdn_inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
-        res = load_all(testapp, fdn_inserts, None, overwrite=overwrite, itype=itype)
+        inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
+    elif in_file:
+        inserts = infile
     elif local_dir:
-        res = load_all(testapp, local_dir, None, overwrite=overwrite, itype=itype)
+        inserts = local_dir
     elif store:
-        res = load_all(testapp, store, None, overwrite=overwrite, itype=itype, from_json=True)
+        inserts = store
+        from_json = True
+
+    if inserts:
+        res = load_all(testapp, inserts, None, overwrite=overwrite, itype=itype, from_json=from_json)
     else:
         res = 'No uploadable content found!'
 
@@ -219,7 +227,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
 
     args:
         testapp
-        inserts : either a folder, or a dictionary in the store format
+        inserts : either a folder, file, or a dictionary in the store format
         docsdir : attachment folder
         overwrite (bool)   : if the database contains the item already, skip or patch
         itype (list or str): limit selection to certain type/types
@@ -228,6 +236,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     returns:
         None if successful, otherwise an Exception
     """
+    # TODO: deal with option of file to load (not directory struture)
     if docsdir is None:
         docsdir = []
     # Collect Items
