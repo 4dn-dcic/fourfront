@@ -44,21 +44,19 @@ export default class ExperimentTypeView extends DefaultItemView {
         if (pubsLen === 1){
             publicationArea = (
                 <Publications.PublicationBelowHeaderRow singularTitle="Reference Publication"
-                    publication={context.reference_pubs[0]} outerClassName={context.sop ? null : 'mb-2'}/>
+                    publication={context.reference_pubs[0]} outerClassName={null} />
             );
         } else if (pubsLen > 1){
             publicationArea = (
-                <div className={context.sop ? null : 'mb-2'}>
-                    <WrappedCollapsibleList items={context.reference_pubs} singularTitle="Reference Publication" itemClassName="publication" />
-                </div>
+                <WrappedCollapsibleList items={context.reference_pubs} singularTitle="Reference Publication" itemClassName="publication" />
             );
         }
 
         return (
-            <React.Fragment>
+            <div className="mb-2">
                 { publicationArea }
-                <SOPBelowHeaderRow sop={context.sop} />
-            </React.Fragment>
+                <SOPBelowHeaderRow sop={context.sop} outerClassName={null} />
+            </div>
         );
     }
 

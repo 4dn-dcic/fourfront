@@ -1,11 +1,11 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { console, DateUtility, object } from './../../util';
-import { FormattedInfoWrapper, WrappedListBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
+import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 
 
@@ -48,6 +48,14 @@ class DetailBlock extends React.PureComponent {
 
 
 class ShortAttribution extends React.PureComponent {
+
+    static propTypes = {
+        'publication'   : PropTypes.shape({
+            'authors'       : PropTypes.arrayOf(PropTypes.string),
+            'journal'       : PropTypes.string,
+            'date_published': PropTypes.string
+        }).isRequired
+    };
 
     render(){
         var pub = this.props.publication;
@@ -103,6 +111,11 @@ class PublicationBelowHeaderRow extends React.Component {
         'outerClassName' : "mb-2"
     };
 
+    /**
+     * @todo
+     * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
+     * component to create own <div> with whatever className is desired, among other element attributes.
+     */
     render(){
         var { publication, singularTitle, outerClassName } = this.props;
         if (!publication) return null;

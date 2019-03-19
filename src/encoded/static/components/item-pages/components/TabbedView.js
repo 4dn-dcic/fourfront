@@ -6,12 +6,12 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import Tabs, { TabPane } from 'rc-tabs';
+import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate, layout } from './../../util';
-import { BasicUserContentBody, UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
+import { navigate } from './../../util';
+import { UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
 
 
 
@@ -19,6 +19,7 @@ export function getIconForCustomTab(tabName){
     switch(tabName){
         case 'summary':
         case 'overview':
+        case 'experiment-summaries':
         case 'experiment_summaries':
             return 'file-text';
         case 'data_processing':
@@ -71,10 +72,11 @@ export class TabbedView extends React.PureComponent {
                 key={tabObj.key || tabObj.tab || tabIndex}
                 data-tab-key={tabObj.key}
                 id={'tab:' + tabObj.key}
-                tab={<span className="tab" data-tab-key={tabObj.key} children={tabObj.tab}/>}
-                children={tabObj.content}
+                tab={<span className="tab" data-tab-key={tabObj.key}>{ tabObj.tab }</span>}
                 placeholder={tabObj.placeholder || <TabPlaceHolder/> }
-                disabled={tabObj.disabled} style={tabObj.style} />
+                disabled={tabObj.disabled} style={tabObj.style}>
+                { tabObj.content }
+            </Tabs.TabPane>
         );
     }
 
