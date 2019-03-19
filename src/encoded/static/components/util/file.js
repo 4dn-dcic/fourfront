@@ -179,6 +179,7 @@ export function isFilenameAnImage(filename, suppressErrors = false){
     var fileNameLower, fileNameLowerEnds;
     if (typeof filename === 'string'){
         fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
+        // Store ending(s) into object so we don't have to call `fileNameLower.slice` per each comparison.
         fileNameLowerEnds = {
             '3' : fileNameLower.slice(-3),
             '4' : fileNameLower.slice(-4),
@@ -191,7 +192,14 @@ export function isFilenameAnImage(filename, suppressErrors = false){
     } else {
         return false;
     }
-    return fileNameLowerEnds['5'] === '.tiff' || fileNameLowerEnds['4'] === '.jpg' || fileNameLowerEnds['5'] === '.jpeg' || fileNameLowerEnds['4'] === '.png' || fileNameLowerEnds['4'] === '.bmp' || fileNameLowerEnds['4'] === '.gif';
+    return (
+        fileNameLowerEnds['5'] === '.tiff' ||
+        fileNameLowerEnds['4'] === '.jpg' ||
+        fileNameLowerEnds['5'] === '.jpeg' ||
+        fileNameLowerEnds['4'] === '.png' ||
+        fileNameLowerEnds['4'] === '.bmp' ||
+        fileNameLowerEnds['4'] === '.gif'
+    );
 }
 
 
