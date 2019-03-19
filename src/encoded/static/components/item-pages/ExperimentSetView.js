@@ -8,7 +8,7 @@ import { Collapse, Button } from 'react-bootstrap';
 import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
-    AttributionTabView, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+    AttributionTabView, HiGlassContainer, HiGlassPlainContainer, HiGlassAjaxLoadContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -260,6 +260,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
  */
 export class HiGlassAdjustableWidthRow extends React.PureComponent {
 
+    // TODO files goes to HiGlassAdjustableWidthRow
     static propTypes = {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
@@ -305,6 +306,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
+        // TODO files came from props?
         var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
             leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
         if (!files || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
@@ -330,6 +332,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
+                        // TODO Replace files
                         return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />;
                     }
                 }}
@@ -416,14 +419,38 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
      * Else, if any bigwig files exist, return those.
      * Else, return null.
      */
+     // TODO Do I need this function anymore? It calls a different function.
     static findAllFilesToVisualize(context){
         return OtherProcessedFilesStackedTableSectionPart.findAllFilesToVisualize( // <- this function might be moved closer to HiGlassContainer in near future.
             expFxn.allProcessedFilesFromExperimentSet(context)
         );
     }
 
+    /**
+    * Looks for static Higlass content in the context.
+    * @param {object} context
+    * @return {string} Returns the HiGlass item in the context (or null if it doesn't)
+    */
+    static getHiglassItemFromProcessedFiles(context){
+        if (!("static_content" in context)) {
+            return null;
+        }
+
+        // Look for any static_content sections with tab:processed-files as the location
+        const higlassTabs = _.filter(context.static_content, function(section){
+            return section.location === "tab:processed-files";
+        });
+
+        console.log(higlassTabs);
+        // Return the content of the first higlassTab.
+        return ( higlassTabs.length > 0 ? higlassTabs[0]["content"] : null);
+    }
+
     constructor(props){
         super(props);
+
+        var gub = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(props.context);
+        console.log("TODO " + gub);
         this.state = {
             'currentlyVisualizedFiles' : ProcessedFilesStackedTableSection.findAllFilesToVisualize(props.context), // TODO: May change, act on some 'currentVisualizedFileType' param or state, etc.
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.files)
@@ -436,6 +463,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         if (nextProps.files !== this.props.files){
             nextState.filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(nextProps.files);
         }
+        // TODO Remove this, I won't need it.
         if (nextProps.context !== this.props.context){
             nextState.currentlyVisualizedFiles = ProcessedFilesStackedTableSection.findAllFilesToVisualize(nextProps.context);
         }
@@ -449,6 +477,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         if (!mounted) return null;
 
         // Used in ProcessedFilesStackedTable for icons/buttons
+        // TODO Get rid of files here. Maybe? currentlyVisualizedFiles
         const currentlyVisualizedFiles = this.state.currentlyVisualizedFiles;
         const processedFilesTableProps = {
             files, currentlyVisualizedFiles, windowWidth,
@@ -475,6 +504,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         var { mounted, width, files, context, leftPanelCollapseWidth, windowWidth } = this.props;
         if (!mounted) return null;
 
+        // TODO replace files here. They come from props.
         return (
             <div className="processed-files-table-section exp-table-section">
                 <h3 className="tab-section-title">
@@ -530,6 +560,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
      * @param {Item[]} files - Files to filter to visualize, according to their `higlass_uid` and `genome_assembly` properties (if any).
      * @returns {Item[]|null} List of files to be visualized.
      */
+     // TODO Do I need this?
     static findAllFilesToVisualize(files){
 
         var firstMcoolFile = _.find(files || [], function(f){
@@ -566,6 +597,9 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
 
+        console.log(props);
+
+        // TODO I won't need files or currentlyVisualizedFiles soon.
         var files = OtherProcessedFilesStackedTableSectionPart.filesWithFromExpAndExpSetProperty(props);
         this.state = {
             'open'      : props.defaultOpen,
@@ -577,6 +611,8 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
 
     componentWillReceiveProps(nextProps){
         if (nextProps.context !== this.props.context || nextProps.collection !== this.props.collection){
+            // TODO Instead of getting the files here you should get the static content section.
+
             var files = OtherProcessedFilesStackedTableSectionPart.filesWithFromExpAndExpSetProperty(nextProps),
                 currentlyVisualizedFiles = OtherProcessedFilesStackedTableSectionPart.findAllFilesToVisualize(files);
 
@@ -600,6 +636,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
 
     render(){
         const { collection, index, context, width, mounted, defaultOpen, windowWidth } = this.props;
+        // TODO currentlyVisualizedFiles has the files. Pass in the higlass item instead.
         const { open, files, currentlyVisualizedFiles } = this.state;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
@@ -615,6 +652,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
                     :
                     <div className="mb-15"/>
                 }
+                /* TODO Pass in the HiGlass item here */
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
                         { currentlyVisualizedFiles ? (
