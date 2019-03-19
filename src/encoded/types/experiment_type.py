@@ -30,7 +30,10 @@ class ExperimentType(Item):
 
     embedded_list = Item.embedded_list + [
         "sop.description",
-        "reference_pubs.short_attribution"
+        "reference_pubs.short_attribution",
+        "reference_pubs.authors",
+        "reference_pubs.date_published",
+        "reference_pubs.journal"
     ]
 
     @calculated_property(schema={
