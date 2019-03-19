@@ -3,12 +3,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
+import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import * as store from './../../store';
 import { ajax, console, DateUtility, object, isServerSide, Filters, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import { ItemPageTitle, ItemHeader, FormattedInfoBlock, FlexibleDescriptionBox, ItemDetailList, ItemFooterRow, Publications, TabbedView, AuditTabView,
-    AttributionTabView, HiGlassContainer, HiGlassPlainContainer, HiGlassAjaxLoadContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+    AttributionTabView, HiGlassContainer, HiGlassPlainContainer, HiGlassAjaxLoadContainer, AdjustableDividerRow, OverviewHeadingContainer, EmbeddedHiglassActions } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { FacetList, RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -89,7 +89,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs            = [];
 
         if (processedFiles && processedFiles.length > 0){
-
             // Processed Files Table Tab
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
@@ -266,7 +265,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         'mounted' : PropTypes.bool.isRequired,
         'files'  : PropTypes.array,
         'renderRightPanel' : PropTypes.func,
-        'windowWidth' : PropTypes.number.isRequired
+        'windowWidth' : PropTypes.number.isRequired,
+        'higlassItem' : PropTypes.object,
     };
 
     constructor(props){
@@ -306,11 +306,10 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        // TODO files came from props?
         var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
-            leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
+            leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
         if (!files || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
-
+        console.log(windowWidth);
         var minOpenHeight = 300,
             maxOpenHeight = 800;
 
@@ -332,8 +331,15 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        // TODO Replace files
-                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />;
+                        /* TODO What is the parentComponentType, and why was it inherited?
+                        TODO Why I can't I wrap this into a div? windowWidth is suddenly null?
+                        TODO HiGlassAjaxLoadContainer doesn't have windowWidth
+                        */
+                        return (
+                        /*<EmbeddedHiglassActions context={higlassItem} parentComponentType={HiGlassAdjustableWidthRow}/>*/
+                        <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
+                        );
+                        /*return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />;*/
                     }
                 }}
                 rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
@@ -431,7 +437,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
     * @param {object} context
     * @return {string} Returns the HiGlass item in the context (or null if it doesn't)
     */
-    static getHiglassItemFromProcessedFiles(context){
+    static getHiglassItemFromProcessedFiles = memoize(function(context){
         if (!("static_content" in context)) {
             return null;
         }
@@ -441,32 +447,31 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             return section.location === "tab:processed-files";
         });
 
-        console.log(higlassTabs);
         // Return the content of the first higlassTab.
         return ( higlassTabs.length > 0 ? higlassTabs[0]["content"] : null);
-    }
+    });
 
     constructor(props){
         super(props);
-
-        var gub = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(props.context);
-        console.log("TODO " + gub);
         this.state = {
+            'higlassItem' : ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(props.context),
             'currentlyVisualizedFiles' : ProcessedFilesStackedTableSection.findAllFilesToVisualize(props.context), // TODO: May change, act on some 'currentVisualizedFileType' param or state, etc.
             'filesWithMetrics' : ProcessedFilesQCStackedTable.filterFiles(props.files)
         };
         this.columnHeaders = ProcessedFilesStackedTableSection.extendedColumnHeaders();
     }
 
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         var nextState = {};
         if (nextProps.files !== this.props.files){
             nextState.filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(nextProps.files);
         }
-        // TODO Remove this, I won't need it.
+
+        // TODO Do I need to update the context suddenly?
         if (nextProps.context !== this.props.context){
-            nextState.currentlyVisualizedFiles = ProcessedFilesStackedTableSection.findAllFilesToVisualize(nextProps.context);
+            nextState.higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(this.props.context);
         }
+
         if (_.keys(nextState).length > 0){
             this.setState(nextState);
         }
@@ -474,6 +479,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     renderTopRow(){
         const { mounted, width, files, context, windowWidth } = this.props;
+        const { higlassItem } = this.state;
         if (!mounted) return null;
 
         // Used in ProcessedFilesStackedTable for icons/buttons
@@ -485,11 +491,11 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             'experimentArray' : context.experiments_in_set,
             'replicateExpsArray' : context.replicate_exps,
             'collapseLimit' : 10, 'collapseShow' : 7,
-            'columnHeaders' : this.columnHeaders
+            'columnHeaders' : this.columnHeaders,
         };
 
         if (currentlyVisualizedFiles && currentlyVisualizedFiles.length > 0){
-            const hiGlassProps = { width, mounted, windowWidth, files : currentlyVisualizedFiles };
+            const hiGlassProps = { width, mounted, windowWidth, higlassItem, files : currentlyVisualizedFiles };
             return (
                 <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
                     <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
@@ -596,8 +602,6 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.Component 
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
-
-        console.log(props);
 
         // TODO I won't need files or currentlyVisualizedFiles soon.
         var files = OtherProcessedFilesStackedTableSectionPart.filesWithFromExpAndExpSetProperty(props);
