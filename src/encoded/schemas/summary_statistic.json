@@ -44,7 +44,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "title": "MIME type",
+                    "title": "MIME Type",
                     "type": "string",
                     "enum": [
                         "text/plain"

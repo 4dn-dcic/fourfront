@@ -276,7 +276,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "title": "MIME type",
+                    "title": "MIME Type",
                     "type": "string",
                     "enum": [
                         "application/msword",
