@@ -57,7 +57,7 @@ class DocumentViewOverview extends React.Component {
         return (
             <div>
                 <div className="row overview-blocks">
-                    <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-xs-12 col-md-6" includeTitle btnSize="lg" />
+                    <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-xs-12 col-md-6" includeTitle btnSize="lg" itemType="Document" />
                 </div>
             </div>
         );
