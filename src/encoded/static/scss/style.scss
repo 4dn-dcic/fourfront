@@ -32,7 +32,7 @@ $expset-table-border-color : #eee;
 @import "bootstrap/variables";
 @import "bootstrap/mixins";
 
-// Fourfront variables & mixins
+// Fourfront variables & mixins - (some used in overridden bootstrap CSS)
 @import "encoded/mixins-custom";
 @import "encoded/base";
 
@@ -94,8 +94,8 @@ $expset-table-border-color : #eee;
 // ENCODE Layout etc. SCSS
 
 // SMACSS-based architecture (http://smacss.com/)
+
 @import "encoded/layout";
-@import "encoded/bootstrap-lib";
 // @import "encoded/modals"; -- Deleted
 @import "encoded/modules/breadcrumbs",
         "encoded/modules/forms",

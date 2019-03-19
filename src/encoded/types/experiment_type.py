@@ -28,6 +28,14 @@ class ExperimentType(Item):
         'additional_protocols': ('Protocol', 'experiment_type')
     }
 
+    embedded_list = Item.embedded_list + [
+        "sop.description",
+        "reference_pubs.short_attribution",
+        "reference_pubs.authors",
+        "reference_pubs.date_published",
+        "reference_pubs.journal"
+    ]
+
     @calculated_property(schema={
         "title": "Experiment Type Grouping",
         "description": "A shorter and more succinct name for the assay subclassification",

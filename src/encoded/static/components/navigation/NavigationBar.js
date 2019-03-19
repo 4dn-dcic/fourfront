@@ -4,12 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem, Checkbox, DropdownButton, Fade, Collapse } from 'react-bootstrap';
-import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './../util';
-import { requestAnimationFrame, FourfrontLogo } from './../viz/utilities';
-import * as store from './../../store';
+import { Navbar, Nav, NavItem } from 'react-bootstrap';
+import { console, ajax } from './../util';
+import { FourfrontLogo } from './../viz/utilities';
 import { productionHost } from './../globals';
-import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, actionToMenuItem, getActionURL } from './components';
+import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, getActionURL } from './components';
 import QuickInfoBar from './../viz/QuickInfoBar';
 import { ChartDataController } from './../viz/chart-data-controller';
 
@@ -32,7 +31,7 @@ export class NavigationBar extends React.PureComponent {
         'updateUserInfo'    : PropTypes.func.isRequired,
         'context'           : PropTypes.object,
         'schemas'           : PropTypes.any
-    }
+    };
 
     /**
      * Default properties.
@@ -45,7 +44,7 @@ export class NavigationBar extends React.PureComponent {
     static defaultProps = {
         'helpItemTreeURI'   : '/pages/311d0f4f-56ee-4450-8cbb-780c10229284/@@embedded',
         'helpItemHref'      : '/help'
-    }
+    };
 
     constructor(props){
         super(props);
@@ -218,7 +217,7 @@ export class NavigationBar extends React.PureComponent {
                                 <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
                                     setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
                             </Nav>
-                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted, overlaysContainer, schemas }} />
+                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted, overlaysContainer, schemas, windowWidth }} />
                             <SearchBar href={href} currentAction={currentAction} />
                         </Navbar.Collapse>
                     </Navbar>

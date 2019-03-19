@@ -183,7 +183,7 @@ def test_update_patch_with_preferred_symbol(testapp, human, rad21_ncbi, lab, awa
 
 
 def test_update_post_with_bogus_geneid(testapp, lab, award):
-    geneid = '999999999999'
+    geneid = '999999999'
     missing_fields = ['official_symbol', 'preferred_symbol', 'ncbi_entrez_status',
                       'fullname', 'organism', 'url']
     gene = testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}).json['@graph'][0]
@@ -192,3 +192,8 @@ def test_update_post_with_bogus_geneid(testapp, lab, award):
     assert 'award' in gene
     for mf in missing_fields:
         assert mf not in gene
+
+
+def test_invalid_geneid(testapp, lab, award):
+    geneid = '99999999999999'
+    testapp.post_json('/gene', {'geneid': geneid, 'lab': lab['@id'], 'award': award['@id']}, status=422)

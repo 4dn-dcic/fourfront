@@ -36,7 +36,7 @@ export function allFilesForWorkflowRunsMappedByUUID(items){
 
 
 export default class WorkflowRunTracingView extends DefaultItemView {
-    
+
     constructor(props){
         super(props);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
@@ -109,9 +109,9 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     }
 
     handleToggleAllRuns(){
-        this.setState({ 'allRuns' : !this.state.allRuns, 'loadingGraphSteps' : true }, ()=>{
-            this.loadGraphSteps(true);
-        });
+        this.setState(function({ allRuns }){
+            return { 'allRuns' : !allRuns, 'loadingGraphSteps' : true };
+        }, () => { this.loadGraphSteps(true); });
     }
 }
 
@@ -148,7 +148,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         }
 
         return {
-            'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
+            'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Provenance</span>,
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
             'content'   : (
@@ -176,12 +176,11 @@ export class FileViewGraphSection extends WorkflowGraphSection {
 
     constructor(props){
         super(props);
-        this.commonGraphProps = this.commonGraphProps.bind(this);
+        this.commonGraphProps           = this.commonGraphProps.bind(this);
         this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
         this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
-        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
-        this.render = this.render.bind(this);
+        this.isNodeCurrentContext       = this.isNodeCurrentContext.bind(this);
         this.state = _.extend({
             'showChart' : 'detail',
             'showIndirectFiles' : false,
@@ -241,7 +240,9 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     onToggleIndirectFiles(){
-        this.setState({ 'showIndirectFiles' : !this.state.showIndirectFiles });
+        this.setState(function({ showIndirectFiles }){
+            return { "showIndirectFiles" : !showIndirectFiles };
+        });
     }
 
     onToggleAllRuns(){
