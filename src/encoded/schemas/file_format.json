@@ -91,7 +91,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "title": "MIME Type",
+                    "title": "Media Type",
                     "type": "string",
                     "enum": [
                         "application/msword",
