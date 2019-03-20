@@ -86,7 +86,7 @@ def load_data_view(context, request):
     if fdn_dir:
         inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
     elif in_file:
-        inserts = infile
+        inserts = in_file
     elif local_dir:
         inserts = local_dir
     elif store:
@@ -244,13 +244,23 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     if from_json:
         store = inserts
     if not from_json:
+        use_itype = False
         # grab json files
-        if not inserts.endswith('/'):
-            inserts += '/'
-        files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+        if os.path.isfile(inserts):
+            # we've specified a single file
+            files = [inserts]
+            use_itype = True
+        elif os.path.isdir(inserts):
+            if not inserts.endswith('/'):
+                inserts += '/'
+            files = [i for i in os.listdir(inserts) if i.endswith('.json')]
         for a_file in files:
-            item_type = a_file.split('/')[-1].replace(".json", "")
-            with open(inserts + a_file) as f:
+            if use_itype:
+                item_type = itype
+            else:
+                item_type = a_file.split('/')[-1].replace(".json", "")
+                a_file = inserts + a_file
+            with open(a_file) as f:
                 store[item_type] = json.loads(f.read())
     # if there is a defined set of items, subtract the rest
     if itype is not None:
