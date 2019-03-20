@@ -840,6 +840,10 @@ export class Detail extends React.PureComponent {
             'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
             'digestion_time', 'ligation_temperature', 'ligation_time', 'ligation_volume',
             'tagging_method',
+            // Experiment Type
+            'experiment_category', 'assay_classification', 'assay_subclassification',
+            'assay_subclass_short', 'sop', 'reference_pubs', 'raw_file_types',
+            'controlled_term', 'other_protocols', 'other_tags',
             // Biosample
             'biosource','biosource_summary','biosample_protocols','modifications_summary',
             'treatments_summary',

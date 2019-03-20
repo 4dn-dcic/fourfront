@@ -182,7 +182,7 @@ class HiglassViewConfig(UserContent):
         "description": "Content for HiGlass Item (unused)",
         "type": "string"
     })
-    def content(self, request, body=None, file=None):
+    def content(self, request):
         return None
 
     class Collection(Item.Collection):
