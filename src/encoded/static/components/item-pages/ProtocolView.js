@@ -25,10 +25,10 @@ export default class ProtocolView extends DefaultItemView {
 
 
 class ProtocolViewOverview extends React.Component {
-    
+
     /**
      * Get overview tab object for tabpane.
-     * 
+     *
      * @param {Object} context - Current Protocol Item being shown.
      * @param {Object} schemas - Schemas passed down from app.state.schemas (or Schemas.get()).
      */
@@ -87,18 +87,25 @@ class OverViewBody extends React.Component {
     }
 }
 
-export class ItemFileAttachment extends React.Component {
+
+export class ItemFileAttachment extends React.PureComponent {
 
     static defaultProps = {
         'required' : false,
         'includeTitle' : false,
-        'itemType' : 'Protocol'
-    }
+        'itemType' : 'Protocol',
+        'property' : "attachment",
+        'btnSize' : null
+    };
 
     wrapInColumn(){
         var wrapInColumn = this.props.wrapInColumn;
         if (!wrapInColumn) return arguments;
-        return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-12 col-md-4"} children={Array.from(arguments)}/>;
+        return (
+            <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-12 col-md-4"}>
+                { Array.from(arguments) }
+            </div>
+        );
     }
 
     attachmentTips(){
@@ -115,13 +122,15 @@ export class ItemFileAttachment extends React.Component {
         if (!attachment || !attachment.size || typeof attachment.size !== 'number') return null;
         var tip = this.attachmentTips().size;
         return (
-            <div className="mb-1"><i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { Schemas.Term.bytesToLargerUnit(attachment.size) }</div>
+            <div className="mb-1">
+                <i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { Schemas.Term.bytesToLargerUnit(attachment.size) }
+            </div>
         );
     }
 
     md5sum(){
         var attachment = (this.props.context && this.props.context.attachment) || null;
-        if (!attachment.md5sum || typeof attachment.md5sum !== 'string') return null;
+        if (!attachment || !attachment.md5sum || typeof attachment.md5sum !== 'string') return null;
         return (
             <div>
                 <object.TooltipInfoIconContainerAuto tips={this.attachmentTips()} fallbackTitle="MD5" property="md5sum" className="text-500" result={attachment} elementType="span" /> : { attachment.md5sum }
@@ -131,7 +140,7 @@ export class ItemFileAttachment extends React.Component {
 
     attachmentType(){
         var attachment = (this.props.context && this.props.context.attachment) || null;
-        if (!attachment.md5sum || typeof attachment.md5sum !== 'string') return null;
+        if (!attachment || !attachment.md5sum || typeof attachment.md5sum !== 'string') return null;
         return (
             <div>
                 <object.TooltipInfoIconContainerAuto tips={this.attachmentTips()} fallbackTitle="File Type" property="type" className="text-500" result={attachment} elementType="span" /> : { attachment.type }
@@ -140,7 +149,7 @@ export class ItemFileAttachment extends React.Component {
     }
 
     render(){
-        var { schemas, context, tips, includeTitle } = this.props;
+        var { context, tips, includeTitle, property, wrapInColumn, btnSize } = this.props;
 
         if ((this.props.hideIfNoValue) && (!context || !context.attachment)) return null;
         var attachment = (context && context.attachment) || null;
@@ -151,7 +160,8 @@ export class ItemFileAttachment extends React.Component {
         }
 
         var title = !includeTitle ? null : (
-            <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'tips', 'schemas')} fallbackTitle="Attachment" property={this.props.property || "attachment"} result={context} elementType="h5" />
+            <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'tips', 'schemas')} fallbackTitle="Attachment"
+                property={property} result={context} elementType="h5" />
         );
 
         var contents = null;
@@ -160,6 +170,7 @@ export class ItemFileAttachment extends React.Component {
                 <div className={"row" + (includeTitle ? ' mt-1' : '')}>
                     <div className="col-xs-12">
                         <fileUtil.ViewFileButton
+                            size={btnSize}
                             filename={(attachment && attachment.download) || null}
                             href={object.itemUtil.atId(context) + attachment.href}
                             disabled={typeof attachment.href !== 'string' || attachment.href.length === 0}
@@ -179,7 +190,7 @@ export class ItemFileAttachment extends React.Component {
             </div>
         );
 
-        return this.props.wrapInColumn ? this.wrapInColumn(elems) : elems; 
+        return wrapInColumn ? this.wrapInColumn(elems) : elems;
     }
 
 }
