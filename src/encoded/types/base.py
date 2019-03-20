@@ -168,7 +168,16 @@ def validate_item_type_of_linkto_field(context, request):
 
 static_content_embed_list = [
     "static_headers.*",            # Type: UserContent, may have differing properties
-    "static_content.content.*",    # Type: UserContent, may have differing properties
+    "static_content.content.@type",
+    "static_content.content.content",
+    "static_content.content.name",
+    "static_content.content.title",
+    "static_content.content.status",
+    "static_content.content.description",
+    "static_content.content.options",
+    "static_content.content.lab",
+    "static_content.content.contributing_labs",
+    "static_content.content.award",
 ]
 
 lab_award_attribution_embed_list = [
