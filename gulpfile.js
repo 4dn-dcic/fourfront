@@ -2,7 +2,8 @@ var gulp        = require('gulp'),
     PluginError = require('plugin-error'),
     log         = require('fancy-log'),
     webpack     = require('webpack'),
-    sass        = require('node-sass');
+    sass        = require('node-sass')
+    fs          = require('fs');
 
 
 var setProduction = (done) => {
@@ -46,28 +47,35 @@ var watch = () => {
 };
 
 
+// TODO: Just use command-line `node-sass` ?
 
-var doSassBuild = (done) => {
+const cssOutputLocation = './src/encoded/static/css/style.css';
+
+var doSassBuild = (done, options = {}) => {
     sass.render({
-          file: './src/encoded/static/scss/style.scss',
-          outFile: './src/encoded/static/css/style.css',
-          outputStyle: 'compressed'
+        file: './src/encoded/static/scss/style.scss',
+        outFile: './src/encoded/static/css/style-map.css', // sourceMap location
+        outputStyle: options.outputStyle || 'compressed',
+        sourceMap: true
     }, function(error, result) { // node-style callback from v3.0.0 onwards
-      if (error) {
-            console.log(error.status); // used to be "code" in v2x and below
-            console.log(error.column);
+        if (error) {
+            console.error("Error", error.status, error.file, error.line + ':' + error.column);
             console.log(error.message);
-            console.log(error.line);
-      } else {
-            console.log(result.css.toString());
+            done();
+        } else {
+            //console.log(result.css.toString());
 
-            console.log(result.stats);
+            console.log("Finished compiling SCSS in", result.stats.duration, "ms");
+            console.log("Writing to", cssOutputLocation);
 
-            console.log(result.map.toString());
-            // or better
-            console.log(JSON.stringify(result.map)); // note, JSON.stringify accepts Buffer too
+            fs.writeFile(cssOutputLocation, result.css.toString(), null, function(err){
+                if (err){
+                    return console.error(err);
+                }
+                console.log("Wrote " + cssOutputLocation);
+                done();
+            });
         }
-        done();
     });
 }
 
@@ -76,12 +84,21 @@ const devSlow       = gulp.series(setDevelopment, doWebpack, watch);
 const devQuick      = gulp.series(setQuick, doWebpack, watch);
 const build         = gulp.series(setProduction, doWebpack);
 const buildQuick    = gulp.series(setQuick, doWebpack);
-const buildSass     = gulp.series(setProduction, doSassBuild);
 
 gulp.task('dev', devSlow);
 gulp.task('default', devQuick);
 gulp.task('dev-quick', devQuick);
 gulp.task('build', build);
 gulp.task('build-quick', buildQuick);
-gulp.task('build-scss', buildSass);
+
+gulp.task('build-scss', (done) => doSassBuild(done, {}));
+gulp.task('build-scss-dev', (done) => {
+    doSassBuild(
+        () => {
+            console.log('Watching for changes (if ran via `npm run watch-scss`)');
+            done();
+        },
+        { outputStyle : 'expanded' }
+    );
+});
 

@@ -4,9 +4,10 @@
   "description": "domready held back.",
   "scripts": {
     "test": "jest",
-    "build": "node --max-old-space-size=4096 ./node_modules/.bin/gulp build",
+    "build": "node --max-old-space-size=2048 ./node_modules/.bin/gulp build",
     "build-quick": "gulp build-quick",
     "build-scss": "gulp build-scss",
+    "watch-scss": "gulp build-scss-dev && node-sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --recursive --output-style expanded",
     "dev": "gulp dev",
     "dev-quick": "gulp dev-quick",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
