@@ -30,24 +30,6 @@ export default class FileView extends WorkflowRunTracingView {
         );
     }
 
-    /**
-    * Looks for static Higlass content in the context.
-    * @param {object} context
-    * @return {boolean} true if one static_content section has HiGlass viewconfs.
-    */
-    static hasHiglassItemInStaticContent(context){
-        var {context} = this.props;
-
-        if (!("static_content" in context)) {
-            return false;
-        }
-
-        // Look for any static_content sections with tab:higlass as the location
-        return _.some(context.static_content, function(section){
-            return section.location === "tab:higlass";
-        });
-    }
-
     constructor(props){
         super(props);
     }

@@ -42,24 +42,13 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
     */
     getFullHiglassItem(){
         var { higlassItem } = this.props;
-
-        if (!higlassItem) {
-            return;
-        }
-
-        // If the viewconfig was loaded already, use that
-        if ("viewconfig" in higlassItem) {
-            this.setState({'higlassItem': higlassItem, 'loading': false});
-        }
-        else if ('@id' in higlassItem) {
-            // Use the @id to make an AJAX request to get the HiGlass Item.
-            this.setState({ 'loading': true }, ()=>{
-                // Use the @id to get the item, then remove the loading message
-                ajax.load(this.props.higlassItem['@id'], (r)=>{
-                    this.setState({ 'higlassItem' : r, 'loading': false });
-                });
+        // Use the @id to make an AJAX request to get the HiGlass Item.
+        this.setState({ 'loading': true }, ()=>{
+            // Use the @id to get the item, then remove the loading message
+            ajax.load(higlassItem['@id'], (r)=>{
+                this.setState({ 'higlassItem' : r, 'loading': false });
             });
-        }
+        });
     }
     render(){
         var { higlassItem, loading } = this.state;
