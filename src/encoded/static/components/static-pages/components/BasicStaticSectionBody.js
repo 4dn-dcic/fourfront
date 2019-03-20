@@ -111,11 +111,12 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 export class EmbeddedHiglassActions extends React.PureComponent {
 
     static defaultProps = {
-        'parentComponentType' : BasicUserContentBody
+        'parentComponentType' : BasicUserContentBody,
+        'descriptionprops' :  { 'className' : 'description' },
     };
 
     render(){
-        var { context, parentComponentType } = this.props,
+        var { context, descriptionprops, parentComponentType } = this.props,
             btnProps = {
                 'href'      : object.itemUtil.atId(context),
                 'data-tip'  : "Open HiGlass display to add other data",
@@ -127,8 +128,8 @@ export class EmbeddedHiglassActions extends React.PureComponent {
         }
 
         return (
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'parentComponentType')}>
-                <div className="description">
+            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'descriptionprops', 'parentComponentType')}>
+                <div {...descriptionprops} >
                     { context.description }
                 </div>
                 <div className="btn-container">

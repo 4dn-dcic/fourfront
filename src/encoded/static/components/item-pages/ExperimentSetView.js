@@ -333,11 +333,13 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        // TODO: Adjust heights
+                        const descriptionprops={
+                            'className': 'description text-ellipsis-container'
+                        };
                         return (
                             <React.Fragment>
-                                <EmbeddedHiglassActions context={higlassItem} />
-                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
+                                <EmbeddedHiglassActions context={higlassItem} descriptionprops={descriptionprops}/>
+                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight + 6, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
                             </React.Fragment>
                         );
                     }
