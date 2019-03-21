@@ -9,7 +9,7 @@ import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typed
 import { ItemHeader, FlexibleDescriptionBox, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 
 var { Item, File, ExperimentSet } = typedefs;
 
@@ -28,7 +28,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     static propTypes = {
         'schemas' : PropTypes.object,
         'context' : PropTypes.object
-    }
+    };
 
     constructor(props){
         super(props);
@@ -145,9 +145,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             <React.Fragment>
                 { super.itemMidSection() }
                 <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview"
-                className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
-                    <i className="expand-icon icon icon-th-list" />
-                } />
+                    className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
+                        <i className="expand-icon icon icon-th-list" />
+                    } />
             </React.Fragment>
         );
     }

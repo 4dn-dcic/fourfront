@@ -5,10 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import { console, object, Schemas } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
+import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
 
@@ -121,6 +119,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return (
             <React.Fragment>
                 <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} />
                 <OverviewHeading context={this.props.context} />
             </React.Fragment>
         );
@@ -136,6 +135,7 @@ export class ExperimentMicView extends ExperimentView {
         return (
             <React.Fragment>
                 <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
                 <OverviewHeadingMic context={this.props.context} />
             </React.Fragment>
         );
