@@ -6,10 +6,10 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import { ItemHeader, FlexibleDescriptionBox, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
+import { ItemHeader, FlexibleDescriptionBox, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer, Publications } from './components';
+import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 
 var { Item, File, ExperimentSet } = typedefs;
 
@@ -28,7 +28,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     static propTypes = {
         'schemas' : PropTypes.object,
         'context' : PropTypes.object
-    }
+    };
 
     constructor(props){
         super(props);
@@ -143,11 +143,12 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     itemMidSection(){
         return (
             <React.Fragment>
-                { super.itemMidSection() }
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} />
                 <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview"
-                className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
-                    <i className="expand-icon icon icon-th-list" />
-                } />
+                    className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
+                        <i className="expand-icon icon icon-th-list" />
+                    } />
             </React.Fragment>
         );
     }
