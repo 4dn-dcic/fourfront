@@ -9,6 +9,16 @@ import { requestAnimationFrame } from './../../../viz/utilities';
 
 let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
 
+export function HiGlassLoadingIndicator(props) {
+    return (
+        <React.Fragment>
+            <h3>
+                <i className={"icon icon-lg icon-" + (props.icon || "television")}/>
+            </h3>
+            { props.title || "Initializing" }
+        </React.Fragment>
+    );
+}
 
 export class HiGlassPlainContainer extends React.PureComponent {
 
@@ -56,14 +66,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'height' : 500,
         'viewConfig' : null,
         'mountDelay' : 500,
-        'placeholder' : (
-            <React.Fragment>
-                <h3>
-                    <i className="icon icon-lg icon-television"/>
-                </h3>
-                Initializing
-            </React.Fragment>
-        )
+        'placeholder' : <HiGlassLoadingIndicator/>,
     };
 
     constructor(props){
