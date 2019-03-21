@@ -6,7 +6,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import { ItemHeader, FlexibleDescriptionBox, HiGlassAjaxLoadContainer, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+import { ItemHeader, FlexibleDescriptionBox, HiGlassAjaxLoadContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { RawFilesStackedTable, RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -312,7 +312,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
             leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
-        if (!files || !mounted || !higlassItem) {
+        if (!mounted || !(higlassItem || files) ) {
             return (renderRightPanel && renderRightPanel(width, null)) || children;
         }
 
@@ -337,12 +337,12 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                             );
                         }
                     } else {
-                        const descriptionprops={
+                        const descriptionProps={
                             'className': 'description text-ellipsis-container'
                         };
                         return (
                             <React.Fragment>
-                                <EmbeddedHiglassActions context={higlassItem} descriptionprops={descriptionprops}/>
+                                <EmbeddedHiglassActions context={higlassItem} descriptionProps={descriptionProps}/>
                                 <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
                             </React.Fragment>
                         );
@@ -450,13 +450,11 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             return null;
         }
 
-        // Look for any static_content sections with tab:processed-files as the location
-        const higlassTabs = _.filter(context.static_content, function(section){
+        // Look for any static_content sections with tab:processed-files as the location and return the first appearance.
+        const higlassTab = _.find(context.static_content, function(section){
             return section.location === "tab:processed-files";
         });
-
-        // Return the content of the first higlassTab.
-        return ( higlassTabs.length > 0 ? higlassTabs[0]["content"] : null);
+        return (higlassTab ? higlassTab.content : null);
     });
 
     renderTopRow(){
@@ -475,9 +473,9 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             'columnHeaders' : ProcessedFilesStackedTableSection.extendedColumnHeaders()
         };
 
-        if (currentlyVisualizedFiles && currentlyVisualizedFiles.length > 0){
-            const higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
-            const hiGlassProps = { width, mounted, windowWidth, higlassItem, files : currentlyVisualizedFiles };
+        const higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
+        if (higlassItem && object.itemUtil.atId(higlassItem)){
+            const hiGlassProps = { width, mounted, windowWidth, higlassItem };
             return (
                 <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
                     <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
