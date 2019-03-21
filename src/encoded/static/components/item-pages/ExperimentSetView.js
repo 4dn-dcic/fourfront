@@ -279,7 +279,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        if (this.props.file && pastProps.width !== this.props.width){
+        if (pastProps.width !== this.props.width){
             this.correctHiGlassTrackDimensions();
         }
     }
@@ -310,7 +310,11 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     render(){
         var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
             leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
-        if (!files || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
+
+        // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
+        if (!files || !mounted || !higlassItem) {
+            return (renderRightPanel && renderRightPanel(width, null)) || children;
+        }
 
         var minOpenHeight = 300,
             maxOpenHeight = 800;
@@ -339,7 +343,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                         return (
                             <React.Fragment>
                                 <EmbeddedHiglassActions context={higlassItem} descriptionprops={descriptionprops}/>
-                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight + 6, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
+                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
                             </React.Fragment>
                         );
                     }
@@ -436,13 +440,12 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         );
     });
 
-    /** TODO WIP
-    * Looks for static Higlass content in the context.
-    * @param {object} context
-    * @return {string} Returns the HiGlass item in the context (or null if it doesn't)
+    /**
+    * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig)
+    * @param {object} context - Object that has static_content.
+    * @return {object} Returns the HiGlassItem in the context (or null if it doesn't)
     */
     static getHiglassItemFromProcessedFiles = memoize(function(context){
-        // ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(props.context)
         if (!("static_content" in context)) {
             return null;
         }
