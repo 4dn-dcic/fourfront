@@ -234,6 +234,9 @@ export default class DefaultItemView extends React.PureComponent {
      * Returns list of elements to be rendered between Item header and the list of properties (or Tabs).
      * May be extended/customized.
      *
+     * **NOTE: If adding something here and intend it to apply to _ALL_ Item views:**,
+     * Ensure any Item views which extend/override this method also receive this edit.
+     *
      * @returns {JSX.Element[]} By default, `Publications.PublicationBelowHeaderRow` and `StaticHeaderArea` component instances.
      */
     itemMidSection(){
