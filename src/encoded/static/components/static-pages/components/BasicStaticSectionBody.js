@@ -8,6 +8,7 @@ import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 import { HiGlassPlainContainer } from './../../item-pages/components/HiGlass/HiGlassPlainContainer';
+import { HiGlassAjaxLoadContainer } from './../../item-pages/components/HiGlass/HiGlassAjaxLoadContainer';
 import * as store from './../../../store';
 import { replaceString as replacePlaceholderString } from './../placeholders';
 
@@ -30,6 +31,8 @@ export class BasicUserContentBody extends React.PureComponent {
     }
 
     itemType(){
+        /** Determines the item type from the context.
+        */
         var { context, itemType } = this.props;
         if (itemType && typeof itemType === 'string') return itemType;
         if (!Array.isArray(context['@type'])) throw new Error('Expected an @type on context.');
@@ -60,7 +63,7 @@ export class BasicUserContentBody extends React.PureComponent {
             return (
                 <React.Fragment>
                     <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    <HiGlassPlainContainer viewConfig={context.viewconfig} />
+                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} />
                 </React.Fragment>
             );
         } else {
