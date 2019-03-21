@@ -143,8 +143,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     itemMidSection(){
         return (
             <React.Fragment>
-                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
-                <StaticHeadersArea context={this.props.context} />
+                { super.itemMidSection() }
                 <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview"
                     className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
                         <i className="expand-icon icon icon-th-list" />
