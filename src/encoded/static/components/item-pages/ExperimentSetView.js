@@ -7,7 +7,7 @@ import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import { ItemHeader, FlexibleDescriptionBox, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer, Publications } from './components';
-import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
+import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 
