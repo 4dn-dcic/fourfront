@@ -434,9 +434,10 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
             Base.metadata.drop_all(session.connection().engine)
             Base.metadata.create_all(session.connection().engine)
         except Exception as e:
-            logger.error("error droping tables: %s" % str(e))
+            logger.error("load_data: error dropping tables: %s" % str(e))
             transaction.abort()
         else:
+            logger.warning("load_data: successfully dropped tables")
             transaction.commit()
         transaction.begin()
 
