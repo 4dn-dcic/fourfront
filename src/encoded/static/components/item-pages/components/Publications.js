@@ -24,7 +24,7 @@ class DetailBlock extends React.PureComponent {
 
     render(){
         var { publication, singularTitle, children } = this.props;
-        if (typeof publication !== 'object' || !publication) return null;
+        if (!publication || !object.itemUtil.atId(publication)) return null;
 
         var title = publication.display_title,
             url = object.itemUtil.atId(publication);
@@ -59,6 +59,7 @@ class ShortAttribution extends React.PureComponent {
 
     render(){
         var pub = this.props.publication;
+        if (!pub || !object.itemUtil.atId(pub)) return null;
 
         var authorsString = null;
         if (Array.isArray(pub.authors)){
@@ -118,7 +119,7 @@ class PublicationBelowHeaderRow extends React.Component {
      */
     render(){
         var { publication, singularTitle, outerClassName } = this.props;
-        if (!publication) return null;
+        if (!publication || !object.itemUtil.atId(publication)) return null;
         return (
             <div className={outerClassName}>
                 <DetailBlock publication={publication} singularTitle={singularTitle} >
@@ -196,7 +197,7 @@ export class Publications extends React.PureComponent {
     }
 
     detailRows(publication = this.props.context.produced_in_pub){
-        if (!publication || typeof publication === 'undefined'){
+        if (!publication || !object.itemUtil.atId(publication)){
             return [];
         }
 
@@ -222,12 +223,13 @@ export class Publications extends React.PureComponent {
             //    inclProps['data-place'] = 'bottom';
             //}
             details.push({
-                label : <span>{ this.toggleAbstractIcon() } Abstract</span>,
-                content : this.shortAbstract()
+                'key' : 'abstract',
+                'label' : <span>{ this.toggleAbstractIcon() } Abstract</span>,
+                'content' : this.shortAbstract()
             });
         }
 
-        if (publication && typeof publication.date_published === 'string'){
+        if (typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
                 'content' : DateUtility.formatPublicationDate(publication.date_published)
@@ -249,7 +251,7 @@ export class Publications extends React.PureComponent {
         } else {
             usedInPublications = _.filter(context.publications_of_set, function(pub){
                 var pubID = object.itemUtil.atId(pub);
-                if (pubID && pubID === producedInPubID){
+                if (!pubID || (pubID && pubID === producedInPubID)){
                     return false;
                 }
                 return true;
@@ -260,11 +262,11 @@ export class Publications extends React.PureComponent {
             <div className="publications-section">
                 <Publications.DetailBlock publication={context.produced_in_pub} singularTitle="Publication Details">
                     {
-                        this.detailRows().map(function(d, i){
+                        _.map(this.detailRows(context.produced_in_pub), function({ key, label, content }, i){
                             return (
-                                <div className="row details-row" key={ d.key || d.label || i }>
-                                    <div className="col-xs-2 text-600 text-right label-col">{ d.label }</div>
-                                    <div className="col-xs-10">{ d.content }</div>
+                                <div className="row details-row" key={ key || label || i }>
+                                    <div className="col-xs-2 text-600 text-right label-col">{ label }</div>
+                                    <div className="col-xs-10">{ content }</div>
                                 </div>
                             );
                         })

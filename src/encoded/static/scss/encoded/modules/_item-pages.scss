@@ -552,11 +552,13 @@ i.item-status-indicator-dot {
 		padding-bottom: 7px;
     }
 
-	.rc-tabs-tabpane {
-		overflow-x: hidden;
-		.info-area {
-			overflow: hidden;
-			border-bottom: none;
+	.rc-tabs-content {
+		.rc-tabs-tabpane {
+			overflow-x: hidden;
+			.info-area {
+				overflow: hidden;
+				border-bottom: none;
+			}
 		}
 	}
 
