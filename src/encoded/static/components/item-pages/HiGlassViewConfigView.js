@@ -631,7 +631,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <h3 className="tab-section-title">
                     <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
                         className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
-                    <CollapsibleItemViewButtonToolbar constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
+                    <CollapsibleItemViewButtonToolbar windowWidth={windowWidth} constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>
                                 <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
