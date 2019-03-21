@@ -746,7 +746,7 @@
        "term_id": "SO:0000104",
        "term_name": "polypeptide",
        "preferred_name": "protein",
-       "uuid": "e4addd27-69e1-47d2-8ff4-a7ada5fc48a5",
+       "uuid": "91f427e6-5246-4992-8123-b4f8fa9eef01",
        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
        "term_url": "http://purl.obolibrary.org/obo/SO_0000104"
    },
@@ -754,7 +754,7 @@
        "namespace": "http://purl.obolibrary.org/obo/",
        "term_id": "SO:0000704",
        "term_name": "gene",
-       "uuid": "38184c75-56ae-4ccb-b7c7-28f5a99c7f6e",
+       "uuid": "0231da78-1adc-4b8a-89b9-4f91908412a3",
        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
        "term_url": "http://purl.obolibrary.org/obo/SO_0000704"
    },
@@ -770,7 +770,7 @@
        "namespace": "http://purl.obolibrary.org/obo/",
        "term_id": "SO:0000001",
        "term_name": "region",
-       "uuid": "bca12371-0380-402a-ac1f-fafe552c2cba",
+       "uuid": "41b7a2c5-f2d9-46b4-a49d-51502fe61bb3",
        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
        "term_url": "http://purl.obolibrary.org/obo/SO_0000001"
    },
