@@ -1,31 +1,16 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { console, DateUtility, object } from './../../util';
-import { FormattedInfoWrapper, WrappedListBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
-
-/*
-var testData = [ // Use this to test list view(s) as none defined in test data.
-    { 'link_id' : '~something~here~1', 'display_title' : "Sample Publicstion One which involces this experiment set and other things" },
-    { 'link_id' : '~something~here~2', 'display_title' : "Something else wich references this set and has data and many words" },
-    { 'link_id' : '~something~here~3', 'display_title' : "Hello 1123" },
-    { 'link_id' : '~something~here~4', 'display_title' : "Hello 11234 sdfsfd asfsdf asfgsdg sdfsdg sadfsdg sdgdsg" },
-    { 'link_id' : '~something~here~5', 'display_title' : "Hello 112345" },
-    { 'link_id' : '~something~here~6', 'display_title' : "Hello 1123456 123456" }
-];
-*/
+import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 
 
 /**
  * Display a FormattedInfoBlock-style block with custom detail (defined via props.children).
- *
- * @memberof module:item-pages/components.Publications
- * @class DetailBlock
- * @extends {React.Component}
  *
  * @prop {string} singularTitle         - Title to show in top left of block. 'S' gets added to end of title if more than 1 item.
  * @prop {Object} publication           - Publication whose link and display_title to display.
@@ -39,9 +24,10 @@ class DetailBlock extends React.PureComponent {
 
     render(){
         var { publication, singularTitle, children } = this.props;
-        if (typeof publication !== 'object' || !publication) return null;
+        if (!publication || !object.itemUtil.atId(publication)) return null;
 
-        var title =  publication.display_title;
+        var title = publication.display_title,
+            url = object.itemUtil.atId(publication);
 
         if (publication.short_attribution && title.indexOf(publication.short_attribution + ' ') > -1){
             // Short Attribution is added to display_title on back-end; clear it off here since we craft our own attribution string manually.
@@ -51,9 +37,9 @@ class DetailBlock extends React.PureComponent {
         return (
             <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
                 <h5 className="block-title">
-                    <a href={object.atIdFromObject(publication)}>{ title }</a>
+                    <a href={url}>{ title }</a>
                 </h5>
-                <div className="details" children={children} />
+                <div className="details">{ children }</div>
             </FormattedInfoWrapper>
         );
     }
@@ -63,8 +49,17 @@ class DetailBlock extends React.PureComponent {
 
 class ShortAttribution extends React.PureComponent {
 
+    static propTypes = {
+        'publication'   : PropTypes.shape({
+            'authors'       : PropTypes.arrayOf(PropTypes.string),
+            'journal'       : PropTypes.string,
+            'date_published': PropTypes.string
+        }).isRequired
+    };
+
     render(){
         var pub = this.props.publication;
+        if (!pub || !object.itemUtil.atId(pub)) return null;
 
         var authorsString = null;
         if (Array.isArray(pub.authors)){
@@ -110,22 +105,33 @@ class ShortAttribution extends React.PureComponent {
 }
 
 
-class ProducedInPublicationBelowHeaderRow extends React.Component {
+class PublicationBelowHeaderRow extends React.Component {
+
+    static defaultProps = {
+        'singularTitle' : "Source Publication",
+        'outerClassName' : "mb-2"
+    };
+
+    /**
+     * @todo
+     * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
+     * component to create own <div> with whatever className is desired, among other element attributes.
+     */
     render(){
-        if (!this.props.produced_in_pub) return null;
+        var { publication, singularTitle, outerClassName } = this.props;
+        if (!publication || !object.itemUtil.atId(publication)) return null;
         return (
-            <div className="row mb-2">
-                <div className="col-sm-12">
-                    <DetailBlock publication={this.props.produced_in_pub} singularTitle="Source Publication" >
-                        <div className="more-details">
-                            <ShortAttribution publication={this.props.produced_in_pub} />
-                        </div>
-                    </DetailBlock>
-                </div>
+            <div className={outerClassName}>
+                <DetailBlock publication={publication} singularTitle={singularTitle} >
+                    <div className="more-details">
+                        <ShortAttribution publication={publication} />
+                    </div>
+                </DetailBlock>
             </div>
         );
     }
 }
+
 
 /**
  * Shows publications for current Item.
@@ -139,14 +145,14 @@ export class Publications extends React.PureComponent {
 
     static DetailBlock = DetailBlock;
     static ShortAttribution = ShortAttribution;
-    static ProducedInPublicationBelowHeaderRow = ProducedInPublicationBelowHeaderRow
+    static PublicationBelowHeaderRow = PublicationBelowHeaderRow;
 
     constructor(props){
         super(props);
         this.shortAbstract = this.shortAbstract.bind(this);
         this.toggleAbstractIcon = this.toggleAbstractIcon.bind(this);
         this.detailRows = this.detailRows.bind(this);
-        this.render = this.render.bind(this);
+        this.onToggleAbstractIconClick = this.onToggleAbstractIconClick.bind(this);
         this.state = {
             'abstractCollapsed' : true
         };
@@ -173,24 +179,25 @@ export class Publications extends React.PureComponent {
         }
     }
 
+    onToggleAbstractIconClick(e){
+        this.setState(function({ abstractCollapsed }){
+            return { 'abstractCollapsed' : !abstractCollapsed };
+        });
+    }
+
     toggleAbstractIcon(publication = this.props.context.produced_in_pub){
         if (!publication || !publication.abstract) return null;
         if (publication && publication.abstract && publication.abstract.length <= 240){
             return null;
         }
         return (
-            <i
-                className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
-                data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'}
-                onClick={(e)=>{
-                    this.setState({ abstractCollapsed : !this.state.abstractCollapsed });
-                }}
-            />
+            <i className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
+                data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'} onClick={this.onToggleAbstractIconClick} />
         );
     }
 
     detailRows(publication = this.props.context.produced_in_pub){
-        if (!publication || typeof publication === 'undefined'){
+        if (!publication || !object.itemUtil.atId(publication)){
             return [];
         }
 
@@ -216,12 +223,13 @@ export class Publications extends React.PureComponent {
             //    inclProps['data-place'] = 'bottom';
             //}
             details.push({
-                label : <span>{ this.toggleAbstractIcon() } Abstract</span>,
-                content : this.shortAbstract()
+                'key' : 'abstract',
+                'label' : <span>{ this.toggleAbstractIcon() } Abstract</span>,
+                'content' : this.shortAbstract()
             });
         }
 
-        if (publication && typeof publication.date_published === 'string'){
+        if (typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
                 'content' : DateUtility.formatPublicationDate(publication.date_published)
@@ -232,11 +240,18 @@ export class Publications extends React.PureComponent {
     }
 
     render(){
-        var context = this.props.context;
-        var usedInPublications = [];
-        if (Array.isArray(context.publications_of_set) && context.publications_of_set.length > 0){
-            usedInPublications = context.publications_of_set.filter(function(pub){
-                if (pub.link_id && context.produced_in_pub && context.produced_in_pub.link_id && pub.link_id === context.produced_in_pub.link_id){
+        var context = this.props.context,
+            producedInPubID = (context.produced_in_pub && object.itemUtil.atId(context.produced_in_pub)) || null,
+            usedInPublications;
+
+        if (!Array.isArray(context.publications_of_set) || context.publications_of_set.length === 0){
+            usedInPublications = [];
+        } else if (!producedInPubID){
+            usedInPublications = context.publications_of_set;
+        } else {
+            usedInPublications = _.filter(context.publications_of_set, function(pub){
+                var pubID = object.itemUtil.atId(pub);
+                if (!pubID || (pubID && pubID === producedInPubID)){
                     return false;
                 }
                 return true;
@@ -247,11 +262,11 @@ export class Publications extends React.PureComponent {
             <div className="publications-section">
                 <Publications.DetailBlock publication={context.produced_in_pub} singularTitle="Publication Details">
                     {
-                        this.detailRows().map(function(d, i){
+                        _.map(this.detailRows(context.produced_in_pub), function({ key, label, content }, i){
                             return (
-                                <div className="row details-row" key={ d.key || d.label || i }>
-                                    <div className="col-xs-2 text-600 text-right label-col">{ d.label }</div>
-                                    <div className="col-xs-10">{ d.content }</div>
+                                <div className="row details-row" key={ key || label || i }>
+                                    <div className="col-xs-2 text-600 text-right label-col">{ label }</div>
+                                    <div className="col-xs-10">{ content }</div>
                                 </div>
                             );
                         })
@@ -263,4 +278,3 @@ export class Publications extends React.PureComponent {
     }
 
 }
-

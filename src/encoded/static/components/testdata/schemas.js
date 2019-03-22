@@ -5508,7 +5508,7 @@ module.exports = {
                 "description": "The user's last (family) name."
             },
             "lab": {
-                "permission": "import-items",
+                "permission": "import_items",
                 "comment": "See lab.json for available identifiers.",
                 "linkTo": "Lab",
                 "description": "Lab user is primarily associated with.",
@@ -5522,7 +5522,7 @@ module.exports = {
                     "type": "string",
                     "linkTo": "Lab"
                 },
-                "permission": "import-items",
+                "permission": "import_items",
                 "uniqueItems": true,
                 "default": [],
                 "title": "Submits for",
@@ -5533,7 +5533,7 @@ module.exports = {
                 "items": {
                     "type": "string"
                 },
-                "permission": "import-items",
+                "permission": "import_items",
                 "uniqueItems": true,
                 "default": [],
                 "title": "Groups",
@@ -5549,7 +5549,7 @@ module.exports = {
                         "REMC"
                     ]
                 },
-                "permission": "import-items",
+                "permission": "import_items",
                 "uniqueItems": true,
                 "description": "The group that determines which set of data the user has permission to view.",
                 "title": "View access group",

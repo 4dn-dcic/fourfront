@@ -93,4 +93,4 @@ def test_load_data_local_dir(testapp):
             load_all.return_value = None
             res = testapp.post_json('/load_data', {'fdn_dir': 'perf-testing'}, status=200)
             assert res.json['status'] == 'success'
-            load_all.assert_called_once_with(mock.ANY, expected_dir, None, itype=None, overwrite=False)
+            load_all.assert_called_once_with(mock.ANY, expected_dir, None, itype=None, overwrite=False, from_json=False)

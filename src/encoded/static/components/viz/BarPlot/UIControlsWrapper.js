@@ -363,7 +363,7 @@ export class UIControlsWrapper extends React.PureComponent {
         return (
             <div className="bar-plot-chart-controls-wrapper">
                 <div className="overlay" style={{
-                    width  : (windowGridSize !== 'xs' ? (layout.gridContainerWidth() * (9/12) - 15) : null)
+                    width  : (windowGridSize !== 'xs' ? (layout.gridContainerWidth(windowWidth) * (9/12) - 15) : null)
                 }}>
 
                     <div className="y-axis-top-label" style={{
@@ -407,7 +407,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                 <div className="col-xs-3" style={{ width : 51 }}>
                                     <h6 className="dropdown-heading">X Axis</h6>
                                 </div>
-                                <div className="col-xs-9 pull-right" style={{ width : (layout.gridContainerWidth() * (windowGridSize !== 'xs' ? 3/12 : 1)) + 5 - 52 }}>
+                                <div className="col-xs-9 pull-right" style={{ "width" : (layout.gridContainerWidth(windowWidth) * (windowGridSize !== 'xs' ? 0.25 : 1)) + 5 - 52 }}>
                                     <DropdownButton
                                         id="select-barplot-field-0"
                                         onSelect={this.handleFieldSelect.bind(this, 0)}

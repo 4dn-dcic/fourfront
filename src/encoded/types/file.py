@@ -46,10 +46,10 @@ from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
 from . import TrackingItem
 from ..authentication import session_properties
-
+import structlog
 import logging
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
-log = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
@@ -1175,12 +1175,13 @@ def download(context, request):
         raise ValueError(external.get('service'))
 
     tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
-    tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
-                     'status': 'in review by lab', 'tracking_type': 'download_tracking',
+    tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
                      'download_tracking': tracking_values}
-    TrackingItem.create_and_commit(request, tracking_item)
+    try:
+        TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
+    except Exception as e:
+        log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])

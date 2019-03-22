@@ -72,7 +72,7 @@
             ]
         },
         "assay_subclassification": {
-            "title": "Assay Sub-classification",
+            "title": "Assay Purpose",
             "description": "Sub-classification of assay based on what is measured",
             "type": "string",
             "lookup": 120,

@@ -1126,3 +1126,20 @@ def test_ready_to_process_set_status_others_can_not_view(
     assert res2['status'] == 'pre-release'
     # others can not view
     viewing_group_member_testapp.get(res1['@id'], status=403)
+
+
+@pytest.fixture
+def static_section_item():
+    return {
+        'name': 'static-section.test_ss',
+        'title': 'Test Static Section',
+        'body': 'This is a test section'
+    }
+
+
+def test_static_section_with_lab_view_by_lab_member(
+        wrangler_testapp, lab_viewer_testapp, lab, static_section_item):
+    static_section_item['lab'] = lab['@id']
+    static_section_item['status'] = 'released to lab'
+    res = wrangler_testapp.post_json('/static_section', static_section_item).json['@graph'][0]
+    lab_viewer_testapp.get(res['@id'], status=200)

@@ -51,13 +51,14 @@ def load_data_view(context, request):
 
     {'local_dir': inserts folder on your computer
      'fdn_dir': inserts folder under encoded
+     'in_file': file containing list of inserts for single item type
      'store': if not local_dir or fdn_dir, use the dictionary
      'overwrite' (Bool): overwrite if existing data
-     'itype': (list or str): only pick some types from the source
+     'itype': (list or str): only pick some types from the source or specify type in in_file
      'config_uri': user supplied configuration file}
 
     post can contain 2 different styles of data
-    1) reference to a folder
+    1) reference to a folder or file
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     '''
@@ -77,16 +78,23 @@ def load_data_view(context, request):
     store = request.json.get('store', {})
     fdn_dir = request.json.get('fdn_dir')
     local_dir = request.json.get('local_dir')
+    in_file = request.json.get('in_file')
     overwrite = request.json.get('overwrite', False)
     itype = request.json.get('itype', None)
-
+    inserts = None
+    from_json = False
     if fdn_dir:
-        fdn_inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
-        res = load_all(testapp, fdn_inserts, None, overwrite=overwrite, itype=itype)
+        inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
+    elif in_file:
+        inserts = in_file
     elif local_dir:
-        res = load_all(testapp, local_dir, None, overwrite=overwrite, itype=itype)
+        inserts = local_dir
     elif store:
-        res = load_all(testapp, store, None, overwrite=overwrite, itype=itype, from_json=True)
+        inserts = store
+        from_json = True
+
+    if inserts:
+        res = load_all(testapp, inserts, None, overwrite=overwrite, itype=itype, from_json=from_json)
     else:
         res = 'No uploadable content found!'
 
@@ -219,7 +227,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
 
     args:
         testapp
-        inserts : either a folder, or a dictionary in the store format
+        inserts : either a folder, file, or a dictionary in the store format
         docsdir : attachment folder
         overwrite (bool)   : if the database contains the item already, skip or patch
         itype (list or str): limit selection to certain type/types
@@ -228,6 +236,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     returns:
         None if successful, otherwise an Exception
     """
+    # TODO: deal with option of file to load (not directory struture)
     if docsdir is None:
         docsdir = []
     # Collect Items
@@ -235,13 +244,22 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     if from_json:
         store = inserts
     if not from_json:
+        use_itype = False
         # grab json files
-        if not inserts.endswith('/'):
-            inserts += '/'
-        files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+        if os.path.isdir(inserts):
+            if not inserts.endswith('/'):
+                inserts += '/'
+            files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+        else:  # we've specified a single file
+            files = [inserts]
+            use_itype = True
         for a_file in files:
-            item_type = a_file.split('/')[-1].replace(".json", "")
-            with open(inserts + a_file) as f:
+            if use_itype:
+                item_type = itype
+            else:
+                item_type = a_file.split('/')[-1].replace(".json", "")
+                a_file = inserts + a_file
+            with open(a_file) as f:
                 store[item_type] = json.loads(f.read())
     # if there is a defined set of items, subtract the rest
     if itype is not None:
@@ -415,9 +433,10 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
             Base.metadata.drop_all(session.connection().engine)
             Base.metadata.create_all(session.connection().engine)
         except Exception as e:
-            logger.error("error droping tables: %s" % str(e))
+            logger.error("load_data: error dropping tables: %s" % str(e))
             transaction.abort()
         else:
+            logger.warning("load_data: successfully dropped tables")
             transaction.commit()
         transaction.begin()
 
@@ -500,14 +519,13 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False
                      clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_ontology_terms(app, post_json=None, patch_json=None):
+def load_ontology_terms(app, post_file):
     from webtest import TestApp
     from webtest.app import AppError
-    # change the data format from list to store
-    if post_json:
-        post_json = {'ontology_term': post_json}
-    if patch_json:
-        patch_json = {'ontology_term': patch_json}
+    post_json = {}
+    # read in json file and create store
+    with open(post_file) as post:
+        post_json['ontology_term'] = json.loads(post.read())
 
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -516,14 +534,12 @@ def load_ontology_terms(app, post_json=None, patch_json=None):
     testapp = TestApp(app, environ)
 
     if post_json:
-        post_res = load_all(testapp, post_json, None, itype='ontology_term')
+        logger.warning('loading ontology terms')
+        post_res = load_all(testapp, post_json, None, itype='ontology_term', overwrite=True, from_json=True)
         if post_res:  # None if successful
-            logger.error('load_ontology_terms: failed to POST', error=post_res)
-
-    if patch_json:
-        patch_res = load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True)
-        if patch_res:  # None if successful
-            logger.error('load_ontology_terms: failed to PATCH', error=patch_res)
+            logger.error('load_ontology_terms: failed to LOAD', error=post_res)
+        else:
+            logger.warning('done loading terms')
 
     # now keep track of the last time we loaded these suckers
     data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}

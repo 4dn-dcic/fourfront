@@ -4,7 +4,7 @@ from snovault import (
 )
 
 
-@audit_checker('file_fastq')
+# @audit_checker('file_fastq')
 def audit_file_with_pair_info_has_paired_with_related_file(value, system):
     '''
     fastq files can be paired and if they are they should have both the 'paired_end'

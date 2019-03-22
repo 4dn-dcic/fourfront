@@ -24,7 +24,8 @@ from encoded.commands.owltools import (
 from dcicutils.ff_utils import (
     get_authentication_with_server,
     get_metadata,
-    search_metadata
+    search_metadata,
+    unified_authentication
 )
 from dcicutils.s3_utils import s3Utils
 import mimetypes
@@ -371,7 +372,7 @@ def get_slim_terms(connection):
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
     slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
-    search_suffix = 'search/?type=OntologyTerm&limit=all&is_slim_for='
+    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
         try:
@@ -383,11 +384,17 @@ def get_slim_terms(connection):
     return slim_terms
 
 
-def get_existing_ontology_terms(connection):
+def get_existing_ontology_terms(connection, ontologies=None):
     '''Retrieves all existing ontology terms from the db
     '''
-    search_suffix = 'search/?type=OntologyTerm&limit=all'
-    return search_metadata(search_suffix, connection)
+    ont_list = ''
+    if ontologies is not None:
+        for o in ontologies:
+            ouuid = o.get('uuid')
+            ont_list += '&source_ontology.uuid={}'.format(ouuid)
+    search_suffix = 'search/?type=OntologyTerm' + ont_list
+    db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
+    return {t['term_id']: t for t in db_terms}
 
 
 def get_ontologies(connection, ont_list):
@@ -396,7 +403,7 @@ def get_ontologies(connection, ont_list):
     '''
     ontologies = []
     if ont_list == 'all':
-        ontologies = search_metadata('search/?type=Ontology&limit=all', connection)
+        ontologies = search_metadata('search/?type=Ontology', connection)
     else:
         ontologies = [get_metadata('ontologys/' + ontology, connection) for ontology in ont_list]
     # removing item not found cases with reporting
@@ -417,7 +424,7 @@ def connect2server(env=None, key=None):
        Also handles keyfiles stored in s3'''
     if key == 's3':
         assert env
-        key = ff_utils.unified_auth(env)
+        key = unified_authentication(None, env)
 
     if all([v in key for v in ['key', 'secret', 'server']]):
         import ast
@@ -564,7 +571,7 @@ def _get_uuids_for_linked(term, idmap):
     return puuids
 
 
-def add_uuids(partitioned_terms):
+def add_uuids_and_combine(partitioned_terms):
     '''adds new uuids to terms to post and existing uuids to patch terms
         this function depends on the partitioned term dictionary that
         contains keys 'post', 'patch' and 'idmap'
@@ -594,12 +601,12 @@ def add_uuids(partitioned_terms):
     try:
         post = list(newterms.values())
     except AttributeError:
-        post = None
+        post = []
     try:
         patch = list(patches.values())
     except AttributeError:
-        patch = None
-    return [post, patch]
+        patch = []
+    return post + patch
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
@@ -660,23 +667,11 @@ def write_outfile(terms, filename, pretty=False):
         write to file by default as a json list or if pretty
         then same with indents and newlines
     '''
-    indent = None
-    lenterms = len(terms)
     with open(filename, 'w') as outfile:
         if pretty:
-            indent = 4
-            outfile.write('[\n')
+            json.dump(terms, outfile, indent=4)
         else:
-            outfile.write('[')
-        for i, term in enumerate(terms):
-            json.dump(term, outfile, indent=indent)
-            if i != lenterms - 1:
-                outfile.write(',')
-            if pretty:
-                outfile.write('\n')
-        outfile.write(']')
-        if pretty:
-            outfile.write('\n')
+            json.dump(terms, outfile)
 
 
 def parse_args(args):
@@ -691,7 +686,8 @@ def parse_args(args):
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
     parser.add_argument('--outdir',
-                        help="the directory (relative to src/encoded) for output files")
+                        help="the directory (relative to src/encoded) for output files",
+                        default='/')
     parser.add_argument('--s3upload',
                         default=False,
                         action='store_true',
@@ -713,11 +709,11 @@ def parse_args(args):
                         help="The environment to use i.e. data, webdev, mastertest.\
                         Default is 'data')")
     parser.add_argument('--key',
-                        default=None,
+                        default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
+    parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
     return parser.parse_args(args)
 
@@ -749,14 +745,12 @@ def main():
         and Updates Terms by generating json inserts
     '''
     args = parse_args(sys.argv[1:])  # to facilitate testing
-    s3_postfile = 'ontology_post.json'
-    s3_patchfile = 'ontology_patch.json'
+    s3_postfile = 'ontology_term.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
     print('Writing to %s' % outdir)
 
     postfile = outdir + s3_postfile
-    patchfile = outdir + s3_patchfile
 
     # fourfront connection
     connection = connect2server(args.env, args.key)
@@ -765,8 +759,10 @@ def main():
         if o['ontology_name'].startswith('4DN'):
             ontologies.pop(i)
     slim_terms = get_slim_terms(connection)
-    db_terms = get_existing_ontology_terms(connection)
-    db_terms = {t['term_id']: t for t in db_terms}
+    from_ontologies = None
+    if (args.ontologies != 'all'):
+        from_ontologies = ontologies
+    db_terms = get_existing_ontology_terms(connection, from_ontologies)
     terms = {}
 
     for ontology in ontologies:
@@ -784,13 +780,12 @@ def main():
         if args.full:
             filter_unchanged = False
         partitioned_terms = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
-        terms2write = add_uuids(partitioned_terms)
+        terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False
         if args.pretty:
             pretty = True
-        write_outfile(terms2write[0], postfile, pretty)
-        write_outfile(terms2write[1], patchfile, pretty)
+        write_outfile(terms2write, postfile, pretty)
 
         if args.load:  # load em into the database
             # pyramids app
@@ -800,16 +795,13 @@ def main():
                 raise("Can't get the fourfront app - check config_uri and app_name")
 
             load_ontology_terms(app,
-                                args.outdir + s3_postfile,
-                                args.outdir + s3_patchfile)
+                                args.outdir + s3_postfile)
 
         if args.s3upload:  # upload file to s3
             s3 = s3Utils(env=args.env)
             s3.outfile_bucket = s3.system_bucket
             with open(postfile, 'rb') as postedfile:
                 s3.s3_put(obj=postedfile, key=s3_postfile)
-            with open(patchfile, 'rb') as patchedfile:
-                s3.s3_put(patchedfile, s3_patchfile)
 
 
 if __name__ == '__main__':

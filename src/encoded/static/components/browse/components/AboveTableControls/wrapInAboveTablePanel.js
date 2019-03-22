@@ -1,5 +1,7 @@
 'use strict';
 
+import React from 'react';
+
 export function wrapInAboveTablePanel(inner, title, className, closeButtonClickHandler){
     var closeButton = null;
     if (typeof closeButtonClickHandler === 'function'){

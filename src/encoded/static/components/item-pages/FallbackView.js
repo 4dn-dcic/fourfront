@@ -7,7 +7,7 @@ import { ItemDetailList } from './components';
 /**
  * Fallback content_view for pages which are not specifically 'Items.
  * Renders out JSON.
- * 
+ *
  * @export
  * @class Item
  * @extends {React.Component}

@@ -8,7 +8,7 @@ import { console, isServerSide } from './../util';
 
 /**
  * Utility functions for aiding with visualizations.
- * 
+ *
  * @module {Object} viz/utilities
  */
 
@@ -34,7 +34,7 @@ export function stringToColor(str) {
 }
 
 
-/** 
+/**
  * Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.
  *
  * @param {function} cb - Callback method.
@@ -98,7 +98,7 @@ export function transformBarPlotAggregationsToD3CompatibleHierarchy(rootField, a
                     'size' : termObj.total && typeof termObj.total[aggregateType] === 'number' ? termObj.total[aggregateType] : 1
                 };
             }
-    
+
         });
     }
 
@@ -125,12 +125,72 @@ export class FourfrontLogo extends React.PureComponent {
         'title'                     : "Data Portal"
     };
 
+    static svgElemStyle = {
+        'verticalAlign' : 'middle',
+        'display' : 'inline-block',
+        'height' : '100%',
+        'paddingBottom' : 10,
+        'paddingTop' : 10,
+        'transition' : "padding .3s, transform .3s"
+    };
+
+    static svgBGCircleStyle = {
+        'fill' : "url(#fourfront_linear_gradient)",
+        "stroke" : "transparent",
+        "strokeWidth" : 1
+    };
+
+    static svgTextStyleOut = {
+        'transition' : "letter-spacing 1s, opacity .7s, stroke .7s, stroke-width .7s, fill .7s",
+        'fontSize' : 23,
+        'fill' : '#fff',
+        'fontFamily' : '"Mada","Work Sans",Helvetica,Arial,sans-serif',
+        'fontWeight' : '600',
+        'stroke' : 'transparent',
+        'strokeWidth' : 0,
+        'strokeLinejoin' : 'round',
+        'opacity' : 1,
+        'letterSpacing' : 0
+    };
+
+    static svgTextStyleIn = {
+        'transition' : "letter-spacing 1s .4s linear, opacity .7s .4s, stroke .7s 4s, stroke-width .7s 4s, fill .7s .4s",
+        'letterSpacing' : -14,
+        'stroke' : 'rgba(0,0,0,0.2)',
+        'opacity' : 0,
+        'fill' : 'transparent',
+        'strokeWidth' : 15
+    };
+
+    static svgInnerCircleStyleOut = {
+        'transition': "opacity 1.2s",
+        'opacity' : 0,
+        'fill' : 'transparent',
+        'strokeWidth' : 15,
+        'stroke' : 'rgba(0,0,0,0.2)',
+        'fontSize' : 23,
+        'fontFamily' : '"Mada","Work Sans",Helvetica,Arial,sans-serif',
+        'fontWeight' : '600',
+        'strokeLinejoin' : 'round'
+    };
+
+    static svgInnerCircleStyleIn = {
+        'transition': "opacity 1.2s .6s",
+        'opacity' : 1
+    };
+
     constructor(props){
         super(props);
         this.setHoverStateOnDoTiming = _.throttle(this.setHoverStateOnDoTiming.bind(this), 1000);
         this.setHoverStateOn    = this.setHoverStateOn.bind(this);
         this.setHoverStateOff   = this.setHoverStateOff.bind(this);
+
         this.svgRef             = React.createRef();
+        this.bgCircleRef        = React.createRef();
+        this.fgTextRef          = React.createRef();
+        this.fgCircleRef        = React.createRef();
+
+        this.state = { hover : false };
     }
 
     setHoverStateOn(e){
@@ -139,23 +199,22 @@ export class FourfrontLogo extends React.PureComponent {
 
     setHoverStateOnDoTiming(e){
         var { circlePathDefinitionHover, textTransformHover, fgCircleTransformHover, hoverDelayUntilTransform } = this.props;
-        var svg = d3.select(this.svgRef.current);
 
         // CSS styles controlled via stylesheets
 
         setTimeout(()=>{
             if (!this.state.hover) return; // No longer hovering. Cancel.
-            svg.select(".fourfront-logo-background-circle")
+            d3.select(this.bgCircleRef.current)
                 .transition()
                 .duration(1000)
                 .attr('d', circlePathDefinitionHover);
 
-            svg.select(".fourfront-logo-text")
+            d3.select(this.fgTextRef.current)
                 .transition()
                 .duration(700)
                 .attr('transform', textTransformHover);
 
-            svg.select(".fourfront-logo-foreground-circle")
+            d3.select(this.fgCircleRef.current)
                 .transition()
                 .duration(1200)
                 .attr('transform', fgCircleTransformHover);
@@ -165,20 +224,20 @@ export class FourfrontLogo extends React.PureComponent {
 
     setHoverStateOff(e){
         this.setState({ 'hover' : false }, ()=>{
-            var svg = d3.select(this.svgRef.current);
-            svg.select(".fourfront-logo-background-circle")
+
+            d3.select(this.bgCircleRef.current)
                 .interrupt()
                 .transition()
                 .duration(1000)
                 .attr('d', this.props.circlePathDefinitionOrig);
 
-            svg.select(".fourfront-logo-text")
+            d3.select(this.fgTextRef.current)
                 .interrupt()
                 .transition()
                 .duration(1200)
                 .attr('transform', this.props.textTransformOrig);
 
-            svg.select(".fourfront-logo-foreground-circle")
+            d3.select(this.fgCircleRef.current)
                 .interrupt()
                 .transition()
                 .duration(1000)
@@ -203,16 +262,22 @@ export class FourfrontLogo extends React.PureComponent {
 
     render(){
         var { id, circlePathDefinitionOrig, circlePathDefinitionHover, textTransformOrig,
-            textTransformHover, fgCircleTransformOrig, onClick, title } = this.props;
+            textTransformHover, fgCircleTransformOrig, onClick, title } = this.props,
+            hover = this.state.hover;
+
         return (
             <Navbar.Brand>
                 <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
                     <span className="img-container">
-                        <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" className="fourfront_logo_svg_instance">
+                        <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={FourfrontLogo.svgElemStyle}>
                             { this.renderDefs() }
-                            <path d={circlePathDefinitionOrig} className="fourfront-logo-background-circle" />
-                            <text transform={textTransformOrig} className="fourfront-logo-text">4DN</text>
-                            <text transform={fgCircleTransformOrig} className="fourfront-logo-foreground-circle">O</text>
+                            <path d={circlePathDefinitionOrig} style={FourfrontLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
+                            <text transform={textTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgTextStyleOut, FourfrontLogo.svgTextStyleIn) : FourfrontLogo.svgTextStyleOut} ref={this.fgTextRef}>
+                                4DN
+                            </text>
+                            <text transform={fgCircleTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgInnerCircleStyleOut, FourfrontLogo.svgInnerCircleStyleIn) : FourfrontLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
+                                O
+                            </text>
                         </svg>
                     </span>
                     <span className="navbar-title">{ title }</span>
@@ -231,7 +296,7 @@ export class FourfrontLogo extends React.PureComponent {
  * @constant
  */
 export const style = {
-    
+
     translate3d : function(x=0, y=0, z=0, append = 'px'){
         if (!append) append = '';
         return 'translate3d(' + x + append + ',' + y + append + ',' + z + append + ')';
