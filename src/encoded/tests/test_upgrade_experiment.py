@@ -84,28 +84,28 @@ def test_experiment_repliseq_2stage_update_type(app, experiment_repliseq_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_repliseq', experiment_repliseq_1, current_version='1', target_version='4')
     assert value['schema_version'] == '4'
-    assert value['experiment_type'] == '/experiment-types/2stage-repliseq/'
+    assert value['experiment_type'] == '/experiment-types/2-stage-repli-seq/'
 
 
 def test_experiment_repliseq_multi_update_type(app, experiment_repliseq_2):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_repliseq', experiment_repliseq_2, current_version='2', target_version='4')
     assert value['schema_version'] == '4'
-    assert value['experiment_type'] == '/experiment-types/multistage-repliseq/'
+    assert value['experiment_type'] == '/experiment-types/multi-stage-repli-seq/'
 
 
 def test_experiment_chiapet_update_type(app, experiment_chiapet_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_chiapet', experiment_chiapet_1, current_version='1', target_version='4')
     assert value['schema_version'] == '4'
-    assert value['experiment_type'] == '/experiment-types/chiapet/'
+    assert value['experiment_type'] == '/experiment-types/chia-pet/'
 
 
 def test_experiment_seq_update_type(app, experiment_seq_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_seq', experiment_seq_1, current_version='1', target_version='4')
     assert value['schema_version'] == '4'
-    assert value['experiment_type'] == '/experiment-types/chipseq/'
+    assert value['experiment_type'] == '/experiment-types/chip-seq/'
 
 
 def test_experiment_mic_update_type(app, experiment_mic_1):
