@@ -243,7 +243,7 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
     testapp.patch_json(two_experiment_replicate_set['@id'],
                        {'other_processed_files': [{'title': 'Test', 'files': [resobj['@id']]}]})
     # hard-coded for convenience; should match experiment_data in datafixtures
-    expected_exp_type = '/experiment-types/in-situ-hic/'
+    expected_exp_type = '/experiment-types/in-situ-hi-c/'
     s3 = boto3.client('s3')
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
                   Body=str.encode('12346789abcd'))

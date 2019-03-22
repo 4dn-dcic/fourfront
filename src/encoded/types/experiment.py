@@ -281,8 +281,8 @@ class Experiment(Item):
             "value": None
         }
         types4control = [
-            '/experiment-types/damidseq/', '/experiment-types/chipseq/',
-            '/experiment-types/nadseq/', '/experiment-types/cut-run/'
+            '/experiment-types/damid-seq/', '/experiment-types/chip-seq/',
+            '/experiment-types/nad-seq/', '/experiment-types/cut-n-run/'
         ]
         if experiment_type is not None and experiment_type in types4control and not targeted_factor:
             out_dict['field'] = 'Target'
