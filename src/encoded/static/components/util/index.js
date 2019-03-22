@@ -63,6 +63,7 @@ export const expFxn = experimentTransformFunctions;
 import * as experimentFilters from './experiments-filters';
 export const Filters = experimentFilters;
 
+export { itemTypeHierarchy } from './itemTypeHierarchy';
 
 import * as SchemaUtilities from './Schemas';
 export const Schemas = SchemaUtilities;
