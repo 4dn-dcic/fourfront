@@ -116,7 +116,6 @@ export class ExperimentSetDetailPane extends React.Component {
     render(){
         var { paddingWidthMap, containerWidth, windowWidth } = this.props,
             expSet = this.props.result,
-            addInfoKeys = ['lab', 'produced_in_pub'],
             paddingWidth = this.props.paddingWidth || 0;
 
         if (paddingWidthMap){
@@ -136,7 +135,7 @@ export class ExperimentSetDetailPane extends React.Component {
                                 fitTo="self"
                                 textClassName="text-normal"
                                 dimensions={null}
-                                linesOfText={Math.max(1, addInfoKeys.length)}
+                                linesOfText={2}
                             />
                         </div>
                         <div className="col-md-6 addinfo-properties-section">
