@@ -61,7 +61,7 @@
             "description": "The md5sum of the file being transferred.",
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
-            "exclude_from": ["submit4dn"],
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "ff_flag":"clear edit",
             "format": "hex"
         },
