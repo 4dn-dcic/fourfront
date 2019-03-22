@@ -20,7 +20,8 @@ describe('Static Page & Content Tests', function () {
             return false;
         });
 
-        cy.get('#help-menu-item').click().wait(500).then(()=>{
+        // Wait until help menu has loaded via AJAX and has 'span' child w/ caret.
+        cy.get('#help-menu-item').should('have.descendants', 'span').click().wait(500).then(()=>{
             cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{
                 console.log(listItems);
 
