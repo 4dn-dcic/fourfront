@@ -88,6 +88,7 @@
                 "DNA-DNA Pairwise Interactions of Enriched Regions",
                 "DNA-DNA Pairwise Interactions of Selected Loci",
                 "RNA-DNA Multi-way Interactions",
+                "RNA-DNA Pairwise Interactions",
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
                 "Single Particle Tracking"
@@ -107,7 +108,10 @@
                     "RNA-DNA",
                     "DNA-Protein",
                     "Single Cell",
-                    "Multi-contact"
+                    "Multi-contact",
+                    "Pairwise",
+                    "1D",
+                    "3D"
                 ]
             }
         },
