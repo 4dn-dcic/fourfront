@@ -4,7 +4,7 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
-import { ajax, console, JWT, object, layout, Schemas } from '../util';
+import { ajax, console, JWT, object, layout, Schemas, itemTypeHierarchy } from '../util';
 //import { s3UploadFile } from '../util/aws';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import SearchView from './../browse/SearchView';
@@ -325,7 +325,7 @@ export default class SubmissionView extends React.PureComponent{
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
         if(this.props.schemas){
-            if(type in Schemas.itemTypeHierarchy && !init){
+            if(type in itemTypeHierarchy && !init){
                 // ambiguous linkTo type found
                 this.setState({
                     'ambiguousIdx': newIdx,
@@ -1616,7 +1616,7 @@ class TypeSelectModal extends React.Component {
                         <div className="input-wrapper" style={{'marginBottom':'15px'}}>
                             <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={ambiguousSelected || "No value"}>
                                 {ambiguousType !== null ?
-                                    Schemas.itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
+                                    itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
                                     :
                                     null
                                 }

@@ -1,5 +1,5 @@
 
-import { itemTypeHierarchy } from './../../../../src/encoded/static/components/util/Schemas';
+import { itemTypeHierarchy } from './../../../../src/encoded/static/components/util/itemTypeHierarchy';
 
 /**
  * Test each Item view to ensure that there is no page rendering error.
