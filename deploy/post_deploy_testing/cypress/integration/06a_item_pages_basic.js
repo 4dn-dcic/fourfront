@@ -30,7 +30,7 @@ let currIDs = [];
 
 describe('Each Item View Works (most public recent only)', function () {
 
-    Cypress._.forEach(typesToCheck.slice(7,11), function(itemType, idx){
+    Cypress._.forEach(typesToCheck, function(itemType, idx){
 
         context('Item Type - "' + itemType + '" (' + (idx + 1) + '/' + typesToCheckLen + ')', function(){
 
