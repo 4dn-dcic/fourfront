@@ -450,5 +450,4 @@ def workflow_5_6(value, system):
 @upgrade_step('workflow', '6', '7')
 def workflow_6_7(value, system):
     '''previous version is now an array'''
-    if not isinstance('previous_version', list):
-        value['previous_version'] = [value['previous_version']]
+    value['previous_version'] = [value['previous_version']]
