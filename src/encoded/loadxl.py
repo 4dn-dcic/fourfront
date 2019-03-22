@@ -49,16 +49,16 @@ def load_data_view(context, request):
     '''
     expected input data
 
-    {'local_dir': inserts folder on your computer
+    {'local_path': path to a directory or file in file system
      'fdn_dir': inserts folder under encoded
-     'in_file': file containing list of inserts for single item type
-     'store': if not local_dir or fdn_dir, use the dictionary
+     'store': if not local_path or fdn_dir, look for a dictionary of items here
      'overwrite' (Bool): overwrite if existing data
      'itype': (list or str): only pick some types from the source or specify type in in_file
      'config_uri': user supplied configuration file}
 
     post can contain 2 different styles of data
-    1) reference to a folder or file
+    1) reference to a folder or file (local_path or fd_dir). If this is done
+       itype can be optionally used to specify type of items loaded from files
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     '''
@@ -76,19 +76,16 @@ def load_data_view(context, request):
     }
     from pkg_resources import resource_filename
     store = request.json.get('store', {})
+    local_path = request.json.get('local_path')
     fdn_dir = request.json.get('fdn_dir')
-    local_dir = request.json.get('local_dir')
-    in_file = request.json.get('in_file')
     overwrite = request.json.get('overwrite', False)
-    itype = request.json.get('itype', None)
+    itype = request.json.get('itype')
     inserts = None
     from_json = False
     if fdn_dir:
         inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
-    elif in_file:
-        inserts = in_file
-    elif local_dir:
-        inserts = local_dir
+    elif local_path:
+        inserts = local_path
     elif store:
         inserts = store
         from_json = True
@@ -241,18 +238,24 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         docsdir = []
     # Collect Items
     store = {}
-    if from_json:
+    if from_json:  # we are directly loading json
         store = inserts
-    if not from_json:
+    if not from_json:  # we are loading a file
         use_itype = False
-        # grab json files
-        if os.path.isdir(inserts):
+        if os.path.isdir(inserts):  # we've specified a directory
             if not inserts.endswith('/'):
                 inserts += '/'
             files = [i for i in os.listdir(inserts) if i.endswith('.json')]
-        else:  # we've specified a single file
+        elif os.path.isfile(inserts):  # we've specified a single file
             files = [inserts]
-            use_itype = True
+            # use the item type if provided AND not a list
+            # otherwise guess from the filename
+            use_itype = True if (itype and isinstance(itype, basestring)) else False
+        else:  # cannot get the file
+            err_msg = 'Failure loading inserts from %s. Could not find matching file or directory.' % inserts
+            print(err_msg)
+            return Exception(err_msg)
+        # load from the directory/file
         for a_file in files:
             if use_itype:
                 item_type = itype
@@ -262,7 +265,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
             with open(a_file) as f:
                 store[item_type] = json.loads(f.read())
     # if there is a defined set of items, subtract the rest
-    if itype is not None:
+    if itype:
         if isinstance(itype, list):
             store = {i: store[i] for i in itype if i in store}
         else:
@@ -270,10 +273,16 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     # clear empty values
     store = {k: v for k, v in store.items() if v is not None}
     if not store:
-        logger.error('No items found in %s %s', inserts, item_type)
-        return
-    # order Items
+        if from_json:
+            err_msg = 'No items found in input "store" json'
+        else:
+            err_msg = 'No items found in %s' % inserts
+        if itype:
+            err_msg += ' for item type(s) %s' % itype
+        print(err_msg)
+        return Exception(err_msg)
 
+    # order Items
     all_types = list(store.keys())
     for ref_item in reversed(ORDER):
         if ref_item in all_types:

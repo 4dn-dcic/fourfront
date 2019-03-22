@@ -2,7 +2,6 @@ import os
 import json
 import sys
 import argparse
-from encoded.loadxl import load_ontology_terms
 from dateutil.relativedelta import relativedelta
 import datetime
 import boto3
@@ -688,14 +687,6 @@ def parse_args(args):
     parser.add_argument('--outdir',
                         help="the directory (relative to src/encoded) for output files",
                         default='/')
-    parser.add_argument('--s3upload',
-                        default=False,
-                        action='store_true',
-                        help="set to upload to system defined s3.")
-    parser.add_argument('--load',
-                        default=False,
-                        action='store_true',
-                        help="also load the ontology stuff into the database")
     parser.add_argument('--pretty',
                         default=False,
                         action='store_true',
@@ -786,22 +777,6 @@ def main():
         if args.pretty:
             pretty = True
         write_outfile(terms2write, postfile, pretty)
-
-        if args.load:  # load em into the database
-            # pyramids app
-            try:
-                app = get_app(args.config_uri, args.app_name)
-            except Exception:
-                raise("Can't get the fourfront app - check config_uri and app_name")
-
-            load_ontology_terms(app,
-                                args.outdir + s3_postfile)
-
-        if args.s3upload:  # upload file to s3
-            s3 = s3Utils(env=args.env)
-            s3.outfile_bucket = s3.system_bucket
-            with open(postfile, 'rb') as postedfile:
-                s3.s3_put(obj=postedfile, key=s3_postfile)
 
 
 if __name__ == '__main__':

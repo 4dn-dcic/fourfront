@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import logging
-
-from pyramid.path import DottedNameResolver
-from pyramid.paster import get_app
-from encoded import configure_dbsession
 import os
+import requests
+import json
 from datetime import datetime
-from pkg_resources import resource_filename
+from dcicutils import ff_utils
 
 
 logger = logging.getLogger(__name__)
@@ -15,34 +13,69 @@ EPILOG = __doc__
 
 
 def main():
-    start = datetime.now()
-    print(str(start))
+    """
+    Load a given JSON file with ontology terms inserts to a server using
+    the `load_data` endpoint defined in loadxl.
+    """
     logging.basicConfig()
     # Loading app will have configured from config file. Reconfigure here:
-    logging.getLogger('encoded').setLevel(logging.WARN)
+    logging.getLogger('encoded').setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser(
         description="Load Ontology Term Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('json_file', help="File containing terms to load")
-    parser.add_argument('config_uri', help="path to configfile - development.ini or production.ini")
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
+    parser.add_argument('--env', default='local',
+                        help='FF environment to update from. Defaults to local')
     args = parser.parse_args()
-    post = args.json_file
 
-    # get the pyramids app
-    app = get_app(args.config_uri, args.app_name)
-    # create db schema
-    configure_dbsession(app)
+    # authentication with Fourfront
+    if args.env == 'local':
+        # prompt access key ID and secret from user
+        config_uri = 'development.ini'
+        local_id = input('[local access key ID] ')
+        local_secret = input('[local access key secret] ')
+        auth = {'key': local_id, 'secret': local_secret, 'server': 'http://localhost:8000'}
+    else:
+        config_uri = 'production.ini'
+        auth = get_authentication_with_server(None, args.env)
+    load_endpoint = '/'.join([auth['server'], 'load_data'])
 
-    load_term_data = 'encoded.loadxl:load_ontology_terms'
-    print("****** load test data is %s" % (load_term_data))
-    load_term_data = DottedNameResolver().resolve(load_term_data)
-    load_term_data(app, post)
-    end = datetime.now()
-    print("FINISHED - START: ", str(start), "\tEND: ", str(end))
+    use_value = None  # use this value instead of file handle if set
 
+    # post to load_data
+    logger.info('load_ontology_terms: Starting POST to %s' % load_endpoint)
+    start = datetime.now()
+    with open(args.json_file) as infile:
+        use_data = {'ontology_term': json.load(infile)}
+        json_data = {'config_uri': config_uri, 'store': use_data, 'itype': 'ontology_term'}
+        try:
+            
+            ### CURRENTLY GETTING 413
+            ### bin/load-ontology /Users/carl/Downloads/ontology_term.json
+
+            res = ff_utils.authorized_request(load_endpoint, auth=auth,
+                                              verb='POST', json=json_data)
+        except Exception as exc:
+            logger.error('load_ontology_terms: error on POST: %s' % str(exc))
+
+    logger.info("load_ontology_terms: Finished request in %s" % str(datetime.now() - start))
+
+    # update sysinfo. Don't worry about doing this on local
+    if args.env != 'local':
+        data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
+        try:
+            found_info = ff_utils.get_metadata('/sysinfos/' + data['name'], key=auth)
+        except Exception:
+            found_info = None
+
+        if found_info:
+            ff_utils.patch_json(data, found_info['uuid'], key=auth)
+        else:
+            ff_utils.post_json(data, key=auth)
+        logger.info("load_ontology_terms: Updated sysinfo with name %s" % data['name'])
+    logger.info("load_ontology_terms: DONE!")
 
 if __name__ == "__main__":
     main()
