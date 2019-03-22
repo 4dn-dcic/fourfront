@@ -265,7 +265,6 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     static propTypes = {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
-        'files'  : PropTypes.array,
         'renderRightPanel' : PropTypes.func,
         'windowWidth' : PropTypes.number.isRequired,
         'higlassItem' : PropTypes.object,
@@ -296,23 +295,12 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
     }
 
-    collapsedToolTipContent(){
-        var fileTitles = _.filter(_.map(this.props.files, function(f){
-            return f.accession || f.display_title || null;
-        }));
-        if (fileTitles.length > 3){
-            fileTitles = fileTitles.slice(0, 2);
-            fileTitles.push('...');
-        }
-        return "Open HiGlass Visualization for file(s)&nbsp; <span class='text-600'>" + ( fileTitles.join(', ') ) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>";
-    }
-
     render(){
-        var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
+        var { mounted, width, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
             leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
-        if (!mounted || !(higlassItem || files) ) {
+        if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
             return (renderRightPanel && renderRightPanel(width, null)) || children;
         }
 
@@ -331,7 +319,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                         } else {
                             return (
                                 <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
-                                    data-html data-place="right" data-tip={this.collapsedToolTipContent()}>
+                                    data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
                                     <i className="icon icon-fw icon-television"/>
                                 </h5>
                             );
@@ -340,10 +328,11 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                         const descriptionProps={
                             'className': 'description text-ellipsis-container'
                         };
+
                         return (
                             <React.Fragment>
-                                <EmbeddedHiglassActions context={higlassItem} descriptionProps={descriptionProps}/>
-                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />
+                                <EmbeddedHiglassActions context={higlassItem} descriptionProps={descriptionProps} />
+                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
                             </React.Fragment>
                         );
                     }
@@ -587,6 +576,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         const files = collection.files;
         const currentlyVisualizedFiles = OtherProcessedFilesStackedTableSectionPart.findAllFilesToVisualize(files);
         const open = this.state.open;
+        const higlassItem = collection.higlass_view_config;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
@@ -604,7 +594,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
                         { currentlyVisualizedFiles ? (
-                            <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} windowWidth={windowWidth} mounted={mounted} width={width - 21}
+                            <HiGlassAdjustableWidthRow higlassItem={higlassItem} windowWidth={windowWidth} mounted={mounted} width={width - 21}
                                 renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />)
                         : this.renderFilesTable(width - 21) }
                     </div>
