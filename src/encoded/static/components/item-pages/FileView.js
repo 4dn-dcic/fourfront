@@ -61,7 +61,10 @@ export default class FileView extends WorkflowRunTracingView {
 
     itemMidSection(){
         return (
-            <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+            <React.Fragment>
+                { super.itemMidSection() }
+                <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+            </React.Fragment>
         );
     }
 

@@ -494,10 +494,6 @@ $open-expset-table-side-border-color : #e4e4e4;
 			position: static;
 		}
 
-		.expset-addinfo-row {
-			margin-bottom: 5px;
-		}
-
 		@media screen and (min-width: $screen-sm-min){
 
 			.addinfo-properties-section.col-sm-6 {
@@ -520,10 +516,6 @@ $open-expset-table-side-border-color : #e4e4e4;
 				margin-bottom: 2px;
 				display: block;
 			}
-		}
-
-		.expset-addinfo-key {
-			font-weight: 500;
 		}
 
 		.expset-addinfo-val {

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, Schemas } from './../util';
-import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
+import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import { Publications, SOPBelowHeaderRow, WrappedCollapsibleList } from './components';
 import { UserContentBodyList } from './../static-pages/components';
 
@@ -56,6 +56,7 @@ export default class ExperimentTypeView extends DefaultItemView {
             <div className="mb-2">
                 { publicationArea }
                 <SOPBelowHeaderRow sop={context.sop} outerClassName={null} />
+                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
             </div>
         );
     }

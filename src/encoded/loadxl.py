@@ -246,14 +246,13 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     if not from_json:
         use_itype = False
         # grab json files
-        if os.path.isfile(inserts):
-            # we've specified a single file
-            files = [inserts]
-            use_itype = True
-        elif os.path.isdir(inserts):
+        if os.path.isdir(inserts):
             if not inserts.endswith('/'):
                 inserts += '/'
             files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+        else:  # we've specified a single file
+            files = [inserts]
+            use_itype = True
         for a_file in files:
             if use_itype:
                 item_type = itype
