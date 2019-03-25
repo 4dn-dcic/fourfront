@@ -165,7 +165,7 @@ export class FacetCharts extends React.PureComponent {
 
                     Filters.saveChangedFilters(newExpSetFilters, browseBaseHref, () => {
                         // Scroll to top of browse page container after navigation is complete.
-                        setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
+                        setTimeout(layout.animateScrollTo, 200, "content", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
                     });
                 },
                 'disabled' : function(cursorProps){
