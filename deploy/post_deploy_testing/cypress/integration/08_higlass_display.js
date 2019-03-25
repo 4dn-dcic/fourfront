@@ -1,5 +1,10 @@
 'use strict';
 
+
+
+const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
+
+
 /**
 * Test you can visit the Higlass Display page.
 */
@@ -29,10 +34,9 @@ describe("HiGlass Display pages", function(){
         it('Have permission to create new displays & view own drafts', function(){
 
             // You should be able to visit the higlass view that is still in "draft" status.
-            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 
             // Log in, visit the page and look for the create button to assert ability to create.
-            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500).end()
+            cy.login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500).end()
                 .get(".above-results-table-row a.btn.btn-xs span").should('have.text', 'Create');
 
             cy.visit(draftUrl).end().logout4DN();
@@ -87,17 +91,18 @@ describe("HiGlass Display pages", function(){
             // Verify logged in users can save higlass displays.
 
             // Go to the display for the draft display.
-            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
             cy.visit(draftUrl);
 
             // When the app creates a new HiGlass display, we'll capture the JSON of the POST call.
             cy.server();
             cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
-            // Click the 'Clone' button.
-            cy.get(".tab-section-title button.toggle-open-button").click().wait(500).end()
+            // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
+            cy.get('.higlass-instance .react-grid-layout').end()
+                // Click the 'Clone' button.
+                .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
                 .get(".tab-section-title .inner-panel.collapse.in").within(($panel)=>{
-                    return cy.contains('Clone').click().wait(300).end();
+                    return cy.contains('Clone').click().end();
                 }).end()
                 .get('.alert div').should('have.text', 'Saved new display.').end()
                 // Inspect POST response.
@@ -118,17 +123,18 @@ describe("HiGlass Display pages", function(){
             // Verify logged in users can save higlass displays.
 
             // Go to the display for the draft display.
-            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
             cy.visit(draftUrl);
 
             // There will be an AJAX response to a POST for the new Higlass display, so capture it here.
             cy.server();
             cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
-            // Click the 'Clone' button.
-            cy.get(".tab-section-title button.toggle-open-button").click().wait(500).end()
+            // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
+            cy.get('.higlass-instance .react-grid-layout').end()
+                // Click the 'Clone' button.
+                .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
                 .get(".tab-section-title .inner-panel.collapse.in").within(($panel)=>{
-                    return cy.contains('Clone').click().wait(300).end();
+                    return cy.contains('Clone').click().end();
                 }).end()
                 // Confirm there is a success message.
                 .get('.alert div').should('have.text', 'Saved new display.').end()
@@ -181,7 +187,7 @@ describe("HiGlass Display pages", function(){
             // Edit the higlass display back to draft status.
             cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500).end().request(
                 'PATCH',
-                "/higlass-view-configs/00000000-1111-0000-1111-000000000002/",
+                draftUrl,
                 {
                     "status":"draft"
                 }
@@ -199,7 +205,6 @@ describe("HiGlass Display pages", function(){
             // Go to the draft higlass display.
             // Click on the Share button.
             // Wait for the message popup to indicate success.
-            const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 
             // This also tests the mobile menu as well as the share/release dropdown btn functionality.
             cy.visit(draftUrl).get('.item-view-header .indicator-item.item-status').should('have.text', 'draft').end()
