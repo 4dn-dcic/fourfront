@@ -41,16 +41,11 @@ describe("HiGlass Display pages", function(){
 
     });
 
-    // Being skipped until Foursight is set up to collect & purge any Items created here.
-    // We should manually add "tag" : "created_via_cypress_test" or something maybe when we perform edit? Idk
-    // Or PATCH/request to it separately right after 'clone' test? Idk
-    // Or in the afterEach logic we also patch that maybe?
-    // Or in foursight we can find "modified_by" : "ud4dntest@gmail.com" + "status":"deleted" ?
-    // Many options... maybe already setup/working ?
-    context.skip('Share/Create and Edit Individual Higlass display page', function() {
+
+    context('Share/Create and Edit Individual Higlass display page', function() {
 
         // Tracks uuids across tests so they can be deleted afterwards.
-        var testUuidsToDelete = [];
+        var testItemsToDelete = [];
 
         beforeEach(function() {
             // Log in.
@@ -58,18 +53,34 @@ describe("HiGlass Display pages", function(){
         });
 
         afterEach(function(){
-            if (testUuidsToDelete.length === 0) return;
+            if (testItemsToDelete.length === 0) return;
 
-            // Log in.
-            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
+            // Log in _as admin_.
+            cy.visit('/higlass-view-configs/').login4DN({'email': '4dndcic@gmail.com', 'useEnvToken' : true}).wait(500);
 
             // Delete all newly created higlass views.
-            Cypress._.forEach(testUuidsToDelete, (newUuid) => {
-                cy.request("DELETE", newUuid).wait(100);
+            cy.wrap(testItemsToDelete).each(function(testItem){ // Synchronously process async stuff.
+                cy.request({
+                    method: "DELETE",
+                    url: testItem['@id'],
+                    headers: {
+                        "Content-Type" : "application/json",
+                        "Accept" : "application/json"
+                    }
+                }).end()
+                    .request({
+                        method: "PATCH",
+                        url: testItem['@id'],
+                        headers: {
+                            "Content-Type" : "application/json",
+                            "Accept" : "application/json"
+                        },
+                        body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+                    });
             });
 
             // Empty the array now that we're done.
-            testUuidsToDelete = [];
+            testItemsToDelete = [];
         });
 
         it('Can clone new draft views', function() {
@@ -83,23 +94,24 @@ describe("HiGlass Display pages", function(){
             cy.server();
             cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
-            // Click the save as button.
-            cy.get('.text-right.inline-block .inline-block:nth-child(2) button.btn.btn-success').click().then(() => {
-                // Confirm there is a success message.
-                cy.get('.alert div').should('have.text', 'Saved new display.');
-            });
+            // Click the 'Clone' button.
+            cy.get(".tab-section-title button.toggle-open-button").click().wait(500).end()
+                .get(".tab-section-title .inner-panel.collapse.in").within(($panel)=>{
+                    return cy.contains('Clone').click().wait(300).end();
+                }).end()
+                .get('.alert div').should('have.text', 'Saved new display.').end()
+                // Inspect POST response.
+                .get('@newHiglassDisplay').then(function (xhr) {
 
-            // Inspect POST response.
-            cy.get('@newHiglassDisplay').then(function (xhr) {
-                // Expect a 201 response.
-                expect(xhr.status).to.eq(201);
+                    // Expect a 201 response.
+                    expect(xhr.status).to.eq(201);
 
-                // Expect a new uuid.
-                expect(xhr.responseBody["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
+                    // Expect a new uuid.
+                    expect(xhr.responseBody["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
 
-                // Add the test uuid so we can delete it later.
-                testUuidsToDelete.push(xhr.responseBody["@graph"][0]["uuid"]);
-            });
+                    // Add the test Item so we can delete it later.
+                    testItemsToDelete.push(xhr.responseBody["@graph"][0]);
+                });
         });
 
         it('Can edit the title and description', function() {
@@ -113,51 +125,53 @@ describe("HiGlass Display pages", function(){
             cy.server();
             cy.route('POST', '/higlass-view-configs/').as('newHiglassDisplay');
 
-            // Click the save as button.
-            cy.get('.text-right.inline-block .inline-block:nth-child(2) button.btn.btn-success').click().then(() => {
+            // Click the 'Clone' button.
+            cy.get(".tab-section-title button.toggle-open-button").click().wait(500).end()
+                .get(".tab-section-title .inner-panel.collapse.in").within(($panel)=>{
+                    return cy.contains('Clone').click().wait(300).end();
+                }).end()
                 // Confirm there is a success message.
-                cy.get('.alert div').should('have.text', 'Saved new display.');
-            });
+                .get('.alert div').should('have.text', 'Saved new display.').end()
+                // Inspect the AJAX response so we can capture the new uuid.
+                .get('@newHiglassDisplay').then(function (xhr) {
 
-            // Inspect the AJAX response so we can capture the new uuid.
-            cy.get('@newHiglassDisplay').then(function (xhr) {
-                // Expect a 201 response.
-                expect(xhr.status).to.eq(201);
+                    // Expect a 201 response.
+                    expect(xhr.status).to.eq(201);
 
-                // Expect a new uuid.
-                expect(xhr.responseBody["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
+                    // Expect a new uuid.
+                    expect(xhr.responseBody["@graph"][0]["uuid"]).to.not.equal("00000000-1111-0000-1111-000000000002");
 
-                // Add the test uuid so we can delete it later.
-                testUuidsToDelete.push(xhr.responseBody["@graph"][0]["uuid"]);
-                const newUuid = xhr.responseBody["@graph"][0]["uuid"];
-                expect(newUuid).to.be.ok;
+                    // Add the test uuid so we can delete it later.
+                    testItemsToDelete.push(xhr.responseBody["@graph"][0]);
+                    const newID = xhr.responseBody["@graph"][0]["@id"];
+                    expect(newID).to.be.ok;
 
-                // Clicking the SaveAs button should redirect us to the new page
-                cy.location('pathname').should('eq', "/higlass-view-configs/" + newUuid + "/");
+                    // Clicking the SaveAs button should redirect us to the new page
+                    cy.location('pathname').should('eq', newID);
 
-                // Click on the edit button and wait for the page load.
-                cy.get(".action-button[data-action='edit'] a").click();
+                    // Click on the edit button and wait for the page load.
+                    cy.get(".action-button[data-action='edit'] a").click();
 
-                // Change the title and description, then save.
-                const newTitle = "Cypress Cool Display";
-                const newDescription = "Look at the description";
+                    // Change the title and description, then save.
+                    const newTitle = "Cypress Cool Display";
+                    const newDescription = "Look at the description";
 
-                cy.get("input#field_for_title").clear().type(newTitle).then(() => {
-                    cy.get('#field_for_description').clear().type(newDescription).then(() => {
-                        // Click validate then click submit
-                        cy.get(".action-buttons-container button.btn-info").click().then(() => {
-                            cy.get(".action-buttons-container button.btn-success").click().wait(1000).then(() => {
-                                // Once the page reloads, look for the updated title/description
-                                cy.request("/higlass-view-configs/" + newUuid + "/?format=json&datastore=database").then((resp)=>{
-                                    expect(resp.body.title).to.equal(newTitle);
-                                    expect(resp.body.description).to.equal(newDescription);
+                    cy.get("input#field_for_title").clear().type(newTitle).then(() => {
+                        cy.get('#field_for_description').clear().type(newDescription).then(() => {
+                            // Click validate then click submit
+                            cy.get(".action-buttons-container button.btn-info").click().then(() => {
+                                cy.get(".action-buttons-container button.btn-success").click().wait(1000).then(() => {
+                                    // Once the page reloads, look for the updated title/description
+                                    cy.request(newID + "?format=json&datastore=database").then((resp)=>{
+                                        expect(resp.body.title).to.equal(newTitle);
+                                        expect(resp.body.description).to.equal(newDescription);
+                                    });
                                 });
                             });
                         });
                     });
-                });
 
-            });
+                });
         });
     });
 
