@@ -86,9 +86,6 @@ def experiment_targeted_factor_upgrade(value, system):
     if factor:
         del value['targeted_factor']
         note = 'Old Target: {}'.format(factor)
-        if 'notes' in value:
-            note = value['notes'] + '; ' + note
-        value['notes'] = note
         targets = system['registry']['collections']['Target']
         biofeats = system['registry']['collections']['BioFeature']
         target = targets.get(factor)
@@ -96,6 +93,11 @@ def experiment_targeted_factor_upgrade(value, system):
             bfuuid = getbf4t(target, biofeats)
         if bfuuid:
             value['targeted_factor'] = [bfuuid]
+        else:
+            note = 'UPDATE NEEDED: ' + note
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
 
 
 @upgrade_step('experiment_capture_c', '1', '2')
@@ -106,13 +108,11 @@ def experiment_capture_c_1_2(value, system):
         del value['targeted_regions']
         targets = system['registry']['collections']['Target']
         biofeats = system['registry']['collections']['BioFeature']
+        note = ''
         for tr in tregions:
             t = tr.get('target')  # it's required
             of = tr.get('oligo_file', '')
-            note = 'Old Target: {} {}'.format(t, of)
-            if 'notes' in value:
-                note = value['notes'] + '; ' + note
-            value['notes'] = note
+            tstr = 'Old Target: {} {}'.format(t, of)
             target = targets.get(t)
             if target:
                 bfuuid = getbf4t(target, biofeats)
@@ -121,5 +121,11 @@ def experiment_capture_c_1_2(value, system):
                 if of:
                     tinfo['oligo_file'] = of
                 new_vals.append(tinfo)
+            else:
+                tstr = 'UPDATE NEEDED: ' + tstr
+            note += tstr
         if new_vals:
             value['targeted_regions'] = new_vals
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note

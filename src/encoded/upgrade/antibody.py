@@ -9,9 +9,6 @@ def antibody_1_2(value, system):
     if abtarget:
         del value['antibody_target']
         note = 'Old Target: {}'.format(abtarget)
-        if 'notes' in value:
-            note = value['notes'] + '; ' + note
-        value['notes'] = note
         targets = system['registry']['collections']['Target']
         biofeats = system['registry']['collections']['BioFeature']
         target = targets.get(abtarget)
@@ -19,3 +16,8 @@ def antibody_1_2(value, system):
             bfuuid = getbf4t(target, biofeats)
         if bfuuid:
             value['antibody_target'] = [bfuuid]
+        else:
+            note = 'UPDATE NEEDED: ' + note
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note

@@ -9,9 +9,6 @@ def treatment_rnai_1_2(value, system):
     if ttarget:
         del value['target']
         note = 'Old Target: {}'.format(ttarget)
-        if 'notes' in value:
-            note = value['notes'] + '; ' + note
-        value['notes'] = note
         targets = system['registry']['collections']['Target']
         biofeats = system['registry']['collections']['BioFeature']
         target = targets.get(ttarget)
@@ -19,3 +16,8 @@ def treatment_rnai_1_2(value, system):
             bfuuid = getbf4t(target, biofeats)
         if bfuuid:
             value['target'] = [bfuuid]
+        else:
+            note = 'UPDATE NEEDED: ' + note
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
