@@ -43,26 +43,33 @@
             "description": "A short unique name for the organism (e.g. 'mouse' or 'human').",
             "type": "string",
             "lookup": 20,
-            "pattern": "^[a-z0-9\\-]+$",
+            "pattern": "^[ a-z0-9\\-]+$",
             "uniqueKey": true
         },
         "scientific_name": {
             "title": "Binomial name",
             "description": "The genus species for the organism (e.g. 'Mus musculus').",
             "type": "string",
-            "lookup": 30,
-            "default": ""
+            "lookup": 30
         },
         "taxon_id": {
             "title": "Taxon ID",
             "description": "The NCBI taxon ID for the organism (e.g. 10090).",
             "type": "string",
             "lookup": 40,
-            "pattern": "^[0-9]+$"
+            "pattern": "^[0-9]+$",
+            "uniqueKey": true
+        },
+        "genome_assembly": {
+            "title": "Genome Assembly",
+            "description": "The reference genome assembly used for analyses for this organism",
+            "type": "string",
+            "enum": [
+                "GRCh38",
+                "GRCm38",
+                "dm6",
+                "galGal5"
+            ]
         }
-    },
-    "boost_values": {
-        "name": 1.0,
-        "scientific_name": 1.0
     }
 }

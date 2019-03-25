@@ -16,7 +16,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "status": {
             "default": "in review by lab"
@@ -77,10 +77,6 @@
                 },
                 "range_query" : {
                     "title": "Range Query",
-                    "type": "boolean"
-                },
-                "is_visualization": {
-                    "title": "Is Visualization",
                     "type": "boolean"
                 },
                 "request_headers": {

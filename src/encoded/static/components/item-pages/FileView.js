@@ -8,7 +8,7 @@ import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
 import * as store from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    HiGlassFileTabView, HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
+    HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -20,7 +20,7 @@ import { FileDownloadButton } from './../util/file';
 // import { FILE } from './../testdata/file/processed-bw';
 
 
-
+/** Container for all of the tabs on a File page. */
 export default class FileView extends WorkflowRunTracingView {
 
     /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
@@ -30,51 +30,18 @@ export default class FileView extends WorkflowRunTracingView {
         );
     }
 
-    static shouldHiGlassViewExist(context){
-        // TODO: Remove context.file_format check?
-        if (!context.higlass_uid || typeof context.higlass_uid !== 'string') return false;
-        var fileFormat  = fileUtil.getFileFormatStr(context),
-            isMcoolFile = fileFormat === 'mcool',
-            isBWFile    = (fileFormat === 'bw' || fileFormat === 'bg'),
-            isBEDDBFile = (fileFormat === 'beddb' || fileFormat === 'bed'),
-            isBIGBEDFile = fileFormat === 'bigbed';
-        return isMcoolFile || isBWFile || isBEDDBFile || isBIGBEDFile;
-    }
-
     constructor(props){
         super(props);
-        this.validateHiGlassData = this.validateHiGlassData.bind(this);
-        if (FileView.shouldHiGlassViewExist(props.context)){
-            this.state = _.extend(this.state || {}, {
-                'validatingHiGlassTileData' : true,
-                'isValidHiGlassTileData' : false,
-                'tips' : object.tipsFromSchema(props.schemas || Schemas.get(), props.context)
-            });
-        }
     }
 
     componentDidMount(){
         super.componentDidMount();
-        this.validateHiGlassData();
     }
 
     componentWillReceiveProps(nextProps){
         if (nextProps.schemas !== this.props.schemas || nextProps.context !== this.props.context){
             this.setState({ 'tips' : object.tipsFromSchema(nextProps.schemas || Schemas.get(), nextProps.context) });
         }
-    }
-
-    /** Request the ID in this.hiGlassViewConfig, ensure that is available and has min_pos, max_pos, then update state. */
-    validateHiGlassData(){
-        var context = this.props.context;
-        if (!FileView.shouldHiGlassViewExist(context)) return;
-        HiGlassConfigurator.validateTilesetUid(
-            // FOR TESTING, UNCOMMENT TOP LINE & COMMENT LINE BELOW IT
-            // SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE,
-            context.higlass_uid,
-            () => this.setState({ 'isValidHiGlassTileData' : true,  'validatingHiGlassTileData' : false }),     // Callback
-            () => this.setState({ 'isValidHiGlassTileData' : false, 'validatingHiGlassTileData' : false })      // Fallback
-        );
     }
 
     getTabViewContents(){
@@ -89,16 +56,15 @@ export default class FileView extends WorkflowRunTracingView {
             initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
         }
 
-        if (FileView.shouldHiGlassViewExist(context)){
-            initTabs.push(HiGlassFileTabView.getTabObject(this.props, !this.state.isValidHiGlassTileData, this.state.validatingHiGlassTileData/* , SAMPLE_VIEWCONFIGS.HIGLASS_WEBSITE */)); // <- uncomment for testing static viewconfig, along w/ other instances of this variable.
-        }
-
         return initTabs.concat(this.getCommonTabs(this.props));
     }
 
     itemMidSection(){
         return (
-            <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+            <React.Fragment>
+                { super.itemMidSection() }
+                <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+            </React.Fragment>
         );
     }
 

@@ -236,7 +236,7 @@ class AccessKeyTable extends React.Component {
 
 
     renderTable(){
-        var { access_keys, loadingStatus } = this.state;
+        var { access_keys } = this.state;
 
         if (!access_keys.length){
             return (
@@ -274,7 +274,6 @@ class AccessKeyTable extends React.Component {
 
     render() {
         var { access_keys, loadingStatus, modal } = this.state;
-        var className = "access-keys-table-container clearfix";
 
         if (!Array.isArray(access_keys) || !this.store){
             if (loadingStatus === 'loading'){
@@ -384,7 +383,7 @@ export default class UserView extends React.PureComponent {
 
                 <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
-                    <div className="row first-row row-eq-height-md">
+                    <div className="row mt-5 mb-12 row-eq-height-md">
 
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-7">
 
@@ -393,7 +392,9 @@ export default class UserView extends React.PureComponent {
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
                                             { object.itemUtil.User.gravatar(user.email, 70) }
-                                            <a className="edit-button-remote text-center" target="_blank" href="https://gravatar.com"><i className="icon icon-pencil"/></a>
+                                            <a className="edit-button-remote text-center" target="_blank" rel="noopener noreferrer" href="https://gravatar.com">
+                                                <i className="icon icon-pencil"/>
+                                            </a>
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
@@ -434,7 +435,7 @@ export default class UserView extends React.PureComponent {
 
                     </div>
 
-                    <AccessKeyTable user={user} access_keys={user.access_keys} />
+                    { user.lab || user.submits_for ? <AccessKeyTable user={user} access_keys={user.access_keys} /> : null }
 
                 </div>
             </div>
@@ -584,7 +585,18 @@ class ProfileWorkFields extends React.Component {
     render(){
         var user        = this.props.user,
             awards      = this.state.awards_list,
-            submits_for = null;
+            submits_for = null,
+            labTitle    = <span className="not-set">No Labs</span>,
+            pendingLabText = "Will be verified in the next few business days"; // Default
+
+        if (user.lab){
+            labTitle = object.itemUtil.generateLink(user.lab);
+        } else if (user.pending_lab && object.itemUtil.isAnItem(user.pending_lab)){
+            // Might occur later... currently not embedded.
+            labTitle = <span>{ object.itemUtil.generateLink(user.lab) } <em data-tip={pendingLabText}>(pending)</em></span>;
+        } else if (user.pending_lab && typeof user.pending_lab === 'string'){
+            labTitle = <span className="text-400">{ pendingLabText }</span>;
+        }
 
         if (user.submits_for && user.submits_for.length > 0){
             submits_for = user.submits_for;
@@ -602,7 +614,7 @@ class ProfileWorkFields extends React.Component {
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
                     <div id="lab" className="col-sm-9 value text-500">
-                        { user.lab ? object.itemUtil.generateLink(user.lab) : <span className="not-set">No Labs</span> }
+                        { labTitle }
                     </div>
                 </div>
                 <div className="row field-entry job_title">

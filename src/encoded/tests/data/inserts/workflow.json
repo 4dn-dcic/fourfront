@@ -761,7 +761,7 @@
         "accession": "4DNWFHB26CID",
         "app_name": "pairsqc-single",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/",
+        "previous_version": ["/workflows/ae3a87cb-3fa2-469e-97c7-540fc2d0a117/"],
         "version_upgrade_log": "max_distance (-M) option for pairsqc is added for mouse data (-M 8.2)",
         "arguments": [
             {
@@ -1063,7 +1063,7 @@
         "app_name": "md5",
         "app_version": "0.2.6",
         "aliases": ["4dn-dcic-lab:wf-md5-0.2.6"],
-        "previous_version": "/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/",
+        "previous_version": ["/workflows/d3f25cd3-e726-4b3c-a022-48f844474b41/"],
         "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
         "arguments": [
             {
@@ -3876,7 +3876,7 @@
         "accession": "4DNWF84NFOQP",
         "app_name": "bwa-mem",
         "app_version": "0.2.6",
-        "previous_version": "/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/",
+        "previous_version": ["/workflows/0fbe4db8-0b5f-448e-8b58-3f8c84baabf5/"],
         "version_upgrade_log": "use of official release of bwa",
         "arguments": [
             {
@@ -5721,7 +5721,7 @@
         ],
         "title": "Repli-seq data processing pipeline for alignment, filtering and counting v14",
         "uuid": "4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
-        "previous_version": "/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364",
+        "previous_version": ["/workflows/146da22a-502d-4500-bf57-a7cf0b4b2364"],
         "version_upgrade_log": "The count script (used by run-count.sh) now sorts the binfile before feeding to bedtools coverage to avoid a sorting inconsistency issue.",
         "accession": "4DNWFBT37VUW"
     },
@@ -6170,7 +6170,7 @@
         ],
         "title": "Repli-seq data processing pipeline for alignment, filtering and counting v15",
         "uuid": "6d265dab-a862-4448-81e0-23a252825ad8",
-        "previous_version": "/workflows/4459a4d8-1bd8-4b6a-b2cc-2506f4270a34",
+        "previous_version": ["/workflows/4459a4d8-1bd8-4b6a-b2cc-2506f4270a34"],
         "version_upgrade_log": "Paired-end data can be handled",
         "accession": "4DNWFBH36F72"
     },
@@ -6620,7 +6620,7 @@
         ],
         "title": "Repli-seq data processing pipeline for alignment, filtering and counting v16",
         "uuid": "2a6807f1-93db-4c7b-b148-672534193974",
-        "previous_version": "/workflows/6d265dab-a862-4448-81e0-23a252825ad8",
+        "previous_version": ["/workflows/6d265dab-a862-4448-81e0-23a252825ad8"],
         "version_upgrade_log": "Chromosome order inconsistency between chromsize and bam is now handled well",
         "accession": "4DNWF3GBT16F"
     },
@@ -12046,81 +12046,602 @@
         "uuid": "2b10e472-065e-43ed-992c-fccad6417b65"
     },
     {
-        "accession": "4DNWBTMVLM17",
-        "app_name": "bedtomultivec",
-        "app_version": "v1",
+        "app_name": "hi-c-processing-pairs",
+        "app_version": "0.2.7",
         "arguments": [
             {
-                "argument_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                "argument_format": "pairs",
                 "argument_type": "Input file",
-                "workflow_argument_name": "bedfile"
+                "workflow_argument_name": "input_pairs"
             },
             {
-                "argument_format": "dba26778-f40a-4561-a552-65539702ded4",
+                "argument_format": "chromsizes",
                 "argument_type": "Input file",
-                "workflow_argument_name": "rows_info"
+                "workflow_argument_name": "chromsizes"
             },
             {
-                "argument_format": "92537561-4c02-440e-a51f-22b4b08b6918",
-                "argument_type": "Output to-be-extra-input file",
-                "workflow_argument_name": "multivec_file"
-            },
-
-            {
-                "argument_type": "parameter",
-                "workflow_argument_name": "assembly"
+                "argument_format": "juicer_format_restriction_site_file",
+                "argument_type": "Input file",
+                "workflow_argument_name": "restriction_file"
             },
             {
                 "argument_type": "parameter",
-                "workflow_argument_name": "resolution"
+                "workflow_argument_name": "nthreads"
             },
             {
                 "argument_type": "parameter",
-                "workflow_argument_name": "num_rows"
-
+                "workflow_argument_name": "min_res"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "maxmem"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "higlass"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "juicer_res"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "custom_res"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "nres"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "chunksize"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "mapqfilter_juicer"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "max_split_cooler"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "no_balance"
+            },
+            {
+                "argument_format": "pairs",
+                "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "pairs_px2"
+                ],
+                "workflow_argument_name": "merged_pairs"
+            },
+            {
+                "argument_format": "hic",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "hic"
+            },
+            {
+                "argument_format": "mcool",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "mcool"
             }
-
         ],
-
         "award": "1U01CA200059-01",
-        "category": ["format conversion"],
-        "cwl_child_filenames": [],
-        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-bedtomultivec/v1/cwl/",
-        "cwl_main_filename": "bedtomultivec.cwl",
-        "cwl_pointer": "",
-        "description": "Converting bed to multivec",
-        "docker_image_name": "4dn-dcic/docker-4dn-bedtomultivec",
+        "cwl_child_filenames": [
+            "merge-pairs.cwl",
+            "addfragtopairs.cwl",
+            "cooler.cwl",
+            "pairs2hic.cwl",
+            "cool2mcool.cwl",
+            "add-hic-normvector-to-mcool.cwl"
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-hic/v43/cwl/",
+        "cwl_directory_url_draft3": "",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/docker-4dn-hic/v43/cwl/",
+        "cwl_main_filename": "hi-c-processing-pairs.cwl",
+        "experiment_types": [
+            "Hi-C", "DNase Hi-C", "micro-C", "Capture Hi-C", "ChIA-PET"
+        ],
+        "description": "This is a subworkflow of the Hi-C data analysis pipeline. It takes pairs files for all replicates of a sample, merges them and then produces multi-resolution Hi-c matrices for visualization. The pipeline produces 3 output files. 1) Replicated merged pairs file 2) Contact matrices in .hic format and 3) Multiresolution mcool file.",
+        "docker_image_name": "duplexa/4dn-hic:v43",
         "docker_registry_url": "https://hub.docker.com/",
         "lab": "4dn-dcic-lab",
-        "name": "bedtomultivec",
+        "name": "hi-c-processing-pairs",
+        "status": "released",
         "steps": [
             {
                 "inputs": [
                     {
                         "meta": {
-                            "cardinality": "single",
-                            "file_format": "69f6d609-f2ac-4c82-9472-1a13331b5ce9",
+                            "cardinality": "array",
+                            "file_format": "pairs",
                             "global": true,
                             "type": "data file"
                         },
-                        "name": "bedfile",
+                        "name": "input_pairs",
                         "source": [
                             {
-                                "name": "bedfile"
+                                "name": "input_pairs"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "merging"
+                    ],
+                    "description": "Merging pair files",
+                    "software_used": [
+                        "/software/9baf9f73-2d59-4eca-a326-340007b2a8b8/"
+                    ]
+                },
+                "name": "merge-pairs",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "merged_pairs",
+                        "target": [
+                            {
+                                "name": "merged_pairs"
+                            },
+                            {
+                                "name": "input_pairs",
+                                "step": "addfragtopairs"
+                            },
+                            {
+                                "name": "pairs",
+                                "step": "cooler"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_pairs",
+                        "source": [
+                            {
+                                "name": "merged_pairs",
+                                "step": "merge-pairs"
                             }
                         ]
                     },
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "dba26778-f40a-4561-a552-65539702ded4",
+                            "file_format": "juicer_format_restriction_site_file",
                             "global": true,
-                            "type": "data file"
+                            "type": "reference file"
                         },
-                        "name": "rows_info",
+                        "name": "restriction_file",
                         "source": [
                             {
-                                "name": "rows_info"
+                                "name": "restriction_file"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "annotation"
+                    ],
+                    "description": "Adding restriction enzyme site information to the pairs file",
+                    "software_used": [
+                        "/software/9baf9f73-2d59-4eca-a326-340007b2a8b8/"
+                    ]
+                },
+                "name": "addfragtopairs",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "pairs_with_frags",
+                        "target": [
+                            {
+                                "name": "input_pairs",
+                                "step": "pairs2hic"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "pairs",
+                        "source": [
+                            {
+                                "name": "merged_pairs",
+                                "step": "merge-pairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chrsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "binsize",
+                        "source": [
+                            {
+                                "name": "min_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "ncores",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "max_split",
+                        "source": [
+                            {
+                                "name": "max_split_cooler"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "aggregation"
+                    ],
+                    "description": "Merged Pairs file is processed using Cooler",
+                    "software_used": [
+                        "/software/9d4d8c31-9711-4345-8a84-d61fc4f7806a/"
+                    ]
+                },
+                "name": "cooler",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "cool",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "cool",
+                        "target": [
+                            {
+                                "name": "input_cool",
+                                "step": "cool2mcool"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "pairs",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_pairs",
+                        "source": [
+                            {
+                                "name": "pairs_with_frags",
+                                "step": "addfragtopairs"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "chromsizes",
+                        "source": [
+                            {
+                                "name": "chromsizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "min_res",
+                        "source": [
+                            {
+                                "name": "min_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "higlass",
+                        "source": [
+                            {
+                                "name": "higlass"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "custom_res",
+                        "source": [
+                            {
+                                "name": "custom_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "maxmem",
+                        "source": [
+                            {
+                                "name": "maxmem"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "mapqfilter",
+                        "source": [
+                            {
+                                "name": "mapqfilter_juicer"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "no_balance",
+                        "source": [
+                            {
+                                "name": "no_balance"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "aggregation",
+                        "normalization"
+                    ],
+                    "description": "Merged Pairs file is processed using Juicebox",
+                    "software_used": [
+                        "/software/b0c823f7-ca1e-44fb-b0f6-3eefb19eae46/"
+                    ]
+                },
+                "name": "pairs2hic",
+                "outputs": [
+                    {
+                        "meta": {
+                            "global": true
+                        },
+                        "name": "hic",
+                        "target": [
+                            {
+                                "name": "hic"
+                            },
+                            {
+                                "name": "input_hic",
+                                "step": "add-hic-normvector-to-mcool"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "cool",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_cool",
+                        "source": [
+                            {
+                                "name": "cool",
+                                "step": "cooler"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "ncores",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "chunksize",
+                        "source": [
+                            {
+                                "name": "chunksize"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "juicer_res",
+                        "source": [
+                            {
+                                "name": "juicer_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "custom_res",
+                        "source": [
+                            {
+                                "name": "custom_res"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "no_balance",
+                        "source": [
+                            {
+                                "name": "no_balance"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "aggregation",
+                        "normalization",
+                        "file format conversion"
+                    ],
+                    "description": "Cooler file is converted to mcool",
+                    "software_used": [
+                        "/software/9d4d8c31-9711-4345-8a84-d61fc4f7806a/"
+                    ]
+                },
+                "name": "cool2mcool",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "mcool",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "mcool",
+                        "target": [
+                            {
+                                "name": "input_mcool",
+                                "step": "add-hic-normvector-to-mcool"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "mcool",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_mcool",
+                        "source": [
+                            {
+                                "name": "mcool",
+                                "step": "cool2mcool"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "hic",
+                            "global": false,
+                            "type": "data file"
+                        },
+                        "name": "input_hic",
+                        "source": [
+                            {
+                                "name": "hic",
+                                "step": "pairs2hic"
                             }
                         ]
                     }
@@ -12129,30 +12650,35 @@
                     "analysis_step_types": [
                         "file format conversion"
                     ],
+                    "description": "HiC normalization vector is added to mcooler",
                     "software_used": [
-                       "/softwares/5de38570-68bf-4545-98b6-d7d51ae08db9/"
+                        "/software/61fc6148-5ccf-41da-a9cc-757a807f9372/"
                     ]
                 },
-                "name": "bedtomultivec",
+                "name": "add-hic-normvector-to-mcool",
                 "outputs": [
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "92537561-4c02-440e-a51f-22b4b08b6918",
+                            "file_format": "mcool",
                             "global": true,
                             "type": "data file"
                         },
-                        "name": "multivec_file",
+                        "name": "mcool_with_hicnorm",
                         "target": [
                             {
-                                "name": "multivec_file"
+                                "name": "mcool"
                             }
                         ]
                     }
                 ]
             }
         ],
-        "title": "Converting bed to multivec v1",
-        "uuid": "7b69a0ce-3bc8-4f85-bb34-8a42cecb9b9c"
+        "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists 0.2.7",
+        "uuid": "23bd6d73-4190-496d-837c-21bcdb3802ed",
+        "accession": "4DNWF2YBHXQM",
+        "previous_version": ["/workflows/c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0"],
+        "version_upgrade_log": "Hic2cool extract-norm MT chromosome handling bug fixed. Cooler convergence failure now doesn't throw error (store NaN instead). Nore, Nonorm, Norenonorm variants are now merged.",
+        "aliases": ["4dn-dcic-lab:wf-hi-c-processing-pairs-0.2.7"]
     }
 ]

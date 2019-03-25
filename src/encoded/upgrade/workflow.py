@@ -446,4 +446,9 @@ def workflow_5_6(value, system):
         value['category'] = 'processing'
         value['category'] = [value['category']]  # convert to an array
 
-    
+
+@upgrade_step('workflow', '6', '7')
+def workflow_6_7(value, system):
+    '''previous version is now an array'''
+    if 'previous_version' in value:
+        value['previous_version'] = [value['previous_version']]

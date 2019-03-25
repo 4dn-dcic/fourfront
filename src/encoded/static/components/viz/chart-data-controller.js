@@ -334,7 +334,7 @@ export const ChartDataController = {
             refs.browseBaseState    = reduxStoreState.browseBaseState;
             refs.contextFilters     = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
 
-            if (refs.href === prevHref){
+            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState){
                 // Nothing relevant has changed. Exit.
                 return;
             }

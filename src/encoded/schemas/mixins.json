@@ -276,7 +276,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "title": "MIME type",
+                    "title": "Media Type",
                     "type": "string",
                     "enum": [
                         "application/msword",
@@ -498,7 +498,7 @@
     "sop_mapping": {
         "sop_mapping": {
             "title": "SOP Mappping",
-            "permission": "import-items",
+            "permission": "import_items",
             "exclude_from" : ["submit4dn", "FFedit-create"],
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
             "type": "object",
@@ -542,14 +542,14 @@
             "type": "array",
             "ff_flag": "clear clone",
             "exclude_from" : ["submit4dn", "FFedit-create"],
-            "permission": "import-items",
+            "permission": "import_items",
             "items": {
                 "description": "A badge (and possibly message) for the item.",
                 "type":  "object",
                 "required": ["badge"],
                 "additionalProperties": false,
                 "exclude_from" : ["submit4dn", "FFedit-create"],
-                "permission": "import-items",
+                "permission": "import_items",
                 "properties": {
                     "badge": {
                         "title": "Badge",

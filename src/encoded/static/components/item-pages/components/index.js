@@ -18,11 +18,12 @@ export { ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoad
 export { FilesInSetTable, FileItemRow } from './FilesInSetTable';
 export { ItemFooterRow } from './ItemFooterRow';
 export { Publications } from './Publications';
+export { SOPBelowHeaderRow } from './SOPBelowHeaderRow';
 export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { AuditTabView } from './AuditTabView';
 export { AttributionTabView } from './AttributionTabView';
-export { HiGlassFileTabView, HiGlassContainer, HiGlassPlainContainer, HiGlassConfigurator } from './HiGlass';
+export { HiGlassAjaxLoadContainer, HiGlassContainer, HiGlassPlainContainer, HiGlassConfigurator } from './HiGlass';
 export { WorkflowDetailPane } from './WorkflowDetailPane';
 export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { WorkflowGraphSectionControls } from './WorkflowGraphSectionControls';
