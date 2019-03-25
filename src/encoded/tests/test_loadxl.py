@@ -3,6 +3,7 @@ from encoded import loadxl
 import json
 from unittest import mock
 from pkg_resources import resource_filename
+from encoded.commands.run_upgrader_on_inserts import get_inserts
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
@@ -94,3 +95,24 @@ def test_load_data_local_dir(testapp):
             res = testapp.post_json('/load_data', {'fdn_dir': 'perf-testing'}, status=200)
             assert res.json['status'] == 'success'
             load_all.assert_called_once_with(mock.ANY, expected_dir, None, itype=None, overwrite=False, from_json=False)
+
+
+def test_load_data_from_json(testapp):
+    user_inserts = list(get_inserts('master-inserts', 'user'))
+    lab_inserts = list(get_inserts('master-inserts', 'lab'))
+    award_inserts = list(get_inserts('master-inserts', 'award'))
+    data = {'store': {'user': user_inserts, 'lab': lab_inserts, 'award': award_inserts},
+            'itype': ['user', 'lab', 'award']}
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', data, status=200)
+        assert res.json['status'] == 'success'
+
+
+def test_load_data_local_path(testapp):
+    local_path = resource_filename('encoded', 'tests/data/master-inserts/')
+    data = {'local_path': local_path, 'itype': ['user', 'lab', 'award']}
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', data, status=200)
+        assert res.json['status'] == 'success'
