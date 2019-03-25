@@ -2,7 +2,7 @@
 import _ from 'underscore';
 
 
-export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' : false }){
+export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' : false, 'countChildTypes' : false }){
 
     function getBarCounts(){
         return cy.get('.bar-plot-chart.chart-container .chart-bar .bar-top-label').then((labels)=>{
@@ -36,17 +36,25 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
             console.log('barCounts', barCounts);
         });
 
+
         if (!options.skipLegend){
             getLegendCounts().then((legendCounts)=>{
                 expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiment_sets);
             });
         }
 
+
         // Hover over all bar parts and count up counts
-        var barPartCounts = { 'experiment_sets' : 0, 'experiments' : 0, 'files' : 0 };
+        var barPartCounts = {
+            'experiment_sets' : 0,
+            'experiments' : 0,
+            'files' : 0
+        };
+
+
         return cy.get('#navbar-icon .navbar-header').hoverIn().end().wait(1000).then(()=>{
 
-            return cy.get('.bar-plot-chart.chart-container .chart-bar').each(($bar)=>{
+            return cy.get('.bar-plot-chart.chart-container .chart-bar:not(.barplot-transition-exit):not(.barplot-transition-exit-active)').each(($bar)=>{
                 return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
                     barPartCounts.experiment_sets += parseInt($barPart.attr('data-count'));
                 });
@@ -59,6 +67,12 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
             expect(hoverCounts.experiments).to.equal(quickInfoBarCounts.experiments);
             expect(hoverCounts.files).to.equal(quickInfoBarCounts.files);
         })*/.end().window().scrollTo('top').end().get('#navbar-icon .navbar-header').hoverIn().wait(300).then(()=>{
+
+            if (!options.countChildTypes) {
+                return cy.window().scrollTo('top').end();
+            }
+
+
             // Change to 'experiments' (2nd menu item in aggregate type drown); compare bar & legend counts
             return cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(()=>{
                 return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(2)')
@@ -71,7 +85,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                                     expect(sum(...legendCounts)).to.equal(quickInfoBarCounts.experiments);
                                 }).end();
                             }
-                        }).end().get('.bar-plot-chart.chart-container .chart-bar').each(($bar)=>{
+                        }).end().get('.bar-plot-chart.chart-container .chart-bar:not(.barplot-transition-exit):not(.barplot-transition-exit-active)').each(($bar)=>{
                             return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
                                 barPartCounts.experiments += parseInt($barPart.attr('data-count'));
                             });
@@ -92,7 +106,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                                 }).end();
                             }
                         }).end()
-                        .get('.bar-plot-chart.chart-container .chart-bar').each(($bar)=>{
+                        .get('.bar-plot-chart.chart-container .chart-bar:not(.barplot-transition-exit):not(.barplot-transition-exit-active)').each(($bar)=>{
                             return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
                                 barPartCounts.files += parseInt($barPart.attr('data-count'));
                             });
@@ -122,11 +136,13 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
     });
 }
 
+
+
 export function testGraphTabClick(){
 
     it("Has functional 'graph' tab which is loaded & clickable.", function(){
         cy.get('.tab-view-container .rc-tabs-nav').within(($tabNav)=>{
-            cy.contains('Graph').should('have.length', 1).then(($tabInnerElem)=>{
+            cy.contains('Provenance').should('have.length', 1).then(($tabInnerElem)=>{
                 const $tab = $tabInnerElem.closest('.rc-tabs-tab');
                 return cy.wrap($tab).should('not.have.class', 'rc-tabs-tab-disabled').end()
                     .wrap($tabInnerElem).click().wait(200).end();
@@ -136,9 +152,13 @@ export function testGraphTabClick(){
 
 }
 
+
+
 export function testNodesTextGlobalInputs(listOfNodeTextNames){
     return testNodesText(listOfNodeTextNames, '.graph-wrapper .nodes-layer .node[data-node-type="input"][data-node-global="true"]');
 }
+
+
 
 export function testNodesText(listOfNodeTextNames, nodesListSelector = '.graph-wrapper .nodes-layer .node'){
 

@@ -1,18 +1,40 @@
 
-describe('Post-Deployment Static Page & Content Tests', function () {
+describe('Static Page & Content Tests', function () {
 
-    it.skip('Every help page has links which return success status codes', function(){
+    before(function(){
+        cy.visit('/');
+    });
 
-        cy.get('#sHelp').click().then(()=>{
-            cy.get('ul[aria-labelledby="sHelp"] li a').then((listItems)=>{
+
+    it('Click & visit each page from menu, ensure ToC exists somewhere, ensure ToC works.', function(){
+
+        cy.on('uncaught:exception', function(err, runnable){
+
+            expect(err.message).to.include("return response;");
+
+            Cypress.log({
+                'name' : "Negligible JSON err.",
+                'message' : "Hit error re: non-serializable function; fixed in subseq. deploys."
+            });
+
+            return false;
+        });
+
+        // Wait until help menu has loaded via AJAX and has 'span' child w/ caret.
+        cy.get('#help-menu-item').should('have.descendants', 'span').click().wait(500).then(()=>{
+            cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{
                 console.log(listItems);
 
                 expect(listItems).to.have.length.above(2); // At least 3 help pages in dropdown.
+                var allLinkElementIDs = Cypress._.map(listItems, function(liEl){
+                    return Cypress.$(liEl).attr('id');
+                });
 
-                cy.get('#page-title-container span.title').should('have.text', 'About').then((title)=>{
+                cy.get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').then((title)=>{
 
                     let prevTitle = title.text();
                     let count = 0;
+                    let haveWeSeenPageWithTableOfContents = false;
 
                     function doVisit(listItem){
 
@@ -23,25 +45,37 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                                 'message' : 'Visited page with title "' + titleText + '".'
                             });
                             if (count < listItems.length){
-                                cy.get('#sHelp').click().wait(100).then(()=>{
-                                    cy.get('ul[aria-labelledby="sHelp"] li:nth-child(' + (count + 1) + ') a').click().then((nextListItem)=>{
+                                cy.get('#help-menu-item').click().wait(500).then(()=>{
+                                    cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().wait(300).then((nextListItem)=>{
                                         doVisit(nextListItem);
                                     });
                                 });
                             }
                         }
-                        cy.wait(100).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+
+                        cy.wait(300).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                             var titleText = t.text();
                             expect(titleText).to.have.length.above(0);
+                            cy.title().should('equal', titleText + ' – 4DN Data Portal').end(); // Ensure <head>...<title>TITLE</title>...</head> matches.
                             prevTitle = titleText;
 
-                            cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"])').each(($linkElem)=>{
-                                const linkHref = $linkElem.attr('href');
-                                console.log($linkElem.attr('href'));
-                                cy.request(linkHref);
-                            }).then(()=>{
+                            if (!haveWeSeenPageWithTableOfContents) {
+                                cy.window().then((w)=>{
+                                    if (w.document.querySelectorAll('div.table-of-contents li.table-content-entry a').length > 0){
+                                        haveWeSeenPageWithTableOfContents = true;
+                                        const origScrollTop = w.scrollY;
+                                        cy.wrap(w).scrollTo('top').end().get('div.table-of-contents li.table-content-entry a').last().click({ force: true }).end().wait(1500).then(()=>{
+                                            expect(w.scrollY).to.not.equal(origScrollTop);
+                                            finish(titleText);
+                                        });
+                                    } else {
+                                        finish(titleText);
+                                    }
+                                });
+
+                            } else {
                                 finish(titleText);
-                            });
+                            }
 
                         });
                     }
@@ -49,102 +83,73 @@ describe('Post-Deployment Static Page & Content Tests', function () {
                     doVisit(listItems[count]);
 
                 });
+            });
+        });
+
+    });
+
+
+    it('Every help page has links which return success status codes - SAMPLING', function(){
+
+        cy.get('#help-menu-item').click().then(()=>{
+
+            // Get all links to _level 2_ static pages. Exclude directory pages for now. Do directory pages in later test.
+            cy.get('.big-dropdown-menu.is-open a.level-2-title').then((listItems)=>{
+
+                console.log(listItems);
+                const listItemsTotalCount = listItems.length;
+
+                expect(listItemsTotalCount).to.be.above(2); // At least 3 help pages in dropdown.
+
+                // To avoid running on every single page x multiple network requests, lets create a random
+                // sampling of 5 list item indices to visit.
+                var itemIndicesToVisit = Cypress._.sampleSize(Cypress._.range(listItemsTotalCount), 5);
+
+                let prevTitle = null;
+                let count = 0;
+
+                function doVisit(){
+
+                    function finish(titleText){
+                        count++;
+                        Cypress.log({
+                            'name' : "Help Page " + count + '/5/' + listItemsTotalCount,
+                            'message' : 'Visited page with title "' + titleText + '".'
+                        });
+
+                        if (itemIndicesToVisit.length > 0){
+                            var nextIndexToVisit = itemIndicesToVisit.shift();
+                            cy.get('#help-menu-item').click().wait(100).then(()=>{
+                                cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(doVisit);
+                            });
+                        }
+                    }
+                    cy.wait(100).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                        var titleText = t.text();
+                        expect(titleText).to.have.length.above(0);
+                        prevTitle = titleText;
+
+                        cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"]):not([href*=".gov"])').each(($linkElem)=>{
+                            const linkHref = $linkElem.attr('href');
+                            console.log($linkElem.attr('href'));
+                            return cy.request(linkHref);
+                        }).then(()=>{
+                            finish(titleText);
+                        });
+
+                    });
+                }
+
+                const firstItemIndexToVisit = itemIndicesToVisit.shift();
+                listItems[firstItemIndexToVisit].click();
+                doVisit();
 
             });
         });
 
     });
 
-    context("Joint Analysis Page", function(){
-
-        before(function(){
-            cy.visit('/joint-analysis-plans');
-        });
-
-        it('Redirected to /joint-analysis from /joint-analysis-plans', function(){
-            cy.location('pathname').should('equal', '/joint-analysis');
-        });
-
-        const yAxisTerms = ['ATAC-seq', 'ChIA-PET', 'DAM-ID seq', 'Repli-seq', 'in situ Hi-C'];
-        const xAxisTerms = ['H1-hESC', 'HFFc6'];
-
-        it('Have at least one of each term - ' + yAxisTerms.join(', ') + ' + ' + xAxisTerms.join(', '), function(){
-            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
-                Cypress._.forEach(yAxisTerms, function(term){
-                    cy.contains(term);
-                });
-                Cypress._.forEach(xAxisTerms, function(term){
-                    cy.contains(term);
-                });
-            });
-        });
-
-        it('X-Axis headers are in proper order', function(){
-            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
-                cy.get('.header-for-viz .column-group-header').should('have.length.greaterThan', 1).then(($headers)=>{
-                    Cypress._.forEach($headers, function(h, idx){
-                        expect(h.innerText).to.equal(xAxisTerms[idx]);
-                    });
-                });
-            });
-        });
-
-        it('Have at least 16 sets depicted in tiles (logged out)', function(){
-            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
-                cy.get('.block-container-group .stacked-block').then(($blocks)=>{
-                    let totalCount = 0;
-                    Cypress._.forEach($blocks, function(block){
-                        const count = parseInt(Cypress.$(block).text());
-                        expect(isNaN(count)).to.equal(false);
-                        expect(count).to.be.greaterThan(0);
-                        totalCount += count;
-                    });
-                    expect(totalCount).to.be.greaterThan(15);
-                });
-            });
-        });
-
-        it("HiGlass initializes (very basic)", function(){
-            cy.window().scrollTo('bottom').end()
-                .wait(2000).end().get('div.CenterTrack-module_center-track-3ptRW', { 'timeout' : (3 * 60 * 1000) }).wait(500);
-        });
-
-        it('Have more (>50) sets depicted when logged in', function(){
-
-            cy.on('uncaught:exception', function(err, runnable){
-
-                expect(err.message).to.include("'options' of null");
-
-                Cypress.log({
-                    'name' : "XHR Callback",
-                    'message' : "Hit AJAX callback timing error. Ignored."
-                });
-
-                return false;
-            });
-
-
-            let origTotalCount = 0;
-            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
-                return cy.get('.block-container-group .stacked-block').then(($blocks)=>{
-                    Cypress._.forEach($blocks, function(block){
-                        origTotalCount += parseInt(Cypress.$(block).text());
-                    });
-                }).end();
-            }).end().login4DN().wait(500).end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
-                let nextTotalCount = 0;
-                return cy.get('.block-container-group .stacked-block').should('have.length.greaterThan', 20).then(($nextBlocks)=>{
-                    Cypress._.forEach($nextBlocks, function(block){
-                        nextTotalCount += parseInt(Cypress.$(block).text());
-                    });
-                    expect(nextTotalCount).to.be.greaterThan(origTotalCount);
-                    expect(nextTotalCount).to.be.greaterThan(49);
-                });
-            }).wait(250).end().window().screenshot().end().wait(250).end().logout4DN();
-        });
-
-
-    });
-
+    // TODO:
+    // test which visits directory page(s) maybe.
 
 });

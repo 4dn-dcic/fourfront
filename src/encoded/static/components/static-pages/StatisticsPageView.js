@@ -187,7 +187,7 @@ class UsageStatsViewController extends StatsViewController {
                 var untilDate   = moment.utc(),
                     fromDate,
                     uri         = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
-                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.is_visualization&group_by=download_tracking.file_format';
+                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
                 if (props.currentGroupBy === 'monthly'){
                     untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
                     fromDate = untilDate.clone();
@@ -769,11 +769,11 @@ class UsageStatsView extends StatsChartViewBase {
             };
             ddtitle = titles[currCountBy];
         } else if (chartID === 'file_downloads'){
-            '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.is_visualization&group_by=download_tracking.file_format';
+            '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
             titles = {
                 'download_tracking.experiment_type'     : <React.Fragment><i className="icon icon-fw icon-folder-o"/>&nbsp; Experiment Type</React.Fragment>,
                 'download_tracking.geo_country'         : <React.Fragment><i className="icon icon-fw icon-globe"/>&nbsp; Country</React.Fragment>,
-                'download_tracking.is_visualization'    : <React.Fragment><i className="icon icon-fw icon-television"/>&nbsp; Downloads as part of visualization</React.Fragment>,
+                'download_tracking.range_query'    : <React.Fragment><i className="icon icon-fw icon-television"/>&nbsp; Downloads as part of visualization</React.Fragment>,
                 'download_tracking.file_format'         : <React.Fragment><i className="icon icon-fw icon-file-text-o"/>&nbsp; File Format</React.Fragment>,
             };
             ddtitle = titles[currCountBy];

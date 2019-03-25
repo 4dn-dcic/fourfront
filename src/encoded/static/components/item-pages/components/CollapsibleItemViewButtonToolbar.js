@@ -41,7 +41,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
     wrapChildForMobile(elem, idx = 0){
         var className = (
             "mobile-size-elem mb-05"
-            + (idx !== 0 ? ' mt-05' : '') 
+            + (idx !== 0 ? ' mt-05' : '')
         );
 
         return <div className={className}>{ elem }</div>;

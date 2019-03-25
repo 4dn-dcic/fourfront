@@ -180,11 +180,11 @@ export class WFRStepDetailBody extends React.Component {
                     { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow_run={wfr} step={step} workflow={workflow}/> : null }
                     { listOfSoftwareInWorkflow ? <hr/> : null }
                     { listOfSoftwareInWorkflow ? <SoftwareDetailsForWorkflowNodeRow software={listOfSoftwareInWorkflow}/> : null }
-                    
+
                 </div>
                 <hr/>
-                
-                
+
+
                 <Fade in={!!(wfr)} key="wfr-detail-container">
                     <div>
                         <h3 className="tab-section-title">
@@ -204,8 +204,8 @@ export class WFRStepDetailBody extends React.Component {
                 { typeof this.state.wfr === 'string' ?
                     <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
                 : null }
-                
-                
+
+
             </div>
         );
     }

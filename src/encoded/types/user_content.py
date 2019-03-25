@@ -177,6 +177,13 @@ class HiglassViewConfig(UserContent):
     #    TODO: Calculate which tilesetUids are defined in viewconfig, if any.
     #    '''
     #    return None
+    @calculated_property(schema={
+        "title": "Content",
+        "description": "Content for HiGlass Item (unused)",
+        "type": "string"
+    })
+    def content(self, request):
+        return None
 
     class Collection(Item.Collection):
         '''

@@ -103,7 +103,7 @@ serverPlugins.push(new webpack.DefinePlugin({
 }));
 
 
-if (mode === 'development'){
+if (env === 'development'){ // Skip for dev-quick
     webPlugins.push(
         new BundleAnalyzerPlugin({
             "analyzerMode" : "static",

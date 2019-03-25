@@ -46,10 +46,10 @@ from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
 from . import TrackingItem
 from ..authentication import session_properties
-
+import structlog
 import logging
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
-log = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
@@ -328,6 +328,9 @@ class File(Item):
                 return obucket.get('title')
         return None
 
+    def _get_ds_cond_from_repset(self, repset):
+        return (repset.get('dataset_label', None), repset.get('condition', None))
+
     def _get_file_experiment_info(self, request, currinfo):
         """
         Get info about an experiment that a file belongs given a File.
@@ -361,7 +364,10 @@ class File(Item):
             rep_set_info = get_item_if_you_can(request, repsetid)
             if not rep_set_info:
                 return info
-            # 2 pieces of info to get from the repset if there is one
+            # pieces of info to get from the repset if there is one
+            ds, c = self._get_ds_cond_from_repset(rep_set_info)
+            info['dataset'] = ds
+            info['condition'] = c
             expts_in_set = rep_set_info.get('experiments_in_set', [])
             if not expts_in_set:
                 return info
@@ -393,6 +399,9 @@ class File(Item):
                     repset = repset[0]
                     rep_set_info = get_item_if_you_can(request, repset)
                     if rep_set_info is not None:
+                        ds, c = self._get_ds_cond_from_repset(rep_set_info)
+                        info['dataset'] = ds
+                        info['condition'] = c
                         rep_exps = rep_set_info.get('replicate_exps', [])
                         for rep in rep_exps:
                             if rep.get('replicate_exp') == expid:
@@ -429,6 +438,12 @@ class File(Item):
             "experiment_bucket": {
                 "type": "string"
             },
+            "dataset": {
+                "type": "string"
+            },
+            "condition": {
+                "type": "string"
+            },
             "track_title": {
                 "type": "string"
             }
@@ -436,7 +451,7 @@ class File(Item):
     })
     def track_and_facet_info(self, request, biosource_name=None):
         props = self.properties
-        fields = ['experiment_type', 'assay_info', 'lab_name',
+        fields = ['experiment_type', 'assay_info', 'lab_name', 'dataset', 'condition',
                   'biosource_name', 'replicate_info', 'experiment_bucket']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
@@ -447,14 +462,14 @@ class File(Item):
         if biosource_name is not None and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
-        if len(track_info) != 6:  # if length==6 we have everything we need
-            if not (len(track_info) == 5 and 'lab_name' not in track_info):
+        if len(track_info) != 8:  # if length==6 we have everything we need
+            if not (len(track_info) == 7 and 'lab_name' not in track_info):
                 # only if everything but lab exists can we avoid getting expt
                 einfo = self._get_file_experiment_info(request, track_info)
                 track_info.update({k: v for k, v in einfo.items() if k not in track_info})
-            if 'experiment_type' not in track_info:
+            # if 'experiment_type' not in track_info:
                 # avoid more unnecessary work if we don't have key piece
-                return
+                # return
 
             if track_info.get('lab_name') is None:
                 labid = props.get('lab')
@@ -1159,12 +1174,13 @@ def download(context, request):
         raise ValueError(external.get('service'))
 
     tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
-    tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
-                     'status': 'in review by lab', 'tracking_type': 'download_tracking',
+    tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
                      'download_tracking': tracking_values}
-    TrackingItem.create_and_commit(request, tracking_item)
+    try:
+        TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
+    except Exception as e:
+        log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])

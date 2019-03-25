@@ -26,6 +26,11 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	}
 }
 
+/** Override Bootstrap defaults **/
+label {
+	font-weight: 600;
+}
+
 // Navbar search
 .navbar-search-form-container {
 	position: relative;

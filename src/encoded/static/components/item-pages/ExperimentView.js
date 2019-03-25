@@ -5,10 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import { console, object, Schemas } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
+import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
 
@@ -45,7 +43,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         }
 
         if (Array.isArray(context.processed_files) && context.processed_files.length > 0) {
-            
+
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
@@ -118,10 +116,13 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
-            <OverviewHeading context={this.props.context} />
-        ];
+        return (
+            <React.Fragment>
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} />
+                <OverviewHeading context={this.props.context} />
+            </React.Fragment>
+        );
     }
 
 }
@@ -129,11 +130,15 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
 
 export class ExperimentMicView extends ExperimentView {
+    /** Uses OverviewHeadingMic instead of OverviewHeading as in ExperimentView. */
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
-            <OverviewHeadingMic context={this.props.context} />
-        ];
+        return (
+            <React.Fragment>
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
+                <OverviewHeadingMic context={this.props.context} />
+            </React.Fragment>
+        );
     }
 }
 
@@ -239,7 +244,7 @@ class OverviewHeadingMic extends React.Component {
                 <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
                 <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                 <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
-                
+
                 <OverViewBodyItem {...commonProps} property='imaging_paths' fallbackTitle="Imaging Paths"
                     wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement='div' listWrapperElement='div' singleItemClassName="block"
                     titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
@@ -278,7 +283,7 @@ export class RawFilesTableSection extends React.Component {
                 'minColumnWidth' : 30
             };
         }
-        
+
         return (
             <div className="raw-files-table-section">
                 <h3 className="tab-section-title">

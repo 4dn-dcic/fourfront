@@ -65,7 +65,7 @@ const CELL_TYPE_NAME_MAP = {
 export class JointAnalysisMatrix extends React.PureComponent {
 
     static standardizeEncodeResult(result, idx){
-        var cellType = result.biosample_term_name || FALLBACK_NAME_FOR_UNDEFINED;
+        var cellType = result.biosample_summary || FALLBACK_NAME_FOR_UNDEFINED;
         var experimentType = result.assay_term_name || FALLBACK_NAME_FOR_UNDEFINED;
         var experimentCategory = _.uniq(result.assay_slims || []);
         if (experimentCategory.length > 1){
@@ -141,8 +141,8 @@ export class JointAnalysisMatrix extends React.PureComponent {
             'experiments_in_set.experiment_categorizer.value', 'experiments_in_set.experiment_categorizer.field', 'experiments_in_set.display_title',
             'experiments_in_set.accession'
         ],
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_term_name=H1-hESC&biosample_term_name=HFFc6&status!=archived&status!=revoked&limit=all',
-        'encode_results_url_fields' : ['assay_slims', 'biosample_term_name', 'assay_term_name', 'description', 'lab', 'status'],
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_summary=H1-hESC&biosample_summary=HFFc6&status!=archived&status!=revoked&limit=all',
+        'encode_results_url_fields' : ['assay_slims', 'biosample_summary', 'assay_term_name', 'description', 'lab', 'status'],
         'self_planned_results_url'  : null
     };
 
