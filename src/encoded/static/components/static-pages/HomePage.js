@@ -40,9 +40,11 @@ export default class HomePage extends React.PureComponent {
      */
     render() {
         return (
-            <div className="container" id="content">
-                <div className="home-content-area">
-                    <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
+            <div className="homepage-wrapper">
+
+                <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
+
+                <div className="container home-content-area" id="content">
                     <div className="row">
                         <div className="col-xs-12 col-md-8">
                             <h2 className="homepage-section-title">Introduction</h2>
@@ -57,6 +59,7 @@ export default class HomePage extends React.PureComponent {
                         <Announcements session={this.props.session} announcements={this.props.context.announcements || null} />
                     </div>
                 </div>
+
             </div>
         );
     }
@@ -198,22 +201,22 @@ class LinksColumn extends React.PureComponent {
                 <h4 className="text-400 mb-15 mt-25">External Links</h4>
                 <div className="links-wrapper clearfix">
                     <div className="link-block">
-                        <a href="http://www.4dnucleome.org/" target="_blank" className="external-link">
+                        <a href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>Main Portal</span>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank" className="external-link">
+                        <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>4DN DCIC</span>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" className="external-link">
+                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>NIH Common Fund</span>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" className="external-link">
+                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>Centers and Labs</span>
                         </a>
                     </div>

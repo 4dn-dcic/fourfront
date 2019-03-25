@@ -175,54 +175,6 @@ h5.fourDN-header {
 }
 
 
-.home-content-area {
-
-	.announcement {
-		padding-bottom: 10px;
-		margin-top: 20px;
-
-		.announcement-title {
-			font-weight: 300;
-			font-size: 1.35rem;
-			border-bottom: 2px solid #168369;
-			padding-bottom: 5px;
-			margin-bottom: 5px;
-			i.icon.icon-minus,
-			i.icon.icon-plus {
-				margin-right: 5px;
-			}
-		}
-
-		.announcement-subtitle {
-			color: #999;
-			font-weight: 400;
-			font-size: 0.9rem;
-		}
-
-		.announcement-content {
-			margin-top: 3px;
-		}
-	}
-
-
-	.fourDN-section-toggle{
-		color: #555;
-		text-decoration: none !important;
-		&:hover,
-		&:focus {
-			color: #000000;
-		}
-	}
-
-	.fourDN-section-info{
-		color: #999 !important;
-		font-weight: 300;
-		font-size: 1.2em;
-	}
-
-}
-
-
 
 
 /**********************************************************
@@ -738,100 +690,9 @@ h5.fourDN-header {
 	margin-top: 30px;
 }
 
-.home-content-area {
+.homepage-wrapper {
 
-	margin-top: 15px;
-
-	.link-block {
-				
-		> a {
-			font-size: 14px;
-			padding: 7px 10px;
-			display: block;
-			/* text-align: center; */
-			font-weight: 400;
-			height: 100%;
-			/*
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			*/
-
-			background: #f8f8f8;
-			border: 1px solid rgba(0,0,0,0.0);
-			width: 97%;
-			transform: translate3d(3%, 0, 0);
-			transition: transform .3s, border-color .5s 0.3s, width .3s;
-
-			&:hover {
-				background-color: #f4f4f4;
-				border-color: rgba(0,0,0,0.05);
-				transform: translate3d(0%, 0, 0);
-				width: 100%;
-			}
-
-			> span {
-				display: inline-block;
-				vertical-align: middle;
-			}
-
-			&.browse-btn {
-				/* Emulates btn-primary styling partially */
-				//color: $btn-primary-color;
-				//background-color: $btn-primary-bg;
-				//border-color: $btn-primary-border;
-				border-color: rgba(92,127,144, 0.3);
-				&:hover, &:active, &.active, &:focus {
-					//background-color: darken($btn-primary-bg, 8%);
-					//border-color: darken($btn-primary-border, 12%);
-					border-color: rgba(92,127,144, 0.8);
-				}
-			}
-
-			&.external-link {
-				padding-right: 20px;
-				&:after {
-					font-family: "FontAwesome";
-					content: "\f14c";
-					position: absolute;
-					right: 12px;
-					top: 50%;
-					margin-top: -11px;
-					opacity: 0.1;
-					transition: opacity .3s;
-					color: #000;
-				}
-				&:hover:after {
-					opacity: 0.5;
-				}
-			}
-
-		}
-		
-		/*
-		&:last-child {
-			border-right: 1px solid #ddd;
-		}
-		*/
-	}
-
-	.homepage-links-row {
-		.links-wrapper {
-			display: flex;
-			.link-block:not(:first-child){
-				border-left: 1px solid #eee;
-			}
-		}
-	}
-
-	.homepage-links-column {
-		.links-wrapper {
-			.link-block {
-				margin-bottom: 5px; //10px;
-			}
-		}
-	}
-
+	/*** Carousel ***/
 
 	$carousel-height : 240px;
 
@@ -846,7 +707,7 @@ h5.fourDN-header {
 		}
 	}
 	
-	.homepage-carousel-container {
+	.homepage-carousel-wrapper {
 		position: relative;
 		height: $carousel-height;
 		transition: opacity 1s;
@@ -857,10 +718,10 @@ h5.fourDN-header {
 
 		&:before {
 			content: "";
-			left: -1000px;
+			left: 0;
 			position: absolute;
 			top: -15px;
-			right: -1000px;
+			right: 0;
 			height: $carousel-height + 30px;
 			background: #f6f6f6;
 			box-shadow: inset 0 0 3px rgba(0,0,0,0.25);
@@ -872,10 +733,6 @@ h5.fourDN-header {
 			&:before {
 				background-color: #eee;
 			}
-			//.homepage-carousel-slide:not(:hover) > .inner-container > .bg-image {
-			//	opacity: 0.7 !important;
-			//	transition: opacity 1s !important;
-			//}
 		}
 	
 		.slider-list {
@@ -999,10 +856,150 @@ h5.fourDN-header {
 	
 	}
 
+	/*** Other homepage things ***/
+
+	.home-content-area {
+
+		margin-top: 15px;
+
+		.link-block {
+					
+			> a {
+				font-size: 14px;
+				padding: 7px 10px;
+				display: block;
+				/* text-align: center; */
+				font-weight: 400;
+				height: 100%;
+				/*
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				*/
+
+				background: #f8f8f8;
+				border: 1px solid rgba(0,0,0,0.0);
+				width: 97%;
+				transform: translate3d(3%, 0, 0);
+				transition: transform .3s, border-color .5s 0.3s, width .3s;
+
+				&:hover {
+					background-color: #f4f4f4;
+					border-color: rgba(0,0,0,0.05);
+					transform: translate3d(0%, 0, 0);
+					width: 100%;
+				}
+
+				> span {
+					display: inline-block;
+					vertical-align: middle;
+				}
+
+				&.browse-btn {
+					/* Emulates btn-primary styling partially */
+					//color: $btn-primary-color;
+					//background-color: $btn-primary-bg;
+					//border-color: $btn-primary-border;
+					border-color: rgba(92,127,144, 0.3);
+					&:hover, &:active, &.active, &:focus {
+						//background-color: darken($btn-primary-bg, 8%);
+						//border-color: darken($btn-primary-border, 12%);
+						border-color: rgba(92,127,144, 0.8);
+					}
+				}
+
+				&.external-link {
+					padding-right: 20px;
+					&:after {
+						font-family: "FontAwesome";
+						content: "\f14c";
+						position: absolute;
+						right: 12px;
+						top: 50%;
+						margin-top: -11px;
+						opacity: 0.1;
+						transition: opacity .3s;
+						color: #000;
+					}
+					&:hover:after {
+						opacity: 0.5;
+					}
+				}
+
+			}
+			
+			/*
+			&:last-child {
+				border-right: 1px solid #ddd;
+			}
+			*/
+		}
+
+		.homepage-links-row {
+			.links-wrapper {
+				display: flex;
+				.link-block:not(:first-child){
+					border-left: 1px solid #eee;
+				}
+			}
+		}
+
+		.homepage-links-column {
+			.links-wrapper {
+				.link-block {
+					margin-bottom: 5px; //10px;
+				}
+			}
+		}
+
+		/** TODO: Reduce this if any is deprecated **/
+
+		.announcement {
+			padding-bottom: 10px;
+			margin-top: 20px;
+	
+			.announcement-title {
+				font-weight: 300;
+				font-size: 1.35rem;
+				border-bottom: 2px solid #168369;
+				padding-bottom: 5px;
+				margin-bottom: 5px;
+				i.icon.icon-minus,
+				i.icon.icon-plus {
+					margin-right: 5px;
+				}
+			}
+	
+			.announcement-subtitle {
+				color: #999;
+				font-weight: 400;
+				font-size: 0.9rem;
+			}
+	
+			.announcement-content {
+				margin-top: 3px;
+			}
+		}
+	
+	
+		.fourDN-section-toggle{
+			color: #555;
+			text-decoration: none !important;
+			&:hover,
+			&:focus {
+				color: #000000;
+			}
+		}
+	
+		.fourDN-section-info{
+			color: #999 !important;
+			font-weight: 300;
+			font-size: 1.2em;
+		}
+
+	}
 
 }
-
-
 
 // Error
 
