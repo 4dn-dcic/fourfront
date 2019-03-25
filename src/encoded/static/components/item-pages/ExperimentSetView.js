@@ -460,7 +460,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         if (!mounted) return null;
 
         return (
-            <div className="processed-files-table-section exp-table-section overflow-hidden">
+            <div className="processed-files-table-section exp-table-section">
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ files.length }</span> Processed Files</span>
                 </h3>
