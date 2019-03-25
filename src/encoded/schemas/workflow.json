@@ -26,7 +26,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "6"
+            "default": "7"
         },
         "accession": {
             "accessionType": "WF"
@@ -92,10 +92,15 @@
             "type": "string"
         },
         "previous_version": {
-            "title": "Previous version",
-            "description": "Link to the previous version of the workflow.",
-            "type": "string",
-            "linkTo": "Workflow"
+            "title": "Previous versions",
+            "description": "Link to the previous versions of the workflow.",
+            "type": "array",
+            "items": {
+                "title": "Previous version",
+                "description": "Link to a previous version of the workflow.",
+                "type": "string",
+                "linkTo": "Workflow"
+            }
         },
         "version_upgrade_log": {
             "title": "Version upgrade log",

@@ -77,7 +77,7 @@ blockquote {
 
 .project-info {
 	h1,h2,h3,h4 {
-		@include text-shadow(rgba(255,255,255,1) 1px 1px 0);
+		text-shadow: 1px 1px 0 #fff;
 	}
     margin-bottom: 10px;
 	display: block;
@@ -296,13 +296,11 @@ h1.page-title + .page-subtitle {
 .page-footer {
 	background-color: #f8f8f8;
 	//height: $footerHeight;
-	// @include text-shadow(0 1px rgba(0, 0, 0, 0.3));
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
 	border-top: 1px solid #f0f0f0;
 	//@include filter-gradient(#ffffff, #f8f8f8, vertical);
-	//@include background-image(linear-gradient(top, rgba(255,255,255,1) 0%,rgba(248,248,248,1) 100%));
 
 
 	a {

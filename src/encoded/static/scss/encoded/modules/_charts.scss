@@ -2582,17 +2582,16 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
         
-        /* Disabled as we now align text to right
-        @media screen and (min-width: $screen-sm-min){
-            @for $i from 1 through 5 {
-                &.depth-#{$i} {
-                    > .row > .label-section {
-                        padding-left: 10px + (27px * $i);
-                    }
-                }
-            }
-        }
-        */
+        /* Disabled as we now align text to right */
+        //@media screen and (min-width: $screen-sm-min){
+        //    @for $i from 1 through 5 {
+        //        &.depth-#{$i} {
+        //            > .row > .label-section {
+        //                padding-left: 10px + (27px * $i);
+        //            }
+        //        }
+        //    }
+        //}
 
     }
 
