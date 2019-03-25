@@ -174,7 +174,7 @@ describe("HiGlass Display pages", function(){
             ).logout4DN();
         });
 
-        it('Can share draft URL', function() {
+        it('Can release HiGlass Item to public.', function() {
 
             // Log in as the sharing user.
             // N.B. Cypress had/has some gotchas/issues in terms of preserving cookies between test, so had previously
@@ -194,7 +194,8 @@ describe("HiGlass Display pages", function(){
                 .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle + ul").within(($ul) => {
                     return cy.contains("Visible by Everyone").click().wait(1000).end();
                 }).end()
-                .get('.alert div').should('have.text', 'Copied HiGlass URL to clipboard.').end()
+                .get('.alert div').should('contain', 'Changed Display status to released.').end()
+
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
                     expect(newJson.body.status).to.equal("released");

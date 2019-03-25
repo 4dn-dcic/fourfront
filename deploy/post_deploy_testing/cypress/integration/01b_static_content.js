@@ -52,6 +52,7 @@ describe('Static Page & Content Tests', function () {
                                 });
                             }
                         }
+
                         cy.wait(300).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                             var titleText = t.text();
                             expect(titleText).to.have.length.above(0);
@@ -131,7 +132,7 @@ describe('Static Page & Content Tests', function () {
                         cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"]):not([href*=".gov"])').each(($linkElem)=>{
                             const linkHref = $linkElem.attr('href');
                             console.log($linkElem.attr('href'));
-                            cy.request(linkHref);
+                            return cy.request(linkHref);
                         }).then(()=>{
                             finish(titleText);
                         });
