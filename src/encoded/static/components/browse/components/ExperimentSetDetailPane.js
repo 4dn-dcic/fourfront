@@ -1,15 +1,12 @@
 'use strict';
 
 import React from 'react';
-import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import ReactTooltip from 'react-tooltip';
 import { Collapse } from 'react-bootstrap';
 import { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
-import { expFxn, layout } from './../../util';
-import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-commons';
+import { expFxn, layout, object } from './../../util';
 
 
 export class ExperimentSetDetailPane extends React.Component {
@@ -25,19 +22,14 @@ export class ExperimentSetDetailPane extends React.Component {
         'selectAllFilesInitially' : PropTypes.bool,
         'result' : PropTypes.object.isRequired,
         'containerWidth' : PropTypes.number,
-        'additionalDetailFields' : PropTypes.object,
         'paddingWidth' : PropTypes.number,
         'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     static defaultProps = {
         'selectAllFilesInitially' : false,
-        'paddingWidth' : 0,
-        'additionalDetailFields' : {
-            'Lab': 'lab',
-            'Publication': 'produced_in_pub',
-        }
-    }
+        'paddingWidth' : 0
+    };
 
     constructor(props){
         super(props);
@@ -48,7 +40,7 @@ export class ExperimentSetDetailPane extends React.Component {
             'processedFilesOpen' : false
         };
     }
-    
+
     /*
     componentDidUpdate(pastProps, pastState){
         if ((pastState.rawFilesOpen !== this.state.rawFilesOpen) || (pastState.processedFilesOpen !== this.state.processedFilesOpen)){
@@ -122,11 +114,10 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     render(){
-        var { additionalDetailFields, paddingWidthMap, containerWidth, windowWidth } = this.props,
+        var { paddingWidthMap, containerWidth, windowWidth } = this.props,
             expSet = this.props.result,
-            addInfoKeys = _.keys(additionalDetailFields),
             paddingWidth = this.props.paddingWidth || 0;
-    
+
         if (paddingWidthMap){
             var rgs = layout.responsiveGridState(windowWidth);
             paddingWidth = paddingWidthMap[rgs] || paddingWidth;
@@ -144,23 +135,26 @@ export class ExperimentSetDetailPane extends React.Component {
                                 fitTo="self"
                                 textClassName="text-normal"
                                 dimensions={null}
-                                linesOfText={Math.max(1, addInfoKeys.length)}
+                                linesOfText={2}
                             />
                         </div>
                         <div className="col-md-6 addinfo-properties-section">
-                        { _.map(addInfoKeys, function(title){
-                            var value = sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : additionalDetailFields[title] }, null, 0)); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
-                            return (
-                                <div className="row expset-addinfo-row clearfix" key={title}>
-                                    <div className="col-xs-4 col-sm-3 expset-addinfo-key">
-                                        { title }:
-                                    </div>
-                                    <div className="col-xs-8 col-sm-9 expset-addinfo-val">
-                                        { value || <small><em>None</em></small> }
-                                    </div>
+                            <div className="row mb-05 clearfix">
+                                <div className="col-xs-4 col-sm-3 text-500">
+                                    Lab:
                                 </div>
-                            );
-                        })}
+                                <div className="col-xs-8 col-sm-9 expset-addinfo-val">
+                                    { object.itemUtil.generateLink(expSet.lab) || <small><em>None</em></small> }
+                                </div>
+                            </div>
+                            <div className="row mb-05 clearfix">
+                                <div className="col-xs-4 col-sm-3 text-500">
+                                    Publication:
+                                </div>
+                                <div className="col-xs-8 col-sm-9 expset-addinfo-val">
+                                    { object.itemUtil.generateLink(expSet.produced_in_pub) || <small><em>None</em></small> }
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

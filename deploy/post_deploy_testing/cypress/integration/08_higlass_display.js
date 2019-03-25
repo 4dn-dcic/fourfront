@@ -187,6 +187,7 @@ describe("HiGlass Display pages", function(){
             // Wait for the message popup to indicate success.
             const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 
+            // This also tests the mobile menu as well as the share/release dropdown btn functionality.
             cy.visit(draftUrl).get('.item-view-header .indicator-item.item-status').should('have.text', 'draft').end()
                 .get(".tab-section-title button.toggle-open-button").click().wait(500).end()
                 .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle").click().wait(300).end()
