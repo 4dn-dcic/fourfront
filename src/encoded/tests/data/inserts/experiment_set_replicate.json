@@ -211,7 +211,8 @@
                 "title" : "A super awesome fileset with an MCOOL file",
                 "type" : "archived",
                 "description" : "Sed ut perspiciatis unde omnis iste natus error sit voluptatem. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.",
-                "files" : ["4DNFIMCOOL01"]
+                "files" : ["4DNFIMCOOL01"],
+                "higlass_view_config": "00000000-1111-0000-1111-000000000002"
             }
         ],
         "processed_files": [
@@ -221,7 +222,14 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released",
+        "static_content":[
+            {
+                "location": "tab:processed-files",
+                "content": "00000000-1111-0000-1111-000000000002",
+                "description": "auto_generated_higlass_view_config"
+            }
+        ]
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b122",
