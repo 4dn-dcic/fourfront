@@ -66,24 +66,35 @@ describe('Each Item View Works (most public recent only)', function () {
 
                 it("Item " + (index + 1) + "/" + itemsPerTypeToCheck + " loads view, has title & details tab.", function(){
                     const currItemID = (currIDs && currIDs.length > index && currIDs[index]) || null;
-                    cy.log("Current @ID is", currItemID);
 
-                    cy.visit(currItemID).get('h1.page-title').should('not.be.empty').end()
-                        .get('div.rc-tabs span[data-tab-key="details"]').should('contain', 'Details');
+                    if (!currItemID) {
+                        expect("PASS").to.equal("PASS");
+                    } else {
+                        cy.log("Visiting", currItemID);
+                        cy.visit(currItemID).get('h1.page-title').should('not.be.empty').end()
+                            .get('div.rc-tabs span[data-tab-key="details"]').should('contain', 'Details');
+                    }
 
                 });
 
                 it("Can navigate to each tab without an error", function(){
                     const currItemID = (currIDs && currIDs.length > index && currIDs[index]) || null;
 
-                    cy.get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function($tab){
-                        var tabKey = $tab.children('span.tab').attr('data-tab-key');
-                        return cy.wrap($tab).click().end()
-                            .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                            .should('have.id', "tab:" + tabKey).end()
-                            .root().should('not.contain', "client-side error")
-                            .end();
-                    });
+                    if (!currItemID) {
+                        cy.log("No more Item(s) to visit for type. Exiting.");
+                        expect("PASS").to.equal("PASS");
+                    } else {
+
+                        cy.get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function($tab){
+                            var tabKey = $tab.children('span.tab').attr('data-tab-key');
+                            return cy.wrap($tab).click().end()
+                                .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                                .should('have.id', "tab:" + tabKey).end()
+                                .root().should('not.contain', "client-side error")
+                                .end();
+                        });
+
+                    }
 
                 });
 
