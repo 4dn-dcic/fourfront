@@ -7,7 +7,6 @@ import { console, navigate } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { Collapse, Button } from 'react-bootstrap';
 import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
-import { FacetCharts } from './../browse/components/FacetCharts';
 
 
 /**
@@ -20,8 +19,10 @@ export default class HomePage extends React.PureComponent {
 
     static propTypes = {
         "context" : PropTypes.shape({
-            "content" : PropTypes.array
-        }).isRequired
+            "content" : PropTypes.array.isRequired,
+            "announcements" : PropTypes.arrayOf(PropTypes.object)
+        }).isRequired,
+        "session": PropTypes.bool.isRequired
     };
 
     introText(){
