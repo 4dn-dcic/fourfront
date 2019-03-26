@@ -36,45 +36,11 @@ export class HomePageCarousel extends React.PureComponent {
         }
     };
 
-    static getDerivedStateFromProps(props, state){
-        if (Array.isArray(props.context.carousel)){
-            return { 'sections' : props.context.carousel };
-        }
-        return null;
-    }
-
-    constructor(props){
-        super(props);
-        this.refFunc = this.refFunc.bind(this);
-        var sections = (props.context && Array.isArray(props.context.carousel) && props.context.carousel) || null, // carousel slides
-            loading  = !sections;
-        this.state = { sections, loading, error: false };
-    }
-
-    componentDidUpdate(pastProps){
-        if (pastProps.session !== this.props.session && !this.state.sections) {
-            this.searchForSlides();
-        }
-    }
-
-    componentDidMount(){
-        if (!this.state.sections) this.searchForSlides();
-    }
-
-    searchForSlides(){
-
-        var fallback = () => {
-            this.setState({ 'loading' : false, 'error' : true });
-        };
-
-        ajax.load('/search/?type=StaticSection&submitted_by.uuid=986b362f-4eb6-4a9c-8173-3ab267307e3a&section_type=Home+Page+Slide&sort=name', (resp)=>{
-            if (resp && Array.isArray(resp['@graph']) && resp['@graph'].length > 0){
-                this.setState({
-                    'sections' : resp['@graph'],
-                    'loading' : false
-                });
-            }
-        }, 'GET', fallback);
+    static refFunc(elem){
+        setTimeout(()=>{
+            if (!elem) return;
+            elem.style.opacity = 1;
+        }, 10);
     }
 
     renderSlide(section, idx){
@@ -99,7 +65,7 @@ export class HomePageCarousel extends React.PureComponent {
                             <BasicStaticSectionBody {..._.pick(section, 'filetype', 'content')} />
                         </div>
                     : null }
-                    </React.Fragment>
+                </React.Fragment>
             );
 
         if (link){
@@ -109,27 +75,12 @@ export class HomePageCarousel extends React.PureComponent {
         return <div className="homepage-carousel-slide" key={idx} children={inner} />;
     }
 
-    refFunc(elem){
-        setTimeout(()=>{
-            if (!elem) return;
-            elem.style.opacity = 1;
-        }, 10);
-    }
-
     render(){
 
-        var { settings, windowWidth } = this.props,
-            { loading, error, sections } = this.state;
+        var { settings, windowWidth, context } = this.props,
+            sections = context && context.carousel;
 
-        if (loading){
-            return (
-                <div className="text-center homepage-carousel-placeholder" key="placeholder">
-                    <i className="icon icon-spin icon-circle-o-notch"/>
-                </div>
-            );
-        }
-
-        if (error || !sections || !Array.isArray(sections) || sections.length === 0){
+        if (!sections || !Array.isArray(sections) || sections.length === 0){
             return null;
         }
 
@@ -148,7 +99,7 @@ export class HomePageCarousel extends React.PureComponent {
 
 
         return (
-            <div className="homepage-carousel-wrapper" ref={this.refFunc} style={{ 'opacity' : 0 }} key="carousel">
+            <div className="homepage-carousel-wrapper" ref={HomePageCarousel.refFunc} style={{ 'opacity' : 0 }} key="carousel">
                 <div className="container">
                     <div className="row">
                         <Carousel {...settings} children={_.map(sections, this.renderSlide)} />
