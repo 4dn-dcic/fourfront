@@ -11,8 +11,6 @@ def imaging_path_1_2(value, system):
         biofeats = system['registry']['collections']['BioFeature']
         del value['target']
         note = 'Old Target: {}'.format(iptargets)
-        if 'notes' in value:
-            note = value['notes'] + '; ' + note
         targets2add = []
         for ipt in iptargets:
             target = targets.get(ipt)
@@ -21,6 +19,8 @@ def imaging_path_1_2(value, system):
             if bfuuid:
                 targets2add.append(bfuuid)
             else:
-                note += 'not found {}; '.format(ipt)
+                note += 'UPDATE NEEDED {}; '.format(ipt)
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
         value['notes'] = note
         value['target'] = targets2add
