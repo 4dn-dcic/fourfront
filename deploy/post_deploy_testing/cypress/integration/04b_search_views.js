@@ -33,7 +33,7 @@ describe('Post-Deployment Search View Tests', function () {
     });
 
 
-    context.only('q=olfactory results are consistently ordered', function(){
+    context('q=olfactory results are consistently ordered', function(){
 
         before(function(){
             cy.visit('/search/');
