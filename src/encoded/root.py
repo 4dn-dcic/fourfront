@@ -279,8 +279,7 @@ class FourfrontRoot(Root):
         "type": "array"
     }, category="page")
     def carousel(self, request):
-        '''Returns -object- with pre-named sections'''
-        sections_to_get = ['home.introduction']
+        '''Returns list of carousel slides'''
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         try:
             return request.embed('/search/?type=StaticSection&section_type=Home+Page+Slide&sort=name', as_user=user).get('@graph', [])
