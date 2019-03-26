@@ -32,4 +32,4 @@ def test_imaging_path_1_2(
     for tr in trs:
         assert tr in uuids2chk
     # check that the one target without the corresponding biofeature has special note
-    assert 'not found {};'.format(targ_agr_w_alias.get('aliases')[0]) in value['notes']
+    assert 'UPDATE NEEDED {};'.format(targ_agr_w_alias.get('aliases')[0]) in value['notes']
