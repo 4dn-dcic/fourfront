@@ -51,9 +51,10 @@ def main():
         use_data = {'ontology_term': json.load(infile)}
         json_data = {'config_uri': config_uri, 'store': use_data, 'itype': 'ontology_term'}
         try:
-
-            ### CURRENTLY GETTING 413
+            
+            ### ERROR:encoded.commands.load_ontology_terms:load_ontology_terms: error on POST: Bad status code for POST request for http://fourfront-mastertest.9wzadzju3p.us-east-1.elasticbeanstalk.com/load_data: 504. Reason: HTTPError('504 Server Error: GATEWAY_TIMEOUT for url: http://fourfront-mastertest.9wzadzju3p.us-east-1.elasticbeanstalk.com/load_data',)
             ### bin/load-ontology /Users/carl/Downloads/ontology_term.json
+            ### bin/load-ontology src/encoded/ontology_term.json --env fourfront-mastertest
 
             res = ff_utils.authorized_request(load_endpoint, auth=auth,
                                               verb='POST', json=json_data)
