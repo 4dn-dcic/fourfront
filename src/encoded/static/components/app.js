@@ -428,8 +428,6 @@ export default class App extends React.Component {
             analytics.registerPageView(this.props.href, this.props.context);
 
             // We need to rebuild tooltips after navigation to a different page.
-            ReactTooltip.rebuild();
-
             // Add a debounce so it runs again after a delay, so other components get a chance to mount.
             App.debouncedOnNavigationTooltipRebuild();
         }

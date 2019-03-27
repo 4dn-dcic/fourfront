@@ -54,16 +54,10 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
             );
         }
 
-        var { children, windowWidth, collapseButtonTitle, session } = this.props,
+        var { children, windowWidth, collapseButtonTitle, tooltip } = this.props,
             gridState       = this.state.mounted && layout.responsiveGridState(windowWidth),
             isMobileSize    = gridState && gridState !== 'lg',
             isOpen          = !isMobileSize || this.state.open;
-
-        // If the user isn't logged in, add a tooltip reminding them to log in.
-        var tooltip = null;
-        if (!session) {
-            tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
-        }
 
         return (
             <div className="pull-right tabview-title-controls-container">

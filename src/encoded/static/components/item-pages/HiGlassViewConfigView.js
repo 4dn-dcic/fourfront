@@ -620,12 +620,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             hiGlassComponentHeight = 600;
         }
 
+        // If the user isn't logged in, add a tooltip reminding them to log in.
+        var tooltip = null;
+        if (!session) {
+            tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
+        }
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
                         className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
-                    <CollapsibleItemViewButtonToolbar session={session} windowWidth={windowWidth} constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
+                    <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth} constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>
                                 <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
