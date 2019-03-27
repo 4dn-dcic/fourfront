@@ -17,7 +17,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
     beforeAll(function() {
         var { Provider, connect } = require('react-redux');
-        FacetCharts = require('./../facetcharts').FacetCharts;
+        FacetCharts = require('../browse/components/FacetCharts').FacetCharts;
         ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
 
         propInitialFields = ['experiments_in_set.experiment_type','experiments_in_set.biosample.biosource.biosource_type'];
