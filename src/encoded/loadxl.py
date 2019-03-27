@@ -11,6 +11,7 @@ from dcicutils.beanstalk_utils import get_beanstalk_real_url
 from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
+from pyramid.response import Response
 from datetime import datetime
 from base64 import b64encode
 from PIL import Image
@@ -42,6 +43,25 @@ IS_ATTACHMENT = [
     'attachment',
     'file_format_specification',
 ]
+
+
+class CatchGenerator(object):
+    """
+    Simple class that accepts a generator function and catches any return
+    value from that function (representative of a StopIteration).
+    If the caught value is an Exception, raise it on close()
+    Based off of: https://stackoverflow.com/questions/34073370
+    """
+    def __init__(self, gen):
+        self.gen = gen
+        self.caught = None
+
+    def __iter__(self):
+        self.caught = yield from self.gen
+
+    def close(self):
+        if self.caught and isinstance(self.caught, Exception):
+            raise self.caught
 
 
 @view_config(route_name='load_data', request_method='POST', permission='add')
@@ -80,6 +100,7 @@ def load_data_view(context, request):
     fdn_dir = request.json.get('fdn_dir')
     overwrite = request.json.get('overwrite', False)
     itype = request.json.get('itype')
+    iter_resp = request.json.get('iter_response', False)
     inserts = None
     from_json = False
     if fdn_dir:
@@ -89,7 +110,16 @@ def load_data_view(context, request):
     elif store:
         inserts = store
         from_json = True
-
+    # if we want to iterate over the response to keep the connection alive
+    if iter_resp:
+        return Response(
+            content_type = 'text/plain',
+            app_iter = CatchGenerator(
+                load_all_gen(testapp, inserts, None, overwrite=overwrite,
+                         itype=itype, from_json=from_json)
+            )
+        )
+    # otherwise, it is a regular view
     if inserts:
         res = load_all(testapp, inserts, None, overwrite=overwrite, itype=itype, from_json=from_json)
     else:
@@ -219,10 +249,19 @@ LOAD_ERROR_MESSAGE = """#   ██▓     ▒█████   ▄▄▄      �
 
 
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
+    gen = CatchGenerator(
+        load_all_gen(testapp, inserts, docsdir, overwrite, itype, from_json)
+    )
+    gen_res = [v for v in gen]  # run the generator
+    # will be an Exception if hit, otherwise None (on success)
+    return gen.caught
+
+
+def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
     """convert data to store format dictionary (same format expected from from_json=True),
     assume main function is to load reasonable number of inserts from a folder
 
-    args:
+    Args:
         testapp
         inserts : either a folder, file, or a dictionary in the store format
         docsdir : attachment folder
@@ -230,7 +269,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
 
-    returns:
+    Returns:
         None if successful, otherwise an Exception
     """
     # TODO: deal with option of file to load (not directory struture)
@@ -329,6 +368,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 res = testapp.post_json('/'+a_type, post_first)
                 assert res.status_code == 201
                 posted += 1
+                yield str.encode('POST: %s,' % res.json['@graph'][0]['uuid'])
             except Exception as e:
                 print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
                       a_type, str(first_fields), str(e)))
@@ -349,11 +389,15 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 res = testapp.patch_json('/'+an_item['uuid'], an_item)
                 assert res.status_code == 200
                 patched += 1
+                yield str.encode('PATCH: %s,' % an_item['uuid'])
             except Exception as e:
                 print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
                       a_type, str(an_item), str(e)))
                 return e
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
+
+    # explicit return upon finish
+    return None
 
 
 def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
