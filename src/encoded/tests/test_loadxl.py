@@ -21,7 +21,7 @@ def test_gen_access_keys(testapp, admin):
 def test_gen_access_keys_on_server(testapp, admin):
     old_get = testapp.get
 
-    def side_effect(path):
+    def side_effect(path, status=None):
         from webtest.response import TestResponse
         if path == '/health?format=json':
             tr = TestResponse()
@@ -29,7 +29,7 @@ def test_gen_access_keys_on_server(testapp, admin):
             tr.content_type = 'application/json'
             return tr
         else:
-            return old_get(path)
+            return old_get(path, status=status)
 
     testapp.get = mock.Mock(side_effect=side_effect)
     with mock.patch('encoded.loadxl.get_beanstalk_real_url') as mocked_url:
@@ -116,3 +116,89 @@ def test_load_data_local_path(testapp):
         mocked_app.return_value = testapp.app
         res = testapp.post_json('/load_data', data, status=200)
         assert res.json['status'] == 'success'
+
+
+def test_load_data_iter_response(testapp):
+    """
+    Use iter_response=True in the request json to return a Pyramid Response
+    that leverages app.iter. The output here will be directly from the
+    generator
+    """
+    user_inserts = list(get_inserts('master-inserts', 'user'))
+    lab_inserts = list(get_inserts('master-inserts', 'lab'))
+    award_inserts = list(get_inserts('master-inserts', 'award'))
+    # the total number of items we expect
+    expected = len(user_inserts) + len(lab_inserts) + len(award_inserts)
+    data = {'store': {'user': user_inserts, 'lab': lab_inserts, 'award': award_inserts},
+            'itype': ['user', 'lab', 'award'], 'iter_response': True}
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', data, status=200)
+        assert res.content_type == 'text/plain'
+        # this is number of successfully POSTed items
+        assert res.text.count('POST:') == expected
+        # this is number of successfully PATCHed items
+        assert res.text.count('PATCH:') == expected
+
+
+def test_load_data_iter_response_fail(testapp):
+    """
+    Use iter_response=True in the request json to return a Pyramid Response
+    that leverages app.iter. The output here will be directly from the
+    generator
+    For this test, expect a validation error because we use incomplete data
+    """
+    user_inserts = list(get_inserts('master-inserts', 'user'))
+    # the total number of items we expect
+    expected = len(user_inserts)
+    data = {'store': {'user': user_inserts}, 'itype': ['user'], 'iter_response': True}
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        res = testapp.post_json('/load_data', data, status=200)
+        assert res.content_type == 'text/plain'
+        # this is number of successfully POSTed items
+        assert res.text.count('POST:') == expected
+        # no users should be successfully PATCHed due to missing links
+        assert res.text.count('PATCH:') == 0
+
+
+def test_load_all_gen(testapp):
+    """
+    The load_all_gen generator is pretty thoroughly tested by the other
+    tests here, but let's test it a bit more explicitly
+    """
+    user_inserts = list(get_inserts('master-inserts', 'user'))
+    lab_inserts = list(get_inserts('master-inserts', 'lab'))
+    award_inserts = list(get_inserts('master-inserts', 'award'))
+    # the total number of items we expect
+    expected = len(user_inserts) + len(lab_inserts) + len(award_inserts)
+    data = {'store': {'user': user_inserts, 'lab': lab_inserts, 'award': award_inserts},
+            'itype': ['user', 'lab', 'award']}
+    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+        mocked_app.return_value = testapp.app
+        gen1 = loadxl.load_all_gen(testapp, data['store'], None,
+                                   itype=data['itype'], from_json=True)
+        res1 = b''.join([v for v in gen1]).decode()
+        assert res1.count('POST:') == expected
+        assert res1.count('PATCH:') == expected
+        # do the same with CatchGenerator. Expect only PATCHes, since items were
+        # already POSTed
+        gen2 = loadxl.load_all_gen(testapp, data['store'], None,
+                                   itype=data['itype'], from_json=True)
+        catch2 = loadxl.CatchGenerator(gen=gen2)
+        res1 = b''.join([v for v in catch2]).decode()
+        assert catch2.caught is None  # no Exception hit
+        assert res1.count('POST:') == 0
+        assert res1.count('PATCH:') == expected
+        # now handle error cases, both with using CatchGenerator and without
+        # let's use an bad directory path to cause Exception
+        bad_dir = resource_filename('encoded', 'tests/data/not-a-fdn-dir/')
+        gen3 = loadxl.load_all_gen(testapp, bad_dir, None)
+        assert [v for v in gen3] == []  # failure
+        # the CatchGenerator will give use access to the Exception
+        gen4 = loadxl.load_all_gen(testapp, bad_dir, None)
+        catch4 = loadxl.CatchGenerator(gen=gen4)
+        res4 = [v for v in catch4]
+        assert res4 == []
+        assert isinstance(catch4.caught, Exception)
+        assert 'Failure loading inserts' in str(catch4.caught)

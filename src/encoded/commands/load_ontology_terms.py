@@ -42,17 +42,16 @@ def main():
     else:
         config_uri = 'production.ini'
         auth = ff_utils.get_authentication_with_server(None, args.env)
+
     load_endpoint = '/'.join([auth['server'], 'load_data'])
-
-    use_value = None  # use this value instead of file handle if set
-
-    # post to load_data
     logger.info('load_ontology_terms: Starting POST to %s' % load_endpoint)
-    start = datetime.now()
     json_data = {'config_uri': config_uri, 'itype': 'ontology_term',
                  'iter_response': True}
     with open(args.json_file) as infile:
-        json_data['store'] = {'ontology_term': json.load(infile)[1000:1500]}
+        json_data['store'] = {'ontology_term': json.load(infile)}
+    logger.info('Will attempt to load %s ontology terms to %s'
+                % (len(json_data['store']['ontology_term']), auth['server']))
+    start = datetime.now()
     try:
         ### ERROR:encoded.commands.load_ontology_terms:load_ontology_terms: error on POST: Bad status code for POST request for http://fourfront-mastertest.9wzadzju3p.us-east-1.elasticbeanstalk.com/load_data: 504. Reason: HTTPError('504 Server Error: GATEWAY_TIMEOUT for url: http://fourfront-mastertest.9wzadzju3p.us-east-1.elasticbeanstalk.com/load_data',)
         ### bin/load-ontology /Users/carl/Downloads/ontology_term.json

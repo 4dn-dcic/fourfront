@@ -61,7 +61,8 @@ class CatchGenerator(object):
 
     def close(self):
         if self.caught and isinstance(self.caught, Exception):
-            raise self.caught
+            print(LOAD_ERROR_MESSAGE)
+            logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
 @view_config(route_name='load_data', request_method='POST', permission='add')
@@ -74,6 +75,7 @@ def load_data_view(context, request):
      'store': if not local_path or fdn_dir, look for a dictionary of items here
      'overwrite' (Bool): overwrite if existing data
      'itype': (list or str): only pick some types from the source or specify type in in_file
+     'iter_response': invoke the Response as an app_iter, directly calling load_all_gen
      'config_uri': user supplied configuration file}
 
     post can contain 2 different styles of data
@@ -111,6 +113,7 @@ def load_data_view(context, request):
         inserts = store
         from_json = True
     # if we want to iterate over the response to keep the connection alive
+    # this directly calls load_all_gen, instead of load_all
     if iter_resp:
         return Response(
             content_type = 'text/plain',
@@ -119,7 +122,7 @@ def load_data_view(context, request):
                          itype=itype, from_json=from_json)
             )
         )
-    # otherwise, it is a regular view
+    # otherwise, it is a regular view and we can call load_all as usual
     if inserts:
         res = load_all(testapp, inserts, None, overwrite=overwrite, itype=itype, from_json=from_json)
     else:
@@ -249,6 +252,16 @@ LOAD_ERROR_MESSAGE = """#   ██▓     ▒█████   ▄▄▄      �
 
 
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
+    """
+    Wrapper function for load_all_gen, which invokes the generator returned
+    from that function. Takes all of the same args as load_all_gen, so
+    please reference that docstring.
+
+    This function uses CatchGenerator, which will catch a returned value from
+    the execution of the generator, which is an Exception in the case of
+    load_all_gen. Return that Exception if encountered, which is consistent
+    with the functionality of load_all_gen.
+    """
     gen = CatchGenerator(
         load_all_gen(testapp, inserts, docsdir, overwrite, itype, from_json)
     )
@@ -258,7 +271,11 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
 
 
 def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
-    """convert data to store format dictionary (same format expected from from_json=True),
+    """
+    Generator function that yields bytes information about each item POSTed/PATCHed.
+    Is the base functionality of load_all function.
+
+    convert data to store format dictionary (same format expected from from_json=True),
     assume main function is to load reasonable number of inserts from a folder
 
     Args:
@@ -268,6 +285,9 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         overwrite (bool)   : if the database contains the item already, skip or patch
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
+
+    Yields:
+        Bytes with information on POSTed/PATCHed items
 
     Returns:
         None if successful, otherwise an Exception
@@ -368,6 +388,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                 res = testapp.post_json('/'+a_type, post_first)
                 assert res.status_code == 201
                 posted += 1
+                # yield bytes to work with Response.app_iter
                 yield str.encode('POST: %s,' % res.json['@graph'][0]['uuid'])
             except Exception as e:
                 print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
@@ -389,6 +410,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                 res = testapp.patch_json('/'+an_item['uuid'], an_item)
                 assert res.status_code == 200
                 patched += 1
+                # yield bytes to work with Response.app_iter
                 yield str.encode('PATCH: %s,' % an_item['uuid'])
             except Exception as e:
                 print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
@@ -401,7 +423,6 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
 
 
 def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
-
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
