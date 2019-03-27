@@ -2203,6 +2203,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
 .stacked-block-viz-container {
 
+    overflow-x: auto; // Allow to scroll on small widths.
+    padding-bottom: 20px;
 
     .header-for-viz {
         display: flex;
@@ -2245,9 +2247,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 transform: translate(1px, -1px) scale(0.925);
             }
             */
-            @media screen and (max-width: $screen-xs-min){
-                width : 100% !important;
-            }
             border: 1px solid #0003;
             /** Styles for Submitted, In Submission, Planned, Not Yet Planned, etc. **/
         }
@@ -2288,16 +2287,48 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
 
-        .label-section > .label-container {
-            position: relative;
-            > h4 {
-                margin-top: 0px;
-                margin-bottom: 2px;
-                text-align: right;
-                width: 100%;
-                padding-left: 25px;
-                font-size: 1rem;
-                font-weight: 600;
+        .grouping-row {
+
+            margin-right: 0;
+            margin-left: 0;
+
+            .label-section {
+                padding-left: 0px;
+                > .label-container {
+                    position: relative;
+                    > h4 {
+                        margin-top: 0px;
+                        margin-bottom: 2px;
+                        text-align: right;
+                        width: 100%;
+                        padding-left: 25px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                    }
+                    > small {
+                        color: #777;
+                        vertical-align: top;
+                    }
+                }
+            }
+
+            .list-section {
+                padding-right: 0px;
+            }
+
+        }
+
+        
+
+        @media screen and (min-width: $screen-md-min){
+            .grouping-row > .label-section > .label-container > small {
+                color: #ddd;
+                transition: color .33s;
+            }
+            &:hover > .grouping-row {
+                > .label-section > .label-container > small {
+                    color: #333;
+                }
             }
         }
 
@@ -2329,35 +2360,20 @@ $workflow-node-color-type-global-context: #ffb3b3;
             }
         }
 
-        .label-section > .label-container > small {
-            color: #777;
-            vertical-align: top;
-        }
-
-        @media screen and (min-width: $screen-md-min){
-            .label-section > .label-container > small {
-                color: #ddd;
-                transition: color .33s;
-            }
-            &:hover > .row {
-                > .label-section > .label-container > small {
-                    color: #333;
-                }
-            }
-        }
-
         &.depth-0 {
             margin-bottom: 0px;
             //> .row > .label-section > .label-container > h4 {
             //    margin-top: 3px;
             //}
 
-            > .row > .list-section { 
-                padding-top: 0px;
-                > .group-value {
-                    font-size: 1.3rem;
+            > .row {
+                > .list-section {
+                    padding-top: 0px;
+                    > .group-value {
+                        font-size: 1.3rem;
+                    }
+    
                 }
-
             }
 
             &:not(.open):not(.with-duplicate-headers):not(:first-child) {
@@ -2382,37 +2398,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
 
-            @media screen and (min-width: $screen-sm-min){
-                &.open > .row > .list-section.has-header,
-                &:first-child > .row > .list-section.has-header {
-                    padding-top: 80px;
-                }
-            }
-
-            @media screen and (max-width: $screen-xs-max){
-
-                margin-bottom: 20px;
-
-                &.open > .row > .list-section.has-header,
-                &:first-child > .row > .list-section.has-header {
-                    .header-for-viz {
-                        position: relative;
-                        top: -45px;
-                        height: 10px;
-                    }
-                }
-                > .row > .label-section > .label-container {
-                    border-top: none;
-                    > h4 {
-                        //padding-top: 10px;
-                        margin-bottom: 0;
-                    }
-
-                }
-
-                .blocks-container .block-container-group {
-                    border-left-color: transparent;
-                }
+            &.open > .row > .list-section.has-header,
+            &:first-child > .row > .list-section.has-header {
+                padding-top: 80px;
             }
 
             &.row-index-0:not(.with-duplicated-headers),
@@ -2445,12 +2433,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
             > .row {
                 > div {
-                    @media screen and (min-width: $screen-sm-min){
-                        float: none !important;
-                        display: inline-block;
-                        vertical-align: middle;
-                    }
-
+                    float: none !important;
+                    display: inline-block;
+                    vertical-align: middle;
                 }
             }
 
@@ -2495,16 +2480,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
                         top: 50%;
                         margin-top: -10px;
                         left: 0;
-                    }
-                    @media screen and (max-width: $screen-xs-min){
-                        position: relative;
-                        height: 30px;
-                        line-height: 34px;
-                        float: left;
-                        margin-right: 10px;
-                        > i.icon {
-                            position: relative;
-                        }
                     }
                 }
                 & + .open {
@@ -2557,16 +2532,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     top: 50%;
                     margin-top: -10px;
                     left: 0;
-                }
-                @media screen and (max-width: $screen-xs-min){
-                    position: relative;
-                    height: 30px;
-                    line-height: 34px;
-                    float: left;
-                    margin-right: 10px;
-                    > i.icon {
-                        position: relative;
-                    }
                 }
             }
             & + .open {
