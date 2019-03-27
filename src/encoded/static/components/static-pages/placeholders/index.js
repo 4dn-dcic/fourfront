@@ -1,26 +1,40 @@
 'use strict';
 
 import React from 'react';
+import JsxParser from 'react-jsx-parser';
+import memoize from 'memoize-one';
+import _ from 'underscore';
 
 import { SlideCarousel } from './SlideCarousel';
 import { JointAnalysisMatrix } from './JointAnalysisMatrix';
+export { SlideCarousel, parsedJSXContent };
 
 
+/**
+ * Any placeholder(s) used in a StaticSection _must_ get imported here
+ * and be available here.
+ */
 const placeholders = { SlideCarousel, JointAnalysisMatrix };
 
+export const replaceString = memoize(function(placeholderString, props){
 
-function replaceString(placeholderString, props){
-    var regCheck    = /^<(\S+)\/>$/,
-        regMatches  = placeholderString.match(regCheck),
-        placeholder = regMatches && regMatches.length === 2 && placeholders[regMatches[1]];
+    var parsedJSXContent = (
+        <JsxParser bindings={props} jsx={placeholderString} components={placeholders} key="placeholder-replacement" renderInWrapper={false} />
+    );
 
-    if (placeholder){
-        return React.createElement(placeholder, props);
+    console.warn('TTT',placeholderString, parsedJSXContent);
+
+    if (parsedJSXContent){
+        return parsedJSXContent;
     } else {
         return placeholderString;
     }
-}
-
-
-// Exports
-export { SlideCarousel, JointAnalysisMatrix, replaceString };
+}, function([nextPlaceHolderString, nextProps], [pastPlaceHolderString, pastProps]){
+    if (nextPlaceHolderString !== pastPlaceHolderString) return false;
+    var keys = _.keys(nextProps), keysLen = keys.length, i, k;
+    for (i = 0; i < keysLen; i++){
+        k = keys[i];
+        if (nextProps[k] !== pastProps[k]) return false;
+    }
+    return true;
+});

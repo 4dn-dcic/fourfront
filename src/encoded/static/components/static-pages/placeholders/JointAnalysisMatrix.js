@@ -327,6 +327,7 @@ class VisualBody extends React.PureComponent {
 
     constructor(props){
         super(props);
+
         // Requires non-static `this.props.encode_results_url` & `this.props.self_results_url`.
         this.blockPopover = this.blockPopover.bind(this);
     }
