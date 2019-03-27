@@ -64,8 +64,8 @@ export default class DefaultItemView extends React.PureComponent {
         var { href, context } = this.props;
         if (!href) return;
 
-        var hrefParts = url.parse(href, true),
-            redirected_from = hrefParts.query && hrefParts.query.redirected_from;
+        var hrefParts = url.parse(href, true);
+        var redirected_from = hrefParts.query && hrefParts.query.redirected_from;
 
         if (Array.isArray(redirected_from)){
             redirected_from = redirected_from[0];
@@ -189,7 +189,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {string} A className
      */
     itemClassName(){
-        return itemClass(this.props.context, 'view-detail item-page-container');
+        return itemClass(this.props.context, 'view-detail item-page-container container');
     }
 
     /**
@@ -279,7 +279,7 @@ export default class DefaultItemView extends React.PureComponent {
      */
     render() {
         return (
-            <div className={this.itemClassName()}>
+            <div className={this.itemClassName()} id="content">
 
                 { this.itemHeader() }
                 { this.itemMidSection() }
