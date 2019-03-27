@@ -22,8 +22,6 @@ export const replaceString = memoize(function(placeholderString, props){
         <JsxParser bindings={props} jsx={placeholderString} components={placeholders} key="placeholder-replacement" renderInWrapper={false} />
     );
 
-    console.warn('TTT',placeholderString, parsedJSXContent);
-
     if (parsedJSXContent){
         return parsedJSXContent;
     } else {

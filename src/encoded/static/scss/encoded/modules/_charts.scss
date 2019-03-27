@@ -2314,6 +2314,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
             .list-section {
                 padding-right: 0px;
+                > .open-empty-placeholder {
+                    background-color: #f7f7f7;
+                    border-radius: 0% 100% 0% 100% / 100% 100% 0% 0%;
+                    border-top: 3px solid #eee;
+                }
             }
 
         }

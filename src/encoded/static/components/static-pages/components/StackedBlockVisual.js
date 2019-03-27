@@ -589,7 +589,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     }
 
     render(){
-        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility } = this.props;
+        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, groupValue,
+            groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility } = this.props;
         var groupingPropertyTitle = null;
         if (Array.isArray(groupingProperties) && groupingProperties[depth]){
             groupingPropertyTitle = titleMap[groupingProperties[depth]] || groupingProperties[depth];
@@ -639,10 +640,12 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             );
         }
 
-        var childBlocks     = !isOpen ? this.childBlocksCollapsed() : null,
-            maxBlocksInRow  = childBlocks && Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count')),
-            blockHeightFull = blockHeight + blockVerticalSpacing,
-            rowHeight       = blockHeight + (blockVerticalSpacing * 2) + 1;
+        var blockHeightFull = blockHeight + blockVerticalSpacing,
+            rowHeight       = blockHeight + (blockVerticalSpacing * 2) + 1,
+            partRowHeight   = parseInt(rowHeight / 3),
+            childBlocks     = !isOpen ? this.childBlocksCollapsed() : <div className="open-empty-placeholder" style={{ 'marginTop' : partRowHeight, 'height' : rowHeight - partRowHeight, 'marginLeft' : blockHorizontalSpacing }}/>,
+            maxBlocksInRow  = childBlocks && Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count'));
+
 
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>

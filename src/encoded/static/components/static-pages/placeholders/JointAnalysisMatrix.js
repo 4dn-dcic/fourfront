@@ -14,38 +14,9 @@ import { StackedBlockVisual } from './../components';
 
 
 
-const TITLE_MAP = {
-    '_common_name' : ' ',
-    'experiment_type' : "Experiment Type",
-    'data_source' : 'Available through',
-    'lab_name' : 'Lab',
-    'experiment_category' : "Category",
-    'state' : 'Submission Status',
-    'cell_type' : 'Cell Type',
-    'short_description' : 'Description',
-    'award' : 'Award',
-    'accession' : 'Accession',
-    'number_of_experiments' : '# Experiments in Set',
-    'submitted_by' : "Submitter",
-    'experimentset_type' : "Set Type",
-};
-
-const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
-    '4DN' : {
-        'experiment_category' : 'experiments_in_set.experiment_type',
-        'experiment_type' : 'experiments_in_set.experiment_type',
-        'cell_type' : 'experiments_in_set.biosample.biosource_summary',
-        'sub_cat' : 'experiments_in_set.experiment_categorizer.value'
-    },
-    'ENCODE' : {
-        'experiment_category' : 'assay_slims',
-        'experiment_type' : 'assay_term_name',
-        'cell_type' : 'biosample_term_name'
-    }
-};
-
+const TITLE_MAP = {}; // Replaced by prop, todo: finish.
+const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {}; // Replaced by prop, todo: finish.
 const STATUS_STATE_TITLE_MAP = {}; // Replaced by prop, todo: finish.
-const CELL_TYPE_NAME_MAP = {}; // Replaced by prop, todo: finish.
 
 
 export class JointAnalysisMatrix extends React.PureComponent {
@@ -69,7 +40,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
             'Out of date'               : ['archived', 'revoked'],
             'Deleted'                   : ['deleted']
         },
-        'cellTypeNameMap'           : {
+        'cellTypeNameMap4DN'        : {
             "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
             "H1-hESC (Tier 1)"          : "H1-hESC",
             "HFFc6 (Tier 1)"            : "HFFc6"
@@ -88,7 +59,24 @@ export class JointAnalysisMatrix extends React.PureComponent {
             }
         },
         'groupingProperties4DN'     : ['experiment_type', 'sub_cat'],
-        'groupingPropertiesEncode'  : ['experiment_category', 'experiment_type']
+        'groupingPropertiesEncode'  : ['experiment_category', 'experiment_type'],
+        'headerColumnsOrder'        : ['H1-hESC', 'H1-DE', 'HFFc6'],
+        'titleMap'                  : {
+            '_common_name'              : ' ',
+            'experiment_type'           : "Experiment Type",
+            'data_source'               : 'Available through',
+            'lab_name'                  : 'Lab',
+            'experiment_category'       : "Category",
+            'state'                     : 'Submission Status',
+            'cell_type'                 : 'Cell Type',
+            'short_description'         : 'Description',
+            'award'                     : 'Award',
+            'accession'                 : 'Accession',
+            'number_of_experiments'     : '# Experiments in Set',
+            'submitted_by'              : "Submitter",
+            'experimentset_type'        : "Set Type",
+        },
+        'columnSubGroupingOrder'    : ['Submitted', 'In Submission', 'Planned', 'Not Planned']
     };
 
     constructor(props){
@@ -129,14 +117,14 @@ export class JointAnalysisMatrix extends React.PureComponent {
     }
 
     standardize4DNResult(result, idx){
-        const { fallbackNameForBlankField, statusStateTitleMap, cellTypeNameMap, groupingPropertiesSearchParamMap } = this.props;
+        const { fallbackNameForBlankField, statusStateTitleMap, cellTypeNameMap4DN, groupingPropertiesSearchParamMap } = this.props;
 
         var cellType = _.uniq(_.flatten(object.getNestedProperty(result, groupingPropertiesSearchParamMap['4DN'].cell_type)));
         if (cellType.length > 1){
             console.warn('We have 2+ cellTypes (experiments_in_set.biosample.biosource_summary) for ', result);
         }
         cellType = cellType[0] || fallbackNameForBlankField;
-        cellType = cellTypeNameMap[cellType] || cellType;
+        cellType = cellTypeNameMap4DN[cellType] || cellType;
 
         var experimentType =  _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_type')));
         if (experimentType.length > 1){
@@ -246,7 +234,10 @@ export class JointAnalysisMatrix extends React.PureComponent {
     render() {
         var { groupingProperties4DN, groupingPropertiesEncode } = this.props;
 
-        var isLoading = _.any(_.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')), ([key, resultsForKey]) => resultsForKey === null && this.props[key + '_url'] !== null );
+        var isLoading = _.any(
+            _.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')),
+            ([key, resultsForKey]) => resultsForKey === null && this.props[key + '_url'] !== null
+        );
 
         if (isLoading){
             return (
@@ -265,40 +256,38 @@ export class JointAnalysisMatrix extends React.PureComponent {
         return (
             <div className="static-section joint-analysis-matrix">
                 <div className="row">
-                    <div className="col-xs-12 col-md-6">
+                    <div className={"col-xs-12 col-md-" + (resultListEncode ? '6' : '12')}>
                         <h3 className="mt-2 mb-0 text-300">4DN</h3>
                         <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
                             <a href={this.props.self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
                         </h5>
                         <VisualBody
+                            {..._.pick(this.props, 'groupingPropertiesSearchParamMap', 'cellTypeNameMap4DN', 'self_planned_results_url',
+                                'self_results_url', 'headerColumnsOrder', 'titleMap')}
                             groupingProperties={groupingProperties4DN}
                             columnGrouping='cell_type'
                             duplicateHeaders={false}
                             columnSubGrouping='state'
                             results={resultList4DN}
-                            encode_results_url={this.props.encode_results_url}
-                            self_results_url={this.props.self_results_url}
-                            self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
-                            headerColumnsOrder={['H1-hESC', "H1-DE", 'HFFc6']}
                         />
                     </div>
+                    { resultListEncode ?
                     <div className="col-xs-12 col-md-6">
                         <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
                         <VisualBody
+                            {..._.pick(this.props, 'groupingPropertiesSearchParamMap', 'encode_results_url', 'headerColumnsOrder', 'titleMap')}
                             groupingProperties={groupingPropertiesEncode}
                             columnGrouping='cell_type'
                             columnSubGrouping='state'
                             results={resultListEncode}
                             duplicateHeaders={false}
-                            encode_results_url={this.props.encode_results_url}
-                            self_results_url={this.props.self_results_url}
-                            self_planned_results_url={this.props.self_planned_results_url}
                             //defaultDepthsOpen={[false, false, false]}
                             //keysToInclude={[]}
                         />
                     </div>
+                    : null }
                 </div>
             </div>
         );
@@ -360,7 +349,7 @@ class VisualBody extends React.PureComponent {
      * @param {Object} props Props passed in from the StackedBlockVisual Component instance.
      */
     blockPopover(data, groupingTitle, groupingPropertyTitle, props){
-        var { self_results_url, encode_results_url } = this.props,
+        var { self_results_url, encode_results_url, groupingPropertiesSearchParamMap, cellTypeNameMap4DN, titleMap } = this.props,
             isGroup = (Array.isArray(data) && data.length > 1) || false,
             aggrData;
 
@@ -371,7 +360,7 @@ class VisualBody extends React.PureComponent {
         if (isGroup){
             aggrData = StackedBlockVisual.aggregateObjectFromList(
                 data,
-                _.keys(TITLE_MAP).concat(['sub_cat', 'sub_cat_title']),
+                _.keys(titleMap).concat(['sub_cat', 'sub_cat_title']),
                 ['sub_cat_title'] // We use this property as an object key (string) so skip parsing to React JSX list;
             );
             // Custom parsing down into string -- remove 'Default' from list and ensure is saved as string.
@@ -386,11 +375,11 @@ class VisualBody extends React.PureComponent {
         }
 
         var groupingPropertyCurrent = props.groupingProperties[props.depth] || null,
-            groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && TITLE_MAP[groupingPropertyCurrent]) || null,
+            groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && titleMap[groupingPropertyCurrent]) || null,
             groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
 
         var yAxisGrouping = props.columnGrouping || null,
-            yAxisGroupingTitle = (yAxisGrouping && TITLE_MAP[yAxisGrouping]) || null,
+            yAxisGroupingTitle = (yAxisGrouping && titleMap[yAxisGrouping]) || null,
             yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null,
             popoverTitle = (
                 <div className="clearfix matrix-popover-title">
@@ -414,11 +403,11 @@ class VisualBody extends React.PureComponent {
 
         var data_source = (aggrData || data).data_source;
         var initialHref = data_source === 'ENCODE' ? encode_results_url : self_results_url;
-        var reversed_cell_type_map = _.invert(CELL_TYPE_NAME_MAP);
+        var reversed_cell_type_map = _.invert(cellTypeNameMap4DN);
 
         var currentFilteringPropertiesVals = _.object(
             _.map(currentFilteringProperties, function(property){
-                var facetField = GROUPING_PROPERTIES_SEARCH_PARAM_MAP[data_source][property], facetTerm = (aggrData || data)[property];
+                var facetField = groupingPropertiesSearchParamMap[data_source][property], facetTerm = (aggrData || data)[property];
                 if (property === 'cell_type' && data_source === '4DN') facetTerm = reversed_cell_type_map[facetTerm] || facetTerm;
                 return [ facetField, facetTerm ];
             })
@@ -474,11 +463,9 @@ class VisualBody extends React.PureComponent {
 
     render(){
         return (
-            <StackedBlockVisual {..._.pick(this.props, 'groupingProperties', 'columnGrouping',
-                'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder')}
+            <StackedBlockVisual {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap',
+                'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder')}
                 data={this.props.results}
-                titleMap={TITLE_MAP}
-                columnSubGroupingOrder={['Submitted', 'In Submission', 'Planned', 'Not Planned']}
                 checkCollapsibility
                 groupValue={VisualBody.groupValue}
                 blockPopover={this.blockPopover}
