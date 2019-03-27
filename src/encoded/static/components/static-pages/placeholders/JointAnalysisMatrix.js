@@ -14,8 +14,6 @@ import { StackedBlockVisual } from './../components';
 
 
 
-const FALLBACK_NAME_FOR_UNDEFINED = 'None';
-
 const TITLE_MAP = {
     '_common_name' : ' ',
     'experiment_type' : "Experiment Type",
@@ -46,28 +44,74 @@ const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {
     }
 };
 
-const STATUS_STATE_TITLE_MAP = {
-    'Submitted'     : ['released', 'current'],
-    'Internal Release' : ['released to project'],
-    'In Submission' : ['in review by lab', 'in review by project', 'submission in progress', 'released to lab'],
-    'Planned'       : ['to be uploaded by workflow', 'planned'],
-    'Out of date'   : ['archived', 'revoked'],
-    'Deleted'       : ['deleted']
-};
-
-const CELL_TYPE_NAME_MAP = {
-    "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
-    "H1-hESC (Tier 1)" : "H1-hESC",
-    "HFFc6 (Tier 1)" : "HFFc6"
-};
+const STATUS_STATE_TITLE_MAP = {}; // Replaced by prop, todo: finish.
+const CELL_TYPE_NAME_MAP = {}; // Replaced by prop, todo: finish.
 
 
 export class JointAnalysisMatrix extends React.PureComponent {
 
-    static standardizeEncodeResult(result, idx){
-        var cellType = result.biosample_summary || FALLBACK_NAME_FOR_UNDEFINED;
-        var experimentType = result.assay_term_name || FALLBACK_NAME_FOR_UNDEFINED;
-        var experimentCategory = _.uniq(result.assay_slims || []);
+    static defaultProps = {
+        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
+        'self_results_url_fields'   : [
+            'experiments_in_set.experiment_type', 'lab', 'experiments_in_set.biosample.biosource_summary', 'status', 'lab.display_title',
+            'experiments_in_set.experiment_categorizer.value', 'experiments_in_set.experiment_categorizer.field', 'experiments_in_set.display_title',
+            'experiments_in_set.accession'
+        ],
+        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_summary=H1-hESC&biosample_summary=HFFc6&status!=archived&status!=revoked&limit=all',
+        'encode_results_url_fields' : ['assay_slims', 'biosample_summary', 'assay_term_name', 'description', 'lab', 'status'],
+        'self_planned_results_url'  : null,
+        'fallbackNameForBlankField' : "None",
+        'statusStateTitleMap'       : {
+            'Submitted'                 : ['released', 'current'],
+            'Internal Release'          : ['released to project'],
+            'In Submission'             : ['in review by lab', 'in review by project', 'submission in progress', 'released to lab'],
+            'Planned'                   : ['to be uploaded by workflow', 'planned'],
+            'Out of date'               : ['archived', 'revoked'],
+            'Deleted'                   : ['deleted']
+        },
+        'cellTypeNameMap'           : {
+            "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
+            "H1-hESC (Tier 1)"          : "H1-hESC",
+            "HFFc6 (Tier 1)"            : "HFFc6"
+        },
+        'groupingPropertiesSearchParamMap' : {
+            '4DN'                       : {
+                'experiment_category'       : 'experiments_in_set.experiment_type',
+                'experiment_type'           : 'experiments_in_set.experiment_type',
+                'cell_type'                 : 'experiments_in_set.biosample.biosource_summary',
+                'sub_cat'                   : 'experiments_in_set.experiment_categorizer.value'
+            },
+            'ENCODE'                    : {
+                'experiment_category'       : 'assay_slims',
+                'experiment_type'           : 'assay_term_name',
+                'cell_type'                 : 'biosample_term_name'
+            }
+        },
+        'groupingProperties4DN'     : ['experiment_type', 'sub_cat'],
+        'groupingPropertiesEncode'  : ['experiment_category', 'experiment_type']
+    };
+
+    constructor(props){
+        super(props);
+        this.standardizeEncodeResult = this.standardizeEncodeResult.bind(this);
+        this.standardize4DNResult = this.standardize4DNResult.bind(this);
+        this.loadSearchQueryResults = this.loadSearchQueryResults.bind(this);
+        this.state = {
+            'mounted'               : false,
+            'self_planned_results'  : null,
+            'self_results'          : null,
+            'encode_results'        : null,
+            'higlassVisible'        : true
+        };
+    }
+
+    standardizeEncodeResult(result, idx){
+        const { fallbackNameForBlankField, statusStateTitleMap } = this.props;
+
+        var cellType            = result.biosample_summary || fallbackNameForBlankField;
+        var experimentType      = result.assay_term_name || fallbackNameForBlankField;
+        var experimentCategory  = _.uniq(result.assay_slims || []);
+
         if (experimentCategory.length > 1){
             console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
         }
@@ -79,24 +123,26 @@ export class JointAnalysisMatrix extends React.PureComponent {
             'experiment_type'       : experimentType,
             'data_source'           : 'ENCODE',
             'short_description'     : result.description || null,
-            'lab_name'              : (result.lab && result.lab.title) || FALLBACK_NAME_FOR_UNDEFINED,
-            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
+            'lab_name'              : (result.lab && result.lab.title) || fallbackNameForBlankField,
+            'state'                 : (_.find(_.pairs(statusStateTitleMap), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
         });
     }
 
-    static standardize4DNResult(result, idx){
-        var cellType = _.uniq(_.flatten(object.getNestedProperty(result, GROUPING_PROPERTIES_SEARCH_PARAM_MAP['4DN'].cell_type)));
+    standardize4DNResult(result, idx){
+        const { fallbackNameForBlankField, statusStateTitleMap, cellTypeNameMap, groupingPropertiesSearchParamMap } = this.props;
+
+        var cellType = _.uniq(_.flatten(object.getNestedProperty(result, groupingPropertiesSearchParamMap['4DN'].cell_type)));
         if (cellType.length > 1){
             console.warn('We have 2+ cellTypes (experiments_in_set.biosample.biosource_summary) for ', result);
         }
-        cellType = cellType[0] || FALLBACK_NAME_FOR_UNDEFINED;
-        cellType = CELL_TYPE_NAME_MAP[cellType] || cellType;
+        cellType = cellType[0] || fallbackNameForBlankField;
+        cellType = cellTypeNameMap[cellType] || cellType;
 
         var experimentType =  _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_type')));
         if (experimentType.length > 1){
             console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
         }
-        experimentType = experimentType[0] || FALLBACK_NAME_FOR_UNDEFINED;
+        experimentType = experimentType[0] || fallbackNameForBlankField;
 
         //var experiment_titles = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.display_title')));
         var experiment_titles = _.map(result.experiments_in_set || [], function(exp){
@@ -127,35 +173,11 @@ export class JointAnalysisMatrix extends React.PureComponent {
             'experiment_category'   : experimentType,
             'data_source'           : '4DN',
             'short_description'     : experiment_titles[0] || null,
-            'lab_name'              : (result.lab && result.lab.display_title) || FALLBACK_NAME_FOR_UNDEFINED,
-            'state'                 : (_.find(_.pairs(STATUS_STATE_TITLE_MAP), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0],
+            'lab_name'              : (result.lab && result.lab.display_title) || fallbackNameForBlankField,
+            'state'                 : (_.find(_.pairs(statusStateTitleMap), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0],
             'sub_cat'               : experiment_categorization_value,
             'sub_cat_title'         : experiment_categorization_title
         });
-    }
-
-    static defaultProps = {
-        'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
-        'self_results_url_fields'   : [
-            'experiments_in_set.experiment_type', 'lab', 'experiments_in_set.biosample.biosource_summary', 'status', 'lab.display_title',
-            'experiments_in_set.experiment_categorizer.value', 'experiments_in_set.experiment_categorizer.field', 'experiments_in_set.display_title',
-            'experiments_in_set.accession'
-        ],
-        'encode_results_url'        : 'https://www.encodeproject.org/search/?type=Experiment&biosample_summary=H1-hESC&biosample_summary=HFFc6&status!=archived&status!=revoked&limit=all',
-        'encode_results_url_fields' : ['assay_slims', 'biosample_summary', 'assay_term_name', 'description', 'lab', 'status'],
-        'self_planned_results_url'  : null
-    };
-
-    constructor(props){
-        super(props);
-        this.loadSearchQueryResults = this.loadSearchQueryResults.bind(this);
-        this.state = {
-            'mounted'               : false,
-            'self_planned_results'  : null,
-            'self_results'          : null,
-            'encode_results'        : null,
-            'higlassVisible'        : true
-        };
     }
 
     componentDidMount(){
@@ -175,9 +197,9 @@ export class JointAnalysisMatrix extends React.PureComponent {
             var updatedState = {};
             updatedState[source_name] = result['@graph'] || [];
             if (source_name === 'encode_results') {
-                updatedState[source_name] = _.map(updatedState[source_name], JointAnalysisMatrix.standardizeEncodeResult);
+                updatedState[source_name] = _.map(updatedState[source_name], this.standardizeEncodeResult);
             } else if (source_name === 'self_results'){
-                updatedState[source_name] = _.map(updatedState[source_name], JointAnalysisMatrix.standardize4DNResult);
+                updatedState[source_name] = _.map(updatedState[source_name], this.standardize4DNResult);
             }
             this.setState(updatedState);
         }
@@ -222,6 +244,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
     }
 
     render() {
+        var { groupingProperties4DN, groupingPropertiesEncode } = this.props;
 
         var isLoading = _.any(_.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')), ([key, resultsForKey]) => resultsForKey === null && this.props[key + '_url'] !== null );
 
@@ -232,8 +255,6 @@ export class JointAnalysisMatrix extends React.PureComponent {
                 </div>
             );
         }
-
-        var groupingProperties = ['experiment_type', 'sub_cat'];
 
         var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
             ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
@@ -250,7 +271,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
                             <a href={this.props.self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
                         </h5>
                         <VisualBody
-                            groupingProperties={groupingProperties}
+                            groupingProperties={groupingProperties4DN}
                             columnGrouping='cell_type'
                             duplicateHeaders={false}
                             columnSubGrouping='state'
@@ -266,7 +287,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
                     <div className="col-xs-12 col-md-6">
                         <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
                         <VisualBody
-                            groupingProperties={['experiment_category', 'experiment_type']}
+                            groupingProperties={groupingPropertiesEncode}
                             columnGrouping='cell_type'
                             columnSubGrouping='state'
                             results={resultListEncode}
