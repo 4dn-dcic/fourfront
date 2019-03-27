@@ -6,17 +6,8 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import { Popover, Button } from 'react-bootstrap';
-import { console, object, ajax, fileUtil } from'./../../util';
-import * as plansData from './../../testdata/stacked-block-matrix-list';
-import * as globals from './../../globals';
+import { console, object, ajax } from'./../../util';
 import { StackedBlockVisual } from './../components';
-
-
-
-
-const TITLE_MAP = {}; // Replaced by prop, todo: finish.
-const GROUPING_PROPERTIES_SEARCH_PARAM_MAP = {}; // Replaced by prop, todo: finish.
-const STATUS_STATE_TITLE_MAP = {}; // Replaced by prop, todo: finish.
 
 
 export class JointAnalysisMatrix extends React.PureComponent {
