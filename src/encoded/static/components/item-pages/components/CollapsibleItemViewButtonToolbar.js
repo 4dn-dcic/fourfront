@@ -7,8 +7,6 @@ import _ from 'underscore';
 import { ButtonToolbar, Collapse, Button, DropdownButton } from 'react-bootstrap';
 import { layout } from './../../util';
 
-
-
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
 
     static defaultProps = {
@@ -56,15 +54,21 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
             );
         }
 
-        var { children, windowWidth, collapseButtonTitle } = this.props,
+        var { children, windowWidth, collapseButtonTitle, session } = this.props,
             gridState       = this.state.mounted && layout.responsiveGridState(windowWidth),
             isMobileSize    = gridState && gridState !== 'lg',
             isOpen          = !isMobileSize || this.state.open;
 
+        // If the user isn't logged in, add a tooltip reminding them to log in.
+        var tooltip = null;
+        if (!session) {
+            tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
+        }
+
         return (
             <div className="pull-right tabview-title-controls-container">
                 { isMobileSize ?
-                    <Collapse in={isOpen}>
+                    <Collapse in={isOpen} data-tip={tooltip}>
                         <div className="inner-panel" key="inner-collapsible-panel">
                             { Array.isArray(children) ? _.map(children, this.wrapChildForMobile) : this.wrapChildForMobile(children) }
                             <hr/>
@@ -72,7 +76,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                     </Collapse>
                 : null }
                 <div className="toolbar-wrapper pull-right" key="toolbar">
-                    <ButtonToolbar>
+                    <ButtonToolbar data-tip={ isMobileSize ? null : tooltip }>
                         { !isMobileSize && this.props.children }
                         <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
                             { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }
