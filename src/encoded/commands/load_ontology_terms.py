@@ -60,15 +60,16 @@ def main():
         logger.error('Error on POST: %s' % str(exc))
     else:
         # process the individual item responses from the generator.
-        # each item should be "POST: <uuid>," or "PATCH: <uuid>,"
-        load_res = {'POST': [], 'PATCH': []}
+        # each item should be "POST: <uuid>,", "PATCH: <uuid>,", or "SKIP: <uuid>"
+        load_res = {'POST': [], 'PATCH': [], 'SKIP': []}
         for val in res.text.split(','):
             val_split = val.strip().split(': ')
             if not val or len(val_split) != 2:
                 continue
-            load_res[val_split[0]].append(val_split[1])
-        logger.info("Success! Result: POSTed %s items and PATCHed %s items"
-                    % (len(load_res['POST']), len(load_res['PATCH'])))
+            if val_split[0] in load_res:
+                load_res[val_split[0]].append(val_split[1])
+        logger.info("Success! Result: POSTed %s, PATCHed %s, skipped %s"
+                    % (len(load_res['POST']), len(load_res['PATCH']), len(load_res['SKIP'])))
         if len(load_res['POST']) > len(load_res['PATCH']):
             logger.error("The following items POSTed but did not PATCH: %s"
                          % (set(load_res['POST']) - set(load_res['PATCH'])))

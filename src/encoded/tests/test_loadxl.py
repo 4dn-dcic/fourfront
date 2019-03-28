@@ -139,6 +139,8 @@ def test_load_data_iter_response(testapp):
         assert res.text.count('POST:') == expected
         # this is number of successfully PATCHed items
         assert res.text.count('PATCH:') == expected
+        # this is the number of items that were skipped completely
+        assert res.text.count('SKIP:') == 0
 
 
 def test_load_data_iter_response_fail(testapp):
@@ -160,6 +162,7 @@ def test_load_data_iter_response_fail(testapp):
         assert res.text.count('POST:') == expected
         # no users should be successfully PATCHed due to missing links
         assert res.text.count('PATCH:') == 0
+        assert res.text.count('SKIP:') == 0
 
 
 def test_load_all_gen(testapp):
@@ -176,20 +179,24 @@ def test_load_all_gen(testapp):
             'itype': ['user', 'lab', 'award']}
     with mock.patch('encoded.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
+        # successful load cases
         gen1 = loadxl.load_all_gen(testapp, data['store'], None,
                                    itype=data['itype'], from_json=True)
         res1 = b''.join([v for v in gen1]).decode()
         assert res1.count('POST:') == expected
         assert res1.count('PATCH:') == expected
-        # do the same with CatchGenerator. Expect only PATCHes, since items were
-        # already POSTed
+        assert res1.count('SKIP:') == 0
+        # do the same with CatchGenerator
+        # items should be SKIP instead of POST, since they were already POSTed
         gen2 = loadxl.load_all_gen(testapp, data['store'], None,
                                    itype=data['itype'], from_json=True)
         catch2 = loadxl.CatchGenerator(gen=gen2)
-        res1 = b''.join([v for v in catch2]).decode()
+        res2 = b''.join([v for v in catch2]).decode()
         assert catch2.caught is None  # no Exception hit
-        assert res1.count('POST:') == 0
-        assert res1.count('PATCH:') == expected
+        assert res2.count('POST:') == 0
+        assert res2.count('PATCH:') == expected
+        assert res2.count('SKIP:') == expected
+
         # now handle error cases, both with using CatchGenerator and without
         # let's use an bad directory path to cause Exception
         bad_dir = resource_filename('encoded', 'tests/data/not-a-fdn-dir/')

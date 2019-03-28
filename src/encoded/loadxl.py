@@ -61,7 +61,6 @@ class CatchGenerator(object):
 
     def close(self):
         if self.caught and isinstance(self.caught, Exception):
-            print(LOAD_ERROR_MESSAGE)
             logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
@@ -376,24 +375,26 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                 exists = True
             except:
                 exists = False
-            # skip the items that exists, if overwrite is not allowed, they them out from patch list
+            # skip the items that exists
+            # if overwrite=True, still include them in PATCH round
             if exists:
                 skip_exist += 1
                 if not overwrite:
                     skip_existing_items.add(an_item['uuid'])
-                continue
-            post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
-            post_first = format_for_attachment(post_first, docsdir)
-            try:
-                res = testapp.post_json('/'+a_type, post_first)
-                assert res.status_code == 201
-                posted += 1
-                # yield bytes to work with Response.app_iter
-                yield str.encode('POST: %s,' % res.json['@graph'][0]['uuid'])
-            except Exception as e:
-                print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
-                      a_type, str(first_fields), str(e)))
-                return e
+                yield str.encode('SKIP: %s,' % an_item['uuid'])
+            else:
+                post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+                post_first = format_for_attachment(post_first, docsdir)
+                try:
+                    res = testapp.post_json('/'+a_type, post_first)
+                    assert res.status_code == 201
+                    posted += 1
+                    # yield bytes to work with Response.app_iter
+                    yield str.encode('POST: %s,' % res.json['@graph'][0]['uuid'])
+                except Exception as e:
+                    print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
+                          a_type, str(first_fields), str(e)))
+                    return e
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
         logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
