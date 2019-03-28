@@ -3,11 +3,11 @@
 /* @flow */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import queryString from 'querystring';
+import memoize from 'memoize-one';
 import { Collapse, Fade } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import Infinite from 'react-infinite';
@@ -301,17 +301,20 @@ class LoadMoreAsYouScroll extends React.PureComponent {
         'href' : PropTypes.string.isRequired,
         'limit' : PropTypes.number,
         'rowHeight' : PropTypes.number.isRequired
-    }
+    };
 
     static defaultProps = {
         'limit' : 25,
         'debouncePointerEvents' : 150,
         'openRowHeight' : 56
+    };
+
+    static canLoadMore(totalExpected, results){
+        return totalExpected > results.length;
     }
 
     constructor(props){
         super(props);
-        this.isMounted = this.isMounted.bind(this);
         this.getInitialFrom = this.getInitialFrom.bind(this);
         this.rebuiltHref = this.rebuiltHref.bind(this);
         this.handleLoad = _.throttle(this.handleLoad.bind(this), 3000);
@@ -329,7 +332,9 @@ class LoadMoreAsYouScroll extends React.PureComponent {
     }
 
     componentDidMount(){
-        if (typeof this.state.mounted === 'boolean') this.setState({ 'mounted' : true });
+        if (typeof this.state.mounted === 'boolean') {
+            this.setState({ 'mounted' : true });
+        }
         //window.addEventListener('scroll', this.handleScrollExt);
     }
     /*
@@ -344,16 +349,6 @@ class LoadMoreAsYouScroll extends React.PureComponent {
         }
     }
     */
-    UNSAFE_componentWillReceiveProps(nextProps){
-        if (!this.state.canLoad && (nextProps.href !== this.props.href || (typeof nextProps.totalExpected === 'number' && this.props.totalExpected !== nextProps.totalExpected))){
-            this.setState({ 'canLoad' : true });
-        }
-    }
-
-    isMounted(){
-        if (typeof this.props.mounted === 'boolean') return this.props.mounted;
-        return this.state.mounted;
-    }
 
     getInitialFrom(){
         if (typeof this.props.page === 'number' && typeof this.props.limit === 'number'){
@@ -374,14 +369,13 @@ class LoadMoreAsYouScroll extends React.PureComponent {
         return url.format(parts);
     }
 
-    handleLoad(e,p,t){
-
+    handleLoad(){
         var nextHref = this.rebuiltHref();
-        var loadCallback = (function(resp){
+        var loadCallback = (resp) => {
             if (resp && resp['@graph'] && resp['@graph'].length > 0){
                 // Check if have same result, if so, refresh all results (something has changed on back-end)
-                var oldKeys = _.map(this.props.results, DimensioningContainer.getKeyForGraphResult);
-                var newKeys = _.map(resp['@graph'], DimensioningContainer.getKeyForGraphResult);
+                var oldKeys = _.map(this.props.results, object.itemUtil.atId);
+                var newKeys = _.map(resp['@graph'], object.itemUtil.atId);
                 var keyIntersection = _.intersection(oldKeys.sort(), newKeys.sort());
                 if (keyIntersection.length > 0){
                     console.error('FOUND ALREADY-PRESENT RESULT IN NEW RESULTS', keyIntersection, newKeys);
@@ -392,20 +386,14 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                         });
                     });
                 } else {
-                    var canLoadMore = !!(this.props.totalExpected && (this.props.results.length + resp['@graph'].length) < this.props.totalExpected);
-                    this.setState({ 'isLoading' : false, 'canLoad' : canLoadMore }, ()=>{
+                    this.setState({ 'isLoading' : false }, ()=>{
                         this.props.setResults(this.props.results.slice(0).concat(resp['@graph']));
                     });
                 }
             } else {
-                if (this.state.canLoad){
-                    this.setState({
-                        'isLoading' : false,
-                        'canLoad' : false
-                    }, () => this.props.setResults(this.props.results));
-                }
+                this.setState({  'isLoading' : false, }, () => this.props.setResults(this.props.results));
             }
-        }).bind(this);
+        };
 
         this.setState({ 'isLoading' : true }, ()=>{
             ajax.load(nextHref, loadCallback, 'GET', loadCallback);
@@ -426,8 +414,10 @@ class LoadMoreAsYouScroll extends React.PureComponent {
     }
     */
     render(){
-        if (!this.isMounted()) return <div>{ this.props.children }</div>;
-        var { children, rowHeight, openDetailPanes, openRowHeight, tableContainerWidth, tableContainerScrollLeft } = this.props;
+        var { children, rowHeight, openDetailPanes, openRowHeight, tableContainerWidth, tableContainerScrollLeft, totalExpected, results } = this.props;
+        if (!(this.props.mounted || this.state.mounted)){
+            return <div>{ children }</div>;
+        }
         var elementHeight = _.keys(openDetailPanes).length === 0 ? rowHeight : React.Children.map(children, function(c){
             if (typeof openDetailPanes[c.props['data-key']] === 'number'){
                 //console.log('height', openDetailPanes[c.props['data-key']], rowHeight, 2 + openDetailPanes[c.props['data-key']] + openRowHeight);
@@ -435,6 +425,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
             }
             return rowHeight;
         });
+        var canLoad = LoadMoreAsYouScroll.canLoadMore(totalExpected, results);
         return (
             <Infinite
                 elementHeight={elementHeight}
@@ -451,7 +442,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                         <i className="icon icon-circle-o-notch icon-spin" />&nbsp; Loading...
                     </div>
                 )}
-                infiniteLoadBeginEdgeOffset={this.state.canLoad ? 200 : undefined}
+                infiniteLoadBeginEdgeOffset={canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(1.5)}
                 preloadBatchSize={Infinite.containerHeightScaleFactor(1.5)}
                 children={children}
@@ -676,10 +667,6 @@ class DimensioningContainer extends React.PureComponent {
         return null;
     }
 
-    static getKeyForGraphResult(graphItem, rowNumber = 0){
-        return object.itemUtil.atId(graphItem);
-    }
-
     constructor(props){
         super(props);
         this.calculateStickyTopOffset = this.calculateStickyTopOffset.bind(this);
@@ -735,7 +722,6 @@ class DimensioningContainer extends React.PureComponent {
         // Register onScroll handler.
         this.scrollHandlerUnsubscribeFxn = registerWindowOnScrollHandler(this.onVerticalScroll);
 
-        this.lastResponsiveGridSize = layout.responsiveGridState(windowWidth || null);
         this.setState(nextState);
     }
 
@@ -746,47 +732,6 @@ class DimensioningContainer extends React.PureComponent {
         }
         var innerContainerElem = this.innerContainerRef.current;
         innerContainerElem && innerContainerElem.removeEventListener('scroll', this.onHorizontalScroll);
-    }
-
-    UNSAFE_componentWillReceiveProps(nextProps){
-        // Reset results on change in results, total, or href.
-        if ( nextProps.href !== this.props.href || !object.itemUtil.compareResultsByID(nextProps.results, this.props.results) ){
-            this.setState({
-                'results' : nextProps.results.slice(0),
-                'openDetailPanes' : {},
-                'widths' : DimensioningContainer.resetHeaderColumnWidths(nextProps.columnDefinitions, this.state.mounted, nextProps.windowWidth)
-            }, ()=>{
-                vizUtil.requestAnimationFrame(()=>{
-                    this.setState({ widths : DimensioningContainer.findAndDecreaseColumnWidths(nextProps.columnDefinitions, 30, nextProps.windowWidth) });
-                });
-            });
-        // Or, reset widths on change in columns
-        } else {
-            var responsiveGridSize = layout.responsiveGridState(nextProps.windowWidth || null);
-            if (nextProps.windowWidth !== this.props.windowWidth || nextProps.columnDefinitions.length !== this.props.columnDefinitions.length || this.lastResponsiveGridSize !== responsiveGridSize){
-                this.resetWidths(nextProps, responsiveGridSize);
-            }
-        }
-    }
-
-    resetWidths(props = this.props, responsiveGridSize){
-        //var responsiveGridSize = layout.responsiveGridState(props.windowWidth || null);
-        this.lastResponsiveGridSize = responsiveGridSize;
-        // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
-        this.setState( ({ mounted })=>{
-            return {
-                "widths" : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, mounted, props.windowWidth),
-                "stickyHeaderTopOffset" : this.calculateStickyTopOffset(props, responsiveGridSize)
-            };
-        }, () => {
-            vizUtil.requestAnimationFrame(()=>{
-                // 2. Upon render into DOM, decrease col sizes.
-                this.setState(_.extend(
-                    this.getTableDims(),
-                    { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(props.columnDefinitions, 30, props.windowWidth) }
-                ));
-            });
-        });
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -945,15 +890,12 @@ class DimensioningContainer extends React.PureComponent {
 
     setResults(results, cb){
         this.setState({
-            'results' : _.uniq(results, false, DimensioningContainer.getKeyForGraphResult)
+            'results' : _.uniq(results, false, object.itemUtil.atId)
         }, cb);
     }
 
     canLoadMore(){
-        var lmaysInstance = this.loadMoreAsYouScrollRef.current || null;
-        return (
-            lmaysInstance && lmaysInstance.state && typeof lmaysInstance.state.canLoad === 'boolean' ? lmaysInstance.state.canLoad : null
-        );
+        return LoadMoreAsYouScroll.canLoadMore(this.props.totalExpected, this.state.results);
     }
 
     renderHeadersRow({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}){
@@ -980,7 +922,7 @@ class DimensioningContainer extends React.PureComponent {
             );
 
         return _.map(results, (r, idx)=>{
-            var key = DimensioningContainer.getKeyForGraphResult(r, idx);
+            var key = object.itemUtil.atId(r);
             return <ResultRow {...commonPropsToPass} result={r} rowNumber={idx} data-key={key} key={key} />;
         });
     }
@@ -1045,6 +987,22 @@ export class SearchResultTable extends React.PureComponent {
         return !isServerSide() && layout.responsiveGridState(windowWidth) !== 'xs';
     }
 
+    /**
+     * Returns the finalized list of columns and their properties in response to
+     * {Object} `hiddenColumns`.
+     *
+     * @param {{ columnDefinitions: Object[], hiddenColumns: Object.<boolean> }} props Component props.
+     */
+    static filterOutHiddenCols = memoize(function(columnDefinitions, hiddenColumns){
+        if (hiddenColumns){
+            return _.filter(columnDefinitions, function(colDef){
+                if (hiddenColumns[colDef.field] === true) return false;
+                return true;
+            });
+        }
+        return columnDefinitions;
+    });
+
     static propTypes = {
         'results'           : PropTypes.arrayOf(ResultRow.propTypes.result).isRequired,
         'href'              : PropTypes.string.isRequired,
@@ -1056,7 +1014,7 @@ export class SearchResultTable extends React.PureComponent {
         'totalExpected'     : PropTypes.number.isRequired,
         'windowWidth'       : PropTypes.number.isRequired,
         'registerWindowOnScrollHandler' : PropTypes.func.isRequired
-    }
+    };
 
     static defaultProps = {
         'columnDefinitions' : columnsToColumnDefinitions({ 'display_title' : { 'title' : 'Title' } }, defaultColumnExtensionMap),
@@ -1070,13 +1028,11 @@ export class SearchResultTable extends React.PureComponent {
         'fullWidthInitOffset' : 60,
         'fullWidthContainerSelectorString' : '.browse-page-container',
         'currentAction' : null
-    }
+    };
 
     constructor(props){
         super(props);
-        this.filterOutHiddenColumns = this.filterOutHiddenColumns.bind(this);
         this.getDimensionContainer = this.getDimensionContainer.bind(this);
-
         this.dimensionContainerRef = React.createRef();
     }
 
@@ -1084,30 +1040,13 @@ export class SearchResultTable extends React.PureComponent {
         return this.dimensionContainerRef.current;
     }
 
-    /**
-     * Returns the finalized list of columns and their properties in response to
-     * {Object} `hiddenColumns`.
-     *
-     * @param {{ columnDefinitions: Object[], hiddenColumns: Object.<boolean> }} props Component props.
-     */
-    filterOutHiddenColumns(props = this.props){
-        var { columnDefinitions, hiddenColumns } = props;
-
-        if (hiddenColumns){
-            return _.filter(columnDefinitions, function(colDef){
-                if (hiddenColumns[colDef.field] === true) return false;
-                return true;
-            });
-        }
-
-        return columnDefinitions;
-    }
-
     render(){
+        var { columnDefinitions, hiddenColumns } = this.props;
         return (
             <DimensioningContainer
                 {..._.omit(this.props, 'hiddenColumns', 'columnDefinitionOverrideMap', 'defaultWidthMap')}
-                columnDefinitions={this.filterOutHiddenColumns()} ref={this.dimensionContainerRef} />
+                columnDefinitions={SearchResultTable.filterOutHiddenCols(columnDefinitions, hiddenColumns)}
+                ref={this.dimensionContainerRef} />
         );
     }
 }

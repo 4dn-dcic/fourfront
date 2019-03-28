@@ -6,15 +6,17 @@ import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
-import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { Filters, navigate, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
-    SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
+    SearchResultTable, defaultColumnExtensionMap, columnsToColumnDefinitions,
+    SortController, SelectedFilesController, CustomColumnController, AboveTableControls, ExperimentSetDetailPane,
     FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
+
+import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
@@ -30,92 +32,104 @@ var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
  */
 class ExperimentSetCheckBox extends React.PureComponent {
 
-    static isDisabled(files){
-        return files.length === 0;
-    }
-
-    static isAllFilesChecked(selectedFiles, allFiles){
-        return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles);
-    }
-
-    static isIndeterminate(selectedFiles, allFiles){
-        return selectedFiles.length > 0 && selectedFiles.length < allFiles.length;
-    }
-
-    static filterSelectedFilesToOnesInExpSet(allFilesForSet, selectedFiles){
-        var max = allFilesForSet.length;
-        var selected = [];
-        for (var i = 0; i < max; i++){
-            if (typeof selectedFiles[allFilesForSet[i]] !== 'undefined'){
-                selected.push(allFilesForSet[i]);
-            }
-        }
-        return selected;
+    static filterSelectedFilesToOnesInExpSet(allFileTriplesForSet, selectedFiles){
+        return _.filter(allFileTriplesForSet, function(accessionTriple){
+            return typeof selectedFiles[accessionTriple] !== 'undefined';
+        });
     }
 
     constructor(props){
         super(props);
-        // These are _NOT_ bound to `this`, but rather just memoized in context of this class
-        // instance.
-        this.allFilesFromExperimentSet          = memoize(allFilesFromExperimentSet);
-        this.filesToAccessionTriples            = memoize(filesToAccessionTriples);
-        this.filterSelectedFilesToOnesInExpSet  = memoize(ExperimentSetCheckBox.filterSelectedFilesToOnesInExpSet);
-        this.isAllFilesChecked                  = memoize(ExperimentSetCheckBox.isAllFilesChecked);
-        this.isDisabled                         = memoize(ExperimentSetCheckBox.isDisabled);
-        this.isIndeterminate                    = memoize(ExperimentSetCheckBox.isIndeterminate);
-
+        this.setIndeterminateOnRefIfNeeded = this.setIndeterminateOnRefIfNeeded.bind(this);
         this.onChange = this.onChange.bind(this);
+        this.checkboxRef = React.createRef();
     }
+
+    componentDidMount(){
+        this.setIndeterminateOnRefIfNeeded();
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.selectedFiles !== this.props.selectedFiles){
+            // Try to avoid accessing DOM (`this.checkboxRef.current.indeterminate = indeterminate`) too frequently
+            // so do (more) JS calculation to try to avoid DOM changes.
+            var currAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(this.props.expSet),
+                pastAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(pastProps.expSet),
+                currSelectedFilesForSet = this.selectedFilesFromSet(currAllFilesKeyedByTriples, this.props.selectedFiles),
+                pastSelectedFilesForSet = this.selectedFilesFromSet(pastAllFilesKeyedByTriples, pastProps.selectedFiles);
+
+            if (currSelectedFilesForSet.length !== pastSelectedFilesForSet.length){
+                this.setIndeterminateOnRefIfNeeded();
+            }
+        }
+    }
+
+    setIndeterminateOnRefIfNeeded(){
+        var { expSet, selectedFiles } = this.props,
+            allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
+            indeterminate           = this.isIndeterminate(allFilesKeyedByTriples, selectedFiles);
+
+        if (this.checkboxRef.current){
+            this.checkboxRef.current.indeterminate = indeterminate;
+        }
+    }
+
+    expSetFilesToObjectKeyedByAccessionTriples = memoize(function(expSet){
+        var allFiles                = allFilesFromExperimentSet(expSet, true),
+            allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true),
+            allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
+        return allFilesKeyedByTriples;
+    });
+
+    selectedFilesFromSet = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        var accessionTriples = _.keys(allFilesKeyedByTriplesForSet);
+        return ExperimentSetCheckBox.filterSelectedFilesToOnesInExpSet(accessionTriples, selectedFiles);
+    });
+
+    isAllFilesChecked = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        var selectedFilesForSetLen = this.selectedFilesFromSet(allFilesKeyedByTriplesForSet, selectedFiles).length,
+            allFileAccessionTriplesLen = _.keys(allFilesKeyedByTriplesForSet).length;
+
+        return allFileAccessionTriplesLen > 0 && selectedFilesForSetLen === allFileAccessionTriplesLen;
+    });
+
+    isIndeterminate = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        var selectedFilesForSet = this.selectedFilesFromSet(allFilesKeyedByTriplesForSet, selectedFiles);
+        return (
+            Array.isArray(selectedFilesForSet) && selectedFilesForSet.length > 0 && selectedFilesForSet.length < _.keys(allFilesKeyedByTriplesForSet).length
+        );
+    });
+
+    isDisabled = memoize(function(allFilesKeyedByTriplesForSet){
+        return _.keys(allFilesKeyedByTriplesForSet).length === 0;
+    });
 
     onChange(e){
         var { expSet, selectedFiles, selectFile, unselectFile } = this.props;
-        var allFiles = this.allFilesFromExperimentSet(expSet, true),
-            allFileAccessionTriples = this.filesToAccessionTriples(allFiles, true, true),
-            allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
 
-        allFileAccessionTriples = allFileAccessionTriples.sort();
-
-        var selectedFilesForSet = this.filterSelectedFilesToOnesInExpSet(allFileAccessionTriples, selectedFiles),
-            isAllFilesChecked = this.isAllFilesChecked(selectedFilesForSet, allFileAccessionTriples);
+        var allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
+            isAllFilesChecked       = this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles),
+            allFileAccessionTriples = _.keys(allFilesKeyedByTriples);
 
         if (!isAllFilesChecked){
-            var fileTriplesToSelect = _.difference(allFileAccessionTriples, selectedFilesForSet);
-            selectFile(fileTriplesToSelect.map(function(triple){
-                var fileAccession = (allFileAccessionTriples[triple] || {}).accession || null;
-                //var experiment = null;
-                //if (fileAccession){
-                //    experiment = expFxn.findExperimentInSetWithFileAccession(expSet.experiments_in_set, fileAccession);
-                //}
-                return [ // [file accessionTriple, meta]
-                    triple,
-                    allFilesKeyedByTriples[triple]
-                ];
-            }));
+            var selectedFilesForSet     = this.selectedFilesFromSet(allFilesKeyedByTriples, selectedFiles),
+                fileTriplesToSelect     = _.difference(allFileAccessionTriples, selectedFilesForSet),
+                triplePlusFileObjs      = _.map(fileTriplesToSelect, function(triple){
+                    return [ triple, allFilesKeyedByTriples[triple] ];
+                });
+            selectFile(triplePlusFileObjs);
         } else if (isAllFilesChecked) {
             unselectFile(allFileAccessionTriples);
         }
     }
 
     render(){
-        var { expSet, selectedFiles } = this.props;
+        var { expSet, selectedFiles } = this.props,
+            allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
+            disabled                = this.isDisabled(allFilesKeyedByTriples),
+            checked                 = !disabled && this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles);
 
-        var allFiles = this.allFilesFromExperimentSet(expSet, true),
-            allFileAccessionTriples = this.filesToAccessionTriples(allFiles, true, true);
-
-        allFileAccessionTriples = allFileAccessionTriples.sort();
-
-        var selectedFilesForSet = this.filterSelectedFilesToOnesInExpSet(allFileAccessionTriples, selectedFiles),
-            isAllFilesChecked = this.isAllFilesChecked(selectedFilesForSet, allFileAccessionTriples);
-
-        var checked = isAllFilesChecked,
-            disabled = this.isDisabled(allFileAccessionTriples),
-            indeterminate = this.isIndeterminate(selectedFilesForSet, allFileAccessionTriples);
-
-        return(
-            <input {...{ checked, disabled }} onChange={this.onChange} type="checkbox" className="expset-checkbox" ref={function(r){
-                if (r) r.indeterminate = (checked ? false : indeterminate);
-            }} />
-        );
+        return <input {...{ checked, disabled }} onChange={this.onChange} type="checkbox" className="expset-checkbox" ref={this.checkboxRef} />;
     }
 }
 
@@ -270,7 +284,7 @@ class ResultTableContainer extends React.PureComponent {
                         ref={this.searchResultTableRef}
                         results={context['@graph']}
                         renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78} />
+                        stickyHeaderTopOffset={-78} key={href} />
                 </div>
             </div>
         );
@@ -601,6 +615,8 @@ export default class BrowseView extends React.Component {
             hrefParts           = url.parse(href, true),
             countExternalSets   = BrowseView.externalDataSetsCount(context),
             facets              = BrowseView.transformedFacets(context, browseBaseState, session);
+
+        context = _.extend({}, context, { '@graph' : BROWSE['@graph'] });
 
         // No results found!
         if (context.total === 0 && context.notification){
