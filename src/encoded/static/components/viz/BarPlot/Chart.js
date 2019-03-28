@@ -44,7 +44,7 @@ export const genChartBarDims = memoize(function(
             width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
             height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
         },
-        availWidthPerBar    = 20,//Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
+        availWidthPerBar    = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
         barXCoords          = d3.range(0, insetDims.width, availWidthPerBar),
         barWidth            = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth),
         sortByAggrCount = function(b){
