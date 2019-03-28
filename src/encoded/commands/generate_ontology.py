@@ -736,12 +736,12 @@ def main():
         and Updates Terms by generating json inserts
     '''
     args = parse_args(sys.argv[1:])  # to facilitate testing
-    s3_postfile = 'ontology_term.json'
+    postfile_name = 'ontology_term.json'
     from pkg_resources import resource_filename
     outdir = resource_filename('encoded', args.outdir)
     print('Writing to %s' % outdir)
 
-    postfile = outdir + s3_postfile
+    postfile = outdir + postfile_name
 
     # fourfront connection
     connection = connect2server(args.env, args.key)

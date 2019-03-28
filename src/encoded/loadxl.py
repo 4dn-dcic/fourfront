@@ -591,33 +591,3 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False
     """
     return load_data(app, access_key_loc, indir='master-inserts',
                      clear_tables=clear_tables, overwrite=overwrite)
-
-
-def load_ontology_terms(app, post_file):
-    from webtest import TestApp
-    from webtest.app import AppError
-    post_json = {}
-    # read in json file and create store
-    with open(post_file) as post:
-        post_json['ontology_term'] = json.loads(post.read())
-
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-
-    if post_json:
-        logger.warning('loading ontology terms')
-        post_res = load_all(testapp, post_json, None, itype='ontology_term', overwrite=True, from_json=True)
-        if post_res:  # None if successful
-            logger.error('load_ontology_terms: failed to LOAD', error=post_res)
-        else:
-            logger.warning('done loading terms')
-
-    # now keep track of the last time we loaded these suckers
-    data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
-    try:
-        testapp.post_json("/sysinfo", data)
-    except AppError:
-        testapp.patch_json("/sysinfo/%s" % data['name'], data)
