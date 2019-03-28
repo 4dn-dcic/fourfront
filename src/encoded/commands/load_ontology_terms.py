@@ -2,7 +2,6 @@
 import argparse
 import logging
 import os
-import requests
 import json
 from datetime import datetime
 from dcicutils import ff_utils
