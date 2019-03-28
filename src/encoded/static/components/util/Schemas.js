@@ -1,10 +1,10 @@
 'use strict';
 
 import _ from 'underscore';
-import url from 'url';
 import React from 'react';
 import { linkFromItem } from './object';
 import { LocalizedTime, format as dateFormat } from './date-utility';
+import { itemTypeHierarchy } from './itemTypeHierarchy';
 
 let cachedSchemas = null;
 
@@ -22,40 +22,6 @@ export function set(schemas){
     return true;
 }
 
-export const itemTypeHierarchy = {
-    'Experiment': [
-        'ExperimentAtacseq', 'ExperimentCaptureC', 'ExperimentChiapet', 'ExperimentDamid', 'ExperimentHiC',
-        'ExperimentMic', 'ExperimentRepliseq', 'ExperimentSeq', 'ExperimentTsaseq'
-    ],
-    'ExperimentSet': [
-        'ExperimentSetReplicate'
-    ],
-    'File': [
-        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy', 'FileVistrack'
-    ],
-    'FileSet': [
-        'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
-    ],
-    'Individual': [
-        'IndividualHuman', 'IndividualMouse', 'IndividualFly', 'IndividualChicken'
-    ],
-    'Treatment': [
-        'TreatmentAgent', 'TreatmentRnai'
-    ],
-    'QualityMetric' : [
-        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc',
-        'QualityMetricDedupqcRepliseq'
-    ],
-    'WorkflowRun' : [
-        'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
-    ],
-    'MicroscopeSetting' : [
-        'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
-    ],
-    'UserContent' : [
-        'StaticSection', 'HiglassViewConfig' //, 'JupyterNotebook'
-    ]
-};
 
 export const Term = {
 
@@ -140,7 +106,7 @@ export const Term = {
             if (field.slice(-4) === '.url' && allowJSXOutput && term.indexOf('http') > -1) {
                 var linkTitle = term.split('/');
                 linkTitle = linkTitle.pop();
-                return <a href={term} target="_blank">{ linkTitle }</a>;
+                return <a href={term} target="_blank" rel="noopener noreferrer">{ linkTitle }</a>;
             }
         }
 

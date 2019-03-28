@@ -32,9 +32,10 @@ export function atIdFromObject(o){
 }
 
 
-export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps = {}, suppressErrors = false){
-    var href = atIdFromObject(item);
-    var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href;
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps = {}, suppressErrors = true){
+    var href = atIdFromObject(item),
+        title =  item && typeof item === 'object' && ((propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href);
+
     if (!href || !title){
         if (item && typeof item === 'object' && typeof item.error === 'string'){
             return <em>{ item.error }</em>;

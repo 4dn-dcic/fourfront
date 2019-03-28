@@ -35,18 +35,14 @@ export default class ErrorPage extends React.Component {
         }else{
             errorMessage = <h3>The page you've requested does not exist or you have found an error. {homelink} to the homepage.</h3>;
         }
-        return(
-            <div className="error-page text-center">
-                {errorMessage}
-            </div>
-        );
+        return <div className="error-page text-center container" id="content">{ errorMessage }</div>;
     }
 }
 
 export class HTTPForbiddenView extends React.Component {
     render(){
         return (
-            <div className="error-page text-left">
+            <div className="error-page text-left container" id="content">
                 <h2 className="text-400">Access was denied to this resource.</h2>
                 <div className="content fourDN-content">
                     <p>

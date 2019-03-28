@@ -1,6 +1,8 @@
 
 import { testGraphTabClick } from './../support/macros';
 
+const countRecentItemsToVisit = 5;
+
 describe("Individual Item Views", function(){
 
     context.only('FileProcessed MCOOL Collection', function(){
@@ -27,13 +29,15 @@ describe("Individual Item Views", function(){
 
     });
 
-    Cypress._.forEach(Cypress._.range(0, 10), function(idx){
+    Cypress._.forEach(Cypress._.range(0, countRecentItemsToVisit), function(idx){
 
-        context('FileProcessed MCOOL - #' + (idx + 1) + '/10', function(){
+        context('FileProcessed MCOOL - #' + (idx + 1) + '/' + countRecentItemsToVisit, function(){
 
             after(function(){ // Return to search results
                 cy.go('back').wait(100).end();
             });
+
+            // TODO gather list of files from Processed files table and test their presence in graph
 
             it('FileView loads correctly on click from SearchView', function(){
                 cy.get('.search-results-container .search-result-row[data-row-number="' + idx + '"] .search-result-column-block[data-field="display_title"] a')

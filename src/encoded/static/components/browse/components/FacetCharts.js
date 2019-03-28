@@ -3,11 +3,11 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import { expFxn, Filters, ajax, console, layout, isServerSide, navigate, analytics } from './util';
-import * as vizUtil from './viz/utilities';
-import ChartDetailCursor from './viz/ChartDetailCursor';
-import { ChartDataController } from './viz/chart-data-controller';
-import * as BarPlot from './viz/BarPlot';
+import { expFxn, Filters, ajax, console, layout, isServerSide, navigate, analytics } from '../../util';
+import * as vizUtil from '../../viz/utilities';
+import ChartDetailCursor from '../../viz/ChartDetailCursor';
+import { ChartDataController } from '../../viz/chart-data-controller';
+import * as BarPlot from '../../viz/BarPlot';
 
 
 /**
@@ -165,7 +165,7 @@ export class FacetCharts extends React.PureComponent {
 
                     Filters.saveChangedFilters(newExpSetFilters, browseBaseHref, () => {
                         // Scroll to top of browse page container after navigation is complete.
-                        setTimeout(layout.animateScrollTo, 200, "browsePageContainer", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
+                        setTimeout(layout.animateScrollTo, 200, "content", Math.abs(layout.getPageVerticalScrollPosition() - 510) * 2, 79);
                     });
                 },
                 'disabled' : function(cursorProps){

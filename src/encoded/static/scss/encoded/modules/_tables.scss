@@ -38,11 +38,11 @@ table>tbody>tr>td {
     border-collapse: separate;
 
     tr:last-child td:first-child {
-        @include border-bottom-left-radius($border-radius-base);
+		border-bottom-left-radius: $border-radius-base;
     }
 
     tr:last-child td:last-child {
-        @include border-bottom-right-radius($border-radius-base);
+		border-bottom-right-radius: $border-radius-base;
     }
 }
 
@@ -233,41 +233,8 @@ $rotated-th-height: 130px;
 $rotated-th-width: 20px;
 $rotated-th-angle: 30deg;
 
-th.rotate30 {
-    height: $rotated-th-height;
-    width: $rotated-th-width;
-    min-width: $rotated-th-width;
-    max-width: $rotated-th-width;
-    position: relative;
-    vertical-align: bottom;
-    padding: 0 !important;
-    border: none !important;
-    > div {
-        position: relative;
-        top: 0;
-        left: $rotated-th-height * tan($rotated-th-angle) / 2;
-        height: 100%;
-        -webkit-transform: skew(-$rotated-th-angle, 0deg);
-        transform: skew(-$rotated-th-angle, 0deg);
-        background-color: #ddd;
-        border-left: solid 1px #fff;
-        border-right: solid 1px #fff;
-        > span {
-            -webkit-transform: skew($rotated-th-angle, 0deg) rotate(270deg + $rotated-th-angle);
-            transform: skew($rotated-th-angle, 0deg) rotate(270deg + $rotated-th-angle);
-            position: absolute;
-            bottom: 59px;
-            left: -57px;
-            display: inline-block;
-            width: $rotated-th-height / cos($rotated-th-angle) - $rotated-th-width * cos($rotated-th-angle);
-            text-align: left;
-            line-height: 1.2;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-    }
-}
+
+
 th.rotate90 {
     vertical-align: top;
     > div {
@@ -472,6 +439,8 @@ $open-expset-table-side-border-color : #e4e4e4;
 }
 
 
+
+
 /** Experiment Set Detail Pane **/
 
 .experiment-set-info-wrapper {
@@ -492,10 +461,6 @@ $open-expset-table-side-border-color : #e4e4e4;
 			padding-top: 12px;
 			padding-bottom: 8px;
 			position: static;
-		}
-
-		.expset-addinfo-row {
-			margin-bottom: 5px;
 		}
 
 		@media screen and (min-width: $screen-sm-min){
@@ -522,16 +487,19 @@ $open-expset-table-side-border-color : #e4e4e4;
 			}
 		}
 
-		.expset-addinfo-key {
-			font-weight: 500;
-		}
-
 		.expset-addinfo-val {
 			padding-right: 25px;
 		}
 	}
 
 	.files-tables-container {
+
+		// Only when present on item page(s)
+		@media screen and (max-width: $screen-sm-max){
+			.item-page-table-row-container & {
+				border-bottom: 1px solid #ddd;
+			}
+		}
 
 		.raw-files-table-section,
 		.processed-files-table-section {
@@ -1917,6 +1885,11 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 	}
 }
 
+/**********************************************************
+			In Experiment Sets Table (Item Pages)
+**********************************************************/
+
+
 .item-page-table-container {
 	.item-page-table-row-container {
 		position: relative;
@@ -1925,9 +1898,6 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		> .inner-wrapper {
 			padding-left: 0;
 			border-top: 1px solid #eee;
-			@media screen and (min-width: $screen-sm-min){
-				padding-left: 10px;
-			}
 			@media screen and (min-width: $screen-md-min){
 				padding-left: 47px;
 			}
@@ -1988,7 +1958,9 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 				}
 
 				&.block {
+
 					// Mobile
+
 					padding: 0;
 					padding-left: 10px;
 					padding-right: 10px;
@@ -2010,6 +1982,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							padding-right: 0;
 						}
 					}
+
 					&[data-field="display_title"]{
 						margin-bottom: 10px;
 						> .inner {
@@ -2049,6 +2022,19 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							}
 						}
 					}
+
+					&[data-field="experiments_in_set.experiment_categorizer.combined"]{
+						.exp-categorizer-cell {
+							> small {
+								top: -1px !important;
+							}
+							> div {
+								top: 0 !important;
+							}
+						}
+					}
+
+
 				}
 
 			}
@@ -2076,6 +2062,13 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 	}
 }
+
+
+
+
+
+
+
 
 // IS the below still used???
 

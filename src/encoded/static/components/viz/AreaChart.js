@@ -480,6 +480,8 @@ export class ChartTooltip extends React.PureComponent {
             'contentFxn'    : null,
             'topPosition'   : 0
         }, props.initialState || {});
+
+        // TODO: Update ref definition for tooltipContainer
     }
 
     componentDidMount(){
