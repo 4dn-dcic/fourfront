@@ -7,7 +7,8 @@ import _ from 'underscore';
 
 import { SlideCarousel } from './SlideCarousel';
 import { JointAnalysisMatrix } from './JointAnalysisMatrix';
-export { SlideCarousel, parsedJSXContent };
+
+export { SlideCarousel, JointAnalysisMatrix };
 
 
 /**
