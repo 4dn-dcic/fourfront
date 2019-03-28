@@ -16,7 +16,7 @@ import {
     FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
 
-import { BROWSE } from './../testdata/browse/4DNESYUY-test';
+//import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
@@ -616,7 +616,7 @@ export default class BrowseView extends React.Component {
             countExternalSets   = BrowseView.externalDataSetsCount(context),
             facets              = BrowseView.transformedFacets(context, browseBaseState, session);
 
-        context = _.extend({}, context, { '@graph' : BROWSE['@graph'] });
+        //context = _.extend({}, context, { '@graph' : BROWSE['@graph'] });
 
         // No results found!
         if (context.total === 0 && context.notification){
