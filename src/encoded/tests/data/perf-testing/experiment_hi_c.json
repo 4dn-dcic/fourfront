@@ -39,7 +39,7 @@
         "ligation_time": 240.0,
         "digestion_enzyme": "d8da42d0-bc20-40e5-bacf-c263b8603e03",
         "fragment_size_selection_method": "SPRI beads",
-        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c", 
+        "experiment_type": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
         "tagging_method": "bio-dATP"
     },
     {
