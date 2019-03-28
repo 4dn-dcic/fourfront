@@ -90,8 +90,6 @@ class Timeout {
     }
 }
 
-
-
 /**
  * The root and top-most React component for our application.
  * This is wrapped by a Redux store and then rendered by either the server-side
@@ -191,6 +189,8 @@ export default class App extends React.Component {
     static defaultProps = {
         'sessionMayBeSet' : null
     };
+
+    static debouncedOnNavigationTooltipRebuild = _.debounce(ReactTooltip.rebuild, 500);
 
     /**
      * Does some initialization, checks if browser HistoryAPI is supported,
@@ -428,8 +428,8 @@ export default class App extends React.Component {
             analytics.registerPageView(this.props.href, this.props.context);
 
             // We need to rebuild tooltips after navigation to a different page.
-            ReactTooltip.rebuild();
-
+            // Add a debounce so it runs again after a delay, so other components get a chance to mount.
+            App.debouncedOnNavigationTooltipRebuild();
         }
 
 
