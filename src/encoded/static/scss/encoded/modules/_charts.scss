@@ -341,15 +341,29 @@
             }
         }
 
-        &.expanded > .label-text {
-            &.extra-long {
-                background: '#fff';
-                &:after {
-                    content: none;
+        &.expanded {
+            > .label-text {
+                &.extra-long {
+                    &:after {
+                        content: none;
+                    }
+                }
+            }
+
+        }
+
+        &.hover, &:hover {
+            z-index: 10;
+            > .label-text {
+                > .inner {
+                    background: #fff;
+                    padding: 1px 0 3px 0;
+                    border-radius: 2px;
                 }
             }
         }
 
+        &.hover > .label-text,
         &:hover > .label-text,
         &.highlight > .label-text {
             .append {

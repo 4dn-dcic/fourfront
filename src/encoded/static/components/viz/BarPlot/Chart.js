@@ -5,16 +5,15 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
-import { console, object, isServerSide, expFxn, Schemas, layout, navigate } from './../../util';
+import { console, isServerSide, Schemas } from './../../util';
 import { PopoverViewContainer } from './ViewContainer';
 
 
-/** 
- * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
+/**
+ * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  *
  * @param {Object} rootField - Top-level field, the aggregations for which represent the X axis.
  * @param {Object} rootField.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiment_sets passed to genChartData.
@@ -45,7 +44,7 @@ export const genChartBarDims = memoize(function(
             width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
             height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
         },
-        availWidthPerBar    = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
+        availWidthPerBar    = 20,//Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
         barXCoords          = d3.range(0, insetDims.width, availWidthPerBar),
         barWidth            = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth),
         sortByAggrCount = function(b){
@@ -58,30 +57,29 @@ export const genChartBarDims = memoize(function(
     function genBarData(fieldObj, outerDims = insetDims, parent = null){
         return _(fieldObj.terms).chain()
             .pairs()
-            .map(function(term, i){
-                var termKey = term[0];
-                var termCount = term[1][aggregateType];
+            .map(function([termKey, termObj], i){
+                var termCount = termObj[aggregateType];
                 var childBars = null;
-                if (typeof term[1].field === 'string'){
-                    termCount = term[1].total[aggregateType];
+                if (typeof termObj.field === 'string'){
+                    termCount = termObj.total[aggregateType];
                 }
                 var maxYForBar = parent ? parent.count : largestExpCountForATerm;
                 var barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
                 var barNode = {
-                    'name' : Schemas.Term.toName(fieldObj.field, termKey),
-                    'term' : termKey,
-                    'count' : termCount,
-                    'field' : fieldObj.field,
-                    'attr' : {
-                        'width' : barWidth,
-                        'height' : barHeight
+                    'name'      : Schemas.Term.toName(fieldObj.field, termKey),
+                    'term'      : termKey,
+                    'count'     : termCount,
+                    'field'     : fieldObj.field,
+                    'attr'      : {
+                        'width'     : barWidth,
+                        'height'    : barHeight
                     },
-                    'experiment_sets' : term[1].experiment_sets,
-                    'experiments' : term[1].experiments,
-                    'files' : term[1].files
+                    'experiment_sets' : termObj.experiment_sets,
+                    'experiments' : termObj.experiments,
+                    'files'     : termObj.files
                 };
-                if (typeof term[1].field === 'string') {
-                    barNode.bars = genBarData(term[1], { 'height' : barHeight }, barNode);
+                if (typeof termObj.field === 'string') {
+                    barNode.bars = genBarData(termObj, { 'height' : barHeight }, barNode);
                 }
                 if (parent){
                     barNode.parent = parent;
@@ -139,16 +137,16 @@ export const genChartBarDims = memoize(function(
 
 
 /**
- * Visualization component for the BarPlot. 
+ * Visualization component for the BarPlot.
  * Contains chart and labels only -- no controls.
  * To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
  * for adjusting its state to select Charting options.
  * Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiment_sets and props.filtered_experiment_sets.
- * 
+ *
  * @type {Component}
  * @see module:viz/chart-data-controller.Provider
  * @see module:viz/BarPlot.UIControlsWrapper
- * 
+ *
  * @prop {Object[]} experiment_sets - List of all expsets, with at least fields needed to aggregate by embedded.
  * @prop {Object[]} filtered_experiment_sets - List of selected expsets, with at least fields needed to aggregate by embedded.
  * @prop {Object[]} fields - List of at least one field objects, each containing at least 'field' property in object-dot-notation.
@@ -219,14 +217,6 @@ export class Chart extends React.PureComponent {
         'aggregateType' : 'experiments',
         'styleOptions' : null, // Can use to override default margins/style stuff.
     };
-    /*
-    static getDerivedStateFromProps(nextProps, ){
-        if (Chart.shouldPerformManualTransitions(nextProps, this.props)){
-            console.log('WILL DO SLOW TRANSITION');
-            this.setState({ transitioning : true });
-        }
-    }
-    */
 
     constructor(props){
         super(props);
@@ -247,12 +237,7 @@ export class Chart extends React.PureComponent {
         this.setState({ 'mounted' : false });
     }
 
-    componentWillUpdate(){
-        // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
-        barplot_color_cycler.resetCache();
-    }
-
-    /** 
+    /**
      * Gets style options for BarPlotChart instance. Internally, extends BarPlotChart.getDefaultStyleOpts() with props.styleOptions.
      * @returns {Object} Style options object.
      */
@@ -261,7 +246,7 @@ export class Chart extends React.PureComponent {
     /**
      * Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
      * Internally, runs BarPlotChart.barDataToLegendData().
-     * 
+     *
      * @deprecated
      * @returns {Array|null} List of fields containing terms. For use by legend component.
      */
@@ -305,14 +290,14 @@ export class Chart extends React.PureComponent {
                     'term'      : b.term,
                     'x'         : b.attr.x,
                     'opacity'   : 1
-                }; 
+                };
             }).sort(function(a,b){
                 return a.term < b.term ? -1 : 1;
             });
 
             return (
-                <div className="y-axis-bottom" style={{ 
-                    left : styleOpts.offset.left, 
+                <div className="y-axis-bottom" style={{
+                    left : styleOpts.offset.left,
                     right : styleOpts.offset.right,
                     height : Math.max(styleOpts.offset.bottom - 5, 0),
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
@@ -373,14 +358,17 @@ export class Chart extends React.PureComponent {
 
     }
 
-    /** 
+    /**
      * Parses props.experiment_sets and/or props.filtered_experiment_sets, depending on props.showType, aggregates experiments into fields,
      * generates data for chart bars, and then draws and returns chart wrapped in a div React element.
-     * 
+     *
      * @returns {JSX.Element} - Chart markup wrapped in a div.
      */
     render(){
         if (this.state.mounted === false) return <div/>;
+
+        // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
+        barplot_color_cycler.resetCache();
 
         var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props,
             styleOptions = this.styleOptions();

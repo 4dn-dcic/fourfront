@@ -79,8 +79,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
             'mounted'               : false,
             'self_planned_results'  : null,
             'self_results'          : null,
-            'encode_results'        : null,
-            'higlassVisible'        : true
+            'encode_results'        : null
         };
     }
 
