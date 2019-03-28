@@ -3,7 +3,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
 import Carousel from 'nuka-carousel';
 import { ajax, layout } from './../../util';
 import { BasicStaticSectionBody } from './BasicStaticSectionBody';
@@ -37,40 +36,11 @@ export class HomePageCarousel extends React.PureComponent {
         }
     };
 
-    constructor(props){
-        super(props);
-        this.refFunc = this.refFunc.bind(this);
-        this.state = {
-            'sections'  : null,
-            'loading'   : true,
-            'error'     : false
-        };
-    }
-
-    componentDidUpdate(pastProps){
-        if (pastProps.session !== this.props.session) {
-            this.searchForSlides();
-        }
-    }
-
-    componentDidMount(){
-        this.searchForSlides();
-    }
-
-    searchForSlides(){
-
-        var fallback = () => {
-            this.setState({ 'loading' : false, 'error' : true });
-        };
-
-        ajax.load('/search/?type=StaticSection&submitted_by.uuid=986b362f-4eb6-4a9c-8173-3ab267307e3a&section_type=Home+Page+Slide&sort=name', (resp)=>{
-            if (resp && Array.isArray(resp['@graph']) && resp['@graph'].length > 0){
-                this.setState({
-                    'sections' : resp['@graph'],
-                    'loading' : false
-                });
-            }
-        }, 'GET', fallback);
+    static refFunc(elem){
+        setTimeout(()=>{
+            if (!elem) return;
+            elem.style.opacity = 1;
+        }, 10);
     }
 
     renderSlide(section, idx){
@@ -78,7 +48,7 @@ export class HomePageCarousel extends React.PureComponent {
             image   = (section && section.options && section.options.image) || null,
             title   = (!section.title ? null :
                 <div className="title-container">
-                    <h4>{ section.title }</h4>
+                    <h4 className="mt-0">{ section.title }</h4>
                     { section.description ?
                         <p>{ section.description }</p>
                     : null }
@@ -95,7 +65,7 @@ export class HomePageCarousel extends React.PureComponent {
                             <BasicStaticSectionBody {..._.pick(section, 'filetype', 'content')} />
                         </div>
                     : null }
-                    </React.Fragment>
+                </React.Fragment>
             );
 
         if (link){
@@ -105,27 +75,12 @@ export class HomePageCarousel extends React.PureComponent {
         return <div className="homepage-carousel-slide" key={idx} children={inner} />;
     }
 
-    refFunc(elem){
-        setTimeout(()=>{
-            if (!elem) return;
-            elem.style.opacity = 1;
-        }, 100);
-    }
-
     render(){
 
-        var { settings, windowWidth } = this.props,
-            { loading, error, sections } = this.state;
+        var { settings, windowWidth, context } = this.props,
+            sections = context && context.carousel;
 
-        if (loading){
-            return (
-                <div className="text-center homepage-carousel-placeholder" key="placeholder">
-                    <i className="icon icon-spin icon-circle-o-notch"/>
-                </div>
-            );
-        }
-
-        if (error || !Array.isArray(sections) || sections.length === 0){
+        if (!sections || !Array.isArray(sections) || sections.length === 0){
             return null;
         }
 
@@ -141,12 +96,14 @@ export class HomePageCarousel extends React.PureComponent {
                 'slidesToShow' : 1
             });
         }
-        
+
 
         return (
-            <div className="homepage-carousel-container" ref={this.refFunc} style={{ 'opacity' : 0 }} key="carousel">
-                <div className="row">
-                    <Carousel {...settings} children={_.map(sections, this.renderSlide)} />
+            <div className="homepage-carousel-wrapper" ref={HomePageCarousel.refFunc} style={{ 'opacity' : 0 }} key="carousel">
+                <div className="container">
+                    <div className="row">
+                        <Carousel {...settings} children={_.map(sections, this.renderSlide)} />
+                    </div>
                 </div>
             </div>
         );

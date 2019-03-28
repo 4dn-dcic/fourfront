@@ -141,7 +141,9 @@ export class Announcements extends React.Component {
     render(){
         var { loaded, announcements, initiallyVisible, className, id, total } = this.props;
         if (loaded) return <AnnouncementsLoaded {...this.props} />;
-        if (!total) total = announcements.length;
+
+        var announcementsLength = (Array.isArray(announcements) && announcements.length) || 0;
+        if (!total) total = announcementsLength;
 
         var persistent, collapsible = null;
 
@@ -149,15 +151,15 @@ export class Announcements extends React.Component {
             return <Announcement key={announce.title} index={idx} section={announce} icon={collapsible ? true : false} />;
         }
 
-        if (announcements.length > initiallyVisible) {
+        if (announcementsLength === 0){
+            return <div className={'text-center ' + (className || '')} id={id}><em>No announcements</em></div>;
+        }
+
+        if (announcementsLength > initiallyVisible) {
             persistent = announcements.slice(0,initiallyVisible);
             collapsible = announcements.slice(initiallyVisible);
         } else {
             persistent = announcements;
-        }
-
-        if (!announcements || announcements.length === 0){
-            return <div className={'text-center ' + (className || '')} id={id}><em>No announcements</em></div>;
         }
 
         var onSeeMoreButtonClick = this.props.onSeeMoreClick || this.toggleOpen;

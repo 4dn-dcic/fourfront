@@ -142,31 +142,20 @@ export class StackedBlockVisual extends React.PureComponent {
             return tip;
         },
         'blockRenderedContents' : function(data, groupingTitle, groupingPropertyTitle){
-
-            var defaultOutput = <span>&nbsp;</span>;
-            var experimentsCountExpected = 0;
-
-            function getCount(num){
-                try {
-                    var n = parseInt(num);
-                    if (isNaN(n)) return 0;
-                    return n;
-                } catch (e){
-                    return 0;
-                }
-            }
-
+            var count = 0;
             if (Array.isArray(data)) {
-                experimentsCountExpected = sumPropertyFromList(data, 'experiments_expected_2017');
+                count = data.length;
             } else if (data) {
-                experimentsCountExpected = getCount(data.experiments_expected_2017);
+                count = 1;
             }
-
-            return experimentsCountExpected || defaultOutput;
+            if (count > 100){
+                return <span style={{ 'fontSize' : '0.95rem', 'position' : 'relative', 'top' : -1 }}>{ count }</span>;
+            }
+            return <span>{ count }</span>;
 
         },
         'groupValue' : function(data, groupingTitle, groupingPropertyTitle){
-            return sumPropertyFromList(StackedBlockGroupedRow.flattenChildBlocks(data), 'experiments_expected_2017');
+            return StackedBlockVisual.Row.flattenChildBlocks(data).length;
         }
     };
 
