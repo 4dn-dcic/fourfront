@@ -71,7 +71,8 @@ describe('Each Item View Works (most public recent only)', function () {
                         expect("PASS").to.equal("PASS");
                     } else {
                         cy.log("Visiting", currItemID);
-                        cy.visit(currItemID).get('h1.page-title').should('not.be.empty').end()
+                        cy.visit(currItemID).wait(300).end()
+                            .get('h1.page-title').should('not.be.empty').end()
                             .get('div.rc-tabs span[data-tab-key="details"]').should('contain', 'Details');
                     }
 

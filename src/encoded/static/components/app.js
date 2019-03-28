@@ -18,7 +18,7 @@ import * as store from '../store';
 import * as origin from '../libs/origin';
 import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
-import { FacetCharts } from './facetcharts';
+import { FacetCharts } from './browse/components/FacetCharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import PageTitle from './PageTitle';
@@ -89,8 +89,6 @@ class Timeout {
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
     }
 }
-
-
 
 /**
  * The root and top-most React component for our application.
@@ -191,6 +189,8 @@ export default class App extends React.Component {
     static defaultProps = {
         'sessionMayBeSet' : null
     };
+
+    static debouncedOnNavigationTooltipRebuild = _.debounce(ReactTooltip.rebuild, 500);
 
     /**
      * Does some initialization, checks if browser HistoryAPI is supported,
@@ -428,8 +428,8 @@ export default class App extends React.Component {
             analytics.registerPageView(this.props.href, this.props.context);
 
             // We need to rebuild tooltips after navigation to a different page.
-            ReactTooltip.rebuild();
-
+            // Add a debounce so it runs again after a delay, so other components get a chance to mount.
+            App.debouncedOnNavigationTooltipRebuild();
         }
 
 
@@ -1449,7 +1449,11 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return content;
+        return (
+            //<div className="container" id="content">
+                <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>
+            //</div>
+        );
     }
 }
 
@@ -1970,6 +1974,6 @@ class ContentErrorBoundary extends React.Component {
             return ContentErrorBoundary.errorNotice();
         }
 
-        return <div className="container" id="content">{ this.props.children }</div>;
+        return this.props.children; //<div className="container" id="content">{ this.props.children }</div>;
     }
 }
