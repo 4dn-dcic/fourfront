@@ -510,7 +510,7 @@ export class ResultRowColumnBlockValue extends React.Component {
 
 
 
-export class HeadersRow extends React.PureComponent {
+export class HeadersRow extends React.Component {
 
     static propTypes = {
         'columnDefinitions' : PropTypes.array.isRequired,//ResultRow.propTypes.columnDefinitions,
@@ -528,9 +528,9 @@ export class HeadersRow extends React.PureComponent {
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.headerColumnWidths !== this.props.headerColumnWidths){
-            this.setState({ 'widths' : nextProps.headerColumnWidths });
+    componentDidUpdate(pastProps){
+        if (pastProps.headerColumnWidths !== this.props.headerColumnWidths){
+            this.setState({ 'widths' : this.props.headerColumnWidths.slice(0) });
         }
     }
 
@@ -563,7 +563,11 @@ export class HeadersRow extends React.PureComponent {
                     + (isSticky ? ' stickied' : '')
                     + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')
                 } style={
-                    isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
+                    isSticky ? _.extend({}, stickyStyle, {
+                        'top'   : -stickyHeaderTopOffset,
+                        'left'  : tableLeftOffset,
+                        'width' : tableContainerWidth
+                    })
                 : null}>
                 <div className="columns clearfix" style={{
                     'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
@@ -575,7 +579,7 @@ export class HeadersRow extends React.PureComponent {
                             w = this.getWidthFor(i),
                             sorterIcon;
 
-                        if (!colDef.noSort && typeof sortBy === 'function' && w >= 50){                            
+                        if (!colDef.noSort && typeof sortBy === 'function' && w >= 50){
                             sorterIcon = <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />;
                         }
                         return (
