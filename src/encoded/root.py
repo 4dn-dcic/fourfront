@@ -213,7 +213,7 @@ def acl_from_settings(settings):
 
 
 @root
-class EncodedRoot(Root):
+class FourfrontRoot(Root):
     properties = {
         'title': 'Home',
         'portal_title': '4DN Data Portal',
@@ -230,7 +230,7 @@ class EncodedRoot(Root):
         return acl
 
     def get(self, name, default=None):
-        resource = super(EncodedRoot, self).get(name, None)
+        resource = super(FourfrontRoot, self).get(name, None)
         if resource is not None:
             return resource
         resource = self.connection.get_by_unique_key('page:location', name)
@@ -255,7 +255,7 @@ class EncodedRoot(Root):
 
     def jsonld_type(self):
         '''Inherits from '@type' calculated property of Root in snovault/resources.py'''
-        return ['HomePage', 'StaticPage'] + super(EncodedRoot, self).jsonld_type()
+        return ['HomePage', 'StaticPage'] + super(FourfrontRoot, self).jsonld_type()
 
     @calculated_property(schema={
         "title": "Static Page Content",
@@ -264,26 +264,39 @@ class EncodedRoot(Root):
     def content(self, request):
         '''Returns -object- with pre-named sections'''
         sections_to_get = ['home.introduction']
+        user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         return_list = []
         for section_name in sections_to_get:
-            try:
-                res = request.embed('/static-sections', section_name, '@@embedded', as_user=True)
+            try: # Can be caused by 404 / Not Found during indexing
+                res = request.embed('/static-sections', section_name, '@@embedded', as_user=user)
                 return_list.append(res)
-            except:
+            except KeyError:
                 pass
         return return_list
 
-#    @calculated_property(schema={
-#        "title": "Announcements",
-#        "type": "array"
-#    })
-#    def announcements(self, request):
-#        '''Returns list of latest announcements'''
-#        try:
-#            ## Doesn't go thru permissions correctly (status:draft visible to non-logged-in-users)
-#            return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=True).get('@graph', [])
-#        except KeyError:
-#            return [ ]
+    @calculated_property(schema={
+        "title": "Carousel Content",
+        "type": "array"
+    }, category="page")
+    def carousel(self, request):
+        '''Returns list of carousel slides'''
+        user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
+        try:
+            return request.embed('/search/?type=StaticSection&section_type=Home+Page+Slide&sort=name', as_user=user).get('@graph', [])
+        except KeyError: # Can be caused by 404 / Not Found during indexing
+            return []
+
+    @calculated_property(schema={
+        "title": "Announcements",
+        "type": "array"
+    }, category="page")
+    def announcements(self, request):
+        '''Returns list of latest announcements'''
+        user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
+        try:
+            return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=user).get('@graph', [])
+        except KeyError: # Can be caused by 404 / Not Found during indexing
+            return []
 
     @calculated_property(schema={
         "title": "Application version",

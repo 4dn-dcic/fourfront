@@ -240,7 +240,7 @@ class SingleUpdate extends React.Component {
                 styleObj.backgroundColor = "#dff0d8"; // Green-ish
         }
 
-        return(
+        return (
             <div className={"overview-blocks-header with-background mb-1" + (open ? ' is-open' : ' is-closed')} style={styleObj}>
                 <h5 className="release-section-title clickable with-accent" onClick={this.toggle}>
                     <span><i className={"expand-icon icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>{ updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>

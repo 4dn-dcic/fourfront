@@ -24,8 +24,6 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 }
 
-
-
 export class HiGlassViewConfigTabView extends React.PureComponent {
 
     static getTabObject(props, width){
@@ -533,8 +531,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             { saveLoading } = this.state,
             tooltip = "Save the current view shown below to this display";
 
-        if (!session) return null;
-
         var editPermission  = this.havePermissionToEdit();
 
         return (
@@ -549,10 +545,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             { cloneLoading } = this.state,
             tooltip = "Create your own new HiGlass Display based off of this one";
 
-        if (!session) return null;
-
         return (
-            <Button onClick={this.handleClone} disabled={cloneLoading} bsStyle="success" key="clonebtn" data-tip={tooltip}>
+            <Button onClick={this.handleClone} disabled={!session || cloneLoading} bsStyle="success" key="clonebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'clone')}/>&nbsp; Clone
             </Button>
         );
@@ -610,7 +604,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     render(){
-        var { isFullscreen, windowWidth, windowHeight, width } = this.props,
+        var { isFullscreen, windowWidth, windowHeight, width, session } = this.props,
             { addFileLoading, genome_assembly } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
@@ -626,12 +620,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             hiGlassComponentHeight = 600;
         }
 
+        // If the user isn't logged in, add a tooltip reminding them to log in.
+        var tooltip = null;
+        if (!session) {
+            tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
+        }
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
                         className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
-                    <CollapsibleItemViewButtonToolbar windowWidth={windowWidth} constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
+                    <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth} constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
                         return (
                             <span>
                                 <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu

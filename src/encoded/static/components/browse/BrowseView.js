@@ -4,16 +4,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
-import { MenuItem, Modal, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel, Collapse } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { Filters, navigate, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
-    SearchResultTable, defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, CustomColumnSelector, AboveTableControls, ExperimentSetDetailPane,
+    SearchResultTable, defaultColumnExtensionMap, columnsToColumnDefinitions,
+    SortController, SelectedFilesController, CustomColumnController, AboveTableControls, ExperimentSetDetailPane,
     FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
+
+//import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
@@ -23,28 +26,110 @@ var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 /**
  * Component for checkbox that is shown in display_title column (first), along with the expand/collapse toggle.
  * Handles/sets an 'intermediate' checked state if partial selection of files comprising the ExperimentSet.
+ *
+ * Component will extract files from ExperimentSet and compare to `props.selectedFiles` to see if all are selected
+ * or not.
  */
 class ExperimentSetCheckBox extends React.PureComponent {
 
-    static isDisabled(files){
-        return files.length === 0;
+    static filterSelectedFilesToOnesInExpSet(allFileTriplesForSet, selectedFiles){
+        return _.filter(allFileTriplesForSet, function(accessionTriple){
+            return typeof selectedFiles[accessionTriple] !== 'undefined';
+        });
     }
 
-    static isAllFilesChecked(selectedFiles, allFiles){
-        return selectedFiles.length === allFiles.length && !ExperimentSetCheckBox.isDisabled(allFiles);
+    constructor(props){
+        super(props);
+        this.setIndeterminateOnRefIfNeeded = this.setIndeterminateOnRefIfNeeded.bind(this);
+        this.onChange = this.onChange.bind(this);
+        this.checkboxRef = React.createRef();
     }
 
-    static isIndeterminate(selectedFiles, allFiles){
-        return selectedFiles.length > 0 && selectedFiles.length < allFiles.length;
+    componentDidMount(){
+        this.setIndeterminateOnRefIfNeeded();
+    }
+
+    componentDidUpdate(pastProps){
+        if (pastProps.selectedFiles !== this.props.selectedFiles){
+            // Try to avoid accessing DOM (`this.checkboxRef.current.indeterminate = indeterminate`) too frequently
+            // so do (more) JS calculation to try to avoid DOM changes.
+            var currAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(this.props.expSet),
+                pastAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(pastProps.expSet),
+                currSelectedFilesForSet = this.selectedFilesFromSet(currAllFilesKeyedByTriples, this.props.selectedFiles),
+                pastSelectedFilesForSet = this.selectedFilesFromSet(pastAllFilesKeyedByTriples, pastProps.selectedFiles);
+
+            if (currSelectedFilesForSet.length !== pastSelectedFilesForSet.length){
+                this.setIndeterminateOnRefIfNeeded();
+            }
+        }
+    }
+
+    setIndeterminateOnRefIfNeeded(){
+        var { expSet, selectedFiles } = this.props,
+            allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
+            indeterminate           = this.isIndeterminate(allFilesKeyedByTriples, selectedFiles);
+
+        if (this.checkboxRef.current){
+            this.checkboxRef.current.indeterminate = indeterminate;
+        }
+    }
+
+    expSetFilesToObjectKeyedByAccessionTriples = memoize(function(expSet){
+        var allFiles                = allFilesFromExperimentSet(expSet, true),
+            allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true),
+            allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
+        return allFilesKeyedByTriples;
+    });
+
+    selectedFilesFromSet = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        var accessionTriples = _.keys(allFilesKeyedByTriplesForSet);
+        return ExperimentSetCheckBox.filterSelectedFilesToOnesInExpSet(accessionTriples, selectedFiles);
+    });
+
+    isAllFilesChecked = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        var selectedFilesForSetLen = this.selectedFilesFromSet(allFilesKeyedByTriplesForSet, selectedFiles).length,
+            allFileAccessionTriplesLen = _.keys(allFilesKeyedByTriplesForSet).length;
+
+        return allFileAccessionTriplesLen > 0 && selectedFilesForSetLen === allFileAccessionTriplesLen;
+    });
+
+    isIndeterminate = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        var selectedFilesForSet = this.selectedFilesFromSet(allFilesKeyedByTriplesForSet, selectedFiles);
+        return (
+            Array.isArray(selectedFilesForSet) && selectedFilesForSet.length > 0 && selectedFilesForSet.length < _.keys(allFilesKeyedByTriplesForSet).length
+        );
+    });
+
+    isDisabled = memoize(function(allFilesKeyedByTriplesForSet){
+        return _.keys(allFilesKeyedByTriplesForSet).length === 0;
+    });
+
+    onChange(e){
+        var { expSet, selectedFiles, selectFile, unselectFile } = this.props;
+
+        var allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
+            isAllFilesChecked       = this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles),
+            allFileAccessionTriples = _.keys(allFilesKeyedByTriples);
+
+        if (!isAllFilesChecked){
+            var selectedFilesForSet     = this.selectedFilesFromSet(allFilesKeyedByTriples, selectedFiles),
+                fileTriplesToSelect     = _.difference(allFileAccessionTriples, selectedFilesForSet),
+                triplePlusFileObjs      = _.map(fileTriplesToSelect, function(triple){
+                    return [ triple, allFilesKeyedByTriples[triple] ];
+                });
+            selectFile(triplePlusFileObjs);
+        } else if (isAllFilesChecked) {
+            unselectFile(allFileAccessionTriples);
+        }
     }
 
     render(){
-        var { checked, disabled, onChange, indeterminate } = this.props;
-        return(
-            <input {...{ checked, disabled, onChange }} type="checkbox" className="expset-checkbox" ref={function(r){
-                if (r) r.indeterminate = (checked ? false : indeterminate);
-            }} />
-        );
+        var { expSet, selectedFiles } = this.props,
+            allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
+            disabled                = this.isDisabled(allFilesKeyedByTriples),
+            checked                 = !disabled && this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles);
+
+        return <input {...{ checked, disabled }} onChange={this.onChange} type="checkbox" className="expset-checkbox" ref={this.checkboxRef} />;
     }
 }
 
@@ -58,10 +143,33 @@ class ExperimentSetCheckBox extends React.PureComponent {
  */
 class ResultTableContainer extends React.PureComponent {
 
+    static colDefOverridesFull(selectedFiles, columnExtensionMap, selectFile, unselectFile){
+        if (typeof selectedFiles === 'undefined'){
+            // We don't need to add checkbox(es) for file selection.
+            return columnExtensionMap || null;
+        }
+
+        // Add Checkboxes
+        return _.extend({}, columnExtensionMap, {
+            'display_title' : _.extend({}, defaultColumnExtensionMap.display_title, {
+                'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
+                'render' : (expSet, columnDefinition, paneProps, width) => {
+                    var origTitleBlock          = defaultColumnExtensionMap.display_title.render(expSet, columnDefinition, paneProps, width),
+                        newChildren             = origTitleBlock.props.children.slice(0);
+
+                    newChildren[2] = newChildren[1];
+                    newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
+                    newChildren[1] = <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />;
+                    return React.cloneElement(origTitleBlock, { 'children' : newChildren });
+                }
+            })
+        });
+    }
+
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
         'href'                      : PropTypes.string.isRequired,
-        'columnExtensionMap' : PropTypes.object,
+        'columnExtensionMap'        : PropTypes.object,
         'context'                   : PropTypes.shape({
             'columns' : PropTypes.objectOf(PropTypes.object).isRequired
         }),
@@ -83,16 +191,9 @@ class ResultTableContainer extends React.PureComponent {
         this.isTermSelected = this.isTermSelected.bind(this);
         this.onFilter = onFilterHandlerMixin.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
-        this.filterSelectedFilesToOnesInExpSet = this.filterSelectedFilesToOnesInExpSet.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
         this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
-
-        // Primarily used here for caching some values re: PureComponents further down rendering tree.
-        var colDefOverrides   = this.colDefOverrides(props),
-            columnDefinitions = this.getColumnDefinitions(props, colDefOverrides);
-
-        this.state = { colDefOverrides, columnDefinitions };
 
         this.searchResultTableRef = React.createRef();
     }
@@ -104,32 +205,6 @@ class ResultTableContainer extends React.PureComponent {
         return dimContainer && dimContainer.resetWidths();
     }
 
-    /**
-     * @todo Refactor into memoized functions.
-     */
-    UNSAFE_componentWillReceiveProps(nextProps){
-        var stateChange = {};
-        if (nextProps.columnExtensionMap !== this.props.columnExtensionMap || !!(this.props.selectedFiles) !== !!(nextProps.selectedFiles) ){
-            stateChange.colDefOverrides = this.colDefOverrides(nextProps);
-        }
-        if (nextProps.context !== this.props.context){
-            stateChange.columnDefinitions = this.getColumnDefinitions(nextProps, stateChange.colDefOverrides || this.state.colDefOverrides);
-        }
-        if (_.keys(stateChange).length > 0){
-            this.setState(stateChange);
-        }
-    }
-
-    filterSelectedFilesToOnesInExpSet(allFilesForSet, selectedFiles = this.props.selectedFiles){
-        var max = allFilesForSet.length;
-        var selected = [];
-        for (var i = 0; i < max; i++){
-            if (typeof selectedFiles[allFilesForSet[i]] !== 'undefined'){
-                selected.push(allFilesForSet[i]);
-            }
-        }
-        return selected;
-    }
 
     /**
      * Builds final form of column definitions to be rendered by table.
@@ -138,8 +213,8 @@ class ResultTableContainer extends React.PureComponent {
      * @param {Object} [props=this.props] Current or next props.
      * @returns {ColumnDefinition[]} Final column definitions.
      */
-    getColumnDefinitions(props = this.props, colDefOverrides = this.state.colDefOverrides){
-        return columnsToColumnDefinitions(props.context.columns, colDefOverrides);
+    getColumnDefinitions(props = this.props){
+        return columnsToColumnDefinitions(props.context.columns, this.colDefOverrides());
     }
 
     isTermSelected(term, facet){
@@ -152,66 +227,12 @@ class ResultTableContainer extends React.PureComponent {
      * if `props.selectedFiles` are passed in as well.
      * If no selected files data structure is being fed through props, this function returns `props.columnExtensionMap`.
      *
-     * Return value gets cached to state.colDefOverrides.
-     *
      * @param {{ selectedFiles?: Object, columnExtensionMap : ColumnDefinition }} props - Current component props.
      * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
      */
     colDefOverrides(props = this.props){
-        if (typeof props.selectedFiles === 'undefined'){
-            // We don't need to add checkbox(es) for file selection.
-            return props.columnExtensionMap || null;
-        }
-
-        var _this = this;
-
-        // Add Checkboxes
-        return _.extend({}, props.columnExtensionMap, {
-            'display_title' : _.extend({}, defaultColumnExtensionMap.display_title, {
-                'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
-                'render' : (expSet, columnDefinition, paneProps, width) => {
-                    var origTitleBlock          = defaultColumnExtensionMap.display_title.render(expSet, columnDefinition, paneProps, width),
-                        newChildren             = origTitleBlock.props.children.slice(0),
-                        allFiles                = allFilesFromExperimentSet(expSet, true),
-                        allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true),
-                        allFilesKeyedByTriples  = _.object(_.zip(allFileAccessionTriples, allFiles));
-
-                    allFileAccessionTriples = allFileAccessionTriples.sort();
-
-                    var selectedFilesForSet = _this.filterSelectedFilesToOnesInExpSet(allFileAccessionTriples); //getSelectedFileForSet(allFileIDs);
-                    newChildren[2] = newChildren[1];
-                    newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
-                    var isAllFilesChecked = ExperimentSetCheckBox.isAllFilesChecked(selectedFilesForSet, allFileAccessionTriples);
-                    newChildren[1] = (
-                        <ExperimentSetCheckBox
-                            key="checkbox"
-                            checked={isAllFilesChecked}
-                            indeterminate={ExperimentSetCheckBox.isIndeterminate(selectedFilesForSet, allFileAccessionTriples)}
-                            disabled={ExperimentSetCheckBox.isDisabled(allFileAccessionTriples)}
-                            onChange={(evt)=>{
-                                if (!isAllFilesChecked){
-                                    var fileTriplesToSelect = _.difference(allFileAccessionTriples, selectedFilesForSet);
-                                    props.selectFile(fileTriplesToSelect.map(function(triple){
-                                        var fileAccession = (allFileAccessionTriples[triple] || {}).accession || null;
-                                        //var experiment = null;
-                                        //if (fileAccession){
-                                        //    experiment = expFxn.findExperimentInSetWithFileAccession(expSet.experiments_in_set, fileAccession);
-                                        //}
-                                        return [ // [file accessionTriple, meta]
-                                            triple,
-                                            allFilesKeyedByTriples[triple]
-                                        ];
-                                    }));
-                                } else if (isAllFilesChecked) {
-                                    props.unselectFile(allFileAccessionTriples);
-                                }
-                            }}
-                        />
-                    );
-                    return React.cloneElement(origTitleBlock, { 'children' : newChildren });
-                }
-            })
-        });
+        var { selectedFiles, selectFile, unselectFile, columnExtensionMap } = props;
+        return ResultTableContainer.colDefOverridesFull(selectedFiles, columnExtensionMap, selectFile, unselectFile);
     }
 
     handleClearFilters(evt){
@@ -225,15 +246,16 @@ class ResultTableContainer extends React.PureComponent {
             <ExperimentSetDetailPane
                 {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth')}
                 {...{ result, containerWidth, toggleExpandCallback }}
-                href={this.props.href || this.props.searchBase} paddingWidth={47}
+                href={this.props.href} paddingWidth={47}
             />
         );
     }
 
     render() {
-        var { context, href, searchBase, countExternalSets, session, browseBaseState, schemas, windowHeight,
+        var { context, href, countExternalSets, session, browseBaseState, schemas, windowHeight,
             totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets } = this.props,
-            showClearFiltersButton  = _.keys(Filters.currentExpSetFilters() || {}).length > 0;
+            showClearFiltersButton = _.keys(Filters.currentExpSetFilters() || {}).length > 0,
+            columnDefinitions = this.getColumnDefinitions();
 
         return (
             <div className="row">
@@ -243,7 +265,7 @@ class ResultTableContainer extends React.PureComponent {
                         <FacetList {...{ session, browseBaseState, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
                             orientation="vertical" className="with-header-bg" filters={context.filters}
                             isTermSelected={this.isTermSelected} onFilter={this.onFilter}
-                            itemTypeForSchemas="ExperimentSetReplicate" href={href || searchBase}
+                            itemTypeForSchemas="ExperimentSetReplicate" href={href}
                             onClearFilters={this.handleClearFilters} />
                     </div>
                     :
@@ -255,15 +277,14 @@ class ResultTableContainer extends React.PureComponent {
                             'columns', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles',
                             'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen', 'isFullscreen'
                         )}
-                        parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={this.state.columnDefinitions}
+                        parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
                         showSelectedFileCount />
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
-                        {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth }}
+                        {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
                         ref={this.searchResultTableRef}
                         results={context['@graph']}
-                        columnDefinitions={this.state.columnDefinitions}
                         renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78} />
+                        stickyHeaderTopOffset={-78} key={href} />
                 </div>
             </div>
         );
@@ -313,7 +334,7 @@ export default class BrowseView extends React.Component {
      * @param {SearchResponse} context - Browse search result with at least 'facets'.
      * @returns {number} Count of external experiment sets.
      */
-    static externalDataSetsCount(context){
+    static externalDataSetsCount = memoize(function(context){
         var projectFacetTerms = (
             Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : []
         );
@@ -321,7 +342,44 @@ export default class BrowseView extends React.Component {
             if (projectTermObj.key === '4DN') return sum; // continue.
             return sum + projectTermObj.doc_count;
         }, 0);
+    });
+
+    /**
+     * Function which is passed into a `.filter()` call to
+     * filter context.facets down in response to frontend-state.
+     *
+     * Currently is meant to filter out Award and Project facets if
+     * we're _not_ showing any external data, as determined via the
+     * prop `browseBaseState` (string).
+     *
+     * @param {{ field: string }} facet - Object representing a facet.
+     * @returns {boolean} Whether to keep or discard facet.
+     */
+    static filterFacet(facet, browseBaseState, session){
+        if (facet.hide_from_view) return false;
+
+        // Exclude facets which are part of browse base state filters.
+        if (browseBaseState){
+            var browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
+        }
+
+        if (facet.field.substring(0, 6) === 'audit.'){
+            if (session && JWT.isLoggedInAsAdmin()) return true;
+            return false; // Exclude audit facets temporarily, if not logged in as admin.
+        }
+
+        return true;
     }
+
+    static transformedFacets = memoize(function(context, browseBaseState, session){
+        return _.filter(
+            context.facets || [],
+            function(facet, index, all){
+                return BrowseView.filterFacet(facet, browseBaseState, session);
+            }
+        );
+    });
 
     /**
      * PropTypes for component.
@@ -347,8 +405,6 @@ export default class BrowseView extends React.Component {
      */
     constructor(props){
         super(props);
-        this.filterFacet = this.filterFacet.bind(this);
-        this.transformedFacets = this.transformedFacets.bind(this);
 
         /**
          * Internal state for root-level BrowseView component.
@@ -547,42 +603,6 @@ export default class BrowseView extends React.Component {
     }
 
     /**
-     * Function which is passed into a `.filter()` call to
-     * filter context.facets down in response to frontend-state.
-     *
-     * Currently is meant to filter out Award and Project facets if
-     * we're _not_ showing any external data, as determined via the
-     * prop `browseBaseState` (string).
-     *
-     * @param {{ field: string }} facet - Object representing a facet.
-     * @param {number} facetIdx - Index of current facet being iterated on.
-     * @param {Object[]} all - All facets.
-     * @returns {boolean} Whether to keep or discard facet.
-     */
-    filterFacet(facet, facetIdx, all){
-        if (facet.hide_from_view) return false;
-
-        var { browseBaseState, session } = this.props;
-
-        // Exclude facets which are part of browse base state filters.
-        if (browseBaseState){
-            var browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
-            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
-        }
-
-        if (facet.field.substring(0, 6) === 'audit.'){
-            if (session && JWT.isLoggedInAsAdmin()) return true;
-            return false; // Exclude audit facets temporarily, if not logged in as admin.
-        }
-
-        return true;
-    }
-
-    transformedFacets(){
-        return _.filter(this.props.context.facets || [], this.filterFacet);
-    }
-
-    /**
      * Renders out components for managing state and view of Browse table in the following order:
      * `SelectedFilesController` -> `CustomColumnController` -> `SortController` -> `ResultTableContainer`.
      *
@@ -594,7 +614,9 @@ export default class BrowseView extends React.Component {
             results             = context['@graph'],
             hrefParts           = url.parse(href, true),
             countExternalSets   = BrowseView.externalDataSetsCount(context),
-            facets              = this.transformedFacets();
+            facets              = BrowseView.transformedFacets(context, browseBaseState, session);
+
+        //context = _.extend({}, context, { '@graph' : BROWSE['@graph'] });
 
         // No results found!
         if (context.total === 0 && context.notification){
@@ -616,7 +638,7 @@ export default class BrowseView extends React.Component {
         }
 
         return (
-            <div className="browse-page-container search-page-container" id="browsePageContainer">
+            <div className="browse-page-container search-page-container container" id="content">
                 <SelectedFilesController href={href}>
                     <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
                         <SortController href={href} context={context} navigate={this.props.navigate || navigate}>

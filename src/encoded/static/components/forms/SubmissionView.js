@@ -1370,14 +1370,10 @@ export default class SubmissionView extends React.PureComponent{
         var bodyCol = this.state.fullScreen ? 'col-sm-12' : 'col-sm-9';
 
         // remove context and navigate from this.props
-        const{
-            context,
-            navigate,
-            ...others
-        } = this.props;
+        const { context, navigate, ...others } = this.props;
         var currObjDisplay = this.state.keyDisplay[currKey] || currType;
         return(
-            <div className="submission-view-page-container">
+            <div className="submission-view-page-container container" id="content">
                 <TypeSelectModal
                     show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={this.props.schemas}
                     buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
