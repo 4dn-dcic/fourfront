@@ -684,9 +684,8 @@ def parse_args(args):
                         default='all',
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
-    parser.add_argument('--outdir',
-                        help="the directory (relative to src/encoded) for output files",
-                        default='/')
+    parser.add_argument('--outfile',
+                        help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
                         default=False,
                         action='store_true',
@@ -735,13 +734,15 @@ def main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
     '''
-    args = parse_args(sys.argv[1:])  # to facilitate testing
-    postfile_name = 'ontology_term.json'
-    from pkg_resources import resource_filename
-    outdir = resource_filename('encoded', args.outdir)
-    print('Writing to %s' % outdir)
+    args = parse_args(sys.argv[1:])
+    postfile = args.outfile
+    if not postfile:
+        postfile = 'ontology_term.json'
+    if '/' not in postfile:  # assume just a filename given
+        from pkg_resources import resource_filename
+        postfile = resource_filename('encoded', postfile)
 
-    postfile = outdir + postfile_name
+    print('Writing to %s' % postfile)
 
     # fourfront connection
     connection = connect2server(args.env, args.key)
