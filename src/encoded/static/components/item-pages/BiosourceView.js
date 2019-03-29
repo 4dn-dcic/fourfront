@@ -2,9 +2,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import _ from 'underscore';
 import { Button, Collapse } from 'react-bootstrap';
 import { console, object, Schemas, DateUtility } from './../util';
-import { FormattedInfoBlock } from './components';
+import { ExperimentSetTableTabView } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
 
@@ -17,6 +18,16 @@ export default class BiosourceView extends DefaultItemView {
         var context = this.props.context;
 
         initTabs.push(BiosourceViewOverview.getTabObject(context, this.props.schemas));
+
+        initTabs.push(ExperimentSetTableTabView.getTabObject(_.extend({}, this.props, {
+            'requestHref' : (
+                "/search/?type=ExperimentSetReplicate&award.project=4DN&experimentset_type=replicate&" +
+                "experiments_in_set.biosample.biosource.display_title=" + this.props.context.display_title
+            ),
+            'title' : function(props, { totalCount }){
+                return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
+            }
+        })));
 
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
     }

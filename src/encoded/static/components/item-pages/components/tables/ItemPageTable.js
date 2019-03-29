@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { object, ajax, Schemas, layout, isServerSide } from './../../../util';
 import {
@@ -24,7 +25,8 @@ export class ItemPageTable extends React.Component {
         'renderDetailPane' : PropTypes.func,
         'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
         'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string),
-        'windowWidth' : PropTypes.number.isRequired
+        'windowWidth' : PropTypes.number.isRequired,
+        'minWidth' : 720
     };
 
     static defaultProps = {
@@ -90,7 +92,7 @@ export class ItemPageTable extends React.Component {
 
     render(){
         var { results, loading, columnExtensionMap, columns, width, windowWidth,
-            defaultOpenIndices, renderDetailPane } = this.props;
+            defaultOpenIndices, renderDetailPane, minWidth } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -100,22 +102,22 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var columnDefinitions   = columnsToColumnDefinitions(columns, columnExtensionMap),
-            responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
+        var columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap);
 
-        width = width || layout.gridContainerWidth(windowWidth);
+        width = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth)));
 
         if (width){
-            columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
+            columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
+                width,
+                columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
+            );
         }
 
-        var commonRowProps = { width, columnDefinitions, responsiveGridState, renderDetailPane };
+        var commonRowProps = { width, columnDefinitions, renderDetailPane };
 
         return (
             <div className="item-page-table-container clearfix">
-                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ?
-                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
-                : null }
+                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
                 { _.map(results, (result, rowIndex)=>{
                     var atId = object.atIdFromObject(result);
                     return (
@@ -140,13 +142,13 @@ class ItemPageTableRow extends React.PureComponent {
         }, 0);
     }
 
-    static scaleColumnDefinitionWidths(realWidth, columnDefinitions){
-        var baseWidth = ItemPageTableRow.totalColumnsBaseWidth(columnDefinitions);
-        var scale = realWidth / baseWidth;
-        return columnDefinitions.map(function(c){
+    static scaleColumnDefinitionWidths = memoize(function(realWidth, columnDefinitions){
+        var baseWidth = ItemPageTableRow.totalColumnsBaseWidth(columnDefinitions),
+            scale = realWidth / baseWidth;
+        return _.map(columnDefinitions, function(c){
             return _.extend({}, c, { 'width' : Math.floor(scale * c.baseWidth) });
         });
-    }
+    });
 
     constructor(props){
         super(props);
@@ -162,17 +164,12 @@ class ItemPageTableRow extends React.PureComponent {
 
     renderValue(colDefinition, result, columnIndex){
         return (
-            <ResultRowColumnBlockValue
-                {...this.props}
-                columnDefinition={colDefinition}
-                columnNumber={columnIndex}
-                key={colDefinition.field}
-                schemas={this.props.schemas || null}
-                result={result}
-                tooltip={true}
+            <ResultRowColumnBlockValue {...this.props}
+                columnDefinition={colDefinition} columnNumber={columnIndex}
+                key={colDefinition.field} schemas={this.props.schemas || null}
+                result={result} tooltip={true}
                 className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
-                detailOpen={this.state.open}
-                toggleDetailOpen={this.toggleOpen}
+                detailOpen={this.state.open} toggleDetailOpen={this.toggleOpen}
                 renderDetailPane={this.props.renderDetailPane}
             />
         );
@@ -238,13 +235,12 @@ class ItemPageTableRow extends React.PureComponent {
     }
 
     render(){
+        const { result, rowNumber, width, renderDetailPane } = this.props;
         return (
             <div className="item-page-table-row-container">
-                { this.props.responsiveGridState === 'xs' || this.props.responsiveGridState === 'sm' ? this.renderRowOfBlocks() : this.renderRowOfColumns() }
-                { this.state.open && typeof this.props.renderDetailPane === 'function' ?
-                    <div className="inner-wrapper">
-                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.width, this.props) }
-                    </div>
+                { this.renderRowOfColumns() }
+                { this.state.open && typeof renderDetailPane === 'function' ?
+                    <div className="inner-wrapper">{ renderDetailPane(result, rowNumber, width, this.props) }</div>
                 : null }
             </div>
         );

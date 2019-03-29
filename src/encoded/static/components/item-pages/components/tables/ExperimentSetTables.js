@@ -141,7 +141,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     }
 
     render(){
-        var { windowWidth, context, requestHref, title } = this.props;
+        var { windowWidth, requestHref, title } = this.props;
         var totalCount = this.state.totalCount;
 
         if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
