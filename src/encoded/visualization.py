@@ -1024,10 +1024,10 @@ def resize_1d_tracks(views):
         horizontal_vector_heatmap_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-vector-heatmap") ]
 
         # Get the height allocated for all of the top tracks.
-        remaining_height = 565
+        remaining_height = 265
         # If there is a central view, the top rows will have less height to work with.
         if view_info["has_center_content"]:
-            remaining_height = 200
+            remaining_height = 100
 
         # Remove the height from the chromosome and gene-annotation tracks
         for track in gene_chromosome_tracks:
