@@ -707,7 +707,7 @@ class AddFileButton extends React.PureComponent {
             tooltip         = "Search for a file and add it to the display.",
             dropMessage     = "Drop a File here.",
             searchURL       = (
-                '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value'
+                '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
                 + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
             );
 
