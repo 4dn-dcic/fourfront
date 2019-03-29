@@ -167,6 +167,7 @@ def test_load_data_iter_response_fail(testapp):
         assert res.text.count('SKIP:') == 0
         # one exception should be encountered
         assert res.text.count('ERROR:') == 1
+        assert 'Bad response: 422 Unprocessable Entity' in res.text
 
 
 def test_load_all_gen(testapp):
