@@ -512,7 +512,7 @@ export class ResultRowColumnBlockValue extends React.Component {
 
 
 
-export class HeadersRow extends React.PureComponent {
+export class HeadersRow extends React.Component {
 
     static propTypes = {
         'columnDefinitions' : PropTypes.array.isRequired,//ResultRow.propTypes.columnDefinitions,
@@ -529,9 +529,8 @@ export class HeadersRow extends React.PureComponent {
         };
     }
 
-    componentDidUpdate(pastProps, pastState){
+    componentDidUpdate(pastProps){
         if (pastProps.headerColumnWidths !== this.props.headerColumnWidths){
-            console.log('TTT');
             this.setState({ 'widths' : this.props.headerColumnWidths.slice(0) });
         }
     }
@@ -567,7 +566,11 @@ export class HeadersRow extends React.PureComponent {
                     + (isSticky ? ' stickied' : '')
                     + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')
                 } style={
-                    isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
+                    isSticky ? _.extend({}, stickyStyle, {
+                        'top'   : -stickyHeaderTopOffset,
+                        'left'  : tableLeftOffset,
+                        'width' : tableContainerWidth
+                    })
                 : null}>
                 <div className="columns clearfix" style={{
                     'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
