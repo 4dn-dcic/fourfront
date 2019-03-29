@@ -61,7 +61,7 @@ def main():
     else:
         # process the individual item responses from the generator.
         # each item should be "POST: <uuid>,", "PATCH: <uuid>,", or "SKIP: <uuid>"
-        load_res = {'POST': [], 'PATCH': [], 'SKIP': []}
+        load_res = {'POST': [], 'PATCH': [], 'SKIP': [], 'ERROR': []}
         for val in res.text.split(','):
             val_split = val.strip().split(': ')
             if not val or len(val_split) != 2:
@@ -70,8 +70,10 @@ def main():
                 load_res[val_split[0]].append(val_split[1])
         logger.info("Success! Attempted to load %s items. Result: POSTed %s, PATCHed %s, skipped %s"
                     % (num_to_load, len(load_res['POST']), len(load_res['PATCH']), len(load_res['SKIP'])))
+        if load_res['ERROR']:
+            logger.error("ERROR encountered during load_data! Error: %s" % load_res['ERROR'])
         if (len(load_res['POST']) + len(load_res['SKIP'])) > len(load_res['PATCH']):
-            logger.error("The following items POSTed / skipped but did not PATCH: %s"
+            logger.error("The following items passed round I (POST/skip) but not round II (PATCH): %s"
                          % (set(load_res['POST'] + load_res['SKIP']) - set(load_res['PATCH'])))
     logger.info("Finished request in %s" % str(datetime.now() - start))
 

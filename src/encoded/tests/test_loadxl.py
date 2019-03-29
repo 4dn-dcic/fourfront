@@ -2,6 +2,7 @@ import pytest
 from encoded import loadxl
 import json
 from unittest import mock
+from past.builtins import basestring
 from pkg_resources import resource_filename
 from encoded.commands.run_upgrader_on_inserts import get_inserts
 
@@ -141,6 +142,7 @@ def test_load_data_iter_response(testapp):
         assert res.text.count('PATCH:') == expected
         # this is the number of items that were skipped completely
         assert res.text.count('SKIP:') == 0
+        assert res.text.count('ERROR:') == 0
 
 
 def test_load_data_iter_response_fail(testapp):
@@ -163,6 +165,8 @@ def test_load_data_iter_response_fail(testapp):
         # no users should be successfully PATCHed due to missing links
         assert res.text.count('PATCH:') == 0
         assert res.text.count('SKIP:') == 0
+        # one exception should be encountered
+        assert res.text.count('ERROR:') == 1
 
 
 def test_load_all_gen(testapp):
@@ -186,26 +190,36 @@ def test_load_all_gen(testapp):
         assert res1.count('POST:') == expected
         assert res1.count('PATCH:') == expected
         assert res1.count('SKIP:') == 0
-        # do the same with CatchGenerator
+        assert res1.count('ERROR:') == 0
+        # do the same with LoadGenWrapper
         # items should be SKIP instead of POST, since they were already POSTed
         gen2 = loadxl.load_all_gen(testapp, data['store'], None,
                                    itype=data['itype'], from_json=True)
-        catch2 = loadxl.CatchGenerator(gen=gen2)
+        catch2 = loadxl.LoadGenWrapper(gen=gen2)
         res2 = b''.join([v for v in catch2]).decode()
         assert catch2.caught is None  # no Exception hit
         assert res2.count('POST:') == 0
         assert res2.count('PATCH:') == expected
         assert res2.count('SKIP:') == expected
-
-        # now handle error cases, both with using CatchGenerator and without
+        assert res1.count('ERROR:') == 0
+        # now handle error cases, both with using LoadGenWrapper and without
         # let's use an bad directory path to cause Exception
         bad_dir = resource_filename('encoded', 'tests/data/not-a-fdn-dir/')
         gen3 = loadxl.load_all_gen(testapp, bad_dir, None)
-        assert [v for v in gen3] == []  # failure
-        # the CatchGenerator will give use access to the Exception
+        res3 = b''.join([v for v in gen3]).decode()
+        assert res3.count('POST:') == 0
+        assert res3.count('PATCH:') == 0
+        assert res3.count('SKIP:') == 0
+        assert res3.count('ERROR:') == 1
+        assert 'Failure loading inserts' in res3
+        # the LoadGenWrapper will give use access to the Exception
         gen4 = loadxl.load_all_gen(testapp, bad_dir, None)
-        catch4 = loadxl.CatchGenerator(gen=gen4)
-        res4 = [v for v in catch4]
-        assert res4 == []
-        assert isinstance(catch4.caught, Exception)
-        assert 'Failure loading inserts' in str(catch4.caught)
+        catch4 = loadxl.LoadGenWrapper(gen=gen4)
+        res4 = b''.join([v for v in catch4]).decode()
+        assert res4.count('POST:') == 0
+        assert res4.count('PATCH:') == 0
+        assert res4.count('SKIP:') == 0
+        assert res4.count('ERROR:') == 1
+        assert 'Failure loading inserts' in res4
+        assert isinstance(catch4.caught, basestring)
+        assert 'Failure loading inserts' in catch4.caught

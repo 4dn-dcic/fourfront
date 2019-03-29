@@ -45,22 +45,29 @@ IS_ATTACHMENT = [
 ]
 
 
-class CatchGenerator(object):
+class LoadGenWrapper(object):
     """
-    Simple class that accepts a generator function and catches any return
-    value from that function (representative of a StopIteration).
-    If the caught value is an Exception, raise it on close()
-    Based off of: https://stackoverflow.com/questions/34073370
+    Simple class that accepts a generator function and handles errors by
+    setting self.caught to the error message.
     """
     def __init__(self, gen):
         self.gen = gen
         self.caught = None
 
     def __iter__(self):
-        self.caught = yield from self.gen
+        """
+        Iterate through self.gen and see if 'ERROR: ' bytes are in any yielded
+        value. If so, store the error message as self.caught and raise
+        StopIteration to halt the generator.
+        """
+        # self.caught = yield from self.gen
+        for iter in self.gen:
+            if b'ERROR:' in iter:
+                self.caught = iter.decode()
+            yield iter
 
     def close(self):
-        if self.caught and isinstance(self.caught, Exception):
+        if self.caught:
             logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
@@ -116,7 +123,7 @@ def load_data_view(context, request):
     if iter_resp:
         return Response(
             content_type = 'text/plain',
-            app_iter = CatchGenerator(
+            app_iter = LoadGenWrapper(
                 load_all_gen(testapp, inserts, None, overwrite=overwrite,
                              itype=itype, from_json=from_json)
             )
@@ -256,18 +263,21 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     from that function. Takes all of the same args as load_all_gen, so
     please reference that docstring.
 
-    This function uses CatchGenerator, which will catch a returned value from
+    This function uses LoadGenWrapper, which will catch a returned value from
     the execution of the generator, which is an Exception in the case of
     load_all_gen. Return that Exception if encountered, which is consistent
     with the functionality of load_all_gen.
     """
-    gen = CatchGenerator(
+    gen = LoadGenWrapper(
         load_all_gen(testapp, inserts, docsdir, overwrite, itype, from_json)
     )
     # run the generator; don't worry about the output
-    for v in gen:
+    for _ in gen:
         pass
-    return gen.caught  # will be an Exception if hit, otherwise None on success
+    # gen.caught will str error message on error, otherwise None on success
+    if gen.caught is not None:
+        return Exception(gen.caught)
+    return gen.caught
 
 
 def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
@@ -290,7 +300,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         Bytes with information on POSTed/PATCHed items
 
     Returns:
-        None if successful, otherwise an Exception
+        None if successful, otherwise a bytes error message
     """
     # TODO: deal with option of file to load (not directory struture)
     if docsdir is None:
@@ -313,7 +323,8 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         else:  # cannot get the file
             err_msg = 'Failure loading inserts from %s. Could not find matching file or directory.' % inserts
             print(err_msg)
-            return Exception(err_msg)
+            yield str.encode('ERROR: %s' % err_msg)
+            raise StopIteration
         # load from the directory/file
         for a_file in files:
             if use_itype:
@@ -339,8 +350,8 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         if itype:
             err_msg += ' for item type(s) %s' % itype
         print(err_msg)
-        return Exception(err_msg)
-
+        yield str.encode('ERROR: %s' % err_msg)
+        raise StopIteration
     # order Items
     all_types = list(store.keys())
     for ref_item in reversed(ORDER):
@@ -395,7 +406,8 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                 except Exception as e:
                     print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
                           a_type, str(first_fields), str(e)))
-                    return e
+                    yield str.encode('ERROR: %s' % str(e))
+                    raise StopIteration
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
         logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
@@ -417,7 +429,8 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
             except Exception as e:
                 print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
                       a_type, str(an_item), str(e)))
-                return e
+                yield str.encode('ERROR: %s' % str(e))
+                raise StopIteration
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 
     # explicit return upon finish
