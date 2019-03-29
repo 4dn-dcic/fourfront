@@ -45,11 +45,12 @@ def main():
     load_endpoint = '/'.join([auth['server'], 'load_data'])
     logger.info('load_ontology_terms: Starting POST to %s' % load_endpoint)
     json_data = {'config_uri': config_uri, 'itype': 'ontology_term',
-                 'iter_response': True}
+                 'overwrite': True, 'iter_response': True}
     with open(args.json_file) as infile:
         json_data['store'] = {'ontology_term': json.load(infile)}
+    num_to_load = len(json_data['store']['ontology_term'])
     logger.info('Will attempt to load %s ontology terms to %s'
-                % (len(json_data['store']['ontology_term']), auth['server']))
+                % (num_to_load, auth['server']))
     start = datetime.now()
     try:
         # sustained by returning Response.app_iter from loadxl.load_data
@@ -67,11 +68,11 @@ def main():
                 continue
             if val_split[0] in load_res:
                 load_res[val_split[0]].append(val_split[1])
-        logger.info("Success! Result: POSTed %s, PATCHed %s, skipped %s"
-                    % (len(load_res['POST']), len(load_res['PATCH']), len(load_res['SKIP'])))
-        if len(load_res['POST']) > len(load_res['PATCH']):
-            logger.error("The following items POSTed but did not PATCH: %s"
-                         % (set(load_res['POST']) - set(load_res['PATCH'])))
+        logger.info("Success! Attempted to load %s items. Result: POSTed %s, PATCHed %s, skipped %s"
+                    % (num_to_load, len(load_res['POST']), len(load_res['PATCH']), len(load_res['SKIP'])))
+        if (len(load_res['POST']) + len(load_res['SKIP'])) > len(load_res['PATCH']):
+            logger.error("The following items POSTed / skipped but did not PATCH: %s"
+                         % (set(load_res['POST'] + load_res['SKIP']) - set(load_res['PATCH'])))
     logger.info("Finished request in %s" % str(datetime.now() - start))
 
     # update sysinfo. Don't worry about doing this on local

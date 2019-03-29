@@ -118,7 +118,7 @@ def load_data_view(context, request):
             content_type = 'text/plain',
             app_iter = CatchGenerator(
                 load_all_gen(testapp, inserts, None, overwrite=overwrite,
-                         itype=itype, from_json=from_json)
+                             itype=itype, from_json=from_json)
             )
         )
     # otherwise, it is a regular view and we can call load_all as usual
@@ -264,9 +264,10 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     gen = CatchGenerator(
         load_all_gen(testapp, inserts, docsdir, overwrite, itype, from_json)
     )
-    gen_res = [v for v in gen]  # run the generator
-    # will be an Exception if hit, otherwise None (on success)
-    return gen.caught
+    # run the generator; don't worry about the output
+    for v in gen:
+        pass
+    return gen.caught  # will be an Exception if hit, otherwise None on success
 
 
 def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
