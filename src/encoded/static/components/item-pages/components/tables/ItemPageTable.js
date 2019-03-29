@@ -3,17 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import Draggable from 'react-draggable';
 import url from 'url';
 import queryString from 'querystring';
-import * as globals from './../../globals';
-import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import { RawFilesStackedTable } from './../../browse/components/file-tables';
+import { object, ajax, Schemas, layout, isServerSide } from './../../../util';
 import {
-    ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
-    defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './../../browse/components/table-commons';
-import { SearchResultDetailPane } from './../../browse/components/SearchResultDetailPane';
+    ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
+    HeadersRow, TableRowToggleOpenButton } from './../../../browse/components/table-commons';
+import { SearchResultDetailPane } from './../../../browse/components/SearchResultDetailPane';
 
 
 
@@ -43,7 +39,7 @@ export class ItemPageTable extends React.Component {
                         link            = object.itemUtil.atId(result),
                         isAnAccession   = false,
                         tooltip;
-    
+
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
 
                     if (link){ // Link instead of plaintext
@@ -117,7 +113,7 @@ export class ItemPageTable extends React.Component {
 
         return (
             <div className="item-page-table-container clearfix">
-                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ? 
+                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ?
                     <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
                 : null }
                 { _.map(results, (result, rowIndex)=>{
@@ -128,7 +124,7 @@ export class ItemPageTable extends React.Component {
                                 (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
                                 || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
                             } />
-                    );     
+                    );
                 }) }
             </div>
         );
@@ -136,7 +132,7 @@ export class ItemPageTable extends React.Component {
 
 }
 
-class ItemPageTableRow extends React.Component {
+class ItemPageTableRow extends React.PureComponent {
 
     static totalColumnsBaseWidth(columns){
         return _.reduce(columns, function(m, colDef){
@@ -159,7 +155,9 @@ class ItemPageTableRow extends React.Component {
     }
 
     toggleOpen(){
-        this.setState({ open : !this.state.open });
+        this.setState(function({ open }){
+            return { open : !open };
+        });
     }
 
     renderValue(colDefinition, result, columnIndex){
@@ -263,26 +261,16 @@ export class ItemPageTableLoader extends React.PureComponent {
         'windowWidth': PropTypes.number.isRequired
     };
 
-    static getInitialState(props){
-        return {
+    constructor(props){
+        super(props);
+        this.state = {
             'items' : null,
             'loading' : true,
             'itemIndexMapping' : _.object(_.map(props.itemUrls, function(url, i){ return [url, i]; }))
         };
     }
 
-    constructor(props){
-        super(props);
-        this.state = ItemPageTableLoader.getInitialState(props);
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (!_.isEqual(nextProps.itemUrls, this.props.itemUrls)){
-            this.setState(ItemPageTableLoader.getInitialState(nextProps), this.componentDidMount);
-        }
-    }
-
-    componentDidMount(){
+    loadItems(){
         var itemUrls = this.props.itemUrls,
             onFinishLoad = _.after(itemUrls.length, ()=>{
                 this.setState({ 'loading' : false });
@@ -306,6 +294,10 @@ export class ItemPageTableLoader extends React.PureComponent {
         }
     }
 
+    componentDidMount(){
+        this.loadItems();
+    }
+
     render(){
         return React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
     }
@@ -318,7 +310,10 @@ export class ItemPageTableSearchLoader extends React.Component {
     constructor(props){
         super(props);
         this.handleResponse = this.handleResponse.bind(this);
-        this.state = { 'loading' : false, 'results' : null };
+        this.state = {
+            'loading' : false,
+            'results' : null
+        };
     }
 
     componentDidMount(){
@@ -377,9 +372,9 @@ export class ItemPageTableSearchLoaderPageController extends React.Component {
 /**
  * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.
  * This will be the component to handle it (convert this.item_uris to one /search/ URI, override componentDidMount etc.)
- * 
+ *
  * Could then automatically detect in ItemPageLoader if length of @ids requested is > 20 or some random number, and auto use this component instead.
- * 
+ *
  * @export
  * @class ItemPageTableBatchLoader
  * @extends {ItemPageTableLoader}
