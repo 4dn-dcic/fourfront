@@ -877,16 +877,17 @@ class DimensioningContainer extends React.PureComponent {
 
     resetWidths(){
         // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
-        this.setState( ({ mounted })=>{
+        this.setState( ({ mounted }, { columnDefinitions, windowWidth }) => {
             return {
-                "widths" : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, mounted, props.windowWidth)
+                "widths" : DimensioningContainer.resetHeaderColumnWidths(columnDefinitions, mounted, windowWidth)
             };
         }, () => {
             vizUtil.requestAnimationFrame(()=>{
+                var { columnDefinitions, windowWidth } = this.props;
                 // 2. Upon render into DOM, decrease col sizes.
                 this.setState(_.extend(
                     this.getTableDims(),
-                    { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(props.columnDefinitions, 30, props.windowWidth) }
+                    { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(columnDefinitions, 30, windowWidth) }
                 ));
             });
         });
