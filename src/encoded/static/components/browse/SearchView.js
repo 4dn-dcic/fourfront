@@ -8,9 +8,8 @@ import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
 import { ajax, console, object, Filters, Schemas, DateUtility, navigate, JWT, typedefs } from './../util';
-import { Button, ButtonToolbar, ButtonGroup, Panel, Table, Collapse} from 'react-bootstrap';
-import { SortController, LimitAndPageControls, SearchResultTable, SearchResultDetailPane,
-    AboveTableControls, CustomColumnSelector, CustomColumnController, FacetList, onFilterHandlerMixin,
+import { SortController, SearchResultTable, SearchResultDetailPane,
+    AboveTableControls, CustomColumnController, FacetList, onFilterHandlerMixin,
     AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns
 } from './components';
 
@@ -224,7 +223,7 @@ class ControlsAndResults extends React.PureComponent {
                         {...{ hiddenColumns, columnDefinitions }} showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf} />
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                         'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
-                        {...{ hiddenColumns, results, columnDefinitions }}
+                        {...{ hiddenColumns, results, columnDefinitions }} key={href}
                         ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total} />
                 </div>
             </div>
