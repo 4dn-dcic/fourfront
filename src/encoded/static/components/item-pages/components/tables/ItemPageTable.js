@@ -25,8 +25,7 @@ export class ItemPageTable extends React.Component {
         'renderDetailPane' : PropTypes.func,
         'defaultOpenIndices' : PropTypes.arrayOf(PropTypes.number),
         'defaultOpenIds' : PropTypes.arrayOf(PropTypes.string),
-        'windowWidth' : PropTypes.number.isRequired,
-        'minWidth' : 720
+        'windowWidth' : PropTypes.number.isRequired
     };
 
     static defaultProps = {
@@ -78,7 +77,8 @@ export class ItemPageTable extends React.Component {
             "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
             "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
-        }
+        },
+        'minWidth' : 720
     };
 
     constructor(props){
@@ -102,18 +102,21 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap);
+        var columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap),
+            responsiveGridState = layout.responsiveGridState(windowWidth);
 
-        width = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth)));
+        width = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
 
-        if (width){
-            columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
-                width,
-                columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
-            );
+        if (!width || isNaN(width)){
+            throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
-        var commonRowProps = { width, columnDefinitions, renderDetailPane };
+        columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
+            width,
+            columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
+        );
+
+        var commonRowProps = { width, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
 
         return (
             <div className="item-page-table-container clearfix">
