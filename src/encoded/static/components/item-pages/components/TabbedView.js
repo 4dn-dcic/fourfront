@@ -100,6 +100,13 @@ export class TabbedView extends React.PureComponent {
     }
 
     static calculateAdditionalTabs = memoize(function(staticContentList, contents){
+
+        // If func, run it to return contents.
+        // Do this here so that memoization is useful, else will always be new instance
+        // of a `contents` array.
+        if (typeof contents === 'function') contents = contents();
+
+
         var resultArr = [];
         //
         // PART 1
@@ -167,6 +174,7 @@ export class TabbedView extends React.PureComponent {
     });
 
     static combineSystemAndCustomTabs = memoize(function(additionalTabs, contents){
+        if (typeof contents === 'function') contents = contents();
         var allTabs;
         if (additionalTabs.length === 0){
             allTabs = contents;
@@ -244,12 +252,18 @@ export class TabbedView extends React.PureComponent {
         var { contents, href } = props,
             hrefParts       = url.parse(href),
             hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
-            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
-            currKey         = foundContent && this.getActiveKey();
+            currKey         = this.getActiveKey();
 
-        if (!foundContent || currKey === hash){
+        if (currKey === hash){
             console.log('Already on tab', hash);
+            return false;
+        }
+
+        var allContentObjs  = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
+            foundContent    = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
+
+        if (!foundContent){
+            console.error('Could not find', hash);
             return false;
         }
 
@@ -273,20 +287,15 @@ export class TabbedView extends React.PureComponent {
 
     additionalTabs(){
         var { context, contents } = this.props,
-            resultArr = [],
             staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
 
         if (staticContentList.length === 0) return []; // No content defined for Item.
-
-        if (typeof contents === 'function') contents = contents();
 
         return TabbedView.calculateAdditionalTabs(staticContentList, contents);
     }
 
     render(){
         var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
-        if (typeof contents === 'function') contents = contents();
-        if (!Array.isArray(contents)) return null;
 
         var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
             tabsProps = {
