@@ -61,10 +61,10 @@ class LoadGenWrapper(object):
         StopIteration to halt the generator.
         """
         # self.caught = yield from self.gen
-        for iter in self.gen:
-            if b'ERROR:' in iter:
-                self.caught = iter.decode()
-            yield iter
+        for iter_val in self.gen:
+            if b'ERROR:' in iter_val:
+                self.caught = iter_val.decode()
+            yield iter_val
 
     def close(self):
         if self.caught:
@@ -350,8 +350,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         if itype:
             err_msg += ' for item type(s) %s' % itype
         print(err_msg)
-        e_str = str(e).replace('\n', '')
-        yield str.encode('ERROR: %s\n' % e_str)
+        yield str.encode('ERROR: %s' % err_msg)
         raise StopIteration
     # order Items
     all_types = list(store.keys())
