@@ -112,11 +112,11 @@ export class EmbeddedHiglassActions extends React.PureComponent {
 
     static defaultProps = {
         'parentComponentType' : BasicUserContentBody,
-        'descriptionProps' :  { 'className' : 'description' },
+        'showDescription' : true,
     };
 
     render(){
-        var { context, descriptionProps, parentComponentType } = this.props,
+        var { context, parentComponentType, showDescription } = this.props,
             btnProps = {
                 'href'      : object.itemUtil.atId(context),
                 'data-tip'  : "Open HiGlass display to add other data",
@@ -128,11 +128,13 @@ export class EmbeddedHiglassActions extends React.PureComponent {
         }
 
         return (
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'descriptionProps', 'parentComponentType')}>
-                <div {...descriptionProps} >
+            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType')}>
+                { showDescription ?
+                <div className="description" >
                     { context.description }
-                </div>
-                <div className="btn-container">
+                </div> :
+                null }
+                <div className={ showDescription ? "btn-container" : ""}>
                     <Button {...btnProps}>
                         <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                         Explore Data
