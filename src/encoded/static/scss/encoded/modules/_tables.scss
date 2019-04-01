@@ -1891,6 +1891,9 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 
 .item-page-table-container {
+	
+	overflow-x: auto;
+
 	.item-page-table-row-container {
 		position: relative;
 		border-bottom: 1px solid #eee;

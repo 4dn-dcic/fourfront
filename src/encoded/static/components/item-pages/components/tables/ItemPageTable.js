@@ -120,8 +120,8 @@ export class ItemPageTable extends React.Component {
 
         return (
             <div className="item-page-table-container clearfix">
-                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
-                { _.map(results, (result, rowIndex)=>{
+                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={width} />
+                { _.map(results, (result, rowIndex) => {
                     var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow {...this.props} {...commonRowProps}
@@ -179,60 +179,20 @@ class ItemPageTableRow extends React.PureComponent {
     }
 
     renderRowOfColumns(){
-        if (!Array.isArray(this.props.columnDefinitions)) {
-            console.error('No columns defined.');
-            return null;
-        }
-        var result = this.props.result;
-        return (
-            <div className={"table-row clearfix" + (typeof this.props.renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
-                {
-                    _.map(this.props.columnDefinitions, (col, index)=>{
-                        return (
-                            <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
-                                { this.renderValue(col, result, index) }
-                            </div>
-                        );
-                    })
-                }
-            </div>
-        );
-    }
+        var { columnDefinitions, result, renderDetailPane } = this.props;
 
-    renderRowOfBlocks(){
-        if (!Array.isArray(this.props.columnDefinitions)) {
+        if (!Array.isArray(columnDefinitions)) {
             console.error('No columns defined.');
             return null;
         }
-        var result = this.props.result;
+
         return (
-            <div className="table-row row clearfix">
-                {
-                    _.map(
-                        _.filter(this.props.columnDefinitions, (col, index)=>{
-                            if (!this.state.open && col.field !== 'display_title'){
-                                return false;
-                            }
-                            return true;
-                        }),
-                        (col, index)=>{
-                            var label;
-                            if (col.field !== 'display_title'){
-                                label = (
-                                    <div className="text-500 label-for-field">
-                                        { col.title || Schemas.Field.toName(col.field) }
-                                    </div>
-                                );
-                            }
-                            return (
-                                <div className={"column block column-for-" + col.field + (col.field === 'display_title' ? ' col-xs-12' : ' col-xs-6')} data-field={col.field}>
-                                    { label }
-                                    { this.renderValue(col, result) }
-                                </div>
-                            );
-                        }
-                    )
-                }
+            <div className={"table-row clearfix" + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
+                { _.map(columnDefinitions, (col, index) =>
+                    <div style={{ 'width' : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
+                        { this.renderValue(col, result, index) }
+                    </div>
+                )}
             </div>
         );
     }
@@ -240,7 +200,7 @@ class ItemPageTableRow extends React.PureComponent {
     render(){
         const { result, rowNumber, width, renderDetailPane } = this.props;
         return (
-            <div className="item-page-table-row-container">
+            <div className="item-page-table-row-container" style={{ width }}>
                 { this.renderRowOfColumns() }
                 { this.state.open && typeof renderDetailPane === 'function' ?
                     <div className="inner-wrapper">{ renderDetailPane(result, rowNumber, width, this.props) }</div>
