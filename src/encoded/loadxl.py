@@ -323,7 +323,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         else:  # cannot get the file
             err_msg = 'Failure loading inserts from %s. Could not find matching file or directory.' % inserts
             print(err_msg)
-            yield str.encode('ERROR: %s' % err_msg)
+            yield str.encode('ERROR: %s\n' % err_msg)
             raise StopIteration
         # load from the directory/file
         for a_file in files:
@@ -350,7 +350,8 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         if itype:
             err_msg += ' for item type(s) %s' % itype
         print(err_msg)
-        yield str.encode('ERROR: %s' % err_msg)
+        e_str = str(e).replace('\n', '')
+        yield str.encode('ERROR: %s\n' % e_str)
         raise StopIteration
     # order Items
     all_types = list(store.keys())
@@ -393,7 +394,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                 skip_exist += 1
                 if not overwrite:
                     skip_existing_items.add(an_item['uuid'])
-                yield str.encode('SKIP: %s,' % an_item['uuid'])
+                yield str.encode('SKIP: %s\n' % an_item['uuid'])
             else:
                 post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
                 post_first = format_for_attachment(post_first, docsdir)
@@ -402,11 +403,13 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     assert res.status_code == 201
                     posted += 1
                     # yield bytes to work with Response.app_iter
-                    yield str.encode('POST: %s,' % res.json['@graph'][0]['uuid'])
+                    yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
                 except Exception as e:
                     print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
                           a_type, str(first_fields), str(e)))
-                    yield str.encode('ERROR: %s' % str(e))
+                    # remove newlines from error, since they mess with generator output
+                    e_str = str(e).replace('\n', '')
+                    yield str.encode('ERROR: %s\n' % e_str)
                     raise StopIteration
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
@@ -425,11 +428,12 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                 assert res.status_code == 200
                 patched += 1
                 # yield bytes to work with Response.app_iter
-                yield str.encode('PATCH: %s,' % an_item['uuid'])
+                yield str.encode('PATCH: %s\n' % an_item['uuid'])
             except Exception as e:
                 print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
                       a_type, str(an_item), str(e)))
-                yield str.encode('ERROR: %s' % str(e))
+                e_str = str(e).replace('\n', '')
+                yield str.encode('ERROR: %s\n' % e_str)
                 raise StopIteration
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
 

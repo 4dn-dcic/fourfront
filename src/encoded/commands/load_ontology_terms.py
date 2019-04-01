@@ -62,12 +62,18 @@ def main():
         # process the individual item responses from the generator.
         # each item should be "POST: <uuid>,", "PATCH: <uuid>,", or "SKIP: <uuid>"
         load_res = {'POST': [], 'PATCH': [], 'SKIP': [], 'ERROR': []}
-        for val in res.text.split(','):
-            val_split = val.strip().split(': ')
-            if not val or len(val_split) != 2:
+        for val in res.text.split('\n'):
+            if val.startswith('POST') or val.startswith('SKIP'):
+                prefix_len = 4  # 'POST' or 'SKIP'
+            else:
+                prefix_len = 5  # 'PATCH' or 'ERROR'
+            # this is a bit weird, but we want to split out the POST/PATCH...
+            # and also remove ': ' from the value for each message
+            cat, msg = val[:prefix_len], val[prefix_len + 2:]
+            if not msg:
                 continue
-            if val_split[0] in load_res:
-                load_res[val_split[0]].append(val_split[1])
+            if cat in load_res:
+                load_res[cat].append(msg)
         logger.info("Success! Attempted to load %s items. Result: POSTed %s, PATCHed %s, skipped %s"
                     % (num_to_load, len(load_res['POST']), len(load_res['PATCH']), len(load_res['SKIP'])))
         if load_res['ERROR']:
