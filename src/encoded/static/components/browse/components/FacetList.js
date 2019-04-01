@@ -430,8 +430,8 @@ class Facet extends React.PureComponent {
 /**
  * Use this function as part of SearchView and BrowseView to be passed down to FacetList.
  * Should be bound to a component instance, with `this` providing 'href', 'context' (with 'filters' property), and 'navigate'.
- * 
- * @param {string} field - Field for which a Facet term was clicked on. 
+ *
+ * @param {string} field - Field for which a Facet term was clicked on.
  * @param {string} term - Term clicked on.
  * @param {function} callback - Any function to execute afterwards.
  * @param {boolean} [skipNavigation=false] - If true, will return next targetSearchHref instead of going to it. Use to e.g. batch up filter changes on multiple fields.
@@ -664,12 +664,12 @@ export class FacetList extends React.PureComponent {
         return (
             <div className={"facets-container facets" + (className ? ' ' + className : '')}>
                 <div className="row facets-header">
-                    <div className="col-xs-6 facets-title-column">
+                    <div className="col-xs-7 facets-title-column text-ellipsis-container">
                         <i className="icon icon-fw icon-filter"></i>
                         &nbsp;
                         <h4 className="facets-title">{ title }</h4>
                     </div>
-                    <div className={"col-xs-6 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
+                    <div className={"col-xs-5 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
                         <a href="#" onClick={onClearFilters} className={"btn btn-xs rounded " + clearButtonClassName}>
                             <i className="icon icon-times"></i> Clear All
                         </a>
