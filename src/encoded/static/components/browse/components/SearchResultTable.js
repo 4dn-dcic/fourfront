@@ -902,8 +902,7 @@ class DimensioningContainer extends React.PureComponent {
 
     renderHeadersRow({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}){
         var { columnDefinitions, windowWidth } = this.props,
-            { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset, widths, mounted } = this.state,
-            fullRowWidth = HeadersRow.fullRowWidth(columnDefinitions, mounted, widths, windowWidth);
+            { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset, widths, mounted } = this.state;
         return (
             <HeadersRow
                 {..._.pick(this.props, 'columnDefinitions', 'sortBy', 'sortColumn', 'sortReverse',
@@ -912,7 +911,7 @@ class DimensioningContainer extends React.PureComponent {
                 stickyHeaderTopOffset={this.stickyHeaderTopOffset()}
                 headerColumnWidths={this.state.widths} setHeaderWidths={this.setHeaderWidths}
                 tableLeftOffset={tableLeftOffset} tableContainerWidth={tableContainerWidth}
-                stickyStyle={style} isSticky={isSticky} width={fullRowWidth} />
+                stickyStyle={style} isSticky={isSticky} />
         );
     }
 

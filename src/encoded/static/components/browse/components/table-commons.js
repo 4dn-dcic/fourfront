@@ -570,7 +570,7 @@ export class HeadersRow extends React.Component {
     }
 
     render(){
-        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane, headerColumnWidths, width } = this.props,
+        var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane, headerColumnWidths } = this.props,
             isAdjustable = headerColumnWidths && this.state.widths;
 
         return (
@@ -585,7 +585,7 @@ export class HeadersRow extends React.Component {
                         'left'  : tableLeftOffset,
                         'width' : tableContainerWidth
                     }) : {
-                        'width' : width || null
+                        'width' : this.props.width || null // Only passed in from ItemPage
                     }}>
                 <div className="columns clearfix" style={{
                     'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
