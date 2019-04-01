@@ -145,11 +145,13 @@ export class IndividualItemTitle extends React.Component {
     constructor(props){
         super(props);
         this.toggle = this.toggle.bind(this);
-        this.state = { open : typeof props.defaultOpen === 'boolean' ? props.defaultOpen : false };
+        this.state = { 'open' : typeof props.defaultOpen === 'boolean' ? props.defaultOpen : false };
     }
 
     toggle(){
-        this.setState({ open : !this.state.open });
+        this.setState(({ open })=>{
+            return { 'open' : !open };
+        });
     }
 
     age(){
