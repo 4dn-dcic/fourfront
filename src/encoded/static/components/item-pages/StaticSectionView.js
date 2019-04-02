@@ -27,7 +27,7 @@ class StaticSectionViewPreview extends React.PureComponent {
     static getTabObject(props){
         return {
             'tab' : <span><i className="icon icon-image icon-fw"/> Preview</span>,
-            'key' : 'protocol-info',
+            'key' : 'preview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
                 <div className="overflow-hidden">

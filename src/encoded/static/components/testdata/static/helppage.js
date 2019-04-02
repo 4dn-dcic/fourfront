@@ -16,8 +16,8 @@ module.exports = {
         {
             "name" : "help.user-guide.data-organization.carousel-place-holder",
             "title": null,
-            "content": "placeholder: <SlideCarousel />",
-            "filetype": "carousel-place-holder"
+            "content": "<SlideCarousel />",
+            "filetype": "jsx"
         },
         {
             "name" : "metadataStructure2",
