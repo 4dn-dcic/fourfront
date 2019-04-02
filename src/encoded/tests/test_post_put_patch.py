@@ -345,7 +345,7 @@ def test_patch_delete_fields_import_items_submitter(content, testapp, submitter_
     res = testapp.get(url)
     assert res.json['protected'] == 'protected default'
     res1 = submitter_testapp.patch_json(url + "?delete_fields=protected", {}, status=200)
-    assert res.json['protected'] == 'protected default'
+    assert res1.json['@graph'][0]['protected'] == 'protected default'
 
     # change protected value
     res = testapp.patch_json(url, {'protected': 'protected new'}, status=200)
