@@ -221,11 +221,12 @@ export class StaticEntry extends React.PureComponent {
 
         if (!content) return null;
 
-        if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            content = replacePlaceholderString(
-                content.slice(12).trim(),
-                _.omit(this.props, 'className', 'section', 'content')
-            );
+        // Handle JSX
+        if (typeof content === 'string' && filetype === 'jsx'){
+            content = replacePlaceholderString(content.trim(), _.omit(this.props, 'className', 'section', 'content'));
+        } else if (typeof content === 'string' && filetype === 'txt' && content.slice(0,12) === 'placeholder:'){
+            // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
+            content = replacePlaceholderString(content.slice(12).trim(), _.omit(this.props, 'className', 'section', 'content'));
         }
 
         var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
