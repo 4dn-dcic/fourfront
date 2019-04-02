@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
@@ -20,7 +21,7 @@ import { replaceString as replacePlaceholderString } from './placeholders';
  *
  * @param {Object} context - Context provided from back-end, including all properties.
  */
-export function parseSectionsContent(context = this.props.context){
+export const parseSectionsContent = memoize(function(context = this.props.context){
 
     var markdownCompilerOptions = {
         // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
@@ -72,7 +73,7 @@ export function parseSectionsContent(context = this.props.context){
                 parse
             )
         });
-}
+});
 
 
 /**
@@ -204,21 +205,12 @@ export class StaticEntry extends React.PureComponent {
         super(props);
         this.renderEntryContent = this.renderEntryContent.bind(this);
         this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 1000);
+
         var options = (props.section && props.section.options) || {};
         this.state = {
             'open' : options.default_open,
             'closing' : false
         };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.sectionName === this.props.sectionName) return;
-        var options = (nextProps.section && nextProps.section.options) || {};
-        this.setState({
-            //'isCollapsible' : options.collapsible,
-            'open' : options.default_open,
-            'closing' : false
-        });
     }
 
     renderEntryContent(baseClassName){
@@ -229,11 +221,12 @@ export class StaticEntry extends React.PureComponent {
 
         if (!content) return null;
 
-        if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            content = replacePlaceholderString(
-                content.slice(12).trim().replace(/\s/g,''), // Remove all whitespace to help reduce any typo errors.
-                _.omit(this.props, 'className', 'section', 'content')
-            );
+        // Handle JSX
+        if (typeof content === 'string' && filetype === 'jsx'){
+            content = replacePlaceholderString(content.trim(), _.omit(this.props, 'className', 'section', 'content'));
+        } else if (typeof content === 'string' && filetype === 'txt' && content.slice(0,12) === 'placeholder:'){
+            // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
+            content = replacePlaceholderString(content.slice(12).trim(), _.omit(this.props, 'className', 'section', 'content'));
         }
 
         var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
@@ -354,11 +347,11 @@ export default class StaticPage extends React.PureComponent {
          * @param {{ content : string|JSX.Element }} section - Object with parsed content, title, etc.
          * @param {Object} props - Collection of props passed down from BodyElement.
          */
-        'entryRenderFxn' : function(sectionName, section, props){
+        'entryRenderFxn' : memoize(function(sectionName, section, props){
             return (
                 <StaticEntry {...props} key={sectionName} sectionName={sectionName} section={section} />
             );
-        }
+        })
     };
 
     static propTypes = {

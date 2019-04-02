@@ -14,9 +14,8 @@ export default class ProtocolView extends DefaultItemView {
     getTabViewContents(){
 
         var initTabs = [];
-        var context = this.props.context;
 
-        initTabs.push(ProtocolViewOverview.getTabObject(context, this.props.schemas));
+        initTabs.push(ProtocolViewOverview.getTabObject(this.props));
 
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
     }
@@ -24,15 +23,14 @@ export default class ProtocolView extends DefaultItemView {
 }
 
 
-class ProtocolViewOverview extends React.Component {
+class ProtocolViewOverview extends React.PureComponent {
 
     /**
      * Get overview tab object for tabpane.
      *
-     * @param {Object} context - Current Protocol Item being shown.
-     * @param {Object} schemas - Schemas passed down from app.state.schemas (or Schemas.get()).
+     * @param {{ context: Object, schemas: Object|null }} props - Object containing Protocol Item context/result and schemas.
      */
-    static getTabObject(context, schemas){
+    static getTabObject(props){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'protocol-info',
@@ -43,48 +41,31 @@ class ProtocolViewOverview extends React.Component {
                         <span>Overview</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <ProtocolViewOverview context={context} schemas={schemas} />
+                    <ProtocolViewOverview context={props.context} schemas={props.schemas} />
                 </div>
             )
         };
     }
 
     render(){
-        var { context } = this.props;
+        const { context, schemas } = this.props;
+        const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+        const result = context;
 
         return (
-            <div>
-                <OverViewBody result={this.props.context} schemas={this.props.schemas} />
+            <div className="row overview-blocks">
+
+                <OverViewBodyItem {...{ result, tips }} property='protocol_type' fallbackTitle="Protocol Type" wrapInColumn />
+
+                <OverViewBodyItem {...{ result, tips }} property='protocol_classification' fallbackTitle="Protocol Classification" wrapInColumn />
+
+                <ItemFileAttachment context={result} tips={tips} wrapInColumn includeTitle />
+
             </div>
         );
 
     }
 
-}
-
-
-class OverViewBody extends React.Component {
-
-    render(){
-        var result = this.props.result;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), result);
-
-        return (
-            <div className="row">
-                <div className="col-md-12 col-xs-12">
-                    <div className="row overview-blocks">
-
-                        <OverViewBodyItem {...{ result, tips }} property='protocol_type' fallbackTitle="Protocol Type" wrapInColumn />
-
-                        <OverViewBodyItem {...{ result, tips }} property='protocol_classification' fallbackTitle="Protocol Classification" wrapInColumn />
-
-                        <ItemFileAttachment context={result} tips={tips} wrapInColumn includeTitle />
-
-                    </div>
-                </div>
-            </div>
-        );
-    }
 }
 
 
