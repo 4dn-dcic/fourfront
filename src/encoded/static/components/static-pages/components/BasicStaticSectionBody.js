@@ -127,14 +127,20 @@ export class EmbeddedHiglassActions extends React.PureComponent {
             btnProps.bsSize = 'sm';
         }
 
+        var enclosingClassName = "extra-info extra-info-for-higlass-display";
+        // If we are not showing the description, right align the explore button.
+        if (!showDescription) {
+            enclosingClassName += " right-align";
+        }
+
         return (
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType')}>
+            <div className={enclosingClassName} {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType')}>
                 { showDescription ?
-                <div className="description" >
-                    { context.description }
-                </div> :
-                null }
-                <div className={ showDescription ? "btn-container" : ""}>
+                    <div className="description" >
+                        { context.description }
+                    </div> :
+                    null }
+                <div className={ showDescription ? "btn-container" : "" }>
                     <Button {...btnProps}>
                         <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                         Explore Data

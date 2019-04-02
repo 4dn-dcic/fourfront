@@ -48,7 +48,7 @@ body .rc-tabs-top {
 
 	box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
 	border-bottom: none;
-  
+
 	.rc-tabs-bar.extra-style-2 {
 		border-top: none;
 		border-bottom: none;
@@ -59,7 +59,7 @@ body .rc-tabs-top {
 		}
 	}
 }
-  
+
 .rc-tabs-bar {
 
 	.rc-tabs-tab {
@@ -171,7 +171,7 @@ body .rc-tabs-top {
 			display: block;
 			color: #fff;
 
-			> span.rc-tabs-tab-prev-icon, 
+			> span.rc-tabs-tab-prev-icon,
 			> span.rc-tabs-tab-next-icon {
 				top: 3px;
 			}
@@ -179,7 +179,7 @@ body .rc-tabs-top {
 			&.rc-tabs-tab-btn-disabled {
 				opacity: 0.25;
 			}
-	
+
 			> .rc-tabs-tab-next-icon:before {
 				font-family: FontAwesome;
 				content: "\f105";
@@ -1146,7 +1146,7 @@ $download-button-width : 100px;
 				opacity: 0.5;
 			}
 
-			div.correspondence { 
+			div.correspondence {
 				> ol, > ul {
 					padding-left: 25px;
 					> li.contact-person {
@@ -1225,6 +1225,10 @@ $download-button-width : 100px;
 
 	display: flex;
 	flex-direction: row;
+
+	&.right-align {
+		flex-direction: row-reverse;
+	}
 
 	> .description {
 		flex: 1;
@@ -1362,7 +1366,7 @@ $download-button-width : 100px;
 		}
 
 	}
-	
+
 	.supplementary-files-section-part {
 		//margin-top: 10px;
 		padding-top: 5px;
