@@ -43,7 +43,7 @@ def biosample_data(tier1_biosource, lab, award):
 
 @pytest.fixture
 def tier1_biosample(testapp, biosample_data, tier1_cell_culture):
-    biosample_data['cell_culture_details'] = tier1_cell_culture['@id']
+    biosample_data['cell_culture_details'] = [tier1_cell_culture['@id']]
     return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 
@@ -54,7 +54,7 @@ def tier1_biosample_no_cld(testapp, biosample_data):
 
 @pytest.fixture
 def tier1_biosample_missing_cld_required(testapp, biosample_data, cell_culture):
-    biosample_data['cell_culture_details'] = cell_culture['@id']
+    biosample_data['cell_culture_details'] = [cell_culture['@id']]
     return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 

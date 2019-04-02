@@ -74,19 +74,19 @@ def test_biosample_biosource_summary_two_biosource(testapp, biosample_1, human_b
 
 
 def test_biosample_biosource_summary_w_differentiation(testapp, biosample_1, human_biosource, biosample_cc_w_diff, de_term):
-    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_w_diff['@id']}).json['@graph'][0]
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': [biosample_cc_w_diff['@id']]}).json['@graph'][0]
     assert human_biosource['biosource_name'] in res['biosource_summary']
     assert ' differentiated to ' in res['biosource_summary']
     assert de_term['display_title'] in res['biosource_summary']
 
 
 def test_biosample_sample_type_w_differentiation(testapp, biosample_1, biosample_cc_w_diff):
-    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_w_diff['@id']}).json['@graph'][0]
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': [biosample_cc_w_diff['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'in vitro differentiated cells'
 
 
 def test_biosample_sample_type_immortalized_wo_differentiation(testapp, biosample_1, biosample_cc_wo_diff):
-    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_wo_diff['@id']}).json['@graph'][0]
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': [biosample_cc_wo_diff['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'immortalized cells'
 
 

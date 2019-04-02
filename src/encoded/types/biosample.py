@@ -124,11 +124,15 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
             if len(ret_str) > 0:
                 ret_str = ret_str[:-5]
-                cc = self.properties.get('cell_culture_details')
-                if cc:
-                    cc_props = request.embed(cc, '@@embedded')
-                    if 'differentiation_tissue' in cc_props:
-                        ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
+                bcc = self.properties.get('cell_culture_details')
+                if bcc:
+                    tissues = []
+                    for cc in bcc:
+                        cc_props = request.embed(cc, '@@embedded')
+                        if 'differentiation_tissue' in cc_props:
+                            tissues.append(cc_props['differentiation_tissue'].get('display_title'))
+                    if list(set(tissues)):
+                        ret_str = ret_str + ' differentiated to ' + ', '.join(tissues)
                 return ret_str
             else:
                 return 'None'
@@ -159,11 +163,12 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         # we've got a single type of biosource
         bcc = self.properties.get('cell_culture_details')
         if bcc is not None:
-            cell_culture = request.embed(bcc, '@@object')
-            ds = cell_culture.get('differentiation_state')
-            dt = cell_culture.get('differentiation_term')
-            if ds or dt:
-                return 'in vitro differentiated cells'
+            for cc in bcc:
+                cell_culture = request.embed(cc, '@@object')
+                ds = cell_culture.get('differentiation_state')
+                dt = cell_culture.get('differentiation_term')
+                if ds or dt:
+                    return 'in vitro differentiated cells'
 
         biosource_type = biosource_types[0]
         if biosource_type == 'multicellular organism':
