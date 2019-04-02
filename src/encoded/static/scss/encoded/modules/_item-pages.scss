@@ -1979,6 +1979,26 @@ $download-button-width : 100px;
 	}
 }
 
+/** For when HiGlass track is being dragged **/
+/**
+    All of this 'hide/override via CSS' is kinda hacky anyway, esp. with the PostCSS classNames;
+    ideally would be nice if can pass in props to HiGlassComponent
+    re: what menu options to include/exclude.
+**/
+
+.TiledPlot-module_stylizedItem-2bQBK {
+	.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
+		.TrackControl-module_track-control-button-2fdIb { // Hide "add track" button.
+			display: none;
+			&:nth-child(2),
+			&:last-child,
+			&:first-child {
+				display: block;
+			}
+		}
+	}
+}
+
 /* Disabled for now - can't reliably target menu items (same classNames)
 .hg-popup {
 
