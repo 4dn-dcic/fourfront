@@ -333,13 +333,26 @@ def test_patch_delete_fields_import_items_admin(link_targets, testapp):
     res = testapp.patch_json(url + "?delete_fields=protected_link", {}, status=200)
 
 
-def test_patch_delete_fields_import_items_submitter(content, submitter_testapp):
-    testapp = submitter_testapp
+def test_patch_delete_fields_import_items_submitter(content, testapp, submitter_testapp):
+    """
+    Since the deleted protected field has a default value in the schema, there
+    are two cases for this test:
+    1. No validation problems if previous value == default value (allow delete
+       to happen, since it will effectively do nothing)
+    2. ValidationFailure if previous protected value != default value
+    """
     url = content['@id']
     res = testapp.get(url)
-    assert res.json['protected']
-    res = testapp.patch_json(url + "?delete_fields=protected", {}, status=422)
-    perm_errs = [err['description'] for err in res.json['errors'] if err['name'] == ['protected']]
+    assert res.json['protected'] == 'protected default'
+    res1 = submitter_testapp.patch_json(url + "?delete_fields=protected", {}, status=200)
+    assert res.json['protected'] == 'protected default'
+
+    # change protected value
+    res = testapp.patch_json(url, {'protected': 'protected new'}, status=200)
+    assert res.json['@graph'][0]['protected'] == 'protected new'
+
+    res2 = submitter_testapp.patch_json(url + "?delete_fields=protected", {}, status=422)
+    perm_errs = [err['description'] for err in res2.json['errors'] if err['name'] == ['protected']]
     assert len(perm_errs) == 1
     assert perm_errs[0] == "permission 'import_items' required"
 
