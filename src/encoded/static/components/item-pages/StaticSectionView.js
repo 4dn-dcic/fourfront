@@ -60,7 +60,9 @@ class StaticSectionViewPreview extends React.PureComponent {
         }
 
         return (
-            <BasicStaticSectionBody {..._.pick(context, 'content', 'filetype')} className="mt-18 static-section-entry" />
+            <div className="mt-18 static-section-entry">
+                <BasicStaticSectionBody {..._.pick(context, 'content', 'filetype')} />
+            </div>
         );
     }
 
