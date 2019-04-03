@@ -263,6 +263,32 @@
     "notes" : "A processed file output from a workflow run.",
     "accession": "4DNFIAAAAAA3",
     "quality_metric": "131106bc-8535-4448-903e-854abbbbbbbb",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "109380000",
+            "tooltip": "",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "55.645",
+            "tooltip": "Percent of total reads (=60.86m)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20.673",
+            "tooltip": "Percent of total reads (=22.61m)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Trans Reads",
+            "value": "23.682",
+            "tooltip": "Percent of total reads (=25.9m)",
+            "numberType": "percent"
+        }
+    ],
     "extra_files" : [
         {
             "file_format" : "pairs_px2",

@@ -208,6 +208,40 @@
             "exclude_from": ["submit4dn", "FFedit-create"],
             "linkTo": "QualityMetric"
         },
+        "quality_metric_summary": {
+            "type": "array",
+            "title": "Quality Metric Summary",
+            "description": "Selected Quality Metrics for Summary",
+            "items": {
+                "title": "Selected Quality Metric",
+                "type": "object",
+                "required": ["title", "value", "tooltip", "numberType"],
+                "additionalProperties": false,
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the Quality Metric",
+                        "title": "Title of the Quality Metric"
+                    },
+                    "value": {
+                        "type": "string",
+                        "title": "Value of the Quality Metric",
+                        "description": "value of the quality metric as a string"
+                    },
+                    "tooltip": {
+                        "type": "string",
+                        "title": "Tooltip for the Quality Metric",
+                        "description": "tooltip for the quality metric to be displayed upon mouseover"
+                    },
+                    "numberType": {
+                        "type": "string",
+                        "title": "Type of the Quality Metric",
+                        "description": "type of the quality metric",
+                        "enum": ["string", "integer", "float", "percent"]
+                    }
+                }
+             }
+        },
         "override_lab_name": {
             "description": "The lab that did the experiment if not the attributed Lab from whence this file",
             "type": "string",
