@@ -1226,6 +1226,10 @@ $download-button-width : 100px;
 	display: flex;
 	flex-direction: row;
 
+	&.right-align {
+		flex-direction: row-reverse;
+	}
+
 	> .description {
 		flex: 1;
 		padding-top: 4px;
