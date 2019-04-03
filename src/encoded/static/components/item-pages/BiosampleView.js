@@ -4,10 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, Schemas } from './../util';
-import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch, ItemPageTable } from './components';
+import { ItemPageTable, ExperimentSetTableTabView } from './components';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
 
 
 export default class BiosampleView extends DefaultItemView {
@@ -18,7 +17,13 @@ export default class BiosampleView extends DefaultItemView {
             width = this.getTabViewWidth();
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
-        initTabs.push(ExpSetsUsedIn.getTabObject(this.props, width));
+
+        initTabs.push(ExperimentSetTableTabView.getTabObject(_.extend({}, this.props, {
+            'requestHref' : "/browse/?type=ExperimentSetReplicate&award.project=4DN&experimentset_type=replicate&experiments_in_set.biosample.display_title=" + this.props.context.display_title,
+            'title' : function(props, { totalCount }){
+                return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
+            }
+        })));
 
         return initTabs.concat(this.getCommonTabs());
     }
@@ -230,26 +235,4 @@ class BiosourceInfoBody extends React.Component {
 
     }
 }
-
-class ExpSetsUsedIn extends React.Component {
-
-    static getTabObject({ context, schemas, windowWidth }, width){
-        return {
-            tab : <span><i className="icon icon-users icon-fw"/> Experiment Sets</span>,
-            key : "experiment-sets",
-            //disabled : (!context.lab && !context.award && !context.submitted_by),
-            content : (
-                <div className="overflow-hidden">
-                    <ExperimentSetTablesLoadedFromSearch {...{ width, schemas, windowWidth }}
-                        requestHref={"/search/?type=ExperimentSetReplicate&experiments_in_set.biosample.uuid=" + encodeURIComponent(context.uuid)} />
-                </div>
-            )
-        };
-    }
-
-    render(){
-        return <div>Test</div>;
-    }
-}
-
 

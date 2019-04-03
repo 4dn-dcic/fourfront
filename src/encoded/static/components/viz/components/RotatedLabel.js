@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import * as vizUtil from './../utilities';
-import { console, isServerSide, Filters, layout } from './../../util';
+import { console, isServerSide, layout } from './../../util';
 
 /**
  * If keep in RotatedLabel.statics, RotatedLabel doesn't exist at time that getDefaultProps() is hit.
@@ -25,7 +25,7 @@ const commonDefaultProps = {
     'debug'             : false
 };
 
-// TODO: 
+// TODO:
 // Adjust so that outer .label-text element does not get offset dynamically in response to text height
 // and instead the .inner element gets offset left and top (- labelHeight / 4 probably) if text is too high.
 // Then adjust dimensioning of props.append so that is also bit more static (no top offset).
@@ -97,10 +97,10 @@ class RotatedLabelAxis extends React.PureComponent {
 
 /**
  * A label meant to be place along an X-axis.
- * Given an angle, label text, placementHeight, and other properties, calculates 
+ * Given an angle, label text, placementHeight, and other properties, calculates
  * visible portion of label and rotates it. Handles showing full label onHover.
  * Optionally adds a directional pointer icon to tail of label.
- * 
+ *
  * @prop {number} angle - Angle of label rotation. Defaults to 30.
  * @prop {number} placementWidth - How wide along the X axis is the object to be labeled. Defaults to 60.
  * @prop {number} placementHeight - How much height, +~10px, is available for the label(s). Defaults to 50.
@@ -162,7 +162,12 @@ export class RotatedLabel extends React.PureComponent {
         this.onMouseLeave = this.onMouseLeave.bind(this);
 
         // State is null unless text is too long and we need a 'show full label' state.
-        this.state = { textHeight : null, shortLabel: null, expanded : null };
+        this.state = {
+            textHeight  : null,
+            shortLabel  : null,
+            expanded    : null,
+            hover       : false
+        };
 
         this.textContainerRef = React.createRef();
     }
@@ -189,7 +194,7 @@ export class RotatedLabel extends React.PureComponent {
 
         if (textHeight > maxHeight){
             shortLabel = layout.shortenString(this.props.label, 28, true);
-            expanded = true;
+            expanded = false;
         }
 
         return { textHeight, shortLabel, expanded };
@@ -209,16 +214,27 @@ export class RotatedLabel extends React.PureComponent {
     }
 
     onMouseEnter(e){
-        this.state && typeof this.state.expanded === 'boolean' && !this.state.expanded && this.setState({ expanded : true });
+        this.setState(function({ expanded, hover }){
+            var nextExpanded = (typeof expanded === 'boolean' || null) && true;
+            if (!hover || expanded !== nextExpanded){
+                return { 'hover' : true, 'expanded' : nextExpanded };
+            }
+        });
+        //this.state && typeof this.state.expanded === 'boolean' && !this.state.expanded && this.setState({ expanded : true });
     }
 
     onMouseLeave(e){
-        this.state && typeof this.state.expanded === 'boolean' && this.state.expanded && this.setState({ expanded : false });
+        this.setState(function({ expanded, hover }){
+            var nextExpanded = (typeof expanded === 'boolean' || null) && false;
+            if (hover || expanded !== nextExpanded){
+                return { 'hover' : false, 'expanded' : nextExpanded };
+            }
+        });
     }
 
-    /** 
+    /**
      * Render the pointer or other appendage for label, positioned at label.x + props.placementWidth / 2.
-     * 
+     *
      * @see http://mathforum.org/sarah/hamilton/ham.1side.1angle.html
      * @param {number} labelHeight
      * @param {number} labelWidth
@@ -226,15 +242,15 @@ export class RotatedLabel extends React.PureComponent {
      */
     renderLabelAppend(labelHeight, labelWidth){
         if (!this.props.append) return null;
-        
+
         var offTop = 0, offRight = 0;
-        
+
         if (this.props.appendOffset > 0){
             // Move appendor upwards by appendOffset, in context of angle/rotation.
             offRight = this.props.appendOffset * Math.sin(this.props.angle/180 * Math.PI);
             offTop = this.props.appendOffset * Math.cos(this.props.angle/180 * Math.PI);
         }
-        
+
         var dims = {
                 // right is same thing as adjacent (= right) = cotan(angle) * (opposite (= labelHeight) / 2)
                 right : - ( (labelHeight / 2) / Math.tan(this.props.angle/180 * Math.PI) ) - offRight,
@@ -260,45 +276,46 @@ export class RotatedLabel extends React.PureComponent {
     }
 
     render(){
-        var labelWidth = this.labelWidth();
-        var labelHeight = Math.min(
-            (this.state && this.state.textHeight) || this.props.lineHeight,
-            this.maxTextHeight()
-        );
-        var angle = - Math.abs(this.props.angle);
+        var { lineHeight, angle, className, x, y, placementWidth, opacity, label, color } = this.props,
+            { expanded, shortLabel, hover } = this.state,
+            term = this.props['data-term'] || this.props.term || null,
+            labelWidth = this.labelWidth(),
+            labelHeight = Math.min(
+                (this.state && this.state.textHeight) || lineHeight,
+                this.maxTextHeight()
+            ),
+            angleToUse = - Math.abs(angle),
+            fullClassName = (
+                "rotated-label " + (className || '') + ((expanded && ' expanded') || '') +
+                (hover ? ' hover' : '')
+            );
 
         return (
-            <div
-                data-term={this.props['data-term'] || this.props.term || null}
-                className={"rotated-label " + (this.props.className || '') + ' ' + ((this.state && this.state.expanded && 'expanded') || '')}
+            <div data-term={term} className={fullClassName} title={shortLabel ? label : null}
                 style={{
-                    transform : vizUtil.style.translate3d(this.props.x, this.props.y, 0),
-                    width : this.props.placementWidth,
-                    opacity : this.props.opacity,
-
+                    transform : vizUtil.style.translate3d(x, y, 0),
+                    width : placementWidth,
+                    opacity : opacity,
                 }}
                 onMouseEnter={this.onMouseEnter}
                 onMouseLeave={this.onMouseLeave}
-                title={this.state && this.state.shortLabel ? this.props.label : null}
                 ref={this.textContainerRef} >
-                <span className={"label-text" + (this.state && this.state.shortLabel ? ' extra-long' : '')} style={{
+
+                <span className={"label-text" + (shortLabel ? ' extra-long' : '')} style={{
                     width: labelWidth,
                     left: parseInt(
-                        (this.props.placementWidth / 2) - labelWidth - (labelHeight * Math.cos(this.props.angle/180 * Math.PI))
+                        (placementWidth / 2) - labelWidth - (labelHeight * Math.cos(angle/180 * Math.PI))
                     ),
-                    transform : vizUtil.style.rotate3d(angle, 'z')
+                    transform : vizUtil.style.rotate3d(angleToUse, 'z')
                 }}>
 
-                    <span className="inner" style={this.props.lineHeight ? {
-                        lineHeight : this.props.lineHeight + 'px'
+                    <span className="inner" style={lineHeight ? {
+                        lineHeight : lineHeight + 'px'
                     } : null }>
-                        { this.props.color ? 
-                            <i className="icon icon-circle color-indicator" style={{ color : this.props.color }}/>
+                        { color ?
+                            <i className="icon icon-circle color-indicator" style={{ color }}/>
                         : null }
-                        { this.state && this.state.expanded ? 
-                            this.props.label
-                            : (this.state && this.state.shortLabel) || this.props.label
-                        }
+                        { expanded ? label : shortLabel || label }
                     </span>
 
                     { this.renderLabelAppend(labelHeight, labelWidth) }
