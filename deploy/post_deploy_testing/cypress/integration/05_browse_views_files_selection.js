@@ -59,7 +59,7 @@ describe('Browse Views - Files Selection', function () {
                 .end();
         });
 
-        it('Can change to sort by date_sorted -- ascending', function(){
+        it('Can change to sort by date_created -- ascending', function(){
             cy.scrollTo(0, 500)
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
                 .scrollIntoView()
@@ -121,7 +121,7 @@ describe('Browse Views - Files Selection', function () {
                                 cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end()
                                 .get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container .stacked-block-table input[type="checkbox"]').each(checkUncheckFileCheckbox.bind(this, origSelectedCount)).end()
                                 .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end();
-                            });    
+                            });
                         }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end();
                 });
             });

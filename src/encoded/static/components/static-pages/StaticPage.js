@@ -23,9 +23,9 @@ import { replaceString as replacePlaceholderString } from './placeholders';
  */
 export const parseSectionsContent = memoize(function(context = this.props.context){
 
-    var markdownCompilerOptions = {
+    const markdownCompilerOptions = {
         // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
-        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){ // => { type : { component, props } }
             return [type, {
                 'component' : MarkdownHeading,
                 'props'     : { 'type' : type }
@@ -154,10 +154,10 @@ class Wrapper extends React.PureComponent {
     }
 
     renderToC(){
-        if (!this.props.tableOfContents || this.props.tableOfContents.enabled === false) return null;
+        const { context, tableOfContents, href } = this.props;
+        if (!tableOfContents || tableOfContents.enabled === false) return null;
 
-        var { context, tableOfContents, href, windowWidth } = this.props,
-            contentColSize = this.contentColSize(),
+        var contentColSize = this.contentColSize(),
             toc = context['table-of-contents'] || (tableOfContents && typeof tableOfContents === 'object' ? tableOfContents : {}),
             title = this.props.title || (context && context.title) || null;
 
@@ -165,7 +165,7 @@ class Wrapper extends React.PureComponent {
             <div key="toc-wrapper" className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
                 <TableOfContents pageTitle={title} fixedGridWidth={12 - contentColSize}
                     maxHeaderDepth={toc['header-depth'] || 6}
-                    {..._.pick(this.props, 'navigate', 'windowWidth', 'context', 'href', 'registerWindowOnScrollHandler')}
+                    {..._.pick(this.props, 'navigate', 'windowWidth', 'windowHeight', 'context', 'href', 'registerWindowOnScrollHandler')}
                     //skipDepth={1}
                     //includeTop={toc['include-top-link']}
                     //listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
@@ -403,7 +403,7 @@ export default class StaticPage extends React.PureComponent {
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
-                {..._.pick(this.props, 'navigate', 'windowWidth', 'registerWindowOnScrollHandler', 'href')}
+                {..._.pick(this.props, 'navigate', 'windowWidth', 'windowHeight', 'registerWindowOnScrollHandler', 'href')}
                 key="page-wrapper" title={parsedContent.title}
                 tableOfContents={tableOfContents} context={parsedContent}
                 children={StaticPage.renderSections(this.entryRenderFxn, parsedContent, this.props)} />
