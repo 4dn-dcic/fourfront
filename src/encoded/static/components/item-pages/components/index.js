@@ -14,7 +14,7 @@ export const ItemHeader = ih;
 
 export { PartialList } from './PartialList';
 export { ExternalReferenceLink } from './ExternalReferenceLink';
-export { ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoadedFromSearch } from './ExperimentSetTables';
+
 export { FilesInSetTable, FileItemRow } from './FilesInSetTable';
 export { ItemFooterRow } from './ItemFooterRow';
 export { Publications } from './Publications';
@@ -28,8 +28,13 @@ export { WorkflowDetailPane } from './WorkflowDetailPane';
 export { WorkflowNodeElement } from './WorkflowNodeElement';
 export { WorkflowGraphSectionControls } from './WorkflowGraphSectionControls';
 export { FlexibleDescriptionBox, FlexibleCharacterCountBox } from './FlexibleDescriptionBox';
-export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
 export { AdjustableDividerRow, DraggableVerticalBorder } from './AdjustableDividerRow';
 export { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 export { OverviewHeadingContainer } from './OverviewHeadingContainer';
-export { ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader } from './ItemPageTable';
+
+
+export {
+    ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader,
+    ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoadedFromSearch, ExperimentSetTableTabView,
+    SimpleFilesTable, SimpleFilesTableLoaded
+} from './tables';
