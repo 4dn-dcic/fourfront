@@ -132,7 +132,7 @@ describe('Browse Views - BarPlotChart II', function () {
 
                 const loggedOutCounts = _.clone(counts);
 
-                cy.wait(100).login4DN().wait(100)
+                cy.wait(100).login4DN()
                     .get('#stats-stat-expsets').should('have.text', '').end()
                     .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', loggedOutCounts.experiment_sets).end().then(()=>{
                         return compareQuickInfoCountsVsBarPlotCounts();

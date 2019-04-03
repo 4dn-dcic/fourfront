@@ -4,15 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
 import * as store from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    HiGlassContainer, HiGlassConfigurator, OverviewHeadingContainer } from './components';
+import { ExperimentSetTablesLoaded, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue, ProcessedFilesQCStackedTable } from './../browse/components';
+import { ProcessedFilesQCStackedTable } from './../browse/components';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { FileDownloadButton } from './../util/file';
 
 // UNCOMMENT FOR TESTING
 // import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
@@ -23,16 +22,13 @@ import { FileDownloadButton } from './../util/file';
 /** Container for all of the tabs on a File page. */
 export default class FileView extends WorkflowRunTracingView {
 
-    /* TODO : Move to WorkflowRunTracingView, DRY up re: WorkflowRunTracingView.loadGraphSteps() */
-    static shouldGraphExist(context){
+    static shouldGraphExist = memoize(function(context){
         return (
             (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+            // We can uncomment below line once do permissions checking on backend for graphing
+            //&& _.any(context.workflow_run_outputs, object.itemUtil.atId)
         );
-    }
-
-    constructor(props){
-        super(props);
-    }
+    });
 
     componentDidMount(){
         super.componentDidMount();
@@ -108,19 +104,15 @@ class FileViewOverview extends React.Component {
     }
 
     render(){
-        var { context, windowWidth, width, tips } = this.props;
-
-        var setUrls = expFxn.experimentSetsFromFile(context, 'ids'),
-            table;
-
-        if (setUrls && setUrls.length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
-        }
+        var { context, windowWidth, width, tips } = this.props,
+            experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
 
         return (
             <div>
                 <FileOverViewBody result={context} tips={tips} windowWidth={windowWidth} />
-                { table }
+                { experimentSetUrls && experimentSetUrls.length > 0 ?
+                    <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
+                : null }
             </div>
         );
         /*

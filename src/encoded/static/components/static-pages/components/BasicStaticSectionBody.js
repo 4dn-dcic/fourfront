@@ -12,6 +12,8 @@ import { HiGlassAjaxLoadContainer } from './../../item-pages/components/HiGlass/
 import * as store from './../../../store';
 import { replaceString as replacePlaceholderString } from './../placeholders';
 
+
+
 export class BasicUserContentBody extends React.PureComponent {
 
     constructor(props){
@@ -67,6 +69,7 @@ export class BasicUserContentBody extends React.PureComponent {
                 </React.Fragment>
             );
         } else {
+            // TODO handle @type=JupyterHub?
             return (
                 <div className="error">
                     <h4>Error determining Item type.</h4>
@@ -87,7 +90,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
         'className' : 'with-background mb-1 mt-1',
         'title'     : "Information",
-        'prependTitleIconFxn' : function(open, props){
+        'prependTitleIconFxn' : function prependedIcon(open, props){
             if (!props.titleIcon) return null;
             return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
         },
@@ -111,11 +114,12 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 export class EmbeddedHiglassActions extends React.PureComponent {
 
     static defaultProps = {
-        'parentComponentType' : BasicUserContentBody
+        'parentComponentType' : BasicUserContentBody,
+        'showDescription' : true,
     };
 
     render(){
-        var { context, parentComponentType } = this.props,
+        var { context, parentComponentType, showDescription } = this.props,
             btnProps = {
                 'href'      : object.itemUtil.atId(context),
                 'data-tip'  : "Open HiGlass display to add other data",
@@ -126,12 +130,20 @@ export class EmbeddedHiglassActions extends React.PureComponent {
             btnProps.bsSize = 'sm';
         }
 
+        var enclosingClassName = "extra-info extra-info-for-higlass-display";
+        // If we are not showing the description, right align the explore button.
+        if (!showDescription) {
+            enclosingClassName += " right-align";
+        }
+
         return (
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'parentComponentType')}>
-                <div className="description">
-                    { context.description }
-                </div>
-                <div className="btn-container">
+            <div className={enclosingClassName} {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType')}>
+                { showDescription ?
+                    <div className="description" >
+                        { context.description }
+                    </div> :
+                    null }
+                <div className={ showDescription ? "btn-container" : "" }>
                     <Button {...btnProps}>
                         <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                         Explore Data
@@ -206,8 +218,11 @@ export class BasicStaticSectionBody extends React.PureComponent {
             return React.createElement(element, passedProps, compiler(content, markdownCompilerOptions || undefined) );
         } else if (filetype === 'html' && typeof content === 'string'){
             return React.createElement(element, passedProps, object.htmlToJSX(content));
+        } else if (filetype === 'jsx' && typeof content === 'string'){
+            return replacePlaceholderString(content.trim());
         } else if (filetype === 'txt' && typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            return replacePlaceholderString(content.slice(12).trim().replace(/\s/g,''));
+            // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
+            return replacePlaceholderString(content.slice(12).trim());
         } else {
             return React.createElement(element, passedProps, content);
         }
