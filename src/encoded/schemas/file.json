@@ -215,7 +215,7 @@
             "items": {
                 "title": "Selected Quality Metric",
                 "type": "object",
-                "required": ["title", "value", "tooltip", "numberType"],
+                "required": ["title", "value", "numberType"],
                 "additionalProperties": false,
                 "properties": {
                     "title": {
