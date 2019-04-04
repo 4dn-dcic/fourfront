@@ -94,11 +94,7 @@ def experiment_1_2(value, system):
         'MC-3C', 'MC-Hi-C', 'GAM', 'NAD-seq', 'single cell Hi-C'
     ]
     if value.get('experiment_type') in types_list:
-        # exptype = value['experiment_type'].replace('&', ' n ').replace(' ', '-')
-        # value['experiment_type'] = '/experiment-types/' + exptype.lower() + '/'
-        exptype = '/experiment-types/{}/'.format(
-            value['experiment_type'].replace('&', ' n ').replace(' ', '-').lower()
-        )
+        exptype = value.get('experiment_type')
     elif value.get('experiment_type') == 'DAM-ID seq':
         exptype = '/experiment-types/damid-seq/'
     elif value.get('experiment_type') == 'Repli-seq':
@@ -107,7 +103,8 @@ def experiment_1_2(value, system):
         elif value.get('total_fractions_in_exp') > 2:
             exptype = '/experiment-types/multi-stage-repli-seq/'
     valid_exptypes = system['registry']['collections']['ExperimentType']
-    exptype_item = formats.get(exptype)
+    formats = system['registry']['collections']['FileFormat']
+    exptype_item = valid_exptypes.get(exptype)
     exptype_uuid = None
     try:
         exptype_uuid = str(exptype_item.uuid)
