@@ -6,11 +6,11 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import { ItemHeader, FlexibleDescriptionBox, HiGlassContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+import { ItemHeader, FlexibleDescriptionBox, HiGlassAjaxLoadContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
-
+import { EmbeddedHiglassActions } from './../static-pages/components';
 var { Item, File, ExperimentSet } = typedefs;
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
@@ -264,9 +264,9 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     static propTypes = {
         'width' : PropTypes.number.isRequired,
         'mounted' : PropTypes.bool.isRequired,
-        'files'  : PropTypes.array,
         'renderRightPanel' : PropTypes.func,
-        'windowWidth' : PropTypes.number.isRequired
+        'windowWidth' : PropTypes.number.isRequired,
+        'higlassItem' : PropTypes.object,
     };
 
     constructor(props){
@@ -277,7 +277,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        if (this.props.file && pastProps.width !== this.props.width){
+        if (pastProps.width !== this.props.width){
             this.correctHiGlassTrackDimensions();
         }
     }
@@ -294,21 +294,14 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
     }
 
-    collapsedToolTipContent(){
-        var fileTitles = _.filter(_.map(this.props.files, function(f){
-            return f.accession || f.display_title || null;
-        }));
-        if (fileTitles.length > 3){
-            fileTitles = fileTitles.slice(0, 2);
-            fileTitles.push('...');
-        }
-        return "Open HiGlass Visualization for file(s)&nbsp; <span class='text-600'>" + ( fileTitles.join(', ') ) + "</span>&nbsp;&nbsp;&nbsp;<i class='icon icon-arrow-right'></i>";
-    }
-
     render(){
-        var { mounted, width, files, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
-            leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth } = this.props;
-        if (!files || !mounted) return (renderRightPanel && renderRightPanel(width, null)) || children;
+        var { mounted, width, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
+            leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
+
+        // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
+        if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
+            return (renderRightPanel && renderRightPanel(width, null)) || children;
+        }
 
         var minOpenHeight = 300,
             maxOpenHeight = 800;
@@ -325,13 +318,18 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
                         } else {
                             return (
                                 <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
-                                    data-html data-place="right" data-tip={this.collapsedToolTipContent()}>
+                                    data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
                                     <i className="icon icon-fw icon-television"/>
                                 </h5>
                             );
                         }
                     } else {
-                        return <HiGlassContainer files={files} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight + 16, minOpenHeight), maxOpenHeight)} ref={this.higlassContainerRef} />;
+                        return (
+                            <React.Fragment>
+                                <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
+                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
+                            </React.Fragment>
+                        );
                     }
                 }}
                 rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
@@ -426,8 +424,26 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         );
     });
 
+    /**
+    * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig)
+    * @param {object} context - Object that has static_content.
+    * @return {object} Returns the HiGlassItem in the context (or null if it doesn't)
+    */
+    static getHiglassItemFromProcessedFiles = memoize(function(context){
+        if (!("static_content" in context)) {
+            return null;
+        }
+
+        // Look for any static_content sections with tab:processed-files as the location and return the first appearance.
+        const higlassTab = _.find(context.static_content, function(section){
+            return section.location === "tab:processed-files";
+        });
+        return (higlassTab ? higlassTab.content : null);
+    });
+
     renderTopRow(){
         const { mounted, width, files, context, windowWidth } = this.props;
+
         if (!mounted) return null;
 
         // Used in ProcessedFilesStackedTable for icons/buttons
@@ -441,8 +457,9 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             'columnHeaders' : ProcessedFilesStackedTableSection.extendedColumnHeaders()
         };
 
-        if (currentlyVisualizedFiles && currentlyVisualizedFiles.length > 0){
-            const hiGlassProps = { width, mounted, windowWidth, files : currentlyVisualizedFiles };
+        const higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
+        if (higlassItem && object.itemUtil.atId(higlassItem)){
+            const hiGlassProps = { width, mounted, windowWidth, higlassItem };
             return (
                 <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
                     <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
@@ -554,6 +571,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         const files = collection.files;
         const currentlyVisualizedFiles = OtherProcessedFilesStackedTableSectionPart.findAllFilesToVisualize(files);
         const open = this.state.open;
+        const higlassItem = collection.higlass_view_config;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
@@ -571,7 +589,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
                         { currentlyVisualizedFiles ? (
-                            <HiGlassAdjustableWidthRow files={currentlyVisualizedFiles} windowWidth={windowWidth} mounted={mounted} width={width - 21}
+                            <HiGlassAdjustableWidthRow higlassItem={higlassItem} windowWidth={windowWidth} mounted={mounted} width={width - 21}
                                 renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />)
                         : this.renderFilesTable(width - 21) }
                     </div>

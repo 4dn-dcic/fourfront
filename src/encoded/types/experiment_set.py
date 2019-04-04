@@ -232,6 +232,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.href",
+        "other_processed_files.higlass_view_config.description",
 
         "experiments_in_set.other_processed_files.files.href",
         "experiments_in_set.other_processed_files.title",

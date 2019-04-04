@@ -8,7 +8,7 @@
  * the root `App` component.
  */
 
-import * as globals             from './globals';
+import { content_views }        from './globals';
 
 import StaticPage               from './static-pages/StaticPage';
 import DirectoryPage            from './static-pages/DirectoryPage';
@@ -38,59 +38,61 @@ import BiosourceView            from './item-pages/BiosourceView';
 import ProtocolView             from './item-pages/ProtocolView';
 import DocumentView             from './item-pages/DocumentView';
 import PublicationView          from './item-pages/PublicationView';
+import StaticSectionView        from './item-pages/StaticSectionView';
 import SubmissionView           from './forms/SubmissionView';
 import BrowseView               from './browse/BrowseView';
 import SearchView               from './browse/SearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
 
 
-globals.content_views.register(StaticPage,    'StaticPage');
-globals.content_views.register(DirectoryPage, 'DirectoryPage');
+content_views.register(StaticPage,    'StaticPage');
+content_views.register(DirectoryPage, 'DirectoryPage');
 
-globals.content_views.register(HomePage,                'HomePage');
-globals.content_views.register(PlannedSubmissionsPage,  'Planned-submissionsPage');
-globals.content_views.register(ReleaseUpdates,          'Release-updatesPage');
-globals.content_views.register(StatisticsPageView,      'StatisticsPage');
+content_views.register(HomePage,                'HomePage');
+content_views.register(PlannedSubmissionsPage,  'Planned-submissionsPage');
+content_views.register(ReleaseUpdates,          'Release-updatesPage');
+content_views.register(StatisticsPageView,      'StatisticsPage');
 
 
-globals.content_views.register(DefaultItemView,         'Item');
-globals.content_views.register(BiosampleView,           'Biosample');
-globals.content_views.register(BiosourceView,           'Biosource');
-globals.content_views.register(ExperimentSetView,       'ExperimentSet');
-globals.content_views.register(ExperimentSetView,       'ExperimentSetReplicate');
-globals.content_views.register(ExperimentView,          'Experiment');
-globals.content_views.register(ExperimentTypeView,      'ExperimentType');
-globals.content_views.register(ExperimentMicView,       'ExperimentMic');
-globals.content_views.register(FileMicroscopyView,      'FileMicroscopy');
-globals.content_views.register(FileSetCalibrationView,  'FileSetCalibration');
-globals.content_views.register(FileView,                'File');
-globals.content_views.register(HealthView,              'Health');
-globals.content_views.register(HiGlassViewConfigView,   'HiglassViewConfig');
-globals.content_views.register(ProtocolView,            'Protocol');
-globals.content_views.register(DocumentView,            'Document');
-globals.content_views.register(PublicationView,         'Publication');
-globals.content_views.register(SchemaView,              'JSONSchema');
-globals.content_views.register(UserView,                'User');
-globals.content_views.register(ImpersonateUserForm,     'User', 'impersonate-user');
-globals.content_views.register(WorkflowRunView,         'WorkflowRun');
-globals.content_views.register(WorkflowRunView,         'WorkflowRunSbg');
-globals.content_views.register(WorkflowRunView,         'WorkflowRunAwsem');
-globals.content_views.register(WorkflowView,            'Workflow');
+content_views.register(DefaultItemView,         'Item');
+content_views.register(BiosampleView,           'Biosample');
+content_views.register(BiosourceView,           'Biosource');
+content_views.register(ExperimentSetView,       'ExperimentSet');
+content_views.register(ExperimentSetView,       'ExperimentSetReplicate');
+content_views.register(ExperimentView,          'Experiment');
+content_views.register(ExperimentTypeView,      'ExperimentType');
+content_views.register(ExperimentMicView,       'ExperimentMic');
+content_views.register(FileMicroscopyView,      'FileMicroscopy');
+content_views.register(FileSetCalibrationView,  'FileSetCalibration');
+content_views.register(FileView,                'File');
+content_views.register(HealthView,              'Health');
+content_views.register(HiGlassViewConfigView,   'HiglassViewConfig');
+content_views.register(ProtocolView,            'Protocol');
+content_views.register(DocumentView,            'Document');
+content_views.register(PublicationView,         'Publication');
+content_views.register(SchemaView,              'JSONSchema');
+content_views.register(UserView,                'User');
+content_views.register(ImpersonateUserForm,     'User', 'impersonate-user');
+content_views.register(WorkflowRunView,         'WorkflowRun');
+content_views.register(WorkflowRunView,         'WorkflowRunSbg');
+content_views.register(WorkflowRunView,         'WorkflowRunAwsem');
+content_views.register(WorkflowView,            'Workflow');
+content_views.register(StaticSectionView,       'StaticSection');
 
-globals.content_views.register(SubmissionView,          'Item', 'edit');
-globals.content_views.register(SubmissionView,          'Item', 'create');
-globals.content_views.register(SubmissionView,          'Item', 'clone');
-globals.content_views.register(SubmissionView,          'Search', 'add');
+content_views.register(SubmissionView,          'Item', 'edit');
+content_views.register(SubmissionView,          'Item', 'create');
+content_views.register(SubmissionView,          'Item', 'clone');
+content_views.register(SubmissionView,          'Search', 'add');
 
-globals.content_views.register(BrowseView,              'Browse');
-globals.content_views.register(SearchView,              'Search');
-globals.content_views.register(SearchView,              'Search', 'selection');
-globals.content_views.register(SearchView,              'Browse', 'selection');
-globals.content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
+content_views.register(BrowseView,              'Browse');
+content_views.register(SearchView,              'Search');
+content_views.register(SearchView,              'Search', 'selection');
+content_views.register(SearchView,              'Browse', 'selection');
+content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
 
 
 // Fallback for anything we haven't registered
-globals.content_views.fallback = function () {
+content_views.fallback = function () {
     return FallbackView;
 };
 

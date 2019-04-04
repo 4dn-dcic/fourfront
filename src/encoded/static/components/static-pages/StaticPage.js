@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
@@ -20,11 +21,11 @@ import { replaceString as replacePlaceholderString } from './placeholders';
  *
  * @param {Object} context - Context provided from back-end, including all properties.
  */
-export function parseSectionsContent(context = this.props.context){
+export const parseSectionsContent = memoize(function(context = this.props.context){
 
-    var markdownCompilerOptions = {
+    const markdownCompilerOptions = {
         // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
-        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){
+        'overrides' : _.object(_.map(['h1','h2','h3','h4', 'h5', 'h6'], function(type){ // => { type : { component, props } }
             return [type, {
                 'component' : MarkdownHeading,
                 'props'     : { 'type' : type }
@@ -72,7 +73,7 @@ export function parseSectionsContent(context = this.props.context){
                 parse
             )
         });
-}
+});
 
 
 /**
@@ -153,10 +154,10 @@ class Wrapper extends React.PureComponent {
     }
 
     renderToC(){
-        if (!this.props.tableOfContents || this.props.tableOfContents.enabled === false) return null;
+        const { context, tableOfContents, href } = this.props;
+        if (!tableOfContents || tableOfContents.enabled === false) return null;
 
-        var { context, tableOfContents, href, windowWidth } = this.props,
-            contentColSize = this.contentColSize(),
+        var contentColSize = this.contentColSize(),
             toc = context['table-of-contents'] || (tableOfContents && typeof tableOfContents === 'object' ? tableOfContents : {}),
             title = this.props.title || (context && context.title) || null;
 
@@ -164,7 +165,7 @@ class Wrapper extends React.PureComponent {
             <div key="toc-wrapper" className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
                 <TableOfContents pageTitle={title} fixedGridWidth={12 - contentColSize}
                     maxHeaderDepth={toc['header-depth'] || 6}
-                    {..._.pick(this.props, 'navigate', 'windowWidth', 'context', 'href', 'registerWindowOnScrollHandler')}
+                    {..._.pick(this.props, 'navigate', 'windowWidth', 'windowHeight', 'context', 'href', 'registerWindowOnScrollHandler')}
                     //skipDepth={1}
                     //includeTop={toc['include-top-link']}
                     //listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
@@ -204,21 +205,12 @@ export class StaticEntry extends React.PureComponent {
         super(props);
         this.renderEntryContent = this.renderEntryContent.bind(this);
         this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 1000);
+
         var options = (props.section && props.section.options) || {};
         this.state = {
             'open' : options.default_open,
             'closing' : false
         };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.sectionName === this.props.sectionName) return;
-        var options = (nextProps.section && nextProps.section.options) || {};
-        this.setState({
-            //'isCollapsible' : options.collapsible,
-            'open' : options.default_open,
-            'closing' : false
-        });
     }
 
     renderEntryContent(baseClassName){
@@ -229,11 +221,12 @@ export class StaticEntry extends React.PureComponent {
 
         if (!content) return null;
 
-        if (typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            content = replacePlaceholderString(
-                content.slice(12).trim().replace(/\s/g,''), // Remove all whitespace to help reduce any typo errors.
-                _.omit(this.props, 'className', 'section', 'content')
-            );
+        // Handle JSX
+        if (typeof content === 'string' && filetype === 'jsx'){
+            content = replacePlaceholderString(content.trim(), _.omit(this.props, 'className', 'section', 'content'));
+        } else if (typeof content === 'string' && filetype === 'txt' && content.slice(0,12) === 'placeholder:'){
+            // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
+            content = replacePlaceholderString(content.slice(12).trim(), _.omit(this.props, 'className', 'section', 'content'));
         }
 
         var className = "section-content clearfix " + (baseClassName? ' ' + baseClassName : '');
@@ -354,11 +347,11 @@ export default class StaticPage extends React.PureComponent {
          * @param {{ content : string|JSX.Element }} section - Object with parsed content, title, etc.
          * @param {Object} props - Collection of props passed down from BodyElement.
          */
-        'entryRenderFxn' : function(sectionName, section, props){
+        'entryRenderFxn' : memoize(function(sectionName, section, props){
             return (
                 <StaticEntry {...props} key={sectionName} sectionName={sectionName} section={section} />
             );
-        }
+        })
     };
 
     static propTypes = {
@@ -410,7 +403,7 @@ export default class StaticPage extends React.PureComponent {
         var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
-                {..._.pick(this.props, 'navigate', 'windowWidth', 'registerWindowOnScrollHandler', 'href')}
+                {..._.pick(this.props, 'navigate', 'windowWidth', 'windowHeight', 'registerWindowOnScrollHandler', 'href')}
                 key="page-wrapper" title={parsedContent.title}
                 tableOfContents={tableOfContents} context={parsedContent}
                 children={StaticPage.renderSections(this.entryRenderFxn, parsedContent, this.props)} />

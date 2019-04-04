@@ -6,9 +6,9 @@ import _ from 'underscore';
 import { Fade, Button } from 'react-bootstrap';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../../util';
 import { FlexibleDescriptionBox } from './../FlexibleDescriptionBox';
-import { SimpleFilesTable } from './../SimpleFilesTable';
+import { SimpleFilesTable } from './../tables';
 import { ItemDetailList } from './../ItemDetailList';
-import { ExperimentSetTablesLoaded } from './../ExperimentSetTables';
+import { ExperimentSetTablesLoaded } from './../tables/ExperimentSetTables';
 import { ViewMetricButton, MetricsView } from './FileDetailBodyMetricsView';
 import { WorkflowNodeElement } from './../WorkflowNodeElement';
 
@@ -191,7 +191,7 @@ export class FileDetailBody extends React.PureComponent {
             if ( file && (Array.isArray(file.experiments) || Array.isArray(file.experiment_sets)) ){
                 var setUrls = expFxn.experimentSetsFromFile(file, 'ids');
                 if (setUrls && setUrls.length > 0){
-                    table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} windowWidth={windowWidth} />;
+                    table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} windowWidth={windowWidth} id={object.itemUtil.atId(file)} />;
                 }
             }
             body = (

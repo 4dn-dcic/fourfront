@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import { Button } from 'react-bootstrap';
-import { content_views } from './../globals';
 import { ajax, layout, navigate } from './../util';
 import { ItemDetailList } from './components';
 import ReactTooltip from 'react-tooltip';
@@ -19,7 +18,7 @@ import _ from 'underscore';
  * @class Item
  * @extends {React.Component}
  */
-export default class HealthView extends React.Component {
+export default class HealthView extends React.PureComponent {
 
     static notFinishedIndexing(db_es_total){
         return db_es_total && (db_es_total.indexOf('< DB has') > -1 || db_es_total.indexOf('loading') > -1) ? true : false;
@@ -44,7 +43,6 @@ export default class HealthView extends React.Component {
     }
 
     getCounts(){
-        var pastState = _.clone(this.state);
         this.setState({
             'db_es_total' : "loading...",
         }, ()=>{
@@ -70,7 +68,7 @@ export default class HealthView extends React.Component {
             width = layout.gridContainerWidth(windowWidth);
 
         return (
-            <div className="view-item">
+            <div className="view-item container" id="content">
                 <hr/>
                 <h3 className="text-400 mb-2 mt-3">Configuration</h3>
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
@@ -169,7 +167,7 @@ class HealthChart extends React.PureComponent {
         this.svgRef = React.createRef();
     }
 
-    componentDidUpdate(pastProps, pastState){      
+    componentDidUpdate(pastProps, pastState){
         this.drawTreeMap();
         this.transitionSize();
         setTimeout(function(){ ReactTooltip.rebuild(); }, 1000);

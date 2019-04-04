@@ -11,6 +11,7 @@ from dcicutils.beanstalk_utils import get_beanstalk_real_url
 from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
+from pyramid.response import Response
 from datetime import datetime
 from base64 import b64encode
 from PIL import Image
@@ -44,21 +45,48 @@ IS_ATTACHMENT = [
 ]
 
 
+class LoadGenWrapper(object):
+    """
+    Simple class that accepts a generator function and handles errors by
+    setting self.caught to the error message.
+    """
+    def __init__(self, gen):
+        self.gen = gen
+        self.caught = None
+
+    def __iter__(self):
+        """
+        Iterate through self.gen and see if 'ERROR: ' bytes are in any yielded
+        value. If so, store the error message as self.caught and raise
+        StopIteration to halt the generator.
+        """
+        # self.caught = yield from self.gen
+        for iter_val in self.gen:
+            if b'ERROR:' in iter_val:
+                self.caught = iter_val.decode()
+            yield iter_val
+
+    def close(self):
+        if self.caught:
+            logger.error('load_data: failed to load with iter_response', error=self.caught)
+
+
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
     '''
     expected input data
 
-    {'local_dir': inserts folder on your computer
+    {'local_path': path to a directory or file in file system
      'fdn_dir': inserts folder under encoded
-     'in_file': file containing list of inserts for single item type
-     'store': if not local_dir or fdn_dir, use the dictionary
+     'store': if not local_path or fdn_dir, look for a dictionary of items here
      'overwrite' (Bool): overwrite if existing data
      'itype': (list or str): only pick some types from the source or specify type in in_file
+     'iter_response': invoke the Response as an app_iter, directly calling load_all_gen
      'config_uri': user supplied configuration file}
 
     post can contain 2 different styles of data
-    1) reference to a folder or file
+    1) reference to a folder or file (local_path or fd_dir). If this is done
+       itype can be optionally used to specify type of items loaded from files
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     '''
@@ -76,23 +104,31 @@ def load_data_view(context, request):
     }
     from pkg_resources import resource_filename
     store = request.json.get('store', {})
+    local_path = request.json.get('local_path')
     fdn_dir = request.json.get('fdn_dir')
-    local_dir = request.json.get('local_dir')
-    in_file = request.json.get('in_file')
     overwrite = request.json.get('overwrite', False)
-    itype = request.json.get('itype', None)
+    itype = request.json.get('itype')
+    iter_resp = request.json.get('iter_response', False)
     inserts = None
     from_json = False
     if fdn_dir:
         inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
-    elif in_file:
-        inserts = in_file
-    elif local_dir:
-        inserts = local_dir
+    elif local_path:
+        inserts = local_path
     elif store:
         inserts = store
         from_json = True
-
+    # if we want to iterate over the response to keep the connection alive
+    # this directly calls load_all_gen, instead of load_all
+    if iter_resp:
+        return Response(
+            content_type = 'text/plain',
+            app_iter = LoadGenWrapper(
+                load_all_gen(testapp, inserts, None, overwrite=overwrite,
+                             itype=itype, from_json=from_json)
+            )
+        )
+    # otherwise, it is a regular view and we can call load_all as usual
     if inserts:
         res = load_all(testapp, inserts, None, overwrite=overwrite, itype=itype, from_json=from_json)
     else:
@@ -222,10 +258,37 @@ LOAD_ERROR_MESSAGE = """#   ██▓     ▒█████   ▄▄▄      �
 
 
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
-    """convert data to store format dictionary (same format expected from from_json=True),
+    """
+    Wrapper function for load_all_gen, which invokes the generator returned
+    from that function. Takes all of the same args as load_all_gen, so
+    please reference that docstring.
+
+    This function uses LoadGenWrapper, which will catch a returned value from
+    the execution of the generator, which is an Exception in the case of
+    load_all_gen. Return that Exception if encountered, which is consistent
+    with the functionality of load_all_gen.
+    """
+    gen = LoadGenWrapper(
+        load_all_gen(testapp, inserts, docsdir, overwrite, itype, from_json)
+    )
+    # run the generator; don't worry about the output
+    for _ in gen:
+        pass
+    # gen.caught will str error message on error, otherwise None on success
+    if gen.caught is not None:
+        return Exception(gen.caught)
+    return gen.caught
+
+
+def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
+    """
+    Generator function that yields bytes information about each item POSTed/PATCHed.
+    Is the base functionality of load_all function.
+
+    convert data to store format dictionary (same format expected from from_json=True),
     assume main function is to load reasonable number of inserts from a folder
 
-    args:
+    Args:
         testapp
         inserts : either a folder, file, or a dictionary in the store format
         docsdir : attachment folder
@@ -233,26 +296,36 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
 
-    returns:
-        None if successful, otherwise an Exception
+    Yields:
+        Bytes with information on POSTed/PATCHed items
+
+    Returns:
+        None if successful, otherwise a bytes error message
     """
     # TODO: deal with option of file to load (not directory struture)
     if docsdir is None:
         docsdir = []
     # Collect Items
     store = {}
-    if from_json:
+    if from_json:  # we are directly loading json
         store = inserts
-    if not from_json:
+    if not from_json:  # we are loading a file
         use_itype = False
-        # grab json files
-        if os.path.isdir(inserts):
+        if os.path.isdir(inserts):  # we've specified a directory
             if not inserts.endswith('/'):
                 inserts += '/'
             files = [i for i in os.listdir(inserts) if i.endswith('.json')]
-        else:  # we've specified a single file
+        elif os.path.isfile(inserts):  # we've specified a single file
             files = [inserts]
-            use_itype = True
+            # use the item type if provided AND not a list
+            # otherwise guess from the filename
+            use_itype = True if (itype and isinstance(itype, basestring)) else False
+        else:  # cannot get the file
+            err_msg = 'Failure loading inserts from %s. Could not find matching file or directory.' % inserts
+            print(err_msg)
+            yield str.encode('ERROR: %s\n' % err_msg)
+            raise StopIteration
+        # load from the directory/file
         for a_file in files:
             if use_itype:
                 item_type = itype
@@ -262,7 +335,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
             with open(a_file) as f:
                 store[item_type] = json.loads(f.read())
     # if there is a defined set of items, subtract the rest
-    if itype is not None:
+    if itype:
         if isinstance(itype, list):
             store = {i: store[i] for i in itype if i in store}
         else:
@@ -270,10 +343,16 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     # clear empty values
     store = {k: v for k, v in store.items() if v is not None}
     if not store:
-        logger.error('No items found in %s %s', inserts, item_type)
-        return
+        if from_json:
+            err_msg = 'No items found in input "store" json'
+        else:
+            err_msg = 'No items found in %s' % inserts
+        if itype:
+            err_msg += ' for item type(s) %s' % itype
+        print(err_msg)
+        yield str.encode('ERROR: %s' % err_msg)
+        raise StopIteration
     # order Items
-
     all_types = list(store.keys())
     for ref_item in reversed(ORDER):
         if ref_item in all_types:
@@ -308,22 +387,29 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 exists = True
             except:
                 exists = False
-            # skip the items that exists, if overwrite is not allowed, they them out from patch list
+            # skip the items that exists
+            # if overwrite=True, still include them in PATCH round
             if exists:
                 skip_exist += 1
                 if not overwrite:
                     skip_existing_items.add(an_item['uuid'])
-                continue
-            post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
-            post_first = format_for_attachment(post_first, docsdir)
-            try:
-                res = testapp.post_json('/'+a_type, post_first)
-                assert res.status_code == 201
-                posted += 1
-            except Exception as e:
-                print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
-                      a_type, str(first_fields), str(e)))
-                return e
+                yield str.encode('SKIP: %s\n' % an_item['uuid'])
+            else:
+                post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+                post_first = format_for_attachment(post_first, docsdir)
+                try:
+                    res = testapp.post_json('/'+a_type, post_first)
+                    assert res.status_code == 201
+                    posted += 1
+                    # yield bytes to work with Response.app_iter
+                    yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
+                except Exception as e:
+                    print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
+                          a_type, str(first_fields), str(e)))
+                    # remove newlines from error, since they mess with generator output
+                    e_str = str(e).replace('\n', '')
+                    yield str.encode('ERROR: %s\n' % e_str)
+                    raise StopIteration
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
         logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
@@ -340,15 +426,21 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 res = testapp.patch_json('/'+an_item['uuid'], an_item)
                 assert res.status_code == 200
                 patched += 1
+                # yield bytes to work with Response.app_iter
+                yield str.encode('PATCH: %s\n' % an_item['uuid'])
             except Exception as e:
                 print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
                       a_type, str(an_item), str(e)))
-                return e
+                e_str = str(e).replace('\n', '')
+                yield str.encode('ERROR: %s\n' % e_str)
+                raise StopIteration
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
+
+    # explicit return upon finish
+    return None
 
 
 def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
-
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
@@ -517,33 +609,3 @@ def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False
     """
     return load_data(app, access_key_loc, indir='master-inserts',
                      clear_tables=clear_tables, overwrite=overwrite)
-
-
-def load_ontology_terms(app, post_file):
-    from webtest import TestApp
-    from webtest.app import AppError
-    post_json = {}
-    # read in json file and create store
-    with open(post_file) as post:
-        post_json['ontology_term'] = json.loads(post.read())
-
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-
-    if post_json:
-        logger.warning('loading ontology terms')
-        post_res = load_all(testapp, post_json, None, itype='ontology_term', overwrite=True, from_json=True)
-        if post_res:  # None if successful
-            logger.error('load_ontology_terms: failed to LOAD', error=post_res)
-        else:
-            logger.warning('done loading terms')
-
-    # now keep track of the last time we loaded these suckers
-    data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
-    try:
-        testapp.post_json("/sysinfo", data)
-    except AppError:
-        testapp.patch_json("/sysinfo/%s" % data['name'], data)
