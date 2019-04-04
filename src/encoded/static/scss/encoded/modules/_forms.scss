@@ -872,6 +872,7 @@ div.fieldset.editable-fields {
 
 		div.field-row {
 			position: relative;
+
 			&:hover {
 				z-index: 100;
 			}
@@ -948,9 +949,12 @@ div.fieldset.editable-fields {
 				flex: 1;
 				opacity: 1;
 				transition: opacity 0.33s;
+
 				&.last-item-empty:not(:hover):not(.in-selection-field) {
 					opacity: 0.7;
 				}
+
+				/* LinkTo selector fields when showing selection window */
 				&.in-selection-field {
 					.field-column > input {
 						border: 2px solid #c78300;
@@ -961,6 +965,12 @@ div.fieldset.editable-fields {
 							border-color: #5b8c55;
 						}
 					}
+				}
+
+				textarea {
+					/** Prevent textareas from being resizable in _width_ **/
+					width: 100% !important;
+					min-height: 50px;
 				}
 			}
 
