@@ -86,22 +86,24 @@ def experiment_seq_2_3(value, system):
 @upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_tsaseq', '1', '2')
 def experiment_1_2(value, system):
-    types_list = [
-        'ATAC-seq', 'CUT&RUN', 'capture Hi-C', 'ChIA-PET', 'ChIP-seq',
-        'dilution Hi-C', 'DNA-paint', 'in situ Hi-C', 'PLAC-seq', 'TSA-seq',
-        'DNA FISH', 'RNA FISH', 'RNA-seq', 'SPT', 'DNase Hi-C', 'DNA SPRITE',
-        'RNA-DNA SPRITE', 'micro-C', 'sci-Hi-C', 'MARGI', 'TrAC-loop', 'TCC',
-        'MC-3C', 'MC-Hi-C', 'GAM', 'NAD-seq', 'single cell Hi-C'
-    ]
-    if value.get('experiment_type') in types_list:
-        exptype = value.get('experiment_type')
-    elif value.get('experiment_type') == 'DAM-ID seq':
-        exptype = '/experiment-types/damid-seq/'
-    elif value.get('experiment_type') == 'Repli-seq':
+    # types_list = [
+    #     'ATAC-seq', 'CUT&RUN', 'capture Hi-C', 'ChIA-PET', 'ChIP-seq',
+    #     'dilution Hi-C', 'DNA-paint', 'in situ Hi-C', 'PLAC-seq', 'TSA-seq',
+    #     'DNA FISH', 'RNA FISH', 'RNA-seq', 'SPT', 'DNase Hi-C', 'DNA SPRITE',
+    #     'RNA-DNA SPRITE', 'micro-C', 'sci-Hi-C', 'MARGI', 'TrAC-loop', 'TCC',
+    #     'MC-3C', 'MC-Hi-C', 'GAM', 'NAD-seq', 'single cell Hi-C'
+    # ]
+    # if value.get('experiment_type') in types_list:
+    #     exptype = value.get('experiment_type')
+    # elif value.get('experiment_type') == 'DAM-ID seq':
+    #     exptype = '/experiment-types/damid-seq/'
+    if value.get('experiment_type') == 'Repli-seq':
         if value.get('total_fractions_in_exp') == 2:
-            exptype = '/experiment-types/2-stage-repli-seq/'
+            exptype = '2-stage Repli-seq'
         elif value.get('total_fractions_in_exp') > 2:
-            exptype = '/experiment-types/multi-stage-repli-seq/'
+            exptype = 'Multi-stage Repli-seq'
+    else:
+        exptype = value.get('experiment_type')
     valid_exptypes = system['registry']['collections']['ExperimentType']
     formats = system['registry']['collections']['FileFormat']
     exptype_item = valid_exptypes.get(exptype)
