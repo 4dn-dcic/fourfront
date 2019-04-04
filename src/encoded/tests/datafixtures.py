@@ -359,6 +359,7 @@ def experiment_data(lab, award, human_biosample, mboI, exp_types):
 
 @pytest.fixture
 def exp_types(testapp, lab, award):
+    from uuid import uuid4
     experiment_types = {}
     title_dict = {
         'hic': 'In situ Hi-C',
@@ -369,16 +370,18 @@ def exp_types(testapp, lab, award):
         'dnase': 'DNase Hi-C',
         'dam': 'DamID-seq',
         'chia': 'ChIA-PET',
-        'repliseq': '2-stage Repli-seq'
+        'repliseq': '2-stage Repli-seq',
+        'chipseq': 'ChIP-seq'
     }
     for k, v in title_dict.items():
         data = {
+            'uuid': str(uuid4()),
             'title': v,
             'lab': lab['@id'],
             'award': award['@id'],
             'status': 'released'
         }
-        experiment_types[k] = testapp.post_json('/experiment_type', data).json['@graph'][0]
+        experiment_types[k] = testapp.post_json('/experiment_type', data, status=201).json['@graph'][0]
     return experiment_types
 
 
