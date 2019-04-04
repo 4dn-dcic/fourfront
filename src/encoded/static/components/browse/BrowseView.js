@@ -310,7 +310,7 @@ class ExternaDataExpSetsCount extends React.PureComponent {
         var { countExternalSets, browseBaseState } = this.props;
         if (countExternalSets < 1) return <div className="above-results-table-row" />;
         return (
-            <div className="above-results-table-row text-right">
+            <div className="above-results-table-row text-right text-ellipsis-container">
                 <span className="inline-block mt-1">
                     <span className="text-600 text-large">{ countExternalSets }</span> { browseBaseState === 'all' ? 'fewer' : 'more' } { "set" + (countExternalSets > 1 ? 's' : '') }{ browseBaseState === 'all' ? '' : ' available' } in <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
                 </span>
@@ -580,23 +580,25 @@ export default class BrowseView extends React.Component {
         // - Tell the user they exist, and how many.
         // - Instruct the user to click on the button to search for Experiment Sets in External Data.
         return (
-            <div className="error-page mt-4">
-                <div className="clearfix">
-                    <hr/>
-                    {
-                        countExternalSets > 0 ?
-                            <h4 className="text-400 mb-18 mt-05">Only External Data results were found.</h4>
-                            :
-                            <h3 className="text-400 mb-05 mt-05">No results found.</h3>
-                    }
-                    { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
-                        <div className="mb-10 mt-1">
-                            <Button bsSize="large" bsStyle="primary" className="text-400 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
-                                Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
-                            </Button>
-                        </div>
-                    : null }
-                    <hr/>
+            <div className="browse-page-container search-page-container container" id="content">
+                <div className="error-page mt-4">
+                    <div className="clearfix">
+                        <hr/>
+                        {
+                            countExternalSets > 0 ?
+                                <h4 className="text-400 mb-18 mt-05">Only External Data results were found.</h4>
+                                :
+                                <h3 className="text-400 mb-05 mt-05">No results found.</h3>
+                        }
+                        { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
+                            <div className="mb-10 mt-1">
+                                <Button bsSize="large" bsStyle="primary" className="text-400 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
+                                    Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
+                                </Button>
+                            </div>
+                        : null }
+                        <hr/>
+                    </div>
                 </div>
             </div>
         );

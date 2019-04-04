@@ -140,19 +140,6 @@ class ResultDetail extends React.PureComponent{
 
 class ResultRow extends React.PureComponent {
 
-    static fullRowWidth(columnDefinitions, mounted=true, dynamicWidths=null, windowWidth=null){
-        return _.reduce(columnDefinitions, function(fw, colDef, i){
-            var w;
-            if (typeof colDef === 'number') w = colDef;
-            else {
-                if (Array.isArray(dynamicWidths) && dynamicWidths[i]) w = dynamicWidths[i];
-                else w = getColumnWidthFromDefinition(colDef, mounted, windowWidth);
-            }
-            if (typeof w !== 'number') w = 0;
-            return fw + w;
-        }, 0);
-    }
-
     static areWidthsEqual(arr1, arr2){
         if (arr1.length !== arr2.length) return false;
         for (var i = 0; i < arr1.length; i++){
@@ -695,7 +682,7 @@ class DimensioningContainer extends React.PureComponent {
             innerContainerElem = this.innerContainerRef.current;
 
         if (innerContainerElem){
-            var fullRowWidth = ResultRow.fullRowWidth(columnDefinitions, this.state.mounted, [], windowWidth);
+            var fullRowWidth = HeadersRow.fullRowWidth(columnDefinitions, this.state.mounted, [], windowWidth);
             if (innerContainerElem.offsetWidth < fullRowWidth){
                 nextState.widths = DimensioningContainer.findAndDecreaseColumnWidths(columnDefinitions, 30, windowWidth);
                 nextState.isWindowPastTableTop = ShadowBorderLayer.isWindowPastTableTop(innerContainerElem);
@@ -914,7 +901,8 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     renderHeadersRow({style, isSticky, wasSticky, distanceFromTop, distanceFromBottom, calculatedHeight}){
-        var { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset } = this.state;
+        var { columnDefinitions, windowWidth } = this.props,
+            { tableContainerWidth, tableContainerScrollLeft, tableLeftOffset, widths, mounted } = this.state;
         return (
             <HeadersRow
                 {..._.pick(this.props, 'columnDefinitions', 'sortBy', 'sortColumn', 'sortReverse',
@@ -946,7 +934,7 @@ class DimensioningContainer extends React.PureComponent {
     render(){
         var { columnDefinitions, windowWidth } = this.props,
             { tableContainerWidth, tableContainerScrollLeft, mounted, widths, isWindowPastTableTop } = this.state,
-            fullRowWidth    = ResultRow.fullRowWidth(columnDefinitions, mounted, widths, windowWidth),
+            fullRowWidth    = HeadersRow.fullRowWidth(columnDefinitions, mounted, widths, windowWidth),
             canLoadMore     = this.canLoadMore(),
             innerContainerElem = this.innerContainerRef.current;
 

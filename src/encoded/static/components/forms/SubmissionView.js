@@ -1061,7 +1061,9 @@ export default class SubmissionView extends React.PureComponent{
                             finalizedContext.submitted_by = object.itemUtil.atId(me_data);
                         }
                     }
-                } else if (userLab && userAward) { // use info of person creating/cloning unless values present
+                // Otherwise, use lab/award of user submitting unless values present
+                // Skip this is we are working on a User object
+                } else if (userLab && userAward && currType !== 'User') {
                     if (currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = object.itemUtil.atId(userAward);
                     }

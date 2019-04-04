@@ -66,7 +66,7 @@ class FileMicroscopyViewOverview extends React.Component {
             table;
 
         if (setUrls && setUrls.length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} />;
+            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
         }
 
         return (

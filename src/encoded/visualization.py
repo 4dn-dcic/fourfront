@@ -445,6 +445,9 @@ def add_files_to_higlass_viewconf(request):
     if not higlass_viewconfig:
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
+        # Add a view section if the default higlass_viewconfig lacks one
+        if "views" not in higlass_viewconfig:
+            higlass_viewconfig["views"] = []
 
     # If no view config could be found, fail
     if not higlass_viewconfig:
@@ -1024,10 +1027,10 @@ def resize_1d_tracks(views):
         horizontal_vector_heatmap_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-vector-heatmap") ]
 
         # Get the height allocated for all of the top tracks.
-        remaining_height = 565
+        remaining_height = 250
         # If there is a central view, the top rows will have less height to work with.
         if view_info["has_center_content"]:
-            remaining_height = 200
+            remaining_height = 100
 
         # Remove the height from the chromosome and gene-annotation tracks
         for track in gene_chromosome_tracks:

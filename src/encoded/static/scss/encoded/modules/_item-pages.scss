@@ -1226,6 +1226,10 @@ $download-button-width : 100px;
 	display: flex;
 	flex-direction: row;
 
+	&.right-align {
+		flex-direction: row-reverse;
+	}
+
 	> .description {
 		flex: 1;
 		padding-top: 4px;
@@ -1251,6 +1255,7 @@ $download-button-width : 100px;
 
 	.overview-blocks-header {
 		&.with-background {
+
 			background: #fbfbfb;
 			padding-left: 16px;
 			padding-right: 16px;
@@ -1261,6 +1266,14 @@ $download-button-width : 100px;
 			> .inner > .overview-blocks {
 				padding-bottom: 10px;
 			}
+
+			/** Cases when markdown parses out a single <span> instead of a <p> (when 1 markdown line) **/
+			> .inner > .static-section-header > div > span:only-child {
+				/* Imitate a <p> */
+				display: block;
+				margin-bottom: 10px;
+			}
+
 			&.is-closed {
 				background-color: #f4f4f4;
 				border-color: #eee;
