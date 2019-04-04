@@ -371,6 +371,7 @@ def exp_types(testapp, lab, award):
         'dam': 'DamID-seq',
         'chia': 'ChIA-PET',
         'repliseq': '2-stage Repli-seq',
+        'multi': 'Multi-stage Repli-seq',
         'chipseq': 'ChIP-seq'
     }
     for k, v in title_dict.items():
