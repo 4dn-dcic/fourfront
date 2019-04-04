@@ -198,6 +198,7 @@ export function generateSparseNestedProperty(field, value){
 
 /**
  * Performs an IN-PLACE 'deep merge' of a small object (one property per level, max) into a host object.
+ * Arrays are not allowed, for simplicity.
  *
  * @param {Object} hostObj           Object to merge/insert into.
  * @param {Object} nestedObj         Object whose value to insert into hostObj.
@@ -213,14 +214,21 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
     }
     if (typeof hostObj[nKey] !== 'undefined'){
         if (typeof nestedObj[nKey] === 'object' && !Array.isArray(hostObj[nKey]) ){
-            return deepExtend(hostObj[nKey], nestedObj[nKey], currentDepth + 1);
-        } else {
-            // No more nested objects, insert here.
+            return deepExtend(hostObj[nKey], nestedObj[nKey], maxDepth, currentDepth + 1);
+        } else { // No more nested objects, insert here.
+            if (typeof nestedObj[nKey] === 'undefined'){
+                // Delete the field
+                delete hostObj[nKey];
+                return true;
+            }
             hostObj[nKey] = nestedObj[nKey];
             return true;
         }
     } else if (typeof nestedObj[nKey] !== 'undefined') {
         // Field doesn't exist on hostObj, but does on nestedObj, == new field.
+        // N.B. this might extend _more_ than anticipated -- TODO: address this later if this function
+        // gets re-used somewhere else.
+        // Or like... see if underscore has some function for this already.
         hostObj[nKey] = nestedObj[nKey];
         return true;
     } else {

@@ -114,11 +114,12 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 export class EmbeddedHiglassActions extends React.PureComponent {
 
     static defaultProps = {
-        'parentComponentType' : BasicUserContentBody
+        'parentComponentType' : BasicUserContentBody,
+        'showDescription' : true,
     };
 
     render(){
-        var { context, parentComponentType } = this.props,
+        var { context, parentComponentType, showDescription } = this.props,
             btnProps = {
                 'href'      : object.itemUtil.atId(context),
                 'data-tip'  : "Open HiGlass display to add other data",
@@ -129,12 +130,20 @@ export class EmbeddedHiglassActions extends React.PureComponent {
             btnProps.bsSize = 'sm';
         }
 
+        var enclosingClassName = "extra-info extra-info-for-higlass-display";
+        // If we are not showing the description, right align the explore button.
+        if (!showDescription) {
+            enclosingClassName += " right-align";
+        }
+
         return (
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'parentComponentType')}>
-                <div className="description">
-                    { context.description }
-                </div>
-                <div className="btn-container">
+            <div className={enclosingClassName} {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType')}>
+                { showDescription ?
+                    <div className="description" >
+                        { context.description }
+                    </div> :
+                    null }
+                <div className={ showDescription ? "btn-container" : "" }>
                     <Button {...btnProps}>
                         <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                         Explore Data

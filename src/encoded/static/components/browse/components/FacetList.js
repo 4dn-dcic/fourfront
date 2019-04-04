@@ -5,11 +5,10 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import moment from 'moment';
-import * as store from './../../../store';
 import { Collapse, Fade } from 'react-bootstrap';
-import { ajax, console, object, isServerSide, Filters, Schemas, layout, analytics, JWT, navigate, DateUtility } from './../../util';
-import * as vizUtil from './../../viz/utilities';
+import { console, Filters, Schemas, layout, analytics, navigate, DateUtility } from './../../util';
 import { PartialList } from './../../item-pages/components';
 import ReactTooltip from 'react-tooltip';
 
@@ -33,36 +32,6 @@ import ReactTooltip from 'react-tooltip';
 
 class Term extends React.PureComponent {
 
-    /**
-     * For non-AJAX filtration.
-     *
-     * @param {Set} termMatchExps - Set of matched exps.
-     * @param {Array} allExpsOrSets - All exps or sets.
-     * @param {string} [expsOrSets='sets'] Whether to count expsets or exps.
-     * @returns {number} Count
-     */
-    static getPassExpsCount(termMatchExps, allExpsOrSets, expsOrSets = 'sets'){
-        var numPassed = 0;
-
-        if (expsOrSets == 'sets'){
-            allExpsOrSets.forEach(function(expSet){
-                for (var i=0; i < expSet.experiments_in_set.length; i++){
-                    if (termMatchExps.has(expSet.experiments_in_set[i])) {
-                        numPassed++;
-                        return;
-                    }
-                }
-            }, this);
-        } else {
-            // We have just list of experiments, not experiment sets.
-            for (var i=0; i < allExpsOrSets.length; i++){
-                if (termMatchExps.has(allExpsOrSets[i])) numPassed++;
-            }
-        }
-
-        return numPassed;
-    }
-
     static propTypes = {
         'facet'             : PropTypes.shape({
             'field'             : PropTypes.string.isRequired
@@ -71,12 +40,9 @@ class Term extends React.PureComponent {
             'key'               : PropTypes.string.isRequired,
             'doc_count'         : PropTypes.number
         }).isRequired,
-        'isTermSelected'    : PropTypes.func.isRequired
-    }
-
-    static defaultProps = {
-        'getHref' : function(){ return '#'; }
-    }
+        'isTermSelected'    : PropTypes.func.isRequired,
+        'onClick'           : PropTypes.func.isRequired
+    };
 
     constructor(props){
         super(props);
@@ -147,16 +113,6 @@ class Term extends React.PureComponent {
         );
     }
 
-}
-
-
-class InfoIcon extends React.Component{
-    render(){
-        if (!this.props.children) return null;
-        return (
-            <i className="icon icon-info-circle" data-tip={this.props.children}/>
-        );
-    }
 }
 
 class FacetTermsList extends React.Component {
@@ -267,7 +223,7 @@ class FacetTermsList extends React.Component {
             terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
         }
 
-        var indicator = (
+        var indicator = ( // Small indicator to help represent how many terms there are available for this Facet.
             <Fade in={facetClosing || !facetOpen}>
                 <span className="pull-right closed-terms-count" data-tip={terms.length + " options"}>
                     { _.range(0, Math.min(Math.ceil(terms.length / 3), 8)).map((c)=>
@@ -326,19 +282,14 @@ class Facet extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.isStatic = this.isStatic.bind(this);
-        this.isEmpty = this.isEmpty.bind(this);
+        this.isStatic = memoize(this.isStatic.bind(this));
         this.handleStaticClick = this.handleStaticClick.bind(this);
         this.handleTermClick = this.handleTermClick.bind(this);
         this.state = { 'filtering' : false };
     }
 
-    isStatic(props = this.props){
-        return Facet.isStatic(props.facet);
-    }
-
-    isEmpty(props = this.props) {
-        return !!(props.facet.terms.length === 0);
+    isStatic(facet){
+        return Facet.isStatic(facet);
     }
 
     /**
@@ -350,10 +301,10 @@ class Facet extends React.PureComponent {
      */
     handleStaticClick(e) {
         var { facet } = this.props,
-            term = facet.terms[0];
+            term = facet.terms[0]; // Would only have 1
 
         e.preventDefault();
-        if (!this.isStatic()) return false;
+        if (!this.isStatic(facet)) return false;
 
         this.setState({ 'filtering' : true }, () => {
             this.handleTermClick(facet, term, e, () =>
@@ -374,12 +325,12 @@ class Facet extends React.PureComponent {
     }
 
     render() {
-        var { facet, schemas, itemTypeForSchemas, isTermSelected, extraClassname } = this.props,
+        var { facet, isTermSelected, extraClassname } = this.props,
             { filtering } = this.state,
             description = facet.description || null,
             title       = facet.title || facet.field;
 
-        if (this.isStatic()){
+        if (this.isStatic(facet)){
             // Only one term
             var selected = isTermSelected(facet.terms[0], facet),
                 termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
@@ -419,8 +370,6 @@ class Facet extends React.PureComponent {
             return <FacetTermsList {...this.props} onTermClick={this.handleTermClick} tooltip={description} title={title} />;
         }
 
-
-
     }
 
 }
@@ -430,8 +379,8 @@ class Facet extends React.PureComponent {
 /**
  * Use this function as part of SearchView and BrowseView to be passed down to FacetList.
  * Should be bound to a component instance, with `this` providing 'href', 'context' (with 'filters' property), and 'navigate'.
- * 
- * @param {string} field - Field for which a Facet term was clicked on. 
+ *
+ * @param {string} field - Field for which a Facet term was clicked on.
  * @param {string} term - Term clicked on.
  * @param {function} callback - Any function to execute afterwards.
  * @param {boolean} [skipNavigation=false] - If true, will return next targetSearchHref instead of going to it. Use to e.g. batch up filter changes on multiple fields.
@@ -664,12 +613,12 @@ export class FacetList extends React.PureComponent {
         return (
             <div className={"facets-container facets" + (className ? ' ' + className : '')}>
                 <div className="row facets-header">
-                    <div className="col-xs-6 facets-title-column">
+                    <div className="col-xs-7 facets-title-column text-ellipsis-container">
                         <i className="icon icon-fw icon-filter"></i>
                         &nbsp;
                         <h4 className="facets-title">{ title }</h4>
                     </div>
-                    <div className={"col-xs-6 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
+                    <div className={"col-xs-5 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
                         <a href="#" onClick={onClearFilters} className={"btn btn-xs rounded " + clearButtonClassName}>
                             <i className="icon icon-times"></i> Clear All
                         </a>
