@@ -140,7 +140,7 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
     summary = 'In situ Hi-C on GM12878 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary
-
+    assert summary in res.json['@graph'][0]['display_title']
 
 # test for experiment_set_replicate _update function
 def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):

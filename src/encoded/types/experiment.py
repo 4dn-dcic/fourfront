@@ -320,8 +320,8 @@ class ExperimentHiC(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -337,7 +337,7 @@ class ExperimentHiC(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+    def display_title(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
 
@@ -362,8 +362,8 @@ class ExperimentCaptureC(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -380,7 +380,7 @@ class ExperimentCaptureC(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+    def display_title(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
@@ -423,8 +423,8 @@ class ExperimentRepliseq(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, cell_cycle_phase=None, stage_fraction=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -440,7 +440,7 @@ class ExperimentRepliseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
+    def display_title(self, request, experiment_type=None, cell_cycle_phase=None, stage_fraction=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
@@ -484,8 +484,8 @@ class ExperimentAtacseq(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -497,7 +497,7 @@ class ExperimentAtacseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None):
+    def display_title(self, request, experiment_type=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
@@ -521,8 +521,8 @@ class ExperimentChiapet(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, biosample=None, target=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -540,7 +540,7 @@ class ExperimentChiapet(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+    def display_title(self, request, experiment_type=None, biosample=None, target=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -564,8 +564,8 @@ class ExperimentDamid(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, fusion=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, biosample=None, fusion=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if fusion:
             sum_str += (' with DAM-' + fusion)
@@ -581,7 +581,7 @@ class ExperimentDamid(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, fusion=None):
+    def display_title(self, request, experiment_type=None, biosample=None, fusion=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, fusion))
 
 
@@ -605,8 +605,8 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, biosample=None, target=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -624,7 +624,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+    def display_title(self, request, experiment_type=None, biosample=None, target=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -648,8 +648,8 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, biosample=None, target=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -667,7 +667,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+    def display_title(self, request, experiment_type=None, biosample=None, target=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -699,8 +699,8 @@ class ExperimentMic(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
-        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type != 'Undefined' else 'Undefined'
+    def experiment_summary(self, request, experiment_type=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -712,7 +712,7 @@ class ExperimentMic(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None):
+    def display_title(self, request, experiment_type=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
