@@ -221,8 +221,9 @@ def audit_replicate_sets_consistency_check(value, system):
                     for bfield, bvalues in merged_biosamples.items():
                         if bfield == 'cell_culture_details':
                             merged_cc_details = defaultdict(list)
-                            for cc in bvalues:
-                                merged_cc_details = merge_items(merged_cc_details, cc)
+                            for ccl in bvalues:
+                                for cc in ccl:
+                                    merged_cc_details = merge_items(merged_cc_details, cc)
                             for cfield, cvalues in merged_cc_details.items():
                                 conflict = find_conflict(cfield, cvalues)
                                 if conflict is not None:
