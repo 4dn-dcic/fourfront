@@ -58,7 +58,7 @@
                     "description": "What type of file or content is contained. If not set, HTML or format of file (if any) is used.",
                     "type" : "string",
                     "lookup" : 1,
-                    "enum" : [ "md", "html", "txt", "csv" ]
+                    "enum" : [ "md", "html", "txt", "csv", "jsx" ]
                 },
                 "collapsible" : {
                     "title" : "Is Collapsible",

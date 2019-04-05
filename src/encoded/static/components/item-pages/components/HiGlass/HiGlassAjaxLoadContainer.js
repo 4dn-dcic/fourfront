@@ -18,6 +18,8 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
             'loading': false,
             'higlassItem' : (props.higlassItem && props.higlassItem.viewconfig) ? props.higlassItem : null
         };
+
+        this.containerRef = React.createRef();
     }
 
     componentDidMount(){
@@ -35,6 +37,15 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
                 this.getFullHiglassItem();
             }
         }
+    }
+
+    /**
+     * Retrieve the HiGlass Component, if it exists.
+     *
+     * @returns {object} The result of getHiGlassComponent on the HiGlass container. Or null if it doesn't exist.
+     */
+    getHiGlassComponent(){
+        return (this.containerRef && this.containerRef.current && this.containerRef.current.getHiGlassComponent()) || null;
     }
 
     /**
@@ -71,6 +82,6 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         }
 
         // Pass the viewconfig to the HiGlassPlainContainer
-        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem')} viewConfig={higlassItem.viewconfig} />;
+        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem')} viewConfig={higlassItem.viewconfig} ref={this.containerRef}/>;
     }
 }

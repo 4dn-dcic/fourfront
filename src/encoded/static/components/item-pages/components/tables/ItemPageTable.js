@@ -3,17 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import Draggable from 'react-draggable';
 import url from 'url';
+import memoize from 'memoize-one';
 import queryString from 'querystring';
-import * as globals from './../../globals';
-import { object, expFxn, ajax, Schemas, layout, isServerSide } from './../../util';
-import { RawFilesStackedTable } from './../../browse/components/file-tables';
+import { object, ajax, Schemas, layout, isServerSide } from './../../../util';
 import {
-    ResultRowColumnBlockValue, extendColumnDefinitions, columnsToColumnDefinitions,
-    defaultColumnExtensionMap, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './../../browse/components/table-commons';
-import { SearchResultDetailPane } from './../../browse/components/SearchResultDetailPane';
+    ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
+    HeadersRow, TableRowToggleOpenButton } from './../../../browse/components/table-commons';
+import { SearchResultDetailPane } from './../../../browse/components/SearchResultDetailPane';
 
 
 
@@ -80,7 +77,8 @@ export class ItemPageTable extends React.Component {
             "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
             "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
-        }
+        },
+        'minWidth' : 720
     };
 
     constructor(props){
@@ -94,7 +92,7 @@ export class ItemPageTable extends React.Component {
 
     render(){
         var { results, loading, columnExtensionMap, columns, width, windowWidth,
-            defaultOpenIndices, renderDetailPane } = this.props;
+            defaultOpenIndices, renderDetailPane, minWidth } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -104,23 +102,26 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var columnDefinitions   = columnsToColumnDefinitions(columns, columnExtensionMap),
-            responsiveGridState = (this.state.mounted && layout.responsiveGridState(windowWidth)) || 'lg';
+        var columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap),
+            responsiveGridState = layout.responsiveGridState(windowWidth);
 
-        width = width || layout.gridContainerWidth(windowWidth);
+        width = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
 
-        if (width){
-            columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(width, columnDefinitionsToScaledColumnDefinitions(columnDefinitions));
+        if (!width || isNaN(width)){
+            throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
-        var commonRowProps = { width, columnDefinitions, responsiveGridState, renderDetailPane };
+        columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
+            width,
+            columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
+        );
+
+        var commonRowProps = { width, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
 
         return (
             <div className="item-page-table-container clearfix">
-                { responsiveGridState === 'md' || responsiveGridState === 'lg' || !responsiveGridState ?
-                    <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} />
-                : null }
-                { _.map(results, (result, rowIndex)=>{
+                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={width} />
+                { _.map(results, (result, rowIndex) => {
                     var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow {...this.props} {...commonRowProps}
@@ -136,7 +137,7 @@ export class ItemPageTable extends React.Component {
 
 }
 
-class ItemPageTableRow extends React.Component {
+class ItemPageTableRow extends React.PureComponent {
 
     static totalColumnsBaseWidth(columns){
         return _.reduce(columns, function(m, colDef){
@@ -144,13 +145,13 @@ class ItemPageTableRow extends React.Component {
         }, 0);
     }
 
-    static scaleColumnDefinitionWidths(realWidth, columnDefinitions){
-        var baseWidth = ItemPageTableRow.totalColumnsBaseWidth(columnDefinitions);
-        var scale = realWidth / baseWidth;
-        return columnDefinitions.map(function(c){
+    static scaleColumnDefinitionWidths = memoize(function(realWidth, columnDefinitions){
+        var baseWidth = ItemPageTableRow.totalColumnsBaseWidth(columnDefinitions),
+            scale = realWidth / baseWidth;
+        return _.map(columnDefinitions, function(c){
             return _.extend({}, c, { 'width' : Math.floor(scale * c.baseWidth) });
         });
-    }
+    });
 
     constructor(props){
         super(props);
@@ -159,94 +160,50 @@ class ItemPageTableRow extends React.Component {
     }
 
     toggleOpen(){
-        this.setState({ open : !this.state.open });
+        this.setState(function({ open }){
+            return { open : !open };
+        });
     }
 
     renderValue(colDefinition, result, columnIndex){
         return (
-            <ResultRowColumnBlockValue
-                {...this.props}
-                columnDefinition={colDefinition}
-                columnNumber={columnIndex}
-                key={colDefinition.field}
-                schemas={this.props.schemas || null}
-                result={result}
-                tooltip={true}
+            <ResultRowColumnBlockValue {...this.props}
+                columnDefinition={colDefinition} columnNumber={columnIndex}
+                key={colDefinition.field} schemas={this.props.schemas || null}
+                result={result} tooltip={true}
                 className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
-                detailOpen={this.state.open}
-                toggleDetailOpen={this.toggleOpen}
+                detailOpen={this.state.open} toggleDetailOpen={this.toggleOpen}
                 renderDetailPane={this.props.renderDetailPane}
             />
         );
     }
 
     renderRowOfColumns(){
-        if (!Array.isArray(this.props.columnDefinitions)) {
-            console.error('No columns defined.');
-            return null;
-        }
-        var result = this.props.result;
-        return (
-            <div className={"table-row clearfix" + (typeof this.props.renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
-                {
-                    _.map(this.props.columnDefinitions, (col, index)=>{
-                        return (
-                            <div style={{ width : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
-                                { this.renderValue(col, result, index) }
-                            </div>
-                        );
-                    })
-                }
-            </div>
-        );
-    }
+        var { columnDefinitions, result, renderDetailPane } = this.props;
 
-    renderRowOfBlocks(){
-        if (!Array.isArray(this.props.columnDefinitions)) {
+        if (!Array.isArray(columnDefinitions)) {
             console.error('No columns defined.');
             return null;
         }
-        var result = this.props.result;
+
         return (
-            <div className="table-row row clearfix">
-                {
-                    _.map(
-                        _.filter(this.props.columnDefinitions, (col, index)=>{
-                            if (!this.state.open && col.field !== 'display_title'){
-                                return false;
-                            }
-                            return true;
-                        }),
-                        (col, index)=>{
-                            var label;
-                            if (col.field !== 'display_title'){
-                                label = (
-                                    <div className="text-500 label-for-field">
-                                        { col.title || Schemas.Field.toName(col.field) }
-                                    </div>
-                                );
-                            }
-                            return (
-                                <div className={"column block column-for-" + col.field + (col.field === 'display_title' ? ' col-xs-12' : ' col-xs-6')} data-field={col.field}>
-                                    { label }
-                                    { this.renderValue(col, result) }
-                                </div>
-                            );
-                        }
-                    )
-                }
+            <div className={"table-row clearfix" + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
+                { _.map(columnDefinitions, (col, index) =>
+                    <div style={{ 'width' : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
+                        { this.renderValue(col, result, index) }
+                    </div>
+                )}
             </div>
         );
     }
 
     render(){
+        const { result, rowNumber, width, renderDetailPane } = this.props;
         return (
-            <div className="item-page-table-row-container">
-                { this.props.responsiveGridState === 'xs' || this.props.responsiveGridState === 'sm' ? this.renderRowOfBlocks() : this.renderRowOfColumns() }
-                { this.state.open && typeof this.props.renderDetailPane === 'function' ?
-                    <div className="inner-wrapper">
-                        { this.props.renderDetailPane(this.props.result, this.props.rowNumber, this.props.width, this.props) }
-                    </div>
+            <div className="item-page-table-row-container" style={{ width }}>
+                { this.renderRowOfColumns() }
+                { this.state.open && typeof renderDetailPane === 'function' ?
+                    <div className="inner-wrapper">{ renderDetailPane(result, rowNumber, width, this.props) }</div>
                 : null }
             </div>
         );
@@ -263,26 +220,16 @@ export class ItemPageTableLoader extends React.PureComponent {
         'windowWidth': PropTypes.number.isRequired
     };
 
-    static getInitialState(props){
-        return {
+    constructor(props){
+        super(props);
+        this.state = {
             'items' : null,
             'loading' : true,
             'itemIndexMapping' : _.object(_.map(props.itemUrls, function(url, i){ return [url, i]; }))
         };
     }
 
-    constructor(props){
-        super(props);
-        this.state = ItemPageTableLoader.getInitialState(props);
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (!_.isEqual(nextProps.itemUrls, this.props.itemUrls)){
-            this.setState(ItemPageTableLoader.getInitialState(nextProps), this.componentDidMount);
-        }
-    }
-
-    componentDidMount(){
+    loadItems(){
         var itemUrls = this.props.itemUrls,
             onFinishLoad = _.after(itemUrls.length, ()=>{
                 this.setState({ 'loading' : false });
@@ -306,6 +253,10 @@ export class ItemPageTableLoader extends React.PureComponent {
         }
     }
 
+    componentDidMount(){
+        this.loadItems();
+    }
+
     render(){
         return React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
     }
@@ -318,7 +269,10 @@ export class ItemPageTableSearchLoader extends React.Component {
     constructor(props){
         super(props);
         this.handleResponse = this.handleResponse.bind(this);
-        this.state = { 'loading' : false, 'results' : null };
+        this.state = {
+            'loading' : false,
+            'results' : null
+        };
     }
 
     componentDidMount(){

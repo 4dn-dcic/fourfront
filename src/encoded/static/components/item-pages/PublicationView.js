@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button, Collapse } from 'react-bootstrap';
 import { console, object, DateUtility } from './../util';
-import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
-import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
+import { ExperimentSetTableTabView } from './components';
+import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
 
 
@@ -22,15 +22,13 @@ export default class PublicationView extends DefaultItemView {
         initTabs.push(PublicationSummary.getTabObject(this.props, width));
 
         if ((context.exp_sets_used_in_pub || []).length > 0 || (context.exp_sets_prod_in_pub || []).length > 0){
-            initTabs.push(PublicationExperimentSets.getTabObject(this.props, width));
+            initTabs.push(ExperimentSetTableTabView.getTabObject(this.props, width));
         }
 
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
     }
 
 }
-
-
 
 
 class PublicationSummary extends React.PureComponent {
@@ -93,7 +91,7 @@ class PublicationSummary extends React.PureComponent {
                     <h4 className={"mt-" + (authors ? '3' : '2') + " mb-1 text-500"}>
                         Link
                     </h4>
-                    <p><a href={url} target="_blank">{ url }</a></p>
+                    <p><a href={url} target="_blank" rel="noopener noreferrer">{ url }</a></p>
                 </React.Fragment>
             );
         }
@@ -234,67 +232,4 @@ class PublicationSummary extends React.PureComponent {
             </div>
         );
     }
-}
-
-
-class PublicationExperimentSets extends React.PureComponent {
-
-    /**
-     * Get overview tab object for tabpane.
-     *
-     * @param {Object} props - Parent Component props, as passed down from app.js
-     * @param {number} width - Width of tab container.
-     */
-    static getTabObject(props, width){
-        return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
-            'key' : 'pub-expsets',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <PublicationExperimentSets {...props} width={width} />
-                </div>
-            )
-        };
-    }
-
-    constructor(props){
-        super(props);
-        this.getCountCallback = this.getCountCallback.bind(this);
-        this.state = {
-            'totalCount' : null
-        };
-    }
-
-    getCountCallback(resp){
-        if (resp && typeof resp.total === 'number'){
-            this.setState({ 'totalCount' : resp.total });
-        }
-    }
-
-
-    render(){
-        var { windowWidth, context } = this.props,
-            { totalCount } = this.state,
-            requestHref = (
-                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.title&publications_of_set.uuid=" + context.uuid
-            ),
-            title = 'Experiment Sets Published';
-
-        if (totalCount){
-            title = totalCount + ' Experiment Sets Published';
-        }
-
-        return (
-            <div>
-                <ExperimentSetTablesLoadedFromSearch requestHref={requestHref} windowWidth={windowWidth} onLoad={this.getCountCallback} title={title} />
-                { totalCount && totalCount > 25 ?
-                    <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
-                        View all Experiment Sets ({ totalCount - 25 + ' more' })
-                    </Button>
-                : null }
-            </div>
-        );
-    }
-
 }

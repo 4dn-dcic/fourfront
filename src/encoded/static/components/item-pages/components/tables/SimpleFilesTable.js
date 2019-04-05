@@ -4,10 +4,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ItemPageTable, ItemPageTableLoader } from './ItemPageTable';
-import { ajax, console, layout, expFxn, object } from './../../util';
+import { console, expFxn } from './../../../util';
 
 
-export class SimpleFilesTable extends React.Component {
+export class SimpleFilesTable extends React.PureComponent {
 
     static propTypes = {
         'results'                 : PropTypes.arrayOf(PropTypes.shape({
@@ -56,15 +56,16 @@ export class SimpleFilesTable extends React.Component {
 }
 
 
-export class SimpleFilesTableLoaded extends React.Component {
+export class SimpleFilesTableLoaded extends React.PureComponent {
 
     static propTypes = {
         'fileUrls' : PropTypes.arrayOf(PropTypes.string).isRequired
     };
 
     render(){
+        var { fileUrls, id } = this.props;
         return (
-            <ItemPageTableLoader itemUrls={this.props.fileUrls}>
+            <ItemPageTableLoader itemUrls={fileUrls} key={id}>
                 <SimpleFilesTable {..._.pick(this.props, 'width', 'defaultOpenIndices',
                     'defaultOpenIds', 'columns', 'columnExtensionMap')} />
             </ItemPageTableLoader>

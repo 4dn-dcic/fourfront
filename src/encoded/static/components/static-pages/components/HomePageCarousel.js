@@ -4,8 +4,45 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Carousel from 'nuka-carousel';
-import { ajax, layout } from './../../util';
+import { ajax, layout, object } from './../../util';
 import { BasicStaticSectionBody } from './BasicStaticSectionBody';
+
+
+export class HomePageCarouselSlide extends React.PureComponent {
+
+    render(){
+        const { options, content, title, description, filetype } = this.props;
+
+        var link        = (options && options.link) || null,
+            image       = (options && options.image) || null,
+            showTitle   = (!title ? null :
+                <div className="title-container">
+                    <h4 className="mt-0">{ title }</h4>
+                    { description ? <p>{ description }</p> : null }
+                </div>
+            ),
+            inner = (
+                <React.Fragment>
+                    <div className="inner-container">
+                        <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
+                        { showTitle }
+                    </div>
+                    { content ?
+                        <div className="inner-body">
+                            <BasicStaticSectionBody {...{ filetype, content }} />
+                        </div>
+                    : null }
+                </React.Fragment>
+            );
+
+        if (link){
+            return <a className="homepage-carousel-slide is-link" href={link}>{ inner }</a>;
+        }
+
+        return <div className="homepage-carousel-slide">{ inner }</div>;
+
+    }
+}
 
 
 export class HomePageCarousel extends React.PureComponent {
@@ -44,35 +81,7 @@ export class HomePageCarousel extends React.PureComponent {
     }
 
     renderSlide(section, idx){
-        var link    = (section && section.options && section.options.link) || null,
-            image   = (section && section.options && section.options.image) || null,
-            title   = (!section.title ? null :
-                <div className="title-container">
-                    <h4 className="mt-0">{ section.title }</h4>
-                    { section.description ?
-                        <p>{ section.description }</p>
-                    : null }
-                </div>
-            ),
-            inner = (
-                <React.Fragment>
-                    <div className="inner-container">
-                        <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
-                        { title }
-                    </div>
-                    { section.body ?
-                        <div className="inner-body">
-                            <BasicStaticSectionBody {..._.pick(section, 'filetype', 'content')} />
-                        </div>
-                    : null }
-                </React.Fragment>
-            );
-
-        if (link){
-            return <a className="homepage-carousel-slide is-link" key={idx} children={inner} href={link} />;
-        }
-
-        return <div className="homepage-carousel-slide" key={idx} children={inner} />;
+        return <HomePageCarouselSlide {...section} key={object.itemUtil.atId(section) || idx} />;
     }
 
     render(){

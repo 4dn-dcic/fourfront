@@ -66,26 +66,3 @@ export default class SchemaView extends React.Component {
     }
 }
 
-/*
-Might need for later
-var Markdown = module.exports.Markdown = React.createClass({
-    render: function() {
-        var marked = require('marked');
-        var html = marked(this.props.source, {sanitize: true});
-        return <div dangerouslySetInnerHTML={{__html: html}} />;
-    }
-});
-
-
-var ChangeLog = module.exports.ChangeLog = React.createClass({
-    render: function() {
-        return (
-            <section className="view-detail panel">
-                <div className="container">
-                    <Markdown source={this.props.source} />
-                </div>
-            </section>
-        );
-    }
-});
-*/
