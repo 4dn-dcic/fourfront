@@ -73,7 +73,14 @@ class ExperimentSet(Item):
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": [
+            "message",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.icon",
+            "badge.description"
+        ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -105,6 +112,7 @@ class ExperimentSet(Item):
         "experiments_in_set.badges.badge.commendation",
         "experiments_in_set.badges.badge.warning",
         "experiments_in_set.badges.badge.badge_classification",
+        "experiments_in_set.badges.badge.icon",
         "experiments_in_set.badges.badge.description",
         "experiments_in_set.badges.message",
 
@@ -127,6 +135,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.badges.badge.commendation",
         "experiments_in_set.biosample.badges.badge.warning",
         "experiments_in_set.biosample.badges.badge.badge_classification",
+        "experiments_in_set.biosample.badges.badge.icon",
         "experiments_in_set.biosample.badges.badge.description",
         "experiments_in_set.biosample.badges.message",
 
@@ -162,6 +171,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
         "experiments_in_set.files.badges.badge.badge_classification",
+        "experiments_in_set.files.badges.badge.icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.message",
 

@@ -7,9 +7,8 @@ import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
-    FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
+import { ItemHeader, ItemDetailList, TabbedView, AuditTabView, Publications, AttributionTabView, BadgesTabView } from './components';
+import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
 import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
 
 var { TabObject, Item } = typedefs;
@@ -120,11 +119,19 @@ export default class DefaultItemView extends React.PureComponent {
         var returnArr = [],
             { context, schemas, windowWidth } = this.props;
 
+        // Attribution Tab
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
 
         returnArr.push(ItemDetailList.getTabObject(this.props));
+
+        // Badges, if any
+        const badges = context && context['aggregated-items'] && context['aggregated-items'].badges;
+        if (Array.isArray(badges) && badges.length > 0){
+            returnArr.push(BadgesTabView.getTabObject(this.props));
+        }
+
         returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
