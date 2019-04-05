@@ -53,14 +53,14 @@ def biosample0(testapp, biosample_data):
 @pytest.fixture
 def biosample1(testapp, biosample_data, biosample_cell_culture1):
     biosample_data['description'] = 'GM12878 second prep'
-    biosample_data['cell_culture_details'] = biosample_cell_culture1['@id']
+    biosample_data['cell_culture_details'] = [biosample_cell_culture1['@id']]
     return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 
 @pytest.fixture
 def biosample2(testapp, biosample_data, biosample_cell_culture2):
     biosample_data['description'] = 'GM12878 third prep'
-    biosample_data['cell_culture_details'] = biosample_cell_culture2['@id']
+    biosample_data['cell_culture_details'] = [biosample_cell_culture2['@id']]
     return testapp.post_json('/biosample', biosample_data).json['@graph'][0]
 
 
@@ -167,16 +167,16 @@ def invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_files,
             biosample_cell_culture_data['differentiation_state'] = 'state' + str(i)
             b_c_c.append(testapp.post_json('/biosample_cell_culture', biosample_cell_culture_data).json['@graph'][0])
             if i == 0:  # we only need to make one biosample in the first 2 iterations
-                biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+                biosample_data['cell_culture_details'] = [b_c_c[0]['@id']]
                 biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
             experiment_data['biosample'] = biosample[0]['@id']
         elif i == 2:  # make a new biosample with different biosource
             biosample_data['biosource'] = [F123_biosource['@id']]
-            biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+            biosample_data['cell_culture_details'] = [b_c_c[0]['@id']]
             biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
             experiment_data['biosample'] = biosample[1]['@id']
         else:  # make third biosample with different cell_culture_details
-            biosample_data['cell_culture_details'] = b_c_c[1]['@id']
+            biosample_data['cell_culture_details'] = [b_c_c[1]['@id']]
             biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
             experiment_data['biosample'] = biosample[2]['@id']
         experiment.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
@@ -211,7 +211,7 @@ def more_invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_fi
             b_c_c.append(testapp.post_json('/biosample_cell_culture', biosample_cell_culture_data).json['@graph'][0])
             if i == 0:  # we only need to make one biosample in the first 2 iterations
                 experiment_data['average_fragment_size'] = 600
-                biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+                biosample_data['cell_culture_details'] = [b_c_c[0]['@id']]
                 biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
             experiment_data['biosample'] = biosample[0]['@id']
         elif i == 2:  # average_fragment_size now above threshold
@@ -219,7 +219,7 @@ def more_invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_fi
         else:  # average_fragment_size below threshold, but biosample difference still causes error
             experiment_data['average_fragment_size'] = 601
             biosample_data['biosource'] = [F123_biosource['@id']]
-            biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+            biosample_data['cell_culture_details'] = [b_c_c[0]['@id']]
             biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
             experiment_data['biosample'] = biosample[1]['@id']
         experiment.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
