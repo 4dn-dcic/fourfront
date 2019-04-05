@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
-import { console, object, Schemas } from './../util';
+import { console, object, Schemas, expFxn } from './../util';
 import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
