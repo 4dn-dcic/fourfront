@@ -359,7 +359,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                     });
                 }
             } else {
-                this.setState({  'isLoading' : false, }, () => this.props.setResults(this.props.results));
+                this.setState({  'isLoading' : false });
             }
         };
 
@@ -587,9 +587,7 @@ class DimensioningContainer extends React.PureComponent {
                 }, 0),
                 (headerElement && (headerElement.offsetWidth + 12)) || 0
             );
-
         }
-
 
         return maxColWidth;
     }
@@ -621,8 +619,24 @@ class DimensioningContainer extends React.PureComponent {
         return null;
     }
 
+    /**
+     * We previously had used `object.itemUtil.compareResultsByID`, however
+     * `getDerivedStateFromProps` is ran right before every single render so
+     * for performance we compare list/object reference instead.
+     *
+     * If results have changed, it implicitly means something like href or user
+     * session has changed as well.
+     */
     static getDerivedStateFromProps(props, state){
-
+        if (state.originalResults !== props.results){
+            console.warn('props.results have changed, resetting some state -- ');
+            return {
+                'results' : props.results.slice(0),
+                'openDetailPanes' : {},
+                'originalResults' : props.results
+            };
+        }
+        return null;
     }
 
     constructor(props){
@@ -642,9 +656,14 @@ class DimensioningContainer extends React.PureComponent {
         this.state = {
             'mounted'   : false,
             'widths'    : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, false, props.windowWidth),
+            // We cache this here in order to be able props.results vs state.orginalResults
+            // in getDerivedStateFromProps.
+            // SearchResultTable _does not_ get context passed in, so we compare results instead.
+            'originalResults' : props.results,
             'results'   : props.results.slice(0),
             'isWindowPastTableTop' : false,
-            'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview
+            // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview
+            'openDetailPanes' : {}
         };
 
         this.innerContainerRef      = React.createRef();
@@ -686,23 +705,18 @@ class DimensioningContainer extends React.PureComponent {
 
     componentDidUpdate(pastProps, pastState){
 
-        //var stateChange = {};
-
-        if (pastState.results.length !== this.state.results.length){
+        if (pastState.results !== this.state.results){
             ReactTooltip.rebuild();
         }
 
-        if (pastProps.columnDefinitions.length !== this.props.columnDefinitions.length){
+        if (pastProps.columnDefinitions.length !== this.props.columnDefinitions.length/* || this.props.results !== pastProps.results*/){
             // We have a list of widths in state; if new col is added, these are no longer aligned, so we reset.
+            // We may optioanlly (currently disabled) also do this if _original_ results have changed as extra glitter to decrease some widths re: col values.
+            // (if done when state.results have changed, it would occur way too many times to be performant (state.results changes as-you-scroll))
             this.resetWidths();
         } else if (pastProps.windowWidth !== this.props.windowWidth){
-            //_.extend(stateChange, this.getTableDims());
             this.setState(this.getTableDims());
         }
-
-        //if (_.keys(stateChange).length > 0){
-        //    this.setState(stateChange);
-        //}
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){

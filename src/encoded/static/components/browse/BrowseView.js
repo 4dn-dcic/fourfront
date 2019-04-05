@@ -175,7 +175,7 @@ class ResultTableContainer extends React.PureComponent {
         }),
         'selectFile'                : PropTypes.func,
         'unselectFile'              : PropTypes.func,
-        'selectedFiles'             : PropTypes.objectOf(PropTypes.string)
+        'selectedFiles'             : PropTypes.objectOf(PropTypes.object)
     };
 
     static defaultProps = {
@@ -284,7 +284,7 @@ class ResultTableContainer extends React.PureComponent {
                         ref={this.searchResultTableRef}
                         results={context['@graph']}
                         renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78} key={href} />
+                        stickyHeaderTopOffset={-78} />
                 </div>
             </div>
         );
