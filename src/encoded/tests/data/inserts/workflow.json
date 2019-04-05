@@ -12677,7 +12677,10 @@
         "title": "Generation of multiresolution Hi-C contact matrices from a set of contact lists 0.2.7",
         "uuid": "23bd6d73-4190-496d-837c-21bcdb3802ed",
         "accession": "4DNWF2YBHXQM",
-        "previous_version": ["/workflows/c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0"],
+        "previous_version": ["/workflows/c9e0e6f7-b0ed-4a42-9466-cadc2dd84df0",
+                             "/workflows/05b62bba-7bfa-46cc-8d8e-3d37f4feb8bd",
+                             "/workflows/bd6e25ea-f368-4758-a821-d30e0b5a4100",
+                             "/workflows/c19ee11e-9d5a-454f-af50-600a0cf990b6"],
         "version_upgrade_log": "Hic2cool extract-norm MT chromosome handling bug fixed. Cooler convergence failure now doesn't throw error (store NaN instead). Nore, Nonorm, Norenonorm variants are now merged.",
         "aliases": ["4dn-dcic-lab:wf-hi-c-processing-pairs-0.2.7"]
     }
