@@ -105,7 +105,6 @@ def experiment_1_2(value, system):
     else:
         exptype = value.get('experiment_type')
     valid_exptypes = system['registry']['collections']['ExperimentType']
-    formats = system['registry']['collections']['FileFormat']
     exptype_item = valid_exptypes.get(exptype)
     exptype_uuid = None
     try:
