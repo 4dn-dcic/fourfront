@@ -316,20 +316,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
         if (typeof this.state.mounted === 'boolean') {
             this.setState({ 'mounted' : true });
         }
-        //window.addEventListener('scroll', this.handleScrollExt);
     }
-    /*
-    componentWillUnmount(){
-        window.removeEventListener('scroll', this.handleScrollExt);
-    }
-    */
-    /*
-    handleScrollExt(){
-        if (typeof this.props.onVerticalScroll === 'function'){
-            return this.props.onVerticalScroll.apply(this.props.onVerticalScroll, arguments);
-        }
-    }
-    */
 
     getInitialFrom(){
         if (typeof this.props.page === 'number' && typeof this.props.limit === 'number'){
@@ -380,20 +367,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
             ajax.load(nextHref, loadCallback, 'GET', loadCallback);
         });
     }
-    /*
-    handleScrollingStateChange(isScrolling){
-        //vizUtil.requestAnimationFrame(()=>{
-            //if (isScrolling && !this.lastIsScrolling){
-            //    this.props.innerContainerElem.style.pointerEvents = 'none';
-            //} else if (this.lastIsScrolling) {
-                this.props.innerContainerElem.style.pointerEvents = '';
-                this.props.innerContainerElem.childNodes[0].focus();
-                //console.log(this.props.innerContainerElem.childNodes[0]);
-            //}
-            //this.lastIsScrolling = !!(isScrolling);
-        //});
-    }
-    */
+
     render(){
         var { children, rowHeight, openDetailPanes, openRowHeight, tableContainerWidth, tableContainerScrollLeft, totalExpected, results } = this.props;
         if (!(this.props.mounted || this.state.mounted)){
@@ -426,8 +400,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                 infiniteLoadBeginEdgeOffset={canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(1.5)}
                 preloadBatchSize={Infinite.containerHeightScaleFactor(1.5)}
-                children={children}
-            />
+                >{ children }</Infinite>
         );
     }
 }
@@ -648,6 +621,10 @@ class DimensioningContainer extends React.PureComponent {
         return null;
     }
 
+    static getDerivedStateFromProps(props, state){
+
+    }
+
     constructor(props){
         super(props);
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
@@ -708,15 +685,24 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps, pastState){
+
+        //var stateChange = {};
+
         if (pastState.results.length !== this.state.results.length){
             ReactTooltip.rebuild();
         }
 
         if (pastProps.columnDefinitions.length !== this.props.columnDefinitions.length){
+            // We have a list of widths in state; if new col is added, these are no longer aligned, so we reset.
             this.resetWidths();
         } else if (pastProps.windowWidth !== this.props.windowWidth){
+            //_.extend(stateChange, this.getTableDims());
             this.setState(this.getTableDims());
         }
+
+        //if (_.keys(stateChange).length > 0){
+        //    this.setState(stateChange);
+        //}
     }
 
     toggleDetailPaneOpen(rowKey, cb = null){
@@ -863,12 +849,14 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     resetWidths(){
+
         // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
-        this.setState( ({ mounted }, { columnDefinitions, windowWidth }) => {
-            return {
-                "widths" : DimensioningContainer.resetHeaderColumnWidths(columnDefinitions, mounted, windowWidth)
-            };
-        }, () => {
+        const resetWidthStateChangeFxn = function({ mounted }, { columnDefinitions, windowWidth }){
+            return { "widths" : DimensioningContainer.resetHeaderColumnWidths(columnDefinitions, mounted, windowWidth) };
+        };
+
+        // 2. Upon render into DOM, decrease col sizes.
+        const resetWidthStateChangeFxnCallback = () => {
             vizUtil.requestAnimationFrame(()=>{
                 var { columnDefinitions, windowWidth } = this.props;
                 // 2. Upon render into DOM, decrease col sizes.
@@ -877,7 +865,9 @@ class DimensioningContainer extends React.PureComponent {
                     { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(columnDefinitions, 30, windowWidth) }
                 ));
             });
-        });
+        };
+
+        this.setState(resetWidthStateChangeFxn, resetWidthStateChangeFxnCallback);
     }
 
     setHeaderWidths(widths){
