@@ -31,7 +31,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
     componentDidUpdate(pastProps){
         // After updating the component, load the new higlass component if it changed.
         if (pastProps.higlassItem !== this.props.higlassItem){
-            if (this.props.hiGlassItem.viewconfig){
+            if (this.props.higlassItem.viewconfig){
                 this.setState({ higlassItem : this.props.higlassItem });
             } else {
                 this.getFullHiglassItem();
