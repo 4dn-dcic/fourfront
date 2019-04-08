@@ -223,7 +223,7 @@ class ControlsAndResults extends React.PureComponent {
                         {...{ hiddenColumns, columnDefinitions }} showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf} />
                     <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                         'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
-                        {...{ hiddenColumns, results, columnDefinitions }} key={href}
+                        {...{ hiddenColumns, results, columnDefinitions }}
                         ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total} />
                 </div>
             </div>
