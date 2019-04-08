@@ -234,7 +234,7 @@ class File(Item):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'experiments.display_title',
         'experiments.accession',
-        'experiments.experiment_type.title',
+        'experiments.`experiment_type`.title',
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
@@ -1244,8 +1244,13 @@ def get_file_experiment_type(request, context, properties):
         if found_experiment_type == 'None' or found_experiment_type == exp_type:
             found_experiment_type = exp_type
         else:  # multiple experiment types
-            found_experiment_type = 'Integrative analysis'
-            break
+            return 'Integrative analysis'
+    if found_experiment_type != 'None':
+        found_item = get_item_if_you_can(request, found_experiment_type)
+        if found_item is None:
+            found_experiment_type = 'None'
+        else:
+            found_experiment_type = found_item.get('title')
     return found_experiment_type
 
 

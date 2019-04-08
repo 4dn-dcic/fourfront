@@ -204,7 +204,7 @@ def test_range_download(testapp, registry, proc_file_json):
     assert resp.headers['Content-Range'] == 'bytes 2-5/12'
 
 
-def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, experiment_data, file_formats):
+def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, experiment_data, file_formats, exp_types):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     experiment_data['processed_files'] = [resobj['@id']]
@@ -218,12 +218,18 @@ def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, expe
 
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
+    et_coll = registry['collections']['ExperimentType']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
     tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
                             if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
     assert len(tracked_exp_file_dls) > 0
     for dl_tracking in tracked_exp_file_dls:
-        assert dl_tracking['experiment_type'] == experiment_data['experiment_type']
+        ex_type_atid = experiment_data['experiment_type']
+        ex_type_name = ex_type_atid.replace('/experiment-types/', '')
+        ex_type_name = ex_type_name.replace('/', '')
+        dl_type = et_coll.get(dl_tracking['experiment_type'])
+        ex_type = et_coll.get(ex_type_name)
+        assert dl_type.properties.get('title') == ex_type.properties.get('title')
         assert 'file_format' in dl_tracking
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
@@ -253,12 +259,18 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
 
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
+    et_coll = registry['collections']['ExperimentType']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
     tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
                             if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
     assert len(tracked_exp_file_dls) > 0
     for dl_tracking in tracked_exp_file_dls:
-        assert dl_tracking['experiment_type'] == expected_exp_type
+        ex_type_atid = expected_exp_type
+        ex_type_name = ex_type_atid.replace('/experiment-types/', '')
+        ex_type_name = ex_type_name.replace('/', '')
+        dl_type = et_coll.get(dl_tracking['experiment_type'])
+        expected_exp_type = et_coll.get(ex_type_name)
+        assert dl_type.properties.get('title') == expected_exp_type.properties.get('title')
         assert 'file_format' in dl_tracking
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')

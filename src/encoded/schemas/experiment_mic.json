@@ -118,7 +118,7 @@
         }
     },
     "columns": {
-        "experiment_type": {
+        "experiment_type.display_title": {
             "title" : "Experiment Type"
         },
         "microscopy_technique": {
@@ -126,7 +126,7 @@
         }
     },
     "facets": {
-        "experiment_type": {
+        "experiment_type.display_title": {
             "title" : "Experiment Type"
         },
         "microscopy_technique": {
