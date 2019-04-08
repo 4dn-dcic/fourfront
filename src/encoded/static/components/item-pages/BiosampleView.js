@@ -32,20 +32,7 @@ export default class BiosampleView extends DefaultItemView {
 
 
 function BiosourcesTable(props){
-    const columns = {
-        "display_title" : { "title" : "Title" },
-        "biosource_type" : { "title" : "Type" },
-        "biosource_vendor" : { "title" : "Vendor" },
-        "cell_line" : { "title" : "Cell Line" },
-        "individual" : {
-            "title" : "Individual",
-            "render" : function resultVal(result, columnDefinition, props, width){
-                if (!result || !result.individual || !object.atIdFromObject(result.individual)) return '-';
-                return <IndividualItemTitle context={result.individual} />;
-            }
-        }
-    };
-    return <ItemPageTable {..._.pick(props, 'schemas', 'width', 'results')} columns={columns} renderDetailPane={null} />;
+    return <ItemPageTable {..._.pick(props, 'schemas', 'width', 'columns', 'results')} renderDetailPane={null} />;
 }
 BiosourcesTable.defaultProps = {
     'columns' : {
