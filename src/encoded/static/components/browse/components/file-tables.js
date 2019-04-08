@@ -283,12 +283,14 @@ export class RawFilesStackedTable extends React.PureComponent {
     renderRootStackedBlockListOfBiosamplesWithExperiments(experimentsGroupedByBiosample){
         return (
             <StackedBlockList className="biosamples" title="Biosamples" rootList collapseLongLists={this.props.collapseLongLists}
-                children={_.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments)} showMoreExtTitle={
+                showMoreExtTitle={
                     experimentsGroupedByBiosample.length > 5 ?
                         'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
                         :
                         null
-                } />
+                }>
+                { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
+            </StackedBlockList>
         );
     }
 
