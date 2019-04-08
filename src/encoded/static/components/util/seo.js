@@ -129,7 +129,7 @@ export class CurrentContext extends React.PureComponent {
                     return CurrentContext.labToSchema(cLab, baseDomain);
                 }),
                 publication = context.produced_in_pub && context.produced_in_pub.short_attribution && context.produced_in_pub.journal && context.produced_in_pub.title && context.produced_in_pub,
-                experimentTypes = getNestedProperty(context, 'experiments_in_set.experiment_type.title');
+                experimentTypes = getNestedProperty(context, 'experiments_in_set.experiment_type.display_title');
 
             if (experimentTypes && Array.isArray(experimentTypes)){
                 experimentTypes = _.uniq(experimentTypes);

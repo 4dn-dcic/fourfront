@@ -15,7 +15,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
     static defaultProps = {
         'self_results_url'          : '/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all',
         'self_results_url_fields'   : [
-            'experiments_in_set.experiment_type', 'lab', 'experiments_in_set.biosample.biosource_summary', 'status', 'lab.display_title',
+            'experiments_in_set.experiment_type.display_title', 'lab', 'experiments_in_set.biosample.biosource_summary', 'status', 'lab.display_title',
             'experiments_in_set.experiment_categorizer.value', 'experiments_in_set.experiment_categorizer.field', 'experiments_in_set.display_title',
             'experiments_in_set.accession'
         ],
@@ -38,8 +38,8 @@ export class JointAnalysisMatrix extends React.PureComponent {
         },
         'groupingPropertiesSearchParamMap' : {
             '4DN'                       : {
-                'experiment_category'       : 'experiments_in_set.experiment_type',
-                'experiment_type'           : 'experiments_in_set.experiment_type',
+                'experiment_category'       : 'experiments_in_set.experiment_type.display_title',
+                'experiment_type'           : 'experiments_in_set.experiment_type.display_title',
                 'cell_type'                 : 'experiments_in_set.biosample.biosource_summary',
                 'sub_cat'                   : 'experiments_in_set.experiment_categorizer.value'
             },
@@ -116,9 +116,9 @@ export class JointAnalysisMatrix extends React.PureComponent {
         cellType = cellType[0] || fallbackNameForBlankField;
         cellType = cellTypeNameMap4DN[cellType] || cellType;
 
-        var experimentType =  _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_type')));
+        var experimentType =  _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_type.display_title')));
         if (experimentType.length > 1){
-            console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
+            console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type.display_title) for ', result);
         }
         experimentType = experimentType[0] || fallbackNameForBlankField;
 
