@@ -80,6 +80,14 @@ def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
     assert 'LaminB' in value['notes']
 
 
+def test_experiment_damid_update_type(registry, experiment_damid_1, exp_types):
+    upgrader = registry['upgrader']
+    value = upgrader.upgrade('experiment_damid', experiment_damid_1, registry=registry,
+                             current_version='1', target_version='3')
+    assert value['schema_version'] == '3'
+    assert value['experiment_type'] == exp_types['dam']['uuid']
+
+
 def test_experiment_repliseq_2stage_update_type(registry, experiment_repliseq_1, exp_types):
     upgrader = registry['upgrader']
     value = upgrader.upgrade('experiment_repliseq', experiment_repliseq_1, registry=registry,
