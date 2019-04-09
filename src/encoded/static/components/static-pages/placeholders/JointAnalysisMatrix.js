@@ -25,7 +25,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
         'fallbackNameForBlankField' : "None",
         'statusStateTitleMap'       : {
             'Submitted'                 : ['released', 'current'],
-            'Internal Release'          : ['released to project'],
+            'Internal Release'          : ['released to project', 'pre-release'],
             'In Submission'             : ['in review by lab', 'in review by project', 'submission in progress', 'released to lab'],
             'Planned'                   : ['to be uploaded by workflow', 'planned'],
             'Out of date'               : ['archived', 'revoked'],
