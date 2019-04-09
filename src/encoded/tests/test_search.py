@@ -394,6 +394,31 @@ def test_search_with_no_value(workbook, testapp):
     assert(set(res_ids2) <= set(res_ids))
 
 
+def test_search_with_added_display_title(workbook, testapp):
+    # 4DNBS1234567 is display_title for biosample
+    search = '/search/?type=Experiment&biosample=4DNBS1234567'
+    # 301 because search query is changed
+    res_json = testapp.get(search, status=301).follow(status=200).json
+    assert res_json['@id'] == '/search/?type=Experiment&biosample.display_title=4DNBS1234567'
+    added_facet = [fct for fct in res_json['facets'] if fct['field'] == 'biosample.display_title']
+    # use the title from biosample in experiment schema
+    assert added_facet[0]['title'] == 'Biological Sample'
+    exps = [exp['uuid'] for exp in res_json['@graph']]
+
+    # make sure the search result is the same for the explicit query
+    res_json2 = testapp.get(res_json['@id']).json
+    exps2 = [exp['uuid'] for exp in res_json2['@graph']]
+    assert set(exps) == set(exps2)
+
+    # check to see that added facet doesn't conflict with existing facet title
+    # query below will change to file_format.display_title=fastq
+    search = '/search/?type=File&file_format=fastq'
+    res_json = testapp.get(search, status=301).follow(status=200).json
+    assert res_json['@id'] == '/search/?type=File&file_format.display_title=fastq'
+    existing_ff_facet = [fct for fct in res_json['facets'] if fct['field'] == 'file_format.file_format']
+    assert existing_ff_facet[0]['title'] == 'File Format'
+    added_ff_facet = [fct for fct in res_json['facets'] if fct['field'] == 'file_format.display_title']
+    assert added_ff_facet[0]['title'] == 'File Format (Title)'
 
 
 #########################################
