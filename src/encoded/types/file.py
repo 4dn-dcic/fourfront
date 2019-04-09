@@ -234,7 +234,7 @@ class File(Item):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'experiments.display_title',
         'experiments.accession',
-        'experiments.`experiment_type`.title',
+        'experiments.experiment_type.title',
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
