@@ -385,7 +385,8 @@ class File(Item):
             if not exp_info:  # sonmethings fishy - abort
                 return info
             exp_type = get_item_if_you_can(request, exp_info.get('experiment_type'))
-            info['experiment_type'] = exp_type.get('title')
+            if exp_type is not None:
+                info['experiment_type'] = exp_type.get('title')
             if 'experiment_bucket' not in info:  # did not get it from rep_set
                 info['experiment_bucket'] = self._get_file_expt_bucket(request, exp_info)
             assay_info = exp_info.get('experiment_categorizer')
