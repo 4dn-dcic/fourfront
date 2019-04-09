@@ -2,6 +2,7 @@ import re
 import math
 import itertools
 from pyramid.view import view_config
+from webob.multidict import MultiDict
 from snovault import (
     AbstractCollection,
     TYPES,
@@ -55,7 +56,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     Search view connects to ElasticSearch and returns the results
     """
     types = request.registry[TYPES]
-    search_base = normalize_query(request, search_type)
+    # list of item types used from the query
+    doc_types = set_doc_types(request, types, search_type)
+    search_base = normalize_query(request, types, doc_types)
     ### INITIALIZE RESULT.
     result = {
         '@context': request.route_path('jsonld_context'),
@@ -75,12 +78,11 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     from_, size = get_pagination(request)
 
     # get desired frame for this search
-    search_frame = request.params.get('frame', 'embedded')
+    search_frame = request.normalized_params.get('frame', 'embedded')
 
     ### PREPARE SEARCH TERM
     prepared_terms = prepare_search_term(request)
 
-    doc_types = set_doc_types(request, types, search_type)
     schemas = [types[item_type].schema for item_type in doc_types]
 
     # set ES index based on doc_type (one type per index)
@@ -148,7 +150,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Add all link for collections
     if size not in (None, 'all') and size < result['total']:
-        params = [(k, v) for k, v in request.params.items() if k != 'limit']
+        params = [(k, v) for k, v in request.normalized_params.items() if k != 'limit']
         params.append(('limit', 'all'))
         if context:
             result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
@@ -239,8 +241,8 @@ def get_pagination(request):
     """
     Fill from_ and size parameters for search if given in the query string
     """
-    from_ = request.params.get('from', 0)
-    size = request.params.get('limit', 25)
+    from_ = request.normalized_params.get('from', 0)
+    size = request.normalized_params.get('limit', 25)
     if size in ('all', ''):
        size = "all"
     else:
@@ -280,25 +282,70 @@ def execute_search_for_all_results(search):
     return es_result
 
 
-def normalize_query(request, search_type):
+def normalize_query(request, types, doc_types):
     """
-    Normalize the query used to make the search. If no type is provided,
-    use type=Item
+    Normalize the query by calculating and setting request.normalized_params
+    (a webob MultiDict) that is derived from custom query rules and also
+    the list of doc_types specified by set_doc_types(). The normalize_param
+    helper function finds field_schema for each query parameter and enforces
+    a set of rules (see below). If the query item types differ from doc_types,
+    override with doc_types
+
+    Args:
+        request: the current Request
+        types: registry[TYPES]
+        doc_types (list): item_types to use for the search
+
+    Returns:
+        string: query string built from normazlied params
     """
-    item_type = search_type if search_type != None else 'Item'
-    types = request.registry[TYPES]
-    fixed_types = (
-        (k, types[v].name if k == 'type' and v in types else v)
+    def normalize_param(key, val):
+        """
+        Process each key/val in the original query param. As part of this,
+        obtain the field schema for each parameter.
+        Current rules:
+        - for 'type', get name from types (from the registry)
+        - append '.display_title' to any terminal linkTo query field
+        """
+        field_schema = schema_for_field(key, request, doc_types)
+        # must drill down into arrays/subobjects for the given field
+        while field_schema and ('items' in field_schema or 'properties' in field_schema):
+            try:
+                field_schema = field_schema['items']
+            except KeyError:
+                pass
+            try:
+                field_schema = field_schema['properties']
+            except KeyError:
+                pass
+        if key == 'type' and val in types:
+            return (key, types[val].name)
+        elif field_schema and 'linkTo' in field_schema:
+            # add display_title to terminal linkTo query fields
+            return (key + '.display_title', val)
+        else:
+            return (key, val)
+
+    normalized_params = (
+        normalize_param(k, v)
         for k, v in request.params.items()
     )
-    qs = urlencode([
+    # use a MultiDict to emulate request.params
+    normalized_params = MultiDict(normalized_params)
+    # overwrite 'type' if not equal to doc_types
+    if set(normalized_params.getall('type')) != set(doc_types):
+        if 'type' in normalized_params:
+            del normalized_params['type']
+        for dtype in doc_types:
+            normalized_params.add('type', dtype)
+    # add the normalized params to the request
+    # these will be used in place of request.params for the rest of search
+    setattr(request, 'normalized_params', normalized_params)
+    # the query string of the normalized search
+    qs = '?' + urlencode([
         (k.encode('utf-8'), v.encode('utf-8'))
-        for k, v in fixed_types
+        for k, v in request.normalized_params.items()
     ])
-    # default to the search_type or type=Item if no type is specified
-    qs = '?' + qs if qs else '?type=' + item_type
-    if 'type=' not in qs:
-        qs += ('&type=' + item_type)
     return qs
 
 
@@ -313,18 +360,18 @@ def clear_filters_setup(request, doc_types, forced_type):
     Returns:
         A URL path
     '''
-    seach_query_specs = request.params.getall('q')
+    seach_query_specs = request.normalized_params.getall('q')
     seach_query_url = urlencode([("q", seach_query) for seach_query in seach_query_specs])
     # types_url will always be present (always >=1 doc_type)
     types_url = urlencode([("type", typ) for typ in doc_types])
-    current_action = request.params.get('currentAction')
+    current_action = request.normalized_params.get('currentAction')
 
     clear_qs = types_url or ''
     if seach_query_url:
         clear_qs += '&' + seach_query_url
     if current_action == 'selection':
         clear_qs += '&currentAction=selection'
-    current_search_sort = request.params.getall('sort')
+    current_search_sort = request.normalized_params.getall('sort')
     current_search_sort_url = urlencode([("sort", s) for s in current_search_sort])
     if current_search_sort_url:
         clear_qs += '&' + current_search_sort_url
@@ -342,7 +389,7 @@ def build_type_filters(result, request, doc_types, types):
             ti = types[item_type]
             qs = urlencode([
                 (k.encode('utf-8'), v.encode('utf-8'))
-                for k, v in request.params.items() if not (k == 'type' and types.all.get('Item' if v == '*' else v) is ti)
+                for k, v in request.normalized_params.items() if not (k == 'type' and types.all.get('Item' if v == '*' else v) is ti)
             ])
             result['filters'].append({
                 'field': 'type',
@@ -359,7 +406,7 @@ def prepare_search_term(request):
     """
     prepared_terms = {}
     prepared_vals = []
-    for field, val in request.params.iteritems():
+    for field, val in request.normalized_params.iteritems():
         if field.startswith('audit') or field.startswith('aggregated_items'):
             continue
         elif field == 'q': # searched string has field 'q'
@@ -380,7 +427,19 @@ def prepare_search_term(request):
 def set_doc_types(request, types, search_type):
     """
     Set the type of documents resulting from the search; order and check for
-    invalid types as well.
+    invalid types as well. If a forced search_type is enforced, use that;
+    otherwise, set types from the query params. Default to Item if none set.
+
+    Args:
+        request: the current Request
+        types: registry[TYPES]
+        search_type (str): forced search item type
+
+    Returns:
+        list: the string item types to use for the search
+
+    Raises:
+        HTTPBadRequest: if an invalid item type is supplied
     """
     doc_types = []
     if search_type is None:
@@ -400,6 +459,7 @@ def set_doc_types(request, types, search_type):
     if len(doc_types) == 0:
         doc_types = ['Item']
     return doc_types
+
 
 def get_search_fields(request, doc_types):
     """
@@ -425,7 +485,7 @@ def list_source_fields(request, doc_types, frame):
     'field=name'
     Add audit to this so we can look at that as well
     """
-    fields_requested = request.params.getall('field')
+    fields_requested = request.normalized_params.getall('field')
     if fields_requested:
         fields = ['embedded.@id', 'embedded.@type']
         for field in fields_requested:
@@ -522,7 +582,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             }
 
     # Prefer sort order specified in request, if any
-    requested_sorts = request.params.getall('sort')
+    requested_sorts = request.normalized_params.getall('sort')
     if requested_sorts:
         for rs in requested_sorts:
             add_to_sort_dict(rs)
@@ -592,9 +652,9 @@ def set_filters(request, search, result, principals, doc_types):
     range_filters = {}
 
     # Exclude status=deleted Items unless explicitly requested/filtered-in.
-    if 'deleted' not in request.params.getall('status'):
+    if 'deleted' not in request.normalized_params.getall('status'):
         field_filters['embedded.status.raw']['must_not_terms'].append('deleted')
-    if 'replaced' not in request.params.getall('status'):
+    if 'replaced' not in request.normalized_params.getall('status'):
         field_filters['embedded.status.raw']['must_not_terms'].append('replaced')
 
     # Exclude type=TrackingItem and type=OntologyTerm from results unless are explictly specified
@@ -603,7 +663,7 @@ def set_filters(request, search, result, principals, doc_types):
     if 'OntologyTerm' not in doc_types:
         field_filters['embedded.@type.raw']['must_not_terms'].append('OntologyTerm')
 
-    for field, term in request.params.items():
+    for field, term in request.normalized_params.items():
         not_field = False # keep track if query is NOT (!)
         exists_field = False # keep track of null values
         range_type = False # If we determine is a range request (field.to, field.from), will be populated with string 'date' or 'numerical'
@@ -615,7 +675,6 @@ def set_filters(request, search, result, principals, doc_types):
         elif term == 'No value':
             exists_field = True
 
-
         # Check for date or numerical range filters
         if (len(field) > 3 and field[-3:] == '.to') or (len(field) > 5 and field[-5:] == '.from'):
             if field[-3:] == '.to':
@@ -625,17 +684,16 @@ def set_filters(request, search, result, principals, doc_types):
                 f_field = field[:-5]
                 range_direction = "gte"
 
-            # The field schema below will only be found for top-level fields.
-            # If schema for field is not found (and range_type thus not set), then treated as ordinary term filter (likely will get 0 results)
+            # If schema for field is not found (and range_type thus not set),
+            # then treated as ordinary term filter (likely will get 0 results)
             field_schema = schema_for_field(f_field, request, doc_types)
             if field_schema:
                 range_type = 'date' if determine_if_is_date_field(f_field, field_schema) else 'numerical'
 
-
         # Add filter to result
         qs = urlencode([
             (k.encode('utf-8'), v.encode('utf-8'))
-            for k, v in request.params.items()
+            for k, v in request.normalized_params.items()
             if (k != field or v != term)
         ])
         remove_path = '{}?{}'.format(request.path, qs)
@@ -667,14 +725,12 @@ def set_filters(request, search, result, principals, doc_types):
 
 
         if range_type:
-
             if query_field not in range_filters:
                 range_filters[query_field] = {}
                 if range_type == 'date':
                     range_filters[query_field]['format'] = 'yyyy-MM-dd HH:mm'
 
             if range_direction in ('gt', 'gte', 'lt', 'lte'):
-
                 if len(term) == 10:
                     # Correct term to have hours, e.g. 00:00 or 23:59, if not otherwise supplied.
                     if range_direction == 'gt' or range_direction == 'lte':
@@ -753,13 +809,13 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
     doc_types, only use the default 'Data Type' and 'Status' facets.
     Add facets for custom url filters whether or not they're in the schema
 
-        :param doc_types:      Item types (@type) for which we are performing a search for.
-        :type  doc_types:      List of strings
-        :param prepared_terms: Lists of terms to match in ElasticSearch, keyed by ElasticSearch field name.
-        :type  prepared_terms: dict
-        :param schemas:        List of schemas for our doc_types.
-        :type  schemas:        List of OrderedDicts
-        :returns: List of tuples containing (0) ElasticSearch-formatted field name (e.g. `embedded.status`) and (1) list of terms for it.
+    Args:
+        doc_types (list): Item types (@type) for which we are performing a search for.
+        prepared_terms (dict): terms to match in ES, keyed by ES field name.
+        schemas (list): List of OrderedDicts of schemas for doc_types.
+
+    Returns:
+        list: tuples containing (0) ElasticSearch-formatted field name (e.g. `embedded.status`) and (1) list of terms for it.
     """
 
     facets = [
@@ -796,6 +852,8 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
     ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
     used_facets = [ facet[0] for facet in facets + append_facets ]
+    used_facet_titles = [facet[1]['title'] for facet in facets + append_facets
+                         if 'title' in facet[1]]
     for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.') # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
@@ -806,6 +864,14 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             # Use the last part of the split field to get the field title
             title_field = split_field[-1]
+
+            # if searching for a display_title, use the title of parent object
+            # use `is_object_title` to keep track of this
+            if title_field == 'display_title' and len(split_field) > 1:
+                title_field = split_field[-2]
+                is_object_title = True
+            else:
+                is_object_title = False
 
             if title_field in used_facets or title_field in disabled_facets:
                 # Cancel if already in facets or is disabled
@@ -824,6 +890,9 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
             for schema in schemas:
                 if title_field in schema['properties']:
                     title_field = schema['properties'][title_field].get('title', title_field)
+                    # see if the title field conflicts for is_object_title facets
+                    if is_object_title and title_field in used_facet_titles:
+                        title_field += ' (Title)'
                     break
 
             facet_tuple = (use_field, {'title': title_field, 'aggregation_type' : aggregation_type})
@@ -857,10 +926,11 @@ def schema_for_field(field, request, doc_types, should_log=False):
     error finding the field from the schema
 
     Args:
-        field: (string) embedded field path, separated by '.'
-        request: current request object
-        doc_types: (list) @types for the search
-        should_log: (bool) logging will only occur if set to True
+        field (string): embedded field path, separated by '.'
+        request: current Request object
+        doc_types (list): @types for the search
+        should_log (bool): logging will only occur if set to True
+
     Returns:
         Dictionary schema for the field, or None if not found
     '''
@@ -1202,7 +1272,7 @@ def format_results(request, hits, search_frame):
     Will retrieve the desired frame from the search hits and automatically
     add 'audit' and 'aggregated_items' frames if they are present
     """
-    fields_requested = request.params.getall('field')
+    fields_requested = request.normalized_params.getall('field')
     if fields_requested:
         frame = 'embedded'
     elif search_frame:
@@ -1309,14 +1379,14 @@ def build_table_columns(request, schemas, doc_types):
     }
 
     # Add type column if any abstract types in search
-    if any_abstract_types and request.params.get('currentAction') != 'selection':
+    if any_abstract_types and request.normalized_params.get('currentAction') != 'selection':
         columns['@type'] = {
             "title" : "Item Type",
             "colTitle" : "Type",
             "order" : -80,
             "description" : "Type or category of Item",
             # Alternative below, if we want type column to be available but hidden by default in selection mode:
-            # "default_hidden": request.params.get('currentAction') == 'selection'
+            # "default_hidden": request.normalized_params.get('currentAction') == 'selection'
         }
 
     for schema in schemas:
