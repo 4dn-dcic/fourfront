@@ -70,6 +70,26 @@ def experiment_mic_1(award, lab):
     }
 
 
+@pytest.fixture
+def experiment_dilution_hic_1(award, lab):
+    return {
+        "schema_version": '1',
+        "award": award['@id'],
+        "lab": lab['@id'],
+        "experiment_type": "dilution Hi-C",
+    }
+
+
+@pytest.fixture
+def experiment_hic_new_type_1(award, lab):
+    return {
+        "schema_version": '1',
+        "award": award['@id'],
+        "lab": lab['@id'],
+        "experiment_type": "special new Hi-C",
+    }
+
+
 def test_experiment_damid_upgrade_pcr_cycles(app, experiment_damid_1):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('experiment_damid', experiment_damid_1, current_version='1', target_version='2')
@@ -126,6 +146,24 @@ def test_experiment_mic_update_type(registry, experiment_mic_1, exp_types):
                              current_version='1', target_version='3')
     assert value['schema_version'] == '3'
     assert value['experiment_type'] == exp_types['fish']['uuid']
+
+
+def test_dilution_hic_update_type(registry, experiment_dilution_hic_1, exp_types):
+    ''' there is a captilization difference between string type and item title'''
+    migrator = registry['upgrader']
+    value = migrator.upgrade('experiment_hi_c', experiment_dilution_hic_1, registry=registry,
+                             current_version='1', target_version='2')
+    assert value['schema_version'] == '2'
+    assert value['experiment_type'] == exp_types['dilution']['uuid']
+
+
+def test_expt_w_unknown_experiment_type(registry, experiment_hic_new_type_1, exp_types):
+    migrator = registry['upgrader']
+    value = migrator.upgrade('experiment_hi_c', experiment_hic_new_type_1, registry=registry,
+                             current_version='1', target_version='2')
+    assert value['schema_version'] == '2'
+    assert 'special new Hi-C ITEM NOT FOUND' in value['notes']
+    assert value['experiment_type'] is None
 
 
 def test_experiment_repliseq_update_antibody(app, experiment_repliseq_2):

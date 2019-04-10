@@ -86,17 +86,6 @@ def experiment_seq_2_3(value, system):
 @upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_tsaseq', '1', '2')
 def experiment_1_2(value, system):
-    # types_list = [
-    #     'ATAC-seq', 'CUT&RUN', 'capture Hi-C', 'ChIA-PET', 'ChIP-seq',
-    #     'dilution Hi-C', 'DNA-paint', 'in situ Hi-C', 'PLAC-seq', 'TSA-seq',
-    #     'DNA FISH', 'RNA FISH', 'RNA-seq', 'SPT', 'DNase Hi-C', 'DNA SPRITE',
-    #     'RNA-DNA SPRITE', 'micro-C', 'sci-Hi-C', 'MARGI', 'TrAC-loop', 'TCC',
-    #     'MC-3C', 'MC-Hi-C', 'GAM', 'NAD-seq', 'single cell Hi-C'
-    # ]
-    # if value.get('experiment_type') in types_list:
-    #     exptype = value.get('experiment_type')
-    # elif value.get('experiment_type') == 'DAM-ID seq':
-    #     exptype = '/experiment-types/damid-seq/'
     exptype = value.get('experiment_type')
     if exptype == 'Repli-seq':
         if value.get('total_fractions_in_exp') == 2:
@@ -107,9 +96,15 @@ def experiment_1_2(value, system):
         exptype = 'DamID-seq'
     valid_exptypes = system['registry']['collections']['ExperimentType']
     exptype_item = valid_exptypes.get(exptype)
+    if not exptype_item:
+        exptypename = exptype.lower().replace(' ', '-')
+    exptype_item = valid_exptypes.get(exptypename)
     exptype_uuid = None
     try:
         exptype_uuid = str(exptype_item.uuid)
     except AttributeError:
-        pass
+        note = '{} ITEM NOT FOUND'.format(exptype)
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
     value['experiment_type'] = exptype_uuid

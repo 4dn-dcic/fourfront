@@ -372,7 +372,8 @@ def exp_types(testapp, lab, award):
         'chia': 'ChIA-PET',
         'repliseq': '2-stage Repli-seq',
         'multi': 'Multi-stage Repli-seq',
-        'chipseq': 'ChIP-seq'
+        'chipseq': 'ChIP-seq',
+        'dilution': 'Dilution Hi-C'
     }
     for k, v in title_dict.items():
         data = {
