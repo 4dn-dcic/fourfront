@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 124 124"
+    height="124"
+    width="124"
+    xml:space="preserve" version="1.1">
+    <defs>
+      <linearGradient
+       id="linearGradient843"
+       spreadMethod="pad"
+       gradientTransform="matrix(-63.389961,63.389961,63.389961,63.389961,84.548042,23.789524)"
+       gradientUnits="userSpaceOnUse"
+       y2="0"
+       x2="1"
+       y1="0"
+       x1="0">
+        <stop offset="0" style="stop-opacity:1;stop-color:#dbba67" />
+        <stop offset="0.514543" style="stop-opacity:1;stop-color:#f8e78f" />
+        <stop offset="1" style="stop-opacity:1;stop-color:#e0c26e" />
+      </linearGradient>
+    </defs>
+    
+    <g transform="matrix(1.3333333,0,0,-1.3333333,0,123.99999)">
+      <g transform="matrix(0.99799853,0,0,1.0267115,-6.2472151,-10.466581)" style="display:inline">
+        <path
+          d="M 98.319,55.484 91.784,47.887 94.76,38.316 85.74,33.94 84.727,23.968 74.716,23.396 70.007,14.544 60.51,17.763 52.853,11.29 45.197,17.763 35.7,14.544 l -4.71,8.852 -10.011,0.573 -1.013,9.972 -9.02,4.375 2.976,9.571 -6.535,7.597 6.535,7.599 -2.976,9.57 9.021,4.375 1.013,9.973 10.011,0.572 4.708,8.852 9.498,-3.219 7.656,6.473 7.657,-6.473 9.497,3.219 4.709,-8.852 L 84.727,87 85.74,77.028 94.76,72.652 91.784,63.083 Z"
+          style="fill:url(#linearGradient843);stroke:none" />
+      </g>
+      <g transform="translate(-6.3530571,-8.9847457)" style="display:inline">
+        <path
+          style="fill:none;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+          d="m 85.182,57.6988 c 1.224,-17.855 -12.26,-33.321 -30.114,-34.543 -17.856,-1.224 -33.322,12.259 -34.544,30.114 -1.223,17.856 12.26,33.321 30.115,34.544 17.855,1.223 33.32,-12.26 34.543,-30.115 z" />
+      </g>
+    </g>
+</svg>
