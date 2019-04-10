@@ -481,6 +481,6 @@ def workflow_7_8(value, system):
                     exptypename = etype.lower().replace(' ', '-')
                     try:
                         new_vals.append(str(valid_exp_types.get(exptypename).uuid))
-                    except:
+                    except AttributeError:
                         continue
         value['experiment_types'] = new_vals
