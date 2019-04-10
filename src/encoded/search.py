@@ -58,6 +58,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     types = request.registry[TYPES]
     # list of item types used from the query
     doc_types = set_doc_types(request, types, search_type)
+    # sets request.normalized_params
     search_base = normalize_query(request, types, doc_types)
     ### INITIALIZE RESULT.
     result = {
@@ -297,7 +298,7 @@ def normalize_query(request, types, doc_types):
         doc_types (list): item_types to use for the search
 
     Returns:
-        string: query string built from normazlied params
+        string: query string built from normalized params
     """
     def normalize_param(key, val):
         """
