@@ -78,6 +78,7 @@ class ExperimentSet(Item):
             "badge.commendation",
             "badge.warning",
             "badge.uuid",
+            "badge.@id",
             "badge.badge_icon",
             "badge.description"
         ]

@@ -741,7 +741,15 @@ class FileFastq(File):
         "badges.message"
     ]
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid", "badge.badge_icon", "badge.description"]
+        "badges": [
+            "message",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     name_key = 'accession'
     rev = dict(File.rev, **{
