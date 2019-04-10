@@ -63,6 +63,10 @@
             {
                 "badge": "ddd03a23-49e5-4c33-afab-9ec90d65faf3",
                 "message": "Nice job!"
+            },
+            {
+            "badge": "/badges/inconsistent-replicate-info/",
+            "message": "Lorem Ipsum Text"
             }
         ]
     },

@@ -89,6 +89,7 @@ class ExperimentSet(Item):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
+        "badges.badge.badge_icon",
         "badges.message",
 
         "produced_in_pub.title",
@@ -109,6 +110,7 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
+
         "experiments_in_set.badges.badge.title",
         "experiments_in_set.badges.badge.commendation",
         "experiments_in_set.badges.badge.warning",
