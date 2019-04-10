@@ -53,7 +53,7 @@ class DefaultDetailPane extends React.Component {
         return (
             <div>
                 {result.description ?
-                        <div className="data-row flexible-description-box result-table-result-heading">
+                        <div className="flexible-description-box result-table-result-heading">
                             {result.description}
                         </div>
                         : null}
