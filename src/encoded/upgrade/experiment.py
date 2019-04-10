@@ -98,7 +98,7 @@ def experiment_1_2(value, system):
     exptype_item = valid_exptypes.get(exptype)
     if not exptype_item:
         exptypename = exptype.lower().replace(' ', '-')
-    exptype_item = valid_exptypes.get(exptypename)
+        exptype_item = valid_exptypes.get(exptypename)
     exptype_uuid = None
     try:
         exptype_uuid = str(exptype_item.uuid)
