@@ -308,8 +308,12 @@ def normalize_query(request, types, doc_types):
         - for 'type', get name from types (from the registry)
         - append '.display_title' to any terminal linkTo query field
         """
+        # type param is a special case. use the name from TypeInfo
+        if key == 'type' and val in types:
+            return (key, types[val].name)
+
+        # find schema for field parameter and drill down into arrays/subobjects
         field_schema = schema_for_field(key, request, doc_types)
-        # must drill down into arrays/subobjects for the given field
         while field_schema and ('items' in field_schema or 'properties' in field_schema):
             try:
                 field_schema = field_schema['items']
@@ -319,9 +323,7 @@ def normalize_query(request, types, doc_types):
                 field_schema = field_schema['properties']
             except KeyError:
                 pass
-        if key == 'type' and val in types:
-            return (key, types[val].name)
-        elif field_schema and 'linkTo' in field_schema:
+        if field_schema and 'linkTo' in field_schema:
             # add display_title to terminal linkTo query fields
             return (key + '.display_title', val)
         else:
