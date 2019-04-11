@@ -314,19 +314,40 @@ export class EmbeddableSVGBadgeIcon extends React.PureComponent {
 
     }
 
+    static ribbons(color = "#081ebb"){
+        const style = { fill : color, fillOpacity: 1, fillRule: "nonzero", stroke: "none" };
+        return (
+            <g transform="matrix(1.3333333, 0, 0, -1.3333333, -1, 130)">
+                <g transform="translate(-6.8762048,-4.9273304)">
+                    <path d="m 26.7374,12.0591 23.046,28.77 -15.008,12.022 -23.469,-29.297" style={style} />
+                    <path d="m 18.1642,25.7154 11.924,-9.368 -9.368,-11.923" style={style} />
+                    <path d="m 5.5362,16.3135 9.492,11.824 11.824,-9.492" style={style} />
+                </g>
+                <g transform="translate(-6.8762048,-4.9273304)">
+                    <path d="m 95.7296,22.6348 -21.179,30.171 -15.738,-11.047 21.565,-30.725" style={style} />
+                    <path d="m 80.2208,18.2227 12.328,8.828 8.828,-12.328" style={style} />
+                    <path d="m 85.7169,3.4693 -8.698,12.42 12.419,8.698" style={style} />
+                </g>
+            </g>
+        );
+    }
+
     static defaultProps = {
         'size' : 20,
-        'badgeType' : 'gold'
+        'badgeType' : 'gold',
+        'ribbons' : true,
+        'innerCircleStrokeWidth' : 3
     };
 
     render(){
-        var { size, badgeType } = this.props,
-            origSize = 124,
+        var { size, badgeType, ribbons, innerCircleStrokeWidth } = this.props,
+            origSize = 132,
             scale = size / origSize;
 
         return (
             <g transform={"scale(" + scale + ")"}>
                 <defs>{ EmbeddableSVGBadgeIcon.linearGradientDefinition(badgeType) }</defs>
+                { ribbons && EmbeddableSVGBadgeIcon.ribbons() }
                 <path
                     style={{ 'fill' : "url(#embeddable_badge_svg_gradient_definition)" }}
                     d="m 122.5,62.000686 -8.69589,10.399902 3.96006,13.102207 -12.0026,5.99052 -1.34796,13.651155 -13.321286,0.78304 -6.2661,12.11793 L 72.188901,113.6388 62.000001,122.5 51.812433,113.6388 39.17511,118.04544 32.907679,105.92751 19.586395,105.1431 18.238432,91.491946 6.2358359,85.502795 10.195894,72.400588 1.5000002,62.000686 10.195894,51.598045 6.2358359,38.497207 18.239762,32.508057 19.587726,18.855533 32.90901,18.072494 39.173779,5.9545612 51.812433,10.361207 62.000001,1.5000025 l 10.1889,8.8612045 12.637323,-4.4066458 6.2661,12.1179328 13.321286,0.784408 1.34796,13.651155 12.0026,5.990519 -3.96006,13.099469 z"
@@ -334,7 +355,7 @@ export class EmbeddableSVGBadgeIcon extends React.PureComponent {
                 <path
                     d="m 105.10525,59.047919 c 1.632,23.806666 -16.346662,44.428001 -40.151994,46.057331 -23.808,1.632 -44.429333,-16.345332 -46.058666,-40.151998 -1.630667,-23.808 16.346666,-44.427999 40.153332,-46.058666 23.806666,-1.630666 44.426668,16.346667 46.057328,40.153333 z"
                     style={{
-                        "fill" : "none", "stroke" : "#fff", "strokeWidth" : 1, "strokeLinecap" : "butt",
+                        "fill" : "none", "stroke" : "#fff", "strokeWidth" : innerCircleStrokeWidth, "strokeLinecap" : "butt",
                         "strokeLinejoin" : "miter", "strokeMiterlimit" : 10, "strokeDasharray" : "none",
                         "strokeOpacity" : 1
                     }}/>
