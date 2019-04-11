@@ -88,10 +88,11 @@ def experiment_seq_2_3(value, system):
 def experiment_1_2(value, system):
     exptype = value.get('experiment_type')
     if exptype == 'Repli-seq':
-        if value.get('total_fractions_in_exp') == 2:
-            exptype = '2-stage Repli-seq'
-        elif value.get('total_fractions_in_exp') > 2:
+        tot_fracs = value.get('total_fractions_in_exp', 2)
+        if tot_fracs > 2:
             exptype = 'Multi-stage Repli-seq'
+        else:
+            exptype = '2-stage Repli-seq'
     elif exptype == 'DAM-ID seq':
         exptype = 'DamID-seq'
     valid_exptypes = system['registry']['collections']['ExperimentType']
