@@ -54,7 +54,7 @@ class Experiment(Item):
     aggregated_items = {
         "badges": [
             "message",
-            "badge.commendation", 
+            "badge.commendation",
             "badge.warning",
             "badge.uuid",
             "badge.@id",
