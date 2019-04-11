@@ -90,21 +90,16 @@ $expset-table-border-color : #eee;
 
 @import "encoded/layout";
 // @import "encoded/modals"; -- Deleted
-@import "encoded/modules/breadcrumbs",
-        "encoded/modules/forms",
+@import "encoded/modules/forms",
         "encoded/modules/matrix",
         "encoded/modules/lists",
         "encoded/modules/navbar",
-        "encoded/modules/panels",
         "encoded/modules/tables",
         "encoded/modules/facet",
         "encoded/modules/search",
-        "encoded/modules/characterizations",
         "encoded/modules/charts",
-        "encoded/modules/audits",
+        "encoded/modules/audits-badges",
         "encoded/modules/tooltip",
-        "encoded/modules/badge",
-        "encoded/modules/blocks",
         "encoded/modules/item-pages",
         "encoded/modules/static-pages";
 @import "encoded/state";

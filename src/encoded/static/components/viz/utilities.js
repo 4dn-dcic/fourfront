@@ -325,43 +325,6 @@ export const style = {
 };
 
 
-/** Functions which are to be called from Chart instances with .apply(this, ...) */
-export const mixin = {
-
-    getBreadcrumbs : function(){
-        if (this.refs && typeof this.refs.breadcrumbs !== 'undefined') return this.refs.breadcrumbs;
-        if (this.props.breadcrumbs && typeof this.props.breadcrumbs === 'function') {
-            return this.props.breadcrumbs();
-        }
-        if (this.props.breadcrumbs && typeof this.props.breadcrumbs !== 'boolean') {
-            return this.props.breadcrumbs;
-        }
-        return null;
-    },
-
-    getDescriptionElement : function(){
-        if (this.refs && typeof this.refs.description !== 'undefined') return this.refs.description;
-        if (this.props.descriptionElement && typeof this.props.descriptionElement === 'function') {
-            return this.props.descriptionElement();
-        }
-        if (this.props.descriptionElement && typeof this.props.descriptionElement !== 'boolean') {
-            return this.props.descriptionElement;
-        }
-        return null;
-    },
-
-    cancelPreventClicks : function(){
-        if (typeof this.props.getCancelPreventClicksCallback === 'function'){
-            var cancelPreventClicks = this.props.getCancelPreventClicksCallback();
-            if (typeof cancelPreventClicks === 'function') return cancelPreventClicks();
-        }
-        return false;
-    }
-
-};
-
-
-
 const highlightTermFxn = _.debounce(function(
     field = 'experiments_in_set.biosample.biosource.individual.organism.name',
     term = 'human',
