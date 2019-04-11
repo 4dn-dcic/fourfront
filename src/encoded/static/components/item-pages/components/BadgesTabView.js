@@ -159,7 +159,8 @@ class SummaryIcon extends React.PureComponent {
         const outerRadius = size / 2;
         const classificationRatios = SummaryIcon.getClassificationRatios(context);
         const classificationRatioPairs = _.pairs(classificationRatios);
-        var tooltip = null, svgBodyItems;
+
+        var tooltip = null, svgArcPaths = null, svgExtraAppends = null;
 
         if (!classificationRatios){
             // Shouldn't happen unless BadgesTabView is present on Item w/o any badges.
@@ -169,17 +170,20 @@ class SummaryIcon extends React.PureComponent {
         const pieChartDims = this.pieGenerator(_.values(classificationRatios));
         const arcGenerator = arc().innerRadius(innerRadius).outerRadius(outerRadius);
 
-        svgBodyItems = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ], idx){
+        svgArcPaths = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ], idx){
             return (
                 <path d={arcGenerator(pieChartDims[idx])} className={"path-for-" + classificationTitle}
                     style={{ 'fill' : classificationColorMap[classificationTitle] || '#ccc' }} />
             );
         });
 
+        // LOGIC NOT FINAL --- TODO: Mapping of classifications to icon (?) for when all badges are of same classification
         if (classificationRatioPairs.length === 1){
-            tooltip = classificationRatioPairs[0][0];
-            // TODO append a badge graphic to this list
-            // @see EmbeddableSVGBadgeIcon (incomplete)
+            tooltip = classificationRatioPairs[0][0]; // 'Classification' instead of percentages of classifications
+            if (tooltip === 'Commendation'){
+                svgArcPaths = null;
+                svgExtraAppends = <EmbeddableSVGBadgeIcon/>;
+            }
         } else {
             tooltip = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ]){
                 return (Math.round(classificationRatio * 10000) / 100) + '% ' + classificationTitle + 's';
@@ -189,7 +193,8 @@ class SummaryIcon extends React.PureComponent {
         return (
             <div className="inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
                 <svg width={size} height={size} style={{ verticalAlign : 'middle' }}>
-                    <g transform={"translate(" + outerRadius + "," + outerRadius + ")"}>{ svgBodyItems }</g>
+                    <g transform={"translate(" + outerRadius + "," + outerRadius + ")"}>{ svgArcPaths }</g>
+                    { svgExtraAppends }
                 </svg>
             </div>
         );
@@ -203,12 +208,8 @@ function BadgeItem(props){
     const { item, parent, windowWidth, height, context } = props;
     const { message, badge } = item;
     const { badge_icon, description } = badge;
-    const responsiveGridState = layout.responsiveGridState(windowWidth);
     const classification = BadgesTabView.badgeClassification(props);
     const badgeTitle = BadgesTabView.badgeTitle(props, classification);
-    const extTitleClassName = (
-        responsiveGridState === 'xs' ? 'mt-0' : 'mt-2'
-    );
     const linkMsg = parent && object.itemUtil.atId(context) !== parent ? (
         <React.Fragment>
             -- <a href={parent} data-tip="Click to visit item containing badge.">View Item</a>
@@ -216,19 +217,21 @@ function BadgeItem(props){
     ) : null;
     const image = badge_icon && (
         <div className="text-center">
-            <img src={badge_icon} style={{ 'maxWidth': '100%', maxHeight : height }}/>
+            <img src={badge_icon} style={{ 'maxWidth': '100%', 'maxHeight' : height }}/>
         </div>
     );
 
     return (
-        <div className="badge-item row mt-1" style={{ minHeight : height }}>
-            <div className="col-xs-3 col-sm-2">{ image }</div>
-            <div className="col-xs-9 col-sm-10">
-                <h4 className={"text-500 mb-0 " + extTitleClassName}>
-                    { badgeTitle }
-                    { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
-                </h4>
-                { message ? <p className="mb-0">{ message } { linkMsg }</p> : linkMsg }
+        <div className="badge-item row flexrow mt-1" style={{ 'minHeight' : height }}>
+            <div className="col-xs-12 col-sm-2">{ image }</div>
+            <div className="col-xs-12 col-sm-10" style={{ alignItems : "center", display: "flex" }}>
+                <div className="inner mb-05">
+                    <h4 className="text-500 mb-0 mt-0">
+                        { badgeTitle }
+                        { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
+                    </h4>
+                    { message ? <p className="mb-0">{ message } { linkMsg }</p> : linkMsg }
+                </div>
             </div>
         </div>
     );
@@ -260,35 +263,36 @@ export class EmbeddableSVGBadgeIcon extends React.PureComponent {
                 x2="1"
                 y1="0"
                 x1="0">
-                <stop offset="0" style="stop-opacity:1;stop-color:#dbba67" />
-                <stop offset="0.514543" style="stop-opacity:1;stop-color:#f8e78f" />
-                <stop offset="1" style="stop-opacity:1;stop-color:#e0c26e" />
+                <stop offset="0" style={{ stopOpacity: 1, stopColor: "#dbba67" }}/>
+                <stop offset="0.514543" style={{ stopOpacity: 1, stopColor: "#f8e78f" }} />
+                <stop offset="1" style={{ stopOpacity: 1, stopColor: "#e0c26e" }} />
             </linearGradient>
         );
     }
 
     static defaultProps = {
-        'size' : 124
+        'size' : 20
     };
 
     render(){
+        var size = this.props.size,
+            origSize = 124,
+            scale = size / origSize;
+
         return (
-            <g transform="matrix(1.3333333,0,0,-1.3333333,0,123.99999)">
-                <g transform="matrix(0.99799853,0,0,1.0267115,-6.2472151,-10.466581)" style={{ display: "inline" }}>
-                    <path
-                        d="M 98.319,55.484 91.784,47.887 94.76,38.316 85.74,33.94 84.727,23.968 74.716,23.396 70.007,14.544 60.51,17.763 52.853,11.29 45.197,17.763 35.7,14.544 l -4.71,8.852 -10.011,0.573 -1.013,9.972 -9.02,4.375 2.976,9.571 -6.535,7.597 6.535,7.599 -2.976,9.57 9.021,4.375 1.013,9.973 10.011,0.572 4.708,8.852 9.498,-3.219 7.656,6.473 7.657,-6.473 9.497,3.219 4.709,-8.852 L 84.727,87 85.74,77.028 94.76,72.652 91.784,63.083 Z"
-                        style={{ 'fill' : "url(#linearGradient843)" }}
-                    />
-                </g>
-                <g transform="translate(-6.3530571,-8.9847457)" style={{ display: "inline" }}>
-                    <path
-                        style={{
-                            "fill" : "none", "stroke" : "#fff", "strokeWidth" : 1, "strokeLinecap" : "butt",
-                            "strokeLinejoin" : "miter", "strokeMiterlimit" : 10, "strokeDasharray" : "none",
-                            "strokeOpacity" : 1
-                        }}
-                        d="m 85.182,57.6988 c 1.224,-17.855 -12.26,-33.321 -30.114,-34.543 -17.856,-1.224 -33.322,12.259 -34.544,30.114 -1.223,17.856 12.26,33.321 30.115,34.544 17.855,1.223 33.32,-12.26 34.543,-30.115 z" />
-                </g>
+            <g transform={"scale(" + scale + ")"}>
+                <defs>{ EmbeddableSVGBadgeIcon.linearGradientDefinition() }</defs>
+                <path
+                    style={{ 'fill' : "url(#linearGradient843)" }}
+                    d="m 122.5,62.000686 -8.69589,10.399902 3.96006,13.102207 -12.0026,5.99052 -1.34796,13.651155 -13.321286,0.78304 -6.2661,12.11793 L 72.188901,113.6388 62.000001,122.5 51.812433,113.6388 39.17511,118.04544 32.907679,105.92751 19.586395,105.1431 18.238432,91.491946 6.2358359,85.502795 10.195894,72.400588 1.5000002,62.000686 10.195894,51.598045 6.2358359,38.497207 18.239762,32.508057 19.587726,18.855533 32.90901,18.072494 39.173779,5.9545612 51.812433,10.361207 62.000001,1.5000025 l 10.1889,8.8612045 12.637323,-4.4066458 6.2661,12.1179328 13.321286,0.784408 1.34796,13.651155 12.0026,5.990519 -3.96006,13.099469 z"
+                />
+                <path
+                    d="m 105.10525,59.047919 c 1.632,23.806666 -16.346662,44.428001 -40.151994,46.057331 -23.808,1.632 -44.429333,-16.345332 -46.058666,-40.151998 -1.630667,-23.808 16.346666,-44.427999 40.153332,-46.058666 23.806666,-1.630666 44.426668,16.346667 46.057328,40.153333 z"
+                    style={{
+                        "fill" : "none", "stroke" : "#fff", "strokeWidth" : 1, "strokeLinecap" : "butt",
+                        "strokeLinejoin" : "miter", "strokeMiterlimit" : 10, "strokeDasharray" : "none",
+                        "strokeOpacity" : 1
+                    }}/>
             </g>
         );
     }
