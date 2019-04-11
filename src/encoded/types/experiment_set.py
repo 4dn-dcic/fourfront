@@ -73,7 +73,8 @@ class ExperimentSet(Item):
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"],
+        "last_modified": ["date_modified"],
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
