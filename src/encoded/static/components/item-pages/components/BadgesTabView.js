@@ -146,59 +146,83 @@ class SummaryIcon extends React.PureComponent {
         'classificationColorMap' : {
             "Commendation"  : '#e5ca75',
             "Warning"       : '#d46200'
+        },
+        'classificationSingleItemMap' : {
+            "Commendation" : function commendationBadge(props){
+                const { size } = props;
+                return (
+                    <div className="inline-block pie-chart-icon-container mr-08" data-tip="Commendation">
+                        <svg height={size} width={size} style={{ verticalAlign : 'middle' }}>
+                            <EmbeddableSVGBadgeIcon badgeType="gold" size={size} />
+                        </svg>
+                    </div>
+                );
+            },
+            "Warning" : function warningBadge(props){
+                return (
+                    <span className="active">
+                        <i className="icon icon-fw icon-warning" data-tip="Warning"/>
+                    </span>
+                );
+            }
         }
     };
 
     constructor(props){
         super(props);
+        this.generateArcs = this.generateArcs.bind(this);
+        this.generatePieChart = this.generatePieChart.bind(this);
         this.pieGenerator = pie();
     }
 
-    render(){
-        const { context, size, innerRadius, classificationColorMap } = this.props;
+    generateArcs = memoize(function(classificationRatioPairs){
+        const { innerRadius, classificationColorMap, size } = this.props;
         const outerRadius = size / 2;
+        const pieChartDims = this.pieGenerator(  _.pluck(classificationRatioPairs, 1)   );
+        const arcGenerator = arc().innerRadius(innerRadius).outerRadius(outerRadius);
+        return _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ], idx){
+            return (
+                <path d={arcGenerator(pieChartDims[idx])} className={"path-for-" + classificationTitle}
+                    style={{ 'fill' : classificationColorMap[classificationTitle] || '#ccc' }} />
+            );
+        });
+    });
+
+    generatePieChart(classificationRatioPairs){
+        const { size } = this.props;
+        const outerRadius = size / 2;
+        const tooltip = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ]){
+            return (Math.round(classificationRatio * 10000) / 100) + '% ' + classificationTitle + 's';
+        }).join(' + ');
+
+        return (
+            <div className="inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
+                <svg width={size} height={size} style={{ verticalAlign : 'middle' }}>
+                    <g transform={"translate(" + outerRadius + "," + outerRadius + ")"}>{ this.generateArcs(classificationRatioPairs) }</g>
+                </svg>
+            </div>
+        );
+    }
+
+    render(){
+        const { context, classificationSingleItemMap } = this.props;
         const classificationRatios = SummaryIcon.getClassificationRatios(context);
         const classificationRatioPairs = _.pairs(classificationRatios);
-
-        var tooltip = null, svgArcPaths = null, svgExtraAppends = null;
+        var singleClassification;
 
         if (!classificationRatios){
             // Shouldn't happen unless BadgesTabView is present on Item w/o any badges.
             return <i className="icon icon-fw icon-circle-o"/>; // Todo: maybe different icon
         }
 
-        const pieChartDims = this.pieGenerator(_.values(classificationRatios));
-        const arcGenerator = arc().innerRadius(innerRadius).outerRadius(outerRadius);
-
-        svgArcPaths = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ], idx){
-            return (
-                <path d={arcGenerator(pieChartDims[idx])} className={"path-for-" + classificationTitle}
-                    style={{ 'fill' : classificationColorMap[classificationTitle] || '#ccc' }} />
-            );
-        });
-
-        // LOGIC NOT FINAL --- TODO: Mapping of classifications to icon (?) for when all badges are of same classification
         if (classificationRatioPairs.length === 1){
-            tooltip = classificationRatioPairs[0][0]; // 'Classification' instead of percentages of classifications
-            if (tooltip === 'Commendation'){
-                svgArcPaths = null;
-                svgExtraAppends = <EmbeddableSVGBadgeIcon/>;
+            singleClassification = classificationRatioPairs[0][0];
+            if (singleClassification && classificationSingleItemMap && classificationSingleItemMap[singleClassification]){
+                return classificationSingleItemMap[singleClassification](this.props);
             }
-        } else {
-            tooltip = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ]){
-                return (Math.round(classificationRatio * 10000) / 100) + '% ' + classificationTitle + 's';
-            }).join(' + ');
         }
 
-        return (
-            <div className="inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
-                <svg width={size} height={size} style={{ verticalAlign : 'middle' }}>
-                    <g transform={"translate(" + outerRadius + "," + outerRadius + ")"}>{ svgArcPaths }</g>
-                    { svgExtraAppends }
-                </svg>
-            </div>
-        );
-
+        return this.generatePieChart(classificationRatioPairs);
     }
 
 }
@@ -253,37 +277,58 @@ BadgeItem.defaultProps = {
 export class EmbeddableSVGBadgeIcon extends React.PureComponent {
 
     static linearGradientDefinition(type = "gold"){ // TODO: Implement other colors/types
-        return (
-            <linearGradient
-                id="linearGradient843"
-                spreadMethod="pad"
-                gradientTransform="matrix(-63.389961,63.389961,63.389961,63.389961,84.548042,23.789524)"
-                gradientUnits="userSpaceOnUse"
-                y2="0"
-                x2="1"
-                y1="0"
-                x1="0">
-                <stop offset="0" style={{ stopOpacity: 1, stopColor: "#dbba67" }}/>
-                <stop offset="0.514543" style={{ stopOpacity: 1, stopColor: "#f8e78f" }} />
-                <stop offset="1" style={{ stopOpacity: 1, stopColor: "#e0c26e" }} />
-            </linearGradient>
-        );
+
+        if (type === 'gold-deprecated'){
+            // Gold variant 1 - light streak in center
+            return (
+                <linearGradient
+                    id="embeddable_badge_svg_gradient_definition"
+                    spreadMethod="pad"
+                    gradientTransform="matrix(-63.389961,63.389961,63.389961,63.389961,84.548042,23.789524)"
+                    gradientUnits="userSpaceOnUse"
+                    y2="0"
+                    x2="1"
+                    y1="0"
+                    x1="0">
+                    <stop offset="0" style={{ stopOpacity: 1, stopColor: "#dbba67" }}/>
+                    <stop offset="0.514543" style={{ stopOpacity: 1, stopColor: "#f8e78f" }} />
+                    <stop offset="1" style={{ stopOpacity: 1, stopColor: "#e0c26e" }} />
+                </linearGradient>
+            );
+        }
+
+        if (type === 'gold'){
+            // Gold variant 2 - light streak near top
+            return (
+                <linearGradient x1="0" y1="0" x2="1" y2="0"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="matrix(-84.350783,-86.777598,84.350783,-86.777598,104.17548,105.38879)"
+                    spreadMethod="pad"
+                    id="embeddable_badge_svg_gradient_definition">
+                    <stop offset="0" style={{ stopOpacity: 1, stopColor: "#d29a11" }} />
+                    <stop offset="0.336498" style={{ stopOpacity: 1, stopColor: "#dcae3c" }} />
+                    <stop offset="1" style={{ stopOpacity: 1, stopColor: "#eed781" }}  />
+                </linearGradient>
+            );
+        }
+
     }
 
     static defaultProps = {
-        'size' : 20
+        'size' : 20,
+        'badgeType' : 'gold'
     };
 
     render(){
-        var size = this.props.size,
+        var { size, badgeType } = this.props,
             origSize = 124,
             scale = size / origSize;
 
         return (
             <g transform={"scale(" + scale + ")"}>
-                <defs>{ EmbeddableSVGBadgeIcon.linearGradientDefinition() }</defs>
+                <defs>{ EmbeddableSVGBadgeIcon.linearGradientDefinition(badgeType) }</defs>
                 <path
-                    style={{ 'fill' : "url(#linearGradient843)" }}
+                    style={{ 'fill' : "url(#embeddable_badge_svg_gradient_definition)" }}
                     d="m 122.5,62.000686 -8.69589,10.399902 3.96006,13.102207 -12.0026,5.99052 -1.34796,13.651155 -13.321286,0.78304 -6.2661,12.11793 L 72.188901,113.6388 62.000001,122.5 51.812433,113.6388 39.17511,118.04544 32.907679,105.92751 19.586395,105.1431 18.238432,91.491946 6.2358359,85.502795 10.195894,72.400588 1.5000002,62.000686 10.195894,51.598045 6.2358359,38.497207 18.239762,32.508057 19.587726,18.855533 32.90901,18.072494 39.173779,5.9545612 51.812433,10.361207 62.000001,1.5000025 l 10.1889,8.8612045 12.637323,-4.4066458 6.2661,12.1179328 13.321286,0.784408 1.34796,13.651155 12.0026,5.990519 -3.96006,13.099469 z"
                 />
                 <path

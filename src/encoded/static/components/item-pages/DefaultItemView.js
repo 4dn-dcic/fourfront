@@ -127,12 +127,16 @@ export default class DefaultItemView extends React.PureComponent {
         returnArr.push(ItemDetailList.getTabObject(this.props));
 
         // Badges, if any
-        const badges = context && context['aggregated-items'] && context['aggregated-items'].badges;
-        if (Array.isArray(badges) && badges.length > 0){
+        const badges = BadgesTabView.getBadgesList(context);
+        if (badges){
             returnArr.push(BadgesTabView.getTabObject(this.props));
         }
 
-        returnArr.push(AuditTabView.getTabObject(this.props));
+        // Audits, if any -- THESE WILL BE DEPRECATED SOME DAY
+        if (AuditTabView.doAnyAuditsExist(context)){
+            returnArr.push(AuditTabView.getTabObject(this.props));
+        }
+
         return returnArr;
     }
 

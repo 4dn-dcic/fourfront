@@ -134,10 +134,6 @@ body .rc-tabs-top {
 			i.icon {
 				margin-right: 3px;
 
-				&.icon-warning, &.icon-check {
-					opacity: 0.25;
-				}
-
 				&.icon-th,
 				&.icon-list,
 				&.icon-warning,
@@ -146,11 +142,6 @@ body .rc-tabs-top {
 					position: relative;
 					top: 1px;
 				}
-
-			}
-
-			span.active > i.icon {
-				opacity : 1;
 
 				&.icon-warning {
 					color: $audit-color-warning;
@@ -2049,7 +2040,7 @@ $download-button-width : 100px;
 ***********************************************************/
 
 div.user-profile-page {
-	
+
 	/* Panels */
 
 	.panel.shadow-border {
