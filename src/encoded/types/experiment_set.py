@@ -235,6 +235,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.href",
+        "other_processed_files.files.status",
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.higlass_view_config.description",
 
@@ -248,6 +249,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
         "experiments_in_set.other_processed_files.files.genome_assembly",
+        "experiments_in_set.other_processed_files.files.status",
         "experiments_in_set.other_processed_files.files.last_modified.date_modified"
     ]
 
