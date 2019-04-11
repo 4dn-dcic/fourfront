@@ -52,7 +52,15 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": [
+            "message",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -60,6 +68,7 @@ class Experiment(Item):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
+        "badges.badge.badge_icon",
         "badges.message",
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
@@ -96,6 +105,7 @@ class Experiment(Item):
         "biosample.badges.badge.warning",
         "biosample.badges.badge.badge_classification",
         "biosample.badges.badge.description",
+        "biosample.badges.badge.badge_icon",
         "biosample.badges.message",
 
         "files.href",
@@ -111,6 +121,7 @@ class Experiment(Item):
         "files.badges.badge.warning",
         "files.badges.badge.badge_classification",
         "files.badges.badge.description",
+        "files.badges.badge.badge_icon",
         "files.badges.message",
 
         "processed_files.href",
