@@ -58,7 +58,7 @@ class Experiment(Item):
             "badge.warning",
             "badge.uuid",
             "badge.@id",
-            "badge.badge_icon"
+            "badge.badge_icon",
             "badge.description"
         ]
     }
