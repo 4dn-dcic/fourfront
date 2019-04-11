@@ -65,8 +65,8 @@
                 "message": "Nice job!"
             },
             {
-            "badge": "/badges/inconsistent-replicate-info/",
-            "message": "Lorem Ipsum Text"
+                "badge": "/badges/inconsistent-replicate-info/",
+                "message": "Lorem Ipsum Text"
             }
         ]
     },
