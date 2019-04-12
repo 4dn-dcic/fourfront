@@ -529,10 +529,8 @@ $small-label-accession-font-size : 0.75rem;
 			transform: translate3d(0px,0px,0px);
 
 			> .name {
-				//@media screen and (min-width: $screen-md-min){
-					display: inline-block;
-					vertical-align: middle;
-				//}
+				display: inline-block;
+				vertical-align: middle;
 				position: relative;
 				padding: 7px 12px;
 				text-align: center;
@@ -544,6 +542,17 @@ $small-label-accession-font-size : 0.75rem;
 
 				&.col-experiment > .name-title.mono-text {
 					text-shadow: 0 0 0;
+				}
+
+				&.col-file-group {
+					padding-top: 8px;
+					padding-bottom: 6px;
+					.multipe-files-checkbox-wrapper {
+						> .checkbox-for-multiple-files {
+							margin: 0;
+						}
+					}
+
 				}
 			}
 
@@ -582,19 +591,6 @@ $small-label-accession-font-size : 0.75rem;
 				}
 			}
 
-			.exp-table-checkbox {
-				display : inline-block;
-				margin-right: -7px;
-				margin-top: 18px;
-			}
-
-			.file-entry-table-checkbox {
-				display : inline-block;
-				margin-right: -7px;
-				margin-top: 0;
-				margin-bottom: -7px;
-			}
-
 			&.odd {
 				@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(245, 240, 240, 0.4), 0%, 30%);
 
@@ -605,7 +601,7 @@ $small-label-accession-font-size : 0.75rem;
 				&:hover {
 					@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(255, 252, 250, 1), 0%, 12%);
 				}
-				&:not(.collapsing-child) > .file-pairs > .view-more-button {
+				&:not(.collapsing-child) > .file-groups > .view-more-button {
 					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 				}
 			}
@@ -623,7 +619,7 @@ $small-label-accession-font-size : 0.75rem;
 					@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 252, 250, 1), 0%, 12%);
 				}
 
-				&:not(.collapsing-child) > .file-pairs > .view-more-button {
+				&:not(.collapsing-child) > .file-groups > .view-more-button {
 					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 				}
 			}
@@ -681,11 +677,11 @@ $small-label-accession-font-size : 0.75rem;
 			}
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info {
 				top: 50%;
-    			margin-top: -9px;
+    			margin-top: -5px;
 				transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
 			}
 			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info.has-subtitle {
-    			margin-top: -13px;
+    			margin-top: -10px;
 			}
 			.s-block:hover > .name > .label-ext-info > .ext {
 				opacity: 0.75;
@@ -719,12 +715,12 @@ $small-label-accession-font-size : 0.75rem;
 				}
 			}
 
-			.s-block.hide-name-on-block-hover .name.col-file > .exp-table-checkbox {
+			.s-block.hide-name-on-block-hover .name.col-file > .file-entry-table-checkbox {
 				transition: opacity .4s;
 				opacity: 1;
 			}
 
-			.s-block.hide-name-on-block-hover:hover > .name.col-file:not(:hover) > .exp-table-checkbox {
+			.s-block.hide-name-on-block-hover:hover > .name.col-file:not(:hover) > .file-entry-table-checkbox {
 				opacity: 0;
 			}
 
@@ -806,10 +802,10 @@ $small-label-accession-font-size : 0.75rem;
 			}
 
 			.s-block-list.files,
-			.s-block-list.file-pairs,
+			.s-block-list.file-groups,
 			.s-block-list.stack-depth-2 {
 
-				.s-block.file-pair {
+				.s-block.file-group {
 					&:not(:last-child){
 						border-bottom: 1px solid #888;
 						border-color: rgba(0,0,0,0.5);
@@ -823,13 +819,8 @@ $small-label-accession-font-size : 0.75rem;
 						border-top: 1px solid transparent;
 					}
 
-					.name.col-file-pair {
+					.name.col-file-group {
 						//line-height: 25px;
-						white-space: nowrap;
-					}
-
-					&.single-item .name.col-file-pair {
-						line-height: 55px;
 						white-space: nowrap;
 					}
 				}
@@ -851,21 +842,27 @@ $small-label-accession-font-size : 0.75rem;
 						white-space: nowrap;
 					}
 
+					/** Same name div as File accession/name **/
 					.name.col-file > .file-entry-table-checkbox {
 						margin-bottom: 0;
 						display: inline-block;
-						margin-right: 2px;
+						margin-right: 10px;
+						margin-left: 5px;
 						vertical-align: middle;
 						margin-top: -2px;
 					}
 
 					.in-stacked-table-button {
 						&.btn-xs {
-							margin-right : -33px;
-							margin-left: 6px;
-							margin-top: -2px;
+							margin-right: 0;
+							margin-left: 2px;
+							margin-top: -3px;
 							margin-bottom: -1px;
-							padding-top: 3px;
+							padding-top: 0px;
+							line-height: 18px;
+							&:first-of-type {
+								margin-left: 8px;
+							}
 						}
 					}
 

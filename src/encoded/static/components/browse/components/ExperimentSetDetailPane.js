@@ -58,9 +58,8 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     renderRawFilesSection(paddingWidth){
-        var { containerWidth } = this.props;
-        var expSet = this.props.result,
-            rawFilesCount = expFxn.fileCountFromExperimentSet(expSet, false, false);
+        const { containerWidth, result } = this.props;
+        const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
 
         if (rawFilesCount === 0) return null;
 
@@ -72,13 +71,16 @@ export class ExperimentSetDetailPane extends React.Component {
                 </h4>
                 <Collapse in={this.state.rawFilesOpen}>
                     <div>
-                        <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile', 'selectedFilesUniqueCount')}
+                        <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
                             columnHeaders={[
                                 { columnClass: 'file-detail', title: 'File Type'},
                                 { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
                             ]}
-                            experimentSetAccession={expSet.accession || null} experimentArray={expSet.experiments_in_set}
-                            replicateExpsArray={expSet.replicate_exps} experimentSetType={expSet.experimentset_type}
+                            /*
+                            experimentSetAccession={result.accession || null} experimentArray={result.experiments_in_set}
+                            replicateExpsArray={result.replicate_exps} experimentSetType={result.experimentset_type}
+                            */
+                            experimentSet={result}
                             width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
                             fadeIn={false} collapseLongLists />
                     </div>
@@ -103,10 +105,9 @@ export class ExperimentSetDetailPane extends React.Component {
                 </h4>
                 <Collapse in={this.state.processedFilesOpen}>
                     <div>
-                        <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile', 'selectedFilesUniqueCount')}
-                            experimentSetAccession={expSet.accession || null} files={processedFiles}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
-                            fadeIn={false} collapseLongLists />
+                        <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
+                            files={processedFiles} fadeIn={false} collapseLongLists
+                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null} />
                     </div>
                 </Collapse>
             </div>

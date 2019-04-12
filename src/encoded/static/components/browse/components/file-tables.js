@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { FacetList } from './FacetList';
-import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock, FileEntryBlockPairColumn } from './StackedBlockTable';
+import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
 import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
 
 var { Item } = typedefs;
@@ -33,7 +33,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-                    { columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : function(stackedBlockProps){
+                    { columnClass: 'file-group',                                title: 'File Group',     initialWidth: 40,   visibleTitle : function(stackedBlockProps){
                         if (stackedBlockProps.selectedFiles && typeof stackedBlockProps.selectFile === 'function' && typeof stackedBlockProps.unselectFile === 'function'){
                             return <i className="icon icon-download"/>;
                         }
@@ -52,8 +52,8 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
-    static staticColumnHeaders(columnHeaders, experimentSetType){
-        return _.map(RawFilesStackedTable.builtInHeaders(experimentSetType), function(staticCol){
+    static staticColumnHeaders(columnHeaders, experimentSet){
+        return _.map(RawFilesStackedTable.builtInHeaders(experimentSet.experimentset_type), function(staticCol){
             return _.extend(
                 _.clone(staticCol),
                 _.findWhere(columnHeaders, { 'title' : staticCol.title }) || {}
@@ -62,16 +62,16 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
-    static customColumnHeaders(columnHeaders, experimentSetType){
+    static customColumnHeaders(columnHeaders, experimentSet){
         return _.filter(columnHeaders, function(col){
-            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(experimentSetType), 'title'), col.title);
+            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(experimentSet.experimentset_type), 'title'), col.title);
         });
     }
 
-    static metricColumnHeaders(showMetricColumns, experimentArray){
+    static metricColumnHeaders(showMetricColumns, experimentSet){
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
         showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || ProcessedFilesQCStackedTable.filterFiles(
-            expFxn.allFilesFromExperiments(experimentArray, false, false, true), true
+            expFxn.allFilesFromExperiments(experimentSet.experiments_in_set || [], false, false, true), true
         ) ? true : false;
 
         if (!showMetricColumns) return null;
@@ -81,26 +81,40 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
 
-    static columnHeaders = memoize(function(columnHeaders, experimentSetType, showMetricColumns, experimentArray){
-        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSetType) || [])
-            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSetType) || [])
-            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentArray) || []);
+    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, experimentSet){
+        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSet) || [])
+            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSet) || [])
+            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || []);
     });
+
+    /**
+     * Adds `from_experiment : { from_experiment_set : { accession }, accession }`
+     * to a file.
+     */
+    static extendFile(file, experiment, experimentSet){
+        return _.extend(
+            {}, file, {
+                'from_experiment' : _.extend(
+                    {}, experiment, { 'from_experiment_set' : experimentSet }
+                )
+            }
+        );
+    }
 
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
-        'experimentArray'           : PropTypes.array,
         'selectedFiles'             : PropTypes.object,
-        'experimentSetAccession'    : PropTypes.string.isRequired,
-        'replicateExpsArray'        : PropTypes.arrayOf(PropTypes.shape({
-            'bio_rep_no'                : PropTypes.number.isRequired,
-            'tec_rep_no'                : PropTypes.number.isRequired,
-            'replicate_exp'             : PropTypes.shape({
-                'accession'                 : PropTypes.string,
-                'uuid'                      : PropTypes.string,
-                'link_id'                   : PropTypes.string
-            }).isRequired
-        })).isRequired,
+        'experimentSet'             : PropTypes.shape({
+            'replicate_exps'            : PropTypes.arrayOf(PropTypes.shape({
+                'bio_rep_no'                : PropTypes.number.isRequired,
+                'tec_rep_no'                : PropTypes.number.isRequired,
+                'replicate_exp'             : PropTypes.shape({
+                    'accession'                 : PropTypes.string,
+                    'uuid'                      : PropTypes.string,
+                    'link_id'                   : PropTypes.string
+                }).isRequired
+            })).isRequired
+        }),
         'keepCounts'                : PropTypes.bool, // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.),
         'collapseLongLists'         : PropTypes.bool
     };
@@ -121,12 +135,9 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.columnHeaders = this.columnHeaders.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
         this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
-        this.renderers.replicate = this.renderers.replicate.bind(this);
-        this.renderers.default = this.renderers.default.bind(this);
 
         this.cache = {
             oddExpRow : true
@@ -137,66 +148,54 @@ export class RawFilesStackedTable extends React.PureComponent {
         };
     }
 
-    /* Combined top row of headers */
-    columnHeaders(){
-        const { columnHeaders, experimentSetType, showMetricColumns, experimentArray } = this.props;
-        return RawFilesStackedTable.columnHeaders(columnHeaders, experimentSetType, showMetricColumns, experimentArray);
-    }
-
-
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        var columnHeaders       = this.state.columnHeaders,
+        const { experimentSet, collapseLongLists, collapseShow, collapseLimit, columnHeaders, showMetricsColumns } = this.props;
+        var fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
             contentsClassName   = 'files',
             contents            = [];
 
         if (Array.isArray(exp.file_pairs)){
-            contentsClassName = 'file-pairs';
-            contents = contents.concat(_.map(exp.file_pairs,function(filePair,j){
-                if (filePair.length === 1){
-                    return <FileEntryBlockPairColumn
-                        key={object.atIdFromObject(filePair[0]) || j}
-                        file={filePair[0]}
-                        experiment={exp}
+            contentsClassName = 'file-groups';
+            contents = contents.concat(_.map(exp.file_pairs, function(filePair,j){
+                // Ensure can be converted to accessionTriple
+                filePair = _.map(filePair, function(f){
+                    return RawFilesStackedTable.extendFile(f, exp, experimentSet);
+                });
+                return (
+                    <FilePairBlock key={j} files={filePair}
                         label={ exp.file_pairs.length > 1 ?
-                            { title : "Pair " + (j + 1) } : { title : "Pair" }
-                        }
-                        hideNameOnHover={false}
-                        isSingleItem={_.reduce(exp.file_pairs, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
-                    />;
-                } else {
-                    return <FilePairBlock
-                        key={j}
-                        files={filePair}
-                        experiment={exp}
-                        label={ exp.file_pairs.length > 1 ?
-                            { title : "Pair " + (j + 1) } : { title : "Pair" }
+                            { 'title' : "Pair " + (j + 1) } : { 'title' : "Pair" }
                         }
                         isSingleItem={_.reduce(exp.file_pairs, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
-                    />;
-                }
+                    />
+                );
             }));
         }
 
         // Add in remaining unpaired files, if any.
         if (Array.isArray(exp.files) && exp.files.length > 0){
             contents = contents.concat(_.map(exp.files, function(file, j){
+                const extendedFile = RawFilesStackedTable.extendFile(file, exp, experimentSet);
+
                 return (
-                    <FileEntryBlockPairColumn
-                        key={object.atIdFromObject(file) || j} file={file}
-                        columnClass="file-pair" hideNameOnHover={false}
-                        experiment={exp} isSingleItem={exp.files.length + contents.length < 2 ? true : false} />
+                    <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
+                        label={{ 'title' : "File" }}
+                        isSingleItem={exp.files.length + contents.length < 2 ? true : false}
+                        columnClass="file-group" hideNameOnHover={false}
+                    />
                 );
+
             }));
         }
 
         if (contents.length === 0){
             /* No Files Exist */
             contents.push(
-                <StackedBlock key="single-empty-item" hideNameOnHover={false} columnClass="file-pair">
-                    { _.pluck(columnHeaders, 'title').indexOf('File Pair') > -1 ? <StackedBlockName/> : null }
+                <StackedBlock key="single-empty-item" hideNameOnHover={false} columnClass="file-group">
+                    { _.pluck(fullColumnHeaders, 'title').indexOf('File Pair') > -1 ? <StackedBlockName/> : null }
                     <StackedBlockList title="Files" className="files">
-                        <FileEntryBlock file={null} columnHeaders={columnHeaders} />
+                        <FileEntryBlock file={null} columnHeaders={fullColumnHeaders} />
                     </StackedBlockList>
                 </StackedBlock>
             );
@@ -204,7 +203,8 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         var experimentVisibleName = (
                 exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                    exp.experiment_type ? exp.experiment_type : exp.accession
+                    exp.experiment_type ? exp.experiment_type :
+                        exp.accession
             ),
             experimentAtId  = object.itemUtil.atId(exp),
             linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
@@ -220,18 +220,22 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'} className={contentsClassName} children={contents}
-                    collapseLimit={this.props.collapseLimit || 3} collapseShow={this.props.collapseShow || 2} collapseLongLists={this.props.collapseLongLists} />
+                <StackedBlockList title={contentsClassName === 'file-groups' ? 'File Group' : 'Files'} className={contentsClassName}
+                    collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2} collapseLongLists={collapseLongLists}>
+                    { contents }
+                </StackedBlockList>
             </StackedBlock>
         );
     }
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
+        const { collapseLimit, collapseShow, collapseLongLists } = this.props;
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
         var biosample       = expsWithBiosample[0].biosample,
             bioRepTitle     = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary,
             biosampleAtId   = object.itemUtil.atId(biosample),
             linkTitle       = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
+
         return (
             <StackedBlock columnClass="biosample" hideNameOnHover={false}
                 key={biosampleAtId || biosample.bio_rep_no || i } id={'bio-' + (biosample.bio_rep_no || i + 1)}
@@ -244,8 +248,8 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ? <a href={biosampleAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList className="experiments" title="Experiments" children={_.map(expsWithBiosample, this.renderExperimentBlock)}
-                    collapseLimit={this.props.collapseLimit || 3} collapseShow={this.props.collapseShow || 2} collapseLongLists={this.props.collapseLongLists}
+                <StackedBlockList className="experiments" title="Experiments"
+                    collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2} collapseLongLists={collapseLongLists}
                     showMoreExtTitle={
                         expsWithBiosample.length <= 5 ? null :
                             'with ' + (
@@ -258,7 +262,9 @@ export class RawFilesStackedTable extends React.PureComponent {
                                     expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) +
                                     ' Files'
                             )
-                    }/>
+                    }>
+                    { _.map(expsWithBiosample, this.renderExperimentBlock) }
+                </StackedBlockList>
             </StackedBlock>
         );
     }
@@ -280,51 +286,39 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Much of styling/layouting is defined in CSS.
      */
     renderRootStackedBlockListOfBiosamplesWithExperiments(experimentsGroupedByBiosample){
+        console.log('EXPS IS', experimentsGroupedByBiosample);
         return (
             <StackedBlockList className="biosamples" title="Biosamples" rootList collapseLongLists={this.props.collapseLongLists}
-                children={_.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments)} showMoreExtTitle={
+                showMoreExtTitle={
                     experimentsGroupedByBiosample.length > 5 ?
                         'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
                         :
                         null
-                } />
+                }>
+                { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
+            </StackedBlockList>
         );
     }
 
-    renderers = {
-
-        replicate : function(){
-
-            var experimentsGroupedByBiosample = _.compose(
-                this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                expFxn.groupExperimentsByBiosampleRepNo,
-                expFxn.groupFilesByPairsForEachExperiment,
-                expFxn.combineWithReplicateNumbers
-            );
-
-            return experimentsGroupedByBiosample(this.props.replicateExpsArray, this.props.experimentArray);
-        },
-
-        default : function(){
-            var experimentsGroupedByBiosample = _.compose(
-                this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                expFxn.groupExperimentsByBiosample,
-                expFxn.flattenFileSetsToFilesIfNoFilesForEachExperiment
-            );
-
-            return experimentsGroupedByBiosample(this.props.experimentArray);
-        }
-    }
-
     render(){
-        var { experimentSetType, experimentArray } = this.props;
+        const { experimentSet, columnHeaders, showMetricsColumns } = this.props;
+        const { accession, experiments_in_set, replicate_exps } = experimentSet;
+
+        const biosampleBlocks = this.renderRootStackedBlockListOfBiosamplesWithExperiments(
+            expFxn.groupExperimentsByBiosampleRepNo(
+                expFxn.groupFilesByPairsForEachExperiment(
+                    expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
+                )
+            )
+        );
+
+        const fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet);
+
         return (
-            <StackedBlockTable {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'experimentSetAccession', 'collapseLongLists', 'width')}
-                columnHeaders={this.columnHeaders()} className="expset-raw-files" fadeIn
-                children={!Array.isArray(experimentArray) ? null :
-                    experimentSetType && typeof this.renderers[experimentSetType] === 'function' ?
-                        this.renderers[experimentSetType]() : this.renderers.default()
-                } />
+            <StackedBlockTable {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'collapseLongLists', 'width')}
+                columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn>
+                { biosampleBlocks }
+            </StackedBlockTable>
         );
     }
 
@@ -334,7 +328,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static propTypes = {
-        'experimentSetAccession' : PropTypes.string.isRequired, // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
+        // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
         'files' : PropTypes.array.isRequired
     };
 
@@ -394,26 +388,26 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         return filesGroupedByExperimentOrGlobal;
     }
 
-    renderFileBlocksForExperiment(experimentAccession, filesForExperiment){
+    renderFileBlocksForExperiment(filesForExperiment){
         var fileBlocks = [],
             filesWithPermissions = _.filter(filesForExperiment, object.itemUtil.atId);
 
         _.forEach(filesWithPermissions, (file, idx) => {
             this.oddExpRow = !this.oddExpRow;
             fileBlocks.push(
-                <FileEntryBlock key={object.atIdFromObject(file) || idx} file={file}
-                    hideNameOnHover={false} experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
+                <FileEntryBlock key={object.atIdFromObject(file) || idx} file={file} hideNameOnHover={true}
                     isSingleItem={filesForExperiment.length === 1 && filesWithPermissions.length === 1} stripe={this.oddExpRow} />
             );
         });
+
         if (filesWithPermissions.length < filesForExperiment.length){
             this.oddExpRow = !this.oddExpRow;
             fileBlocks.push(
                 <FileEntryBlock key="no-view-permission-file-or-files" file={{ 'error' : 'no view permissions' }}
-                    experimentAccession={experimentAccession === 'global' ? 'NONE' : experimentAccession}
-                    isSingleItem={filesWithPermissions.length === 0} stripe={this.oddExpRow} />
+                    isSingleItem={filesWithPermissions.length === 0} stripe={this.oddExpRow} hideNameOnHover={false} />
             );
         }
+
         return fileBlocks;
     }
 
@@ -423,41 +417,43 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             if (aP[0] === 'global') return -1;
             if (bP[0] === 'global') return 1;
             return 0;
-        }), (p)=>{
-            var experimentAccession = p[0];
-            var filesForExperiment = p[1];
+        }), ([ experimentAccession, filesForExperiment ])=>{
+
             var experimentObj = _.find(_.pluck(filesForExperiment, 'from_experiment'), function(exp){ return exp && exp.accession && exp.accession === experimentAccession; });
 
             var nameTitle = (
-                experimentAccession === 'global' ? <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple Experiments</div>
-                : (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
+                experimentAccession === 'global' ? ( // Case if came from multiple experiments
+                    <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple Experiments</div>
+                ) : (
+                    (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
+                )
             );
+
             var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
+
             var repsExist = experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no;
+
             var nameBlock = (
                 <StackedBlockName style={repsExist ? { paddingTop : 19, paddingBottom: 19 } : null}>
-                    { repsExist ?
-                        <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div>
-                    : <div/> }
-                    { nameLink ?
-                        <a href={nameLink} className="name-title text-500">{ nameTitle }</a>
-                        :
-                        <div className={"name-title" + (nameTitle === this.props.experimentSetAccession ? ' mono-text' : '')}>{ nameTitle }</div>
-                    }
+                    { repsExist ? <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div> : <div/> }
+                    { nameLink ? <a href={nameLink} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
+
+            var expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
+
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
                     key={experimentAccession} id={'exp-' + experimentAccession} label={{
                         'title' : experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment',
-                        //'subtitle' : visibleBiosampleTitle,
                         'subtitleVisible' : true,
-                        'accession' : experimentAccession === 'global' ? this.props.experimentSetAccession : experimentAccession
+                        'accession' : experimentAccession === 'global' ? expSetAccession : experimentAccession
                     }}>
                     { nameBlock }
                     <StackedBlockList className="files" collapseLongLists={this.props.collapseLongLists}
-                        title={this.props.titleForFiles} showMoreExtTitle={null}
-                        children={ this.renderFileBlocksForExperiment(experimentAccession, filesForExperiment) /*expsWithBiosample.map(this.renderExperimentBlock)*/} />
+                        title={this.props.titleForFiles} showMoreExtTitle={null}>
+                        { this.renderFileBlocksForExperiment(filesForExperiment) }
+                    </StackedBlockList>
                 </StackedBlock>
             );
 

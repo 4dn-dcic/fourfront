@@ -49,13 +49,7 @@ describe('Testing RawFilesStackedTable', function() {
                 return (
                     <div>
                         <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref={this.ref}>
-                            <RawFilesStackedTable
-                                experimentArray={context.experiments_in_set}
-                                experimentSetAccession={context.accession}
-                                replicateExpsArray={context.replicate_exps}
-                                experimentSetType={context.experimentset_type}
-                                width={960}
-                            />
+                            <RawFilesStackedTable experimentSet={context} width={960} />
                         </SelectedFilesController>
                     </div>
                 );
@@ -81,7 +75,7 @@ describe('Testing RawFilesStackedTable', function() {
         ).toEqual(checkIfHaveHeaders);
 
         // Then ensure they're rendered.
-        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testRawFilesStackedTable, 'expset-headers');
+        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testRawFilesStackedTable, 'stacked-block-table-headers');
         var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         expect(
             _.intersection(
