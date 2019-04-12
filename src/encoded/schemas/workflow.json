@@ -54,8 +54,7 @@
             "items": {
                 "title": "Experiment type",
                 "description": "type of experiment that the workflow is applied to",
-                "type": "string",
-                "linkTo": "ExperimentType"
+                "type": "string"
             }
         },
         "category": {
