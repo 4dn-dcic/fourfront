@@ -26,5 +26,12 @@
         "taxon_id": "9031",
         "genome_assembly": "galGal5",
         "uuid": "fed8c206-762f-497f-821b-1c8ff7900bd2"
+    },
+    {
+        "name": "green monkey",
+        "scientific_name": "Chlorocebus sabaeus",
+        "taxon_id": "60711",
+        "genome_assembly": "chlSab2",
+        "uuid": "feb8c945-762f-497f-821b-1c8ff2235ae2"
     }
 ]
