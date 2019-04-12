@@ -490,27 +490,15 @@ export class FilePairBlock extends React.PureComponent {
         'selectedFiles' : PropTypes.object,
     };
 
+    static defaultProps = {
+        'excludeChildrenCheckboxes' : true
+    };
+
     constructor(props){
         super(props);
-        this.renderFileEntryBlock = this.renderFileEntryBlock.bind(this);
         this.nameColumn = this.nameColumn.bind(this);
         this.onCheckboxChange = this.onCheckboxChange.bind(this);
         this.isSingleItem = memoize(FilePairBlock.isSingleItem);
-    }
-
-    renderFileEntryBlock(file,i){
-        const { files, isSingleItem } = this.props;
-        const isReallySingleItem = this.isSingleItem(isSingleItem, files);
-
-        return (
-            <FileEntryBlock key={object.atIdFromObject(file)}
-                {..._.pick(this.props, 'columnHeaders', 'handleFileCheckboxChange', 'selectedFiles', 'colWidthStyles')}
-                file={file} className={null}
-                isSingleItem={isReallySingleItem}
-                hideNameOnHover={!isReallySingleItem}
-                excludeCheckbox // Excluded as this block has own checkbox
-                type="paired-end" />
-        );
     }
 
     onCheckboxChange(e){
@@ -540,14 +528,29 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     render(){
-        const { files, columnHeaders, colWidthStyles } = this.props;
+        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes } = this.props;
+        const isReallySingleItem = this.isSingleItem(isSingleItem, files);
+
+        let childBlocks;
+
+        if (!Array.isArray(files) || files.length === 0){
+            // Blank placeholder thingy (?) todo: test
+            childBlocks = <FileEntryBlock file={null} {...{ columnHeaders, colWidthStyles }} />;
+        } else {
+            childBlocks = _.map(files, (file) =>
+                <FileEntryBlock key={object.atIdFromObject(file)}
+                    {..._.pick(this.props, 'columnHeaders', 'handleFileCheckboxChange', 'selectedFiles', 'colWidthStyles')}
+                    file={file} className={null}
+                    isSingleItem={isReallySingleItem} hideNameOnHover={!isReallySingleItem}
+                    excludeCheckbox={excludeChildrenCheckboxes} // May be excluded as this block has own checkbox
+                    type="paired-end" />
+            );
+        }
 
         return (
             <div className="s-block file-group keep-label-on-name-hover">
                 { this.nameColumn() }
-                <div className="files s-block-list">
-                    { Array.isArray(files) && files.length > 0 ? _.map(files, this.renderFileEntryBlock) : <FileEntryBlock file={null} {...{ columnHeaders, colWidthStyles }} /> }
-                </div>
+                <div className="files s-block-list">{ childBlocks }</div>
             </div>
         );
     }
@@ -641,7 +644,11 @@ export class FileEntryBlock extends React.PureComponent {
                 baseStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (typeof col.render === 'function'){
-                row.push(<div key={col.field || i} className={colClassName} style={baseStyle} children={col.render(file, col.field, i, this.props)} />);
+                row.push(
+                    <div key={col.field || i} className={colClassName} style={baseStyle}>
+                        { col.render(file, col.field, i, this.props) }
+                    </div>
+                );
                 continue;
             }
 
@@ -676,7 +683,7 @@ export class FileEntryBlock extends React.PureComponent {
                         );
                     }
                 }
-                row.push(<div key={col.field} className={colClassName} style={baseStyle} children={val} />);
+                row.push(<div key={col.field} className={colClassName} style={baseStyle}>{ val }</div>);
                 continue;
             }
 
@@ -1104,7 +1111,7 @@ export class StackedBlockTable extends React.PureComponent {
             };
             return (
                 <div className={"heading-block col-" + colHeader.columnClass + (colHeader.className ? ' ' + colHeader.className : '')}
-                    key={colHeader.columnClass || index} style={style} data-column-class={colHeader.columnClass}>
+                    key={colHeader.field || index} style={style} data-column-class={colHeader.columnClass}>
                     { visibleTitle }
                 </div>
             );

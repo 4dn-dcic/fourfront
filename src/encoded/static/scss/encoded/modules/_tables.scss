@@ -1,4 +1,4 @@
-/*  TABLES    */
+/*  COMMON TABLES */
 
 table {
     @include font-size(0.9);
@@ -28,7 +28,8 @@ table>tbody>tr>td {
     border-top: 0px;
     padding: 2px 3px;
     text-align: center;
-    vertical-align: middle !important;
+	vertical-align: middle !important;
+	outline: none !important;
 }
 
 .table-panel {
@@ -124,173 +125,10 @@ table.matrix {
 
 
 
-/***** Updated Exp/ExpSet tables ******/
-
-/** ExpSet Tables for Browse page **/
-
-.expset-button{
-	padding: 0px !important;
-	text-align: center;
-	box-shadow: none !important;
-}
-
-.expset-result-table-fix {
-	&.overflowing:after {
-		/*
-		content : "";
-		height: 100%;
-		position: absolute;
-		top: 0;
-		right: -1px;
-		border-right: 1px solid transparent;
-		box-shadow: 0px 0 8px #000;
-		*/
-	}
-}
-
-.expset-table-container {
-	overflow-x: auto;
-	position: relative;
-	margin-bottom: 80px;
-	padding-right: 0px;
-	border-right: 10px solid #fff;
-
-	.expset-panel {
-		margin: 0px;
-		border: none;
-
-		> div > .panel-body{
-			padding: 0;
-			padding-left: 30px;
-		}
-	}
-}
-
-.expset-table,
-.expsets-table {
-
-	border: none !important;
-
-	> thead,
-	> tbody {
-		> tr > :first-child {
-			border-left: none;
-		}
-		> tr > :last-child {
-			border-right: none;
-		}
-	}
-
-	> thead {
-
-		> tr > th {
-			border: none;
-			padding: 8px;
-		}
-
-	}
-
-	> tbody.expset-section {
-		/*
-		&:nth-child(odd) > tr.expset-table-row {
-			background-color: #f9f9f9;
-		}
-		&:nth-child(even) > tr.expset-table-row {
-			background-color: #ffffff;
-		}
-		*/
-
-		> tr > td {
-			/*
-			border: 1px solid $expset-table-border-color;
-			border-left-color : #f4f4f4;
-			border-left-color: rgba(0,0,0,0.02);
-			border-right-color : #f4f4f4;
-			border-right-color: rgba(0,0,0,0.02);
-			*/
-			border-top: 1px solid #ddd;
-			border-bottom: none; /* Show top border instead of bottom border to make highlighting currently-open cell easier */
-			max-width: 160px;
-
-			&.dropdown-button-cell {
-				padding : 0 !important;
-				width : 38px;
-			}
-		}
-
-	}
-
-}
-
-/* Only for table of Experiment Sets */
-
-$open-expset-table-side-border-color : #e4e4e4;
-
-.expset-hits {
-	padding: 0px 10px 0px 10px;
-}
-
-.expset-sublist-entry {
-	margin-bottom: 2px;
-}
-
-.expset-sublist-empty{
-	margin-left: 50px;
-	margin-bottom: 2px;
-	color: #999999;
-}
-
-
-.expset-checkbox-sub{
-	margin: 0px -6px -3px 0px !important;
-	display: inline-block;
-}
-
-.expset-checkbox-cell{
-	text-align: center;
-}
-
-.expset-file{
-	margin-left: 25px;
-}
-
-.expset-whole-selector{
-	padding: 10px;
-}
-
-.expset-file-selector{
-	@media (min-width: $screen-sm-min){
-		border-right: 1px #ccc solid;
-		padding-right: 10px;
-		margin-right: 10px;
-	}
-}
-
-.expset-selector-header{
-	> h5{
-		margin: 0px !important;
-	}
-
-}
-
-.expset-selector-button{
-	margin-top: 5px;
-}
-
-.browse-title{
-    text-align: left;
-    margin-bottom: 10px;
-	font-weight: 400;
-	color: #999999 !important;
-}
 
 //extend table class to get ride of bottom margin
 .table{
 	margin-bottom: 0px;
-}
-
-.control-cell{
-	white-space: nowrap;
 }
 
 
@@ -843,13 +681,15 @@ $small-label-accession-font-size : 0.75rem;
 					}
 
 					/** Same name div as File accession/name **/
-					.name.col-file > .file-entry-table-checkbox {
-						margin-bottom: 0;
-						display: inline-block;
-						margin-right: 10px;
-						margin-left: 5px;
-						vertical-align: middle;
-						margin-top: -2px;
+					.name.col-file {
+						> .file-entry-table-checkbox {
+							margin-bottom: 0;
+							display: inline-block;
+							margin-right: 10px;
+							margin-left: 5px;
+							vertical-align: middle;
+							margin-top: -2px;
+						}
 					}
 
 					.in-stacked-table-button {
@@ -1285,9 +1125,13 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 									}
 								}
 								.expset-checkbox {
-									float: left;
 									margin-right: 15px;
-									margin-top: 3px;
+									margin-top: -1px;
+									display: inline-block;
+									vertical-align: text-top;
+								}
+								.title-block {
+									display: inline-block;
 								}
 								.mono-text {
 									letter-spacing: 0.5px;

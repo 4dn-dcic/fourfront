@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { FacetList } from './FacetList';
-import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
+import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
 import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
 
 var { Item } = typedefs;
@@ -140,11 +140,10 @@ export class RawFilesStackedTable extends React.PureComponent {
         this.renderRootStackedBlockListOfBiosamplesWithExperiments = this.renderRootStackedBlockListOfBiosamplesWithExperiments.bind(this);
 
         this.cache = {
-            oddExpRow : true
+            'oddExpRow' : true
         };
         this.state = {
-            'columnWidths'    : null, // set on componentDidMount via updateColumnWidths
-            'mounted'         : false
+            'mounted' : false
         };
     }
 
@@ -336,8 +335,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         'columnHeaders' : [
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
-            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            {  columnClass: 'file', title: 'File', initialWidth: 130 },
+            //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
+            { columnClass: 'file',        title: 'File',      initialWidth: 130 },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 120 },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
@@ -346,46 +345,24 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         'titleForFiles'     : 'Processed Files'
     };
 
-    constructor(props){
-        super(props);
-        this.oddExpRow = false;
-        var filesGroupedByExperimentOrGlobal = this.filesGroupedByExperimentOrGlobal(props);
-        this.state = {
-            'renderedExperimentBlocks' : this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal) // StackedBlockTable will clone its children to update width etc.
-        };
-    }
-
-    /**
-     * @todo
-     * Create _memoized_ static function(s) for `filesGroupedByExperimentOrGlobal` & `renderExperimentBlocks` which
-     * will accept individual required props as parameters and then have instance methods pluck out the params
-     * from props and feed them to static counterparts.
-     */
-    UNSAFE_componentWillReceiveProps(nextProps){
-        if (nextProps.files !== this.props.files){
-            var filesGroupedByExperimentOrGlobal = this.filesGroupedByExperimentOrGlobal(nextProps);
-            this.setState({ 'renderedExperimentBlocks' : this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal) });
-        }
-    }
-
-    /** @todo Refactor & test */
-    UNSAFE_componentWillUpdate(nextProps, nextState){
-        this.oddExpRow = false;
-    }
-
-    filesGroupedByExperimentOrGlobal(props){
+    static filesGroupedByExperimentOrGlobal = memoize(function(files){
         // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
-        var groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(props.files);
-        var filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
+        const groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(files);
+        const filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
 
         // This should always be true (or false b.c of 0). It might change to not always be true (> 1). In this case, we should, figure out a different way of handling it. Like an extra stacked block at front for ExpSet.
-        var expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
+        const expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
         if (expSetAccessions.length === 1){
             filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]];
         } else if (expSetAccessions.length > 1) {
             console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
         return filesGroupedByExperimentOrGlobal;
+    });
+
+    constructor(props){
+        super(props);
+        this.oddExpRow = false;
     }
 
     renderFileBlocksForExperiment(filesForExperiment){
@@ -411,7 +388,9 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         return fileBlocks;
     }
 
-    renderExperimentBlocks(filesGroupedByExperimentOrGlobal = this.state.filesGroupedByExperimentOrGlobal){
+    renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
+
+        const { collapseLongLists, titleForFiles } = this.props;
 
         return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(function(aP, bP){
             if (aP[0] === 'global') return -1;
@@ -419,24 +398,24 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             return 0;
         }), ([ experimentAccession, filesForExperiment ])=>{
 
-            var experimentObj = _.find(_.pluck(filesForExperiment, 'from_experiment'), function(exp){ return exp && exp.accession && exp.accession === experimentAccession; });
-
-            var nameTitle = (
-                experimentAccession === 'global' ? ( // Case if came from multiple experiments
-                    <div style={{ fontSize : '1.25rem', lineHeight : '16px', height: 16 }} className="text-300">Multiple Experiments</div>
+            const experiment = filesForExperiment[0].from_experiment; // All should have same 1
+            const nameTitle = (
+                experimentAccession === 'global' ? (
+                    // Case if came from multiple experiments
+                    <div style={{ 'fontSize' : '1.25rem', 'lineHeight' : '16px', 'height': 16 }} className="text-300">Multiple Experiments</div>
                 ) : (
-                    (experimentObj && typeof experimentObj.display_title === 'string' && experimentObj.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
+                    (experiment && typeof experiment.display_title === 'string' && experiment.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
                 )
             );
 
-            var nameLink = (experimentAccession !== 'global' && object.atIdFromObject(experimentObj)) || null;
+            const experimentAtId = (experimentAccession !== 'global' && object.atIdFromObject(experiment)) || null;
 
-            var repsExist = experimentObj && experimentObj.bio_rep_no && experimentObj.tec_rep_no;
+            const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
 
             var nameBlock = (
-                <StackedBlockName style={repsExist ? { paddingTop : 19, paddingBottom: 19 } : null}>
-                    { repsExist ? <div>Bio Rep <b>{ experimentObj.bio_rep_no }</b>, Tec Rep <b>{ experimentObj.tec_rep_no }</b></div> : <div/> }
-                    { nameLink ? <a href={nameLink} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
+                <StackedBlockName style={replicateNumbersExists ? { paddingTop : 19, paddingBottom: 19 } : null}>
+                    { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
+                    { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
 
@@ -450,8 +429,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                         'accession' : experimentAccession === 'global' ? expSetAccession : experimentAccession
                     }}>
                     { nameBlock }
-                    <StackedBlockList className="files" collapseLongLists={this.props.collapseLongLists}
-                        title={this.props.titleForFiles} showMoreExtTitle={null}>
+                    <StackedBlockList className="files" collapseLongLists={collapseLongLists} title={titleForFiles} showMoreExtTitle={null}>
                         { this.renderFileBlocksForExperiment(filesForExperiment) }
                     </StackedBlockList>
                 </StackedBlock>
@@ -462,9 +440,12 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     render(){
+        const { files, collapseLongLists } = this.props;
         return (
             <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn>
-                <StackedBlockList className="sets" title="Experiments" collapseLongLists={this.props.collapseLongLists} children={this.state.renderedExperimentBlocks} rootList />
+                <StackedBlockList className="sets" title="Experiments" collapseLongLists={collapseLongLists} rootList>
+                    { this.renderExperimentBlocks(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files)) }
+                </StackedBlockList>
             </StackedBlockTable>
         );
     }

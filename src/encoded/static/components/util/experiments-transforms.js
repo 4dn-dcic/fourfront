@@ -369,21 +369,30 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
     );
 }
 
+/**
+ * Groups processed files by experiment or experiment set.
+ */
 export function processedFilesFromExperimentSetToGroup(processed_files, combined = false){
 
     var byES = {};
     var byE  = {};
+
     _.forEach(processed_files, function(pF){
         if (typeof pF.from_experiment !== 'undefined' && typeof pF.from_experiment.accession === 'string' && pF.from_experiment.accession !== "NONE"){
             if (!Array.isArray(byE[pF.from_experiment.accession])){
                 byE[pF.from_experiment.accession] = [];
             }
             byE[pF.from_experiment.accession].push(pF);
-        } else if (typeof pF.from_experiment_set !== 'undefined' && typeof pF.from_experiment_set.accession === 'string'){
-            if (!Array.isArray(byES[pF.from_experiment_set.accession])){
-                byES[pF.from_experiment_set.accession] = [];
+            return; // Belongs to a single Exp. Don't group under ExpSet as well.
+        }
+
+        var expSet = pF.from_experiment_set || (pF.from_experiment && pF.from_experiment && pF.from_experiment.from_experiment_set);
+
+        if (expSet && typeof expSet !== 'undefined' && typeof expSet.accession === 'string'){
+            if (!Array.isArray(byES[expSet.accession])){
+                byES[expSet.accession] = [];
             }
-            byES[pF.from_experiment_set.accession].push(pF);
+            byES[expSet.accession].push(pF);
         }
     });
 
@@ -608,7 +617,7 @@ export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false)
  * Combine file pairs and unpaired files into one array. 
  * Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
  * Can always _.flatten() this or map out first file per pair.
- * 
+ *
  * @param {ExperimentSet} experiment_set - Experiment Set
  * @returns {File[]|File[][]} For example, [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
  */

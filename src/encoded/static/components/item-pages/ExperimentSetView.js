@@ -32,7 +32,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.isWorkflowNodeCurrentContext = this.isWorkflowNodeCurrentContext.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         var state = {
@@ -223,11 +222,8 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns
                         {..._.pick(this.props, 'width', 'windowWidth')}
-                        experimentSetType={context.experimentset_type}
+                        experimentSet={context}
                         showMetricColumns={anyFilesWithMetrics}
-                        experimentSetAccession={context.accession || null}
-                        experimentArray={context.experiments_in_set}
-                        replicateExpsArray={context.replicate_exps}
                         keepCounts={false}
                         //columnHeaders={expTableColumnHeaders}
                         collapseLongLists={true}
