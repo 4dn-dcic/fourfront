@@ -455,32 +455,32 @@ def workflow_6_7(value, system):
         value['previous_version'] = [value['previous_version']]
 
 
-@upgrade_step('workflow', '7', '8')
-def workflow_7_8(value, system):
-    '''experiment_types is now an array of linkTo'''
-    if 'experiment_types' in value:
-        valid_exp_types = system['registry']['collections']['ExperimentType']
-        new_vals = []
-        exp_types = value.get('experiment_types')
-        for etype in exp_types:
-            if etype == 'Repli-seq':
-                try:
-                    new_vals.append(str(valid_exp_types.get('2-stage Repli-seq').uuid))
-                    new_vals.append(str(valid_exp_types.get('Multi-stage Repli-seq').uuid))
-                except AttributeError:
-                    continue
-            elif etype == 'DAM-ID seq':
-                try:
-                    new_vals.append(str(valid_exp_types.get('DamID-seq').uuid))
-                except AttributeError:
-                    continue
-            else:
-                try:
-                    new_vals.append(str(valid_exp_types.get(etype).uuid))
-                except AttributeError:
-                    exptypename = etype.lower().replace(' ', '-')
-                    try:
-                        new_vals.append(str(valid_exp_types.get(exptypename).uuid))
-                    except AttributeError:
-                        continue
-        value['experiment_types'] = new_vals
+# @upgrade_step('workflow', '7', '8')
+# def workflow_7_8(value, system):
+#     '''experiment_types is now an array of linkTo'''
+#     if 'experiment_types' in value:
+#         valid_exp_types = system['registry']['collections']['ExperimentType']
+#         new_vals = []
+#         exp_types = value.get('experiment_types')
+#         for etype in exp_types:
+#             if etype == 'Repli-seq':
+#                 try:
+#                     new_vals.append(str(valid_exp_types.get('2-stage Repli-seq').uuid))
+#                     new_vals.append(str(valid_exp_types.get('Multi-stage Repli-seq').uuid))
+#                 except AttributeError:
+#                     continue
+#             elif etype == 'DAM-ID seq':
+#                 try:
+#                     new_vals.append(str(valid_exp_types.get('DamID-seq').uuid))
+#                 except AttributeError:
+#                     continue
+#             else:
+#                 try:
+#                     new_vals.append(str(valid_exp_types.get(etype).uuid))
+#                 except AttributeError:
+#                     exptypename = etype.lower().replace(' ', '-')
+#                     try:
+#                         new_vals.append(str(valid_exp_types.get(exptypename).uuid))
+#                     except AttributeError:
+#                         continue
+#         value['experiment_types'] = new_vals

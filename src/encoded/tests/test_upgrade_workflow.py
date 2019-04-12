@@ -615,31 +615,31 @@ def test_workflow_upgrade_6_7(
     assert isinstance(value['previous_version'], list)
 
 
-@pytest.fixture
-def workflow_7(software, award, lab, workflow_bam):
-    return{
-        "schema_version": '6',
-        "award": award['@id'],
-        "lab": lab['@id'],
-        "title": "some workflow",
-        "name": "some workflow",
-        "previous_version": [workflow_bam['@id']]
-    }
-
-
-def test_workflow_upgrade_7_8(workflow_7, registry, exp_types):
-    types2upg = {'Repli-seq': None, 'In situ Hi-C': 'hic', 'Capture Hi-C': 'capc', 'DNA FISH': 'fish', 'dilution Hi-C': 'dilution'}
-    from snovault import UPGRADER
-    upgrader = registry[UPGRADER]
-    for etype, lookup in types2upg.items():
-        workflow_7['experiment_types'] = [etype]
-        value = upgrader.upgrade('workflow', workflow_7, registry=registry,
-                                 current_version='7', target_version='8')
-        assert value['schema_version'] == '8'
-        newetypes = value['experiment_types']
-        if etype == 'Repli-seq':
-            assert len(newetypes) == 2
-            assert exp_types['repliseq'].get('uuid') in newetypes
-            assert exp_types['multi'].get('uuid') in newetypes
-        else:
-            assert exp_types[lookup].get('uuid') == newetypes[0]
+# @pytest.fixture
+# def workflow_7(software, award, lab, workflow_bam):
+#     return{
+#         "schema_version": '6',
+#         "award": award['@id'],
+#         "lab": lab['@id'],
+#         "title": "some workflow",
+#         "name": "some workflow",
+#         "previous_version": [workflow_bam['@id']]
+#     }
+#
+#
+# def test_workflow_upgrade_7_8(workflow_7, registry, exp_types):
+#     types2upg = {'Repli-seq': None, 'In situ Hi-C': 'hic', 'Capture Hi-C': 'capc', 'DNA FISH': 'fish', 'dilution Hi-C': 'dilution'}
+#     from snovault import UPGRADER
+#     upgrader = registry[UPGRADER]
+#     for etype, lookup in types2upg.items():
+#         workflow_7['experiment_types'] = [etype]
+#         value = upgrader.upgrade('workflow', workflow_7, registry=registry,
+#                                  current_version='7', target_version='8')
+#         assert value['schema_version'] == '8'
+#         newetypes = value['experiment_types']
+#         if etype == 'Repli-seq':
+#             assert len(newetypes) == 2
+#             assert exp_types['repliseq'].get('uuid') in newetypes
+#             assert exp_types['multi'].get('uuid') in newetypes
+#         else:
+#             assert exp_types[lookup].get('uuid') == newetypes[0]
