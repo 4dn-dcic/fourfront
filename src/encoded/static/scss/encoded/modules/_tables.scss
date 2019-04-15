@@ -255,7 +255,7 @@ $small-label-accession-font-size : 0.75rem;
 	position: relative;
 	display: block;
 	//min-width: $expset-full-width;
-	min-width: 750px;
+	//min-width: 750px;
 	transition: opacity .35s;
 
 	&.fade-in:not(.mounted){
@@ -374,24 +374,14 @@ $small-label-accession-font-size : 0.75rem;
 				text-align: center;
 				line-height: 20px;
 
-				> .name-title.mono-text {
+				> .mono-text {
 					font-size: 0.85rem;
 				}
 
-				&.col-experiment > .name-title.mono-text {
+				&.col-experiment > .mono-text {
 					text-shadow: 0 0 0;
 				}
 
-				&.col-file-group {
-					padding-top: 8px;
-					padding-bottom: 6px;
-					.multipe-files-checkbox-wrapper {
-						> .checkbox-for-multiple-files {
-							margin: 0;
-						}
-					}
-
-				}
 			}
 
 			> .name:after,
@@ -493,11 +483,11 @@ $small-label-accession-font-size : 0.75rem;
 				transform: translate3d(0px,0,0);
 			}
 
-			.s-block.hide-name-on-block-hover > .name > .name-title {
+			.s-block.hide-name-on-block-hover > .name > *:not(.label-ext-info) {
 				opacity: 1;
 				transition: opacity .4s;
 			}
-			.s-block.hide-name-on-block-hover:not(.single-item):hover > .name:not(:hover) > .name-title {
+			.s-block.hide-name-on-block-hover:not(.single-item):hover > .name:not(:hover) > *:not(.label-ext-info) {
 				opacity: 0;
 			}
 
@@ -660,6 +650,15 @@ $small-label-accession-font-size : 0.75rem;
 					.name.col-file-group {
 						//line-height: 25px;
 						white-space: nowrap;
+
+						padding: 8px 0 6px;
+
+						.multipe-files-checkbox-wrapper {
+							> .checkbox-for-multiple-files {
+								margin: 0;
+							}
+						}
+
 					}
 				}
 

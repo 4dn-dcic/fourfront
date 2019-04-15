@@ -7,6 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import { Button } from 'react-bootstrap';
+import { IndeterminateCheckbox } from './../forms/components/IndeterminateCheckbox';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { Filters, navigate, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
@@ -20,7 +21,6 @@ import {
 
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
-
 
 
 /**
@@ -40,38 +40,7 @@ class ExperimentSetCheckBox extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.setIndeterminateOnRefIfNeeded = this.setIndeterminateOnRefIfNeeded.bind(this);
         this.onChange = this.onChange.bind(this);
-        this.checkboxRef = React.createRef();
-    }
-
-    componentDidMount(){
-        this.setIndeterminateOnRefIfNeeded();
-    }
-
-    componentDidUpdate(pastProps){
-        if (pastProps.selectedFiles !== this.props.selectedFiles){
-            // Try to avoid accessing DOM (`this.checkboxRef.current.indeterminate = indeterminate`) too frequently
-            // so do (more) JS calculation to try to avoid DOM changes.
-            var currAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(this.props.expSet),
-                pastAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(pastProps.expSet),
-                currSelectedFilesForSet = this.selectedFilesFromSet(currAllFilesKeyedByTriples, this.props.selectedFiles),
-                pastSelectedFilesForSet = this.selectedFilesFromSet(pastAllFilesKeyedByTriples, pastProps.selectedFiles);
-
-            if (currSelectedFilesForSet.length !== pastSelectedFilesForSet.length){
-                this.setIndeterminateOnRefIfNeeded();
-            }
-        }
-    }
-
-    setIndeterminateOnRefIfNeeded(){
-        var { expSet, selectedFiles } = this.props,
-            allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
-            indeterminate           = this.isIndeterminate(allFilesKeyedByTriples, selectedFiles);
-
-        if (this.checkboxRef.current){
-            this.checkboxRef.current.indeterminate = indeterminate;
-        }
     }
 
     expSetFilesToObjectKeyedByAccessionTriples = memoize(function(expSet){
@@ -127,9 +96,10 @@ class ExperimentSetCheckBox extends React.PureComponent {
         var { expSet, selectedFiles } = this.props,
             allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
             disabled                = this.isDisabled(allFilesKeyedByTriples),
-            checked                 = !disabled && this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles);
+            checked                 = !disabled && this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles),
+            indeterminate           = !checked && !disabled && this.isIndeterminate(allFilesKeyedByTriples, selectedFiles);
 
-        return <input {...{ checked, disabled }} onChange={this.onChange} type="checkbox" className="expset-checkbox" ref={this.checkboxRef} />;
+        return <IndeterminateCheckbox {...{ checked, disabled, indeterminate }} onChange={this.onChange} className="expset-checkbox" />;
     }
 }
 

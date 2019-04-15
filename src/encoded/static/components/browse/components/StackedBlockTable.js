@@ -3,12 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
-import { Button, Checkbox, Collapse } from 'react-bootstrap';
+import { Button, Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import url from 'url';
-import { FacetList } from './FacetList';
-import { expFxn, Filters, console, isServerSide, analytics, object, Schemas, fileUtil, typedefs } from './../../util';
-import { requestAnimationFrame } from './../../viz/utilities';
+import { IndeterminateCheckbox } from './../../forms/components/IndeterminateCheckbox';
+import { expFxn, console, isServerSide, analytics, object, Schemas, fileUtil, typedefs } from './../../util';
 import * as store from './../../../store';
 
 var { Item } = typedefs;
@@ -18,36 +17,36 @@ var { Item } = typedefs;
  * Label to show at top left of Name block.
  */
 export function StackedBlockNameLabel(props){
-    var { title, subtitle, accession, inline, className } = props;
-
-    function titleElement(){
-        return React.createElement(
-            inline ? 'span' : 'div',
-            { className : "label-title" },
-            title
-        );
-    }
-
-    function subtitleElement(){
-        if (!accession && !subtitle) return null;
-        return React.createElement(
-            inline ? 'span' : 'div',
-            { className : "ext" + (accession ? ' is-accession' : '') },
-            <object.CopyWrapper value={accession} key="copy-accession">{accession || subtitle}</object.CopyWrapper>
-        );
-    }
-
-    var fullClassName = "label-ext-info";
-    if (typeof className === 'string') fullClassName += ' ' + className;
-    if (subtitle !== null) fullClassName += ' has-subtitle';
+    const { title, subtitle, accession, className, subtitleVisible } = props;
+    const cls = (
+        "label-ext-info" + (className? ' ' + className : '') +
+        (subtitle? ' has-subtitle' : '' ) +
+        (subtitleVisible ? ' subtitle-visible' : '')
+    );
 
     return (
-        <div className={fullClassName} key="label">
-            { titleElement() }
-            { subtitleElement() }
+        <div className={cls} key="label">
+            <div className="label-title">{ title }</div>
+            { subtitle || accession ?
+                <div className={"ext" + (accession ? ' is-accession' : '')}>
+                    { accession ?
+                        <object.CopyWrapper value={accession} key="copy-accession">{ accession || subtitle }</object.CopyWrapper>
+                    : subtitle }
+                </div>
+            : null }
         </div>
     );
 }
+
+StackedBlockNameLabel.propTypes = {
+    /** Subtitle/label will appear more opaque when not hovered over */
+    'subtitleVisible' : PropTypes.bool,
+    'className' : PropTypes.string,
+    'title' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
+    'subtitle' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
+    // Pass in place of or in addition to subtitle (takes precedence).
+    'accession' : PropTypes.string
+};
 
 /**
  * Name element to be put inside of StackedBlocks as the first child.
@@ -56,96 +55,20 @@ export class StackedBlockName extends React.PureComponent {
 
     static Label = StackedBlockNameLabel
 
-    static propTypes = {
-        'columnClass' : PropTypes.string,
-        'colWidthStyles' : PropTypes.object,
-        'label' : PropTypes.node,
-        //PropTypes.shape({
-        //    title : PropTypes.node,
-        //    subtitle : PropTypes.node,
-        //    subtitleVisible : PropTypes.bool
-        //}),
-        'style' : PropTypes.object,
-        'visible' : PropTypes.bool, // ? forgot
-        'verticalAlign' : PropTypes.string // CSS vertical-align property. Change alignment/positioning if wanted.
-
-    }
-
-    static defaultProps = {
-        'visible' : true,
-        'passProps' : true
-    };
-
-    constructor(props){
-        super(props);
-        this.getColumnWidthStyle = this.getColumnWidthStyle.bind(this);
-        this.adjustedChildren = this.adjustedChildren.bind(this);
-    }
-
-    getColumnWidthStyle(){
-        const { colWidthStyles, columnClass, expTable } = this.props;
-        if (colWidthStyles && typeof colWidthStyles[columnClass] !== 'undefined'){
-            return colWidthStyles[columnClass];
-        }
-
-        if (expTable && expTable.state && Array.isArray(expTable.state.columnWidths)){
-            var colWidthIndex = _.findIndex(expTable.columnHeaders(), { 'columnClass' : columnClass });
-            if (colWidthIndex > -1) return { 'width' : expTable.state.columnWidths[colWidthIndex] };
-        }
-
-        return null;
-    }
-
-    adjustedChildren(){
-        const { children, passProps } = this.props;
-        return React.Children.map(children, (c)=>{
-            var addedProps = {};
-
-            if (c && c.props && (!c.props.className || (typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1))){
-                addedProps.className = (c.props.className || '') + ' name-title';
-            }
-
-            if (c && c.type && typeof c.type === 'function' && passProps){
-                _.extend(addedProps, this.props, c.props);
-            }
-
-            if (_.keys(addedProps).length > 0){
-                return React.cloneElement(c, addedProps, c.props.children);
-            }
-
-            return c;
-        });
-    }
-
     render(){
-        if (!this.props.visible) return null;
-        var style = null;
-        var colWidthStyle = this.getColumnWidthStyle();
-        if (colWidthStyle){
-            if (this.props.colStyle) style = _.extend(_.clone(colWidthStyle), this.props.colStyle);
-            else style = _.clone(colWidthStyle);
-        }
-        if (this.props.relativePosition){
-            if (style) style.position = 'relative';
-            else style = { 'position' : 'relative' };
-        }
-        if (this.props.verticalAlign){
-            if (style) style.verticalAlign = this.props.verticalAlign;
-            else style = { 'verticalAlign' : this.props.verticalAlign };
-        }
-        if (this.props.style){
-            if (style) style = _.extend({}, this.props.style, style);
-            else style = _.clone(this.props.style);
-        }
+        const { children, style, relativePosition, colWidthStyles, columnClass, label } = this.props;
+
+        var useStyle = {};
+        const colWidthStyle = colWidthStyles[columnClass];
+
+        if (style)              _.extend(useStyle, style);
+        if (colWidthStyle)      _.extend(useStyle, colWidthStyle);
+        if (relativePosition)   useStyle.position = 'relative';
+
         return (
-            <div className={"name col-" + this.props.columnClass} style={style}>
-                { this.props.label ?
-                    <StackedBlockName.Label {..._.extend({}, this.props.label, {
-                        inline : false,
-                        className : this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
-                    })} />
-                    : null }
-                { this.adjustedChildren() }
+            <div className={"name col-" + columnClass} style={useStyle}>
+                { label ? <StackedBlockName.Label {...label} /> : null }
+                { children }
             </div>
         );
     }
@@ -155,7 +78,7 @@ export class StackedBlockName extends React.PureComponent {
 /**
  * Button to toggle collapse/visible of longer StacedkBlockLists. Used in StackedBlockLists.
  */
-export class StackedBlockListViewMoreButton extends React.Component {
+export class StackedBlockListViewMoreButton extends React.PureComponent {
 
     static propTypes = {
         'collapsibleChildren' : PropTypes.array,
@@ -164,48 +87,22 @@ export class StackedBlockListViewMoreButton extends React.Component {
         // + those from parent .List
     };
 
-
-    shouldComponentUpdate(nextProps){
-        if (this.props.collapsed !== nextProps.collapsed) return true;
-        if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
-        if (this.props.title !== nextProps.title) return true;
-        if (this.props.showMoreExtTitle !== nextProps.showMoreExtTitle) return true;
-        return false;
-    }
-
     render(){
-        const { collapsibleChildren, collapsed, currentlyCollapsing, parentID, title, showMoreExtTitle, handleCollapseToggle } = this.props;
+        const { collapsibleChildren, collapsed, title, showMoreExtTitle, handleCollapseToggle } = this.props;
+        const collapsibleChildrenLen = collapsibleChildren.length;
 
-        if (collapsibleChildren.length === 0) return null;
+        if (collapsibleChildrenLen === 0) return null;
 
-        var collapsedMsg = collapsed &&
-        (currentlyCollapsing ?
-            (currentlyCollapsing === parentID ? false : true)
-            :
-            true
+        const titleStr = (
+            (collapsed? "Show " + collapsibleChildrenLen + " More" : "Show Fewer") +
+            (title? ' ' + title : '')
         );
-
-        function collapseTitle(){
-            let showTitle = null;
-            if (collapsedMsg){
-                showTitle = "Show " + collapsibleChildren.length + " More";
-            } else {
-                showTitle = "Show Fewer";
-            }
-            if (title) showTitle += ' ' + title;
-
-            let extTitle = null;
-            if (showMoreExtTitle && collapsedMsg){
-                extTitle = <span className="ext text-400"> { showMoreExtTitle }</span>;
-            }
-
-            return <span>{ showTitle }{ extTitle }</span>;
-        }
 
         return (
             <div className="view-more-button" onClick={handleCollapseToggle}>
-                <i className={"icon icon-" + (collapsedMsg ? 'plus': 'minus')}></i>
-                { collapseTitle() }
+                <i className={"icon icon-" + (collapsed ? 'plus': 'minus')}/>
+                { titleStr }
+                { showMoreExtTitle ? <span className="ext text-400">{ showMoreExtTitle }</span> : null }
             </div>
         );
     }
@@ -219,124 +116,79 @@ export class StackedBlockList extends React.PureComponent {
     static ViewMoreButton = StackedBlockListViewMoreButton;
 
     static propTypes = {
-        title               : PropTypes.string,
-        showMoreExtTitle    : PropTypes.string,
-        collapseLimit       : PropTypes.number,
-        collapseShow        : PropTypes.number,
-        expTable            : PropTypes.any,
-        collapseLongLists   : PropTypes.bool.isRequired
-    };
-
-    static defaultProps = {
-        'collapseLimit'     : 4,
-        'collapseShow'      : 3,
-        'collapseLongLists' : true
+        'showMoreExtTitle'    : PropTypes.string,
+        'collapseLimit'       : PropTypes.number,
+        'collapseShow'        : PropTypes.number,
+        'collapseLongLists'   : PropTypes.bool,
+        'defaultCollapsed'    : PropTypes.bool,
+        'children'            : PropTypes.arrayOf(PropTypes.node),
+        'stackDepth'          : PropTypes.number
     };
 
     constructor(props){
         super(props);
-        this.finishTransition = this.finishTransition.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
-        if (props.collapseLongLists && Array.isArray(props.children) && props.children.length > props.collapseLimit){
-            this.state = { 'collapsed' : true };
-        }
-    }
-
-    finishTransition(){
-        if (this.props.expTable && this.props.expTable.state){
-            this.props.expTable.setState({ 'collapsing' : false });
-        }
+        this.state = { 'collapsed' : props.defaultCollapsed };
     }
 
     adjustedChildren(){
-        return React.Children.map(this.props.children, (c)=>{
+        const { children, stackDepth } = this.props;
+        return React.Children.map(children, (c)=>{
 
             //console.log('LIST_CHILD', c, typeof c)
 
             //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
-            var addedProps = {};
 
-            addedProps.stackDepth = this.props.stackDepth + 1;
+            var addedProps = _.pick(this.props, 'colWidthStyles', 'selectedFiles', 'columnHeaders', 'handleFileCheckboxChange');
 
-            if (this.props.parentIDList && !c.props.parentIDList){
-                addedProps.parentIDList = this.props.parentIDList;
-            }
-            if (this.props.currentlyCollapsing && !c.props.currentlyCollapsing){
-                addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
-            }
-            if (this.props.expTable && !c.props.expTable){
-                addedProps.expTable = this.props.expTable;
-            }
-            if (this.props.colWidthStyles && !c.props.colWidthStyles){
-                addedProps.colWidthStyles = this.props.colWidthStyles;
-            }
-            if (this.props.experimentSetType && !c.props.experimentSetType){
-                addedProps.experimentSetType = this.props.experimentSetType;
-            }
-            if (this.props.experimentSetAccession && !c.props.experimentSetAccession){
-                addedProps.experimentSetAccession = this.props.experimentSetAccession;
-            }
-            if (this.props.selectedFiles && !c.props.selectedFiles){
-                addedProps.selectedFiles = this.props.selectedFiles;
-            }
-            if (this.props.columnHeaders && !c.props.columnHeaders){
-                addedProps.columnHeaders = this.props.columnHeaders;
-            }
-            if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
-                addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
-            }
-            if (typeof this.props.collapseLongLists === 'boolean' && typeof c.props.collapseLongLists !== 'boolean'){
-                addedProps.collapseLongLists = this.props.collapseLongLists;
-            }
-            if (_.keys(addedProps).length > 0){
-                return React.cloneElement(c, addedProps, c.props.children);
-            }
-            return c;
+            addedProps.stackDepth = stackDepth + 1;
+
+            _.forEach(['collapseLongLists', 'collapseLimit', 'collapseShow', 'defaultCollapsed'], (prop)=>{
+                if (typeof c.props[prop] === 'undefined'){
+                    addedProps[prop] = this.props[prop];
+                }
+            });
+
+            return React.cloneElement(c, addedProps, c.props.children);
         });
     }
 
     handleCollapseToggle(){
-        if (this.props.expTable && this.props.expTable.state && !this.props.expTable.state.collapsing){
-            this.props.expTable.setState({
-                'collapsing' : this.props.rootList ? 'root' :
-                    this.props.parentID || this.props.className || true
-            }, ()=>{
-                this.setState(function({ collapsed }){
-                    return { 'collapsed' : !collapsed };
-                });
-            });
-        } else this.setState(function({ collapsed }){
+        this.setState(function({ collapsed }){
             return { 'collapsed' : !collapsed };
         });
     }
 
     render(){
-        var { collapseLongLists, stackDepth, collapseLimit, collapseShow } = this.props,
+        var { collapseLongLists, stackDepth, collapseLimit, collapseShow, className } = this.props,
             children = this.adjustedChildren(),
-            className = "s-block-list " + (this.props.className || '') + (' stack-depth-' + stackDepth),
-            timeout = 350; // Default
+            cls = "s-block-list " + (className || '') + (' stack-depth-' + stackDepth);
 
         if (collapseLongLists === false || !Array.isArray(children) || children.length <= collapseLimit) {
             // Don't have enough items for collapsible element, return plain list.
-            return <div className={className}>{ children }</div>;
+            return <div className={cls}>{ children }</div>;
         }
 
-        var collapsibleChildren = children.slice(collapseShow);
-        if (collapsibleChildren.length > 18) {
-            className += ' transition-slow';
-            timeout = 1000;
-        } else if (collapsibleChildren.length > 9) {
-            className += ' transition-med';
-            timeout = 500;
+        const collapsibleChildren = children.slice(collapseShow);
+        const collapsibleChildrenLen = collapsibleChildren.length;
+
+        var collapsibleChildrenElemsList;
+
+        if (collapsibleChildrenLen > Math.min(collapseShow, 10)) { // Don't transition
+            collapsibleChildrenElemsList = this.state.collapsed ? null : <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>;
+        } else {
+            collapsibleChildrenElemsList = (
+                <Collapse in={!this.state.collapsed}>
+                    <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
+                </Collapse>
+            );
         }
 
         return (
-            <div className={className} data-count-collapsed={collapsibleChildren.length}>
-                { children.slice(0, this.props.collapseShow) }
-                <Collapse in={!this.state.collapsed} timeout={timeout} onExited={this.finishTransition} onEntered={this.finishTransition}>
-                    <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
-                </Collapse>
+            <div className={cls} data-count-collapsed={collapsibleChildren.length}>
+                { children.slice(0, collapseShow) }
+                { collapsibleChildrenElemsList }
                 <StackedBlockListViewMoreButton {...this.props} collapsibleChildren={collapsibleChildren}
                     collapsed={this.state.collapsed} handleCollapseToggle={this.handleCollapseToggle} />
             </div>
@@ -355,127 +207,97 @@ export class StackedBlock extends React.PureComponent {
         super(props);
         this.render = this.render.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
-        this.childIDList = new Set();
     }
 
     adjustedChildren(){
-        return React.Children.map(this.props.children, (c) => {
+        const { children } = this.props;
+        return React.Children.map(children, (c, index) => {
             if (c === null) return null;
-            var addedProps = {};
 
-            addedProps.stackDepth = this.props.stackDepth;
+            var addedProps = _.pick(this.props,
+                'columnClass', 'colWidthStyles', 'label', 'expTable', 'currentlyCollapsing', 'stackDepth',
+                'selectedFiles', 'columnHeaders', 'handleFileCheckboxChange'
+            );
 
-            if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
-            if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
-            if (!c.props.label && this.props.label) addedProps.label = this.props.label;
-            if (!c.props.expTable && this.props.expTable) addedProps.expTable = this.props.expTable;
-            if (!c.props.experimentSetType && this.props.experimentSetType) addedProps.experimentSetType = this.props.experimentSetType;
-            if (!c.props.currentlyCollapsing && this.props.currentlyCollapsing) addedProps.currentlyCollapsing = this.props.currentlyCollapsing;
-
-            if (this.props.selectedFiles && !c.props.selectedFiles){
-                addedProps.selectedFiles = this.props.selectedFiles;
-            }
-            if (this.props.experimentSetAccession && !c.props.experimentSetAccession){
-                addedProps.experimentSetAccession = this.props.experimentSetAccession;
-            }
-            if (this.props.columnHeaders && !c.props.columnHeaders){
-                addedProps.columnHeaders = this.props.columnHeaders;
-            }
-            if (this.props.handleFileCheckboxChange && !c.props.handleFileCheckboxChange){
-                addedProps.handleFileCheckboxChange = this.props.handleFileCheckboxChange;
-            }
-            if (typeof this.props.collapseLongLists === 'boolean' && typeof c.props.collapseLongLists !== 'boolean'){
-                addedProps.collapseLongLists = this.props.collapseLongLists;
-            }
-
-            if (c.props.children){
-                // Grab & save child s-block ids (one level deep)
-                React.Children.forEach(c.props.children, (cc)=>{
-                    if (cc.props && typeof cc.props.id === 'string'){
-                        this.childIDList.add(cc.props.id);
-                    }
-                });
-            }
-            if (this.props.id){
-                // Pass down (and include self in) parent s-block ids to child elements.
-                if (this.props.parentIDList){
-                    addedProps.parentIDList = new Set(this.props.parentIDList);
-                } else {
-                    addedProps.parentIDList = new Set();
+            _.forEach(['collapseLongLists', 'collapseLimit', 'collapseShow', 'defaultCollapsed'], (prop)=>{
+                if (typeof c.props[prop] === 'undefined'){
+                    addedProps[prop] = this.props[prop];
                 }
-                addedProps.parentIDList.add(this.props.id);
-                addedProps.parentID = this.props.id;
-            }
-            if (Object.keys(addedProps).length > 0){
+            });
+
+            if (_.keys(addedProps).length > 0){
                 return React.cloneElement(c, addedProps, c.props.children);
             } else return c;
         });
     }
 
     render(){
-        const { columnClass, stackDepth, stripe, hideNameOnHover, keepLabelOnHover, currentlyCollapsing, id, parentIDList } = this.props;
-        var className = columnClass ? columnClass + ' ' : '';
-        className += "s-block"  + (' stack-depth-' + stackDepth);
-        if (hideNameOnHover) className += ' hide-name-on-block-hover';
-        if (keepLabelOnHover) className += ' keep-label-on-name-hover';
+        const { columnClass, className, stackDepth, stripe, hideNameOnHover, keepLabelOnHover, id } = this.props;
+        let cls = (
+            "s-block stack-depth-" + stackDepth +
+            (columnClass ? ' ' + columnClass : '') +
+            (hideNameOnHover ? ' hide-name-on-block-hover' : '') +
+            (keepLabelOnHover ? ' keep-label-on-name-hover' : '') +
+            (className ? ' ' + className : '')
+        );
         if (typeof stripe !== 'undefined' && stripe !== null){
-            if (stripe === true || stripe === 'even') className += ' even';
-            else className += ' odd';
+            if (stripe === true || stripe === 'even') cls += ' even';
+            else cls += ' odd';
         }
-        if (currentlyCollapsing){
-            className += ' s-block-list-collapsing collapsing-' + currentlyCollapsing;
-            if (
-                currentlyCollapsing === id ||
-                currentlyCollapsing === 'root' ||
-                ((parentIDList instanceof Set) && parentIDList.has(currentlyCollapsing)) ||
-                ((this.childIDList instanceof Set) && this.childIDList.has(currentlyCollapsing))
-            ) className += ' collapsing-child';
-        }
-        if (typeof this.props.className === 'string') className += ' ' + this.props.className;
-        return <div className={className}>{ this.adjustedChildren() }</div>;
+        return <div className={cls} data-id={id}>{ this.adjustedChildren() }</div>;
     }
 
 }
 
 
 /** Renders out a checkbox which controls selected state of multiple files */
-function MultipleFileCheckbox(props){
-    const { files, selectedFiles, onChange } = props;
-    const filesCount = (Array.isArray(files) && files.length) || 0;
+class MultipleFileCheckbox extends React.PureComponent {
 
-    // Don't render anything if no selectedFiles passed in.
-    if (!selectedFiles || filesCount === 0 || !onChange || !files[0].accession) return null;
+    static propTypes = {
+        'selectedFiles' : PropTypes.object,
+        'onChange' : PropTypes.func,
+        'files' : PropTypes.array
+    };
 
-    const accessionTriples = expFxn.filesToAccessionTriples(files, true);
-    const checked = MultipleFileCheckbox.isChecked(accessionTriples, selectedFiles);
-    const lineHeight = (filesCount * 35 + (filesCount - 1) - 15) + 'px';
+    static defaultProps = {
+        'className' : 'checkbox-for-multiple-files',
+        'name' : "file-checkbox"
+    };
 
-    return (
-        <div className="multipe-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
-            <input type="checkbox" checked={checked} id={'checkbox-for-' + accessionTriples.join('_')}
-                data-select-files={accessionTriples}
-                {..._.omit(props, 'files', 'selectedFiles')} />
-        </div>
-    );
-}
+    isChecked = memoize(function(accessionTriples, selectedFiles){
+        for (var i = 0; i < accessionTriples.length; i++){
+            if (typeof selectedFiles[accessionTriples[i]] === 'undefined') return false;
+        }
+        return true;
+    })
 
-MultipleFileCheckbox.isChecked = function(accessionTriples, selectedFiles){
-    for (var i = 0; i < accessionTriples.length; i++){
-        if (typeof selectedFiles[accessionTriples[i]] === 'undefined') return false;
+    isIndeterminate = memoize(function(accessionTriples, selectedFiles){
+        for (var i = 0; i < accessionTriples.length; i++){
+            if (typeof selectedFiles[accessionTriples[i]] !== 'undefined') return true;
+        }
+        return false;
+    });
+
+    render(){
+        const { files, selectedFiles, onChange } = this.props;
+        const filesCount = (Array.isArray(files) && files.length) || 0;
+
+        // Don't render anything if no selectedFiles passed in.
+        if (!selectedFiles || filesCount === 0 || !onChange || !files[0].accession) return null;
+
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const checked = this.isChecked(accessionTriples, selectedFiles);
+        const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
+        const lineHeight = (filesCount * 35 + (filesCount - 1) - 15) + 'px';
+
+        return (
+            <div className="multipe-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
+                <IndeterminateCheckbox {...{ indeterminate, checked }} id={'checkbox-for-' + accessionTriples.join('_')}
+                    data-select-files={accessionTriples} {..._.omit(this.props, 'files', 'selectedFiles')} />
+            </div>
+        );
     }
-    return true;
-};
-
-MultipleFileCheckbox.propTypes = {
-    'selectedFiles' : PropTypes.object,
-    'onChange' : PropTypes.func,
-    'files' : PropTypes.array
-};
-
-MultipleFileCheckbox.defaultProps = {
-    'className' : 'checkbox-for-multiple-files',
-    'name' : "file-checkbox"
-};
+}
 
 
 export class FilePairBlock extends React.PureComponent {
@@ -488,10 +310,12 @@ export class FilePairBlock extends React.PureComponent {
         'handleFileCheckboxChange' : PropTypes.func,
         'isSingleItem' : PropTypes.bool,
         'selectedFiles' : PropTypes.object,
+        'files' : PropTypes.arrayOf(PropTypes.object)
     };
 
     static defaultProps = {
-        'excludeChildrenCheckboxes' : true
+        'excludeChildrenCheckboxes' : true,
+        'excludeOwnCheckbox' : false
     };
 
     constructor(props){
@@ -508,7 +332,7 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     nameColumn(){
-        const { colVisible, label, colWidthStyles, name, files, selectedFiles } = this.props;
+        const { colVisible, label, colWidthStyles, name, files, selectedFiles, excludeOwnCheckbox } = this.props;
         if (colVisible === false) return null;
         var labelToShow = null;
         if (typeof label === 'string'){
@@ -520,7 +344,9 @@ export class FilePairBlock extends React.PureComponent {
             <div className="name col-file-group" style={colWidthStyles ? _.clone(colWidthStyles['file-group']) : null}>
                 { labelToShow }
                 <div className="name-title" key="name-title">
-                    <MultipleFileCheckbox onChange={this.onCheckboxChange} files={files} selectedFiles={selectedFiles}  />
+                    { !excludeOwnCheckbox ?
+                        <MultipleFileCheckbox onChange={this.onCheckboxChange} files={files} selectedFiles={selectedFiles} />
+                    : null }
                     { name }
                 </div>
             </div>
@@ -528,8 +354,12 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     render(){
-        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes } = this.props;
+        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover } = this.props;
         const isReallySingleItem = this.isSingleItem(isSingleItem, files);
+        const cls = (
+            "s-block file-group keep-label-on-name-hover" +
+            (hideNameOnHover ? ' hide-name-on-block-hover' : '')
+        );
 
         let childBlocks;
 
@@ -548,7 +378,7 @@ export class FilePairBlock extends React.PureComponent {
         }
 
         return (
-            <div className="s-block file-group keep-label-on-name-hover">
+            <div className={cls}>
                 { this.nameColumn() }
                 <div className="files s-block-list">{ childBlocks }</div>
             </div>
@@ -591,8 +421,10 @@ export class FileEntryBlock extends React.PureComponent {
     static propTypes = {
         'selectedFiles' : PropTypes.object,
         'handleFileCheckboxChange' : PropTypes.func,
-        'excludeCheckbox' : PropTypes.bool
-    }
+        'excludeCheckbox' : PropTypes.bool,
+        'file' : PropTypes.object,
+        'columnHeaders' : PropTypes.arrayOf(PropTypes.object)
+    };
 
     static defaultProps = {
         'excludeCheckbox' : false,
@@ -602,7 +434,7 @@ export class FileEntryBlock extends React.PureComponent {
         },
         'hideNameOnHover' : false,
         'keepLabelOnHover' : true
-    }
+    };
 
     constructor(props){
         super(props);
@@ -975,10 +807,7 @@ export class StackedBlockTable extends React.PureComponent {
                     return col.field || col.columnClass;
                 }),
                 function(cn, index){
-                    return [
-                        cn,
-                        { 'width' : columnWidths[index] }
-                    ];
+                    return [cn, { 'width' : columnWidths[index] }];
                 }
             )
         );
@@ -1004,6 +833,10 @@ export class StackedBlockTable extends React.PureComponent {
         ],
         'width': null,
         'defaultInitialColumnWidth' : 120,
+        'collapseLimit'     : 4,
+        'collapseShow'      : 3,
+        'collapseLongLists' : true,
+        'defaultCollapsed'  : true
     };
 
     constructor(props){
@@ -1011,6 +844,7 @@ export class StackedBlockTable extends React.PureComponent {
         this.adjustedChildren = this.adjustedChildren.bind(this);
         this.colWidthStyles = this.colWidthStyles.bind(this);
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
+        this.setCollapsingState = _.throttle(this.setCollapsingState.bind(this));
 
         this.cache = {
             'oddExpRow' : true
@@ -1063,28 +897,23 @@ export class StackedBlockTable extends React.PureComponent {
         }
     }
 
+    setCollapsingState(collapsing){
+        this.setState({ collapsing });
+    }
+
     adjustedChildren(){
-        const { children, columnHeaders } = this.props;
+        const { children, columnHeaders, selectedFiles } = this.props;
         const colWidthStyles = this.colWidthStyles();
 
         return React.Children.map(children, (c)=>{
-            //if (c.type.displayName !== 'StackedBlock') return c; // Only add props to StackedBlocks
+            var addedProps = _.omit(this.props, 'columnHeaders', 'stackDepth', 'colWidthStyles', 'handleFileCheckboxChange');
 
-            var addedProps = {};
-
-            // REQUIRED & PASSED DOWN
+            // REQUIRED & PASSED DOWN TO STACKEDBLOCKLIST
             addedProps.handleFileCheckboxChange = this.handleFileCheckboxChange;
-            addedProps.colWidthStyles           = colWidthStyles;
-            addedProps.currentlyCollapsing      = this.state.collapsing;
-            addedProps.expTable                 = this;
-            addedProps.stackDepth               = 0;
-            addedProps.columnHeaders            = columnHeaders;
-
-            _.extend(
-                addedProps,
-                _.omit(this.props, 'columnHeaders', 'stackDepth', 'expTable', 'currentlyCollapsing',
-                    'colWidthStyles', 'handleFileCheckboxChange')
-            );
+            addedProps.colWidthStyles      = colWidthStyles;
+            addedProps.stackDepth          = 0;
+            addedProps.columnHeaders       = columnHeaders;
+            addedProps.selectedFiles       = selectedFiles;
 
             return React.cloneElement(c, addedProps, c.props.children);
         });

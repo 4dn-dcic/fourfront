@@ -108,16 +108,13 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         if (processedFilesLen > 0){
-
             // Graph Section Tab
-            if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
-                tabs.push(FileViewGraphSection.getTabObject(
-                    _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
-                    this.state,
-                    this.handleToggleAllRuns,
-                    width
-                ));
-            }
+            tabs.push(FileViewGraphSection.getTabObject(
+                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
+                this.state,
+                this.handleToggleAllRuns,
+                width
+            ));
         }
 
         // Other Files Tab
@@ -454,9 +451,9 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         if (higlassItem && object.itemUtil.atId(higlassItem)){
             const hiGlassProps = { width, mounted, windowWidth, higlassItem };
             return (
-                <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={(rightPanelWidth, resetDivider, leftPanelCollapsed)=>
-                    <ProcessedFilesStackedTable {..._.extend({ 'width' : Math.max(rightPanelWidth, 320), leftPanelCollapsed, resetDivider }, processedFilesTableProps)} />
-                } />
+                <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={function(rightPanelWidth, resetDivider, leftPanelCollapsed){
+                    return <ProcessedFilesStackedTable {..._.extend({ leftPanelCollapsed, resetDivider }, processedFilesTableProps)} width={Math.max(rightPanelWidth, 320)} />;
+                }} />
             );
         } else {
             return <ProcessedFilesStackedTable {...processedFilesTableProps} width={width}/>;
