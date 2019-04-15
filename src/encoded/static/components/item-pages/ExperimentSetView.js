@@ -80,17 +80,19 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         //context = SET;
 
-        var processedFiles  = expFxn.allProcessedFilesFromExperimentSet(context),
-            rawFiles        = expFxn.allFilesFromExperimentSet(context, false),
-            width           = this.getTabViewWidth(),
-            commonProps     = { width, context, schemas, windowWidth },
-            tabs            = [];
+        var processedFiles      = expFxn.allProcessedFilesFromExperimentSet(context),
+            processedFilesLen   = (processedFiles && processedFiles.length) || 0,
+            rawFiles            = expFxn.allFilesFromExperimentSet(context, false),
+            rawFilesLen         = (rawFiles && rawFiles.length) || 0,
+            width               = this.getTabViewWidth(),
+            commonProps         = { width, context, schemas, windowWidth },
+            tabs                = [];
 
-        if (processedFiles && processedFiles.length > 0){
+        if (processedFilesLen > 0){
 
             // Processed Files Table Tab
             tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
+                tab : <span><i className="icon icon-microchip icon-fw"/> { processedFilesLen } Processed File{ processedFilesLen > 1 ? 's' : '' }</span>,
                 key : 'processed-files',
                 content : <ProcessedFilesStackedTableSection files={processedFiles} {...commonProps} {...this.state} />
             });
@@ -98,15 +100,15 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         // Raw files tab, if have experiments with raw files
-        if (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0 && Array.isArray(rawFiles) && rawFiles.length > 0){
+        if (rawFilesLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
+                tab : <span><i className="icon icon-leaf icon-fw"/> { rawFilesLen } Raw File{ rawFilesLen > 1 ? 's' : '' }</span>,
                 key : 'raw-files',
                 content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} {...this.state} />
             });
         }
 
-        if (processedFiles && processedFiles.length > 0){
+        if (processedFilesLen > 0){
 
             // Graph Section Tab
             if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
@@ -209,28 +211,23 @@ class ExperimentSetHeader extends React.PureComponent {
 
 export class RawFilesStackedTableSection extends React.PureComponent {
     render(){
-
-        var { context, files } = this.props;
-
-        var fileCount = files.length,
-            expSetCount = (context.experiments_in_set && context.experiments_in_set.length) || 0,
-            anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
+        const { context, files } = this.props;
+        const fileCount = files.length;
+        const anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
 
         return (
-            <div className="exp-table-section">
-                { expSetCount ?
+            <div className="overflow-hidden">
                 <h3 className="tab-section-title">
-                    <span><span className="text-400">{ fileCount }</span> Raw Files</span>
+                    <span className="text-400">{ fileCount }</span> Raw File{ fileCount > 1 ? 's' : '' }
                 </h3>
-                : null }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns
-                        {..._.pick(this.props, 'width', 'windowWidth', 'facets')}
-                        experimentSetType={this.props.context.experimentset_type}
+                        {..._.pick(this.props, 'width', 'windowWidth')}
+                        experimentSetType={context.experimentset_type}
                         showMetricColumns={anyFilesWithMetrics}
-                        experimentSetAccession={this.props.context.accession || null}
-                        experimentArray={this.props.context.experiments_in_set}
-                        replicateExpsArray={this.props.context.replicate_exps}
+                        experimentSetAccession={context.accession || null}
+                        experimentArray={context.experiments_in_set}
+                        replicateExpsArray={context.replicate_exps}
                         keepCounts={false}
                         //columnHeaders={expTableColumnHeaders}
                         collapseLongLists={true}
