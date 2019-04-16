@@ -214,10 +214,8 @@ class ResultTableContainer extends React.PureComponent {
     browseExpSetDetailPane(result, rowNumber, containerWidth, toggleExpandCallback){
         return (
             <ExperimentSetDetailPane
-                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth')}
-                {...{ result, containerWidth, toggleExpandCallback }}
-                href={this.props.href} paddingWidth={47}
-            />
+                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth', 'href')}
+                {...{ result, containerWidth, toggleExpandCallback }} paddingWidth={47} />
         );
     }
 

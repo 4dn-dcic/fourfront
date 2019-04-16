@@ -116,7 +116,7 @@ class ResultDetail extends React.PureComponent{
     render(){
         var { open, rowNumber, result, tableContainerWidth, tableContainerScrollLeft, renderDetailPane, toggleDetailOpen } = this.props;
         return (
-            <div className={"result-table-detail-container" + (open || this.state.closing ? ' open' : ' closed')}>
+            <div className={"result-table-detail-container detail-" + (open || this.state.closing ? 'open' : 'closed')}>
                 { open ?
                     <div className="result-table-detail" ref={this.detailRef} style={{
                         'width' : tableContainerWidth,
@@ -254,7 +254,7 @@ class ResultRow extends React.PureComponent {
             isDraggable = currentAction === 'selection';
 
         return (
-            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
+            <div className={"search-result-row detail-" + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
                 // TODO POTENTIALLY: Use to set height on open/close icon & sticky title column.
                 var height = (r && r.offsetHeight) || null;
                 if (height && height !== this.rowFullHeight){

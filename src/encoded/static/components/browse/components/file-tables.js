@@ -175,6 +175,8 @@ class FileColumnActionsBtn extends React.PureComponent {
 export function renderFileTitleColumn(file, fileEntryBlockProps, { fileAtId, fileTitleString }){
     const className = 'title-of-file' + (file.accession ? ' mono-text' : '');
 
+    console.log('TTT4', fileEntryBlockProps);
+
     /**
      * Allow these file rows to be dragged to other places.
      * @todo Move to file-tables.js if removing higlass-related stuff.
@@ -528,7 +530,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'File',      initialWidth: 150, render: renderFileTitleColumn },
+            { columnClass: 'file',        title: 'File',      initialWidth: 135, render: renderFileTitleColumn },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 120 },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
