@@ -145,6 +145,12 @@ var providerCallbacks = {};
 var providerLoadStartCallbacks = {};
 
 /**
+ * @private
+ * @ignore
+ */
+var currentRequests = { filtered: null, unfiltered: null };
+
+/**
  * After load & update, called to start any registered 'on update' callbacks.
  *
  * @ignore
@@ -580,19 +586,23 @@ export const ChartDataController = {
 
         notifyLoadStartCallbacks();
 
-        ajax.load(
+        if (currentRequests.unfiltered !== null){
+            currentRequests.unfiltered.abort && currentRequests.unfiltered.abort();
+        }
+        currentRequests.unfiltered = ajax.load(
             refs.baseSearchPath,
             function(unfiltered_result){
                 barplot_data_unfiltered = unfiltered_result;
+                currentRequests.unfiltered = null;
                 cb();
             }, 'POST', function(errResp){
                 opts.error = true;
-
                 if (errResp && typeof errResp === 'object'){
                     if (typeof errResp.total === 'object' && errResp.total){
                         barplot_data_unfiltered = errResp;
                     }
                 }
+                currentRequests.unfiltered = null;
                 console.warn('Some error, refetching context.');
                 reFetchContext();
                 cb();
@@ -608,12 +618,17 @@ export const ChartDataController = {
                 baseSearchParams,
                 Filters.expSetFiltersToJSON(currentExpSetFilters)
             );
-            ajax.load(
+            if (currentRequests.filtered !== null){
+                currentRequests.filtered.abort && currentRequests.filtered.abort();
+            }
+            currentRequests.filtered = ajax.load(
                 refs.baseSearchPath,
                 function(filtered_result){
                     barplot_data_filtered = filtered_result;
+                    currentRequests.filtered = null;
                     cb();
-                }, 'POST', function(){
+                }, 'POST', function(errResp){
+                    currentRequests.filtered = null;
                     cb();
                 }, JSON.stringify({
                     "search_query_params" : filteredSearchParams,
@@ -649,10 +664,14 @@ export const ChartDataController = {
             Filters.expSetFiltersToJSON(currentExpSetFilters)
         );
 
+        if (currentRequests.filtered !== null){
+            currentRequests.filtered.abort && currentRequests.filtered.abort();
+        }
         notifyLoadStartCallbacks();
-        ajax.load(
+        currentRequests.filtered = ajax.load(
             refs.baseSearchPath,
             function(filteredContext){
+                currentRequests.filtered = null;
                 ChartDataController.setState({
                     'barplot_data_filtered' : filteredContext,
                     'isLoadingChartData' : false
@@ -661,11 +680,11 @@ export const ChartDataController = {
             'POST',
             function(){
                 // Fallback (no results or lost connection)
+                currentRequests.filtered = null;
                 ChartDataController.setState({
                     'barplot_data_filtered' : null,
                     'isLoadingChartData' : false
                 }, callback, opts);
-                if (typeof callback === 'function') callback();
             },
             JSON.stringify({
                 "search_query_params" : filteredSearchParams,
