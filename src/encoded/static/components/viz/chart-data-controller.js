@@ -612,15 +612,16 @@ export const ChartDataController = {
             })
         );
 
+        if (currentRequests.filtered !== null){
+            currentRequests.filtered.abort && currentRequests.filtered.abort();
+            currentRequests.filtered = null;
+        }
         if (filtersSet){
             var filteredSearchParams = navigate.mergeObjectsOfLists(
                 { 'q' : searchQuery || null },
                 baseSearchParams,
                 Filters.expSetFiltersToJSON(currentExpSetFilters)
             );
-            if (currentRequests.filtered !== null){
-                currentRequests.filtered.abort && currentRequests.filtered.abort();
-            }
             currentRequests.filtered = ajax.load(
                 refs.baseSearchPath,
                 function(filtered_result){
