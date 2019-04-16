@@ -67,7 +67,7 @@ export class ExperimentSetDetailPane extends React.Component {
             <div className="raw-files-table-section">
                 <h4 className="pane-section-title" onClick={this.toggleRawFilesOpen}>
                     <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw files
+                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
                 </h4>
                 <Collapse in={this.state.rawFilesOpen}>
                     <div>

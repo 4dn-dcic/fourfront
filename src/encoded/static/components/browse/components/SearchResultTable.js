@@ -80,8 +80,6 @@ class ResultDetail extends React.PureComponent{
     constructor(props){
         super(props);
         this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'closing' : false };
 
         this.detailRef = React.createRef();
@@ -125,11 +123,9 @@ class ResultDetail extends React.PureComponent{
                         'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
                     }}>
                         { renderDetailPane(result, rowNumber, tableContainerWidth, this.setDetailHeightFromPane) }
-                        { tableContainerScrollLeft && tableContainerScrollLeft > 10 ?
-                            <div className="close-button-container text-center" onClick={toggleDetailOpen}>
-                                <i className="icon icon-angle-up"/>
-                            </div>
-                        : null }
+                        <div className="close-button-container text-center" onClick={toggleDetailOpen} data-tip="Collapse Details">
+                            <i className="icon icon-angle-up"/>
+                        </div>
                     </div>
                 : <div/> }
             </div>

@@ -880,6 +880,7 @@ $small-label-accession-font-size : 0.75rem;
 			background: transparent;
 			border-radius: 3px;
 			outline: none;
+			transition: background-color .3s;
 			> .icon-container {
 				position: absolute;
 				top: 10px;
@@ -906,8 +907,7 @@ $small-label-accession-font-size : 0.75rem;
 		> button {
 			border-radius: 0px;
 			background-color: #f8f8f8;
-			border-left-color: rgba(0,0,0,0.125);
-			border-right-color: #fdfdfd;
+			border-left-color: #ddd;
 			> .icon-container {
 				top: 20px;
 			}
@@ -1252,16 +1252,18 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							> .close-button-container {
 								position: absolute;
 								left: 8px;
-								top: 10px;
-								width: 28px;
+								top: 7px;
+								bottom: 7px;
+								width: 27px;
 								margin-left: 1px;
-								height: 28px;
-								line-height: 28px;
+								line-height: 30px;
 								font-size: 1rem;
 								cursor: pointer;
 								border-radius: 3px;
+								background-color: #f8f8f8;
+								transition: background-color .3s;
 								&:hover {
-									background-color: rgba(0,0,0,0.075);
+									background-color: #eee;
 								}
 							}
 							@include generic-results-flex-description-container;
