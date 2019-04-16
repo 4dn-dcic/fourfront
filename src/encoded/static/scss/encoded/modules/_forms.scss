@@ -566,7 +566,10 @@ div.fieldset.editable-fields {
 
 .onoffswitch {
     position: relative; width: 40px;
-    @include user-select(none);
+	@include user-select(none);
+	&.disabled {
+		opacity: 0.75;
+	}
 }
 .onoffswitch-checkbox {
     display: none;
@@ -589,7 +592,11 @@ div.fieldset.editable-fields {
 .onoffswitch-inner:before {
     content: "";
     padding-left: 10px;
-    background-color: #46A9EB; color: #FFFFFF;
+	background-color: #46A9EB; color: #FFFFFF;
+	transition: background-color .5s;
+}
+.onoffswitch.disabled .onoffswitch-inner:before {
+	background-color: #eaeaea;
 }
 .onoffswitch-inner:after {
     content: "";

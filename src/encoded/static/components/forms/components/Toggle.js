@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import _ from 'underscore';
 import { object, console } from './../../util';
 
 /**
@@ -25,17 +26,12 @@ export class Toggle extends React.Component {
     }
 
     render(){
-        var id = this.props.id || object.randomId();
+        const { className, id, disabled } = this.props;
+        const useID = id || object.randomId();
         return (
-            <div className={"onoffswitch " + this.props.className}>
-                <input
-                    type="checkbox"
-                    onChange={this.props.onChange}
-                    name={this.props.name}
-                    id={id}
-                    className="onoffswitch-checkbox"
-                    checked={this.props.checked}
-                />
+            <div className={"onoffswitch " + className + (disabled ? ' disabled' : '')}>
+                <input type="checkbox" id={useID} {..._.omit(this.props, 'id', 'className')}
+                    className="onoffswitch-checkbox" />
                 <label className="onoffswitch-label" htmlFor={id}>
                     <span className="onoffswitch-inner"></span>
                     <span className="onoffswitch-switch"></span>
