@@ -525,14 +525,13 @@ class ShadowBorderLayer extends React.Component {
     }
 
     performScrollAction(direction = "right"){
-        const { horizontalScrollRateOnEdgeButton, tableContainerWidth, fullRowWidth, innerContainerElem } = this.props;
+        const { horizontalScrollRateOnEdgeButton, tableContainerWidth, fullRowWidth, innerContainerElem, setContainerScrollLeft } = this.props;
         const scrollAction = (depth) => {
             var change = (direction === 'right' ? 1 : -1) * horizontalScrollRateOnEdgeButton;
             var maxScrollLeft = fullRowWidth - tableContainerWidth;
             var leftOffset = Math.max(0, Math.min(maxScrollLeft, innerContainerElem.scrollLeft + change));
             innerContainerElem.scrollLeft = leftOffset;
-            var detailPanes = DimensioningContainer.findDetailPaneElements();
-            if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, leftOffset);
+            setContainerScrollLeft(leftOffset);
 
             if (depth >= 10000){
                 console.error("Reached depth 10k on a recursive function 'performScrollAction.'");
@@ -647,6 +646,7 @@ class DimensioningContainer extends React.PureComponent {
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
         this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
+        this.setContainerScrollLeft = this.setContainerScrollLeft.bind(this);
         this.onHorizontalScroll = this.onHorizontalScroll.bind(this);
         this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 200);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
@@ -745,16 +745,18 @@ class DimensioningContainer extends React.PureComponent {
         }, cb);
     }
 
-    onHorizontalScroll(e){
-        e && e.stopPropagation();
-        var nextScrollLeft = e.target.scrollLeft;
-
+    setContainerScrollLeft(nextScrollLeft){
         this.setState(function({ tableContainerScrollLeft }){
             if (tableContainerScrollLeft === nextScrollLeft) {
                 return null;
             }
             return { 'tableContainerScrollLeft' : nextScrollLeft };
         });
+    }
+
+    onHorizontalScroll(e){
+        e && e.stopPropagation();
+        this.setContainerScrollLeft(e.target.scrollLeft || 0);
         return false;
     }
 
@@ -964,7 +966,8 @@ class DimensioningContainer extends React.PureComponent {
                                 />
                             </div>
                         </div>
-                        <ShadowBorderLayer {...{ tableContainerScrollLeft, tableContainerWidth, fullRowWidth, isWindowPastTableTop, innerContainerElem }} />
+                        <ShadowBorderLayer {...{ tableContainerScrollLeft, tableContainerWidth, fullRowWidth, isWindowPastTableTop, innerContainerElem }}
+                            setContainerScrollLeft={this.setContainerScrollLeft} />
                     </div>
                 </StickyContainer>
                 { canLoadMore === false ?
