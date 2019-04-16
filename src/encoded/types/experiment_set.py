@@ -236,6 +236,8 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Trans reads",
         "experiments_in_set.processed_files.quality_metric.Cis reads (>20kb)",
         "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
+        "experiments_in_set.processed_files.static_content.location",
+        "experiments_in_set.processed_files.static_content.content", # Should only pull in @id, uuid, & display_title
         #"experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",

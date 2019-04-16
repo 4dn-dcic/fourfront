@@ -20,7 +20,7 @@ export function StackedBlockNameLabel(props){
     const { title, subtitle, accession, className, subtitleVisible } = props;
     const cls = (
         "label-ext-info" + (className? ' ' + className : '') +
-        (subtitle? ' has-subtitle' : '' ) +
+        (subtitle || accession ? ' has-subtitle' : '' ) +
         (subtitleVisible ? ' subtitle-visible' : '')
     );
 
@@ -215,7 +215,7 @@ export class StackedBlock extends React.PureComponent {
             if (c === null) return null;
 
             var addedProps = _.pick(this.props,
-                'columnClass', 'colWidthStyles', 'label', 'expTable', 'currentlyCollapsing', 'stackDepth',
+                'columnClass', 'colWidthStyles', 'label', 'stackDepth',
                 'selectedFiles', 'columnHeaders', 'handleFileCheckboxChange'
             );
 
@@ -332,8 +332,7 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     nameColumn(){
-        const { colVisible, label, colWidthStyles, name, files, selectedFiles, excludeOwnCheckbox } = this.props;
-        if (colVisible === false) return null;
+        const { label, colWidthStyles, name, files, selectedFiles, excludeOwnCheckbox } = this.props;
         var labelToShow = null;
         if (typeof label === 'string'){
             labelToShow = <StackedBlock.Name.Label title="Pair" subtitle={label} />;
@@ -369,8 +368,9 @@ export class FilePairBlock extends React.PureComponent {
         } else {
             childBlocks = _.map(files, (file) =>
                 <FileEntryBlock key={object.atIdFromObject(file)}
-                    {..._.pick(this.props, 'columnHeaders', 'handleFileCheckboxChange', 'selectedFiles', 'colWidthStyles')}
-                    file={file} className={null}
+                    {..._.omit(this.props, 'files', 'file', 'isSingleItem', 'className', 'type', 'excludeChildrenCheckboxes', 'excludeOwnCheckbox', 'name', 'label')}
+                    file={file}
+                    className={null}
                     isSingleItem={isReallySingleItem} hideNameOnHover={!isReallySingleItem}
                     excludeCheckbox={excludeChildrenCheckboxes} // May be excluded as this block has own checkbox
                     type="paired-end" />
@@ -558,11 +558,11 @@ export class FileEntryBlock extends React.PureComponent {
 
         if (typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, this.props, { fileAtId, fileTitleString });
-            if (renderedName) return <div key="name-title" className="name-title">{ renderedName }</div>;
+            if (renderedName) return <span key="name-title" className="name-title">{ renderedName }</span>;
         }
 
         if (!fileAtId) {
-            return <div key="name-title" className="name-title">{ fileTitleString }</div>;
+            return <span key="name-title" className="name-title">{ fileTitleString }</span>;
         }
 
         return <a key="name-title" className="name-title mono-text" href={fileAtId}>{ fileTitleString }</a>;
@@ -605,117 +605,6 @@ export class FileEntryBlock extends React.PureComponent {
         return <StackedBlock.Name.Label {...commonProperties} />;
     }
 
-    /**
-    * Add a link to an external JuiceBox site for some file types.
-    * @param {string} fileHref          - URL path used to access the file
-    * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-    * @param {string} host              - The host part of the current url
-    *
-    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
-    */
-    renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host){
-        var externalLinkButton = null;
-        // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic) {
-            // Make an external juicebox link.
-            var onClick = function(evt){
-
-                // If we're on the server side, there is no need to make an external link.
-                if (isServerSide()) return null;
-
-                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
-                var win = window.open(targetLocation, '_blank');
-                win.focus();
-            };
-
-            // Build the juicebox button
-            externalLinkButton = (
-                <Button key="juicebox-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                    J<i className="icon icon-fw icon-external-link text-smaller"/>
-                </Button>
-            );
-        }
-
-        // Return the External link.
-        return externalLinkButton;
-    }
-
-    /**
-    * Add a link to WashU Epigenome site for some file types.
-    * @param {string} fileHref          - URL path used to access the file
-    * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-    * @param {string} host              - The host part of the current url
-    * @param {string} genome_assembly   - The file's genome assembly
-    *
-    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
-    */
-    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
-        var externalLinkButton = null;
-
-        // We may need to map the genome assembly to Epigenome's assemblies.
-        const assemblyMap = {
-            'GRCh38' : 'hg38',
-            'GRCm38' : 'mm10'
-        };
-
-        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
-        if (!(genome_assembly && genome_assembly in assemblyMap)) {
-            return null;
-        }
-
-        // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic) {
-            // Make an external juicebox link.
-            var onClick = function(evt){
-
-                // If we're on the server side, there is no need to make an external link.
-                if (isServerSide()) return null;
-
-                const epiGenomeMapping = assemblyMap[genome_assembly];
-                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
-
-                var win = window.open(targetLocation, '_blank');
-                win.focus();
-            };
-
-            // Build the Epigenome button
-            externalLinkButton = (
-                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick}>
-                    E<i className="icon icon-fw icon-external-link text-smaller"/>
-                </Button>
-            );
-        }
-
-        // Return the External link.
-        return externalLinkButton;
-    }
-
-    renderExternalButtons(){
-        if (!this.props.file) return;
-        var { file } = this.props,
-            fileFormat              = fileUtil.getFileFormatStr(file),
-            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
-                (fileFormat && fileFormat === 'hic')
-                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )),
-            externalLinkButton      = null,
-            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
-            fileIsPublic = (file.status === 'archived' || file.status === 'released'),
-            fileHref = file.href,
-            currentPageUrlBase = store && store.getState().href,
-            hrefParts = url.parse(currentPageUrlBase),
-            host = hrefParts.protocol + '//' + hrefParts.host;
-
-        return (
-            <React.Fragment>
-                {this.renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host)}
-                {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
-            </React.Fragment>
-        );
-    }
-
     renderName(){
         var { file, colWidthStyles } = this.props;
         return (
@@ -724,7 +613,6 @@ export class FileEntryBlock extends React.PureComponent {
                 { this.renderLabel() }
                 <SingleFileCheckbox {...this.props} />
                 { this.renderNameInnerTitle() }
-                { this.renderExternalButtons() }
             </div>
         );
     }
