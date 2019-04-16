@@ -175,8 +175,6 @@ class FileColumnActionsBtn extends React.PureComponent {
 export function renderFileTitleColumn(file, fileEntryBlockProps, { fileAtId, fileTitleString }){
     const className = 'title-of-file' + (file.accession ? ' mono-text' : '');
 
-    console.log('TTT4', fileEntryBlockProps);
-
     /**
      * Allow these file rows to be dragged to other places.
      * @todo Move to file-tables.js if removing higlass-related stuff.

@@ -412,7 +412,7 @@ class ShadowBorderLayer extends React.Component {
 
     static defaultProps = {
         'horizontalScrollRateOnEdgeButton' : 10
-    }
+    };
 
     static isWindowPastTableTop(tableContainerElement, windowHeight = null, scrollTop = null, tableTopOffset = null){
         if (isServerSide()) return false;
@@ -429,7 +429,8 @@ class ShadowBorderLayer extends React.Component {
         super(props);
         this.scrolling = false;
         this.performScrollAction = this.performScrollAction.bind(this);
-        this.handleScrollButtonClick = this.handleScrollButtonClick.bind(this);
+        this.handleLeftScrollButtonMouseDown = this.handleScrollButtonMouseDown.bind(this, 'left');
+        this.handleRightScrollButtonMouseDown = this.handleScrollButtonMouseDown.bind(this, 'right');
         this.handleScrollButtonUp = this.handleScrollButtonUp.bind(this);
         this.lastDimClassName = null;
     }
@@ -490,6 +491,13 @@ class ShadowBorderLayer extends React.Component {
         //return this.lastDimClassName;
     }
 
+    handleScrollButtonMouseDown(direction = "right", evt){
+        if (evt.button === 0) { // Left click
+            this.scrolling = true;
+            this.performScrollAction(direction);
+        }
+    }
+
     edgeScrollButtonLeft(leftEdgeContentWidth){
         if (!this.props.innerContainerElem) return null;
         var className = "edge-scroll-button left-edge";
@@ -497,7 +505,7 @@ class ShadowBorderLayer extends React.Component {
             className += ' faded-out';
         }
         return (
-            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'left')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+            <div className={className} onMouseDown={this.handleLeftScrollButtonMouseDown} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
                 <i className="icon icon-caret-left"/>
             </div>
         );
@@ -510,34 +518,35 @@ class ShadowBorderLayer extends React.Component {
             className += ' faded-out';
         }
         return (
-            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'right')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+            <div className={className} onMouseDown={this.handleRightScrollButtonMouseDown} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
                 <i className="icon icon-caret-right"/>
             </div>
         );
     }
 
-    performScrollAction(direction = "right", depth = 0){
-        vizUtil.requestAnimationFrame(()=>{
-            var change = (direction === 'right' ? 1 : -1) * this.props.horizontalScrollRateOnEdgeButton;
-            var maxScrollLeft = this.props.fullRowWidth - this.props.tableContainerWidth;
-            var leftOffset = this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
+    performScrollAction(direction = "right"){
+        const { horizontalScrollRateOnEdgeButton, tableContainerWidth, fullRowWidth, innerContainerElem } = this.props;
+        const scrollAction = (depth) => {
+            var change = (direction === 'right' ? 1 : -1) * horizontalScrollRateOnEdgeButton;
+            var maxScrollLeft = fullRowWidth - tableContainerWidth;
+            var leftOffset = Math.max(0, Math.min(maxScrollLeft, innerContainerElem.scrollLeft + change));
+            innerContainerElem.scrollLeft = leftOffset;
             var detailPanes = DimensioningContainer.findDetailPaneElements();
             if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, leftOffset);
+
             if (depth >= 10000){
                 console.error("Reached depth 10k on a recursive function 'performScrollAction.'");
                 return;
             }
-            if (this.scrolling) {
-                this.performScrollAction(direction, depth + 1);
-            }
-        });
-    }
 
-    handleScrollButtonClick(direction = "right", evt){
-        if (evt.button === 0) { // Left click
-            this.scrolling = true;
-            this.performScrollAction(direction);
-        }
+            if (this.scrolling) {
+                vizUtil.requestAnimationFrame(function(){
+                    scrollAction(depth + 1);
+                });
+            }
+        };
+
+        scrollAction(0);
     }
 
     handleScrollButtonUp(){
@@ -598,11 +607,9 @@ class DimensioningContainer extends React.PureComponent {
 
     static setDetailPanesLeftOffset(detailPanes, leftOffset = 0, cb = null){
         if (detailPanes && detailPanes.length > 0){
-            vizUtil.requestAnimationFrame(()=>{
-                var transformStyle = vizUtil.style.translate3d(leftOffset);
-                detailPanes.forEach(function(d){
-                    d.style.transform = transformStyle;
-                });
+            var transformStyle = vizUtil.style.translate3d(leftOffset);
+            _.forEach(detailPanes, function(d){
+                d.style.transform = transformStyle;
             });
         }
         if (typeof cb === 'function') cb();
@@ -740,11 +747,13 @@ class DimensioningContainer extends React.PureComponent {
 
     onHorizontalScroll(e){
         e && e.stopPropagation();
-        var nextScrollLeft = e.target.scrollLeft,
-            detailPanes = DimensioningContainer.findDetailPaneElements();
+        var nextScrollLeft = e.target.scrollLeft;
 
-        if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, nextScrollLeft, ()=>{
-            this.setState({ 'tableContainerScrollLeft' : nextScrollLeft });
+        this.setState(function({ tableContainerScrollLeft }){
+            if (tableContainerScrollLeft === nextScrollLeft) {
+                return null;
+            }
+            return { 'tableContainerScrollLeft' : nextScrollLeft };
         });
         return false;
     }
