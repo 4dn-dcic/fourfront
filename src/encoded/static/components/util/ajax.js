@@ -69,6 +69,7 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
     } else {
         xhr.send();
     }
+    return xhr;
 }
 
 export function promise(url, method = 'GET', headers = {}, data = null, cache = true, debugResponse = false){

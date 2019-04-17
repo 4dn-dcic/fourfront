@@ -73,8 +73,15 @@ class ExperimentSet(Item):
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"],
-        "last_modified": ["date_modified"],
+        "badges": [
+            "message",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -82,6 +89,7 @@ class ExperimentSet(Item):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
+        "badges.badge.badge_icon",
         "badges.message",
 
         "produced_in_pub.title",
@@ -102,10 +110,12 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
+
         "experiments_in_set.badges.badge.title",
         "experiments_in_set.badges.badge.commendation",
         "experiments_in_set.badges.badge.warning",
         "experiments_in_set.badges.badge.badge_classification",
+        "experiments_in_set.badges.badge.badge_icon",
         "experiments_in_set.badges.badge.description",
         "experiments_in_set.badges.message",
 
@@ -128,6 +138,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.badges.badge.commendation",
         "experiments_in_set.biosample.badges.badge.warning",
         "experiments_in_set.biosample.badges.badge.badge_classification",
+        "experiments_in_set.biosample.badges.badge.badge_icon",
         "experiments_in_set.biosample.badges.badge.description",
         "experiments_in_set.biosample.badges.message",
 
@@ -164,6 +175,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
         "experiments_in_set.files.badges.badge.badge_classification",
+        "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.message",
 

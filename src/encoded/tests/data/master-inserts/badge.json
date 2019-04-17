@@ -11,7 +11,7 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Silver biosample",
         "badge_category": "Biosample",
-        "status": "released",
+        "status": "deleted",
         "uuid": "b62ef24e-7d35-4bc3-abe2-276442cbbc58"
     },
     {
@@ -23,6 +23,7 @@
             "good_biosamples"
         ],
         "badge_classification": "Commendation",
+        "badge_icon" : "/static/img/badges/biosample-badge-gold-star.svg",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Gold biosample",
         "badge_category": "Biosample",
@@ -53,6 +54,7 @@
             "tier1_metadata_present"
         ],
         "badge_classification": "Warning",
+        "badge_icon" : "/static/img/badges/biosample-orange-circle.svg",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Tier 1 biosample missing required metadata",
         "badge_category": "Biosample",
@@ -71,6 +73,7 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Issues with replicate numbers",
         "badge_category": "Experiment Set - Replicate",
+        "badge_icon" : "/static/img/badges/replicates-orange-circle.svg",
         "status": "released",
         "uuid": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"
     },
@@ -86,6 +89,7 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Experiment Set has replicate experiments with inconsistent metadata",
         "badge_category": "ExperimentSetReplicate",
+        "badge_icon" : "/static/img/badges/replicates-orange-circle.svg",
         "status": "released",
         "uuid": "a4df9ff7-fe85-4672-86ac-7c38b5d9c853"
     }
