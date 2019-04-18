@@ -173,6 +173,9 @@ class FileColumnActionsBtn extends React.PureComponent {
  * @returns {?JSX.Element}
  */
 export function renderFileTitleColumn(file, fileEntryBlockProps, { fileAtId, fileTitleString }){
+
+    if (!file) return <em>No file available</em>;
+
     const className = 'title-of-file' + (file.accession ? ' mono-text' : '');
 
     /**
@@ -350,43 +353,51 @@ export class RawFilesStackedTable extends React.PureComponent {
         const { experimentSet, collapseLongLists, collapseShow, collapseLimit, columnHeaders, showMetricsColumns, href } = this.props;
 
         const allRawFiles = exp.files || [];
-        const filePairs = expFxn.groupFilesByPairs(allRawFiles);
-        const unpairedFiles = expFxn.findUnpairedFiles(allRawFiles);
+
+        const allFilesInGroups = fileUtil.groupFilesByRelations(allRawFiles);
+        const [ fileGroups, ungroupedFiles ] = fileUtil.extractSinglyGroupedItems(allFilesInGroups);
+
+        const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
+        const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
         var fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
             contentsClassName   = 'files',
             contents            = [];
 
-        if (Array.isArray(filePairs) && filePairs.length > 0){
+        if (haveGroups){
             contentsClassName = 'file-groups';
-            contents = contents.concat(_.map(filePairs, function(filePair,j){
+            contents = contents.concat(_.map(fileGroups, function(group, j){
                 // Ensure can be converted to accessionTriple
-                filePair = _.map(filePair, function(f){
+                group = _.map(group, function(f){
                     return RawFilesStackedTable.extendFile(f, exp, experimentSet);
                 });
+                // Find relation/group type(s)
+                const relationshipTypes = new Set(_.pluck(_.flatten(_.pluck(group, 'related_files'), true), 'relationship_type'));
+                const isPair = relationshipTypes.size === 1 && relationshipTypes.has('paired with');
+                const labelTitle = isPair ? 'Pair' : 'Grp';
                 return (
-                    <FilePairBlock key={j} files={filePair}
-                        excludeChildrenCheckboxes={true}
-                        excludeOwnCheckbox={false}
-                        label={filePairs.length > 1 ?
-                            { 'title' : "Pair " + (j + 1) } : { 'title' : "Pair" }
+                    <FilePairBlock key={j} files={group}
+                        excludeChildrenCheckboxes={isPair}
+                        excludeOwnCheckbox={group.length === 1}
+                        label={fileGroups.length > 1 ?
+                            { 'title' : labelTitle + " " + (j + 1) } : { 'title' : labelTitle }
                         }
                         href={href}
-                        isSingleItem={_.reduce(filePairs, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
+                        isSingleItem={_.reduce(fileGroups, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
                     />
                 );
             }));
         }
 
         // Add in remaining unpaired files, if any.
-        if (Array.isArray(unpairedFiles) && unpairedFiles.length > 0){
-            contents = contents.concat(_.map(unpairedFiles, function(file, j){
+        if (haveUngroupedFiles){
+            contents = contents.concat(_.map(ungroupedFiles, function(file, j){
                 const extendedFile = RawFilesStackedTable.extendFile(file, exp, experimentSet);
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
                         label={{ 'title' : "File" }}
-                        isSingleItem={unpairedFiles.length + contents.length < 2 ? true : false}
+                        isSingleItem={ungroupedFiles.length + contents.length < 2 ? true : false}
                         columnClass="file-group" hideNameOnHover={true} href={href}
                     />
                 );
@@ -412,7 +423,13 @@ export class RawFilesStackedTable extends React.PureComponent {
                         exp.accession
             ),
             experimentAtId  = object.itemUtil.atId(exp),
-            linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
+            linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName,
+            // Shown in show more button, e.g. "Show X more Files".
+            listTitle       = (
+                (haveUngroupedFiles? "Files" : '') +
+                (haveUngroupedFiles && haveGroups? " or " : '') +
+                (haveGroups? "Groups" : '')
+            );
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
@@ -425,7 +442,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList title="Files" className={contentsClassName}
+                <StackedBlockList title={listTitle} className={contentsClassName}
                     collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2} collapseLongLists={collapseLongLists}>
                     { contents }
                 </StackedBlockList>

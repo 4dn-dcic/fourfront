@@ -694,9 +694,6 @@ export function groupFilesByPairs(files_in_experiment){
     );
 }
 
-export function groupFilesByRelations(files){
-    
-}
 
 /**
  * @deprecated
