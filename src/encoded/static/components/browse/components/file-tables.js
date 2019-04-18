@@ -510,14 +510,6 @@ export class RawFilesStackedTable extends React.PureComponent {
         const showMoreExtTitle = experimentsGroupedByBiosample.length > 5 ?
             'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments' : null;
 
-        //const biosampleBlocks = this.renderRootStackedBlockListOfBiosamplesWithExperiments(
-        //    expFxn.groupExperimentsByBiosampleRepNo(
-        //        expFxn.groupFilesByPairsForEachExperiment(
-        //            expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
-        //        )
-        //    )
-        //);
-
         const fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet);
 
         return (
