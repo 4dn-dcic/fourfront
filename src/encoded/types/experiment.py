@@ -6,10 +6,19 @@ from snovault import (
     collection,
     load_schema
 )
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
+from pyramid.view import view_config
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
+    collection_add,
+    get_item_if_you_can,
+    item_edit,
     lab_award_attribution_embed_list
 )
 
@@ -762,3 +771,37 @@ def clone(context, request):
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
             'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
         }
+
+
+def validate_exp_type_validity_for_experiment(context, request):
+    """Check if the specified experiment type (e.g. In situ Hi-C) is allowed
+    for the experiment schema (e.g. ExperimentHiC).
+    """
+    data = request.json
+    if 'experiment_type' in data:
+        exp_type_item = get_item_if_you_can(request, data['experiment_type'], 'experiment-types')
+        if not exp_type_item:
+            # item level validation will take care of generating the error
+            return
+        exp_type_name = exp_type_item['title']
+        allowed_types = exp_type_item.get('valid_item_types', [])
+        exp = context.type_info.name
+        if exp not in allowed_types:
+            msg = 'Experiment Type {} is not allowed for {}'.format(exp_type_name, exp)
+            request.errors.add('body', None, msg)
+        else:
+            request.validated.update({})
+
+
+@view_config(context=Experiment.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_exp_type_validity_for_experiment])
+def experiment_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=Experiment, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_exp_type_validity_for_experiment])
+@view_config(context=Experiment, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_exp_type_validity_for_experiment])
+def experiment_edit(context, request, render=None):
+    return item_edit(context, request, render)
