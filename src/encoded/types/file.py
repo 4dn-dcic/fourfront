@@ -813,6 +813,11 @@ class FileProcessed(File):
         'other_experiments': ('Experiment', 'other_processed_files.files'),
         'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
+    aggregated_items = {
+        "last_modified":[
+            "date_modified"
+        ],
+    }
 
     @classmethod
     def get_bucket(cls, registry):
