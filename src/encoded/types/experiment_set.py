@@ -144,6 +144,7 @@ class ExperimentSet(Item):
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
+        "experiments_in_set.last_modified.date_modified",
 
         # Files - For common embeds (href, file_format, etc) we could programatically get rid of a bunch of similar lines - e.g.:
         # for f in ['href', 'accession', 'file_size, ...]:
@@ -199,6 +200,7 @@ class ExperimentSet(Item):
         "processed_files.extra_files.file_format",
         "processed_files.higlass_uid",
         "processed_files.genome_assembly",
+        "processed_files.last_modified.date_modified",
 
         #"processed_files.quality_metric.Total reads",
         #"processed_files.quality_metric.Total Sequences",
@@ -238,6 +240,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.content", # Should only pull in @id, uuid, & display_title
+        "experiments_in_set.processed_files.last_modified.date_modified",
         #"experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
@@ -247,6 +250,8 @@ class ExperimentSet(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.href",
+        "other_processed_files.files.status",
+        "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.higlass_view_config.description",
 
         "experiments_in_set.other_processed_files.files.href",
@@ -258,7 +263,9 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.file_format",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
-        "experiments_in_set.other_processed_files.files.genome_assembly"
+        "experiments_in_set.other_processed_files.files.genome_assembly",
+        "experiments_in_set.other_processed_files.files.status",
+        "experiments_in_set.other_processed_files.files.last_modified.date_modified"
     ]
 
     @calculated_property(schema={
