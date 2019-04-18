@@ -323,6 +323,9 @@ class Experiment(Item):
             out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
         return out_dict
 
+    class Collection(Item.Collection):
+        pass
+
 
 @collection(
     name='experiments-hi-c',
