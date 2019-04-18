@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
-import { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn, layout, object } from './../../util';
 
@@ -76,7 +76,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                     <div>
                         <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
                             columnHeaders={[
-                                { columnClass: 'file-detail', title: 'File Type'},
+                                { columnClass: 'file-detail', title: 'File Type', render: renderFileTypeSummaryColumn },
                                 { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
                             ]}
                             experimentSet={result} href={href}

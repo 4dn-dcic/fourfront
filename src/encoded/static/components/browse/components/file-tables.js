@@ -160,9 +160,6 @@ class FileColumnActionsBtn extends React.PureComponent {
  * Renderer for "columnClass" : "file" column definition.
  * It takes a different param signature than ordinary file-detail columns, which accept `file`, `fieldName`, `headerIndex`, and `fileEntryBlockProps`.
  *
- * @todo
- * Create a new component `FileTableActionBtns` or similar which would render out the additional file buttons.
- * This component should likely render out a single
  * @todo (MAYBE) Create a new file and put this as well as FileEntryBlocks into it (?)
  *
  * @param {File} file - File for row/column.
@@ -172,9 +169,21 @@ class FileColumnActionsBtn extends React.PureComponent {
  * @param {string} param.fileTitleString - The title of current of file.
  * @returns {?JSX.Element}
  */
-export function renderFileTitleColumn(file, fileEntryBlockProps, { fileAtId, fileTitleString }){
+export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockProps){
+    const fileAtId = file && object.itemUtil.atId(file);
+    if (!fileAtId) return <em>No file available</em>;
 
-    if (!file) return <em>No file available</em>;
+    var fileTitleString;
+    if (file.accession) {
+        fileTitleString = file.accession;
+    } else {
+        var idParts = _.filter(fileAtId.split('/'));
+        if (idParts[1].slice(0,5) === '4DNFI'){
+            fileTitleString = idParts[1];
+        } else {
+            fileTitleString = fileAtId;
+        }
+    }
 
     const className = 'title-of-file' + (file.accession ? ' mono-text' : '');
 
@@ -199,9 +208,9 @@ export function renderFileTitleColumn(file, fileEntryBlockProps, { fileAtId, fil
     }
 
     let title = (fileAtId?
-            <a href={fileAtId} className={className} onDragStart={onDragStart}>{ fileTitleString }</a>
-            :
-            <span className={className} onDragStart={onDragStart}>{ fileTitleString }</span>
+        <a href={fileAtId} className={className} onDragStart={onDragStart}>{ fileTitleString }</a>
+        :
+        <span className={className} onDragStart={onDragStart}>{ fileTitleString }</span>
     );
 
     return (
@@ -210,6 +219,22 @@ export function renderFileTitleColumn(file, fileEntryBlockProps, { fileAtId, fil
             <FileColumnActionsBtn file={file} href={fileEntryBlockProps.href}/>
         </React.Fragment>
     );
+}
+
+
+export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
+    const fileFormat = fileUtil.getFileFormatStr(file);
+    let summary = (
+        file.file_type_detailed ||
+        ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
+        fileFormat ||
+        '-'
+    );
+    // Remove 'other', if present, because it just takes up horizontal space.
+    if (summary.slice(0, 6).toLowerCase() === 'other '){
+        return summary.slice(7).slice(0, -1);
+    }
+    return summary;
 }
 
 
@@ -337,8 +362,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         'columnHeaders'     : [
             { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            //{ columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
+            { columnClass: 'file-detail',                               title: 'File Size',     initialWidth: 80,   field : "file_size" }
         ],
         'collapseLongLists' : true,
         'showMetricColumns' : null
@@ -369,7 +393,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
-        var fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
+        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
             contentsClassName   = 'files',
             contents            = [];
 
@@ -547,7 +571,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
             { columnClass: 'file',        title: 'File',      initialWidth: 135, render: renderFileTitleColumn },
-            { columnClass: 'file-detail', title: 'File Type', initialWidth: 120 },
+            { columnClass: 'file-detail', title: 'File Type', initialWidth: 120, render: renderFileTypeSummaryColumn },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
         'collapseLongLists' : true,
@@ -668,19 +692,59 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 }
 
 
+export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
 
-export class RawFilesStackedTableExtendedColumns extends RawFilesStackedTable {
+    static defaultProps = RawFilesStackedTable.defaultProps;
 
-    metricColumnHeaders(){
-        var origMetricHeaders = super.metricColumnHeaders();
-        if (!Array.isArray(origMetricHeaders) || origMetricHeaders.length === 0) return [];
-        return origMetricHeaders.concat([
-            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
-            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" }
-        ]);
+    static renderQCOverallQualityStatusColumn(file, field, detailIndex, fileEntryBlockProps){
+        const val = object.getNestedProperty(file, field, true); // col.field should be 'quality_metric.overall_quality_status' here.
+        const linkToReport = (file.quality_metric && file.quality_metric.url) || null;
+        if (val === 'PASS'){
+            return (
+                <span>
+                    <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
+                    &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
+                </span>
+            );
+        } else if (val === 'FAIL'){
+            return (
+                <span>
+                    <i className="icon icon-times" style={{ 'color' : 'red' }}/>
+                    &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
+                </span>
+            );
+        } else {
+            return '-';
+        }
     }
 
+    render(){
+        const { columnHeaders, showMetricColumns, experimentSet } = this.props;
+        let extendedPropColHeaders = columnHeaders;
+
+        const origMetricHeaders = RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet);
+        if (Array.isArray(origMetricHeaders) && origMetricHeaders.length > 0){
+            extendedPropColHeaders = columnHeaders.slice().concat([
+                {
+                    columnClass: 'file-detail',
+                    title: 'Sequence Length',
+                    initialWidth: 110,
+                    field : "quality_metric.Sequence length"
+                },
+                {
+                    columnClass: 'file-detail',
+                    title: 'Overall Quality',
+                    initialWidth: 110,
+                    field : "quality_metric.overall_quality_status",
+                    render: RawFilesStackedTableExtendedColumns.renderQCOverallQualityStatusColumn
+                }
+            ]);
+        }
+
+        return <RawFilesStackedTable {...this.props} columnHeaders={extendedPropColHeaders} />;
+    }
 }
+
 
 export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
 

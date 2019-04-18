@@ -442,95 +442,47 @@ export class FileEntryBlock extends React.PureComponent {
         this.renderName = this.renderName.bind(this);
     }
 
-    fileTypeSummary(){
-        var file = this.props.file,
-            fileFormat = fileUtil.getFileFormatStr(file),
-            summary = (
-                file.file_type_detailed ||
-                ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
-                file.file_format ||
-                '-'
-            );
-
-        // Remove 'other', if present, because it just takes up horizontal space.
-        if (summary.slice(0, 6).toLowerCase() === 'other '){
-            return summary.slice(7).slice(0, -1);
-        }
-        return summary;
-    }
-
+    /**
+     * Returns a row (list) of column values for `"file-detail"` columnClass columnHeaders.
+     * Contains a number of hard-coded rules for certain titles:
+     */
     filledFileRow(){
-        var { columnHeaders, className, colWidthStyles, file } = this.props,
-            row = [],
-            cols = _.filter(columnHeaders, (col)=>{
-                if (col.columnClass === 'file-detail') return true;
-                return false;
-            }),
-            baseClassName = (className || '') + " col-file-detail item";
+        const { columnHeaders, className, colWidthStyles, file } = this.props;
+        const fileAtId = object.itemUtil.atId(file);
+        const row = []; // Return val.
+        const cols = _.filter(columnHeaders, function(col){ return col.columnClass === 'file-detail'; });
+        const baseClassName = (className || '') + " col-file-detail item";
 
-        for (var i = 0; i < cols.length; i++){
+        _.forEach(cols, (col, index)=>{
 
-            var col = cols[i],
-                colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + i,
-                title = col.valueTitle || col.title,
-                baseStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
+            const colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + index;
+            const title = col.valueTitle || col.title;
+            const colStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (typeof col.render === 'function'){
                 row.push(
-                    <div key={col.field || i} className={colClassName} style={baseStyle}>
-                        { col.render(file, col.field, i, this.props) }
+                    <div key={col.field || index} className={colClassName} style={colStyle}>
+                        { col.render(file, col.field, index, this.props) }
                     </div>
                 );
-                continue;
+                return;
             }
 
-            if (!file || !object.atIdFromObject(file)) {
-                row.push(<div key={"file-detail-empty-" + i} className={colClassName} style={baseStyle}></div>);
-                continue;
-            }
-
-            if (title === 'File Type'){
-                row.push(<div key="file-type" className={colClassName} style={baseStyle}>{ this.fileTypeSummary() }</div>);
-                continue;
+            if (!fileAtId) {
+                // Empty block to take up space/width needed.
+                row.push(<div key={"file-detail-empty-" + index} className={colClassName} style={colStyle}></div>);
+                return;
             }
 
             if (typeof col.field === 'string'){
+                // Grab value out of file.
                 let val = object.getNestedProperty(file, col.field, true);
                 val = (val && Schemas.Term.toName(col.field, val, true)) || '-';
-                if (col.field === 'quality_metric.overall_quality_status'){
-                    var linkToReport = (file.quality_metric && file.quality_metric.url) || null;
-                    if (val === 'PASS'){
-                        val = (
-                            <span>
-                                <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
-                                &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
-                            </span>
-                        );
-                    } else if (val === 'FAIL'){
-                        val = (
-                            <span>
-                                <i className="icon icon-times" style={{ 'color' : 'red' }}/>
-                                &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
-                            </span>
-                        );
-                    }
-                }
-                row.push(<div key={col.field} className={colClassName} style={baseStyle}>{ val }</div>);
-                continue;
+                row.push(<div key={col.field} className={colClassName} style={colStyle}>{ val }</div>);
+                return;
             }
+        });
 
-            if (title === 'File Info'){ // AKA Paired Info
-                var fileFormat = fileUtil.getFileFormatStr(file);
-                if (typeof file.paired_end !== 'undefined') {
-                    row.push(<div key="file-info" className={colClassName} style={baseStyle}>Paired end {file.paired_end}</div>);
-                } else if (fileFormat === 'fastq' || fileFormat === 'fasta') {
-                    row.push(<div key="file-info" className={colClassName} style={baseStyle}>Unpaired</div>);
-                } else {
-                    row.push(<div key="file-info" className={colClassName} style={baseStyle}></div>);
-                }
-                continue;
-            }
-        }
         return row;
     }
 
@@ -546,23 +498,26 @@ export class FileEntryBlock extends React.PureComponent {
             return <div key="name-title" className="name-title"><em>{ fileError }</em></div>;
         }
 
-        if (!file)                              fileTitleString = 'No Files';
-        if (!fileTitleString && file.accession) fileTitleString = file.accession;
+        if (!file || !fileAtId) {
+            return <div key="name-title" className="name-title"><em>No file(s) or view permissions.</em></div>;
+        }
+
+        if (typeof colForFile.render === 'function') {
+            var renderedName = colForFile.render(file, colForFile.field || null, 0, this.props);
+            if (renderedName) return <span key="name-title" className="name-title">{ renderedName }</span>;
+        }
+
+        if (!fileTitleString && file.accession) {
+            fileTitleString = file.accession;
+        }
         if (!fileTitleString && fileAtId) {
             var idParts = _.filter(fileAtId.split('/'));
             if (idParts[1].slice(0,5) === '4DNFI'){
                 fileTitleString = idParts[1];
             }
         }
-        if (!fileTitleString)                   fileTitleString = file.uuid || fileAtId || 'N/A';
-
-        if (typeof colForFile.render === 'function') {
-            var renderedName = colForFile.render(file, this.props, { fileAtId, fileTitleString });
-            if (renderedName) return <span key="name-title" className="name-title">{ renderedName }</span>;
-        }
-
-        if (!fileAtId) {
-            return <span key="name-title" className="name-title">{ fileTitleString }</span>;
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
         }
 
         return <a key="name-title" className="name-title mono-text" href={fileAtId}>{ fileTitleString }</a>;
