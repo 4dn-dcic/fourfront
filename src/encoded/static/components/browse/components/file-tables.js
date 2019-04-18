@@ -412,9 +412,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                     <FilePairBlock key={j} files={group}
                         excludeChildrenCheckboxes={isPair}
                         excludeOwnCheckbox={group.length === 1}
-                        label={fileGroups.length > 1 ?
-                            { 'title' : labelTitle + " " + (j + 1) } : { 'title' : labelTitle }
-                        }
+                        label={<StackedBlockNameLabel title={fileGroups.length > 1 ? labelTitle + " " + (j + 1) : labelTitle} />}
                         href={href}
                         isSingleItem={_.reduce(fileGroups, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
                     />
@@ -429,7 +427,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
-                        label={{ 'title' : "File" }}
+                        label={<StackedBlockNameLabel title="File"/>}
                         isSingleItem={ungroupedFiles.length + contents.length < 2 ? true : false}
                         columnClass="file-group" hideNameOnHover={true} href={href}
                     />
@@ -466,12 +464,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
-                label={{
-                    'accession'       : exp.accession,
-                    'title'           : 'Experiment',
-                    'subtitle'        : experimentVisibleName,
-                    'subtitleVisible' : true
-                }}>
+                label={<StackedBlockNameLabel title="Experiment" accession={exp.accession} subtitleVisible />}>
                 <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
@@ -497,12 +490,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         return (
             <StackedBlock columnClass="biosample" hideNameOnHover={false}
                 key={biosampleAtId || biosample.bio_rep_no || i } id={'bio-' + (biosample.bio_rep_no || i + 1)}
-                label={{
-                    title : 'Biosample',
-                    subtitle : bioRepTitle,
-                    subtitleVisible : true,
-                    accession : biosample.accession
-                }}>
+                label={<StackedBlockNameLabel title="Biosample" subtitle={bioRepTitle} accession={biosample.accession} subtitleVisible/>}>
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ?
                         <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
@@ -662,11 +650,10 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
-                    key={experimentAccession} label={{
-                        'title' : experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment',
-                        'subtitleVisible' : true,
-                        'accession' : experimentAccession === 'global' ? expSetAccession : experimentAccession
-                    }}>
+                    key={experimentAccession} label={
+                        <StackedBlockNameLabel title={experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment'}
+                            accession={experimentAccession === 'global' ? expSetAccession : experimentAccession} subtitleVisible />
+                    }>
                     { nameBlock }
                     <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={null}>
                         { this.renderFileBlocksForExperiment(filesForExperiment) }

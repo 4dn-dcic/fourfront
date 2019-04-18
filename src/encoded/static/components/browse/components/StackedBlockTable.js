@@ -67,7 +67,8 @@ export class StackedBlockName extends React.PureComponent {
 
         return (
             <div className={"name col-" + columnClass} style={useStyle}>
-                { label ? <StackedBlockName.Label {...label} /> : null }
+                {/* label ? <StackedBlockName.Label {...label} /> : null */}
+                { label }
                 { children }
             </div>
         );
@@ -205,7 +206,6 @@ export class StackedBlock extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
 
@@ -232,7 +232,7 @@ export class StackedBlock extends React.PureComponent {
     }
 
     render(){
-        const { columnClass, className, stackDepth, stripe, hideNameOnHover, keepLabelOnHover, id } = this.props;
+        const { columnClass, className, stackDepth, stripe, hideNameOnHover, keepLabelOnHover } = this.props;
         let cls = (
             "s-block stack-depth-" + stackDepth +
             (columnClass ? ' ' + columnClass : '') +
@@ -244,7 +244,7 @@ export class StackedBlock extends React.PureComponent {
             if (stripe === true || stripe === 'even') cls += ' even';
             else cls += ' odd';
         }
-        return <div className={cls} data-id={id}>{ this.adjustedChildren() }</div>;
+        return <div className={cls}>{ this.adjustedChildren() }</div>;
     }
 
 }
@@ -288,7 +288,7 @@ class MultipleFileCheckbox extends React.PureComponent {
         const accessionTriples = expFxn.filesToAccessionTriples(files, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
-        const lineHeight = (filesCount * 35 + (filesCount - 1) - 15) + 'px';
+        const lineHeight = (filesCount * 36 - 14) + 'px';
 
         return (
             <div className="multiple-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
@@ -333,15 +333,17 @@ export class FilePairBlock extends React.PureComponent {
 
     nameColumn(){
         const { label, colWidthStyles, name, files, selectedFiles, excludeOwnCheckbox } = this.props;
+        /*
         var labelToShow = null;
         if (typeof label === 'string'){
             labelToShow = <StackedBlock.Name.Label title="Pair" subtitle={label} />;
         } else if (typeof label === 'object' && label){
             labelToShow = <StackedBlock.Name.Label {...label} />;
         }
+        */
         return (
             <div className="name col-file-group" style={colWidthStyles ? _.clone(colWidthStyles['file-group']) : null}>
-                { labelToShow }
+                { label }
                 <div className="name-title" key="name-title">
                     { !excludeOwnCheckbox ?
                         <MultipleFileCheckbox onChange={this.onCheckboxChange} files={files} selectedFiles={selectedFiles} />
@@ -428,10 +430,7 @@ export class FileEntryBlock extends React.PureComponent {
 
     static defaultProps = {
         'excludeCheckbox' : false,
-        'label' : {
-            'title' : 'File',
-            'subtitle' : null
-        },
+        'label' : <StackedBlockNameLabel title="File" />,
         'hideNameOnHover' : false,
         'keepLabelOnHover' : true
     };
@@ -523,49 +522,13 @@ export class FileEntryBlock extends React.PureComponent {
         return <a key="name-title" className="name-title mono-text" href={fileAtId}>{ fileTitleString }</a>;
     }
 
-    renderLabel(){
-        var { file, label, type, sequenceNum, columnHeaders } = this.props;
-
-        if (!file) return null;
-
-        var commonProperties = {
-            'key'       : "name-block-label",
-            'title'     : label && label.title,
-            'inline'    : false,
-            'className' : 'col-file',
-            'subtitle'  : label && label.subtitle
-        };
-
-        if (label) {
-            return <StackedBlock.Name.Label {..._.extend(commonProperties, label)} />;
-        } else if (type === 'sequence-replicate') {
-            return <StackedBlock.Name.Label {..._.extend(commonProperties, label, { 'subtitle' : (sequenceNum ? 'Seq Replicate ' + sequenceNum : null) })} />;
-        } else if (type === 'paired-end') {
-            return <StackedBlock.Name.Label {...commonProperties} />;
-            //return RawFilesStackedTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
-            //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
-            //}));
-        }
-
-        if (Array.isArray(columnHeaders)) {
-            var headerTitles = _.pluck(columnHeaders, 'title');
-            if ((file.file_type || fileUtil.getFileFormatStr(file)) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0){
-                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || (file.file_format && file.file_format.display_title)} />;
-            }
-            if (file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0){
-                return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
-            }
-        }
-
-        return <StackedBlock.Name.Label {...commonProperties} />;
-    }
 
     renderName(){
-        var { file, colWidthStyles } = this.props;
+        var { file, colWidthStyles, label } = this.props;
         return (
             <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
                 style={colWidthStyles ? colWidthStyles.file : null}>
-                { this.renderLabel() }
+                { label }
                 <SingleFileCheckbox {...this.props} />
                 { this.renderNameInnerTitle() }
             </div>
