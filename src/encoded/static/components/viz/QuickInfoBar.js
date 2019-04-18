@@ -8,7 +8,6 @@ import memoize from 'memoize-one';
 import { Filters, console,  analytics, navigate } from '../util';
 import { Toggle } from './../forms/components';
 import { ActiveFiltersBar } from './components/ActiveFiltersBar';
-import { ChartDataController } from './chart-data-controller';
 import ReactTooltip from 'react-tooltip';
 
 
@@ -16,7 +15,7 @@ import ReactTooltip from 'react-tooltip';
 /**
  * Bar shown below header on home and browse pages.
  * Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
- * 
+ *
  * Possible todo: Remove functions for updating counts, instead wrap in ChartDataController.provider and aggregate, using shouldComponentUpdate
  * More likely todo: Do chart-stuff aggregation on back-end, display context.charts.aggregations.counts.files, ...experiments, ...experiment_sets, etc. here instead.
  *
@@ -50,8 +49,8 @@ export default class QuickInfoBar extends React.PureComponent {
         return { current, total };
     }
 
-    static expSetFilters = memoize(function(contextFilters){
-        return Filters.contextFiltersToExpSetFilters(contextFilters);
+    static expSetFilters = memoize(function(contextFilters, browseBaseState){
+        return Filters.contextFiltersToExpSetFilters(contextFilters, browseBaseState);
     });
 
     static defaultProps = {
@@ -62,9 +61,9 @@ export default class QuickInfoBar extends React.PureComponent {
     };
 
     static getDerivedStateFromProps(props, state){
-        var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null);
+        var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null, props.browseBaseState);
         var show = state.show && expSetFilters && _.keys(expSetFilters).length > 0 && state.show;
-        return { expSetFilters, show };
+        return { show };
     }
 
     /**
@@ -86,7 +85,7 @@ export default class QuickInfoBar extends React.PureComponent {
         this.anyFiltersSet = this.anyFiltersSet.bind(this);
         this.className = this.className.bind(this);
         this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
-        this.onBrowseStateToggle = this.onBrowseStateToggle.bind(this);
+        this.onBrowseStateToggle = _.throttle(this.onBrowseStateToggle.bind(this), 1000, { trailing: false });
         this.onPanelAreaMouseLeave = this.onPanelAreaMouseLeave.bind(this);
         this.renderStats = this.renderStats.bind(this);
         this.renderHoverBar = this.renderHoverBar.bind(this);
@@ -94,17 +93,13 @@ export default class QuickInfoBar extends React.PureComponent {
             'mounted'               : false,
             'show'                  : false,
             'reallyShow'            : false,
-            'expSetFilters'         : Filters.contextFiltersToExpSetFilters((props.context && props.context.filters) || null)
+            'togglingBrowseState'   : false
         };
     }
 
     /** @private */
     componentDidMount(){
         this.setState({'mounted' : true});
-    }
-
-    componentDidUpdate(pastProps, pastState){
-        if (this.anyFiltersSet() !== this.anyFiltersSet(pastProps)) ReactTooltip.rebuild();
     }
 
     /**
@@ -134,7 +129,9 @@ export default class QuickInfoBar extends React.PureComponent {
         return false;
     }
 
-    anyFiltersSet(expSetFilters = this.state.expSetFilters){
+    anyFiltersSet(){
+        const { context, browseBaseState } = this.props;
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
         return (expSetFilters && _.keys(expSetFilters).length > 0);
     }
 
@@ -146,12 +143,16 @@ export default class QuickInfoBar extends React.PureComponent {
     }
 
     onIconMouseEnter(e){
+        const { context, browseBaseState } = this.props;
         var areAnyFiltersSet = this.anyFiltersSet();
         if (this.timeout) clearTimeout(this.timeout);
         if (areAnyFiltersSet) this.setState({ 'show' : 'activeFilters', 'reallyShow' : true });
+
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
+
         analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
             'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
-            'dimension1' : analytics.getStringifiedCurrentFilters(this.state.expSetFilters)
+            'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
         });
     }
 
@@ -163,8 +164,10 @@ export default class QuickInfoBar extends React.PureComponent {
     }
 
     renderStats(extraClassName = null){
-        var areAnyFiltersSet = this.anyFiltersSet();
-        var { total, current } = QuickInfoBar.getCountsFromProps(this.props);
+        const { context, browseBaseState } = this.props;
+        const areAnyFiltersSet = this.anyFiltersSet();
+        const { total, current } = QuickInfoBar.getCountsFromProps(this.props);
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
 
         var stats;
         if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
@@ -180,7 +183,7 @@ export default class QuickInfoBar extends React.PureComponent {
                 'files'             : total.files || 0
             };
         }
-        var statProps = _.extend(_.pick(this.props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : this.state.expSetFilters });
+        var statProps = _.extend(_.pick(this.props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : expSetFilters });
         return (
             <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
                 <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
@@ -194,15 +197,22 @@ export default class QuickInfoBar extends React.PureComponent {
     }
 
     onBrowseStateToggle(){
-        navigate.setBrowseBaseStateAndRefresh(this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', this.props.href, this.props.context);
+        const { context, browseBaseState, href } = this.props;
+        this.setState({ 'togglingBrowseState' : true }, () => {
+            navigate.setBrowseBaseStateAndRefresh(browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', href, context, null, () => {
+                this.setState({ 'togglingBrowseState' : false });
+            });
+        });
     }
 
     renderBrowseStateToggle(){
-        var checked = this.props.browseBaseState === 'all';
+        const { browseBaseState, isLoadingChartData } = this.props;
+        const checked = browseBaseState === 'all';
         return (
             <div className="col-xs-4 text-right browse-base-state-toggle-container">
                 <div className="inner-more">
-                    <Toggle checked={checked} onChange={this.onBrowseStateToggle} id="toggle-external-data-switch" />
+                    <Toggle disabled={isLoadingChartData || this.state.togglingBrowseState} id="toggle-external-data-switch"
+                        checked={checked} onChange={this.onBrowseStateToggle} />
                     <small>Include External Data</small>
                 </div>
             </div>
@@ -210,20 +220,16 @@ export default class QuickInfoBar extends React.PureComponent {
     }
 
     renderHoverBar(){
+        const { context, browseBaseState, href, schemas } = this.props;
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
         if (this.state.show === 'activeFilters' || (this.state.show === false && this.state.reallyShow)) {
             return (
                 <div className="bottom-side">
                     <div className="crumbs-label">
                         Filtered by
                     </div>
-                    <ActiveFiltersBar
-                        expSetFilters={this.state.expSetFilters}
-                        orderedFieldNames={null}
-                        href={this.props.href}
-                        showTitle={false}
-                        schemas={this.props.schemas}
-                        context={this.props.context}
-                    />
+                    <ActiveFiltersBar expSetFilters={expSetFilters} orderedFieldNames={null}
+                        href={href} showTitle={false} schemas={schemas} context={context} />
                     <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
                         <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
                     </div>
@@ -298,10 +304,10 @@ class Stat extends React.PureComponent {
 
         if (typeof this.props.href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
-            if (navigate.isBrowseHref(this.props.href)) return <span>{ this.props.shortLabel }</span>; 
+            if (navigate.isBrowseHref(this.props.href)) return <span>{ this.props.shortLabel }</span>;
             if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ this.props.shortLabel }</span>;
         }
-        
+
         return (
             <a href={targetHref}>{ this.props.shortLabel }</a>
         );
