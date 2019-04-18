@@ -57,31 +57,6 @@ export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles
 }
 
 
-/**
- * Sorted by accession. Does not need to be all from one Experiment Set.
- * For usage especially by ChartDataController-using components.
- *
- * @param {Experiment[]} experiments - List of experiments with at least a 'files' property.
- * @param {boolean} [includeProcessedFiles=false] - Whether to include processed files in count.
- * @param {boolean} [includeFileSets=false] - Whether to include file sets in count.
- * @param {boolean} [uniqify=false] - Whether to run resulting files through `_.uniq` by their accession.
- * @returns {File[]} List of all files gathered from experiments list.
- */
-export function allFilesFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false, uniqify = false){
-    var files = _.sortBy(
-        _.flatten(
-            _.map(experiments || [], function(exp){ return allFilesFromExperiment(exp, includeProcessedFiles, includeFileSets); }),
-            true
-        ),
-        'accession'
-    );
-
-    if (uniqify){
-        return _.uniq(files, true, function(file){ return file.accession; });
-    }
-    return files;
-}
-
 export function fileToAccessionTriple(file, toString = false){
     if (typeof file.accession !== 'string') throw new Error("No 'accession' property set on this file.");
     if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file. " + (file.accession));
@@ -120,80 +95,6 @@ export function filesToAccessionTriples(files, toString = false){
 }
 
 
-
-/**
- * Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment.
- *
- * @param {ExperimentSet[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph'].
- * @returns {Experiment[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
- */
-export function listAllExperimentsFromExperimentSets(experiment_sets){
-    var uniqExpAccessions = {};
-    return _(experiment_sets || []).chain()
-        .map(function(set){
-            return _.map(set.experiments_in_set || [], function(exp){
-                // Make sure we return new exp & set objects instead of mutating existing ones.
-                var cExp = _.clone(exp);
-                var cSet = _.clone(set);
-                cSet.experiments_in_set = cSet.experiments_in_set.length;
-                cExp.experiment_sets = [cSet];
-                cExp.from_experiment_set = cSet;
-                return cExp;
-            });
-        })
-        .flatten(true)
-        .filter(function(exp){
-            if (typeof uniqExpAccessions[exp.accession] !== 'undefined'){
-                // Already have exp with same accession; keep 1 instance of it but combine their experiment_sets.
-                uniqExpAccessions[exp.accession].experiment_sets = uniqExpAccessions[exp.accession].experiment_sets.concat(exp.experiment_sets);
-                return false;
-            } else {
-                uniqExpAccessions[exp.accession] = exp;
-                return true;
-            }
-        })
-        .value();
-    //return _.flatten(experiment_sets.map(function(set){ return set.experiments_in_set }), true);
-}
-
-
-/**
- * Groups experiments by experiment_set accession.
- * Almost inverse of listAllExperimentsFromExperimentSets, though returns an object.
- *
- * @param {Experiment[]} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
- * @returns {Object} Contains experiment_set accessions as keys and array of experiments in that set as value.
- */
-export function groupExperimentsIntoExperimentSets(experiments){
-    var expSets = {};
-    if (!Array.isArray(experiments)) throw new Error('param "experiments" must be an array');
-    if (experiments.length === 0) return expSets;
-    experiments.forEach(function(exp, i){
-        if (!Array.isArray(exp.experiment_sets) || exp.experiment_sets.length === 0){
-            // TODO : If no experiment sets, add to a 'None' set?
-            throw new Error('Experiment "' + exp.accession + '" (index '+ i +') has no experiment sets.');
-        }
-        exp.experiment_sets.forEach(function(expSet, i){
-            //if (typeof expSet.accession !== 'string') throw new Error('experiment_set.accession must be a string, we have:' + expSet.accession);
-            var expSetKey = expSet.accession || 'set' + i;
-            if (!(expSets[expSetKey] instanceof Set)){
-                expSets[expSetKey] = new Set();
-            }
-            expSets[expSetKey].add(exp);
-        });
-    });
-
-    var expSetKeys = _.keys(expSets);
-    var currentKey = null;
-    while (typeof expSetKeys[0] !== 'undefined'){
-        // Convert Sets to Arrays
-        currentKey = expSetKeys.pop();
-        expSets[currentKey] = [...expSets[currentKey]];
-    }
-    return expSets;
-}
-
-
 /**
  * Returns (copies of) 'experiments_in_set' from an ExperimentSet,
  * each extended with a "from_experiment_set" property, which may be used
@@ -210,15 +111,9 @@ export function experimentsFromExperimentSet(experiment_set){
 }
 
 
-/** @return Object with experiment accessions as keys, from input array of experiments. */
-export function convertToObjectKeyedByAccession(experiments, keepExpObject = true){
-    return _.object(_.map(experiments || [], function(exp){
-        return [ exp.accession, keepExpObject ? exp : true ];
-    }));
-}
-
-
 /**
+ * Extracts `experiment_sets` and `experiments.experiment_sets` property value(s) from file.
+ *
  * @param {File} file - File Item object with 'experiments' and 'experiments.experiment_sets' properties.
  * @param {string} returnFormat - One of 'list', 'object', or 'ids'. Format which to return.
  * @returns {Object.<ExperimentSet>} Object with ExperimentSet @ids as keys and their JSON as values.

@@ -9,7 +9,7 @@ import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
 import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs, fileUtil, navigate } from './../../util';
 
-var { Item } = typedefs;
+var { Item, ExperimentSet } = typedefs;
 
 
 
@@ -270,10 +270,19 @@ export class RawFilesStackedTable extends React.PureComponent {
         });
     }
 
+    /**
+     * Adds Total Sequences matric column if any raw files in expSet have a `quality_metric`.
+     * Or if param `showMetricColumns` is set to true;
+     *
+     * @see ProcessedFilesQCStackedTable.filterFiles
+     *
+     * @param {boolean} showMetricColumns - Skips check for quality_metric and returns column if true.
+     * @param {ExperimentSet} experimentSet - ExperimentSet Item.
+     */
     static metricColumnHeaders(showMetricColumns, experimentSet){
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
         showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || ProcessedFilesQCStackedTable.filterFiles(
-            expFxn.allFilesFromExperiments(experimentSet.experiments_in_set || [], false, false, true), true
+            expFxn.allFilesFromExperimentSet(experimentSet, false), true
         ) ? true : false;
 
         if (!showMetricColumns) return null;
