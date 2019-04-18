@@ -63,10 +63,6 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
 /**
  * Basic greedy file grouping algorithm.
  *
- * `related_files` are linked _bidirectionally_ so we avoid
- * iteration over ungroupedFiles to search for if any relate
- * to self file.
- *
  * @param {{ related_files: { relationship_type : string, file: Object }[] }[]} files - List of File Items.
  * @param {boolean} isBidirectional - If set to true, runs slightly faster.
  * @returns {File[][]} A list of groups (lists) of files grouped by their related_files connection(s).
