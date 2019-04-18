@@ -51,7 +51,8 @@
             "type": "string",
             "lookup": 10,
             "description": "A controlled term specifying the type of experiment.",
-            "linkTo": "ExperimentType"
+            "linkTo": "ExperimentType",
+            "ff_flag": "filter:valid_item_types"
         },
         "protocol": {
             "title": "Reference Protocol",
