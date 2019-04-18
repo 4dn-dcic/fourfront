@@ -140,6 +140,17 @@
                 "type": "string",
                 "linkTo": "Publication"
             }
+        },
+        "valid_item_types": {
+            "title": "Valid Item Types",
+            "description": "Types of items that can utilize this experiment type",
+            "type": "array",
+            "permission": "import_items",
+            "items": {
+                "title": "Item Type",
+                "description": "Item class name (e.g. ExperimentHiC)",
+                "type": "string"
+            }
         }
     },
     "facets": {
