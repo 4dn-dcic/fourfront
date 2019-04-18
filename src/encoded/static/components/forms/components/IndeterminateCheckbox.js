@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 
 export class IndeterminateCheckbox extends React.PureComponent {
     constructor(props){
@@ -27,6 +28,6 @@ export class IndeterminateCheckbox extends React.PureComponent {
     }
 
     render(){
-        return <input type="checkbox" {...this.props} ref={this.checkboxRef} />;
+        return <input type="checkbox" {..._.omit(this.props, 'indeterminate')} ref={this.checkboxRef} />;
     }
 }

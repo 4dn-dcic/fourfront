@@ -291,7 +291,7 @@ class MultipleFileCheckbox extends React.PureComponent {
         const lineHeight = (filesCount * 35 + (filesCount - 1) - 15) + 'px';
 
         return (
-            <div className="multipe-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
+            <div className="multiple-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
                 <IndeterminateCheckbox {...{ indeterminate, checked }} id={'checkbox-for-' + accessionTriples.join('_')}
                     data-select-files={accessionTriples} {..._.omit(this.props, 'files', 'selectedFiles')} />
             </div>
