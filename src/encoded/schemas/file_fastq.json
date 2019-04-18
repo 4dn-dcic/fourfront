@@ -90,7 +90,7 @@
                 "title": "Flowcell details",
                 "type": "object",
                 "required": ["machine"],
-                "additionalProperties": false,
+                "additionalProperties": true,
                 "properties": {
                     "machine": {
                         "title": "Machine Name",
