@@ -362,26 +362,27 @@ def exp_types(testapp, lab, award):
     from uuid import uuid4
     experiment_types = {}
     title_dict = {
-        'hic': 'In situ Hi-C',
-        'microc': 'Micro-C',
-        'capc': 'Capture Hi-C',
-        'rnaseq': 'RNA-seq',
-        'fish': 'DNA FISH',
-        'dnase': 'DNase Hi-C',
-        'dam': 'DamID-seq',
-        'chia': 'ChIA-PET',
-        'repliseq': '2-stage Repli-seq',
-        'multi': 'Multi-stage Repli-seq',
-        'chipseq': 'ChIP-seq',
-        'dilution': 'Dilution Hi-C'
+        'hic': ('In situ Hi-C', ["ExperimentHiC"]),
+        'microc': ('Micro-C', ["ExperimentHiC"]),
+        'capc': ('Capture Hi-C', ["ExperimentCaptureC"]),
+        'rnaseq': ('RNA-seq', ["ExperimentSeq"]),
+        'fish': ('DNA FISH', ["ExperimentMic"]),
+        'dnase': ('DNase Hi-C', ["ExperimentHiC"]),
+        'dam': ('DamID-seq', ["ExperimentDamid"]),
+        'chia': ('ChIA-PET', ["ExperimentChiapet"]),
+        'repliseq': ('2-stage Repli-seq', ["ExperimentRepliseq"]),
+        'multi': ('Multi-stage Repli-seq', ["ExperimentRepliseq"]),
+        'chipseq': ('ChIP-seq', ["ExperimentSeq"]),
+        'dilution': ('Dilution Hi-C', ["ExperimentHiC"])
     }
     for k, v in title_dict.items():
         data = {
             'uuid': str(uuid4()),
-            'title': v,
+            'title': v[0],
             'lab': lab['@id'],
             'award': award['@id'],
-            'status': 'released'
+            'status': 'released',
+            'valid_item_types': v[1]
         }
         experiment_types[k] = testapp.post_json('/experiment_type', data, status=201).json['@graph'][0]
     return experiment_types
