@@ -694,6 +694,9 @@ $small-label-accession-font-size : 0.75rem;
 							&:first-of-type {
 								margin-left: 8px;
 							}
+							&:only-of-type {
+								margin-right: -35px;
+							}
 						}
 					}
 
@@ -709,9 +712,6 @@ $small-label-accession-font-size : 0.75rem;
 						//&:hover > span.caret {
 						//	opacity: 1;
 						//}
-						&:only-of-type {
-							margin-right: -35px;
-						}
 					}
 
 				}

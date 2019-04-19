@@ -48,7 +48,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         ));
     }
 
-    higlassButton(){
+    higlassButton(otherBtnsExist = false){
         const { file } = this.props;
 
         // Need to embed these selectively-ish.. todo later maybe.
@@ -58,6 +58,7 @@ class FileColumnActionsBtn extends React.PureComponent {
             if (sc.content['@type'].indexOf("HiglassViewConfig") > -1){
                 return true;
             }
+            return false;
         });
 
         const higlassViewConfAtId = higlassViewConfSection && object.itemUtil.atId(higlassViewConfSection.content);
@@ -68,11 +69,21 @@ class FileColumnActionsBtn extends React.PureComponent {
             navigate(higlassViewConfAtId);
         }
 
-        return (
-            <MenuItem data-tip="Visualize this file using the HiGlass Browser" onClick={onClick} key="higlass">
-                HiGlass
-            </MenuItem>
-        );
+        if (otherBtnsExist){
+            return (
+                <MenuItem data-tip="Visualize this file using the HiGlass Browser" onClick={onClick} key="higlass">
+                    HiGlass
+                </MenuItem>
+            );
+        } else {
+            return (
+                <div className="inline-block" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
+                    <Button bsSize="xs" className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize with HiGlass" onClick={onClick}>
+                        <i className="icon icon-fw icon-television"/>
+                    </Button>
+                </div>
+            );
+        }
 
     }
 
@@ -140,19 +151,23 @@ class FileColumnActionsBtn extends React.PureComponent {
         //const higlassBtn = this.higlassButton();
         const juiceboxBtn = this.juiceboxButton();
         const epigenomeBtn = this.epigenomeButton();
+        const hasJBOrEpigenomeBtn = !!(juiceboxBtn || epigenomeBtn);
 
-        const btnList = [juiceboxBtn, epigenomeBtn];
+        // We are likely to have either juicebox+epigenome btn _or_ higlassBtn.
+        const higlassBtn = this.higlassButton(hasJBOrEpigenomeBtn);
 
-        // If no buttons, exit.
-        if ( _.every(btnList, function(btn){ return !btn; }) ) return null;
-
-        return (
-            <DropdownButton className="in-stacked-table-button" bsStyle="primary"
-                title={<i className="icon icon-fw icon-television"/>} dropup bsSize="xs">
-                { btnList }
-            </DropdownButton>
-        );
-
+        if (hasJBOrEpigenomeBtn){
+            return (
+                <DropdownButton className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize this file..."
+                    title={<i className="icon icon-fw icon-television"/>} dropup bsSize="xs">
+                    { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
+                </DropdownButton>
+            );
+        } else if (higlassBtn) {
+            return higlassBtn;
+        } else {
+            return null;
+        }
     }
 }
 

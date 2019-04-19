@@ -201,6 +201,8 @@ class ExperimentSet(Item):
         "processed_files.higlass_uid",
         "processed_files.genome_assembly",
         "processed_files.last_modified.date_modified",
+        "processed_files.static_content.location",
+        "processed_files.static_content.content.@type",
 
         #"processed_files.quality_metric.Total reads",
         #"processed_files.quality_metric.Total Sequences",
@@ -239,7 +241,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Cis reads (>20kb)",
         "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
         "experiments_in_set.processed_files.static_content.location",
-        "experiments_in_set.processed_files.static_content.content", # Should only pull in @id, uuid, & display_title
+        "experiments_in_set.processed_files.static_content.content.@type", # Should only pull in @id, uuid, & display_title
         "experiments_in_set.processed_files.last_modified.date_modified",
         #"experiments_in_set.processed_files.@type"
 
