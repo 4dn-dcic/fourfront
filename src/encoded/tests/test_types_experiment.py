@@ -764,3 +764,25 @@ def test_experiment_categorizer_cap_c_w_2regions(
     wanted = ', '.join(sorted([target_w_region['target_summary'], another_target_w_region['target_summary']]))
     assert expt_w_2_targ_regions['experiment_categorizer']['field'] == 'Target'
     assert expt_w_2_targ_regions['experiment_categorizer']['value'] == wanted
+
+
+@pytest.fixture
+def new_exp_type(lab, award):
+    from uuid import uuid4
+    data = {
+        'uuid': str(uuid4()),
+        'title': 'Title',
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'status': 'released',
+        'valid_item_types': ['ExperimentSeq']
+    }
+    return data
+
+def test_validate_exp_type_valid(testapp, experiment_data, new_exp_type):
+    exp_type1 = testapp.post_json('/experiment_type', new_exp_type).json['@graph'][0]
+    experiment_data['experiment_type'] = exp_type1['@id']
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=422)
+    testapp.patch_json(exp_type1['@id'], {'valid_item_types': ['ExperimentSeq', 'ExperimentHiC']})
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    assert expt['experiment_type'] == '/experiment-types/title/'
