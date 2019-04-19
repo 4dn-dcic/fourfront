@@ -207,7 +207,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
         evt.dataTransfer.setData('text/4dn-item-json', JSON.stringify(file));
     }
 
-    let title = (fileAtId?
+    const title = (fileAtId?
         <a href={fileAtId} className={className} onDragStart={onDragStart}>{ fileTitleString }</a>
         :
         <span className={className} onDragStart={onDragStart}>{ fileTitleString }</span>
@@ -224,7 +224,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
 
 export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
     const fileFormat = fileUtil.getFileFormatStr(file);
-    let summary = (
+    const summary = (
         file.file_type_detailed ||
         ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
         fileFormat ||
