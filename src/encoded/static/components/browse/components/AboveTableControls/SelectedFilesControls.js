@@ -17,18 +17,6 @@ import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
 var { Item } = typedefs;
 
 
-export class SelectedFilesOverview extends React.Component {
-
-    render(){
-        var selectedFilesCount = _.keys(this.props.selectedFiles).length;
-
-        return (
-            <div className="pull-left box">
-                <span className="text-500">{ selectedFilesCount }</span> / { this.props.totalFilesCount } files selected.
-            </div>
-        );
-    }
-}
 
 /**
 * Upon clicking the button, reveal a modal popup giving users more download instructions.
