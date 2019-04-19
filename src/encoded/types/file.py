@@ -245,6 +245,7 @@ class File(Item):
         'experiments.biosample.treatments_summary',
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.digestion_enzyme.name',
+        'experiments.last_modified.date_modified',
         'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession',
@@ -798,6 +799,7 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        'experiment_sets.last_modified.date_modified',
         "quality_metric.Total reads",
         "quality_metric.Trans reads",
         "quality_metric.Cis reads (>20kb)",
@@ -813,6 +815,11 @@ class FileProcessed(File):
         'other_experiments': ('Experiment', 'other_processed_files.files'),
         'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
+    aggregated_items = {
+        "last_modified":[
+            "date_modified"
+        ],
+    }
 
     @classmethod
     def get_bucket(cls, registry):

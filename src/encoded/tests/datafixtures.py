@@ -7,7 +7,7 @@ ORDER = [
     'genomic_region', 'bio_feature', 'target', 'imaging_path', 'publication',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
-    'individual_human', 'individual_mouse', 'individual_fly',
+    'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
     'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
     'treatment_agent', 'biosample', 'quality_metric_fastqc',
     'quality_metric_bamqc', 'quality_metric_pairsqc',

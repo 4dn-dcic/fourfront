@@ -46,6 +46,21 @@ class IndividualHuman(Individual):
 
 
 @collection(
+    name='individuals-primate',
+    unique_key='accession',
+    properties={
+        'title': 'Individuals-Primates',
+        'description': 'Listing Biosample Primate Individuals',
+    })
+class IndividualPrimate(Individual):
+    """the sub class of individuals for primate species."""
+
+    item_type = 'individual_primate'
+    schema = load_schema('encoded:schemas/individual_primate.json')
+    embedded_list = Individual.embedded_list
+
+
+@collection(
     name='individuals-mouse',
     unique_key='accession',
     properties={
