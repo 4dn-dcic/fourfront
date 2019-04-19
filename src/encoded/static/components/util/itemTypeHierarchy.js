@@ -20,7 +20,7 @@ export const itemTypeHierarchy = {
         'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
     ],
     'Individual': [
-        'IndividualHuman', 'IndividualMouse', 'IndividualFly', 'IndividualChicken'
+        'IndividualHuman', 'IndividualPrimate', 'IndividualMouse', 'IndividualFly', 'IndividualChicken'
     ],
     'Treatment': [
         'TreatmentAgent', 'TreatmentRnai'
@@ -39,4 +39,3 @@ export const itemTypeHierarchy = {
         'StaticSection', 'HiglassViewConfig' //, 'JupyterNotebook'
     ]
 };
-
