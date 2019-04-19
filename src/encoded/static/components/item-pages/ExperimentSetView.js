@@ -316,59 +316,6 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
 export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
-     * Renderer for "columnClass" : "file" column definition.
-     * It takes a different param signature than ordinary file-detail columns, which accept `file`, `fieldName`, `headerIndex`, and `fileEntryBlockProps`.
-     *
-     * @param {File} file - File for row/column.
-     * @param {{ expTable: { props: { leftPanelCollapsed: boolean, resetDivider: function }}}} tableProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
-     * @param {Object} param - Props passed in from a FileEntryBlock.
-     * @param {string} param.fileAtId - The atId of current file.
-     * @param {string} param.fileTitleString - The title of current of file.
-     * @returns {?JSX.Element}
-     */
-    static renderFileColumn(file, tableProps, { fileAtId, fileTitleString }){
-        const className = file.accession ? 'mono-text' : null;
-        const title = (fileAtId?
-            <a href={fileAtId} className={className}>{ fileTitleString }</a> : <div className={className}>{ fileTitleString }</div>
-        );
-
-        /**
-         * Allow these file rows to be dragged to other places.
-         * @todo Move to file-tables.js if removing higlass-related stuff.
-         */
-        var onDragStart = function(evt){
-            if (!evt || !evt.dataTransfer) return;
-            var windowHrefParts = window && window.location;
-            if (windowHrefParts && windowHrefParts.protocol && windowHrefParts.hostname){
-                var formedURL = (
-                    (hrefParts.protocol || '') +
-                    (hrefParts.hostname ? '//' +  hrefParts.hostname + (hrefParts.port ? ':' + hrefParts.port : '') : '') +
-                    fileAtId
-                );
-                evt.dataTransfer.setData('text/plain', formedURL);
-                evt.dataTransfer.setData('text/uri-list', formedURL);
-            }
-            evt.dataTransfer.setData('text/4dn-item-id', fileAtId);
-            evt.dataTransfer.setData('text/4dn-item-json', JSON.stringify(file));
-        };
-
-        // This file itself has a HiGlass Item -- show an icon to indicate
-        if (file && file.higlass_uid){
-            return (
-                <span onDragStart={onDragStart}>
-                    { title }
-                    <span className="indicator-higlass-available in-stacked-table-icon-indicator">
-                        <i className="icon icon-angle-left mr-04" />
-                        <i className="icon icon-fw icon-television text-smaller" data-tip="This file may be visualized with HiGlass." />
-                    </span>
-                </span>
-            );
-        }
-
-        return <span onDragStart={onDragStart}>{title}</span>;
-    }
-
-    /**
     * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig)
     * @param {object} context - Object that has static_content.
     * @return {object} Returns the HiGlassItem in the context (or null if it doesn't)

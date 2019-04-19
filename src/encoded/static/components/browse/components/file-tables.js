@@ -176,12 +176,6 @@ class FileColumnActionsBtn extends React.PureComponent {
  * It takes a different param signature than ordinary file-detail columns, which accept `file`, `fieldName`, `headerIndex`, and `fileEntryBlockProps`.
  *
  * @todo (MAYBE) Create a new file and put this as well as FileEntryBlocks into it (?)
- *
- * @param {File} file - File for row/column.
- * @param {Object} fileEntryBlockProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
- * @param {Object} param - Props passed in from a FileEntryBlock.
- * @param {string} param.fileAtId - The atId of current file.
- * @param {string} param.fileTitleString - The title of current of file.
  * @returns {?JSX.Element}
  */
 export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockProps){
