@@ -104,7 +104,7 @@
     "detect-browser": "^3.0.1",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
-    "higlass": "^1.5.2",
+    "higlass": "^1.5.4",
     "html-react-parser": "^0.4.7",
     "js-md5": "^0.4.2",
     "jsonwebtoken": "^7.4.3",
