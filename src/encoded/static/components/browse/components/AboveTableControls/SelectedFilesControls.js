@@ -574,10 +574,12 @@ export class SelectedFilesFilterByButton extends React.Component {
     render(){
         var { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel } = this.props,
             isDisabled              = !selectedFiles || _.keys(selectedFiles).length === 0,
-            currentFiltersLength    = currentFileTypeFilters.length;
+            currentFiltersLength    = currentFileTypeFilters.length,
+            tooltip                 = "<div class='text-center'>Filter down selected files based on their file type.<br/>(does not affect checkboxes below)</div>";
 
         return (
-            <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled} onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'}>
+            <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled}
+                onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'} data-tip={tooltip} data-html>
                 <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
                 {
                     currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
@@ -619,10 +621,10 @@ export class SelectedFilesControls extends React.PureComponent {
                     'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles')} totalFilesCount={totalFilesCount} />
                 <div className="pull-left box selection-buttons">
                     <ButtonGroup>
+                        <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                         <SelectedFilesFilterByButton {..._.pick(this.props, 'setFileTypeFilters', 'currentFileTypeFilters',
                             'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
                             'currentOpenPanel' )} totalFilesCount={totalFilesCount} />
-                        <SelectedFilesDownloadButton {...this.props} totalFilesCount={totalFilesCount} />
                     </ButtonGroup>
                 </div>
             </div>
