@@ -46,7 +46,7 @@ def sop_map_data(protocol, lab, award):
         'lab': lab['@id'],
         'award': award['@id'],
         "associated_item_type": "ExperimentHiC",
-        "id_values": ["In situ Hi-C"],
+        "id_values": ["in situ Hi-C"],
         "notes": "This is just a dummy insert not linked to true SOP protocol",
         "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": protocol['@id'],
@@ -64,7 +64,7 @@ def sop_map_data_2(lab, award):
             'lab': lab['@id'],
             'award': award['@id'],
             "associated_item_type": "ExperimentHiC",
-            "id_values": ["In situ Hi-C"],
+            "id_values": ["in situ Hi-C"],
             "notes": "This is a dummy second version of map",
             "description": "Second",
         }
@@ -137,7 +137,7 @@ def test_experiment_update_hic_sop_map_not_added_when_already_present(testapp, e
 
 
 def test_calculated_experiment_summary(testapp, experiment, mboI):
-    summary = 'In situ Hi-C on GM12878 with MboI'
+    summary = 'in situ Hi-C on GM12878 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary
     assert summary in res.json['@graph'][0]['display_title']

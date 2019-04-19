@@ -459,7 +459,7 @@
     {
         "name" : "help.protocols.experiment-types.in-situ-hi-c-dilution-hi-c",
         "uuid" : "10000000-0000-0000-0000-ffff00003000",
-        "title" : "In situ Hi-C / Dilution Hi-C",
+        "title" : "in situ Hi-C / Dilution Hi-C",
         "body" : "Lorem ipsum dolor amet offal plaid readymade unicorn kombucha skateboard. Direct trade pop-up salvia organic. Truffaut lomo food truck man bun gastropub hella portland seitan post-ironic quinoa swag. Franzen flexitarian pour-over fam ennui. Freegan fanny pack tumeric vaporware tacos gluten-free quinoa +1 activated charcoal portland pok pok chartreuse actually. Church-key unicorn brooklyn migas paleo wolf.\n\nTaxidermy celiac scenester sustainable disrupt vaporware. Authentic chicharrones direct trade narwhal VHS iceland. Messenger bag intelligentsia seitan quinoa, hashtag YOLO cornhole VHS bitters. Gochujang sriracha messenger bag, mlkshk lyft authentic sartorial vinyl flexitarian godard green juice vice fam roof party jianbing.",
         "options" : {
             "filetype" : "md"
@@ -700,7 +700,7 @@
             "filetype" : "jsx"
         }
     },
-    
+
 
 
     {

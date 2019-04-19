@@ -628,7 +628,7 @@ def test_workflow_upgrade_6_7(
 #
 #
 # def test_workflow_upgrade_7_8(workflow_7, registry, exp_types):
-#     types2upg = {'Repli-seq': None, 'In situ Hi-C': 'hic', 'Capture Hi-C': 'capc', 'DNA FISH': 'fish', 'dilution Hi-C': 'dilution'}
+#     types2upg = {'Repli-seq': None, 'in situ Hi-C': 'hic', 'Capture Hi-C': 'capc', 'DNA FISH': 'fish', 'dilution Hi-C': 'dilution'}
 #     from snovault import UPGRADER
 #     upgrader = registry[UPGRADER]
 #     for etype, lookup in types2upg.items():

@@ -1095,7 +1095,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'processed file'
     assert tf_info['assay_info'] == 'MboI'
 
@@ -1107,7 +1107,7 @@ def test_track_and_file_facet_info_file_link_to_expt_opfbucket(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'some other files'
 
 
@@ -1119,7 +1119,7 @@ def test_track_and_file_facet_info_file_link_to_expt_pf_and_opf_buckets(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'processed file'
 
 
@@ -1132,7 +1132,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep(
     testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
 
 
@@ -1147,7 +1147,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep_and_custom_eset(
     testapp.post_json('/experiment_set', custom_experiment_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
 
 
@@ -1172,7 +1172,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_cell(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['biosource_name'] == 'GM12878'
 
 
@@ -1184,7 +1184,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_tissue(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['biosource_name'] == 'lung'
 
 
@@ -1220,7 +1220,7 @@ def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
     testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'processed file'
     assert tf_info['assay_info'] == 'MboI'
     assert tf_info['biosource_name'] == 'GM12878'
@@ -1325,7 +1325,7 @@ def test_track_and_file_facet_info_file_patch_override_fields(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'In situ Hi-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     # make sure it does change
     testapp.patch_json(pfile['@id'], {'override_experiment_type': 'new type'}, status=200)
     res2 = testapp.get(pfile['@id']).json
