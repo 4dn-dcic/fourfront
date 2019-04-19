@@ -777,7 +777,7 @@ def clone(context, request):
 
 
 def validate_exp_type_validity_for_experiment(context, request):
-    """Check if the specified experiment type (e.g. In situ Hi-C) is allowed
+    """Check if the specified experiment type (e.g. in situ Hi-C) is allowed
     for the experiment schema (e.g. ExperimentHiC).
     """
     data = request.json
