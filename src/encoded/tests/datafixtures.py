@@ -362,7 +362,7 @@ def exp_types(testapp, lab, award):
     from uuid import uuid4
     experiment_types = {}
     title_dict = {
-        'hic': ('In situ Hi-C', ["ExperimentHiC"]),
+        'hic': ('in situ Hi-C', ["ExperimentHiC"]),
         'microc': ('Micro-C', ["ExperimentHiC"]),
         'capc': ('Capture Hi-C', ["ExperimentCaptureC"]),
         'rnaseq': ('RNA-seq', ["ExperimentSeq"]),
