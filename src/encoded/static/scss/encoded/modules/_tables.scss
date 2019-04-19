@@ -362,8 +362,10 @@ $small-label-accession-font-size : 0.75rem;
 		.s-block {
 			display: block;
 			position: relative;
+			/*
 			overflow-y: hidden;
 			overflow-x: hidden;
+			*/
 			transform: translate3d(0px,0px,0px);
 
 			> .name {
@@ -422,14 +424,10 @@ $small-label-accession-font-size : 0.75rem;
 			&.odd {
 				@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(245, 240, 240, 0.4), 0%, 30%);
 
-				&.s-block-list-collapsing.collapsing-child {
-					background : #f6f5f5;
-					background: rgb(255, 252, 250);
-				}
 				&:hover {
 					@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(255, 252, 250, 1), 0%, 12%);
 				}
-				&:not(.collapsing-child) > .file-groups > .view-more-button {
+				> .file-groups > .view-more-button {
 					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 				}
 			}
@@ -438,16 +436,10 @@ $small-label-accession-font-size : 0.75rem;
 				//background-color: rgba(255, 220, 200, 0.5);
 				@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 250, 250, 0.4), 0%, 30%);
 
-				&.s-block-list-collapsing.collapsing-child {
-					background: #faf9f9;
-					background: rgb(255, 252, 250);
-				}
-
 				&:hover {
 					@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 252, 250, 1), 0%, 12%);
 				}
-
-				&:not(.collapsing-child) > .file-groups > .view-more-button {
+				> .file-groups > .view-more-button {
 					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 				}
 			}
@@ -653,7 +645,7 @@ $small-label-accession-font-size : 0.75rem;
 
 						padding: 8px 0 6px;
 
-						.multipe-files-checkbox-wrapper {
+						.multiple-files-checkbox-wrapper {
 							> .checkbox-for-multiple-files {
 								margin: 0;
 							}
@@ -696,26 +688,30 @@ $small-label-accession-font-size : 0.75rem;
 							margin-right: 0;
 							margin-left: 2px;
 							margin-top: -3px;
-							margin-bottom: -1px;
-							padding-top: 0px;
+							margin-bottom: -2px;
+							padding-top: 2px;
 							line-height: 18px;
 							&:first-of-type {
 								margin-left: 8px;
 							}
+							&:only-of-type {
+								margin-right: -35px;
+							}
 						}
 					}
 
-					.in-stacked-table-icon-indicator {
-						display: inline-block;
-						margin-left: 12px;
-						margin-right: -27px;
-						&.indicator-higlass-available {
-							margin-right: -30px;
-							margin-left: 7px;
+					/** Override/hide the dropdown caret **/
+					.btn-group-xs .in-stacked-table-button.btn-xs {
+						/* padding-right: 17px; */
+						padding-right: 5px;
+						padding-left: 5px;
+						> span.caret {
+							display: none;
+							/* right: 6px: */
 						}
-						&.disabled {
-							color: #999;
-						}
+						//&:hover > span.caret {
+						//	opacity: 1;
+						//}
 					}
 
 				}
@@ -726,39 +722,21 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block.biosample.stack-depth-1 {
 				&:nth-child(2n-1){
 					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-odd, 0%, 12%);
-					&.s-block-list-collapsing.collapsing-child {
-						background : $expset-biosample-bg-odd;
-						transform: translate3d(0px,0px,0px);
-					}
-					&:not(.collapsing-child) > .experiments > .view-more-button {
-						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-					}
 				}
 
 				&:nth-child(2n-2){
 					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-even, 0%, 12%);
-					&.s-block-list-collapsing.collapsing-child {
-						background : $expset-biosample-bg-even;
-						transform: translate3d(0px,0px,0px);
-					}
-					&:not(.collapsing-child) > .experiments > .view-more-button {
+					> .experiments > .view-more-button {
 						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 					}
 				}
 			}
 
 			.s-block.experiment.stack-depth-1 {
-
 					@include gradient-horizontal(rgba(255, 255, 255, 0), #f7f8f9, 0%, 12%);
-					&.s-block-list-collapsing.collapsing-child {
-						background : #f7f8f9;
-						transform: translate3d(0px,0px,0px);
-					}
-					&:not(.collapsing-child) > .experiments > .view-more-button {
+					> .experiments > .view-more-button {
 						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 					}
-
-
 			}
 
 		}
@@ -1171,7 +1149,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						}
 					}
 
-					&.open {
+					&.detail-open {
 						> .columns {
 							background-color: rgba(255,255,255,0.75);
 							box-shadow: 0 1px 6px rgba(0,0,0,0.33);
@@ -1196,7 +1174,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						}
 					}
 
-					&.open + .search-result-row.open {
+					&.detail-open + .search-result-row.open {
 						> .columns {
 							> .search-result-column-block {
 
@@ -1235,7 +1213,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						position: relative;
 						background: #fdfdfd;
 
-						&.closed {
+						&.detail-closed {
 							display: none;
 						}
 						.result-table-detail {

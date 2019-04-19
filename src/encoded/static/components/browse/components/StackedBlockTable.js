@@ -20,7 +20,7 @@ export function StackedBlockNameLabel(props){
     const { title, subtitle, accession, className, subtitleVisible } = props;
     const cls = (
         "label-ext-info" + (className? ' ' + className : '') +
-        (subtitle? ' has-subtitle' : '' ) +
+        (subtitle || accession ? ' has-subtitle' : '' ) +
         (subtitleVisible ? ' subtitle-visible' : '')
     );
 
@@ -67,7 +67,8 @@ export class StackedBlockName extends React.PureComponent {
 
         return (
             <div className={"name col-" + columnClass} style={useStyle}>
-                { label ? <StackedBlockName.Label {...label} /> : null }
+                {/* label ? <StackedBlockName.Label {...label} /> : null */}
+                { label }
                 { children }
             </div>
         );
@@ -205,7 +206,6 @@ export class StackedBlock extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.adjustedChildren = this.adjustedChildren.bind(this);
     }
 
@@ -215,7 +215,7 @@ export class StackedBlock extends React.PureComponent {
             if (c === null) return null;
 
             var addedProps = _.pick(this.props,
-                'columnClass', 'colWidthStyles', 'label', 'expTable', 'currentlyCollapsing', 'stackDepth',
+                'columnClass', 'colWidthStyles', 'label', 'stackDepth',
                 'selectedFiles', 'columnHeaders', 'handleFileCheckboxChange'
             );
 
@@ -232,7 +232,7 @@ export class StackedBlock extends React.PureComponent {
     }
 
     render(){
-        const { columnClass, className, stackDepth, stripe, hideNameOnHover, keepLabelOnHover, id } = this.props;
+        const { columnClass, className, stackDepth, stripe, hideNameOnHover, keepLabelOnHover } = this.props;
         let cls = (
             "s-block stack-depth-" + stackDepth +
             (columnClass ? ' ' + columnClass : '') +
@@ -244,7 +244,7 @@ export class StackedBlock extends React.PureComponent {
             if (stripe === true || stripe === 'even') cls += ' even';
             else cls += ' odd';
         }
-        return <div className={cls} data-id={id}>{ this.adjustedChildren() }</div>;
+        return <div className={cls}>{ this.adjustedChildren() }</div>;
     }
 
 }
@@ -288,10 +288,10 @@ class MultipleFileCheckbox extends React.PureComponent {
         const accessionTriples = expFxn.filesToAccessionTriples(files, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
-        const lineHeight = (filesCount * 35 + (filesCount - 1) - 15) + 'px';
+        const lineHeight = (filesCount * 36 - 14) + 'px';
 
         return (
-            <div className="multipe-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
+            <div className="multiple-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
                 <IndeterminateCheckbox {...{ indeterminate, checked }} id={'checkbox-for-' + accessionTriples.join('_')}
                     data-select-files={accessionTriples} {..._.omit(this.props, 'files', 'selectedFiles')} />
             </div>
@@ -332,17 +332,18 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     nameColumn(){
-        const { colVisible, label, colWidthStyles, name, files, selectedFiles, excludeOwnCheckbox } = this.props;
-        if (colVisible === false) return null;
+        const { label, colWidthStyles, name, files, selectedFiles, excludeOwnCheckbox } = this.props;
+        /*
         var labelToShow = null;
         if (typeof label === 'string'){
             labelToShow = <StackedBlock.Name.Label title="Pair" subtitle={label} />;
         } else if (typeof label === 'object' && label){
             labelToShow = <StackedBlock.Name.Label {...label} />;
         }
+        */
         return (
             <div className="name col-file-group" style={colWidthStyles ? _.clone(colWidthStyles['file-group']) : null}>
-                { labelToShow }
+                { label }
                 <div className="name-title" key="name-title">
                     { !excludeOwnCheckbox ?
                         <MultipleFileCheckbox onChange={this.onCheckboxChange} files={files} selectedFiles={selectedFiles} />
@@ -369,8 +370,9 @@ export class FilePairBlock extends React.PureComponent {
         } else {
             childBlocks = _.map(files, (file) =>
                 <FileEntryBlock key={object.atIdFromObject(file)}
-                    {..._.pick(this.props, 'columnHeaders', 'handleFileCheckboxChange', 'selectedFiles', 'colWidthStyles')}
-                    file={file} className={null}
+                    {..._.omit(this.props, 'files', 'file', 'isSingleItem', 'className', 'type', 'excludeChildrenCheckboxes', 'excludeOwnCheckbox', 'name', 'label')}
+                    file={file}
+                    className={null}
                     isSingleItem={isReallySingleItem} hideNameOnHover={!isReallySingleItem}
                     excludeCheckbox={excludeChildrenCheckboxes} // May be excluded as this block has own checkbox
                     type="paired-end" />
@@ -428,10 +430,7 @@ export class FileEntryBlock extends React.PureComponent {
 
     static defaultProps = {
         'excludeCheckbox' : false,
-        'label' : {
-            'title' : 'File',
-            'subtitle' : null
-        },
+        'label' : <StackedBlockNameLabel title="File" />,
         'hideNameOnHover' : false,
         'keepLabelOnHover' : true
     };
@@ -442,95 +441,47 @@ export class FileEntryBlock extends React.PureComponent {
         this.renderName = this.renderName.bind(this);
     }
 
-    fileTypeSummary(){
-        var file = this.props.file,
-            fileFormat = fileUtil.getFileFormatStr(file),
-            summary = (
-                file.file_type_detailed ||
-                ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
-                file.file_format ||
-                '-'
-            );
-
-        // Remove 'other', if present, because it just takes up horizontal space.
-        if (summary.slice(0, 6).toLowerCase() === 'other '){
-            return summary.slice(7).slice(0, -1);
-        }
-        return summary;
-    }
-
+    /**
+     * Returns a row (list) of column values for `"file-detail"` columnClass columnHeaders.
+     * Contains a number of hard-coded rules for certain titles:
+     */
     filledFileRow(){
-        var { columnHeaders, className, colWidthStyles, file } = this.props,
-            row = [],
-            cols = _.filter(columnHeaders, (col)=>{
-                if (col.columnClass === 'file-detail') return true;
-                return false;
-            }),
-            baseClassName = (className || '') + " col-file-detail item";
+        const { columnHeaders, className, colWidthStyles, file } = this.props;
+        const fileAtId = object.itemUtil.atId(file);
+        const row = []; // Return val.
+        const cols = _.filter(columnHeaders, function(col){ return col.columnClass === 'file-detail'; });
+        const baseClassName = (className || '') + " col-file-detail item";
 
-        for (var i = 0; i < cols.length; i++){
+        _.forEach(cols, (col, index)=>{
 
-            var col = cols[i],
-                colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + i,
-                title = col.valueTitle || col.title,
-                baseStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
+            const colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + index;
+            const title = col.valueTitle || col.title;
+            const colStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
 
             if (typeof col.render === 'function'){
                 row.push(
-                    <div key={col.field || i} className={colClassName} style={baseStyle}>
-                        { col.render(file, col.field, i, this.props) }
+                    <div key={col.field || index} className={colClassName} style={colStyle}>
+                        { col.render(file, col.field, index, this.props) }
                     </div>
                 );
-                continue;
+                return;
             }
 
-            if (!file || !object.atIdFromObject(file)) {
-                row.push(<div key={"file-detail-empty-" + i} className={colClassName} style={baseStyle}></div>);
-                continue;
-            }
-
-            if (title === 'File Type'){
-                row.push(<div key="file-type" className={colClassName} style={baseStyle}>{ this.fileTypeSummary() }</div>);
-                continue;
+            if (!fileAtId) {
+                // Empty block to take up space/width needed.
+                row.push(<div key={"file-detail-empty-" + index} className={colClassName} style={colStyle}></div>);
+                return;
             }
 
             if (typeof col.field === 'string'){
+                // Grab value out of file.
                 let val = object.getNestedProperty(file, col.field, true);
                 val = (val && Schemas.Term.toName(col.field, val, true)) || '-';
-                if (col.field === 'quality_metric.overall_quality_status'){
-                    var linkToReport = (file.quality_metric && file.quality_metric.url) || null;
-                    if (val === 'PASS'){
-                        val = (
-                            <span>
-                                <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
-                                &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
-                            </span>
-                        );
-                    } else if (val === 'FAIL'){
-                        val = (
-                            <span>
-                                <i className="icon icon-times" style={{ 'color' : 'red' }}/>
-                                &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
-                            </span>
-                        );
-                    }
-                }
-                row.push(<div key={col.field} className={colClassName} style={baseStyle}>{ val }</div>);
-                continue;
+                row.push(<div key={col.field} className={colClassName} style={colStyle}>{ val }</div>);
+                return;
             }
+        });
 
-            if (title === 'File Info'){ // AKA Paired Info
-                var fileFormat = fileUtil.getFileFormatStr(file);
-                if (typeof file.paired_end !== 'undefined') {
-                    row.push(<div key="file-info" className={colClassName} style={baseStyle}>Paired end {file.paired_end}</div>);
-                } else if (fileFormat === 'fastq' || fileFormat === 'fasta') {
-                    row.push(<div key="file-info" className={colClassName} style={baseStyle}>Unpaired</div>);
-                } else {
-                    row.push(<div key="file-info" className={colClassName} style={baseStyle}></div>);
-                }
-                continue;
-            }
-        }
         return row;
     }
 
@@ -546,185 +497,40 @@ export class FileEntryBlock extends React.PureComponent {
             return <div key="name-title" className="name-title"><em>{ fileError }</em></div>;
         }
 
-        if (!file)                              fileTitleString = 'No Files';
-        if (!fileTitleString && file.accession) fileTitleString = file.accession;
+        if (!file || !fileAtId) {
+            return <div key="name-title" className="name-title"><em>No file(s) or view permissions.</em></div>;
+        }
+
+        if (typeof colForFile.render === 'function') {
+            var renderedName = colForFile.render(file, colForFile.field || null, 0, this.props);
+            if (renderedName) return <span key="name-title" className="name-title">{ renderedName }</span>;
+        }
+
+        if (!fileTitleString && file.accession) {
+            fileTitleString = file.accession;
+        }
         if (!fileTitleString && fileAtId) {
             var idParts = _.filter(fileAtId.split('/'));
             if (idParts[1].slice(0,5) === '4DNFI'){
                 fileTitleString = idParts[1];
             }
         }
-        if (!fileTitleString)                   fileTitleString = file.uuid || fileAtId || 'N/A';
-
-        if (typeof colForFile.render === 'function') {
-            var renderedName = colForFile.render(file, this.props, { fileAtId, fileTitleString });
-            if (renderedName) return <div key="name-title" className="name-title">{ renderedName }</div>;
-        }
-
-        if (!fileAtId) {
-            return <div key="name-title" className="name-title">{ fileTitleString }</div>;
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
         }
 
         return <a key="name-title" className="name-title mono-text" href={fileAtId}>{ fileTitleString }</a>;
     }
 
-    renderLabel(){
-        var { file, label, type, sequenceNum, columnHeaders } = this.props;
-
-        if (!file) return null;
-
-        var commonProperties = {
-            'key'       : "name-block-label",
-            'title'     : label && label.title,
-            'inline'    : false,
-            'className' : 'col-file',
-            'subtitle'  : label && label.subtitle
-        };
-
-        if (label) {
-            return <StackedBlock.Name.Label {..._.extend(commonProperties, label)} />;
-        } else if (type === 'sequence-replicate') {
-            return <StackedBlock.Name.Label {..._.extend(commonProperties, label, { 'subtitle' : (sequenceNum ? 'Seq Replicate ' + sequenceNum : null) })} />;
-        } else if (type === 'paired-end') {
-            return <StackedBlock.Name.Label {...commonProperties} />;
-            //return RawFilesStackedTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
-            //    //subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
-            //}));
-        }
-
-        if (Array.isArray(columnHeaders)) {
-            var headerTitles = _.pluck(columnHeaders, 'title');
-            if ((file.file_type || fileUtil.getFileFormatStr(file)) && _.intersection(headerTitles,['File Type', 'File Format']).length === 0){
-                return <StackedBlock.Name.Label {...commonProperties } subtitle={file.file_type || (file.file_format && file.file_format.display_title)} />;
-            }
-            if (file.instrument && _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0){
-                return <StackedBlock.Name.Label {...commonProperties} subtitle={file.instrument} />;
-            }
-        }
-
-        return <StackedBlock.Name.Label {...commonProperties} />;
-    }
-
-    /**
-    * Add a link to an external JuiceBox site for some file types.
-    * @param {string} fileHref          - URL path used to access the file
-    * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-    * @param {string} host              - The host part of the current url
-    *
-    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
-    */
-    renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host){
-        var externalLinkButton = null;
-        // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic) {
-            // Make an external juicebox link.
-            var onClick = function(evt){
-
-                // If we're on the server side, there is no need to make an external link.
-                if (isServerSide()) return null;
-
-                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
-                var win = window.open(targetLocation, '_blank');
-                win.focus();
-            };
-
-            // Build the juicebox button
-            externalLinkButton = (
-                <Button key="juicebox-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in JuiceBox" onClick={onClick}>
-                    J<i className="icon icon-fw icon-external-link text-smaller"/>
-                </Button>
-            );
-        }
-
-        // Return the External link.
-        return externalLinkButton;
-    }
-
-    /**
-    * Add a link to WashU Epigenome site for some file types.
-    * @param {string} fileHref          - URL path used to access the file
-    * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-    * @param {string} host              - The host part of the current url
-    * @param {string} genome_assembly   - The file's genome assembly
-    *
-    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
-    */
-    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
-        var externalLinkButton = null;
-
-        // We may need to map the genome assembly to Epigenome's assemblies.
-        const assemblyMap = {
-            'GRCh38' : 'hg38',
-            'GRCm38' : 'mm10'
-        };
-
-        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
-        if (!(genome_assembly && genome_assembly in assemblyMap)) {
-            return null;
-        }
-
-        // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic) {
-            // Make an external juicebox link.
-            var onClick = function(evt){
-
-                // If we're on the server side, there is no need to make an external link.
-                if (isServerSide()) return null;
-
-                const epiGenomeMapping = assemblyMap[genome_assembly];
-                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
-
-                var win = window.open(targetLocation, '_blank');
-                win.focus();
-            };
-
-            // Build the Epigenome button
-            externalLinkButton = (
-                <Button key="epigenome-link-button" bsSize="xs" bsStyle="primary" className="text-600 inline-block clickable in-stacked-table-button" data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick}>
-                    E<i className="icon icon-fw icon-external-link text-smaller"/>
-                </Button>
-            );
-        }
-
-        // Return the External link.
-        return externalLinkButton;
-    }
-
-    renderExternalButtons(){
-        if (!this.props.file) return;
-        var { file } = this.props,
-            fileFormat              = fileUtil.getFileFormatStr(file),
-            fileIsHic               = (file && file.href && ( // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
-                (fileFormat && fileFormat === 'hic')
-                || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
-            )),
-            externalLinkButton      = null,
-            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
-            fileIsPublic = (file.status === 'archived' || file.status === 'released'),
-            fileHref = file.href,
-            currentPageUrlBase = store && store.getState().href,
-            hrefParts = url.parse(currentPageUrlBase),
-            host = hrefParts.protocol + '//' + hrefParts.host;
-
-        return (
-            <React.Fragment>
-                {this.renderJuiceboxLink(fileHref, fileIsHic, fileIsPublic, host)}
-                {this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly)}
-            </React.Fragment>
-        );
-    }
 
     renderName(){
-        var { file, colWidthStyles } = this.props;
+        var { file, colWidthStyles, label } = this.props;
         return (
             <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
                 style={colWidthStyles ? colWidthStyles.file : null}>
-                { this.renderLabel() }
+                { label }
                 <SingleFileCheckbox {...this.props} />
                 { this.renderNameInnerTitle() }
-                { this.renderExternalButtons() }
             </div>
         );
     }

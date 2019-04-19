@@ -4,10 +4,253 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
+import url from 'url';
+import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
-import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
+import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs, fileUtil, navigate } from './../../util';
 
-var { Item } = typedefs;
+var { Item, ExperimentSet } = typedefs;
+
+
+
+
+class FileColumnActionsBtn extends React.PureComponent {
+
+    static hostFromHref = memoize(function(href){
+        const hrefParts = (href && url.parse(href)) || null;
+        const host = hrefParts && (
+            (hrefParts.protocol || '') +
+            (hrefParts.hostname ? '//' +  hrefParts.hostname + (hrefParts.port ? ':' + hrefParts.port : '') : '')
+        );
+        return host || null;
+    });
+
+    static epiGenomeAssemblyMapping = {
+        'GRCh38' : 'hg38',
+        'GRCm38' : 'mm10'
+    };
+
+    constructor(props){
+        super(props);
+        this.isFileHIC = this.isFileHIC.bind(this);
+        this.higlassButton = this.higlassButton.bind(this);
+        this.juiceboxButton = this.juiceboxButton.bind(this);
+        this.epigenomeButton = this.epigenomeButton.bind(this);
+    }
+
+    isFileHIC(){
+        const file = this.props.file;
+        const fileFormat = fileUtil.getFileFormatStr(file);
+        return (file && file.href && (
+            // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
+            (fileFormat && fileFormat === 'hic')
+            || (file.file_type_detailed && file.file_type_detailed.indexOf('(hic)') > -1)
+        ));
+    }
+
+    higlassButton(otherBtnsExist = false){
+        const { file } = this.props;
+
+        // Need to embed these selectively-ish.. todo later maybe.
+        const higlassViewConfSection = _.find(file.static_content || [], function(sc){
+            if (sc.location !== 'tab:higlass' || !sc.content) return false;
+            if (!Array.isArray(sc.content['@type'])) return false;
+            if (sc.content['@type'].indexOf("HiglassViewConfig") > -1){
+                return true;
+            }
+            return false;
+        });
+
+        const higlassViewConfAtId = higlassViewConfSection && object.itemUtil.atId(higlassViewConfSection.content);
+
+        if (!higlassViewConfSection) return null;
+
+        function onClick(){
+            navigate(higlassViewConfAtId);
+        }
+
+        if (otherBtnsExist){
+            return (
+                <MenuItem data-tip="Visualize this file using the HiGlass Browser" onClick={onClick} key="higlass">
+                    HiGlass
+                </MenuItem>
+            );
+        } else {
+            return (
+                <div className="inline-block" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
+                    <Button bsSize="xs" className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize with HiGlass" onClick={onClick}>
+                        <i className="icon icon-fw icon-television"/>
+                    </Button>
+                </div>
+            );
+        }
+
+    }
+
+    juiceboxButton(){
+        const { file, href } = this.props;
+        const host = FileColumnActionsBtn.hostFromHref(href);
+
+        if (!host || !file.href) return null; // Needed for a link to be made
+
+        if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
+            return null;
+        }
+
+        function onClick(){
+            // If we're server-side, there is access to the global browser window object/API.
+            if (isServerSide()) return null;
+            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+            var win = window.open(targetLocation, '_blank');
+            win.focus();
+        }
+
+        return (
+            <MenuItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
+                JuiceBox <i className="icon icon-fw icon-external-link text-smaller"/>
+            </MenuItem>
+        );
+
+    }
+
+    epigenomeButton(){
+        const { file, href } = this.props;
+        const host = FileColumnActionsBtn.hostFromHref(href);
+        const genomeAssembly = file.genome_assembly || null;
+        const epiGenomeMapping = (genomeAssembly && FileColumnActionsBtn.epiGenomeAssemblyMapping[genomeAssembly]) || null;
+
+        // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
+        if (!epiGenomeMapping || !host || !file.href) return null; // Needed for a link to be made
+
+        if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
+            return null;
+        }
+
+        function onClick(){
+            // If we're server-side, there is access to the global browser window object/API.
+            if (isServerSide()) return null;
+            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + file.href;
+            var win = window.open(targetLocation, '_blank');
+            win.focus();
+        }
+
+        return (
+            <MenuItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
+                Epigenome Browser <i className="icon icon-fw icon-external-link text-smaller"/>
+            </MenuItem>
+        );
+    }
+
+    render(){
+        const { file, href } = this.props;
+        const fileIsPublic = (file.status === 'archived' || file.status === 'released');
+        if (!fileIsPublic){ // If not public, then 3rd-party service such as JuiceBox cannot access file to viz it.
+            return null;
+        }
+
+        //const higlassBtn = this.higlassButton();
+        const juiceboxBtn = this.juiceboxButton();
+        const epigenomeBtn = this.epigenomeButton();
+        const hasJBOrEpigenomeBtn = !!(juiceboxBtn || epigenomeBtn);
+
+        // We are likely to have either juicebox+epigenome btn _or_ higlassBtn.
+        const higlassBtn = this.higlassButton(hasJBOrEpigenomeBtn);
+
+        if (hasJBOrEpigenomeBtn){
+            return (
+                <DropdownButton className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize this file..."
+                    title={<i className="icon icon-fw icon-television"/>} dropup bsSize="xs">
+                    { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
+                </DropdownButton>
+            );
+        } else if (higlassBtn) {
+            return higlassBtn;
+        } else {
+            return null;
+        }
+    }
+}
+
+/**
+ * Renderer for "columnClass" : "file" column definition.
+ * It takes a different param signature than ordinary file-detail columns, which accept `file`, `fieldName`, `headerIndex`, and `fileEntryBlockProps`.
+ *
+ * @todo (MAYBE) Create a new file and put this as well as FileEntryBlocks into it (?)
+ *
+ * @param {File} file - File for row/column.
+ * @param {Object} fileEntryBlockProps - Props passed down from FileEntryBlock, including reference to parent StackedTable as expTable.
+ * @param {Object} param - Props passed in from a FileEntryBlock.
+ * @param {string} param.fileAtId - The atId of current file.
+ * @param {string} param.fileTitleString - The title of current of file.
+ * @returns {?JSX.Element}
+ */
+export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockProps){
+    const fileAtId = file && object.itemUtil.atId(file);
+    if (!fileAtId) return <em>No file available</em>;
+
+    var fileTitleString;
+    if (file.accession) {
+        fileTitleString = file.accession;
+    } else {
+        var idParts = _.filter(fileAtId.split('/'));
+        if (idParts[1].slice(0,5) === '4DNFI'){
+            fileTitleString = idParts[1];
+        } else {
+            fileTitleString = fileAtId;
+        }
+    }
+
+    const className = 'title-of-file' + (file.accession ? ' mono-text' : '');
+
+    /**
+     * Allow these file rows to be dragged to other places.
+     * @todo Move to file-tables.js if removing higlass-related stuff.
+     */
+    function onDragStart(evt){
+        if (!evt || !evt.dataTransfer) return;
+        var windowHrefParts = window && window.location;
+        if (windowHrefParts && windowHrefParts.protocol && windowHrefParts.hostname){
+            var formedURL = (
+                (hrefParts.protocol || '') +
+                (hrefParts.hostname ? '//' +  hrefParts.hostname + (hrefParts.port ? ':' + hrefParts.port : '') : '') +
+                fileAtId
+            );
+            evt.dataTransfer.setData('text/plain', formedURL);
+            evt.dataTransfer.setData('text/uri-list', formedURL);
+        }
+        evt.dataTransfer.setData('text/4dn-item-id', fileAtId);
+        evt.dataTransfer.setData('text/4dn-item-json', JSON.stringify(file));
+    }
+
+    const title = (fileAtId?
+        <a href={fileAtId} className={className} onDragStart={onDragStart}>{ fileTitleString }</a>
+        :
+        <span className={className} onDragStart={onDragStart}>{ fileTitleString }</span>
+    );
+
+    return (
+        <React.Fragment>
+            { title }
+            <FileColumnActionsBtn file={file} href={fileEntryBlockProps.href}/>
+        </React.Fragment>
+    );
+}
+
+
+export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
+    const fileFormat = fileUtil.getFileFormatStr(file);
+    const summary = (
+        file.file_type_detailed ||
+        ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
+        fileFormat ||
+        '-'
+    );
+    // Remove 'other', if present, because it just takes up horizontal space.
+    if (summary.slice(0, 6).toLowerCase() === 'other '){
+        return summary.slice(7).slice(0, -1);
+    }
+    return summary;
+}
 
 
 /**
@@ -38,13 +281,13 @@ export class RawFilesStackedTable extends React.PureComponent {
                         }
                         return null;
                     } },
-                    { columnClass: 'file',                                      title: 'File',          initialWidth: 125   }
+                    { columnClass: 'file',                                      title: 'File',          initialWidth: 125,  render: renderFileTitleColumn   }
                 ];
             default:
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-                    { columnClass: 'file',                                      title: 'File',          initialWidth: 125   }
+                    { columnClass: 'file',                                      title: 'File',          initialWidth: 125,  render: renderFileTitleColumn}
                 ];
         }
 
@@ -67,10 +310,19 @@ export class RawFilesStackedTable extends React.PureComponent {
         });
     }
 
+    /**
+     * Adds Total Sequences matric column if any raw files in expSet have a `quality_metric`.
+     * Or if param `showMetricColumns` is set to true;
+     *
+     * @see ProcessedFilesQCStackedTable.filterFiles
+     *
+     * @param {boolean} showMetricColumns - Skips check for quality_metric and returns column if true.
+     * @param {ExperimentSet} experimentSet - ExperimentSet Item.
+     */
     static metricColumnHeaders(showMetricColumns, experimentSet){
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
         showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || ProcessedFilesQCStackedTable.filterFiles(
-            expFxn.allFilesFromExperiments(experimentSet.experiments_in_set || [], false, false, true), true
+            expFxn.allFilesFromExperimentSet(experimentSet, false), true
         ) ? true : false;
 
         if (!showMetricColumns) return null;
@@ -125,8 +377,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         'columnHeaders'     : [
             { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            //{ columnClass: 'file',                                      title: 'File Info',     initialWidth: 120   },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
+            { columnClass: 'file-detail',                               title: 'File Size',     initialWidth: 80,   field : "file_size" }
         ],
         'collapseLongLists' : true,
         'showMetricColumns' : null
@@ -147,46 +398,53 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        const { experimentSet, collapseLongLists, collapseShow, collapseLimit, columnHeaders, showMetricsColumns } = this.props;
+        const { experimentSet, collapseLongLists, collapseShow, collapseLimit, columnHeaders, showMetricsColumns, href } = this.props;
 
         const allRawFiles = exp.files || [];
-        const filePairs = expFxn.groupFilesByPairs(allRawFiles);
-        const unpairedFiles = expFxn.findUnpairedFiles(allRawFiles);
 
-        var fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
+        const allFilesInGroups = fileUtil.groupFilesByRelations(allRawFiles);
+        const [ fileGroups, ungroupedFiles ] = fileUtil.extractSinglyGroupedItems(allFilesInGroups);
+
+        const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
+        const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
+
+        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
             contentsClassName   = 'files',
             contents            = [];
 
-        if (Array.isArray(filePairs) && filePairs.length > 0){
+        if (haveGroups){
             contentsClassName = 'file-groups';
-            contents = contents.concat(_.map(filePairs, function(filePair,j){
+            contents = contents.concat(_.map(fileGroups, function(group, j){
                 // Ensure can be converted to accessionTriple
-                filePair = _.map(filePair, function(f){
+                group = _.map(group, function(f){
                     return RawFilesStackedTable.extendFile(f, exp, experimentSet);
                 });
+                // Find relation/group type(s)
+                const relationshipTypes = new Set(_.pluck(_.flatten(_.pluck(group, 'related_files'), true), 'relationship_type'));
+                const isPair = relationshipTypes.size === 1 && relationshipTypes.has('paired with');
+                const labelTitle = isPair ? 'Pair' : 'Grp';
                 return (
-                    <FilePairBlock key={j} files={filePair}
-                        excludeChildrenCheckboxes={true}
-                        excludeOwnCheckbox={false}
-                        label={filePairs.length > 1 ?
-                            { 'title' : "Pair " + (j + 1) } : { 'title' : "Pair" }
-                        }
-                        isSingleItem={_.reduce(filePairs, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
+                    <FilePairBlock key={j} files={group}
+                        excludeChildrenCheckboxes={isPair}
+                        excludeOwnCheckbox={group.length === 1}
+                        label={<StackedBlockNameLabel title={fileGroups.length > 1 ? labelTitle + " " + (j + 1) : labelTitle} />}
+                        href={href}
+                        isSingleItem={_.reduce(fileGroups, function(m,fp){ return m + (fp || []).length; }, 0) + exp.files.length + contents.length < 2 ? true : false}
                     />
                 );
             }));
         }
 
         // Add in remaining unpaired files, if any.
-        if (Array.isArray(unpairedFiles) && unpairedFiles.length > 0){
-            contents = contents.concat(_.map(unpairedFiles, function(file, j){
+        if (haveUngroupedFiles){
+            contents = contents.concat(_.map(ungroupedFiles, function(file, j){
                 const extendedFile = RawFilesStackedTable.extendFile(file, exp, experimentSet);
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
-                        label={{ 'title' : "File" }}
-                        isSingleItem={unpairedFiles.length + contents.length < 2 ? true : false}
-                        columnClass="file-group" hideNameOnHover={true}
+                        label={<StackedBlockNameLabel title="File"/>}
+                        isSingleItem={ungroupedFiles.length + contents.length < 2 ? true : false}
+                        columnClass="file-group" hideNameOnHover={true} href={href}
                     />
                 );
 
@@ -199,7 +457,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlock key="single-empty-item" hideNameOnHover={false} columnClass="file-group">
                     { _.pluck(fullColumnHeaders, 'title').indexOf('File Pair') > -1 ? <StackedBlockName/> : null }
                     <StackedBlockList title="Files" className="files">
-                        <FileEntryBlock file={null} columnHeaders={fullColumnHeaders} />
+                        <FileEntryBlock file={null} columnHeaders={fullColumnHeaders} href={href} />
                     </StackedBlockList>
                 </StackedBlock>
             );
@@ -211,20 +469,21 @@ export class RawFilesStackedTable extends React.PureComponent {
                         exp.accession
             ),
             experimentAtId  = object.itemUtil.atId(exp),
-            linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
+            linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName,
+            // Shown in show more button, e.g. "Show X more Files".
+            listTitle       = (
+                (haveUngroupedFiles? "Files" : '') +
+                (haveUngroupedFiles && haveGroups? " or " : '') +
+                (haveGroups? "Groups" : '')
+            );
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
-                label={{
-                    'accession'       : exp.accession,
-                    'title'           : 'Experiment',
-                    'subtitle'        : experimentVisibleName,
-                    'subtitleVisible' : true
-                }}>
+                label={<StackedBlockNameLabel title="Experiment" accession={exp.accession} subtitleVisible />}>
                 <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList title="Files" className={contentsClassName}
+                <StackedBlockList title={listTitle} className={contentsClassName}
                     collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2} collapseLongLists={collapseLongLists}>
                     { contents }
                 </StackedBlockList>
@@ -246,12 +505,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         return (
             <StackedBlock columnClass="biosample" hideNameOnHover={false}
                 key={biosampleAtId || biosample.bio_rep_no || i } id={'bio-' + (biosample.bio_rep_no || i + 1)}
-                label={{
-                    title : 'Biosample',
-                    subtitle : bioRepTitle,
-                    subtitleVisible : true,
-                    accession : biosample.accession
-                }}>
+                label={<StackedBlockNameLabel title="Biosample" subtitle={bioRepTitle} accession={biosample.accession} subtitleVisible/>}>
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ?
                         <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
@@ -292,14 +546,6 @@ export class RawFilesStackedTable extends React.PureComponent {
         const showMoreExtTitle = experimentsGroupedByBiosample.length > 5 ?
             'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments' : null;
 
-        //const biosampleBlocks = this.renderRootStackedBlockListOfBiosamplesWithExperiments(
-        //    expFxn.groupExperimentsByBiosampleRepNo(
-        //        expFxn.groupFilesByPairsForEachExperiment(
-        //            expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
-        //        )
-        //    )
-        //);
-
         const fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet);
 
         return (
@@ -327,8 +573,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
             { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'File',      initialWidth: 130 },
-            { columnClass: 'file-detail', title: 'File Type', initialWidth: 120 },
+            { columnClass: 'file',        title: 'File',      initialWidth: 135, render: renderFileTitleColumn },
+            { columnClass: 'file-detail', title: 'File Type', initialWidth: 120, render: renderFileTypeSummaryColumn },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
         'collapseLongLists' : true,
@@ -357,13 +603,14 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderFileBlocksForExperiment(filesForExperiment){
+        const { href } = this.props;
         var fileBlocks = [],
             filesWithPermissions = _.filter(filesForExperiment, object.itemUtil.atId);
 
         _.forEach(filesWithPermissions, (file, idx) => {
             this.oddExpRow = !this.oddExpRow;
             fileBlocks.push(
-                <FileEntryBlock key={object.atIdFromObject(file) || idx} file={file} hideNameOnHover={true}
+                <FileEntryBlock key={object.atIdFromObject(file) || idx} file={file} hideNameOnHover={false} href={href}
                     isSingleItem={filesForExperiment.length === 1 && filesWithPermissions.length === 1} stripe={this.oddExpRow} />
             );
         });
@@ -371,7 +618,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         if (filesWithPermissions.length < filesForExperiment.length){
             this.oddExpRow = !this.oddExpRow;
             fileBlocks.push(
-                <FileEntryBlock key="no-view-permission-file-or-files" file={{ 'error' : 'no view permissions' }}
+                <FileEntryBlock key="no-view-permission-file-or-files" file={{ 'error' : 'no view permissions' }} href={href}
                     isSingleItem={filesWithPermissions.length === 0} stripe={this.oddExpRow} hideNameOnHover={false} />
             );
         }
@@ -383,17 +630,21 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
         const { collapseLongLists, titleForFiles } = this.props;
 
-        return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(function(aP, bP){
-            if (aP[0] === 'global') return -1;
-            if (bP[0] === 'global') return 1;
+        return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(function([ expAAccesion, filesForExpA ], [ expBAccesion, filesForExpB ]){
+            // Bubble 'global' exps (aka grouping of files that belong to multiple exps or expset itself)
+            // to top.
+            if (expAAccesion === 'global') return -1;
+            if (expBAccesion === 'global') return 1;
             return 0;
         }), ([ experimentAccession, filesForExperiment ])=>{
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
+
             const nameTitle = (
-                experimentAccession === 'global' ? (
-                    // Case if came from multiple experiments
-                    <div style={{ 'fontSize' : '1.25rem', 'lineHeight' : '16px', 'height': 16 }} className="text-300">Multiple Experiments</div>
+                experimentAccession === 'global' ? ( // Case if came from multiple experiments
+                    <div style={{ 'fontSize' : '1.25rem', 'height': 16 }} className="text-300">
+                        Multiple Experiments
+                    </div>
                 ) : (
                     (experiment && typeof experiment.display_title === 'string' && experiment.display_title.replace(' - ' + experimentAccession, '')) || experimentAccession
                 )
@@ -414,13 +665,12 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
-                    key={experimentAccession} label={{
-                        'title' : experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment',
-                        'subtitleVisible' : true,
-                        'accession' : experimentAccession === 'global' ? expSetAccession : experimentAccession
-                    }}>
+                    key={experimentAccession} label={
+                        <StackedBlockNameLabel title={experimentAccession === 'global' ? 'From Multiple Experiments' : 'Experiment'}
+                            accession={experimentAccession === 'global' ? expSetAccession : experimentAccession} subtitleVisible />
+                    }>
                     { nameBlock }
-                    <StackedBlockList className="files" collapseLongLists={collapseLongLists} title={titleForFiles} showMoreExtTitle={null}>
+                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={null}>
                         { this.renderFileBlocksForExperiment(filesForExperiment) }
                     </StackedBlockList>
                 </StackedBlock>
@@ -432,11 +682,11 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     render(){
         const { files, collapseLongLists } = this.props;
+        const filesGroupedByExperimentOrGlobal = ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files);
+        const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
         return (
             <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn>
-                <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>
-                    { this.renderExperimentBlocks(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files)) }
-                </StackedBlockList>
+                <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{ experimentBlocks }</StackedBlockList>
             </StackedBlockTable>
         );
     }
@@ -444,19 +694,59 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 }
 
 
+export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
 
-export class RawFilesStackedTableExtendedColumns extends RawFilesStackedTable {
+    static defaultProps = RawFilesStackedTable.defaultProps;
 
-    metricColumnHeaders(){
-        var origMetricHeaders = super.metricColumnHeaders();
-        if (!Array.isArray(origMetricHeaders) || origMetricHeaders.length === 0) return [];
-        return origMetricHeaders.concat([
-            { columnClass: 'file-detail', title: 'Sequence Length', initialWidth: 110, field : "quality_metric.Sequence length" },
-            { columnClass: 'file-detail', title: 'Overall Quality', initialWidth: 110, field : "quality_metric.overall_quality_status" }
-        ]);
+    static renderQCOverallQualityStatusColumn(file, field, detailIndex, fileEntryBlockProps){
+        const val = object.getNestedProperty(file, field, true); // col.field should be 'quality_metric.overall_quality_status' here.
+        const linkToReport = (file.quality_metric && file.quality_metric.url) || null;
+        if (val === 'PASS'){
+            return (
+                <span>
+                    <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
+                    &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
+                </span>
+            );
+        } else if (val === 'FAIL'){
+            return (
+                <span>
+                    <i className="icon icon-times" style={{ 'color' : 'red' }}/>
+                    &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
+                </span>
+            );
+        } else {
+            return '-';
+        }
     }
 
+    render(){
+        const { columnHeaders, showMetricColumns, experimentSet } = this.props;
+        let extendedPropColHeaders = columnHeaders;
+
+        const origMetricHeaders = RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet);
+        if (Array.isArray(origMetricHeaders) && origMetricHeaders.length > 0){
+            extendedPropColHeaders = columnHeaders.slice().concat([
+                {
+                    columnClass: 'file-detail',
+                    title: 'Sequence Length',
+                    initialWidth: 110,
+                    field : "quality_metric.Sequence length"
+                },
+                {
+                    columnClass: 'file-detail',
+                    title: 'Overall Quality',
+                    initialWidth: 110,
+                    field : "quality_metric.overall_quality_status",
+                    render: RawFilesStackedTableExtendedColumns.renderQCOverallQualityStatusColumn
+                }
+            ]);
+        }
+
+        return <RawFilesStackedTable {...this.props} columnHeaders={extendedPropColHeaders} />;
+    }
 }
+
 
 export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
 
@@ -498,10 +788,10 @@ export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
     static defaultProps = {
         'columnHeaders' : [
             //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
+            { columnClass: 'experiment',   className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
             //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'For File',          initialWidth: 100   },
-            { columnClass: 'file-detail', title: 'Filtered Reads', initialWidth: 80, field : "quality_metric.Total reads" },
+            { columnClass: 'file',        title: 'For File',            initialWidth: 100,  },
+            { columnClass: 'file-detail', title: 'Filtered Reads',      initialWidth: 80, field : "quality_metric.Total reads" },
             //{ columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
             //{ columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
             { columnClass: 'file-detail', title: 'Cis reads (>20kb)',   initialWidth: 80, field : "quality_metric.Cis reads (>20kb)", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
