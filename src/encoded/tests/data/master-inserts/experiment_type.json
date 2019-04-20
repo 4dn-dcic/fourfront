@@ -202,11 +202,7 @@
         "uuid": "c17e27cd-544a-9a3b-fed3-17a666544b3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
-<<<<<<< HEAD
         "other_tags": ["RNA-DNA", "Multi-contact"],
-=======
-        "other_tags": ["DNA-DNA", "Multi-contact"],
->>>>>>> master
         "valid_item_types": ["ExperimentSeq"]
     },
     {
