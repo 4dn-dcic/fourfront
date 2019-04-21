@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Fade } from 'react-bootstrap';
 import { console, object, ajax } from './../../../util';
 import { ItemDetailList } from './../ItemDetailList';
-import { StepDetailBody } from './StepDetailBody';
+import { WorkflowStepDetailPurposesBox, WorkflowStepTitleBox } from './StepDetailBody';
 
 function tipIfLongString(tip){
     if (typeof tip !== 'string' || tip.length < 35){
@@ -16,7 +16,8 @@ function tipIfLongString(tip){
 }
 
 
-class WorkflowDetailsForWorkflowNodeRow extends React.Component {
+class WorkflowDetailsForWorkflowNodeRow extends React.PureComponent {
+
     render(){
         var { workflow, workflow_run } = this.props;
         var title, innerContent;
@@ -92,11 +93,10 @@ class SoftwareDetailsForWorkflowNodeRow extends React.Component {
 
 
 
-export class WFRStepDetailBody extends React.Component {
+export class WFRStepDetailBody extends React.PureComponent {
     constructor(props){
         super(props);
         this.maybeLoadWFR = this.maybeLoadWFR.bind(this);
-        this.purposesBox = StepDetailBody.prototype.purposesBox.bind(this);
         this.state = {
             "wfr" : (this.props.step && this.props.step['@id']) || null
         };
@@ -171,10 +171,8 @@ export class WFRStepDetailBody extends React.Component {
             <div style={{ minHeight : this.props.minHeight }}>
                 <div className="information">
                     <div className="row">
-
-                        { this.stepTitleBox() }
-                        { this.purposesBox() }
-
+                        <WorkflowStepTitleBox step={step} label="Workflow Run" />
+                        <WorkflowStepDetailPurposesBox step={step} />
                     </div>
                     { workflow ? <hr/> : null }
                     { workflow ? <WorkflowDetailsForWorkflowNodeRow workflow_run={wfr} step={step} workflow={workflow}/> : null }

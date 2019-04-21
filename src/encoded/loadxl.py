@@ -373,7 +373,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         if 'aliases' not in ids:
             ids.append('aliases')
         # file format is required for files, but its usability depends this field
-        if a_type == 'file_format':
+        if a_type in ['file_format', 'experiment_type']:
             req_fields.append('valid_item_types')
         first_fields = list(set(req_fields+ids))
         skip_existing_items = set()

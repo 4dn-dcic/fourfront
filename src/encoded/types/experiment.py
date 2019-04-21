@@ -6,10 +6,19 @@ from snovault import (
     collection,
     load_schema
 )
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_patch,
+    validate_item_content_put,
+)
+from pyramid.view import view_config
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
+    collection_add,
+    get_item_if_you_can,
+    item_edit,
     lab_award_attribution_embed_list
 )
 
@@ -73,6 +82,7 @@ class Experiment(Item):
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
+        "experiment_type.title",
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
@@ -169,6 +179,8 @@ class Experiment(Item):
 
     def _update(self, properties, sheets=None):
         sop_coll = None
+        exp_type = self.registry['collections']['ExperimentType']
+        exp_type_title = exp_type.get(properties['experiment_type']).properties['title']
         if 'sop_mapping' in properties.keys():
             # check if the SopMap has bad Status
             sop_coll = self.registry['collections']['SopMap']
@@ -186,7 +198,7 @@ class Experiment(Item):
             if sop_coll is None:
                 sop_coll = self.registry['collections']['SopMap']
             # if sop_mapping field not present see if it should be
-            sopmap = self.find_current_sop_map(properties['experiment_type'], sop_coll)
+            sopmap = self.find_current_sop_map(exp_type_title, sop_coll)
             properties['sop_mapping'] = {}
             if sopmap is not None:
                 sop_mapping = str(sopmap.uuid)
@@ -282,19 +294,21 @@ class Experiment(Item):
         return pubs
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
-    def experiment_categorizer(self, request):
+    def experiment_categorizer(self, request, experiment_type=None):
         ''' The generalish case for if there is a targeted_factor use that
             and if not use enzyme - more specific cases in specific schemas
         '''
         digestion_enzyme = self.properties.get('digestion_enzyme')
         targeted_factor = self.properties.get('targeted_factor')
-        expt_type = self.properties.get('experiment_type')
         out_dict = {
             "field": "Default",
             "value": None
         }
-        types4control = ['DAM-ID seq', 'CHIP-seq', 'NAD-seq', 'CUT&RUN']
-        if expt_type is not None and expt_type in types4control and not targeted_factor:
+        types4control = [
+            '/experiment-types/damid-seq/', '/experiment-types/chip-seq/',
+            '/experiment-types/nad-seq/', '/experiment-types/cut-n-run/'
+        ]
+        if experiment_type is not None and experiment_type in types4control and not targeted_factor:
             out_dict['field'] = 'Target'
             out_dict['value'] = 'None (Control)'
         elif targeted_factor is not None:
@@ -308,6 +322,9 @@ class Experiment(Item):
         if out_dict['value'] is not None:
             out_dict['combined'] = out_dict['field'] + ': ' + out_dict['value']
         return out_dict
+
+    class Collection(Item.Collection):
+        pass
 
 
 @collection(
@@ -330,8 +347,8 @@ class ExperimentHiC(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -347,7 +364,7 @@ class ExperimentHiC(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+    def display_title(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
 
@@ -372,8 +389,8 @@ class ExperimentCaptureC(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -390,7 +407,7 @@ class ExperimentCaptureC(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+    def display_title(self, request, experiment_type=None, digestion_enzyme=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, digestion_enzyme, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
@@ -433,8 +450,8 @@ class ExperimentRepliseq(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, cell_cycle_phase=None, stage_fraction=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -450,7 +467,7 @@ class ExperimentRepliseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', cell_cycle_phase=None, stage_fraction=None, biosample=None):
+    def display_title(self, request, experiment_type=None, cell_cycle_phase=None, stage_fraction=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, cell_cycle_phase, stage_fraction, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
@@ -494,8 +511,8 @@ class ExperimentAtacseq(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -507,7 +524,7 @@ class ExperimentAtacseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None):
+    def display_title(self, request, experiment_type=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
@@ -531,8 +548,8 @@ class ExperimentChiapet(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, biosample=None, target=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -550,7 +567,7 @@ class ExperimentChiapet(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+    def display_title(self, request, experiment_type=None, biosample=None, target=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -574,8 +591,8 @@ class ExperimentDamid(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, fusion=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, biosample=None, fusion=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if fusion:
             sum_str += (' with DAM-' + fusion)
@@ -591,7 +608,7 @@ class ExperimentDamid(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, fusion=None):
+    def display_title(self, request, experiment_type=None, biosample=None, fusion=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, fusion))
 
 
@@ -615,8 +632,8 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, biosample=None, target=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -634,7 +651,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+    def display_title(self, request, experiment_type=None, biosample=None, target=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -658,8 +675,8 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None, target=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, biosample=None, target=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
 
         if target:
             target_props = request.embed(target, '@@object')
@@ -677,7 +694,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None, target=None):
+    def display_title(self, request, experiment_type=None, biosample=None, target=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -709,8 +726,8 @@ class ExperimentMic(Experiment):
         "description": "Summary of the experiment, including type, enzyme and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
-        sum_str = experiment_type
+    def experiment_summary(self, request, experiment_type=None, biosample=None):
+        sum_str = request.embed(experiment_type, '@@object')['title'] if experiment_type else 'Undefined'
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
@@ -722,7 +739,7 @@ class ExperimentMic(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type='Undefined', biosample=None):
+    def display_title(self, request, experiment_type=None, biosample=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
@@ -757,3 +774,37 @@ def clone(context, request):
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
             'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
         }
+
+
+def validate_exp_type_validity_for_experiment(context, request):
+    """Check if the specified experiment type (e.g. in situ Hi-C) is allowed
+    for the experiment schema (e.g. ExperimentHiC).
+    """
+    data = request.json
+    if 'experiment_type' in data:
+        exp_type_item = get_item_if_you_can(request, data['experiment_type'], 'experiment-types')
+        if not exp_type_item:
+            # item level validation will take care of generating the error
+            return
+        exp_type_name = exp_type_item['title']
+        allowed_types = exp_type_item.get('valid_item_types', [])
+        exp = context.type_info.name
+        if exp not in allowed_types:
+            msg = 'Experiment Type {} is not allowed for {}'.format(exp_type_name, exp)
+            request.errors.add('body', None, msg)
+        else:
+            request.validated.update({})
+
+
+@view_config(context=Experiment.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post, validate_exp_type_validity_for_experiment])
+def experiment_add(context, request, render=None):
+    return collection_add(context, request, render)
+
+
+@view_config(context=Experiment, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put, validate_exp_type_validity_for_experiment])
+@view_config(context=Experiment, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch, validate_exp_type_validity_for_experiment])
+def experiment_edit(context, request, render=None):
+    return item_edit(context, request, render)

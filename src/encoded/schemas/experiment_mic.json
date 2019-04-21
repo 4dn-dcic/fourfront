@@ -37,22 +37,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
-        },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "type" : "string",
-            "lookup": 10,
-            "enum": [
-                "DNA-paint",
-                "DNA FISH",
-                "RNA FISH",
-                "FISH",
-                "Immunofluorescence",
-                "Fluorescence",
-                "Cryo-EM",
-                "SPT"
-            ]
+            "default": "3"
         },
         "microscopy_technique": {
             "title" : "Microscopy Technique",
@@ -133,7 +118,7 @@
         }
     },
     "columns": {
-        "experiment_type": {
+        "experiment_type.display_title": {
             "title" : "Experiment Type"
         },
         "microscopy_technique": {
@@ -141,7 +126,7 @@
         }
     },
     "facets": {
-        "experiment_type": {
+        "experiment_type.display_title": {
             "title" : "Experiment Type"
         },
         "microscopy_technique": {

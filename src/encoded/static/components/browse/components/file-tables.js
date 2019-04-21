@@ -204,7 +204,8 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         var experimentVisibleName = (
                 exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                    exp.experiment_type ? exp.experiment_type : exp.accession
+                    (exp.experiment_type && exp.experiment_type.display_title) ? exp.experiment_type.display_title :
+                        exp.accession
             ),
             experimentAtId  = object.itemUtil.atId(exp),
             linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
@@ -217,7 +218,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                     'subtitle'        : experimentVisibleName,
                     'subtitleVisible' : true
                 }}>
-                <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
+                <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'} className={contentsClassName} children={contents}
@@ -282,12 +283,14 @@ export class RawFilesStackedTable extends React.PureComponent {
     renderRootStackedBlockListOfBiosamplesWithExperiments(experimentsGroupedByBiosample){
         return (
             <StackedBlockList className="biosamples" title="Biosamples" rootList collapseLongLists={this.props.collapseLongLists}
-                children={_.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments)} showMoreExtTitle={
+                showMoreExtTitle={
                     experimentsGroupedByBiosample.length > 5 ?
                         'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
                         :
                         null
-                } />
+                }>
+                { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
+            </StackedBlockList>
         );
     }
 

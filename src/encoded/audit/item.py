@@ -9,7 +9,7 @@ from snovault.schema_utils import validate
 from snovault.util import simple_path_ids
 
 
-@audit_checker('Item', frame='object')
+# @audit_checker('Item', frame='object')
 def audit_item_schema(value, system):
     context = system['context']
     registry = system['registry']
@@ -73,7 +73,7 @@ STATUS_LEVEL = {
 }
 
 
-@audit_checker('Item', frame='object')
+# @audit_checker('Item', frame='object')
 def audit_item_status(value, system):
     if 'status' not in value:
         return

@@ -198,7 +198,7 @@ class Publication(Item, ItemWithAttachment):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "exp_sets_prod_in_pub.experimentset_type",
         "exp_sets_prod_in_pub.accession",
-        "exp_sets_prod_in_pub.experiments_in_set.experiment_type",
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title",
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
     ]
