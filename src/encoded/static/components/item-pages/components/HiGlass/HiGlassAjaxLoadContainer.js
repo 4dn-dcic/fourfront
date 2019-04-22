@@ -3,22 +3,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, ajax, console, fileUtil } from './../../../util';
+import { isServerSide, ajax, console, object } from './../../../util';
 import { HiGlassPlainContainer, HiGlassLoadingIndicator } from './HiGlassPlainContainer';
 
-/** This class will pass the HiGlass Item's viewconfig to the HiGlassPlainContainer, possibly using AJAX to get the information.*/
+
+/**
+ * Accepts `higlassItem` (HiglassViewConfig Item JSON) as a prop and loads in the full
+ * representation from `higlassItem.@id` if `higlassItem.viewconfig` is not present before
+ * instantiating a HiGlassPlainContainer.
+ */
 export class HiGlassAjaxLoadContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
-
         this.getFullHiglassItem = this.getFullHiglassItem.bind(this);
-
         this.state = {
             'loading': false,
             'higlassItem' : (props.higlassItem && props.higlassItem.viewconfig) ? props.higlassItem : null
         };
-
         this.containerRef = React.createRef();
     }
 
@@ -32,7 +34,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         // After updating the component, load the new higlass component if it changed.
         if (pastProps.higlassItem !== this.props.higlassItem){
             if (this.props.higlassItem.viewconfig){
-                this.setState({ higlassItem : this.props.higlassItem });
+                this.setState({ 'higlassItem' : this.props.higlassItem });
             } else {
                 this.getFullHiglassItem();
             }

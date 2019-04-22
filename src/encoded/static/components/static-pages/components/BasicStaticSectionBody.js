@@ -7,8 +7,7 @@ import { Button } from 'react-bootstrap';
 import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
-import { HiGlassPlainContainer } from './../../item-pages/components/HiGlass/HiGlassPlainContainer';
-import { HiGlassAjaxLoadContainer } from './../../item-pages/components/HiGlass/HiGlassAjaxLoadContainer';
+import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import * as store from './../../../store';
 import { replaceString as replacePlaceholderString } from './../placeholders';
 
@@ -100,7 +99,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     renderInnerBody(){
         var { context, href } = this.props,
             open        = this.state.open,
-            isHiGlass   = isHiGlassDisplay(context);
+            isHiGlass   = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
@@ -228,9 +227,4 @@ export class BasicStaticSectionBody extends React.PureComponent {
         }
     }
 
-}
-
-
-export function isHiGlassDisplay(context){
-    return Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1;
 }
