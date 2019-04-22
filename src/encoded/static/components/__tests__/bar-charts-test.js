@@ -20,7 +20,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         FacetCharts = require('../browse/components/FacetCharts').FacetCharts;
         ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
 
-        propInitialFields = ['experiments_in_set.experiment_type.title','experiments_in_set.biosample.biosource.biosource_type'];
+        propInitialFields = ['experiments_in_set.experiment_type.display_title','experiments_in_set.biosample.biosource.biosource_type'];
 
         //context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
         fieldEndpointResult = require('../testdata/bar_plot_aggregations_1').JSON;

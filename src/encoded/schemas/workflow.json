@@ -422,7 +422,7 @@
         "category": {
             "title": "Workflow Category"
         },
-        "experiment_types.experiment_type.title": {
+        "experiment_types.experiment_type.display_title": {
             "title": "Experiment Type"
         },
         "steps.meta.analysis_step_types" : {
@@ -444,7 +444,7 @@
             "colTitle": "Category",
             "default_hidden" : true
         },
-        "experiment_types.experiment_type.title": {
+        "experiment_types.experiment_type.display_title": {
             "title": "Experiment Types"
         },
         "app_name": {
