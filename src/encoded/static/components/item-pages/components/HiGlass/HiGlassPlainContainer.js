@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console } from './../../../util';
+import { ajax, console, object } from './../../../util';
 import { requestAnimationFrame } from './../../../viz/utilities';
 
 

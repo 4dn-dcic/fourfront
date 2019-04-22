@@ -58,7 +58,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         // Use the @id to make an AJAX request to get the HiGlass Item.
         this.setState({ 'loading': true }, ()=>{
             // Use the @id to get the item, then remove the loading message
-            ajax.load(higlassItem['@id'], (r)=>{
+            ajax.load(object.itemUtil.atId(higlassItem), (r)=>{
                 this.setState({ 'higlassItem' : r, 'loading': false });
             });
         });
@@ -80,7 +80,11 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
 
         // Raise an error if there is no viewconfig
         if (!higlassItem || !higlassItem.viewconfig) {
-            return <div className="text-center" style={placeholderStyle}><HiGlassLoadingIndicator icon="exclamation-triangle" title="No HiGlass content found. Please go back or try again later." /></div>;
+            return (
+                <div className="text-center" style={placeholderStyle}>
+                    <HiGlassLoadingIndicator icon="exclamation-triangle" title="No HiGlass content found. Please go back or try again later." />
+                </div>
+            );
         }
 
         // Pass the viewconfig to the HiGlassPlainContainer
