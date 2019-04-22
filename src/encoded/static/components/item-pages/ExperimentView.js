@@ -184,11 +184,11 @@ class ExperimentSetsViewOverview extends React.Component {
     }
 
     render(){
-        var { context, width, windowWidth } = this.props,
+        var { context, width, windowWidth, href } = this.props,
             experimentSetUrls = _.map(context.experiment_sets || [], object.atIdFromObject);
 
         if (experimentSetUrls.length > 0){
-            return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
+            return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth, href }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
         }
 
         return null;

@@ -1227,6 +1227,10 @@ $download-button-width : 100px;
 	display: flex;
 	flex-direction: row;
 
+	/** Keep section above padding/margins of HiGlassComponent **/
+	position: relative;
+	z-index: 5;
+  
 	&.right-align {
 		flex-direction: row-reverse;
 	}
