@@ -46,7 +46,7 @@ def sop_map_data(protocol, lab, award):
         'lab': lab['@id'],
         'award': award['@id'],
         "associated_item_type": "ExperimentHiC",
-        "id_values": ["micro-C"],
+        "id_values": ["in situ Hi-C"],
         "notes": "This is just a dummy insert not linked to true SOP protocol",
         "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": protocol['@id'],
@@ -64,7 +64,7 @@ def sop_map_data_2(lab, award):
             'lab': lab['@id'],
             'award': award['@id'],
             "associated_item_type": "ExperimentHiC",
-            "id_values": ["micro-C"],
+            "id_values": ["in situ Hi-C"],
             "notes": "This is a dummy second version of map",
             "description": "Second",
         }
@@ -90,8 +90,8 @@ def test_experiment_update_hic_sop_mapping_added_on_submit(testapp, experiment_d
     assert res_exp.json['@graph'][0]['sop_mapping']['sop_map'] == res_sop.json['@graph'][0]['@id']
 
 
-def test_experiment_update_hic_sop_mapping_has_map_is_no(testapp, experiment_data):
-    experiment_data['experiment_type'] = 'DNase Hi-C'
+def test_experiment_update_hic_sop_mapping_has_map_is_no(testapp, experiment_data, exp_types):
+    experiment_data['experiment_type'] = exp_types['dnase']['@id']
     res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
     assert 'sop_mapping' in res_exp.json['@graph'][0]
     assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "No"
@@ -137,10 +137,10 @@ def test_experiment_update_hic_sop_map_not_added_when_already_present(testapp, e
 
 
 def test_calculated_experiment_summary(testapp, experiment, mboI):
-    summary = 'micro-C on GM12878 with MboI'
+    summary = 'in situ Hi-C on GM12878 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary
-
+    assert summary in res.json['@graph'][0]['display_title']
 
 # test for experiment_set_replicate _update function
 def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):
@@ -155,10 +155,10 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
 
 # test for default_embedding practice with embedded list
 # this test should change should any of the reference embeds below be altered
-def test_experiment_set_default_embedded_list(registry):
+def test_experiment_set_default_embedded_list(registry, exp_types):
     from snovault import TYPES
     exp_data = {
-        'experiment_type': 'micro-C',
+        'experiment_type': exp_types['microc']['uuid'],
         'status': 'in review by lab'
     }
     # create experimentHiC obj; _update (and by extension, add_default_embeds)
@@ -354,8 +354,8 @@ def repset_w_exp1(testapp, replicate_experiment_set_data, experiment):
 
 
 @pytest.fixture
-def experiment2(testapp, experiment_data):
-    experiment_data['experiment_type'] = 'capture Hi-C'
+def experiment2(testapp, experiment_data, exp_types):
+    experiment_data['experiment_type'] = exp_types['capc']['@id']
     return testapp.post_json('/experiment_capture_c', experiment_data).json['@graph'][0]
 
 
@@ -538,13 +538,13 @@ def target_w_prot(testapp, lab, award):
 
 
 @pytest.fixture
-def exp_w_target_info(lab, award, human_biosample,
+def exp_w_target_info(lab, award, human_biosample, exp_types,
                       mboI, genomic_region_bio_feature):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'capture Hi-C',
+        'experiment_type': exp_types['capc']['@id'],
         'targeted_regions': [{'target': [genomic_region_bio_feature['@id']]}]
     }
 
@@ -563,24 +563,24 @@ def expt_w_2_targ_regions(testapp, exp_w_target_info, gene_bio_feature):
 
 @pytest.fixture
 def expt_w_target(testapp, lab, award, human_biosample,
-                  mboI, prot_bio_feature):
+                  mboI, prot_bio_feature, exp_types):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'ChIA-PET',
+        'experiment_type': exp_types['chia']['@id'],
         'targeted_factor': [prot_bio_feature['@id']]
     }
     return testapp.post_json('/experiment_chiapet', item).json['@graph'][0]
 
 
 @pytest.fixture
-def repliseq_info(lab, award, human_biosample):
+def repliseq_info(lab, award, human_biosample, exp_types):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'Repli-seq',
+        'experiment_type': exp_types['repliseq']['@id'],
     }
 
 
@@ -603,14 +603,14 @@ def repliseq_3(testapp, repliseq_info):
 
 
 @pytest.fixture
-def damid_no_fusion(testapp, repliseq_info):
-    repliseq_info['experiment_type'] = 'DAM-ID seq'
+def damid_no_fusion(testapp, repliseq_info, exp_types):
+    repliseq_info['experiment_type'] = exp_types['dam']['@id']
     return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
 
 
 @pytest.fixture
-def damid_w_fusion(testapp, repliseq_info, prot_bio_feature):
-    repliseq_info['experiment_type'] = 'DAM-ID seq'
+def damid_w_fusion(testapp, repliseq_info, prot_bio_feature, exp_types):
+    repliseq_info['experiment_type'] = exp_types['dam']['@id']
     repliseq_info['targeted_factor'] = [prot_bio_feature['@id']]
     return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
 
@@ -645,14 +645,14 @@ def imaging_path_3(testapp, basic_info, basic_region_bio_feature):
 
 
 @pytest.fixture
-def microscopy_no_path(testapp, repliseq_info):
-    repliseq_info['experiment_type'] = "Immunofluorescence"
+def microscopy_no_path(testapp, repliseq_info, exp_types):
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
 
 
 @pytest.fixture
-def microscopy_w_path(testapp, repliseq_info, imaging_path_1):
-    repliseq_info['experiment_type'] = "Immunofluorescence"
+def microscopy_w_path(testapp, repliseq_info, imaging_path_1, exp_types):
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
     img_path = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
     repliseq_info['imaging_paths'] = [img_path]
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
@@ -660,8 +660,8 @@ def microscopy_w_path(testapp, repliseq_info, imaging_path_1):
 
 @pytest.fixture
 def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_2,
-                           imaging_path_3):
-    repliseq_info['experiment_type'] = "Immunofluorescence"
+                           imaging_path_3, exp_types):
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
     img_path1 = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
     img_path2 = {'path': imaging_path_2['@id'], 'channel': 'ch02'}
     img_path3 = {'path': imaging_path_3['@id'], 'channel': 'ch03'}
@@ -689,8 +689,8 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
         assert v in value
 
 
-def test_experiment_categorizer_4_chiapet_no_fusion(testapp, repliseq_info):
-    repliseq_info['experiment_type'] = 'ChIA-PET'
+def test_experiment_categorizer_4_chiapet_no_fusion(testapp, repliseq_info, exp_types):
+    repliseq_info['experiment_type'] = exp_types['chia']['@id']
     res = testapp.post_json('/experiment_chiapet', repliseq_info).json['@graph'][0]
     assert res['experiment_categorizer']['field'] == 'Default'
     assert res['experiment_categorizer']['value'] is None
@@ -707,7 +707,6 @@ def test_experiment_categorizer_4_damid_w_fusion(testapp, damid_w_fusion, prot_b
 
 
 def test_experiment_categorizer_4_repliseq_no_fraction_info(testapp, repliseq_1):
-    # import pdb; pdb.set_trace()
     assert repliseq_1['experiment_categorizer']['field'] == 'Default'
     assert repliseq_1['experiment_categorizer'].get('value') is None
 
@@ -742,16 +741,16 @@ def test_experiment_categorizer_w_target_and_enzyme(testapp, expt_w_target, prot
     assert res['experiment_categorizer']['value'] == prot_bio_feature['display_title']
 
 
-def test_experiment_categorizer_w_no_cat1(testapp, experiment_data):
+def test_experiment_categorizer_w_no_cat1(testapp, experiment_data, exp_types):
     del experiment_data['digestion_enzyme']
-    experiment_data['experiment_type'] = 'RNA-seq'
+    experiment_data['experiment_type'] = exp_types['rnaseq']['@id']
     expt = testapp.post_json('/experiment_seq', experiment_data).json['@graph'][0]
     assert expt['experiment_categorizer']['field'] == 'Default'
     assert expt['experiment_categorizer'].get('value') is None
 
 
-def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI):
-    experiment_data['experiment_type'] = 'capture Hi-C'
+def test_experiment_categorizer_cap_c_no_regions(testapp, experiment_data, mboI, exp_types):
+    experiment_data['experiment_type'] = exp_types['capc']['@id']
     expt = testapp.post_json('/experiment_capture_c', experiment_data).json['@graph'][0]
     assert expt['experiment_categorizer']['field'] == 'Enzyme'
     assert expt['experiment_categorizer']['value'] == mboI['display_title']
@@ -767,3 +766,26 @@ def test_experiment_categorizer_cap_c_w_2regions(
     wanted = ', '.join(sorted([genomic_region_bio_feature['display_title'], gene_bio_feature['display_title']]))
     assert expt_w_2_targ_regions['experiment_categorizer']['field'] == 'Target'
     assert expt_w_2_targ_regions['experiment_categorizer']['value'] == wanted
+
+
+@pytest.fixture
+def new_exp_type(lab, award):
+    from uuid import uuid4
+    data = {
+        'uuid': str(uuid4()),
+        'title': 'Title',
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'status': 'released',
+        'valid_item_types': ['ExperimentSeq']
+    }
+    return data
+
+
+def test_validate_exp_type_valid(testapp, experiment_data, new_exp_type):
+    exp_type1 = testapp.post_json('/experiment_type', new_exp_type).json['@graph'][0]
+    experiment_data['experiment_type'] = exp_type1['@id']
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=422)
+    testapp.patch_json(exp_type1['@id'], {'valid_item_types': ['ExperimentSeq', 'ExperimentHiC']})
+    expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
+    assert expt['experiment_type'] == '/experiment-types/title/'

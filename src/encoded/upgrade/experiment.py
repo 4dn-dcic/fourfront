@@ -77,10 +77,45 @@ def experiment_seq_2_3(value, system):
         value['experiment_type'] = 'ChIP-seq'
 
 
-@upgrade_step('experiment_seq', '3', '4')
+@upgrade_step('experiment_atacseq', '1', '2')
+@upgrade_step('experiment_capture_c', '1', '2')
 @upgrade_step('experiment_chiapet', '3', '4')
 @upgrade_step('experiment_damid', '2', '3')
+@upgrade_step('experiment_hi_c', '1', '2')
+@upgrade_step('experiment_mic', '2', '3')
+@upgrade_step('experiment_repliseq', '3', '4')
+@upgrade_step('experiment_seq', '3', '4')
 @upgrade_step('experiment_tsaseq', '1', '2')
+def experiment_1_2(value, system):
+    exptype = value.get('experiment_type')
+    if exptype == 'Repli-seq':
+        tot_fracs = value.get('total_fractions_in_exp', 2)
+        if tot_fracs > 2:
+            exptype = 'Multi-stage Repli-seq'
+        else:
+            exptype = '2-stage Repli-seq'
+    elif exptype == 'DAM-ID seq':
+        exptype = 'DamID-seq'
+    valid_exptypes = system['registry']['collections']['ExperimentType']
+    exptype_item = valid_exptypes.get(exptype)
+    if not exptype_item:
+        exptypename = exptype.lower().replace(' ', '-')
+        exptype_item = valid_exptypes.get(exptypename)
+    exptype_uuid = None
+    try:
+        exptype_uuid = str(exptype_item.uuid)
+    except AttributeError:
+        note = '{} ITEM NOT FOUND'.format(exptype)
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
+    value['experiment_type'] = exptype_uuid
+
+
+@upgrade_step('experiment_seq', '4', '5')
+@upgrade_step('experiment_chiapet', '4', '5')
+@upgrade_step('experiment_damid', '3', '4')
+@upgrade_step('experiment_tsaseq', '2', '3')
 def experiment_targeted_factor_upgrade(value, system):
     factor = value.get('targeted_factor')
     if factor:
@@ -100,7 +135,7 @@ def experiment_targeted_factor_upgrade(value, system):
         value['notes'] = note
 
 
-@upgrade_step('experiment_capture_c', '1', '2')
+@upgrade_step('experiment_capture_c', '2', '3')
 def experiment_capture_c_1_2(value, system):
     tregions = value.get('targeted_regions')
     if tregions:

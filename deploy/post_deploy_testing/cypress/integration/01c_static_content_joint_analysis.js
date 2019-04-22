@@ -10,7 +10,7 @@ describe('Joint Analysis Page', function () {
 
     context("Expandable Matrix Section", function(){
 
-        const yAxisTerms = ['ATAC-seq', 'ChIA-PET', 'DAM-ID seq', 'Repli-seq', 'in situ Hi-C'];
+        const yAxisTerms = ['ATAC-seq', 'ChIA-PET', 'DamID-seq', 'Repli-seq', 'in situ Hi-C'];
         const xAxisTerms = ['H1-hESC', 'H1-DE', 'HFFc6'];
 
 

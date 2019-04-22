@@ -22,7 +22,7 @@ export class ExperimentSetTables extends React.PureComponent {
     };
 
     render(){
-        var { loading, title, windowWidth } = this.props,
+        var { loading, title, windowWidth, href } = this.props,
             expSets = this.props.experiment_sets || this.props.results;
 
         if (loading || !Array.isArray(expSets)){
@@ -45,14 +45,14 @@ export class ExperimentSetTables extends React.PureComponent {
                 <ItemPageTable
                     results={expSets}
                     renderDetailPane={(es, rowNum, width)=>
-                        <ExperimentSetDetailPane result={es} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
+                        <ExperimentSetDetailPane result={es} href={href} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
                             'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
                         }} />
                     }
                     columns={{
                         "display_title" : { "title" : "Title" },
                         "number_of_experiments" : { "title" : "Exps" },
-                        "experiments_in_set.experiment_type": { "title" : "Experiment Type" },
+                        "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
                         "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
                         "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
                         "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
@@ -74,7 +74,7 @@ export class ExperimentSetTablesLoaded extends React.PureComponent {
         var { experimentSetUrls, id } = this.props;
         return (
             <ItemPageTableLoader itemUrls={experimentSetUrls} key={id}>
-                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad')} />
+                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
             </ItemPageTableLoader>
         );
     }
@@ -85,7 +85,7 @@ export class ExperimentSetTablesLoadedFromSearch extends React.PureComponent {
     render(){
         return (
             <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
-                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad')} />
+                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
             </ItemPageTableSearchLoaderPageController>
         );
     }
@@ -141,7 +141,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     }
 
     render(){
-        var { windowWidth, requestHref, title } = this.props;
+        var { windowWidth, requestHref, title, href } = this.props;
         var totalCount = this.state.totalCount;
 
         if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
@@ -149,7 +149,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
 
         return (
             <div>
-                <ExperimentSetTablesLoadedFromSearch requestHref={requestHref} windowWidth={windowWidth} onLoad={this.getCountCallback} title={title} />
+                <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, href }} onLoad={this.getCountCallback} />
                 { totalCount && totalCount > 25 ?
                     <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
                         View all Experiment Sets ({ totalCount - 25 + ' more' })

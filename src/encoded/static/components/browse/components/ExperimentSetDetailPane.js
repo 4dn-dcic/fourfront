@@ -4,12 +4,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
-import { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn, layout, object } from './../../util';
 
 
-export class ExperimentSetDetailPane extends React.Component {
+export class ExperimentSetDetailPane extends React.PureComponent {
 
     /**
      * Gets all file UUIDs from an ExperimentSet.
@@ -23,7 +23,8 @@ export class ExperimentSetDetailPane extends React.Component {
         'result' : PropTypes.object.isRequired,
         'containerWidth' : PropTypes.number,
         'paddingWidth' : PropTypes.number,
-        'windowWidth' : PropTypes.number.isRequired
+        'windowWidth' : PropTypes.number.isRequired,
+        'href' : PropTypes.string.isRequired
     };
 
     static defaultProps = {
@@ -33,8 +34,8 @@ export class ExperimentSetDetailPane extends React.Component {
 
     constructor(props){
         super(props);
-        this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), { 'trailing' : false });
-        this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), { 'trailing' : false });
+        this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), 500, { 'trailing' : false });
+        this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), 500, { 'trailing' : false });
         this.state = {
             'rawFilesOpen' : false,
             'processedFilesOpen' : false
@@ -52,15 +53,16 @@ export class ExperimentSetDetailPane extends React.Component {
     */
 
     toggleStateProperty(property){
-        var state = {};
-        state[property] = !this.state[property];
-        this.setState(state);
+        this.setState(function(currState){
+            var nextState = {};
+            nextState[property] = !currState[property];
+            return nextState;
+        });
     }
 
     renderRawFilesSection(paddingWidth){
-        var { containerWidth } = this.props;
-        var expSet = this.props.result,
-            rawFilesCount = expFxn.fileCountFromExperimentSet(expSet, false, false);
+        const { containerWidth, result, href } = this.props;
+        const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
 
         if (rawFilesCount === 0) return null;
 
@@ -68,17 +70,16 @@ export class ExperimentSetDetailPane extends React.Component {
             <div className="raw-files-table-section">
                 <h4 className="pane-section-title" onClick={this.toggleRawFilesOpen}>
                     <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw files
+                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
                 </h4>
                 <Collapse in={this.state.rawFilesOpen}>
                     <div>
-                        <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile', 'selectedFilesUniqueCount')}
+                        <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
                             columnHeaders={[
-                                { columnClass: 'file-detail', title: 'File Type'},
+                                { columnClass: 'file-detail', title: 'File Type', render: renderFileTypeSummaryColumn },
                                 { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
                             ]}
-                            experimentSetAccession={expSet.accession || null} experimentArray={expSet.experiments_in_set}
-                            replicateExpsArray={expSet.replicate_exps} experimentSetType={expSet.experimentset_type}
+                            experimentSet={result} href={href}
                             width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
                             fadeIn={false} collapseLongLists />
                     </div>
@@ -88,9 +89,8 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     renderProcessedFilesSection(paddingWidth){
-        var { containerWidth } = this.props;
-        var expSet = this.props.result,
-            processedFiles = expFxn.allProcessedFilesFromExperimentSet(expSet);
+        const { containerWidth, result, href } = this.props;
+        const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
 
         if (!Array.isArray(processedFiles) || processedFiles.length === 0){
             return null;
@@ -103,10 +103,9 @@ export class ExperimentSetDetailPane extends React.Component {
                 </h4>
                 <Collapse in={this.state.processedFilesOpen}>
                     <div>
-                        <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile', 'selectedFilesUniqueCount')}
-                            experimentSetAccession={expSet.accession || null} files={processedFiles}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
-                            fadeIn={false} collapseLongLists />
+                        <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
+                            files={processedFiles} fadeIn={false} collapseLongLists href={href}
+                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null} />
                     </div>
                 </Collapse>
             </div>
@@ -114,13 +113,12 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     render(){
-        var { paddingWidthMap, containerWidth, windowWidth } = this.props,
-            expSet = this.props.result,
-            paddingWidth = this.props.paddingWidth || 0;
+        const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result } = this.props;
+        let usePadWidth = paddingWidth || 0;
 
         if (paddingWidthMap){
             var rgs = layout.responsiveGridState(windowWidth);
-            paddingWidth = paddingWidthMap[rgs] || paddingWidth;
+            usePadWidth = paddingWidthMap[rgs] || paddingWidth;
         }
 
         return (
@@ -131,7 +129,7 @@ export class ExperimentSetDetailPane extends React.Component {
                             {/* <label className="text-500 description-label">Description</label> */}
                             <FlexibleDescriptionBox
                                 windowWidth={windowWidth}
-                                description={ expSet.description }
+                                description={ result.description }
                                 fitTo="self"
                                 textClassName="text-normal"
                                 dimensions={null}
@@ -144,7 +142,7 @@ export class ExperimentSetDetailPane extends React.Component {
                                     Lab:
                                 </div>
                                 <div className="col-xs-8 col-sm-9 expset-addinfo-val">
-                                    { object.itemUtil.generateLink(expSet.lab) || <small><em>None</em></small> }
+                                    { object.itemUtil.generateLink(result.lab) || <small><em>None</em></small> }
                                 </div>
                             </div>
                             <div className="row mb-05 clearfix">
@@ -152,15 +150,15 @@ export class ExperimentSetDetailPane extends React.Component {
                                     Publication:
                                 </div>
                                 <div className="col-xs-8 col-sm-9 expset-addinfo-val">
-                                    { object.itemUtil.generateLink(expSet.produced_in_pub) || <small><em>None</em></small> }
+                                    { object.itemUtil.generateLink(result.produced_in_pub) || <small><em>None</em></small> }
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - paddingWidth) : null }} className="files-tables-container">
-                    { this.renderRawFilesSection(paddingWidth) }
-                    { this.renderProcessedFilesSection(paddingWidth) }
+                <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - usePadWidth) : null }} className="files-tables-container">
+                    { this.renderRawFilesSection(usePadWidth) }
+                    { this.renderProcessedFilesSection(usePadWidth) }
                 </div>
             </div>
         );

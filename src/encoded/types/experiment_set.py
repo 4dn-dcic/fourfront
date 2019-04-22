@@ -73,7 +73,15 @@ class ExperimentSet(Item):
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": [
+            "message",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -81,6 +89,7 @@ class ExperimentSet(Item):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
+        "badges.badge.badge_icon",
         "badges.message",
 
         "produced_in_pub.title",
@@ -95,16 +104,18 @@ class ExperimentSet(Item):
         "publications_of_set.authors",
         "publications_of_set.date_published",
 
-        "experiments_in_set.experiment_type",
+        "experiments_in_set.experiment_type.title",
         "experiments_in_set.accession",
         "experiments_in_set.status",
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
+
         "experiments_in_set.badges.badge.title",
         "experiments_in_set.badges.badge.commendation",
         "experiments_in_set.badges.badge.warning",
         "experiments_in_set.badges.badge.badge_classification",
+        "experiments_in_set.badges.badge.badge_icon",
         "experiments_in_set.badges.badge.description",
         "experiments_in_set.badges.message",
 
@@ -127,11 +138,13 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.badges.badge.commendation",
         "experiments_in_set.biosample.badges.badge.warning",
         "experiments_in_set.biosample.badges.badge.badge_classification",
+        "experiments_in_set.biosample.badges.badge.badge_icon",
         "experiments_in_set.biosample.badges.badge.description",
         "experiments_in_set.biosample.badges.message",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
+        "experiments_in_set.last_modified.date_modified",
 
         # Files - For common embeds (href, file_format, etc) we could programatically get rid of a bunch of similar lines - e.g.:
         # for f in ['href', 'accession', 'file_size, ...]:
@@ -162,6 +175,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
         "experiments_in_set.files.badges.badge.badge_classification",
+        "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.message",
 
@@ -186,6 +200,9 @@ class ExperimentSet(Item):
         "processed_files.extra_files.file_format",
         "processed_files.higlass_uid",
         "processed_files.genome_assembly",
+        "processed_files.last_modified.date_modified",
+        "processed_files.static_content.location",
+        "processed_files.static_content.content.@type",
 
         #"processed_files.quality_metric.Total reads",
         #"processed_files.quality_metric.Total Sequences",
@@ -223,6 +240,9 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Trans reads",
         "experiments_in_set.processed_files.quality_metric.Cis reads (>20kb)",
         "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
+        "experiments_in_set.processed_files.static_content.location",
+        "experiments_in_set.processed_files.static_content.content.@type", # Should only pull in @id, uuid, & display_title
+        "experiments_in_set.processed_files.last_modified.date_modified",
         #"experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
@@ -232,6 +252,8 @@ class ExperimentSet(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.href",
+        "other_processed_files.files.status",
+        "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.higlass_view_config.description",
 
         "experiments_in_set.other_processed_files.files.href",
@@ -243,7 +265,9 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.file_format",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
-        "experiments_in_set.other_processed_files.files.genome_assembly"
+        "experiments_in_set.other_processed_files.files.genome_assembly",
+        "experiments_in_set.other_processed_files.files.status",
+        "experiments_in_set.other_processed_files.files.last_modified.date_modified"
     ]
 
     @calculated_property(schema={

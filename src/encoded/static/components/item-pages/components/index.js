@@ -22,6 +22,7 @@ export { SOPBelowHeaderRow } from './SOPBelowHeaderRow';
 export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { AuditTabView } from './AuditTabView';
+export { BadgesTabView } from './BadgesTabView';
 export { AttributionTabView } from './AttributionTabView';
 export { HiGlassAjaxLoadContainer, HiGlassContainer, HiGlassPlainContainer, HiGlassConfigurator } from './HiGlass';
 export { WorkflowDetailPane } from './WorkflowDetailPane';

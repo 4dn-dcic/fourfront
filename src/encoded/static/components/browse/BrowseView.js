@@ -7,6 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import { Button } from 'react-bootstrap';
+import { IndeterminateCheckbox } from './../forms/components/IndeterminateCheckbox';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { Filters, navigate, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
@@ -20,7 +21,6 @@ import {
 
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
-
 
 
 /**
@@ -40,38 +40,7 @@ class ExperimentSetCheckBox extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.setIndeterminateOnRefIfNeeded = this.setIndeterminateOnRefIfNeeded.bind(this);
         this.onChange = this.onChange.bind(this);
-        this.checkboxRef = React.createRef();
-    }
-
-    componentDidMount(){
-        this.setIndeterminateOnRefIfNeeded();
-    }
-
-    componentDidUpdate(pastProps){
-        if (pastProps.selectedFiles !== this.props.selectedFiles){
-            // Try to avoid accessing DOM (`this.checkboxRef.current.indeterminate = indeterminate`) too frequently
-            // so do (more) JS calculation to try to avoid DOM changes.
-            var currAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(this.props.expSet),
-                pastAllFilesKeyedByTriples = this.expSetFilesToObjectKeyedByAccessionTriples(pastProps.expSet),
-                currSelectedFilesForSet = this.selectedFilesFromSet(currAllFilesKeyedByTriples, this.props.selectedFiles),
-                pastSelectedFilesForSet = this.selectedFilesFromSet(pastAllFilesKeyedByTriples, pastProps.selectedFiles);
-
-            if (currSelectedFilesForSet.length !== pastSelectedFilesForSet.length){
-                this.setIndeterminateOnRefIfNeeded();
-            }
-        }
-    }
-
-    setIndeterminateOnRefIfNeeded(){
-        var { expSet, selectedFiles } = this.props,
-            allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
-            indeterminate           = this.isIndeterminate(allFilesKeyedByTriples, selectedFiles);
-
-        if (this.checkboxRef.current){
-            this.checkboxRef.current.indeterminate = indeterminate;
-        }
     }
 
     expSetFilesToObjectKeyedByAccessionTriples = memoize(function(expSet){
@@ -127,9 +96,10 @@ class ExperimentSetCheckBox extends React.PureComponent {
         var { expSet, selectedFiles } = this.props,
             allFilesKeyedByTriples  = this.expSetFilesToObjectKeyedByAccessionTriples(expSet),
             disabled                = this.isDisabled(allFilesKeyedByTriples),
-            checked                 = !disabled && this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles);
+            checked                 = !disabled && this.isAllFilesChecked(allFilesKeyedByTriples, selectedFiles),
+            indeterminate           = !checked && !disabled && this.isIndeterminate(allFilesKeyedByTriples, selectedFiles);
 
-        return <input {...{ checked, disabled }} onChange={this.onChange} type="checkbox" className="expset-checkbox" ref={this.checkboxRef} />;
+        return <IndeterminateCheckbox {...{ checked, disabled, indeterminate }} onChange={this.onChange} className="expset-checkbox" />;
     }
 }
 
@@ -175,7 +145,7 @@ class ResultTableContainer extends React.PureComponent {
         }),
         'selectFile'                : PropTypes.func,
         'unselectFile'              : PropTypes.func,
-        'selectedFiles'             : PropTypes.objectOf(PropTypes.string)
+        'selectedFiles'             : PropTypes.objectOf(PropTypes.object)
     };
 
     static defaultProps = {
@@ -244,10 +214,8 @@ class ResultTableContainer extends React.PureComponent {
     browseExpSetDetailPane(result, rowNumber, containerWidth, toggleExpandCallback){
         return (
             <ExperimentSetDetailPane
-                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth')}
-                {...{ result, containerWidth, toggleExpandCallback }}
-                href={this.props.href} paddingWidth={47}
-            />
+                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth', 'href')}
+                {...{ result, containerWidth, toggleExpandCallback }} paddingWidth={47} />
         );
     }
 
@@ -284,7 +252,7 @@ class ResultTableContainer extends React.PureComponent {
                         ref={this.searchResultTableRef}
                         results={context['@graph']}
                         renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78} key={href} />
+                        stickyHeaderTopOffset={-78} />
                 </div>
             </div>
         );
@@ -562,15 +530,13 @@ export default class BrowseView extends React.Component {
      * @returns {JSX.Element} Elements and content for fallback view, including some suggested actions.
      */
     renderNoResultsView(hrefParts, countExternalSets){
-        var context = this.props.context,
-            browseBaseHref = navigate.getBrowseBaseHref(),
-            queryForSearchAllItems = _.extend( _.omit(hrefParts.query, ..._.keys(navigate.getBrowseBaseParams()) ), { 'type' : 'Item' } );
+        const { context, href, browseBaseState } = this.props;
 
-        // Function to reuse the search function but with External Data flag activated.
-        var browseExternalData = (e)=>{
+        /** Function to reuse the search function but with External Data flag activated. */
+        const browseExternalData = (e)=>{
             e.preventDefault();
             e.stopPropagation();
-            navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
+            navigate.setBrowseBaseStateAndRefresh('all', href, context);
         };
 
         // If there are no External Sets found:
@@ -590,7 +556,7 @@ export default class BrowseView extends React.Component {
                                 :
                                 <h3 className="text-400 mb-05 mt-05">No results found.</h3>
                         }
-                        { this.props.browseBaseState !== 'all' && countExternalSets > 0 ?
+                        { browseBaseState !== 'all' && countExternalSets > 0 ?
                             <div className="mb-10 mt-1">
                                 <Button bsSize="large" bsStyle="primary" className="text-400 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
                                     Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }

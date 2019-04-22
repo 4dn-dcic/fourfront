@@ -53,7 +53,7 @@ class DefaultDetailPane extends React.Component {
         return (
             <div>
                 {result.description ?
-                        <div className="data-row flexible-description-box result-table-result-heading">
+                        <div className="flexible-description-box result-table-result-heading">
                             {result.description}
                         </div>
                         : null}
@@ -80,8 +80,6 @@ class ResultDetail extends React.PureComponent{
     constructor(props){
         super(props);
         this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'closing' : false };
 
         this.detailRef = React.createRef();
@@ -118,18 +116,16 @@ class ResultDetail extends React.PureComponent{
     render(){
         var { open, rowNumber, result, tableContainerWidth, tableContainerScrollLeft, renderDetailPane, toggleDetailOpen } = this.props;
         return (
-            <div className={"result-table-detail-container" + (open || this.state.closing ? ' open' : ' closed')}>
+            <div className={"result-table-detail-container detail-" + (open || this.state.closing ? 'open' : 'closed')}>
                 { open ?
                     <div className="result-table-detail" ref={this.detailRef} style={{
                         'width' : tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
                     }}>
                         { renderDetailPane(result, rowNumber, tableContainerWidth, this.setDetailHeightFromPane) }
-                        { tableContainerScrollLeft && tableContainerScrollLeft > 10 ?
-                            <div className="close-button-container text-center" onClick={toggleDetailOpen}>
-                                <i className="icon icon-angle-up"/>
-                            </div>
-                        : null }
+                        <div className="close-button-container text-center" onClick={toggleDetailOpen} data-tip="Collapse Details">
+                            <i className="icon icon-angle-up"/>
+                        </div>
                     </div>
                 : <div/> }
             </div>
@@ -258,7 +254,7 @@ class ResultRow extends React.PureComponent {
             isDraggable = currentAction === 'selection';
 
         return (
-            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
+            <div className={"search-result-row detail-" + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
                 // TODO POTENTIALLY: Use to set height on open/close icon & sticky title column.
                 var height = (r && r.offsetHeight) || null;
                 if (height && height !== this.rowFullHeight){
@@ -316,20 +312,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
         if (typeof this.state.mounted === 'boolean') {
             this.setState({ 'mounted' : true });
         }
-        //window.addEventListener('scroll', this.handleScrollExt);
     }
-    /*
-    componentWillUnmount(){
-        window.removeEventListener('scroll', this.handleScrollExt);
-    }
-    */
-    /*
-    handleScrollExt(){
-        if (typeof this.props.onVerticalScroll === 'function'){
-            return this.props.onVerticalScroll.apply(this.props.onVerticalScroll, arguments);
-        }
-    }
-    */
 
     getInitialFrom(){
         if (typeof this.props.page === 'number' && typeof this.props.limit === 'number'){
@@ -372,7 +355,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                     });
                 }
             } else {
-                this.setState({  'isLoading' : false, }, () => this.props.setResults(this.props.results));
+                this.setState({  'isLoading' : false });
             }
         };
 
@@ -380,20 +363,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
             ajax.load(nextHref, loadCallback, 'GET', loadCallback);
         });
     }
-    /*
-    handleScrollingStateChange(isScrolling){
-        //vizUtil.requestAnimationFrame(()=>{
-            //if (isScrolling && !this.lastIsScrolling){
-            //    this.props.innerContainerElem.style.pointerEvents = 'none';
-            //} else if (this.lastIsScrolling) {
-                this.props.innerContainerElem.style.pointerEvents = '';
-                this.props.innerContainerElem.childNodes[0].focus();
-                //console.log(this.props.innerContainerElem.childNodes[0]);
-            //}
-            //this.lastIsScrolling = !!(isScrolling);
-        //});
-    }
-    */
+
     render(){
         var { children, rowHeight, openDetailPanes, openRowHeight, tableContainerWidth, tableContainerScrollLeft, totalExpected, results } = this.props;
         if (!(this.props.mounted || this.state.mounted)){
@@ -426,8 +396,7 @@ class LoadMoreAsYouScroll extends React.PureComponent {
                 infiniteLoadBeginEdgeOffset={canLoad ? 200 : undefined}
                 preloadAdditionalHeight={Infinite.containerHeightScaleFactor(1.5)}
                 preloadBatchSize={Infinite.containerHeightScaleFactor(1.5)}
-                children={children}
-            />
+                >{ children }</Infinite>
         );
     }
 }
@@ -443,7 +412,7 @@ class ShadowBorderLayer extends React.Component {
 
     static defaultProps = {
         'horizontalScrollRateOnEdgeButton' : 10
-    }
+    };
 
     static isWindowPastTableTop(tableContainerElement, windowHeight = null, scrollTop = null, tableTopOffset = null){
         if (isServerSide()) return false;
@@ -460,7 +429,8 @@ class ShadowBorderLayer extends React.Component {
         super(props);
         this.scrolling = false;
         this.performScrollAction = this.performScrollAction.bind(this);
-        this.handleScrollButtonClick = this.handleScrollButtonClick.bind(this);
+        this.handleLeftScrollButtonMouseDown = this.handleScrollButtonMouseDown.bind(this, 'left');
+        this.handleRightScrollButtonMouseDown = this.handleScrollButtonMouseDown.bind(this, 'right');
         this.handleScrollButtonUp = this.handleScrollButtonUp.bind(this);
         this.lastDimClassName = null;
     }
@@ -521,6 +491,13 @@ class ShadowBorderLayer extends React.Component {
         //return this.lastDimClassName;
     }
 
+    handleScrollButtonMouseDown(direction = "right", evt){
+        if (evt.button === 0) { // Left click
+            this.scrolling = true;
+            this.performScrollAction(direction);
+        }
+    }
+
     edgeScrollButtonLeft(leftEdgeContentWidth){
         if (!this.props.innerContainerElem) return null;
         var className = "edge-scroll-button left-edge";
@@ -528,7 +505,7 @@ class ShadowBorderLayer extends React.Component {
             className += ' faded-out';
         }
         return (
-            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'left')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+            <div className={className} onMouseDown={this.handleLeftScrollButtonMouseDown} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
                 <i className="icon icon-caret-left"/>
             </div>
         );
@@ -541,34 +518,34 @@ class ShadowBorderLayer extends React.Component {
             className += ' faded-out';
         }
         return (
-            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'right')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+            <div className={className} onMouseDown={this.handleRightScrollButtonMouseDown} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
                 <i className="icon icon-caret-right"/>
             </div>
         );
     }
 
-    performScrollAction(direction = "right", depth = 0){
-        vizUtil.requestAnimationFrame(()=>{
-            var change = (direction === 'right' ? 1 : -1) * this.props.horizontalScrollRateOnEdgeButton;
-            var maxScrollLeft = this.props.fullRowWidth - this.props.tableContainerWidth;
-            var leftOffset = this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
-            var detailPanes = DimensioningContainer.findDetailPaneElements();
-            if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, leftOffset);
+    performScrollAction(direction = "right"){
+        const { horizontalScrollRateOnEdgeButton, tableContainerWidth, fullRowWidth, innerContainerElem, setContainerScrollLeft } = this.props;
+        const scrollAction = (depth) => {
+            var change = (direction === 'right' ? 1 : -1) * horizontalScrollRateOnEdgeButton;
+            var maxScrollLeft = fullRowWidth - tableContainerWidth;
+            var leftOffset = Math.max(0, Math.min(maxScrollLeft, innerContainerElem.scrollLeft + change));
+            innerContainerElem.scrollLeft = leftOffset;
+            setContainerScrollLeft(leftOffset);
+
             if (depth >= 10000){
                 console.error("Reached depth 10k on a recursive function 'performScrollAction.'");
                 return;
             }
-            if (this.scrolling) {
-                this.performScrollAction(direction, depth + 1);
-            }
-        });
-    }
 
-    handleScrollButtonClick(direction = "right", evt){
-        if (evt.button === 0) { // Left click
-            this.scrolling = true;
-            this.performScrollAction(direction);
-        }
+            if (this.scrolling) {
+                vizUtil.requestAnimationFrame(function(){
+                    scrollAction(depth + 1);
+                });
+            }
+        };
+
+        scrollAction(0);
     }
 
     handleScrollButtonUp(){
@@ -614,9 +591,7 @@ class DimensioningContainer extends React.PureComponent {
                 }, 0),
                 (headerElement && (headerElement.offsetWidth + 12)) || 0
             );
-
         }
-
 
         return maxColWidth;
     }
@@ -631,11 +606,9 @@ class DimensioningContainer extends React.PureComponent {
 
     static setDetailPanesLeftOffset(detailPanes, leftOffset = 0, cb = null){
         if (detailPanes && detailPanes.length > 0){
-            vizUtil.requestAnimationFrame(()=>{
-                var transformStyle = vizUtil.style.translate3d(leftOffset);
-                detailPanes.forEach(function(d){
-                    d.style.transform = transformStyle;
-                });
+            var transformStyle = vizUtil.style.translate3d(leftOffset);
+            _.forEach(detailPanes, function(d){
+                d.style.transform = transformStyle;
             });
         }
         if (typeof cb === 'function') cb();
@@ -648,11 +621,32 @@ class DimensioningContainer extends React.PureComponent {
         return null;
     }
 
+    /**
+     * We previously had used `object.itemUtil.compareResultsByID`, however
+     * `getDerivedStateFromProps` is ran right before every single render so
+     * for performance we compare list/object reference instead.
+     *
+     * If results have changed, it implicitly means something like href or user
+     * session has changed as well.
+     */
+    static getDerivedStateFromProps(props, state){
+        if (state.originalResults !== props.results){
+            console.warn('props.results have changed, resetting some state -- ');
+            return {
+                'results' : props.results.slice(0),
+                'openDetailPanes' : {},
+                'originalResults' : props.results
+            };
+        }
+        return null;
+    }
+
     constructor(props){
         super(props);
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
         this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
+        this.setContainerScrollLeft = this.setContainerScrollLeft.bind(this);
         this.onHorizontalScroll = this.onHorizontalScroll.bind(this);
         this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 200);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
@@ -665,9 +659,14 @@ class DimensioningContainer extends React.PureComponent {
         this.state = {
             'mounted'   : false,
             'widths'    : DimensioningContainer.resetHeaderColumnWidths(props.columnDefinitions, false, props.windowWidth),
+            // We cache this here in order to be able props.results vs state.orginalResults
+            // in getDerivedStateFromProps.
+            // SearchResultTable _does not_ get context passed in, so we compare results instead.
+            'originalResults' : props.results,
             'results'   : props.results.slice(0),
             'isWindowPastTableTop' : false,
-            'openDetailPanes' : {} // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview
+            // { row key : detail pane height } used for determining if detail pane is open + height for Infinite listview
+            'openDetailPanes' : {}
         };
 
         this.innerContainerRef      = React.createRef();
@@ -708,11 +707,15 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps, pastState){
-        if (pastState.results.length !== this.state.results.length){
+
+        if (pastState.results !== this.state.results){
             ReactTooltip.rebuild();
         }
 
-        if (pastProps.columnDefinitions.length !== this.props.columnDefinitions.length){
+        if (pastProps.columnDefinitions.length !== this.props.columnDefinitions.length/* || this.props.results !== pastProps.results*/){
+            // We have a list of widths in state; if new col is added, these are no longer aligned, so we reset.
+            // We may optioanlly (currently disabled) also do this if _original_ results have changed as extra glitter to decrease some widths re: col values.
+            // (if done when state.results have changed, it would occur way too many times to be performant (state.results changes as-you-scroll))
             this.resetWidths();
         } else if (pastProps.windowWidth !== this.props.windowWidth){
             this.setState(this.getTableDims());
@@ -742,14 +745,18 @@ class DimensioningContainer extends React.PureComponent {
         }, cb);
     }
 
+    setContainerScrollLeft(nextScrollLeft){
+        this.setState(function({ tableContainerScrollLeft }){
+            if (tableContainerScrollLeft === nextScrollLeft) {
+                return null;
+            }
+            return { 'tableContainerScrollLeft' : nextScrollLeft };
+        });
+    }
+
     onHorizontalScroll(e){
         e && e.stopPropagation();
-        var nextScrollLeft = e.target.scrollLeft,
-            detailPanes = DimensioningContainer.findDetailPaneElements();
-
-        if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, nextScrollLeft, ()=>{
-            this.setState({ 'tableContainerScrollLeft' : nextScrollLeft });
-        });
+        this.setContainerScrollLeft(e.target.scrollLeft || 0);
         return false;
     }
 
@@ -863,12 +870,14 @@ class DimensioningContainer extends React.PureComponent {
     }
 
     resetWidths(){
+
         // 1. Reset state.widths to be [0,0,0,0, ...newColumnDefinitionsLength], forcing them to widthMap sizes.
-        this.setState( ({ mounted }, { columnDefinitions, windowWidth }) => {
-            return {
-                "widths" : DimensioningContainer.resetHeaderColumnWidths(columnDefinitions, mounted, windowWidth)
-            };
-        }, () => {
+        const resetWidthStateChangeFxn = function({ mounted }, { columnDefinitions, windowWidth }){
+            return { "widths" : DimensioningContainer.resetHeaderColumnWidths(columnDefinitions, mounted, windowWidth) };
+        };
+
+        // 2. Upon render into DOM, decrease col sizes.
+        const resetWidthStateChangeFxnCallback = () => {
             vizUtil.requestAnimationFrame(()=>{
                 var { columnDefinitions, windowWidth } = this.props;
                 // 2. Upon render into DOM, decrease col sizes.
@@ -877,7 +886,9 @@ class DimensioningContainer extends React.PureComponent {
                     { 'widths' : DimensioningContainer.findAndDecreaseColumnWidths(columnDefinitions, 30, windowWidth) }
                 ));
             });
-        });
+        };
+
+        this.setState(resetWidthStateChangeFxn, resetWidthStateChangeFxnCallback);
     }
 
     setHeaderWidths(widths){
@@ -955,7 +966,8 @@ class DimensioningContainer extends React.PureComponent {
                                 />
                             </div>
                         </div>
-                        <ShadowBorderLayer {...{ tableContainerScrollLeft, tableContainerWidth, fullRowWidth, isWindowPastTableTop, innerContainerElem }} />
+                        <ShadowBorderLayer {...{ tableContainerScrollLeft, tableContainerWidth, fullRowWidth, isWindowPastTableTop, innerContainerElem }}
+                            setContainerScrollLeft={this.setContainerScrollLeft} />
                     </div>
                 </StickyContainer>
                 { canLoadMore === false ?

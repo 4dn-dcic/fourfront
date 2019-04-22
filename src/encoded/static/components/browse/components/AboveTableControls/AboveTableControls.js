@@ -227,9 +227,8 @@ export class AboveTableControls extends React.Component {
         return (
             <div className="pull-right right-buttons">
                 <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
-                    <i className="icon icon-gear icon-fw"/>
-                    <span className="hidden-xs hidden-sm">Columns</span>
-                    <i className="icon icon-fw icon-angle-down"/>
+                    <i className="icon icon-fw icon-table" />
+                    <i className="icon icon-fw icon-angle-down ml-03"/>
                 </Button>
                 <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (!isFullscreen ? '' : ' expanded')}
                     onClick={this.handleLayoutToggle} data-tip={(!isFullscreen ? 'Expand' : 'Collapse') + " table width"}>

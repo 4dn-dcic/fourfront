@@ -37,14 +37,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
-        },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "default": "DAM-ID seq",
-            "enum": [
-                "DAM-ID seq"
-            ]
+            "default": "4"
         },
         "targeted_factor": {
             "title": "Target Fusion Protein",

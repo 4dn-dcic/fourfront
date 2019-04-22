@@ -2,20 +2,25 @@
 
 import React from 'react';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 
-
+/**
+ * @deprecated
+ */
 export class AuditTabView extends React.PureComponent {
 
     static getTabObject(props){
         var context         = props.context,
+            auditCount      = AuditTabView.getAuditCount(context),
             audits          = context.audit,
             auditIconClass  = AuditTabView.getItemIndicatorIcon(context);
+
         return {
             tab : (
-                <span className={audits && _.keys(audits).length > 0 ? 'active' : null}>
-                    <i className={"icon icon-fw icon-" + auditIconClass}/> Audits
+                <span>
+                    <i className={"icon icon-fw icon-" + auditIconClass}/> { auditCount } Audit{ auditCount > 1 ? 's' : '' }
                 </span>
             ),
             key : "audits",
@@ -42,20 +47,24 @@ export class AuditTabView extends React.PureComponent {
         return auditIconClass;
     }
 
+    static getAuditCount = memoize(function(context){
+        return _.reduce(context.audit || [], function(m,v){ return m + v.length; }, 0);
+    });
+
     /**
      * @static
      * @public
      * @param {Object} context - Item object representation containing 'audit' property.
      * @returns {boolean} True if any audits exist.
      */
-    static doAnyAuditsExist = function(context){
+    static doAnyAuditsExist = memoize(function(context){
         if (typeof context.audit === 'undefined') return false;
-        if (_.keys(context.audit).length === 0 || _.reduce(context.audit, function(m,v){ return m + v.length; }, 0) === 0){
+        if (AuditTabView.getAuditCount(context) === 0){
             return false;
         } else {
             return true;
         }
-    }
+    });
 
     /**
      * Returns string broken into parts with a JSON segment in it.

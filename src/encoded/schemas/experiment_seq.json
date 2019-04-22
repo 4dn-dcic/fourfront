@@ -45,21 +45,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "4"
-        },
-        "experiment_type": {
-            "enum": [
-            "ChIP-seq",
-            "RNA-seq",
-            "NAD-seq",
-            "DNA SPRITE",
-            "RNA-DNA SPRITE",
-            "MARGI",
-            "GAM",
-            "CUT&RUN",
-            "TrAC-loop",
-            "TRIP"
-          ]
+            "default": "5"
         },
         "targeted_factor": {
             "title": "Target",

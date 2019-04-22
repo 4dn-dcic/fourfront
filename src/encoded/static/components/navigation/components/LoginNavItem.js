@@ -4,11 +4,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { NavItem } from 'react-bootstrap';
+import { NavItem, Modal } from 'react-bootstrap';
 import Auth0Lock from 'auth0-lock';
 import { JWT, ajax, navigate, isServerSide, analytics, object, layout } from './../../util';
 import Alerts from './../../alerts';
-import { UserRegistrationModal, decodeJWT } from './../../forms/UserRegistrationForm';
+import UserRegistrationForm, { decodeJWT } from './../../forms/UserRegistrationForm';
 
 
 
@@ -25,7 +25,7 @@ export class LoginNavItem extends React.Component {
         super(props);
         this.showLock           = _.throttle(this.showLock.bind(this), 1000, { trailing: false });
         this.loginCallback      = this.loginCallback.bind(this);
-        this.loginErrorCallback = this.loginErroCallback.bind(this);
+        this.loginErrorCallback = this.loginErrorCallback.bind(this);
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
         this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.state = {
@@ -102,17 +102,13 @@ export class LoginNavItem extends React.Component {
                 Alerts.deQueue(Alerts.LoggedOut);
                 console.info('Login completed');
 
-                this.setState({ "isLoading" : false });
-
-                if (href && href.indexOf('/error/login-failed') !== -1){
-                    navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
-                }
-
                 // Fetch user profile and use their primary lab as the eventLabel.
                 const profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
                 const isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
 
                 if (profileURL){
+                    this.setState({ "isLoading" : false });
+
                     // Register an analytics event for UI login.
                     // This is used to segment public vs internal audience in Analytics dashboards.
                     ajax.load(profileURL, (profile)=>{
@@ -148,7 +144,7 @@ export class LoginNavItem extends React.Component {
 
     }
 
-    loginErroCallback(error){
+    loginErrorCallback(error){
         if (!error.code && error.type === 'timed-out'){
             // Server or network error of some sort most likely.
             Alerts.queue(Alerts.LoginFailed);
@@ -169,8 +165,8 @@ export class LoginNavItem extends React.Component {
 
         this.loginCallback(
             { 'idToken' : token },
-            (userProfile) => { // on success:
-                this.setState({ 'showRegistrationModal' : false });
+            // Success callback -- shows "Success" Alert msg.
+            (userProfile) => {
                 var userDetails = JWT.getUserDetails(), // We should have this after /login
                     userProfileURL = userProfile && object.itemUtil.atId(userProfile),
                     userFullName = (
@@ -183,12 +179,13 @@ export class LoginNavItem extends React.Component {
                             <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
                         </ul>
                     );
-
-                Alerts.queue({
-                    "title"     : "Registered & Logged In",
-                    "message"   : msg,
-                    "style"     : 'success',
-                    'navigateDisappearThreshold' : 2
+                this.setState({ 'showRegistrationModal' : false }, function(){
+                    Alerts.queue({
+                        "title"     : "Registered & Logged In",
+                        "message"   : msg,
+                        "style"     : 'success',
+                        'navigateDisappearThreshold' : 2
+                    });
                 });
             },
             (err) => {
@@ -204,11 +201,85 @@ export class LoginNavItem extends React.Component {
         this.setState({ 'showRegistrationModal' : false });
     }
 
+    renderRegistrationModal(){
+        const { showRegistrationModal, isLoading } = this.state;
+        const schemas = this.props.schemas;
+
+        if (!showRegistrationModal) return null;
+
+        const token = JWT.get();
+        // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
+        const decodedToken = token && decodeJWT(token);
+        const unverifiedEmail = decodedToken && decodedToken.email;
+        const onExitLinkClick = (e) => {
+            e.preventDefault();
+            this.setState({ 'showRegistrationModal' : false }, this.showLock);
+        };
+
+        if (!unverifiedEmail){
+            // Error (maybe if user manually cleared cookies or localStorage... idk)
+            return (
+                <Modal show onHide={this.onRegistrationCancel}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Missing Email</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>An error has occurred. Please try to login/register again.</p>
+                    </Modal.Body>
+                </Modal>
+            );
+        }
+
+        const isEmailAGmail = unverifiedEmail.slice(-10) === "@gmail.com";
+        const onGoogleLinkClick = (e) => {
+            e.preventDefault();
+            analytics.event('Authentication', 'CreateGoogleAccountLinkClick', { eventLabel : "None" });
+            window.open(e.target.href);
+        };
+        const formHeading = (
+            <div className="mb-3">
+                <h4 className="text-400 mb-2 mt-05">
+                    You have never logged in as <span className="text-600">{ unverifiedEmail }</span> before.
+                </h4>
+                <ul>
+                    <li>
+                        Please <span className="text-500">register below</span> or <a href="#" className="text-500" onClick={onExitLinkClick}>
+                            use a different email address
+                        </a> if you have an existing account.
+                    </li>
+                    { isEmailAGmail?
+                        <li>
+                            If you prefer, you can use your institutional email address as your account ID by creating a new google account
+                            at <a href="https://accounts.google.com/signup/v2" target="_blank" rel="noopener noreferrer" onClick={onGoogleLinkClick}>
+                                https://accounts.google.com/signup/v2
+                            </a> and
+                            selecting &quot;Use my current email address instead&quot;.
+                        </li>
+                    : null }
+                </ul>
+            </div>
+        );
+
+        return (
+            <Modal show bsSize="large" onHide={this.onRegistrationCancel}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Registration</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <UserRegistrationForm heading={formHeading} schemas={schemas} jwtToken={token}
+                        onComplete={this.onRegistrationComplete} onCancel={this.onRegistrationCancel} />
+                </Modal.Body>
+            </Modal>
+        );
+    }
+
     render() {
-        var { schemas, windowWidth, id } = this.props,
+        var { windowWidth, id } = this.props,
             { showRegistrationModal, isLoading } = this.state,
-            gridState = layout.responsiveGridState(windowWidth),
-            loginNavItem = (
+            gridState = layout.responsiveGridState(windowWidth);
+
+        return (
+            <React.Fragment>
                 <NavItem key="login-reg-btn" active={showRegistrationModal} onClick={this.showLock} className="user-account-item" id={id}>
                     { isLoading ? (
                         <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>
@@ -219,40 +290,7 @@ export class LoginNavItem extends React.Component {
                         </React.Fragment>
                     )}
                 </NavItem>
-            ),
-            userRegistrationModal = null;
-
-        if (showRegistrationModal){
-            // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
-            var token           = JWT.get(),
-                decodedToken    = decodeJWT(token),
-                unverifiedEmail = decodedToken.email,
-                onExitLinkClick = (e) => {
-                    e.preventDefault();
-                    this.setState({ 'showRegistrationModal' : false }, this.showLock);
-                },
-                formHeading    = unverifiedEmail && (
-                    <h4 className="text-400 mb-25 mt-05">
-                        You have never logged in as <span className="text-600">{ unverifiedEmail }</span> before.
-                        <br/>
-                        Please <span className="text-500">register below</span> or <a href="#" className="text-500" onClick={onExitLinkClick}>use a different email address</a> if have an existing account.
-                    </h4>
-                );
-
-            userRegistrationModal = (
-                <UserRegistrationModal onComplete={this.onRegistrationComplete} schemas={schemas} jwtToken={token}
-                    onCancel={this.onRegistrationCancel} formHeading={formHeading} />
-            );
-            //return ReactDOM.createPortal(
-            //    <UserRegistrationModal onComplete={this.onRegistrationComplete} />,
-            //    overlaysContainer
-            //);
-        }
-
-        return (
-            <React.Fragment>
-                { loginNavItem }
-                { userRegistrationModal }
+                { this.renderRegistrationModal() }
             </React.Fragment>
         );
     }
