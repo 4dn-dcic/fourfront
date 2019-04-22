@@ -44,22 +44,7 @@
     },
     "properties": {
         "schema_version": {
-            "default": "1"
-        },
-        "experiment_type": {
-            "title" : "Experiment Type",
-            "enum": [
-                "in situ Hi-C",
-                "dilution Hi-C",
-                "micro-C",
-                "DNase Hi-C",
-                "TCC",
-                "cryomilling TCC",
-                "single cell Hi-C",
-                "sci-Hi-C",
-                "MC-3C",
-                "MC-Hi-C"
-            ]
+            "default": "2"
         },
         "crosslinking_method": {
             "title": "Crosslinking Method",

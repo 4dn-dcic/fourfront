@@ -190,7 +190,7 @@ class SingleUpdate extends React.Component {
         return (
             <tr key={item.primary_id.uuid} >
                 <td><a href={atId}>{ item.primary_id.display_title }</a></td>
-                <td>{ firstExp.experiment_type }</td>
+                <td>{ firstExp.experiment_type && firstExp.experiment_type.display_title }</td>
                 <td>{ firstExp.biosample.biosource_summary }</td>
                 <td>{ categorizer }</td>
                 <td>{ this.buildSecondary(atId, item.secondary_ids) }</td>

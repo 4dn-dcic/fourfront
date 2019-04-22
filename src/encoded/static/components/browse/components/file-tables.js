@@ -449,7 +449,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             /* No Files Exist */
             contents.push(
                 <StackedBlock key="single-empty-item" hideNameOnHover={false} columnClass="file-group">
-                    { _.pluck(fullColumnHeaders, 'title').indexOf('File Pair') > -1 ? <StackedBlockName/> : null }
+                    { _.pluck(fullColumnHeaders, 'title').indexOf('File Group') > -1 ? <StackedBlockName/> : null }
                     <StackedBlockList title="Files" className="files">
                         <FileEntryBlock file={null} columnHeaders={fullColumnHeaders} href={href} />
                     </StackedBlockList>
@@ -459,7 +459,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         var experimentVisibleName = (
                 exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                    exp.experiment_type ? exp.experiment_type :
+                    (exp.experiment_type && exp.experiment_type.display_title) ? exp.experiment_type.display_title :
                         exp.accession
             ),
             experimentAtId  = object.itemUtil.atId(exp),
@@ -474,7 +474,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
                 label={<StackedBlockNameLabel title="Experiment" accession={exp.accession} subtitleVisible />}>
-                <StackedBlockName relativePosition={expFxn.fileCount(exp) > 6}>
+                <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList title={listTitle} className={contentsClassName}

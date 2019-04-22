@@ -47,10 +47,12 @@
             "formInput": "textarea"
         },
         "experiment_type": {
+            "title": "Experiment Type",
             "type": "string",
             "lookup": 10,
             "description": "A controlled term specifying the type of experiment.",
-            "internal_comment":"should be ontology term?"
+            "linkTo": "ExperimentType",
+            "ff_flag": "filter:valid_item_types"
         },
         "protocol": {
             "title": "Reference Protocol",
@@ -212,7 +214,7 @@
         }
     },
     "facets": {
-        "experiment_type" : {
+        "experiment_type.title" : {
             "title" : "Experiment Type"
         },
         "biosample.biosource.individual.organism.name": {

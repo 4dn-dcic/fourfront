@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
-import { console, object, Schemas } from './../util';
+import { console, object, Schemas, expFxn } from './../util';
 import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -112,7 +112,8 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
      */
     typeInfo(){
-        return { 'title' : this.props.context.experiment_type || null, 'description' : "Type of Experiment" };
+        const experimentType = expFxn.getExperimentTypeStr(this.props.context);
+        return (experimentType && { 'title' : experimentType, 'description' : "Type of Experiment" }) || null;
     }
 
     /**
