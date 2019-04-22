@@ -12,7 +12,8 @@ import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
 import { EmbeddedHiglassActions } from './../static-pages/components';
-var { Item, File, ExperimentSet } = typedefs;
+
+const { Item, File, ExperimentSet } = typedefs;
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
 // import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
@@ -28,20 +29,19 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
     static propTypes = {
         'schemas' : PropTypes.object,
-        'context' : PropTypes.object
+        'context' : PropTypes.object.isRequired
     };
 
     constructor(props){
         super(props);
         this.isWorkflowNodeCurrentContext = this.isWorkflowNodeCurrentContext.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
-        var state = {
-            // `selectedFiles` not currently used -- can be passed down to RawFilesStackedTableExtendedColumns eventually to enable selection & download.
-            //'selectedFiles': new Set(),
-            'mounted' : false
-        };
-        if (!this.state) this.state = state; // May inherit from WorkfowRunTracingView
-        else _.extend(this.state, state);
+
+        /**
+         * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
+         * `loadingGraphSteps`, `allRuns`, `steps`, & `mounted`
+         */
+        this.state = this.state;
     }
 
     static anyOtherProcessedFilesExist = memoize(function(context){
@@ -76,40 +76,39 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
      * Executed on width change, as well as this ItemView's prop change.
      */
     getTabViewContents(){
-        var { context, schemas, windowWidth, href } = this.props;
+        const { context, schemas, windowWidth, windowHeight, href } = this.props;
+        const mounted = this.state.mounted;
 
-        //context = SET;
+        //context = SET; // Use for testing along with _testing_data
 
         var processedFiles      = expFxn.allProcessedFilesFromExperimentSet(context),
             processedFilesLen   = (processedFiles && processedFiles.length) || 0,
             rawFiles            = expFxn.allFilesFromExperimentSet(context, false),
             rawFilesLen         = (rawFiles && rawFiles.length) || 0,
             width               = this.getTabViewWidth(),
-            commonProps         = { width, context, schemas, windowWidth, href },
+            commonProps         = { width, context, schemas, windowWidth, href, mounted },
             tabs                = [];
 
+        // Processed Files Table Tab
         if (processedFilesLen > 0){
-
-            // Processed Files Table Tab
             tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> { processedFilesLen } Processed File{ processedFilesLen > 1 ? 's' : '' }</span>,
+                tab : <span><i className="icon icon-microchip icon-fw"/>{ ' ' + processedFilesLen + " Processed File" + (processedFilesLen > 1 ? 's' : '') }</span>,
                 key : 'processed-files',
-                content : <ProcessedFilesStackedTableSection files={processedFiles} {...commonProps} {...this.state} />
+                content : <ProcessedFilesStackedTableSection files={processedFiles} {...commonProps} />
             });
-
         }
 
         // Raw files tab, if have experiments with raw files
         if (rawFilesLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-leaf icon-fw"/> { rawFilesLen } Raw File{ rawFilesLen > 1 ? 's' : '' }</span>,
+                tab : <span><i className="icon icon-leaf icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
                 key : 'raw-files',
-                content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} {...this.state} />
+                content : <RawFilesStackedTableSection files={rawFiles} {...commonProps} />
             });
         }
 
+        // Graph Section Tab
         if (processedFilesLen > 0){
-            // Graph Section Tab
             tabs.push(FileViewGraphSection.getTabObject(
                 _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
                 this.state,
@@ -127,16 +126,14 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             });
         }
 
-        return tabs.concat(this.getCommonTabs(this.props)).map((tabObj)=>{
+        return tabs.concat(this.getCommonTabs()).map((tabObj)=>{
             return _.extend(tabObj, {
-                'style' : { minHeight : Math.max(this.state.mounted && !isServerSide() && (window.innerHeight - 180), 100) || 800 }
+                'style' : {
+                    'minHeight' : Math.max(this.state.mounted && !isServerSide() && (windowHeight - 180), 100) || 800
+                }
             });
         });
 
-    }
-
-    itemHeader(){
-        return <ExperimentSetHeader {...this.props} />;
     }
 
     itemMidSection(){
@@ -144,9 +141,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             <React.Fragment>
                 { super.itemMidSection() }
                 <OverviewHeading context={this.props.context} schemas={this.props.schemas} key="overview"
-                    className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={(open, props)=>
-                        <i className="expand-icon icon icon-th-list" />
-                    } />
+                    className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={function(open, props){
+                        return <i className="expand-icon icon icon-th-list" />;
+                    }} />
             </React.Fragment>
         );
     }
@@ -168,39 +165,18 @@ class OverviewHeading extends React.PureComponent {
                 <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" />
 
                 <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_categorizer.combined' fallbackTitle="Assay Details" titleRenderFxn={function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
-                    var expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
-                    expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
-                    if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
-                        return <span><span className="text-500">{ expCatObj.field }:</span> { expCatObj.value }</span>;
-                    }
-                    return OverViewBodyItem.titleRenderPresets.default(...arguments);
-                }} />
+                <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_categorizer.combined' fallbackTitle="Assay Details"
+                    titleRenderFxn={function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+                        var expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
+                        expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
+                        if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
+                            return <span><span className="text-500">{ expCatObj.field }:</span> { expCatObj.value }</span>;
+                        }
+                        return OverViewBodyItem.titleRenderPresets.default(...arguments);
+                    }} />
                 <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" />
                 <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" />
             </OverviewHeadingContainer>
-        );
-    }
-}
-
-
-
-
-/**
- * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
- *
- * @prop {Object} context - Same context prop as available on parent component.
- * @prop {string} href - Current page href, passed down from app or Redux store.
- */
-class ExperimentSetHeader extends React.PureComponent {
-    render() {
-        if (this.props.debug) console.log('render ExperimentSetHeader');
-        return (
-            <ItemHeader.Wrapper {..._.pick(this.props, 'href', 'context', 'schemas', 'windowWidth')} className="exp-set-header-area">
-                <ItemHeader.TopRow />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
         );
     }
 }

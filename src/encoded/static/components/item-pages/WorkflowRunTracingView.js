@@ -50,11 +50,10 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     }
 
     componentDidMount(){
-        super.componentDidMount(...arguments);
-
+        super.componentDidMount(...arguments); // DefaultItem's this.maybeSetRedirectedAlert()
         var nextState = { 'mounted' : true };
-
         if (!this.state.steps){
+            // Will always evaluate unless are using _testing_data to override.
             nextState.loadingGraphSteps = true;
             this.loadGraphSteps();
         }
@@ -122,18 +121,18 @@ export class FileViewGraphSection extends WorkflowGraphSection {
      * Returns tab object representation for Graph section.
      * Used by any ItemView which loads provenance graph steps into its state.steps.
      *
-     * @param {Object} parentProps - All props from parent Item view.
-     * @param {Object} parentState - All properties from parent Item view state.
-     * @param {!Object[]} parentState.steps - Steps of provenance graph, AJAXed-in by parent Item view.
-     * @param {boolean} parentState.mounted - Whether parent component/view has been mounted yet.
-     * @param {boolean} parentState.allRuns - Whether 'all runs' (vs grouped runs) are currently being loaded.
-     * @param {boolean} parentState.loadingGraphSteps - Whether steps are currently being loaded.
+     * @param {Object} props - All props from parent Item view.
+     * @param {Object} state - All properties from parent Item view state.
+     * @param {!Object[]} state.steps - Steps of provenance graph, AJAXed-in by parent Item view.
+     * @param {boolean} state.mounted - Whether parent component/view has been mounted yet.
+     * @param {boolean} state.allRuns - Whether 'all runs' (vs grouped runs) are currently being loaded.
+     * @param {boolean} state.loadingGraphSteps - Whether steps are currently being loaded.
      * @param {function} onToggleAllRuns - Callback function passed from parent Item view. Called when 'toggle all runs' checkbox is changed.
      * @returns {{ tab: JSX.Element, key: string, disabled?: boolean, isDefault?: boolean, content: JSX.Element }} Tab object
      */
-    static getTabObject(parentProps, parentState, onToggleAllRuns, width){
-        var { loadingGraphSteps, steps, mounted, allRuns } = parentState,
-            { context } = parentProps,
+    static getTabObject(props, state, onToggleAllRuns, width){
+        var { loadingGraphSteps, steps } = state,
+            { context } = props,
             iconClass   = "icon icon-fw icon-",
             tooltip     = null;
 
@@ -152,7 +151,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
             'content'   : (
-                <FileViewGraphSection {...parentProps} {..._.pick(parentState, 'steps', 'mounted', 'allRuns')} width={width}
+                <FileViewGraphSection {...props} {..._.pick(state, 'steps', 'mounted', 'allRuns')} width={width}
                     key={"graph-for-" + context.uuid} onToggleAllRuns={onToggleAllRuns} loading={loadingGraphSteps} />
             )
         };
