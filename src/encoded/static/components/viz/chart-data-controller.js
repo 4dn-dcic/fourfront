@@ -63,7 +63,7 @@ var state = {
         //},
         //{ title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
         //{ title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+        { title : "Experiment Type", field : 'experiments_in_set.experiment_type.title' },
         {
             title : "Digestion Enzyme",
             field : 'experiments_in_set.digestion_enzyme.name',

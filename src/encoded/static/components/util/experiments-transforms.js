@@ -8,6 +8,19 @@ import { Item, File, Experiment, ExperimentSet } from './typedefs';
 var console = patchedConsoleInstance;
 
 
+
+/**
+ * Gets experiment_type string from an experiment.
+ * Requires experiment_type.title to be embedded.
+ *
+ * @param {Experiment} exp - An Experiment Item JSON
+ * @returns {string|null} Type of the experiment.
+ */
+export function getExperimentTypeStr(exp){
+    return (exp && exp.experiment_type && (exp.experiment_type.title || exp.experiment_type.display_title)) || null;
+}
+
+
 /**
  * @param {Experiment[]} experiments - List of experiments, e.g. from experiments_in_set.
  * @returns {Experiment[]} - List of experiments without files.
@@ -36,7 +49,7 @@ export function listEmptyExperiments(experiments){
  */
 export function fileCountFromExperiments(experiments, includeProcessedFiles = false, includeFileSets = false){
     return _.reduce(_.map(experiments, function(exp, i){
-        return fileCount(exp, includeProcessedFiles, includeFileSets);
+        return fileCountFromSingleExperiment(exp, includeProcessedFiles, includeFileSets);
     }), function(r,expFileCount,i){
         return r + expFileCount;
     }, 0);
@@ -348,7 +361,7 @@ export function findExperimentInSetWithFileAccession(experiments_in_set, file_ac
     });
 }
 
-export function fileCount(experiment, includeProcessedFiles = false, includeFileSets = false){
+export function fileCountFromSingleExperiment(experiment, includeProcessedFiles = false, includeFileSets = false){
     var count = 0;
     if (Array.isArray(experiment.files)) {
         count += experiment.files.length;

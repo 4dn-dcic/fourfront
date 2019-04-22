@@ -2,7 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { console, Schemas, fileUtil, object } from './../../util';
+import { console, Schemas, fileUtil, object, expFxn } from './../../util';
 import _ from 'underscore';
 import { requestAnimationFrame } from './../../viz/utilities';
 import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
@@ -158,7 +158,7 @@ export class WorkflowNodeElement extends React.PureComponent {
 
         // Workflow name, if any
         if (node.nodeType === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
-            //title 
+            //title
             output += '<hr class="mt-08 mb-05"/><div class="mb-05 mt-08"><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
@@ -174,7 +174,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             output += '<small class="mb-05 inline-block">' + description + '</small>';
         }
 
-        return output; 
+        return output;
     }
 
     aboveNodeTitle(){
@@ -221,13 +221,18 @@ export class WorkflowNodeElement extends React.PureComponent {
             return <div {...elemProps}>{ title }</div>;
         }
 
-        // If Analysis Step
+        // If Analysis Step (---  this case is unused since node.meta.workflow.steps is used up above?)
         if (node.nodeType === 'step' && node.meta.uuid){
             if (node.meta.uuid && Array.isArray(node.meta.analysis_step_types) && node.meta.analysis_step_types.length > 0){
                 return <div {...elemProps}>{  _.map(node.meta.analysis_step_types, Schemas.Term.capitalize).join(', ') }</div>;
             }
             if (node.meta.workflow && Array.isArray(node.meta.workflow.experiment_types) && node.meta.workflow.experiment_types.length > 0){
-                return <div {...elemProps}>{  _.map(node.meta.workflow.experiment_types, Schemas.Term.capitalize).join(', ') }</div>;
+                // Currently these are strings but might change to linkTo Item in near future(s).
+                // TODO: Remove this block once is never string
+                if (typeof node.meta.workflow.experiment_types[0] === 'string'){
+                    return <div {...elemProps}>{  _.map(node.meta.workflow.experiment_types, Schemas.Term.capitalize).join(', ') }</div>;
+                }
+                return <div {...elemProps}>{ _.map(node.meta.workflow.experiment_types, expFxn.getExperimentTypeStr).join(', ') }</div>;
             }
         }
 
@@ -379,7 +384,7 @@ export class WorkflowNodeElement extends React.PureComponent {
 
         if (selected && qc.url){
             markerProps.className += ' clickable';
-            return <a href={qc.url} target="_blank" {...markerProps} onClick={function(e){
+            return <a href={qc.url} target="_blank" rel="noreferrer noopener" {...markerProps} onClick={function(e){
                 e.preventDefault();
                 e.stopPropagation();
                 ViewMetricButton.openChildWindow(qc.url);

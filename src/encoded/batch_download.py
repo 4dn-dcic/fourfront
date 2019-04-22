@@ -57,7 +57,7 @@ TSV_MAPPING = OrderedDict([
     ('File Type',                   (FILE,      ['file_type'])),
     ('File Format',                 (FILE,      ['file_format.display_title'])),
    #('Experiment Title',            (EXP,       ['display_title'])),
-    ('Experiment Type',             (EXP,       ['experiment_type'])),
+    ('Experiment Type',             (EXP,       ['experiment_type.display_title'])),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
     ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'])),
 

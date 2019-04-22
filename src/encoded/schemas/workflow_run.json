@@ -235,7 +235,7 @@
             "colTitle": "Category",
             "default_hidden" : true
         },
-        "workflow.experiment_types": {
+        "workflow.experiment_types.display_title": {
             "title": "Experiment Types"
         },
         "workflow.app_name": {

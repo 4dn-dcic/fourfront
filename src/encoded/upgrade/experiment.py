@@ -74,3 +74,38 @@ def experiment_seq_1_2(value, system):
 def experiment_seq_2_3(value, system):
     if value.get('experiment_type') == 'CHIP-seq':
         value['experiment_type'] = 'ChIP-seq'
+
+
+@upgrade_step('experiment_atacseq', '1', '2')
+@upgrade_step('experiment_capture_c', '1', '2')
+@upgrade_step('experiment_chiapet', '3', '4')
+@upgrade_step('experiment_damid', '2', '3')
+@upgrade_step('experiment_hi_c', '1', '2')
+@upgrade_step('experiment_mic', '2', '3')
+@upgrade_step('experiment_repliseq', '3', '4')
+@upgrade_step('experiment_seq', '3', '4')
+@upgrade_step('experiment_tsaseq', '1', '2')
+def experiment_1_2(value, system):
+    exptype = value.get('experiment_type')
+    if exptype == 'Repli-seq':
+        tot_fracs = value.get('total_fractions_in_exp', 2)
+        if tot_fracs > 2:
+            exptype = 'Multi-stage Repli-seq'
+        else:
+            exptype = '2-stage Repli-seq'
+    elif exptype == 'DAM-ID seq':
+        exptype = 'DamID-seq'
+    valid_exptypes = system['registry']['collections']['ExperimentType']
+    exptype_item = valid_exptypes.get(exptype)
+    if not exptype_item:
+        exptypename = exptype.lower().replace(' ', '-')
+        exptype_item = valid_exptypes.get(exptypename)
+    exptype_uuid = None
+    try:
+        exptype_uuid = str(exptype_item.uuid)
+    except AttributeError:
+        note = '{} ITEM NOT FOUND'.format(exptype)
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
+    value['experiment_type'] = exptype_uuid

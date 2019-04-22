@@ -42,7 +42,7 @@ export class FacetCharts extends React.PureComponent {
         },
         'views' : ['small', 'large'],
         'initialFields' : [
-            'experiments_in_set.experiment_type',
+            'experiments_in_set.experiment_type.title',
             'experiments_in_set.biosample.biosource.individual.organism.name'
         ]
     };
