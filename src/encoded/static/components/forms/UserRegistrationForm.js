@@ -7,7 +7,7 @@ import serialize from 'form-serialize';
 import memoize from 'memoize-one';
 import jwt from 'jsonwebtoken';
 import Alerts from './../alerts';
-import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock, Alert, Collapse } from 'react-bootstrap';
+import { Button, FormGroup, ControlLabel, FormControl, HelpBlock, Alert, Collapse } from 'react-bootstrap';
 import { console, object, ajax, JWT, analytics } from './../util';
 import { LinkToSelector } from './components/LinkToSelector';
 
@@ -483,38 +483,3 @@ class JobTitleField extends React.PureComponent {
         );
     }
 }
-
-
-export class UserRegistrationModal extends React.PureComponent {
-
-    static defaultProps = {
-        "title" : "Registration",
-        "heading" : null
-    };
-
-    constructor(props){
-        super(props);
-        this.state = {
-            'showForm' : false
-        };
-    }
-
-    render(){
-        var { title, heading, onCancel, formHeading } = this.props;
-
-        return (
-            <Modal show bsSize="large" onHide={onCancel}>
-
-                <Modal.Header closeButton>
-                    <Modal.Title>{ title }</Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body>
-                    <UserRegistrationForm {..._.pick(this.props, 'onCancel', 'schemas', 'onComplete', 'jwtToken')} heading={formHeading} />
-                </Modal.Body>
-            </Modal>
-        );
-    }
-
-}
-
