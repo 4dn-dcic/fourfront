@@ -3,9 +3,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Button } from 'react-bootstrap';
+import { itemUtil } from './object';
 import { isServerSide } from './misc';
+import patchedConsoleInstance from './patched-console';
+const console = patchedConsoleInstance;
 import { File } from './typedefs';
-
 
 
 /**
@@ -58,7 +60,113 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
 
 
 
-/*** Common React Classes ***/
+/**
+ * Basic greedy file grouping algorithm.
+ *
+ * @param {{ related_files: { relationship_type : string, file: Object }[] }[]} files - List of File Items.
+ * @param {boolean} isBidirectional - If set to true, runs slightly faster.
+ * @returns {File[][]} A list of groups (lists) of files grouped by their related_files connection(s).
+ */
+export function groupFilesByRelations(files, isBidirectional=true){
+
+    const groups = [];
+    const ungroupedFiles = files.slice(0);
+    const encounteredIDs = new Set();
+
+    var currGroup       = [ ungroupedFiles.shift() ],
+        currGroupIdx    = 0,
+        currFile, currFileID, ungroupedIter, anotherUngroupedFile;
+
+    while (ungroupedFiles.length > 0){
+
+        if (currGroupIdx >= currGroup.length){
+            // No more left to add to curr. group. Start new one.
+            groups.push(currGroup);
+            currGroup = [ ungroupedFiles.shift() ];
+            currGroupIdx = 0;
+        }
+
+        currFile = currGroup[currGroupIdx];
+        currFileID = itemUtil.atId(currFile);
+
+        if (!currFileID) {
+            // No view permission most likely, continue.
+            currGroupIdx++;
+            continue;
+        }
+
+        // Handle unidirectional cases from this file pointing to others.
+        // Bidirectional cases are implicitly handled as part of this.
+        _.forEach(currFile.related_files || [], function(relatedFileEmbeddedObject){
+            const relatedFileID = itemUtil.atId(relatedFileEmbeddedObject.file);
+            const relationshipType = relatedFileEmbeddedObject.relationship_type; // Unused
+            if (!relatedFileID){
+                // Most likely no view permissions
+                // Cancel out -- remaining file (if any) will be picked up as part of while loop.
+                return;
+            }
+            if (encounteredIDs.has(relatedFileID)){
+                // Has been encountered already, likely as part of bidirectional connection.
+                return;
+            }
+            const relatedFileIndex = _.findIndex(ungroupedFiles, function(ungroupedFile){
+                return relatedFileID === itemUtil.atId(ungroupedFile);
+            });
+            if (relatedFileIndex === -1){
+                console.warn("Could not find related_file \"" + relatedFileID + "\" in list of ungrouped files.");
+                return;
+            }
+
+            const relatedFile = ungroupedFiles[relatedFileIndex];
+            ungroupedFiles.splice(relatedFileIndex, 1);
+            currGroup.push(relatedFile);
+        });
+
+        if (!isBidirectional){
+            // Handle unidirectional cases from other files pointing to this 1.
+            for (ungroupedIter = 0; ungroupedIter < ungroupedFiles.length; ungroupedIter++){
+                anotherUngroupedFile = ungroupedFiles[ungroupedIter];
+
+                _.forEach(anotherUngroupedFile.related_files || [], function(relatedFileEmbeddedObject){
+                    const relatedFileID = itemUtil.atId(relatedFileEmbeddedObject.file);
+                    if (!relatedFileID){
+                        // Most likely no view permissions
+                        // Cancel out -- remaining file (if any) will be picked up as part of while loop.
+                        return;
+                    }
+                    if (encounteredIDs.has(relatedFileID)){
+                        // Has been encountered already, likely as part of bidirectional connection.
+                        return;
+                    }
+                    if (relatedFileID === currFileID){
+                        currGroup.push(anotherUngroupedFile);
+                        ungroupedFiles.splice(ungroupedIter, 1);
+                        ungroupedIter--;
+                    }
+                });
+            }
+        }
+
+        encounteredIDs.add(currFileID);
+        currGroupIdx++;
+    }
+
+    groups.push(currGroup);
+
+    return groups;
+}
+
+export function extractSinglyGroupedItems(groups){
+    const [ multiFileGroups, singleFileGroups ] = _.partition(groups, function(g){
+        return g.length > 1;
+    });
+    return [ multiFileGroups, _.flatten(singleFileGroups, true) ];
+}
+
+
+/**************************
+ ** Common React Classes **
+ ************************/
 
 export class FileDownloadButton extends React.PureComponent {
 

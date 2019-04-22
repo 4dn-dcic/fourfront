@@ -1,6 +1,6 @@
 'use strict';
 
-export { 
+export {
     defaultColumnBlockRenderFxn, defaultColumnExtensionMap, columnsToColumnDefinitions,
     ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton,
     defaultHiddenColumnMapFromColumns, haveContextColumnsChanged

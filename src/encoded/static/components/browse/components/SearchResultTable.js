@@ -80,8 +80,6 @@ class ResultDetail extends React.PureComponent{
     constructor(props){
         super(props);
         this.setDetailHeightFromPane = this.setDetailHeightFromPane.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'closing' : false };
 
         this.detailRef = React.createRef();
@@ -118,18 +116,16 @@ class ResultDetail extends React.PureComponent{
     render(){
         var { open, rowNumber, result, tableContainerWidth, tableContainerScrollLeft, renderDetailPane, toggleDetailOpen } = this.props;
         return (
-            <div className={"result-table-detail-container" + (open || this.state.closing ? ' open' : ' closed')}>
+            <div className={"result-table-detail-container detail-" + (open || this.state.closing ? 'open' : 'closed')}>
                 { open ?
                     <div className="result-table-detail" ref={this.detailRef} style={{
                         'width' : tableContainerWidth,
                         'transform' : vizUtil.style.translate3d(tableContainerScrollLeft)
                     }}>
                         { renderDetailPane(result, rowNumber, tableContainerWidth, this.setDetailHeightFromPane) }
-                        { tableContainerScrollLeft && tableContainerScrollLeft > 10 ?
-                            <div className="close-button-container text-center" onClick={toggleDetailOpen}>
-                                <i className="icon icon-angle-up"/>
-                            </div>
-                        : null }
+                        <div className="close-button-container text-center" onClick={toggleDetailOpen} data-tip="Collapse Details">
+                            <i className="icon icon-angle-up"/>
+                        </div>
                     </div>
                 : <div/> }
             </div>
@@ -258,7 +254,7 @@ class ResultRow extends React.PureComponent {
             isDraggable = currentAction === 'selection';
 
         return (
-            <div className={"search-result-row " + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
+            <div className={"search-result-row detail-" + (detailOpen ? 'open' : 'closed') + (isDraggable ? ' is-draggable' : '')} data-row-number={rowNumber} /* ref={(r)=>{
                 // TODO POTENTIALLY: Use to set height on open/close icon & sticky title column.
                 var height = (r && r.offsetHeight) || null;
                 if (height && height !== this.rowFullHeight){
@@ -416,7 +412,7 @@ class ShadowBorderLayer extends React.Component {
 
     static defaultProps = {
         'horizontalScrollRateOnEdgeButton' : 10
-    }
+    };
 
     static isWindowPastTableTop(tableContainerElement, windowHeight = null, scrollTop = null, tableTopOffset = null){
         if (isServerSide()) return false;
@@ -433,7 +429,8 @@ class ShadowBorderLayer extends React.Component {
         super(props);
         this.scrolling = false;
         this.performScrollAction = this.performScrollAction.bind(this);
-        this.handleScrollButtonClick = this.handleScrollButtonClick.bind(this);
+        this.handleLeftScrollButtonMouseDown = this.handleScrollButtonMouseDown.bind(this, 'left');
+        this.handleRightScrollButtonMouseDown = this.handleScrollButtonMouseDown.bind(this, 'right');
         this.handleScrollButtonUp = this.handleScrollButtonUp.bind(this);
         this.lastDimClassName = null;
     }
@@ -494,6 +491,13 @@ class ShadowBorderLayer extends React.Component {
         //return this.lastDimClassName;
     }
 
+    handleScrollButtonMouseDown(direction = "right", evt){
+        if (evt.button === 0) { // Left click
+            this.scrolling = true;
+            this.performScrollAction(direction);
+        }
+    }
+
     edgeScrollButtonLeft(leftEdgeContentWidth){
         if (!this.props.innerContainerElem) return null;
         var className = "edge-scroll-button left-edge";
@@ -501,7 +505,7 @@ class ShadowBorderLayer extends React.Component {
             className += ' faded-out';
         }
         return (
-            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'left')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+            <div className={className} onMouseDown={this.handleLeftScrollButtonMouseDown} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
                 <i className="icon icon-caret-left"/>
             </div>
         );
@@ -514,34 +518,34 @@ class ShadowBorderLayer extends React.Component {
             className += ' faded-out';
         }
         return (
-            <div className={className} onMouseDown={this.handleScrollButtonClick.bind(this, 'right')} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
+            <div className={className} onMouseDown={this.handleRightScrollButtonMouseDown} onMouseUp={this.handleScrollButtonUp} onMouseOut={this.handleScrollButtonUp}>
                 <i className="icon icon-caret-right"/>
             </div>
         );
     }
 
-    performScrollAction(direction = "right", depth = 0){
-        vizUtil.requestAnimationFrame(()=>{
-            var change = (direction === 'right' ? 1 : -1) * this.props.horizontalScrollRateOnEdgeButton;
-            var maxScrollLeft = this.props.fullRowWidth - this.props.tableContainerWidth;
-            var leftOffset = this.props.innerContainerElem.scrollLeft = Math.max(0, Math.min(maxScrollLeft, this.props.innerContainerElem.scrollLeft + change));
-            var detailPanes = DimensioningContainer.findDetailPaneElements();
-            if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, leftOffset);
+    performScrollAction(direction = "right"){
+        const { horizontalScrollRateOnEdgeButton, tableContainerWidth, fullRowWidth, innerContainerElem, setContainerScrollLeft } = this.props;
+        const scrollAction = (depth) => {
+            var change = (direction === 'right' ? 1 : -1) * horizontalScrollRateOnEdgeButton;
+            var maxScrollLeft = fullRowWidth - tableContainerWidth;
+            var leftOffset = Math.max(0, Math.min(maxScrollLeft, innerContainerElem.scrollLeft + change));
+            innerContainerElem.scrollLeft = leftOffset;
+            setContainerScrollLeft(leftOffset);
+
             if (depth >= 10000){
                 console.error("Reached depth 10k on a recursive function 'performScrollAction.'");
                 return;
             }
-            if (this.scrolling) {
-                this.performScrollAction(direction, depth + 1);
-            }
-        });
-    }
 
-    handleScrollButtonClick(direction = "right", evt){
-        if (evt.button === 0) { // Left click
-            this.scrolling = true;
-            this.performScrollAction(direction);
-        }
+            if (this.scrolling) {
+                vizUtil.requestAnimationFrame(function(){
+                    scrollAction(depth + 1);
+                });
+            }
+        };
+
+        scrollAction(0);
     }
 
     handleScrollButtonUp(){
@@ -602,11 +606,9 @@ class DimensioningContainer extends React.PureComponent {
 
     static setDetailPanesLeftOffset(detailPanes, leftOffset = 0, cb = null){
         if (detailPanes && detailPanes.length > 0){
-            vizUtil.requestAnimationFrame(()=>{
-                var transformStyle = vizUtil.style.translate3d(leftOffset);
-                detailPanes.forEach(function(d){
-                    d.style.transform = transformStyle;
-                });
+            var transformStyle = vizUtil.style.translate3d(leftOffset);
+            _.forEach(detailPanes, function(d){
+                d.style.transform = transformStyle;
             });
         }
         if (typeof cb === 'function') cb();
@@ -644,6 +646,7 @@ class DimensioningContainer extends React.PureComponent {
         this.throttledUpdate = _.debounce(this.forceUpdate.bind(this), 500);
         this.toggleDetailPaneOpen = _.throttle(this.toggleDetailPaneOpen.bind(this), 500);
         this.setDetailHeight = this.setDetailHeight.bind(this);
+        this.setContainerScrollLeft = this.setContainerScrollLeft.bind(this);
         this.onHorizontalScroll = this.onHorizontalScroll.bind(this);
         this.onVerticalScroll = _.throttle(this.onVerticalScroll.bind(this), 200);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
@@ -742,14 +745,18 @@ class DimensioningContainer extends React.PureComponent {
         }, cb);
     }
 
+    setContainerScrollLeft(nextScrollLeft){
+        this.setState(function({ tableContainerScrollLeft }){
+            if (tableContainerScrollLeft === nextScrollLeft) {
+                return null;
+            }
+            return { 'tableContainerScrollLeft' : nextScrollLeft };
+        });
+    }
+
     onHorizontalScroll(e){
         e && e.stopPropagation();
-        var nextScrollLeft = e.target.scrollLeft,
-            detailPanes = DimensioningContainer.findDetailPaneElements();
-
-        if (detailPanes) DimensioningContainer.setDetailPanesLeftOffset(detailPanes, nextScrollLeft, ()=>{
-            this.setState({ 'tableContainerScrollLeft' : nextScrollLeft });
-        });
+        this.setContainerScrollLeft(e.target.scrollLeft || 0);
         return false;
     }
 
@@ -959,7 +966,8 @@ class DimensioningContainer extends React.PureComponent {
                                 />
                             </div>
                         </div>
-                        <ShadowBorderLayer {...{ tableContainerScrollLeft, tableContainerWidth, fullRowWidth, isWindowPastTableTop, innerContainerElem }} />
+                        <ShadowBorderLayer {...{ tableContainerScrollLeft, tableContainerWidth, fullRowWidth, isWindowPastTableTop, innerContainerElem }}
+                            setContainerScrollLeft={this.setContainerScrollLeft} />
                     </div>
                 </StickyContainer>
                 { canLoadMore === false ?
