@@ -25,7 +25,7 @@ export class LoginNavItem extends React.Component {
         super(props);
         this.showLock           = _.throttle(this.showLock.bind(this), 1000, { trailing: false });
         this.loginCallback      = this.loginCallback.bind(this);
-        this.loginErrorCallback = this.loginErroCallback.bind(this);
+        this.loginErrorCallback = this.loginErrorCallback.bind(this);
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
         this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.state = {
@@ -102,17 +102,13 @@ export class LoginNavItem extends React.Component {
                 Alerts.deQueue(Alerts.LoggedOut);
                 console.info('Login completed');
 
-                this.setState({ "isLoading" : false });
-
-                if (href && href.indexOf('/error/login-failed') !== -1){
-                    navigate('/', {'inPlace':true}); // Navigate home -- perhaps we should remove this and leave them on login failed page? idk
-                }
-
                 // Fetch user profile and use their primary lab as the eventLabel.
                 const profileURL = (_.findWhere(r.user_actions || [], { 'id' : 'profile' }) || {}).href;
                 const isAdmin = r.details && Array.isArray(r.details.groups) && r.details.groups.indexOf('admin') > -1;
 
                 if (profileURL){
+                    this.setState({ "isLoading" : false });
+
                     // Register an analytics event for UI login.
                     // This is used to segment public vs internal audience in Analytics dashboards.
                     ajax.load(profileURL, (profile)=>{
@@ -148,7 +144,7 @@ export class LoginNavItem extends React.Component {
 
     }
 
-    loginErroCallback(error){
+    loginErrorCallback(error){
         if (!error.code && error.type === 'timed-out'){
             // Server or network error of some sort most likely.
             Alerts.queue(Alerts.LoginFailed);
@@ -169,8 +165,8 @@ export class LoginNavItem extends React.Component {
 
         this.loginCallback(
             { 'idToken' : token },
-            (userProfile) => { // on success:
-                this.setState({ 'showRegistrationModal' : false });
+            // Success callback -- shows "Success" Alert msg.
+            (userProfile) => {
                 var userDetails = JWT.getUserDetails(), // We should have this after /login
                     userProfileURL = userProfile && object.itemUtil.atId(userProfile),
                     userFullName = (
@@ -183,12 +179,13 @@ export class LoginNavItem extends React.Component {
                             <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
                         </ul>
                     );
-
-                Alerts.queue({
-                    "title"     : "Registered & Logged In",
-                    "message"   : msg,
-                    "style"     : 'success',
-                    'navigateDisappearThreshold' : 2
+                this.setState({ 'showRegistrationModal' : false }, function(){
+                    Alerts.queue({
+                        "title"     : "Registered & Logged In",
+                        "message"   : msg,
+                        "style"     : 'success',
+                        'navigateDisappearThreshold' : 2
+                    });
                 });
             },
             (err) => {

@@ -65,25 +65,19 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
     function performLogin(token){
         return cy.window().then((w)=>{
             w.fourfront.JWT.save(token);
-            var res = w.fourfront.navigate('', {'inPlace':true});
-
-            if (res){
-                return res.then((navResponse)=>{
-
-                    return cy.request({ // Probably not needed except to validate JWT (we can just reload and be logged in by this point)
-                        'url' : '/login',
-                        'method' : 'POST',
-                        'body' : JSON.stringify({'id_token' : token}),
-                        'headers' : { 'Authorization': 'Bearer ' + token },
-                        'followRedirect' : true
-                    }).then(function(resp){
-                        //w.fourfront.JWT.save(jwt_token);
-                        w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
-                        w.fourfront.app.updateUserInfo(); // Triggers app.state.session change
-                    }).end();
-
-                });
-            }
+            cy.request({
+                'url' : '/login',
+                'method' : 'POST',
+                'body' : JSON.stringify({'id_token' : token}),
+                'headers' : { 'Authorization': 'Bearer ' + token },
+                'followRedirect' : true
+            }).then(function(resp){
+                w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
+                // Triggers app.state.session change (req'd to update UI)
+                w.fourfront.app.updateUserInfo();
+                // Refresh curr page/context
+                w.fourfront.navigate('', {'inPlace':true});
+            }).end();
         }).end();
     }
 
@@ -101,7 +95,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
     // If no token, we try to generate/impersonate one ourselves
 
     const email = options.email || options.user || Cypress.env('LOGIN_AS_USER') || '4dndcic@gmail.com';
-    const auth0client = Cypress.env('Auth0Client') || 'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB';
+    const auth0client = Cypress.env('Auth0Client');
     const auth0secret = Cypress.env('Auth0Secret');
 
     if (!auth0client || !auth0secret) throw new Error('Cannot test login if no Auth0Client & Auth0Secret in ENV vars.');
