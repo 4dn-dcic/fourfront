@@ -31,17 +31,17 @@ export class BasicUserContentBody extends React.PureComponent {
         });
     }
 
+    /** Determines the item type from the context. */
     itemType(){
-        /** Determines the item type from the context.
-        */
         var { context, itemType } = this.props;
         if (itemType && typeof itemType === 'string') return itemType;
         if (!Array.isArray(context['@type'])) throw new Error('Expected an @type on context.');
         if (context['@type'].indexOf('StaticSection') > -1){
             return 'StaticSection';
-        } else if (context['@type'].indexOf('HiglassViewConfig') > -1){
+        } else if (isHiglassViewConfigItem(context)){ // Func internally checks context['@type'].indexOf('HiglassViewConfig') > -1 also
             return 'HiglassViewConfig';
         } else {
+            // TODO: Case for JupyterNotebook (?) and/or yet-to-be-created ones.
             throw new Error('Unsupported Item type.');
         }
     }
