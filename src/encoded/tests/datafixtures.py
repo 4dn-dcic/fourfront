@@ -7,7 +7,7 @@ ORDER = [
     'genomic_region', 'bio_feature', 'target', 'imaging_path', 'publication',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
-    'individual_human', 'individual_mouse', 'individual_fly',
+    'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
     'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
     'treatment_agent', 'biosample', 'quality_metric_fastqc',
     'quality_metric_bamqc', 'quality_metric_pairsqc',
@@ -367,24 +367,55 @@ def experiment(testapp, experiment_data):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample, mboI):
+def experiment_data(lab, award, human_biosample, mboI, exp_types):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': exp_types['hic']['@id'],
         'digestion_enzyme': mboI['@id'],
         'status': 'in review by lab'
     }
 
 
 @pytest.fixture
-def experiment_project_release(testapp, lab, award, human_biosample):
+def exp_types(testapp, lab, award):
+    from uuid import uuid4
+    experiment_types = {}
+    title_dict = {
+        'hic': ('in situ Hi-C', ["ExperimentHiC"]),
+        'microc': ('Micro-C', ["ExperimentHiC"]),
+        'capc': ('Capture Hi-C', ["ExperimentCaptureC"]),
+        'rnaseq': ('RNA-seq', ["ExperimentSeq"]),
+        'fish': ('DNA FISH', ["ExperimentMic"]),
+        'dnase': ('DNase Hi-C', ["ExperimentHiC"]),
+        'dam': ('DamID-seq', ["ExperimentDamid"]),
+        'chia': ('ChIA-PET', ["ExperimentChiapet"]),
+        'repliseq': ('2-stage Repli-seq', ["ExperimentRepliseq"]),
+        'multi': ('Multi-stage Repli-seq', ["ExperimentRepliseq"]),
+        'chipseq': ('ChIP-seq', ["ExperimentSeq"]),
+        'dilution': ('Dilution Hi-C', ["ExperimentHiC"])
+    }
+    for k, v in title_dict.items():
+        data = {
+            'uuid': str(uuid4()),
+            'title': v[0],
+            'lab': lab['@id'],
+            'award': award['@id'],
+            'status': 'released',
+            'valid_item_types': v[1]
+        }
+        experiment_types[k] = testapp.post_json('/experiment_type', data, status=201).json['@graph'][0]
+    return experiment_types
+
+
+@pytest.fixture
+def experiment_project_release(testapp, lab, award, human_biosample, exp_types):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': exp_types['microc']['@id'],
         'status': 'released to project'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]

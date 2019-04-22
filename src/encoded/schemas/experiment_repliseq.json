@@ -39,13 +39,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
-        },
-        "experiment_type": {
-            "enum": [
-            "Repli-seq",
-            "single cell Repli-seq"
-          ]
+            "default": "4"
         },
         "dna_label": {
             "title": "DNA label",

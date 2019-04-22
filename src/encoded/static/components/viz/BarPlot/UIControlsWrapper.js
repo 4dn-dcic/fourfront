@@ -40,7 +40,7 @@ export class UIControlsWrapper extends React.PureComponent {
             'both'              : 'All & Selected'
         },
         'availableFields_XAxis' : [
-            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type.title' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
@@ -51,7 +51,7 @@ export class UIControlsWrapper extends React.PureComponent {
         ],
         'availableFields_Subdivision' : [
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
-            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type.title' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
@@ -439,7 +439,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                     />
                                 </div>
                             </div>
-                            
+
                         </div>
 
                     </div>

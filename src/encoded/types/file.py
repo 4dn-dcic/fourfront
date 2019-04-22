@@ -234,7 +234,7 @@ class File(Item):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         'experiments.display_title',
         'experiments.accession',
-        'experiments.experiment_type',
+        'experiments.experiment_type.title',
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
@@ -245,6 +245,7 @@ class File(Item):
         'experiments.biosample.treatments_summary',
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.digestion_enzyme.name',
+        'experiments.last_modified.date_modified',
         'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession',
@@ -384,7 +385,9 @@ class File(Item):
             exp_info = get_item_if_you_can(request, expid)
             if not exp_info:  # sonmethings fishy - abort
                 return info
-            info['experiment_type'] = exp_info.get('experiment_type')
+            exp_type = get_item_if_you_can(request, exp_info.get('experiment_type'))
+            if exp_type is not None:
+                info['experiment_type'] = exp_type.get('title')
             if 'experiment_bucket' not in info:  # did not get it from rep_set
                 info['experiment_bucket'] = self._get_file_expt_bucket(request, exp_info)
             assay_info = exp_info.get('experiment_categorizer')
@@ -737,10 +740,19 @@ class FileFastq(File):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
+        "badges.badge.badge_icon",
         "badges.message"
     ]
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": [
+            "message",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     name_key = 'accession'
     rev = dict(File.rev, **{
@@ -787,6 +799,7 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        'experiment_sets.last_modified.date_modified',
         "quality_metric.Total reads",
         "quality_metric.Trans reads",
         "quality_metric.Cis reads (>20kb)",
@@ -802,6 +815,11 @@ class FileProcessed(File):
         'other_experiments': ('Experiment', 'other_processed_files.files'),
         'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
+    aggregated_items = {
+        "last_modified":[
+            "date_modified"
+        ],
+    }
 
     @classmethod
     def get_bucket(cls, registry):
@@ -1243,8 +1261,13 @@ def get_file_experiment_type(request, context, properties):
         if found_experiment_type == 'None' or found_experiment_type == exp_type:
             found_experiment_type = exp_type
         else:  # multiple experiment types
-            found_experiment_type = 'Integrative analysis'
-            break
+            return 'Integrative analysis'
+    if found_experiment_type != 'None':
+        found_item = get_item_if_you_can(request, found_experiment_type)
+        if found_item is None:
+            found_experiment_type = 'None'
+        else:
+            found_experiment_type = found_item.get('title')
     return found_experiment_type
 
 

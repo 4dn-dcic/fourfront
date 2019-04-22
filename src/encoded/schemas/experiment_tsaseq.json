@@ -40,12 +40,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
-        },
-        "experiment_type": {
-            "enum": [
-                "TSA-seq"
-            ]
+            "default": "2"
         },
         "protocol_version": {
             "title": "Protocol version",

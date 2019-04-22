@@ -36,6 +36,7 @@ export default class PlannedSubmissionsPage extends React.Component {
         var groupingProperties = ['grant_type', 'center_name',  'lab_name'];
         var columnGrouping = 'experiment_category',
             columnSubGrouping = 'experiment_type';
+
         var headerColumnsOrder = [
             'Hi-C',
             'ChIA-PET',
@@ -49,8 +50,6 @@ export default class PlannedSubmissionsPage extends React.Component {
             'proteomics'
         ];
 
-        
-
         // Filter out properties from objects which we don't want to be shown in tooltip.
         var keysToInclude = [
             'grant_type','center_name', 'lab_name',
@@ -63,7 +62,7 @@ export default class PlannedSubmissionsPage extends React.Component {
         });
 
 
-        return ( 
+        return (
             <StaticPage.Wrapper>
                 <StackedBlockVisual
                     data={listOfObjectsToVisualize}
