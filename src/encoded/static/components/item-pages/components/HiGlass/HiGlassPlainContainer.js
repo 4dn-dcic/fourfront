@@ -3,12 +3,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console } from './../../../util';
+import { ajax, console, object } from './../../../util';
 import { requestAnimationFrame } from './../../../viz/utilities';
 
 
-let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
+/**
+ * Helper function to test if an Item is a HiglassViewConfig Item.
+ * To be used by Components such as BasicStaticSectionBody to determine
+ * what time of view to render.
+ */
+export function isHiglassViewConfigItem(context){
+    if (!context) return false;
+    if (Array.isArray(context['@type'])){
+        // Ideal case is that @type is present. However it may not be embedded in all cases.
+        return context['@type'].indexOf('HiglassViewConfig') > -1;
+    }
+    // Fallback test in case @type is not present;
+    const itemAtId = object.itemUtil.atId(context);
+    if (!itemAtId || itemAtId[0] !== '/') return false;
+    const pathPartForType = itemAtId.slice(1).split('/', 1)[0];
+    return pathPartForType === 'higlass-view-configs';
+}
 
+
+/**
+ * Functional component to display loading indicator.
+ *
+ * @param {{ icon: string, title: JSX.Element|string }} props Props passed into this Component.
+ */
 export function HiGlassLoadingIndicator(props) {
     return (
         <React.Fragment>
@@ -20,31 +42,10 @@ export function HiGlassLoadingIndicator(props) {
     );
 }
 
+/** Loaded upon componentDidMount; HiGlassComponent is not supported server-side. */
+let HiGlassComponent = null;
+
 export class HiGlassPlainContainer extends React.PureComponent {
-
-    static does2DTrackExist(viewConfig){
-
-        var found = false;
-
-        _.forEach(viewConfig.views || [], function(view){
-            if (found) return;
-            _.forEach((view.tracks && view.tracks.center) || [], function(centerTrack){
-                if (found) return;
-                if (centerTrack.position === 'center') {
-                    found = true;
-                }
-            });
-        });
-
-        return found;
-    }
-
-    static getPrimaryViewID(viewConfig){
-        if (!viewConfig || !Array.isArray(viewConfig.views) || viewConfig.views.length === 0){
-            return null;
-        }
-        return _.uniq(_.pluck(viewConfig.views, 'uid'))[0];
-    }
 
     static correctTrackDimensions(hiGlassComponent){
         requestAnimationFrame(()=>{
