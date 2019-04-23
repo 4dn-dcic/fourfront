@@ -150,7 +150,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         return (
             <div>
                 <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, href }} onLoad={this.getCountCallback} />
-                { totalCount && totalCount > 1 ?
+                { totalCount && totalCount > 25 ?
                     <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
                         View all Experiment Sets ({ totalCount - 25 + ' more' })
                     </Button>
