@@ -519,7 +519,11 @@ export class FileEntryBlock extends React.PureComponent {
             fileTitleString = file.uuid || fileAtId || 'N/A';
         }
 
-        return <a key="name-title" className="name-title mono-text" href={fileAtId}>{ fileTitleString }</a>;
+        return (
+            <span className="name-title">
+                <a className="title-of-file mono-text" href={fileAtId}>{ fileTitleString }</a>
+            </span>
+        );
     }
 
 

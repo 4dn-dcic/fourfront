@@ -376,11 +376,11 @@ $small-label-accession-font-size : 0.75rem;
 				text-align: center;
 				line-height: 20px;
 
-				> .mono-text {
+				.mono-text {
 					font-size: 0.85rem;
 				}
 
-				&.col-experiment > .mono-text {
+				&.col-experiment .mono-text {
 					text-shadow: 0 0 0;
 				}
 
