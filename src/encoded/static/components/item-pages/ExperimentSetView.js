@@ -6,7 +6,8 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import { ItemHeader, FlexibleDescriptionBox, HiGlassAjaxLoadContainer, HiGlassPlainContainer, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+import { ItemHeader, HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassViewConfigItem,
+    FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
@@ -316,19 +317,21 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
 export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
-    * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig)
-    * @param {object} context - Object that has static_content.
-    * @return {object} Returns the HiGlassItem in the context (or null if it doesn't)
-    */
+     * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig).
+     *
+     * @param {object} context - Object that has static_content.
+     * @return {object} Returns the HiGlassItem in the context (or null if it doesn't)
+     */
     static getHiglassItemFromProcessedFiles = memoize(function(context){
-        if (!("static_content" in context)) {
+        if (!Array.isArray(context.static_content)){
             return null;
         }
 
-        // Look for any static_content sections with tab:processed-files as the location and return the first appearance.
+        // Return the first appearance of a HiglassViewConfig Item located at "tab:processed-files"
         const higlassTab = _.find(context.static_content, function(section){
-            return section.location === "tab:processed-files";
+            return section.location === "tab:processed-files" && isHiglassViewConfigItem(section.content);
         });
+
         return (higlassTab ? higlassTab.content : null);
     });
 
