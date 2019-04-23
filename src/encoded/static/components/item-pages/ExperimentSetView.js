@@ -10,7 +10,7 @@ import { ItemHeader, HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassV
     FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, ProcessedFilesQCStackedTable } from './../browse/components';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
 const { Item, File, ExperimentSet } = typedefs;
@@ -186,7 +186,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
     render(){
         const { context, files } = this.props;
         const fileCount = files.length;
-        const anyFilesWithMetrics = !!(ProcessedFilesQCStackedTable.filterFiles(files, true));
+        const anyFilesWithMetrics = !!(fileUtil.filterFilesWithEmbeddedMetricItem(files, true));
 
         return (
             <div className="overflow-hidden">
@@ -340,9 +340,12 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     renderQCMetricsTablesRow(){
         const { width, files, windowWidth, href } = this.props;
-        const filesWithMetrics = ProcessedFilesQCStackedTable.filterFiles(files);
+        const filesWithMetrics = fileUtil.filterFilesWithQCSummary(files);
+        const filesWithMetricsLen = filesWithMetrics.length;
 
-        if (!filesWithMetrics || filesWithMetrics.length === 0) return null;
+        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
+
+        const filesByTitles = fileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
 
         return (
             <div className="row">
@@ -350,8 +353,48 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                     <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
                         <span>Quality Metrics</span>
                     </h3>
-                    <ProcessedFilesQCStackedTable {...{ width, windowWidth, href }} key="metrics-table"
-                        files={filesWithMetrics} collapseLimit={10} collapseShow={7} collapseLongLists={true} />
+                    { _.map(filesByTitles, function(fileGroup, i){
+                        const columnHeaders = [
+                            // Static headers
+                            { columnClass: 'experiment',  title: 'Experiment',  initialWidth: 145,  className: 'text-left' },
+                            { columnClass: 'file',        title: 'For File',    initialWidth: 100 }
+                        ].concat(_.map(fileGroup[0].quality_metric_summary, function(qmsItem, qmsIndex){ // Dynamic Headers
+                            function renderColValue(file, field, colIndex, fileEntryBlockProps){
+                                var val = file.quality_metric_summary[qmsIndex].value;
+                                var tooltip = file.quality_metric_summary[qmsIndex].tooltip || null;
+                                if (qmsItem.numberType === 'percent'){
+                                    val += '%';
+                                } else if (qmsItem.numberType && ['number', 'integer'].indexOf(qmsItem.numberType) > -1) {
+                                    if (!tooltip && val >= 1000) {
+                                        let chunked =  _.chunk((val + '').split('').reverse(), 3);
+                                        tooltip = _.map(chunked, function(c){
+                                            return c.reverse().join('');
+                                        }).reverse().join(',');
+                                    }
+                                    val = Schemas.Term.roundLargeNumber(val);
+                                }
+                                return (
+                                    <span className="inline-block" data-tip={tooltip}>
+                                        { val }
+                                    </span>
+                                );
+                            }
+                            return { columnClass : 'file-detail', title : qmsItem.title, initialWidth : 80, render : renderColValue };
+                        }));
+                        // Link to Report, if any files w/ one.
+                        const anyFilesWithMetricURL = _.any(fileGroup, function(f){
+                            return f && f.quality_metric && f.quality_metric.url;
+                        });
+                        if (anyFilesWithMetricURL){
+                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render : renderFileQCReportLinkButton });
+                        } else {
+                            columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render : function(){ return ''; } });
+                        }
+                        return (
+                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i}
+                                files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
+                        );
+                    }) }
                 </div>
             </div>
         );
