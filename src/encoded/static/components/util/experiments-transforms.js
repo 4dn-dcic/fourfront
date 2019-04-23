@@ -11,13 +11,12 @@ var console = patchedConsoleInstance;
 
 /**
  * Gets experiment_type string from an experiment.
- * Requires experiment_type.display_title to be embedded.
  *
  * @param {Experiment} exp - An Experiment Item JSON
  * @returns {string|null} Type of the experiment.
  */
 export function getExperimentTypeStr(exp){
-    return (exp && exp.experiment_type && (exp.experiment_type.display_title || exp.experiment_type.display_title)) || null;
+    return (exp && exp.experiment_type && exp.experiment_type.display_title)) || null;
 }
 
 
