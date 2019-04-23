@@ -364,7 +364,8 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                                 var tooltip = file.quality_metric_summary[qmsIndex].tooltip || null;
                                 if (qmsItem.numberType === 'percent'){
                                     val += '%';
-                                } else if (typeof val === 'number' && qmsItem.numberType && ['number', 'integer'].indexOf(qmsItem.numberType) > -1) {
+                                } else if (qmsItem.numberType && ['number', 'integer'].indexOf(qmsItem.numberType) > -1) {
+                                    val = parseFloat(val);
                                     if (!tooltip && val >= 1000) {
                                         // Put full number into tooltip w. commas.
                                         const chunked =  _.chunk((val + '').split('').reverse(), 3);
