@@ -16,7 +16,7 @@ var console = patchedConsoleInstance;
  * @returns {string|null} Type of the experiment.
  */
 export function getExperimentTypeStr(exp){
-    return (exp && exp.experiment_type && exp.experiment_type.display_title)) || null;
+    return (exp && exp.experiment_type && exp.experiment_type.display_title) || null;
 }
 
 
