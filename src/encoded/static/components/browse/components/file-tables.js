@@ -249,7 +249,7 @@ export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryB
 
 export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
     if (!file || !file.quality_metric || !file.quality_metric.url){
-        return null;
+        return '-';
     }
     const filename = Schemas.Term.toName('quality_metric.url', file.quality_metric.url, false);
     return (
