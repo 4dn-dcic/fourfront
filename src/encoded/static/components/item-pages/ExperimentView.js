@@ -113,7 +113,13 @@ export default class ExperimentView extends WorkflowRunTracingView {
      */
     typeInfo(){
         const experimentType = expFxn.getExperimentTypeStr(this.props.context);
-        return (experimentType && { 'title' : experimentType, 'description' : "Type of Experiment" }) || null;
+        if (experimentType){
+            return {
+                'title' : experimentType,
+                'description' : "Type of Experiment"
+            };
+        }
+        return null;
     }
 
     /**

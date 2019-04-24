@@ -247,6 +247,18 @@ export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryB
 }
 
 
+export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
+    if (!file || !file.quality_metric || !file.quality_metric.url){
+        return '-';
+    }
+    const filename = Schemas.Term.toName('quality_metric.url', file.quality_metric.url, false);
+    return (
+        <Button bsStyle="primary" bsSize="xs" data-tip={"View report - " + filename} href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
+            <i className="icon icon-fw icon-file-text-o" />
+        </Button>
+    );
+}
+
 /**
  * To be used within Experiments Set View/Page, or
  * within a collapsible row on the browse page.
@@ -308,14 +320,14 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Adds Total Sequences matric column if any raw files in expSet have a `quality_metric`.
      * Or if param `showMetricColumns` is set to true;
      *
-     * @see ProcessedFilesQCStackedTable.filterFiles
+     * @see fileUtil.filterFilesWithEmbeddedMetricItem
      *
      * @param {boolean} showMetricColumns - Skips check for quality_metric and returns column if true.
      * @param {ExperimentSet} experimentSet - ExperimentSet Item.
      */
     static metricColumnHeaders(showMetricColumns, experimentSet){
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
-        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || ProcessedFilesQCStackedTable.filterFiles(
+        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || fileUtil.filterFilesWithEmbeddedMetricItem(
             expFxn.allFilesFromExperimentSet(experimentSet, false), true
         ) ? true : false;
 
@@ -688,6 +700,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 }
 
 
+
 export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
 
     static defaultProps = RawFilesStackedTable.defaultProps;
@@ -741,59 +754,3 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
     }
 }
 
-
-export class ProcessedFilesQCStackedTable extends ProcessedFilesStackedTable {
-
-    /**
-     * Filter a list of files down to those with a value for `quality_metric` and `quality_metric.overall_quality_status`.
-     *
-     * @param {Item[]} files                    List of files, potentially with quality_metric.
-     * @param {boolean} [checkAny=false]        Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
-     * @returns {Item[]|true} Filtered list of files or boolean for "any", depending on `checkAny` param.
-     */
-    static filterFiles = memoize(function(files, checkAny=false){
-        var func = checkAny ? _.any : _.filter;
-        return func(files.slice(0), function(f){
-            return f.quality_metric && f.quality_metric.overall_quality_status;
-        });
-    });
-
-    /**
-     * Converts file + field (param) into a human-readable percentage.
-     *
-     * @param {Item} file - File to get 'percentOfTotalReads' from.
-     * @param {string} field - Property where 'percentOfTotalReads' value can be found.
-     * @param {number} colIndex - Unused.
-     * @param {Object} props - Unused.
-     * @returns {JSX.Element|string} Human-readable value for percent of total reads.
-     */
-    static percentOfTotalReads(file, field, colIndex, props){
-        var numVal = object.getNestedProperty(file, field);
-        if (numVal && typeof numVal === 'number' && file.quality_metric && file.quality_metric['Total reads']){
-            var percentVal = Math.round((numVal / file.quality_metric['Total reads']) * 100 * 1000) / 1000;
-            var numValRounded = Schemas.Term.roundLargeNumber(numVal);
-            return (
-                <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
-            );
-        }
-        return '-';
-    }
-
-    static defaultProps = {
-        'columnHeaders' : [
-            //{ columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
-            { columnClass: 'experiment',   className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-            //{ columnClass: 'file-pair',                                 title: 'File Pair',     initialWidth: 40,   visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'For File',            initialWidth: 100,  },
-            { columnClass: 'file-detail', title: 'Filtered Reads',      initialWidth: 80, field : "quality_metric.Total reads" },
-            //{ columnClass: 'file-detail', title: 'Cis/Trans Ratio', initialWidth: 80, field : "quality_metric.Cis/Trans ratio" },
-            //{ columnClass: 'file-detail', title: '% LR IC Reads', initialWidth: 80, field : "quality_metric.% Long-range intrachromosomal reads" },
-            { columnClass: 'file-detail', title: 'Cis reads (>20kb)',   initialWidth: 80, field : "quality_metric.Cis reads (>20kb)", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
-            { columnClass: 'file-detail', title: 'Short cis reads',     initialWidth: 80, field : "quality_metric.Short cis reads (<20kb)", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
-            { columnClass: 'file-detail', title: 'Trans Reads',         initialWidth: 80, field : "quality_metric.Trans reads", render: ProcessedFilesQCStackedTable.percentOfTotalReads },
-            { columnClass: 'file-detail', title: 'Link to Report', initialWidth: 80, field : "quality_metric.url" }
-        ],
-        'titleForFiles' : "Processed File Metrics"
-    };
-
-}

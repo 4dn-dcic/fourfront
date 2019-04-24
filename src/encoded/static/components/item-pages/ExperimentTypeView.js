@@ -23,15 +23,6 @@ export default class ExperimentTypeView extends DefaultItemView {
     }
 
     /**
-     * What is to be displayed at top left of page, under title, to the left of accession (if any).
-     *
-     * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
-     */
-    typeInfo(){
-        return null;
-    }
-
-    /**
      * What is to be displayed below Item description and above the TabbedView, if anything. Can return an array or single item.
      *
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
