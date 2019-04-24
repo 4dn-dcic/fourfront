@@ -42,18 +42,17 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
+        const context = this.props.context;
+        const width = this.getTabViewWidth();
+        let tabs = [];
 
-        var initTabs = [],
-            context = this.props.context,
-            width = this.getTabViewWidth();
-
-        initTabs.push(FileViewOverview.getTabObject(this.props, width));
+        tabs.push(FileViewOverview.getTabObject(this.props, width));
 
         if (FileView.shouldGraphExist(context)){
-            initTabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
+            tabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
         }
 
-        return initTabs.concat(this.getCommonTabs(this.props));
+        return tabs.concat(this.getCommonTabs(this.props));
     }
 
     itemMidSection(){
@@ -113,7 +112,7 @@ class FileViewOverview extends React.PureComponent {
             <div>
                 <div className="row overview-blocks">
                     <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-xs-12" />
-                    <QualityControlResults file={context} wrapInColumn="col-md-6" schemas={schemas} />
+                    <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                     <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                 </div>
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
