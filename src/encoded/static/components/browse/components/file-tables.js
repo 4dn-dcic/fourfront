@@ -25,6 +25,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         return host || null;
     });
 
+    // N.B. This map is replicated in /item-pages/FileView.js - potential todo: import from there or move to fileUtil (util/file.js)
     static epiGenomeAssemblyMapping = {
         'GRCh38' : 'hg38',
         'GRCm38' : 'mm10'

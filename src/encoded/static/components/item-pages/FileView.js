@@ -9,7 +9,7 @@ import { Button } from 'react-bootstrap';
 import * as store from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { ExperimentSetTablesLoaded, OverviewHeadingContainer } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
+import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
 // UNCOMMENT FOR TESTING
@@ -70,9 +70,9 @@ export default class FileView extends WorkflowRunTracingView {
 
 
 
-class FileViewOverview extends React.Component {
+class FileViewOverview extends React.PureComponent {
 
-    static getTabObject({context, schemas, windowWidth }, width){
+    static getTabObject({ context, schemas, windowWidth, href }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'file-overview',
@@ -83,7 +83,7 @@ class FileViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview {...{ context, width, windowWidth, schemas }} />
+                    <FileViewOverview {...{ context, width, windowWidth, schemas, href }} />
                 </div>
             )
         };
@@ -102,15 +102,19 @@ class FileViewOverview extends React.Component {
                 }))
             }))
         }).isRequired
-    }
+    };
 
     render(){
-        var { context, windowWidth, width, schemas } = this.props,
+        var { context, windowWidth, width, schemas, href } = this.props,
             experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
 
         return (
             <div>
-                <FileOverViewBody {...{ context, schemas, windowWidth }} />
+                <div className="row overview-blocks">
+                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-xs-12" />
+                    <QualityControlResults property="quality_metric" file={context} wrapInColumn="col-md-6" schemas={schemas} />
+                    <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
+                </div>
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
                     <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
                 : null }
@@ -120,14 +124,13 @@ class FileViewOverview extends React.Component {
 
 }
 
-export class FileOverviewHeading extends React.Component {
+
+export class FileOverviewHeading extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.onTransition = this.onTransition.bind(this);
-        this.onTransitionSetOpen = this.onTransition.bind(this, true);
-        this.onTransitionUnsetOpen = this.onTransition.bind(this, false);
-        this.overviewBlocks = this.overviewBlocks.bind(this);
+        this.onTransitionSetOpen    = this.onTransition.bind(this, true);
+        this.onTransitionUnsetOpen  = this.onTransition.bind(this, false);
         this.state = {
             'isPropertiesOpen' : true,
             'mounted' : false
@@ -142,36 +145,33 @@ export class FileOverviewHeading extends React.Component {
         this.setState({ 'isPropertiesOpen' : isOpen });
     }
 
-    overviewBlocks(){
-        const { context, schemas } = this.props;
-        const tips = FileView.schemaForFile(context, schemas);
-        var commonProps = { tips, 'result' : context, 'wrapInColumn' : "col-sm-3 col-lg-3" };
-        return [
-            <OverViewBodyItem {...commonProps} key="file_format" property='file_format' fallbackTitle="File Format" />,
-            <OverViewBodyItem {...commonProps} key="file_type" property='file_type' fallbackTitle="File Type" />,
-            <OverViewBodyItem {...commonProps} key="file_classification" property='file_classification' fallbackTitle="General Classification" />,
-            <OverViewBodyItem {...commonProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={function(field, value){
-                return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName('file_size', value) }</span>;
-            }} />
-        ];
-    }
-
     render(){
-        var responsiveSize = layout.responsiveGridState(this.props.windowWidth);
-        var isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
+        const { context, schemas, windowWidth } = this.props;
+        const { mounted, isPropertiesOpen }  = this.state;
+        const responsiveSize = layout.responsiveGridState(windowWidth);
+        const isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
+        const commonHeadingBlockProps = { 'tips' : FileView.schemaForFile(context, schemas), 'result' : context, 'wrapInColumn' : "col-sm-3 col-lg-3" };
         return (
             <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
                 <div className="col-xs-12 col-md-9 col-lg-8">
-                    <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen} children={this.overviewBlocks()}/>
+                    <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property='file_format' fallbackTitle="File Format" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property='file_type' fallbackTitle="File Type" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property='file_classification' fallbackTitle="General Classification" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={function(field, value){
+                            return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
+                        }} />
+                    </OverviewHeadingContainer>
                 </div>
                 <div className="col-xs-12 col-md-3 col-lg-4 mt-1 mb-3">
-                    <FileViewDownloadButtonContainer file={this.props.context} size="lg" verticallyCentered={!isSmallerSize && this.state.isPropertiesOpen} />
+                    <FileViewDownloadButtonContainer file={context} size="lg" verticallyCentered={!isSmallerSize && isPropertiesOpen} />
                 </div>
 
             </div>
         );
     }
 }
+
 
 export function FileViewDownloadButtonContainer(props){
     const { className, size, file, context, result } = props;
@@ -188,160 +188,91 @@ FileViewDownloadButtonContainer.defaultProps = { 'size' : null };
 
 
 
-export function FileVisualizationButtons(props){
+export class ExternalVisualizationButtons extends React.PureComponent {
 
-    const { file } = this.props;
-
-    var fileFormat              = fileUtil.getFileFormatStr(file),
-        fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
-        fileIsHic               = (fileFormat === 'hic'),
-        genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
-        fileHref                = file.href,
-        pageHref                = this.props.href || (store && store.getState().href),
-        hrefParts               = url.parse(pageHref),
-        host                    = hrefParts.protocol + '//' + hrefParts.host,
-        juiceBoxBtn             = this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
-        epigenomeBtn            = this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly);
-}
-
-
-export class FileOverViewBody extends React.PureComponent {
+    static defaultProps = {
+        'wrapInColumn' : "col-xs-12",
+        'className' : "inner"
+    };
 
     /**
      * Add a link to an external JuiceBox site for some file types.
-     * @param {string} fileHref          - URL path used to access the file
-     * @param {boolean} fileIsHic        - If true the file format is HiC
-     * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-     * @param {string} host              - The host part of the current url
-     *
+     * @param {string} fileHref - URL used to access the file
      * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
      */
-    renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
-
-
-
-        var externalLinkButton = null;
-        // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic) {
-
-            // Make an external juicebox link.
-            var onClick = function(evt){
-
-                // If we're on the server side, there is no need to make an external link.
-                if (isServerSide()) return null;
-
-                var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + fileHref;
-                var win = window.open(targetLocation, '_blank');
-                win.focus();
-            };
-
-            // Build the juicebox button
-            externalLinkButton = (
-                <Button bsStyle="primary" onClick={onClick} className="mr-05">
-                    <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-                </Button>
-            );
-        }
-
-        // Return the External link.
-        return externalLinkButton;
+    renderJuiceboxBtn(fileHref){
+        return (
+            <Button bsStyle="primary" href={"http://aidenlab.org/juicebox/?hicUrl=" + fileHref} className="mr-05" tagret="_blank">
+                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+            </Button>
+        );
     }
 
     /**
      * Add a link to an external Epigenome site for some file types.
-     * @param {string} fileHref          - URL path used to access the file
-     * @param {boolean} fileIsHic        - If true the file format is HiC
-     * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-     * @param {string} host              - The host part of the current url
-     * @param {string} genome_assembly   - The file's genome assembly
-     *
+     * @param {string} fileHref - URL used to access the file\
+     * @param {string} genome_assembly - The file's genome assembly
      * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
      */
-    renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
-        var externalLinkButton = null;
+    renderEpigenomeBtn(fileHref, genome_assembly) {
 
         // We may need to map the genome assembly to Epigenome's assemblies.
+        // N.B. This map is replicated in /browse/components/file-tables.js
         const assemblyMap = {
             'GRCh38' : 'hg38',
             'GRCm38' : 'mm10'
         };
+        const genome = genome_assembly && assemblyMap[genome_assembly];
 
         // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
-        if (!(genome_assembly && genome_assembly in assemblyMap)) {
+        if (!genome) return null;
+
+        // Build the Epigenome button
+        return (
+            <Button bsStyle="primary" href={"http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" +fileHref} target="_blank" rel="noreferrer noopener">
+                <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+            </Button>
+        );
+    }
+
+    render(){
+        const { file, href, wrapInColumn, className } = this.props;
+        var epigenomeBtn, juiceBoxBtn;
+
+        if (!(file.status === 'archived' || file.status === 'released')){
+            return null; // External tools cannot access non-released files.
+        }
+        if (!file.href){
             return null;
         }
 
-        // Do not show the link if the file cannot be viewed by the public.
-        if (fileIsHic && fileIsPublic) {
-            // Make an external juicebox link.
-            var onClick = function(evt){
+        const fileFormat = fileUtil.getFileFormatStr(file);
+        const hrefParts = url.parse(href || (store && store.getState().href));
+        const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
 
-                // If we're on the server side, there is no need to make an external link.
-                if (isServerSide()) return null;
 
-                const epiGenomeMapping = assemblyMap[genome_assembly];
-                var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + fileHref;
-
-                var win = window.open(targetLocation, '_blank');
-                win.focus();
-            };
-
-            // Build the Epigenome button
-            externalLinkButton = (
-                <Button bsStyle="primary" onClick={onClick}>
-                    <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-                </Button>
-            );
+        if (fileFormat === 'hic'){
+            juiceBoxBtn = this.renderJuiceboxBtn(fileUrl);
+            epigenomeBtn = this.renderEpigenomeBtn(fileUrl, file.genome_assembly || null);
         }
-
-        // Return the External link.
-        return externalLinkButton;
-    }
-
-    /**
-     * Generate the HTML markup for external visualization links.
-     **/
-    visualizeExternallyButton(){
-        var file                    = this.props.result,
-            fileFormat              = fileUtil.getFileFormatStr(file),
-            fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
-            fileIsHic               = (fileFormat === 'hic'),
-            genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
-            fileHref                = file.href,
-            pageHref                = this.props.href || (store && store.getState().href),
-            hrefParts               = url.parse(pageHref),
-            host                    = hrefParts.protocol + '//' + hrefParts.host,
-            juiceBoxBtn             = this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
-            epigenomeBtn            = this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly);
 
         if (!juiceBoxBtn && !epigenomeBtn){
             return null;
         }
 
         return (
-            <div className="inner col-xs-12">
-                <div className="inner">
-                    <h5>{ "Visualization" + (juiceBoxBtn && epigenomeBtn ? 's' : '') }</h5>
+            <WrapInColumn wrap={wrapInColumn}>
+                <div className={className}>
+                    <h5>Visualization</h5>
                     { juiceBoxBtn }
                     { epigenomeBtn }
                 </div>
-            </div>
+            </WrapInColumn>
         );
     }
 
-    render(){
-        const { context, schemas } = this.props;
-        const extVizButton = this.visualizeExternallyButton();
-        return (
-            <div className="row overview-blocks">
-                { extVizButton }
-                <QualityControlResults property="quality_metric" file={context} wrapInColumn="col-md-6" schemas={schemas} />
-                <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
-            </div>
-        );
-
-    }
 }
+
 
 
 export class QualityControlResults extends React.PureComponent {
@@ -424,18 +355,14 @@ export class QualityControlResults extends React.PureComponent {
         var noValue = !qualityMetric && (!file || !file[property]);
         if (noValue && hideIfNoValue) return null;
 
-        var elem = (
-            <div className="inner">
-                <object.TooltipInfoIconContainerAuto result={file} property={property} tips={tips} elementType="h5" fallbackTitle="Quality Metric Results" />
-                <div className="overview-list-elements-container">{ (noValue && (<em>Not Available</em>)) || this.metrics() }</div>
-            </div>
+        return (
+            <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">
+                <div className="inner">
+                    <object.TooltipInfoIconContainerAuto result={file} property={property} tips={tips} elementType="h5" fallbackTitle="Quality Metric Results" />
+                    <div className="overview-list-elements-container">{ (noValue && (<em>Not Available</em>)) || this.metrics() }</div>
+                </div>
+            </WrapInColumn>
         );
-
-        if (wrapInColumn){
-            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"}>{ elem }</div>;
-        } else {
-            return elem;
-        }
     }
 
 }

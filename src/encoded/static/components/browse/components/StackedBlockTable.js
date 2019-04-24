@@ -42,8 +42,8 @@ StackedBlockNameLabel.propTypes = {
     /** Subtitle/label will appear more opaque when not hovered over */
     'subtitleVisible' : PropTypes.bool,
     'className' : PropTypes.string,
-    'title' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
-    'subtitle' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
+    'title' : PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+    'subtitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     // Pass in place of or in addition to subtitle (takes precedence).
     'accession' : PropTypes.string
 };

@@ -10,7 +10,7 @@ import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTable
 import { OverViewBodyItem } from './DefaultItemView';
 import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
 import { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
-import FileView, { FileOverViewBody, RelatedFilesOverViewBlock, FileViewDownloadButtonColumn, QualityControlResults } from './FileView';
+import FileView, { RelatedFilesOverViewBlock, FileViewDownloadButtonColumn, QualityControlResults } from './FileView';
 
 
 export default class FileMicroscopyView extends FileView {
@@ -57,22 +57,18 @@ class FileMicroscopyViewOverview extends React.Component {
                 }))
             })).isRequired
         }).isRequired
-    }
+    };
 
     render(){
-        var { context, schemas, width, windowWidth } = this.props;
-
-        var setUrls = expFxn.experimentSetsFromFile(context, 'ids'),
-            table;
-
-        if (setUrls && setUrls.length > 0){
-            table = <ExperimentSetTablesLoaded experimentSetUrls={setUrls} width={width} windowWidth={windowWidth} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
-        }
+        const { context, schemas, width, windowWidth } = this.props;
+        const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
 
         return (
             <div>
-                <FileMicOverViewBody result={context} schemas={schemas} windowWidth={windowWidth} />
-                { table }
+                <FileMicOverViewBody {...{ context, schemas, windowWidth }} />
+                { experimentSetUrls && experimentSetUrls.length > 0 ?
+                    <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
+                : null }
             </div>
         );
 
@@ -83,14 +79,15 @@ class FileMicroscopyViewOverview extends React.Component {
 /**
  * Adds a Thumbnail item to FileOverViewBody.
  */
-class FileMicOverViewBody extends FileOverViewBody {
+class FileMicOverViewBody extends React.PureComponent {
     render(){
-        var file = this.props.result;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), file);
+        const { context, schemas, windowWidth } = this.props;
+        const file = context;
+        const tips = object.tipsFromSchema(schemas || Schemas.get(), file);
 
-        var parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
+        const parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
 
-        var parentExperimentWithImagingPaths = _.find(parentExperimentsReversed, function(exp){
+        const parentExperimentWithImagingPaths = _.find(parentExperimentsReversed, function(exp){
             return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path;
         }) || parentExperimentsReversed[0] || null;
 
@@ -100,30 +97,26 @@ class FileMicOverViewBody extends FileOverViewBody {
         }
 
         return (
-            <div>
-                <div className="row overview-blocks">
+            <div className="row overview-blocks">
 
-                    { thumbnail ?
-                        <div className="col xs-6 col-sm-4">
-                            <Thumbnail href={ file.omerolink || null } className="inline-block" alt="OMERO Thumbnail" target="_blank" src={thumbnail} style={{ margin : '12px 0px 0px 0px' }} />
-                        </div>
-                        : null
-                    }
+                { thumbnail ?
+                    <div className="col xs-6 col-sm-4">
+                        <Thumbnail href={ file.omerolink || null } className="inline-block" alt="OMERO Thumbnail" target="_blank" src={thumbnail} style={{ margin : '12px 0px 0px 0px' }} />
+                    </div>
+                : null }
 
-                    { parentExperimentWithImagingPaths ?
-                        <OverViewBodyItem
-                            result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(this.props.schemas || Schemas.get(), parentExperimentWithImagingPaths)}
-                            wrapInColumn={"col-xs-12 pull-right col-sm-" + (thumbnail ? '8' : '12')} property='imaging_paths' fallbackTitle="Imaging Paths"
-                            listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
-                    : null }
+                { parentExperimentWithImagingPaths ?
+                    <OverViewBodyItem
+                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas || Schemas.get(), parentExperimentWithImagingPaths)}
+                        wrapInColumn={"col-xs-12 pull-right col-sm-" + (thumbnail ? '8' : '12')} property='imaging_paths' fallbackTitle="Imaging Paths"
+                        listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+                : null }
 
-                    <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn={thumbnail ? "col-sm-8" : "col-sm-6"} schemas={this.props.schemas} />
+                <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn={thumbnail ? "col-sm-8" : "col-sm-6"} schemas={schemas} />
 
-                    <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn={"col-xs-12 " + (thumbnail ? "col-sm-8" : "col-sm-6")} />
+                <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn={"col-xs-12 " + (thumbnail ? "col-sm-8" : "col-sm-6")} />
 
-                </div>
             </div>
-
         );
 
     }
