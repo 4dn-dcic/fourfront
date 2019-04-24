@@ -17,17 +17,15 @@ import url from 'url';
 var console = patchedConsoleInstance;
 
 /**
- * Convert a link_id, if one exists on param 'object', to an '@id' link.
- * If an '@id' exists already, gets that.
+ * Get '@id' from param 'object' if it exists
  *
- * @param {Object} o - Must have a 'link_id' or '@id' property. Else will return null.
+ * @param {Object} o - Must have an'@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */
 export function atIdFromObject(o){
     if (!o) return null;
     if (typeof o !== 'object') return null;
     if (typeof o['@id'] === 'string') return o['@id'];
-    if (typeof o.link_id === 'string') return o.link_id.replace(/~/g, "/");
     return null;
 }
 

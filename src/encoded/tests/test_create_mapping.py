@@ -11,7 +11,7 @@ def test_create_mapping(registry, item_type):
     Only tests the mappings generated from schemas
     """
     from snovault.elasticsearch.create_mapping import type_mapping
-    from snovault.fourfront_utils import add_default_embeds
+    from snovault.util import add_default_embeds
     from snovault import TYPES
     mapping = type_mapping(registry[TYPES], item_type)
     assert mapping

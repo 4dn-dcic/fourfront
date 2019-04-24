@@ -88,8 +88,8 @@ export const Term = {
                     name = null;
                 }
                 break;
-            case 'link_id':
-                name = term.replace(/~/g, "/");
+            case '@id':
+                name = term;
                 break;
             default:
                 name = null;
@@ -166,7 +166,7 @@ export const Field = {
         'experiments_in_set.experiment_type' : 'Experiment Type',
         'experiments_in_set.experiment_type.title' : 'Experiment Type',
         'experimentset_type' : 'Set Type',
-        'link_id' : "Link",
+        '@id' : "Link",
         'display_title' : "Title"
     },
 

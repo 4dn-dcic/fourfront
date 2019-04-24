@@ -261,8 +261,6 @@ def add_schemas_to_html_responses(config):
                                 del schema['properties']['@type']
                             if schema['properties'].get('display_title') is not None:
                                 del schema['properties']['display_title']
-                            if schema['properties'].get('link_id') is not None:
-                                del schema['properties']['link_id']
                             if schema['properties'].get('schema_version') is not None:
                                 del schema['properties']['schema_version']
                             if schema['properties'].get('uuid') is not None:

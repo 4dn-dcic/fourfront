@@ -49,7 +49,7 @@ export default class SubscriptionsView extends React.PureComponent {
      */
     getUserInfo = () => {
         ajax.promise('/me?frame=embedded').then(response => {
-            if (!response.link_id || !response.subscriptions){
+            if (!response.uuid || !response.subscriptions){
                 this.setState({
                     'subscriptions': null,
                     'initialized': true
@@ -210,10 +210,10 @@ class SubscriptionEntry extends React.Component{
     }
 
     generateEntry = (entry) => {
-        if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry.link_id){
+        if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry['@id']){
             return;
         }
-        var format_id = entry.link_id.replace(/~/g, "/");
+        var format_id = entry['@id'];
         return(
             <tr key={entry.date_created}>
                 <td>

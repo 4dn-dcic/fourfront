@@ -89,7 +89,7 @@ class SubItemListView extends React.Component {
             'alwaysCollapsibleKeys' : [],
             'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
-                    'audit', 'lab', 'award', 'description', 'link_id'
+                    'audit', 'lab', 'award', 'description'
                 ).concat([
                 // Add
                     'schema_version', 'uuid'
@@ -281,7 +281,7 @@ class SubItemTable extends React.Component {
             var columnKeysFromSchema = _.keys(Schemas.getSchemaForItemType(Schemas.getItemType(objectWithAllItemKeys)).columns);
 
             columnKeys = rootKeys.filter(function(k){
-                if (k === 'display_title' || k === 'link_id' || k === 'accession') return true;
+                if (k === 'display_title' || k === '@id' || k === 'accession') return true;
                 if (columnKeysFromSchema.indexOf(k) > -1) return true;
                 return false;
             }).map(function(k){
@@ -551,7 +551,7 @@ class SubItemTable extends React.Component {
                                         if (typeof val === 'boolean'){
                                             val = <code>{ val ? 'True' : 'False' }</code>;
                                         }
-                                        if ((colVal.key === 'link_id' || colVal.key === '@id') && val.slice(0,1) === '/') {
+                                        if (colVal.key === '@id' && val.slice(0,1) === '/') {
                                             val = <a href={val}>{ val }</a>;
                                         }
                                         if (typeof val === 'string' && val.length > 50){
@@ -740,9 +740,8 @@ export class Detail extends React.PureComponent {
             }
         } else if (typeof item === 'string'){
 
-            if (keyPrefix === '@id' || keyPrefix === 'link_id'){
-                var href = (keyPrefix === 'link_id' ? item.replace(/~/g, "/") : item);
-                return <a key={item} href={href} target={popLink ? "_blank" : null}>{href}</a>;
+            if (keyPrefix === '@id'){
+                return <a key={item} href={item} target={popLink ? "_blank" : null}>{item}</a>;
             }
 
             if(item.charAt(0) === '/' && item.indexOf('@@download') > -1){
@@ -783,10 +782,6 @@ export class Detail extends React.PureComponent {
         '@id' : {
             'title' : 'Link',
             'description' : 'Link to Item'
-        },
-        'link_id' : {
-            'title' : 'Link',
-            'description' : 'Link to Item',
         },
         'subscriptions.url' : {
             'render' : function(value){
@@ -829,7 +824,7 @@ export class Detail extends React.PureComponent {
             '@context', 'actions', 'audit', 'principals_allowed',
             // Visible elsewhere on page
             'lab', 'award', 'description',
-            '@id', 'link_id', 'display_title'
+            '@id', 'display_title'
         ],
         'stickyKeys' : [
             'display_title', 'title',
@@ -857,7 +852,6 @@ export class Detail extends React.PureComponent {
             'attachment',
             // Things to go at bottom consistently
             'aliases',
-            'link_id', // In case is not excluded, should probably be near top (transformed to clickable link)
         ],
         'alwaysCollapsibleKeys' : [
             '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'

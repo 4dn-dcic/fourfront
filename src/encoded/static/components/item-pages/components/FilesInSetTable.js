@@ -12,9 +12,9 @@ import { console, object } from './../../util';
  * Show the submitter's name and link to their profile.
  * If passed a props.labName and props.showLabName == true,
  * then will show that labName instead. Use for when hovering over the lab icon, for example.
- * 
+ *
  * Also shows props.labName if no props.user object supplied.
- * 
+ *
  * @memberof module:item-pages/components.FilesInSetTable
  * @class SubmitterLink
  * @type {Component}
@@ -28,7 +28,7 @@ class SubmitterLink extends React.Component {
     render (){
         var user = this.props.user;
         var labName = this.props.labName;
-        
+
         if (labName && (this.props.showLabName || !user)){
             return (
                 <span>
@@ -41,7 +41,7 @@ class SubmitterLink extends React.Component {
         var title = user.display_title || user.title || (typeof user === 'string' ? user : null) || "Submitter";
         if (!atId && title === 'Submitter') return null;
         else if (!atId) return title;
-        
+
         return (
             <span>
                 <a href={atId}>{ title }</a>
@@ -54,7 +54,7 @@ class SubmitterLink extends React.Component {
 
 /**
  * Renders a "users group" icon which links to submitter's lab.
- * 
+ *
  * @prop {Object} lab - Lab object.
  * @prop {function} onMouseEnter - Callback for cursor entering icon.
  * @prop {function} onMouseLeave - Callback for cursor leaving icon.
@@ -79,11 +79,11 @@ class LabIcon extends React.Component {
         if (!lab) return this.noLab();
         var atId = object.atIdFromObject(lab);
         if (!atId) {
-            console.error("We need lab with link_id or @id.");
+            console.error("We need lab with @id.");
             return this.noLab();
         }
         return (
-            <a 
+            <a
                 href={atId}
                 className="lab-icon inline-block"
                 onMouseEnter={this.props.onMouseEnter}
@@ -117,7 +117,7 @@ export class FileItemRow extends React.Component {
 
         var fileDownloadHref = (file && file.href) || null;
         var attachmentDownloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
-        
+
         var fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format && (file.file_format.file_format || file.file_format.display_title));
         var attachmentIconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
 
@@ -156,11 +156,11 @@ export class FileItemRow extends React.Component {
                 </div>
 
                 <div className="col-xs-11 col-md-3 col-lg-2 submitter">
-                    <SubmitterLink 
+                    <SubmitterLink
                         user={file && file.submitted_by}
                     />
                 </div>
-                
+
                 <div className="col-xs-12 col-md-12 divider-column">
                     <div className="divider"/>
                 </div>
@@ -192,7 +192,7 @@ class Small extends React.Component {
     render(){
         return (
             <div className="files-in-set-table smaller-version">
-                { 
+                {
                     this.props.files.map(function(file, i){
                         var atId = object.atIdFromObject(file);
                         var title = file.display_title || file.accession;
@@ -248,10 +248,10 @@ export class FilesInSetTable extends React.Component {
         };
     }
 
-    /** 
+    /**
      * Generate a download link for a file attachment from a fileObject, which should represent a (partial) JSON of a file Item.
-     * 
-     * @param {Object} fileObject - Object must have a link_id or an @id property, as well as an 'attachment' property containing 'href'.
+     *
+     * @param {Object} fileObject - Object must have an @id property, as well as an 'attachment' property containing 'href'.
      * @returns {string} URL to download file attachment from.
      */
     static attachmentDownloadLinkFromFile(fileObject){
@@ -277,7 +277,7 @@ export class FilesInSetTable extends React.Component {
 
     /**
      * Converts a file-type or mime-type string into a FontAwesome icon className suffix.
-     * 
+     *
      * @param {string} fileType - MIMEType to get icon className suffix for.
      * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
      */
@@ -318,7 +318,7 @@ export class FilesInSetTable extends React.Component {
 
     /**
      * Renders heading with titles for table on medium and large width screens.
-     * 
+     *
      * @returns {JSX.Element} <div> element
     */
     header(){
@@ -345,7 +345,7 @@ export class FilesInSetTable extends React.Component {
                 <div className="col-xs-12 col-md-3 col-lg-2 submitter">
                     Submitter
                 </div>
-                
+
                 <div className="col-xs-12 col-md-12 divider-column">
                     <div className="divider"/>
                 </div>
@@ -357,7 +357,7 @@ export class FilesInSetTable extends React.Component {
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { this.props.files.map((file, i)=> <FileItemRow file={file} key={file.link_id || i} />) }
+                { this.props.files.map((file, i)=> <FileItemRow file={file} key={file['@id'] || i} />) }
             </div>
         );
     }

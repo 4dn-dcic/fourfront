@@ -171,11 +171,13 @@ def test_experiment_set_default_embedded_list(registry, exp_types):
     assert type_info_embedded == embedded_list
     if 'produced_in_pub.*' in embedded_list:
         assert 'produced_in_pub.*' in embedded
-        assert 'produced_in_pub.award.link_id' in embedded
+        assert 'produced_in_pub.award.@id' in embedded
+        assert 'produced_in_pub.award.principals_allowed' in embedded
         assert 'produced_in_pub.award.display_title' in embedded
         assert 'produced_in_pub.award.uuid' in embedded
     assert 'experiment_sets.accession' in embedded_list
-    assert 'experiment_sets.link_id' in embedded
+    assert 'experiment_sets.@id' in embedded
+    assert 'experiment_sets.principals_allowed' in embedded
     assert 'experiment_sets.display_title' in embedded
     assert 'experiment_sets.uuid' in embedded
 

@@ -699,8 +699,8 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
 
                             // Get the @id or obj representation of the file we want to match.
                             var fileToMatch = n.meta.run_data.file,
-                                filesToCheck = _.filter(_.map(currentIONodesMatched, function(n2){	
-                                    return (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;	
+                                filesToCheck = _.filter(_.map(currentIONodesMatched, function(n2){
+                                    return (n2 && n2.meta && n2.meta.run_data && n2.meta.run_data.file) || null;
                                 }), function(file){ return file !== null; });
 
                             if ( _.any(filesToCheck, compareTwoFilesByID.bind(null, fileToMatch))){
@@ -1029,7 +1029,7 @@ export function parseBasicIOAnalysisSteps(analysis_steps, workflowItem, parsingO
 
     return parseAnalysisSteps([
         _.extend(
-            _.omit(workflowItem, 'arguments', 'analysis_steps', 'link_id', '@context', 'cwl_data'), // Use workflowItem as if it were AnalysisStep
+            _.omit(workflowItem, 'arguments', 'analysis_steps', '@context', 'cwl_data'), // Use workflowItem as if it were AnalysisStep
             {
                 'inputs'    : _.filter(_.flatten( _.pluck(analysis_steps, 'inputs'), true ), checkIfGlobal),
                 'outputs'   : _.filter(_.flatten( _.pluck(analysis_steps, 'outputs'), true ), checkIfGlobal)

@@ -1,7 +1,7 @@
 import pytest
 from pkg_resources import resource_listdir
 from snovault.schema_utils import load_schema
-from snovault.fourfront_utils import crawl_schema
+from snovault.util import crawl_schema
 import re
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
