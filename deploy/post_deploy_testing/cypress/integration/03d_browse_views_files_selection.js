@@ -118,12 +118,14 @@ describe('Browse Views - Files Selection', function () {
                 return cy.get('.search-results-container .search-result-row .search-result-column-block button.toggle-detail-button').should('have.length.greaterThan', 24).each(($toggleDetailButton, idx)=>{
                     if (idx > 7) return;
                     return cy.wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end()
-                        .get('.search-results-container .search-result-row.open').then(($resultRow)=>{
-                            return cy.get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container h4 i.toggle-open-icon').each(($toggleFilesOpenButton, idx)=>{
-                                cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end()
-                                .get('.search-results-container .search-result-row.open .result-table-detail-container.open .files-tables-container .stacked-block-table input[type="checkbox"]').each(checkUncheckFileCheckbox.bind(this, origSelectedCount)).end()
-                                .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end();
-                            });
+                        .get('.search-results-container .search-result-row.detail-open').then(($resultRow)=>{
+                            return cy.get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container h4 i.toggle-open-icon')
+                                .each(($toggleFilesOpenButton, idx)=>{ // Raw Files (0), Processed Files (1)
+                                    cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end() // Open
+                                    .get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container .stacked-block-table input[type="checkbox"]')
+                                    .each(checkUncheckFileCheckbox.bind(null, origSelectedCount)).end()
+                                    .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end(); // Close
+                                });
                         }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end();
                 });
             });
