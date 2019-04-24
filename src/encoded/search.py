@@ -1311,7 +1311,7 @@ def find_index_by_doc_types(request, doc_types, ignore):
         if doc_type in ignore:
             continue
         else:
-            result = get_jsonld_types_from_collection_type(request, doc_type)
+            result = get_jsonld_types_from_collection_type(request.registry, doc_type)
             indexes.extend(result)
     # remove any duplicates
     indexes = list(set(indexes))
