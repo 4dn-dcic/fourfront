@@ -151,18 +151,20 @@ Cypress.Commands.add('getQuickInfoBarCounts', function(options = { shouldNotEqua
 
 });
 
-// TODO: Give these buttons unique IDs in case layout changes.
+
 
 Cypress.Commands.add('getSelectAllFilesButton', function(options = {}){
-    return cy.get('div.above-results-table-row > div > div:nth-child(1) > div:nth-child(1) > div > button');
+    return cy.get('div.above-results-table-row #select-all-files-button');
 });
 
 Cypress.Commands.add('getFileTypePanelButton', function(options = {}){
-    return cy.get('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:first-child');
+    return cy.get('div.above-results-table-row #selected-files-file-type-filter-button');
 });
 
+// TODO: Change these functions to use the `id` attributes of these buttons once they make it to prod.
+
 Cypress.Commands.add('getDownloadButton', function(options = {}){
-    return cy.get('div.above-results-table-row > div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:nth-child(2)');
+    return cy.get('div.above-results-table-row div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:nth-child(1)');
 });
 
 /** Session Caching */

@@ -29,7 +29,7 @@ describe('Browse Views - Files Selection', function () {
 
             cy.get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
                 .getQuickInfoBarCounts().then((counts)=>{
-                    expect(counts.experiment_sets).to.be.greaterThan(7);
+                    expect(counts.experiment_sets).to.be.greaterThan(6);
                     expect(counts.files).to.be.greaterThan(20);
                 });
 
