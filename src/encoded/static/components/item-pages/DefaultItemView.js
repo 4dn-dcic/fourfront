@@ -459,7 +459,7 @@ export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment 
 }
 
 
-export class OverViewBodyItem extends React.Component {
+export class OverViewBodyItem extends React.PureComponent {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {

@@ -29,14 +29,16 @@ export default class FileView extends WorkflowRunTracingView {
         );
     });
 
+    /**
+     * Returns schema properties for this File @type, in form of:
+     * { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+     */
+    static schemaForFile = memoize(function(context, schemas){
+        return object.tipsFromSchema(schemas, context);
+    });
+
     componentDidMount(){
         super.componentDidMount();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (nextProps.schemas !== this.props.schemas || nextProps.context !== this.props.context){
-            this.setState({ 'tips' : object.tipsFromSchema(nextProps.schemas || Schemas.get(), nextProps.context) });
-        }
     }
 
     getTabViewContents(){
@@ -58,7 +60,7 @@ export default class FileView extends WorkflowRunTracingView {
         return (
             <React.Fragment>
                 { super.itemMidSection() }
-                <FileOverviewHeading windowWidth={this.props.windowWidth} context={this.props.context} tips={this.state.tips} />
+                <FileOverviewHeading {..._.pick(this.props, 'windoWidth', 'context', 'schemas')} />
             </React.Fragment>
         );
     }
@@ -81,7 +83,7 @@ class FileViewOverview extends React.Component {
                         <span>More Information</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview {...{ context, width, windowWidth }} tips={schemas} />
+                    <FileViewOverview {...{ context, width, windowWidth, schemas }} />
                 </div>
             )
         };
@@ -103,42 +105,17 @@ class FileViewOverview extends React.Component {
     }
 
     render(){
-        var { context, windowWidth, width, tips } = this.props,
+        var { context, windowWidth, width, schemas } = this.props,
             experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
 
         return (
             <div>
-                <FileOverViewBody result={context} tips={tips} windowWidth={windowWidth} />
+                <FileOverViewBody {...{ context, schemas, windowWidth }} />
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
                     <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
                 : null }
             </div>
         );
-        /*
-        return (
-            <div className="row">
-                <div className="col-md-6">
-                    <h3 className="tab-section-title">
-                        <span>Quality Control Results</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    TEST
-                </div>
-                <div className="col-md-6">
-                    <h3 className="tab-section-title">
-                        <span>Others</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <FileOverViewBody result={context} schemas={this.props.schemas} />
-                </div>
-
-                <div className="col-md-12">
-                    { table }
-                </div>
-            </div>
-        );
-        */
-
     }
 
 }
@@ -166,16 +143,16 @@ export class FileOverviewHeading extends React.Component {
     }
 
     overviewBlocks(){
-        var file = this.props.context,
-            tips = this.props.tips,    // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-            commonProps = { tips, 'result' : file, 'wrapInColumn' : "col-sm-3 col-lg-3" };
+        const { context, schemas } = this.props;
+        const tips = FileView.schemaForFile(context, schemas);
+        var commonProps = { tips, 'result' : context, 'wrapInColumn' : "col-sm-3 col-lg-3" };
         return [
             <OverViewBodyItem {...commonProps} key="file_format" property='file_format' fallbackTitle="File Format" />,
             <OverViewBodyItem {...commonProps} key="file_type" property='file_type' fallbackTitle="File Type" />,
             <OverViewBodyItem {...commonProps} key="file_classification" property='file_classification' fallbackTitle="General Classification" />,
-            <OverViewBodyItem {...commonProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={(field, size)=>
-                <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName('file_size', size) }</span>
-            } />
+            <OverViewBodyItem {...commonProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={function(field, value){
+                return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName('file_size', value) }</span>;
+            }} />
         ];
     }
 
@@ -196,70 +173,57 @@ export class FileOverviewHeading extends React.Component {
     }
 }
 
-export class FileViewDownloadButtonContainer extends React.Component {
+export function FileViewDownloadButtonContainer(props){
+    const { className, size, file, context, result } = props;
+    const fileToUse = file || context || result;
+    return (
+        <div className={"file-download-container" + (className ? ' ' + className : '')}>
+            <fileUtil.FileDownloadButtonAuto result={fileToUse} size={size} />
+        </div>
+    );
+}
+FileViewDownloadButtonContainer.defaultProps = { 'size' : null };
 
-    static defaultProps = {
-        'size' : null
-    };
 
-    render(){
-        var { className, size } = this.props,
-            file = this.props.file || this.props.context || this.props.result;
-        return (
-            <div className={"file-download-container" + (className ? ' ' + className : '')}>
-                <fileUtil.FileDownloadButtonAuto result={file} size={size} />
-            </div>
-        );
-    }
+
+
+
+export function FileVisualizationButtons(props){
+
+    const { file } = this.props;
+
+    var fileFormat              = fileUtil.getFileFormatStr(file),
+        fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
+        fileIsHic               = (fileFormat === 'hic'),
+        genome_assembly         = ("genome_assembly" in file) ? file.genome_assembly : null,
+        fileHref                = file.href,
+        pageHref                = this.props.href || (store && store.getState().href),
+        hrefParts               = url.parse(pageHref),
+        host                    = hrefParts.protocol + '//' + hrefParts.host,
+        juiceBoxBtn             = this.renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host),
+        epigenomeBtn            = this.renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly);
 }
 
-export class FileOverViewBody extends React.Component {
 
-    constructor(props){
-        super(props);
-        this.handleJuiceBoxVizClick = this.handleJuiceBoxVizClick.bind(this);
-        this.handleEpigenomeClick = this.handleEpigenomeClick.bind(this);
-    }
-
-    handleJuiceBoxVizClick(evt){
-        var file            = this.props.result,
-            pageHref        = this.props.href || (store && store.getState().href),
-            hrefParts       = url.parse(pageHref),
-            host            = hrefParts.protocol + '//' + hrefParts.host,
-            targetLocation  = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
-
-        if (isServerSide()) return null;
-        var win = window.open(targetLocation, '_blank');
-        win.focus();
-    }
-
-    handleEpigenomeClick(evt){
-        var file            = this.props.result,
-            pageHref        = this.props.href || (store && store.getState().href),
-            hrefParts       = url.parse(pageHref),
-            host            = hrefParts.protocol + '//' + hrefParts.host,
-            genome_assembly = ("genome_assembly" in file) ? file.genome_assembly : null,
-            targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome_assembly + "&hicUrl=" + host + file.href;
-
-        if (!genome_assembly) return null;
-        if (isServerSide()) return null;
-        var win = window.open(targetLocation, '_blank');
-        win.focus();
-    }
+export class FileOverViewBody extends React.PureComponent {
 
     /**
-    * Add a link to an external JuiceBox site for some file types.
-    * @param {string} fileHref          - URL path used to access the file
-    * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-    * @param {string} host              - The host part of the current url
-    *
-    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
-    */
+     * Add a link to an external JuiceBox site for some file types.
+     * @param {string} fileHref          - URL path used to access the file
+     * @param {boolean} fileIsHic        - If true the file format is HiC
+     * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+     * @param {string} host              - The host part of the current url
+     *
+     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+     */
     renderJuiceboxlLink(fileHref, fileIsHic, fileIsPublic, host){
+
+
+
         var externalLinkButton = null;
         // Do not show the link if the file cannot be viewed by the public.
         if (fileIsHic && fileIsPublic) {
+
             // Make an external juicebox link.
             var onClick = function(evt){
 
@@ -284,15 +248,15 @@ export class FileOverViewBody extends React.Component {
     }
 
     /**
-    * Add a link to an external Epigenome site for some file types.
-    * @param {string} fileHref          - URL path used to access the file
-    * @param {boolean} fileIsHic        - If true the file format is HiC
-    * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
-    * @param {string} host              - The host part of the current url
-    * @param {string} genome_assembly   - The file's genome assembly
-    *
-    * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
-    */
+     * Add a link to an external Epigenome site for some file types.
+     * @param {string} fileHref          - URL path used to access the file
+     * @param {boolean} fileIsHic        - If true the file format is HiC
+     * @param {boolean} fileIsPublic     - If true the file can be publicly viewed
+     * @param {string} host              - The host part of the current url
+     * @param {string} genome_assembly   - The file's genome assembly
+     *
+     * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
+     */
     renderEpigenomeLink(fileHref, fileIsHic, fileIsPublic, host, genome_assembly) {
         var externalLinkButton = null;
 
@@ -335,11 +299,10 @@ export class FileOverViewBody extends React.Component {
     }
 
     /**
-    * Generate the HTML markup for external visualization links.
-    **/
+     * Generate the HTML markup for external visualization links.
+     **/
     visualizeExternallyButton(){
         var file                    = this.props.result,
-            tips                    = this.props.tips,
             fileFormat              = fileUtil.getFileFormatStr(file),
             fileIsPublic            = (file.status === 'archived' || file.status === 'released'),
             fileIsHic               = (fileFormat === 'hic'),
@@ -356,24 +319,24 @@ export class FileOverViewBody extends React.Component {
         }
 
         return (
-            <OverViewBodyItem wrapInColumn="col-md-6" fallbackTitle="Visualization" titleRenderFxn={(field, size)=>
-                <React.Fragment>
+            <div className="inner col-xs-12">
+                <div className="inner">
+                    <h5>{ "Visualization" + (juiceBoxBtn && epigenomeBtn ? 's' : '') }</h5>
                     { juiceBoxBtn }
                     { epigenomeBtn }
-                </React.Fragment>
-            } />
+                </div>
+            </div>
         );
     }
 
     render(){
-        var file = this.props.result,
-            tips = this.props.tips,
-            extVizButton = this.visualizeExternallyButton();
+        const { context, schemas } = this.props;
+        const extVizButton = this.visualizeExternallyButton();
         return (
             <div className="row overview-blocks">
                 { extVizButton }
-                <RelatedFilesOverViewBlock tips={tips} file={file} property="related_files" wrapInColumn="col-md-6" hideIfNoValue />
-                <QualityControlResults property="quality_metric" tips={tips} file={file} wrapInColumn="col-md-6" schemas={this.props.schemas} />
+                <QualityControlResults property="quality_metric" file={context} wrapInColumn="col-md-6" schemas={schemas} />
+                <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
             </div>
         );
 
@@ -407,7 +370,7 @@ export class QualityControlResults extends React.PureComponent {
     static defaultProps = { 'property' : 'quality_metric', 'hideIfNoValue' : false };
 
     metrics(){
-        var { file, property, hideIfNoValue, tips, wrapInColumn, qualityMetric, schemas } = this.props;
+        var { file, property, hideIfNoValue, wrapInColumn, qualityMetric, schemas } = this.props;
         if (!qualityMetric) qualityMetric = file[property];
         let qcType = null;
         if (file['@type'].indexOf('FileFastQ') > -1){
@@ -455,7 +418,8 @@ export class QualityControlResults extends React.PureComponent {
     }
 
     render(){
-        var { file, property, hideIfNoValue, tips, wrapInColumn, qualityMetric } = this.props;
+        const { file, property, hideIfNoValue, schemas, wrapInColumn, qualityMetric } = this.props;
+        const tips = FileView.schemaForFile(file, schemas);
 
         var noValue = !qualityMetric && (!file || !file[property]);
         if (noValue && hideIfNoValue) return null;
@@ -468,7 +432,7 @@ export class QualityControlResults extends React.PureComponent {
         );
 
         if (wrapInColumn){
-            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"} children={elem} />;
+            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"}>{ elem }</div>;
         } else {
             return elem;
         }
@@ -476,12 +440,14 @@ export class QualityControlResults extends React.PureComponent {
 
 }
 
+
+
 /**
  * Reuse when showing related_files of an Item.
  *
  * @deprecated ?
  */
-export class RelatedFilesOverViewBlock extends React.Component {
+export class RelatedFilesOverViewBlock extends React.PureComponent {
 
     static defaultProps = {
         'wrapInColumn' : true,
@@ -508,7 +474,8 @@ export class RelatedFilesOverViewBlock extends React.Component {
     }
 
     render(){
-        var { file, related_files, property, hideIfNoValue, tips, wrapInColumn } = this.props;
+        const { file, related_files, property, hideIfNoValue, schemas, wrapInColumn } = this.props;
+        const tips = FileView.schemaForFile(file, schemas);
 
         var relatedFiles = this.relatedFiles();
 
@@ -518,7 +485,7 @@ export class RelatedFilesOverViewBlock extends React.Component {
             relatedFiles = <li className="related-file"><em>None</em></li>;
         }
 
-        var elem = (
+        const elem = (
             <div className="inner">
                 <object.TooltipInfoIconContainerAuto result={file} property={property || "related_files"} tips={tips} elementType="h5" fallbackTitle="Related Files" />
                 <ul className="overview-list-elements-container">{ relatedFiles }</ul>
@@ -526,7 +493,7 @@ export class RelatedFilesOverViewBlock extends React.Component {
         );
 
         if (wrapInColumn){
-            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"} children={elem} />;
+            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"}>{ elem }</div>;
         } else {
             return elem;
         }
