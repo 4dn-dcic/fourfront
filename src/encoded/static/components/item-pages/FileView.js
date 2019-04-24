@@ -57,10 +57,11 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
+        const gridState = layout.responsiveGridState(this.props.windowWidth);
         return (
             <React.Fragment>
                 { super.itemMidSection() }
-                <FileOverviewHeading {..._.pick(this.props, 'windoWidth', 'context', 'schemas')} />
+                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas')} gridState={gridState} />
             </React.Fragment>
         );
     }
@@ -93,26 +94,26 @@ class FileViewOverview extends React.PureComponent {
         'context' : PropTypes.shape({
             'experiments' : PropTypes.arrayOf(PropTypes.shape({
                 'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                    'link_id' : PropTypes.string.isRequired
+                    '@id' : PropTypes.string.isRequired
                 }))
             })),
             'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
                 'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
-                    'link_id' : PropTypes.string.isRequired
+                    '@id' : PropTypes.string.isRequired
                 }))
             }))
         }).isRequired
     };
 
     render(){
-        var { context, windowWidth, width, schemas, href } = this.props,
-            experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
+        const { context, windowWidth, width, schemas, href } = this.props;
+        const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
 
         return (
             <div>
                 <div className="row overview-blocks">
                     <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-xs-12" />
-                    <QualityControlResults property="quality_metric" file={context} wrapInColumn="col-md-6" schemas={schemas} />
+                    <QualityControlResults file={context} wrapInColumn="col-md-6" schemas={schemas} />
                     <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                 </div>
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
@@ -146,14 +147,13 @@ export class FileOverviewHeading extends React.PureComponent {
     }
 
     render(){
-        const { context, schemas, windowWidth } = this.props;
-        const { mounted, isPropertiesOpen }  = this.state;
-        const responsiveSize = layout.responsiveGridState(windowWidth);
-        const isSmallerSize = this.state.mounted && (responsiveSize === 'xs' || responsiveSize === 'sm');
-        const commonHeadingBlockProps = { 'tips' : FileView.schemaForFile(context, schemas), 'result' : context, 'wrapInColumn' : "col-sm-3 col-lg-3" };
+        const { context, schemas, gridState } = this.props;
+        const { mounted, isPropertiesOpen } = this.state;
+        const isSmallerSize = mounted && (gridState === 'xs' || gridState === 'sm');
+        const commonHeadingBlockProps = { 'tips' : FileView.schemaForFile(context, schemas), 'result' : context, 'wrapInColumn' : "col-sm-6 col-lg-3" };
         return (
             <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
-                <div className="col-xs-12 col-md-9 col-lg-8">
+                <div className="col-xs-12 col-md-8">
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property='file_format' fallbackTitle="File Format" />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property='file_type' fallbackTitle="File Type" />
@@ -163,7 +163,7 @@ export class FileOverviewHeading extends React.PureComponent {
                         }} />
                     </OverviewHeadingContainer>
                 </div>
-                <div className="col-xs-12 col-md-3 col-lg-4 mt-1 mb-3">
+                <div className="col-xs-12 col-md-4 mt-1 mb-3">
                     <FileViewDownloadButtonContainer file={context} size="lg" verticallyCentered={!isSmallerSize && isPropertiesOpen} />
                 </div>
 
@@ -275,91 +275,145 @@ export class ExternalVisualizationButtons extends React.PureComponent {
 
 
 
-export class QualityControlResults extends React.PureComponent {
 
-    /**
-     * Converts file + field (param) into a human-readable percentage.
-     *
-     * @param {Item} file - File to get 'percentOfTotalReads' from.
-     * @param {string} field - Property where 'percentOfTotalReads' value can be found.
-     * @param {number} colIndex - Unused.
-     * @param {Object} props - Unused.
-     * @returns {JSX.Element|string} Human-readable value for percent of total reads.
-     */
-    static percentOfTotalReads(file, field, colIndex, props){
-        var numVal = object.getNestedProperty(file, field);
-        if (numVal && typeof numVal === 'number' && file.quality_metric && file.quality_metric['Total reads']){
-            var percentVal = Math.round((numVal / file.quality_metric['Total reads']) * 100 * 1000) / 1000;
-            var numValRounded = Schemas.Term.roundLargeNumber(numVal);
-            return (
-                <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
-            );
-        }
-        return '-';
-    }
-
-    static defaultProps = { 'property' : 'quality_metric', 'hideIfNoValue' : false };
-
-    metrics(){
-        var { file, property, hideIfNoValue, wrapInColumn, qualityMetric, schemas } = this.props;
-        if (!qualityMetric) qualityMetric = file[property];
-        let qcType = null;
-        if (file['@type'].indexOf('FileFastQ') > -1){
-            qcType = 'QualityMetricFastqc';
-        } else {
-            qcType = 'QualityMetricPairsqc';
-        }
-        qualityMetric['@type'] = [qcType, 'QualityMetric', 'Item'];
-        var metricTips = object.tipsFromSchema(schemas || Schemas.get(), qualityMetric);
-
-        function renderMetric(prop, title, renderPercent = false){
-            if (!qualityMetric[prop]) return null;
-            return (
-                <div className="overview-list-element">
-                    <div className="row">
-                        <div className="col-xs-4 text-right">
-                            <object.TooltipInfoIconContainerAuto result={qualityMetric} property={prop} tips={metricTips} elementType="h5" fallbackTitle={title} className="mb-0 mt-02" />
-                        </div>
-                        <div className="col-xs-8">
-                            <div className="inner value">
-                                { renderPercent ? QualityControlResults.percentOfTotalReads(file, property + '.' + prop) : Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
-                            </div>
-                        </div>
+function QCMetricFromEmbed(props){
+    const { metric, qcProperty, fallbackTitle, tips, percent } = props;
+    if (!metric[qcProperty]) return null;
+    return (
+        <div className="overview-list-element">
+            <div className="row">
+                <div className="col-xs-4 text-right">
+                    <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} tips={tips} elementType="h5" fallbackTitle={fallbackTitle || qcProperty} className="mb-0 mt-02" />
+                </div>
+                <div className="col-xs-8">
+                    <div className="inner value">
+                        { percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, metric[qcProperty], true) }
                     </div>
                 </div>
-            );
+            </div>
+        </div>
+    );
+}
+QCMetricFromEmbed.percentOfTotalReads = function(quality_metric, field){
+    var numVal = object.getNestedProperty(quality_metric, field);
+    if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
+        var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
+        var numValRounded = Schemas.Term.roundLargeNumber(numVal);
+        return (
+            <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
+        );
+    }
+    return '-';
+};
+
+
+export function QCMetricFromSummary(props){
+    const { title } = props;
+    const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
+
+    return (
+        <div className="overview-list-element">
+            <div className="row">
+                <div className="col-xs-4 text-right">
+                    <h5 className="mb-0 mt-02">{ title }</h5>
+                </div>
+                <div className="col-xs-8">
+                    <div className="inner value">
+                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05" data-tip={tooltip} /> : null }
+                        { value }
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }){
+    // We expect these values to always be strings or undefined which are passed by value (not reference).\
+    // Hence we use var instead of const and safely overwrite them.
+    if (numberType === 'percent'){
+        value += '%';
+    } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
+        value = parseFloat(value);
+        if (!tooltip && value >= 1000) {
+            tooltip = Schemas.Term.decorateNumberWithCommas(value);
         }
+        value = Schemas.Term.roundLargeNumber(value);
+    }
+    return { value, tooltip };
+};
 
-        var itemsToReturn = [
-            renderMetric("Total reads", "Total Reads in File"),
-            //renderMetric("Cis/Trans ratio", "Cis/Trans Ratio"),
-            //renderMetric("% Long-range intrachromosomal reads", "% LR IC Reads"),
-            renderMetric("Total Sequences", "Total Sequences"),
-            renderMetric("Sequence length", "Sequence length"),
-            renderMetric("Cis reads (>20kb)", "Cis reads (>20kb)", true),
-            renderMetric("Short cis reads (<20kb)", "Short cis reads (<20kb)", true),
-            renderMetric("Trans reads", "Trans Reads", true),
-            renderMetric("Sequence length", "Sequence length"),
-            renderMetric("overall_quality_status", "Overall Quality"),
-            renderMetric("url", "Link to Report")
-        ];
 
-        return itemsToReturn;
+export class QualityControlResults extends React.PureComponent {
+
+    static defaultProps = {
+        'hideIfNoValue' : false
+    };
+
+    /** To be deprecated (?) */
+    metricsFromEmbeddedReport(){
+        const { file, schemas } = this.props;
+        const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas || Schemas.get(), file.quality_metric) };
+        return (
+            <div className="overview-list-elements-container">
+                <QCMetricFromEmbed {...commonProps} qcProperty="Total reads" fallbackTitle="Total Reads in File" />
+                <QCMetricFromEmbed {...commonProps} qcProperty="Total Sequences" />
+                <QCMetricFromEmbed {...commonProps} qcProperty="Sequence length" />
+                <QCMetricFromEmbed {...commonProps} qcProperty="Cis reads (>20kb)" percent />
+                <QCMetricFromEmbed {...commonProps} qcProperty="Short cis reads (<20kb)" percent />
+                <QCMetricFromEmbed {...commonProps} qcProperty="Trans reads" fallbackTitle="Trans Reads" percent />
+                <QCMetricFromEmbed {...commonProps} qcProperty="Sequence length" />
+                <QCMetricFromEmbed {...commonProps} qcProperty="overall_quality_status" fallbackTitle="Overall Quality" />
+                <QCMetricFromEmbed {...commonProps} qcProperty="url" fallbackTitle="Link to Report" />
+            </div>
+        );
+    }
+
+    metricsFromSummary(){
+        const { file, schemas } = this.props;
+        const metric = file && file.quality_metric;
+        const metricURL = metric && metric.url;
+        return (
+            <div className="overview-list-elements-container">
+                { _.map(file.quality_metric_summary, function(qmsItem){ return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; }) }
+                { metricURL ?
+                    <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
+                        <React.Fragment>
+                            <a href={metricURL} target="_blank" rel="noopener noreferrer">{ Schemas.Term.hrefToFilename(metricURL) }</a>
+                            <i className="ml-05 icon icon-fw icon-external-link text-small"/>
+                        </React.Fragment>
+                    } />
+                : null }
+            </div>
+        );
 
     }
 
     render(){
-        const { file, property, hideIfNoValue, schemas, wrapInColumn, qualityMetric } = this.props;
-        const tips = FileView.schemaForFile(file, schemas);
+        const { file, hideIfNoValue, schemas, wrapInColumn } = this.props;
 
-        var noValue = !qualityMetric && (!file || !file[property]);
-        if (noValue && hideIfNoValue) return null;
+        let metrics, titleProperty = "quality_metric_summary";
+
+        const qualityMetricEmbeddedExists = file && file.quality_metric && object.itemUtil.atId(file.quality_metric);
+        const qualityMetricSummaryExists = file && Array.isArray(file.quality_metric_summary) && file.quality_metric_summary.length > 0;
+
+        if (!qualityMetricEmbeddedExists && !qualityMetricSummaryExists && hideIfNoValue) return null;
+
+        if (qualityMetricSummaryExists){
+            metrics = this.metricsFromSummary();
+        } else if (qualityMetricEmbeddedExists){
+            metrics = this.metricsFromEmbeddedReport();
+            titleProperty = "quality_metric";
+        } else if (hideIfNoValue){
+            return null;
+        }
+
+        const tips = FileView.schemaForFile(file, schemas);
 
         return (
             <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">
                 <div className="inner">
-                    <object.TooltipInfoIconContainerAuto result={file} property={property} tips={tips} elementType="h5" fallbackTitle="Quality Metric Results" />
-                    <div className="overview-list-elements-container">{ (noValue && (<em>Not Available</em>)) || this.metrics() }</div>
+                <object.TooltipInfoIconContainerAuto result={file} property={titleProperty} tips={tips} elementType="h5" fallbackTitle="Quality Metric Summary" />
+                    { metrics || (<em>Not Available</em>) }
                 </div>
             </WrapInColumn>
         );
