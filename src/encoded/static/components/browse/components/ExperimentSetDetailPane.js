@@ -24,12 +24,14 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         'containerWidth' : PropTypes.number,
         'paddingWidth' : PropTypes.number,
         'windowWidth' : PropTypes.number.isRequired,
-        'href' : PropTypes.string.isRequired
+        'href' : PropTypes.string.isRequired,
+        'minimumWidth' : PropTypes.number
     };
 
     static defaultProps = {
         'selectAllFilesInitially' : false,
-        'paddingWidth' : 0
+        'paddingWidth' : 0,
+        'minimumWidth' : 725
     };
 
     constructor(props){
@@ -61,7 +63,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
     }
 
     renderRawFilesSection(paddingWidth){
-        const { containerWidth, result, href } = this.props;
+        const { containerWidth, result, href, minimumWidth } = this.props;
         const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
 
         if (rawFilesCount === 0) return null;
@@ -80,7 +82,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                                 { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
                             ]}
                             experimentSet={result} href={href}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
+                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null}
                             fadeIn={false} collapseLongLists />
                     </div>
                 </Collapse>
@@ -89,7 +91,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
     }
 
     renderProcessedFilesSection(paddingWidth){
-        const { containerWidth, result, href } = this.props;
+        const { containerWidth, result, href, minimumWidth } = this.props;
         const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
 
         if (!Array.isArray(processedFiles) || processedFiles.length === 0){
@@ -105,7 +107,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                     <div>
                         <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
                             files={processedFiles} fadeIn={false} collapseLongLists href={href}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null} />
+                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null} />
                     </div>
                 </Collapse>
             </div>
