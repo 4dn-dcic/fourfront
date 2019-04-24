@@ -741,11 +741,11 @@ class FileFastq(File):
         "badges.badge.badge_classification",
         "badges.badge.description",
         "badges.badge.badge_icon",
-        "badges.message"
+        "badges.messages"
     ]
     aggregated_items = {
         "badges": [
-            "message",
+            "messages",
             "badge.commendation",
             "badge.warning",
             "badge.uuid",
