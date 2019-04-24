@@ -75,7 +75,7 @@ def item_counts(config):
             db_count = request.registry[STORAGE].write.__len__(coll_name)
             item_name = collection.type_info.name
             # check to see if this collection contains child collections
-            check_collections = get_jsonld_types_from_collection_type(request.registry, coll_name, [coll_name])
+            check_collections = get_jsonld_types_from_collection_type(request.registry, coll_name)
             to_subtract[coll_name] = [coll for coll in check_collections if coll != coll_name]
             es_count = es_counts.get(item_name, 0)
             db_es_counts[coll_name] = [db_count, es_count] # order is important
