@@ -255,13 +255,12 @@ function BadgeItem(props){
                         { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
                     </h4>
                     <ul>
-                          { messages ? <p className="mb-0">{ messages.map(function(item) {
-                              return (
-                                  <li>
-                                      { item }
-                                  </li>
-                              );
-                          }) } { linkMsg }</p> : linkMsg }
+                        { messages ? (
+                            <p className="mb-0">
+                                { messages.map(function(item) { return (<li>{ item }</li>); }) }
+                                { linkMsg }
+                            </p>
+                        ) : linkMsg }
                     </ul>
                 </div>
             </div>
