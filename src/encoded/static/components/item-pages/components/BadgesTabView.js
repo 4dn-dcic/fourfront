@@ -230,7 +230,7 @@ class SummaryIcon extends React.PureComponent {
 
 function BadgeItem(props){
     const { item, parent, windowWidth, height, context } = props;
-    const { message, badge } = item;
+    const { messages, badge } = item;
     const { badge_icon, description } = badge;
     const classification = BadgesTabView.badgeClassification(props);
     const badgeTitle = BadgesTabView.badgeTitle(props, classification);
@@ -254,7 +254,15 @@ function BadgeItem(props){
                         { badgeTitle }
                         { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
                     </h4>
-                    { message ? <p className="mb-0">{ message } { linkMsg }</p> : linkMsg }
+                    <ul>
+                          { messages ? <p className="mb-0">{ messages.map(function(item) {
+                              return (
+                                  <li>
+                                      { item }
+                                  </li>
+                              );
+                          }) } { linkMsg }</p> : linkMsg }
+                    </ul>
                 </div>
             </div>
         </div>
@@ -363,5 +371,3 @@ export class EmbeddableSVGBadgeIcon extends React.PureComponent {
         );
     }
 }
-
-
