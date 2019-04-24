@@ -1,6 +1,4 @@
 'use strict';
 
-export { HiGlassContainer, HiGlassConfigurator } from './HiGlassContainer';
-export { HiGlassPlainContainer } from './HiGlassPlainContainer';
-export { HiGlassLocalStorage } from './HiGlassLocalStorage';
+export { HiGlassPlainContainer, isHiglassViewConfigItem } from './HiGlassPlainContainer';
 export { HiGlassAjaxLoadContainer } from './HiGlassAjaxLoadContainer';

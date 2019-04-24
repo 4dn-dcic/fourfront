@@ -3,12 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse, MenuItem, ButtonToolbar, DropdownButton } from 'react-bootstrap';
+import { Button, Collapse, MenuItem, DropdownButton } from 'react-bootstrap';
 import Alerts from './../alerts';
-import { JWT, console, object, ajax, layout, DateUtility, navigate } from './../util';
-import { FormattedInfoBlock, HiGlassPlainContainer, ItemDetailList, CollapsibleItemViewButtonToolbar } from './components';
+import { JWT, console, object, ajax, layout, navigate } from './../util';
+import { HiGlassPlainContainer, CollapsibleItemViewButtonToolbar } from './components';
 import { LinkToSelector } from './../forms/components';
-import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
+import DefaultItemView from './DefaultItemView';
+
+
 
 export default class HiGlassViewConfigView extends DefaultItemView {
 
@@ -23,6 +25,8 @@ export default class HiGlassViewConfigView extends DefaultItemView {
     }
 
 }
+
+
 
 export class HiGlassViewConfigTabView extends React.PureComponent {
 

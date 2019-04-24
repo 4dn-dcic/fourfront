@@ -7,8 +7,7 @@ import { Button } from 'react-bootstrap';
 import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
-import { HiGlassPlainContainer } from './../../item-pages/components/HiGlass/HiGlassPlainContainer';
-import { HiGlassAjaxLoadContainer } from './../../item-pages/components/HiGlass/HiGlassAjaxLoadContainer';
+import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import * as store from './../../../store';
 import { replaceString as replacePlaceholderString } from './../placeholders';
 
@@ -32,17 +31,17 @@ export class BasicUserContentBody extends React.PureComponent {
         });
     }
 
+    /** Determines the item type from the context. */
     itemType(){
-        /** Determines the item type from the context.
-        */
         var { context, itemType } = this.props;
         if (itemType && typeof itemType === 'string') return itemType;
         if (!Array.isArray(context['@type'])) throw new Error('Expected an @type on context.');
         if (context['@type'].indexOf('StaticSection') > -1){
             return 'StaticSection';
-        } else if (context['@type'].indexOf('HiglassViewConfig') > -1){
+        } else if (isHiglassViewConfigItem(context)){ // Func internally checks context['@type'].indexOf('HiglassViewConfig') > -1 also
             return 'HiglassViewConfig';
         } else {
+            // TODO: Case for JupyterNotebook (?) and/or yet-to-be-created ones.
             throw new Error('Unsupported Item type.');
         }
     }
@@ -100,7 +99,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     renderInnerBody(){
         var { context, href } = this.props,
             open        = this.state.open,
-            isHiGlass   = isHiGlassDisplay(context);
+            isHiGlass   = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
@@ -228,9 +227,4 @@ export class BasicStaticSectionBody extends React.PureComponent {
         }
     }
 
-}
-
-
-export function isHiGlassDisplay(context){
-    return Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1;
 }

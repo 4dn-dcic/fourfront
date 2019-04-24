@@ -103,10 +103,14 @@ export const Term = {
             if (field.slice(-14) === 'Sequence length') return Term.roundLargeNumber(term);
             if (field.slice(-15) === 'Cis/Trans ratio') return Term.roundDecimal(term) + '%';
             if (field.slice(-35) === '% Long-range intrachromosomal reads') return Term.roundDecimal(term) + '%';
-            if (field.slice(-4) === '.url' && allowJSXOutput && term.indexOf('http') > -1) {
+            if (field.slice(-4) === '.url' && term.indexOf('http') > -1) {
                 var linkTitle = term.split('/');
-                linkTitle = linkTitle.pop();
-                return <a href={term} target="_blank" rel="noopener noreferrer">{ linkTitle }</a>;
+                linkTitle = linkTitle.pop(); // Filename most likely for quality_metric.url case(s).
+                if (allowJSXOutput){
+                    return <a href={term} target="_blank" rel="noopener noreferrer">{ linkTitle }</a>;
+                } else {
+                    return linkTitle;
+                }
             }
         }
 
