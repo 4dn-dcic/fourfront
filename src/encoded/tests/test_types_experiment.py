@@ -173,13 +173,13 @@ def test_experiment_set_default_embedded_list(registry, exp_types):
         assert 'produced_in_pub.*' in embedded
         assert 'produced_in_pub.award.@id' in embedded
         assert 'produced_in_pub.award.@type' in embedded
-        assert 'produced_in_pub.award.principals_allowed' in embedded
+        assert 'produced_in_pub.award.principals_allowed.*' in embedded
         assert 'produced_in_pub.award.display_title' in embedded
         assert 'produced_in_pub.award.uuid' in embedded
     assert 'experiment_sets.accession' in embedded_list
     assert 'experiment_sets.@id' in embedded
     assert 'experiment_sets.@type' in embedded
-    assert 'experiment_sets.principals_allowed' in embedded
+    assert 'experiment_sets.principals_allowed.*' in embedded
     assert 'experiment_sets.display_title' in embedded
     assert 'experiment_sets.uuid' in embedded
 
