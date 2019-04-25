@@ -18,7 +18,6 @@ export class ItemPageTable extends React.Component {
 
     static propTypes = {
         'results' : PropTypes.arrayOf(PropTypes.shape({
-            'link_id' : PropTypes.string.isRequired,
             'display_title' : PropTypes.string.isRequired
         })).isRequired,
         'loading' : PropTypes.bool,

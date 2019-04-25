@@ -178,7 +178,7 @@ class ExperimentSetsViewOverview extends React.Component {
     static propTypes = {
         'context' : PropTypes.shape({
             'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                'link_id' : PropTypes.string.isRequired
+                '@id' : PropTypes.string.isRequired
             })).isRequired
         }).isRequired
     }

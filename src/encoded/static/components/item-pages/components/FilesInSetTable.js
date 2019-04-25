@@ -173,7 +173,6 @@ export class FileItemRow extends React.Component {
 /** These props are shared between FilesInSetTable and FilesInSetTable.Small */
 const propTypes = {
     'files' : PropTypes.arrayOf(PropTypes.shape({
-        //'link_id'         : PropTypes.string.isRequired,
         'accession'       : PropTypes.string,
         'display_title'   : PropTypes.string,
         'attachment'      : PropTypes.shape({ 'download' : PropTypes.string }).isRequired,
