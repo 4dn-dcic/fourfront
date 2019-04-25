@@ -12,7 +12,7 @@ EPILOG = __doc__
 
 # This order determines order that items will be mapped + added to the queue
 # Can use item type (e.g. file_fastq) or class name (e.g. FileFastq)
-INDEX_ORDER = [
+ITEM_INDEX_ORDER = [
     'Award',
     'Lab',
     'AccessKey',
@@ -47,6 +47,7 @@ INDEX_ORDER = [
     'IndividualFly',
     'IndividualHuman',
     'IndividualMouse',
+    'IndividualPrimate',
 
     'Image',
     'Modification',
