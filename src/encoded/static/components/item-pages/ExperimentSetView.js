@@ -37,6 +37,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         super(props);
         this.isWorkflowNodeCurrentContext = this.isWorkflowNodeCurrentContext.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
+        this.shouldGraphExist = this.shouldGraphExist.bind(this);
+        this.allProcessedFilesFromExperimentSet = memoize(expFxn.allProcessedFilesFromExperimentSet);
+        this.allFilesFromExperimentSet = memoize(expFxn.allFilesFromExperimentSet);
 
         /**
          * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
@@ -62,6 +65,13 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         return true;
     });
 
+    shouldGraphExist(){
+        const context = this.props.context;
+        const processedFiles = this.allProcessedFilesFromExperimentSet(context);
+        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
+        return processedFilesLen > 0;
+    }
+
     isWorkflowNodeCurrentContext(node){
         var ctx = this.props.context;
         if (!ctx) return false;
@@ -82,9 +92,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         //context = SET; // Use for testing along with _testing_data
 
-        var processedFiles      = expFxn.allProcessedFilesFromExperimentSet(context),
+        var processedFiles      = this.allProcessedFilesFromExperimentSet(context),
             processedFilesLen   = (processedFiles && processedFiles.length) || 0,
-            rawFiles            = expFxn.allFilesFromExperimentSet(context, false),
+            rawFiles            = this.allFilesFromExperimentSet(context, false),
             rawFilesLen         = (rawFiles && rawFiles.length) || 0,
             width               = this.getTabViewWidth(),
             commonProps         = { width, context, schemas, windowWidth, href, mounted },
@@ -109,7 +119,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         // Graph Section Tab
-        if (processedFilesLen > 0){
+        if (this.shouldGraphExist()){
             tabs.push(FileViewGraphSection.getTabObject(
                 _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
                 this.state,

@@ -21,14 +21,6 @@ import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTraci
 /** Container for all of the tabs on a File page. */
 export default class FileView extends WorkflowRunTracingView {
 
-    static shouldGraphExist = memoize(function(context){
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-            // We can uncomment below line once do permissions checking on backend for graphing
-            //&& _.any(context.workflow_run_outputs, object.itemUtil.atId)
-        );
-    });
-
     /**
      * Returns schema properties for this File @type, in form of:
      * { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
@@ -37,8 +29,22 @@ export default class FileView extends WorkflowRunTracingView {
         return object.tipsFromSchema(schemas, context);
     });
 
+    constructor(props){
+        super(props);
+        this.shouldGraphExist = this.shouldGraphExist.bind(this);
+    }
+
     componentDidMount(){
         super.componentDidMount();
+    }
+
+    shouldGraphExist(){
+        const context = this.props.context;
+        return (
+            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
+            // We can uncomment below line once do permissions checking on backend for graphing
+            //&& _.any(context.workflow_run_outputs, object.itemUtil.atId)
+        );
     }
 
     getTabViewContents(){
@@ -48,7 +54,7 @@ export default class FileView extends WorkflowRunTracingView {
 
         tabs.push(FileViewOverview.getTabObject(this.props, width));
 
-        if (FileView.shouldGraphExist(context)){
+        if (this.shouldGraphExist(context)){
             tabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
         }
 
