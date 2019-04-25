@@ -230,15 +230,6 @@ export const textContentWidth = memoize(function(
     return textLineWidth;
 });
 
-
-export function verticalCenterOffset(innerElem, extraHeight = 0, outerElem = null){
-    if (!outerElem) {
-        outerElem = innerElem.offsetParent || innerElem.parentElement;
-    }
-    if (!outerElem || !innerElem.offsetHeight || !outerElem.offsetHeight) return 0;
-    return ((outerElem.offsetHeight + extraHeight) - innerElem.offsetHeight) / 2;
-}
-
 /**
  * Grabs the outer-most scrolling container for the page, either <body> or <html>.
  * Needed because the outer-most scrolling container differs between Google Chrome (which use `document.body`, aka <body>)
