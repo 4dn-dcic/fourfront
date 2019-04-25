@@ -98,7 +98,7 @@ class FileMicOverViewBody extends React.PureComponent {
             );
         } else if (file.omerolink){
             thumbnailLink = (
-                <Button className="btn btn-primary btn-block" href={file.omerolink} target="_blank" rel="noopener noreferrer">
+                <Button className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
                     View in OMERO
                 </Button>
             );
