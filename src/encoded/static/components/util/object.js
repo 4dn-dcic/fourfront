@@ -67,13 +67,6 @@ export function tipsFromSchema(schemas, content){
     if (content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
         var type = content['@type'][0];
         return tipsFromSchemaByType(schemas, content['@type'][0]);
-    //} else if (content['@id'] && typeof content['@id'] === 'string'){
-    //    const lowerCaseType = _.filter(content['@id'].split('/'))[0].replace(/\-/g, '_');
-    //    const schemasKeyedByLowerType = _.object(_.map(_.filter(_.values(schemas), function(schm){ return !!(schm.id); }), function(schm){
-    //        let schmLowerKey = schm.id.replace('/profiles/', '').replace('.json', '');
-    //        return [schmLowerKey, schm];
-    //    }));
-    //    return tipsFromSchemaByType(schemasKeyedByLowerType, lowerCaseType);
     }
     return {};
 }
@@ -431,17 +424,15 @@ export function singleTreatment(treatment) {
 }
 
 
-export class TooltipInfoIconContainer extends React.Component {
-    render(){
-        var { elementType, title, tooltip, className } = this.props;
-        return React.createElement(elementType || 'div', {
-            'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
-        }, (
-            <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
-                <i data-tip={tooltip} className="icon icon-info-circle"/>
-            : null }</span>
-        ));
-    }
+export function TooltipInfoIconContainer(props){
+    const { elementType, title, tooltip, className, children } = props;
+    return React.createElement(elementType || 'div', {
+        'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
+    }, (
+        <span>{ title || children }&nbsp;{ typeof tooltip === 'string' ?
+            <i data-tip={tooltip} className="icon icon-info-circle"/>
+        : null }</span>
+    ));
 }
 
 export class TooltipInfoIconContainerAuto extends React.Component {

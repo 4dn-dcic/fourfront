@@ -249,7 +249,8 @@ class File(Item):
         'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession',
-        'quality_metric.display_title'
+        'quality_metric.display_title',
+        'quality_metric.@type'
     ]
     name_key = 'accession'
     rev = {

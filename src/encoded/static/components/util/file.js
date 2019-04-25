@@ -2,11 +2,13 @@ var CryptoJS = require('crypto-js');
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { Button } from 'react-bootstrap';
 import { itemUtil } from './object';
 import { isServerSide } from './misc';
 import patchedConsoleInstance from './patched-console';
 const console = patchedConsoleInstance;
+
 import { File } from './typedefs';
 
 
@@ -59,6 +61,11 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
 
 
 
+
+
+/**********************************
+ *** Grouping-related functions ***
+ **********************************/
 
 /**
  * Basic greedy file grouping algorithm.
@@ -163,6 +170,59 @@ export function extractSinglyGroupedItems(groups){
     return [ multiFileGroups, _.flatten(singleFileGroups, true) ];
 }
 
+
+/**
+ * Filter a list of files down to those with a value for `quality_metric` and `quality_metric.overall_quality_status`.
+ *
+ * @deprecated If Raw Files also start have quality_metric_summary populated, then we can migrate away from & delete this func.
+ *
+ * @param {File[]} files                    List of files, potentially with quality_metric.
+ * @param {boolean} [checkAny=false]        Whether to run a _.any (returning a boolean) instead of a _.filter, for performance in case don't need the files themselves.
+ * @returns {File[]|true} Filtered list of files or boolean for "any", depending on `checkAny` param.
+ */
+export const filterFilesWithEmbeddedMetricItem = memoize(function(files, checkAny=false){
+    var func = checkAny ? _.any : _.filter;
+    return func(files, function(f){
+        return f.quality_metric && f.quality_metric.overall_quality_status;
+    });
+});
+
+
+export const filterFilesWithQCSummary = memoize(function(files, checkAny=false){
+    var func = checkAny ? _.any : _.filter;
+    return func(files, function(f){
+        return (
+            Array.isArray(f.quality_metric_summary) &&
+            f.quality_metric_summary.length > 0 &&
+            // Ensure all unique titles
+            f.quality_metric_summary.length === Array.from(new Set(_.pluck(f.quality_metric_summary, 'title'))).length
+        );
+    });
+});
+
+/**
+ * Groups files with a `quality_metric_summary` property by the concatanated
+ * unique titles of the summary items/columns.
+ *
+ * @param {File[]} filesWithMetrics - List of files which all contain a `quality_metric_summary`.
+ * @returns {File[][]} Groups of files as 2d array.
+ */
+export const groupFilesByQCSummaryTitles = memoize(function(filesWithMetrics, sep="\t"){
+    return _.pluck(
+        Array.from(
+            _.reduce(filesWithMetrics, function(m, file, i){
+                const titles = _.pluck(file.quality_metric_summary, 'title');
+                const titlesAsString = titles.join(sep); // Using Tab as is unlikely character to be used in a title column.
+                if (!m.has(titlesAsString)){
+                    m.set(titlesAsString, []);
+                }
+                m.get(titlesAsString).push(file);
+                return m;
+            }, new Map())
+        ),
+        1
+    );
+});
 
 /**************************
  ** Common React Classes **
@@ -309,7 +369,6 @@ export function isFilenameAnImage(filename, suppressErrors = false){
         fileNameLowerEnds['4'] === '.gif'
     );
 }
-
 
 
 /*** MD5 Related ***/

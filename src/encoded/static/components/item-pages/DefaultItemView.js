@@ -2,10 +2,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
-import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
 import { ItemHeader, ItemDetailList, TabbedView, AuditTabView, Publications, AttributionTabView, BadgesTabView } from './components';
 import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
@@ -115,7 +115,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @param {Object} props Current props sent down to view. Should be about same as in App render function.
      * @returns {TabObject[]}
      */
-    getCommonTabs(props = this.props){
+    getCommonTabs(){
         var returnArr = [],
             { context, schemas, windowWidth } = this.props;
 
@@ -233,7 +233,7 @@ export default class DefaultItemView extends React.PureComponent {
      */
     itemHeader(){
         return (
-            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')} className="exp-set-header-area">
+            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <ItemHeader.TopRow typeInfo={this.typeInfo()} />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
@@ -459,7 +459,7 @@ export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment 
 }
 
 
-export class OverViewBodyItem extends React.Component {
+export class OverViewBodyItem extends React.PureComponent {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
@@ -564,22 +564,26 @@ export class OverViewBodyItem extends React.Component {
         'listWrapperElementProps'       : null,
         'listItemElement'               : 'li',
         'listItemElementProps'          : null,
-        'columnExtraClassName'          : null,
         'singleItemClassName'           : null,
         'fallbackTitle'                 : null,
         'propertyForLabel'              : null,
         'property'                      : null
+    };
+
+    constructor(props){
+        super(props);
+        this.createList = memoize(this.createList);
     }
 
     /** Feeds params + props into static function */
-    createList(valueForProperty, listItemElement, listItemElementProps){
-        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps, this.props.result);
+    createList(valueForProperty, property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps, result){
+        return OverViewBodyItem.createList(valueForProperty, property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps, result);
     }
 
     render(){
         var {
             result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, propertyForLabel,
-            listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName, singleItemClassName
+            listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, singleItemClassName
         } = this.props;
 
         function fallbackify(val){
@@ -596,7 +600,15 @@ export class OverViewBodyItem extends React.Component {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
-        var resultPropertyValue = property && this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
+        var resultPropertyValue = property && this.createList(
+            object.getNestedProperty(result, property),
+            property,
+            titleRenderFxn,
+            addDescriptionTipForLinkTos,
+            listItemElement,
+            listItemElementProps,
+            result
+        );
 
         if (property && this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
             return null;
@@ -632,19 +644,21 @@ export class OverViewBodyItem extends React.Component {
             );
         }
 
-        if (wrapInColumn){
-            var outerClassName = (columnExtraClassName ? columnExtraClassName : '');
-            if (typeof wrapInColumn === 'string'){
-                // MAYBE TODO-REMOVE / ANTI-PATTERN
-                if (wrapInColumn === 'auto' && this._reactInternalInstance && this._reactInternalInstance._hostParent && this._reactInternalInstance._hostParent._currentElement && this._reactInternalInstance._hostParent._currentElement.props && Array.isArray(this._reactInternalInstance._hostParent._currentElement.props.children)){
-                    var rowCountItems = React.Children.count(this._reactInternalInstance._hostParent._currentElement.props.children);
-                    outerClassName += ' col-md-' + (12 / rowCountItems) + ' col-xs-6';
-                } else outerClassName += ' ' + wrapInColumn;
-            } else {
-                outerClassName += " col-xs-6 col-md-4"; // Default column sizing
-            }
-            return <div className={outerClassName} key="outer" children={innerBlockReturned} />;
-        } else return innerBlockReturned;
-
+        return <WrapInColumn wrap={wrapInColumn}>{ innerBlockReturned }</WrapInColumn>;
     }
 }
+
+export function WrapInColumn(props){
+    const { children, wrap, className, defaultWrapClassName } = props;
+    if (!wrap) return children;
+
+    let wrapClassName;
+    if (wrap === true)                  wrapClassName = defaultWrapClassName;
+    else if (typeof wrap === 'string')  wrapClassName = wrap;
+    return <div className={wrapClassName + (className ? ' ' + className : '')}>{ children }</div>;
+}
+WrapInColumn.defaultProps = {
+    'wrap' : false,
+    'defaultWrapClassName' : "col-xs-6 col-md-4"
+};
+

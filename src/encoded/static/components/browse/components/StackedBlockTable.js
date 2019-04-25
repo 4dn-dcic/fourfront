@@ -42,8 +42,8 @@ StackedBlockNameLabel.propTypes = {
     /** Subtitle/label will appear more opaque when not hovered over */
     'subtitleVisible' : PropTypes.bool,
     'className' : PropTypes.string,
-    'title' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
-    'subtitle' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
+    'title' : PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+    'subtitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     // Pass in place of or in addition to subtitle (takes precedence).
     'accession' : PropTypes.string
 };
@@ -456,7 +456,7 @@ export class FileEntryBlock extends React.PureComponent {
 
             const colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + index;
             const title = col.valueTitle || col.title;
-            const colStyle = colWidthStyles ? colWidthStyles[col.field || col.columnClass || 'file-detail'] : null;
+            const colStyle = colWidthStyles ? colWidthStyles[col.field || col.title || col.columnClass] : null;
 
             if (typeof col.render === 'function'){
                 row.push(
@@ -519,7 +519,11 @@ export class FileEntryBlock extends React.PureComponent {
             fileTitleString = file.uuid || fileAtId || 'N/A';
         }
 
-        return <a key="name-title" className="name-title mono-text" href={fileAtId}>{ fileTitleString }</a>;
+        return (
+            <span className="name-title">
+                <a className="title-of-file mono-text" href={fileAtId}>{ fileTitleString }</a>
+            </span>
+        );
     }
 
 
@@ -569,7 +573,7 @@ export class StackedBlockTable extends React.PureComponent {
     static StackedBlock = StackedBlock;
 
     static getOriginalColumnWidthArray = memoize(function(columnHeaders, defaultInitialColumnWidth){
-        return _.map(columnHeaders, (c) => c.initialWidth || defaultInitialColumnWidth );
+        return _.map(columnHeaders, function(c){ return c.initialWidth || defaultInitialColumnWidth; });
     });
 
     static totalColumnsWidth = memoize(function(columnHeaders, defaultInitialColumnWidth){
@@ -608,14 +612,15 @@ export class StackedBlockTable extends React.PureComponent {
     static colWidthStyles = memoize(function(columnWidths, columnHeaders){
         // { 'experiment' : { width } , 'biosample' : { width }, ... }
         return _.object(
-            _.map(
-                _.map(columnHeaders, function(col){
-                    return col.field || col.columnClass;
-                }),
-                function(cn, index){
-                    return [cn, { 'width' : columnWidths[index] }];
+            _.map(columnHeaders, function(col, index){
+                var key;
+                if (col.columnClass === 'file-detail'){
+                    key = col.field || col.title || 'file-detail';
+                } else {
+                    key = col.columnClass;
                 }
-            )
+                return [key, { 'width' : columnWidths[index] }];
+            })
         );
     });
 

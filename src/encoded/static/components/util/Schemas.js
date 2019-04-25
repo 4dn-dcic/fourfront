@@ -103,10 +103,13 @@ export const Term = {
             if (field.slice(-14) === 'Sequence length') return Term.roundLargeNumber(term);
             if (field.slice(-15) === 'Cis/Trans ratio') return Term.roundDecimal(term) + '%';
             if (field.slice(-35) === '% Long-range intrachromosomal reads') return Term.roundDecimal(term) + '%';
-            if (field.slice(-4) === '.url' && allowJSXOutput && term.indexOf('http') > -1) {
-                var linkTitle = term.split('/');
-                linkTitle = linkTitle.pop();
-                return <a href={term} target="_blank" rel="noopener noreferrer">{ linkTitle }</a>;
+            if (field.slice(-4) === '.url' && term.indexOf('http') > -1) {
+                var linkTitle = Term.hrefToFilename(term); // Filename most likely for quality_metric.url case(s).
+                if (allowJSXOutput){
+                    return <a href={term} target="_blank" rel="noopener noreferrer">{ linkTitle }</a>;
+                } else {
+                    return linkTitle;
+                }
             }
         }
 
@@ -150,6 +153,21 @@ export const Term = {
         if (isNaN(parseInt(num))) throw Error('Not a Number - ', num);
         const multiplier = Math.pow(10, decimalsVisible);
         return Math.round(num * multiplier) / multiplier;
+    },
+
+    decorateNumberWithCommas : function(num){
+        if (!num || typeof num !== 'number' || num < 1000) return num;
+        // Put full number into tooltip w. commas.
+        const chunked =  _.chunk((num + '').split('').reverse(), 3);
+        return _.map(chunked, function(c){
+            return c.reverse().join('');
+        }).reverse().join(',');
+    },
+
+    /** Only use where filename is expected. */
+    hrefToFilename : function(href){
+        var linkTitle = href.split('/');
+        return linkTitle = linkTitle.pop();
     }
 
 };

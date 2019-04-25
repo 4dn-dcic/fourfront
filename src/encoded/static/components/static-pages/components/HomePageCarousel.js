@@ -13,30 +13,35 @@ export class HomePageCarouselSlide extends React.PureComponent {
     render(){
         const { options, content, title, description, filetype } = this.props;
 
-        var link        = (options && options.link) || null,
-            image       = (options && options.image) || null,
-            showTitle   = (!title ? null :
-                <div className="title-container">
-                    <h4 className="mt-0">{ title }</h4>
-                    { description ? <p>{ description }</p> : null }
+        const link        = (options && options.link) || null;
+        const image       = (options && options.image) || null;
+        const showTitle   = (!title ? null :
+            <div className="title-container">
+                <h4 className="mt-0">{ title }</h4>
+                { description ? <p>{ description }</p> : null }
+            </div>
+        );
+        const inner = (
+            <React.Fragment>
+                <div className="inner-container">
+                    <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
+                    { showTitle }
                 </div>
-            ),
-            inner = (
-                <React.Fragment>
-                    <div className="inner-container">
-                        <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
-                        { showTitle }
+                { content ?
+                    <div className="inner-body">
+                        <BasicStaticSectionBody {...{ filetype, content }} />
                     </div>
-                    { content ?
-                        <div className="inner-body">
-                            <BasicStaticSectionBody {...{ filetype, content }} />
-                        </div>
-                    : null }
-                </React.Fragment>
-            );
+                : null }
+            </React.Fragment>
+        );
 
         if (link){
-            return <a className="homepage-carousel-slide is-link" href={link}>{ inner }</a>;
+            const isExternalLink = link.slice(0, 4) === 'http';
+            return (
+                <a className="homepage-carousel-slide is-link" href={link} target={isExternalLink ? '_blank' : null} rel={isExternalLink ? 'noopener noreferrer' : null}>
+                    { inner }
+                </a>
+            );
         }
 
         return <div className="homepage-carousel-slide">{ inner }</div>;

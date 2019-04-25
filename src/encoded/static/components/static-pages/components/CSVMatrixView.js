@@ -21,7 +21,7 @@ export const CSVParsingUtilities = {
         if (typeof csvString  !== 'string') throw new Error("csvString must be a string.");
         var data = d3.csvParseRows(csvString);
 
-        options = _.extend(CSVParsingUtilities.defaultCSVParseOptions(), options, { 
+        options = _.extend(CSVParsingUtilities.defaultCSVParseOptions(), options, {
             'endCell' : options.endCell || CSVParsingUtilities.findEndCellCoordsFromGrid(data, options)
         });
 
@@ -119,7 +119,7 @@ export const CSVParsingUtilities = {
                 }
 
                 var { tooltipContent, hasLinks } = CSVParsingUtilities.generateCellTooltipContent(cellValue, yAxisLabels, xAxisLabels, rowIndex, columnIndex, options);
-                
+
                 return {
                     'originalValue' : cellValue,
                     'numericValue'  : numVal,
@@ -146,11 +146,9 @@ export const CSVParsingUtilities = {
     },
 
     matrixCellStyle : function(data, maxValue = 10) {
-        var numVal = (data && data.numericValue) || data;
-        return {
-            backgroundColor: 'rgba(65, 65, 138, '+ numVal/maxValue + ')',
-            border: numVal >= 1 ? 'none' : '1px dotted #eee'
-        };
+        var numVal = (data && typeof data.numericValue === 'number' ? data.numericValue : data || 0);
+        var opacity = numVal/maxValue;
+        return { opacity };
     },
 
     // TODO: Use Bootstrap Popovers instead.
@@ -199,7 +197,7 @@ export const CSVParsingUtilities = {
                 });
                 extraStringShown = extraStringShown.replace(/(Link: ([^;]+;))/g, '').trim();
                 linksStr = '<div class="row" style="padding-top: 6px; padding-bottom: 8px;">' + _.map(links, function(link, i){
-                    return '<div class="col-sm-'+ (12 / Math.min(links.length, 4) ) + '"><a class="btn btn-sm btn-block btn-primary" href="' + link + '" target="_blank">'+ linkTitles[i] + '</a></div>'; 
+                    return '<div class="col-sm-'+ (12 / Math.min(links.length, 4) ) + '"><a class="btn btn-sm btn-block btn-primary" href="' + link + '" target="_blank">'+ linkTitles[i] + '</a></div>';
                 }).join(' ') + '</div>';
             }
         }
@@ -239,7 +237,7 @@ export const CSVParsingUtilities = {
     },
 
     xAxisLabelsFrom2DArray : function(data, options){
-        return _.zip.apply(_.zip, options.xaxisRows.map(function(xRow){ 
+        return _.zip.apply(_.zip, options.xaxisRows.map(function(xRow){
             return data[xRow - 1].filter(function(colLabel, colIdx){
                 if (colIdx < options.startCell[0] - 1) return false;
                 if (colIdx > options.endCell[0] - 1) return false;
@@ -253,7 +251,7 @@ export const CSVParsingUtilities = {
     },
 
     yAxisLabelsFrom2DArray : function(data, options){
-        return _.zip.apply(_.zip, options.yaxisCols.map(function(yCol){ 
+        return _.zip.apply(_.zip, options.yaxisCols.map(function(yCol){
             return _.pluck(data, yCol - 1).filter(function(rowLabel, rowIdx){
                 if (rowIdx < options.startCell[1] - 1) return false;
                 if (rowIdx > options.endCell[1] - 1) return false;
@@ -294,23 +292,18 @@ export const CSVParsingUtilities = {
  * Extends MatrixView Component to accept a 'csv' {string} prop which can be parsed into Matrix data.
  * Component which takes in a CSV string as a prop, transforms it into a 2D array, and plots on a matrix.
  * See src/encoded/static/data/static_pages.json to see options which may be configured (pass as 'options' prop).
- * 
+ *
  * @export
  * @class CSVMatrixView
  * @extends {MatrixView}
  * @prop {string} csv - String representation of a CSV file.
  * @prop {Object} options - Options for parsing CSV. TODO: typedef
  */
-export class CSVMatrixView extends MatrixView {
+export class CSVMatrixView extends React.PureComponent {
 
     static defaultProps = {
         'maxValue' : 4
-    }
-
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
+    };
 
     render(){
         var options = this.props.options || {};
@@ -319,19 +312,17 @@ export class CSVMatrixView extends MatrixView {
             throw new Error("No valid CSV prop defined.");
         }
 
-        var { grid, title, xAxisLabels, yAxisLabels } = CSVParsingUtilities.CSVStringTo2DArraySet(this.props.csv, options);
+        const { grid, title, xAxisLabels, yAxisLabels } = CSVParsingUtilities.CSVStringTo2DArraySet(this.props.csv, options);
+        const propsToPass = _.extend({
+            grid, xAxisLabels, yAxisLabels, title,
+            xAxisTitle: options.xaxisTitle,
+            yaxisTitle: options.yaxisTitle,
+            styleFxn: CSVParsingUtilities.matrixCellStyle,
+            maxValue: this.props.maxValue || null,
+            showXAxisTitle : false
+        }, _.omit(this.props, 'grid', 'title', 'xAxisLabels', 'yAxisLabels'));
 
-        return super.render.call(this, 
-            grid,
-            xAxisLabels,
-            yAxisLabels,
-            options.xaxisTitle || null,
-            options.yaxisTitle || null,
-            title,
-            CSVParsingUtilities.matrixCellStyle,
-            this.props.maxValue,
-            false
-        );
+        return <MatrixView {...propsToPass} />;
 
     }
 
