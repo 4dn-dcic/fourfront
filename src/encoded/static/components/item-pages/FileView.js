@@ -395,8 +395,6 @@ export class QualityControlResults extends React.PureComponent {
         const qualityMetricEmbeddedExists = file && file.quality_metric && object.itemUtil.atId(file.quality_metric);
         const qualityMetricSummaryExists = file && Array.isArray(file.quality_metric_summary) && file.quality_metric_summary.length > 0;
 
-        if (!qualityMetricEmbeddedExists && !qualityMetricSummaryExists && hideIfNoValue) return null;
-
         if (qualityMetricSummaryExists){
             metrics = this.metricsFromSummary();
         } else if (qualityMetricEmbeddedExists){
@@ -424,15 +422,13 @@ export class QualityControlResults extends React.PureComponent {
 
 /**
  * Reuse when showing related_files of an Item.
- *
- * @deprecated ?
  */
 export class RelatedFilesOverViewBlock extends React.PureComponent {
 
     static defaultProps = {
         'wrapInColumn' : true,
         'property' : 'related_files'
-    }
+    };
 
     relatedFiles(){
         var { file, related_files, property } = this.props;
@@ -454,7 +450,7 @@ export class RelatedFilesOverViewBlock extends React.PureComponent {
     }
 
     render(){
-        const { file, related_files, property, hideIfNoValue, schemas, wrapInColumn } = this.props;
+        const { file, property, hideIfNoValue, schemas, wrapInColumn } = this.props;
         const tips = FileView.schemaForFile(file, schemas);
 
         var relatedFiles = this.relatedFiles();
@@ -465,19 +461,14 @@ export class RelatedFilesOverViewBlock extends React.PureComponent {
             relatedFiles = <li className="related-file"><em>None</em></li>;
         }
 
-        const elem = (
-            <div className="inner">
-                <object.TooltipInfoIconContainerAuto result={file} property={property || "related_files"} tips={tips} elementType="h5" fallbackTitle="Related Files" />
-                <ul className="overview-list-elements-container">{ relatedFiles }</ul>
-            </div>
+        return (
+            <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">
+                <div className="inner">
+                    <object.TooltipInfoIconContainerAuto result={file} property={property || "related_files"} tips={tips} elementType="h5" fallbackTitle="Related Files" />
+                    <ul className="overview-list-elements-container">{ relatedFiles }</ul>
+                </div>
+            </WrapInColumn>
         );
-
-        if (wrapInColumn){
-            return <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-sm-12"}>{ elem }</div>;
-        } else {
-            return elem;
-        }
-
-
     }
+
 }
