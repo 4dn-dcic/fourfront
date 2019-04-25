@@ -191,14 +191,14 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         var innerBtnTitle = (
             <span>
                 <span className="hidden-xs hidden-sm">Download </span>
-                { countToShow }
+                <span className="count-to-download-integer">{ countToShow }</span>
                 <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
             </span>
         );
 
         return (
             <React.Fragment>
-                <Button key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
+                <Button id="browse-view-download-files-btn" key="download" onClick={this.handleClickRevealModal} disabled={disabled} data-tip={tip} className={disabled ? "btn-secondary" : "btn-primary"}>
                     <i className="icon icon-download icon-fw shift-down-1"/> { innerBtnTitle }
                 </Button>
                 { this.renderModal(subSelectedFiles) }

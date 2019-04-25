@@ -5,12 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { Checkbox, Button, ButtonGroup } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import * as store from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { ExperimentSetTablesLoaded, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
-import { ProcessedFilesQCStackedTable } from './../browse/components';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
 // UNCOMMENT FOR TESTING
@@ -384,6 +383,27 @@ export class FileOverViewBody extends React.Component {
 
 export class QualityControlResults extends React.PureComponent {
 
+    /**
+     * Converts file + field (param) into a human-readable percentage.
+     *
+     * @param {Item} file - File to get 'percentOfTotalReads' from.
+     * @param {string} field - Property where 'percentOfTotalReads' value can be found.
+     * @param {number} colIndex - Unused.
+     * @param {Object} props - Unused.
+     * @returns {JSX.Element|string} Human-readable value for percent of total reads.
+     */
+    static percentOfTotalReads(file, field, colIndex, props){
+        var numVal = object.getNestedProperty(file, field);
+        if (numVal && typeof numVal === 'number' && file.quality_metric && file.quality_metric['Total reads']){
+            var percentVal = Math.round((numVal / file.quality_metric['Total reads']) * 100 * 1000) / 1000;
+            var numValRounded = Schemas.Term.roundLargeNumber(numVal);
+            return (
+                <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
+            );
+        }
+        return '-';
+    }
+
     static defaultProps = { 'property' : 'quality_metric', 'hideIfNoValue' : false };
 
     metrics(){
@@ -408,7 +428,7 @@ export class QualityControlResults extends React.PureComponent {
                         </div>
                         <div className="col-xs-8">
                             <div className="inner value">
-                                { renderPercent ? ProcessedFilesQCStackedTable.percentOfTotalReads(file, property + '.' + prop) : Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
+                                { renderPercent ? QualityControlResults.percentOfTotalReads(file, property + '.' + prop) : Schemas.Term.toName(property + '.' + prop, qualityMetric[prop], true) }
                             </div>
                         </div>
                     </div>

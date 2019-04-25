@@ -115,7 +115,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @param {Object} props Current props sent down to view. Should be about same as in App render function.
      * @returns {TabObject[]}
      */
-    getCommonTabs(props = this.props){
+    getCommonTabs(){
         var returnArr = [],
             { context, schemas, windowWidth } = this.props;
 
@@ -233,7 +233,7 @@ export default class DefaultItemView extends React.PureComponent {
      */
     itemHeader(){
         return (
-            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')} className="exp-set-header-area">
+            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <ItemHeader.TopRow typeInfo={this.typeInfo()} />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
