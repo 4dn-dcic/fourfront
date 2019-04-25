@@ -234,16 +234,32 @@ function BadgeItem(props){
     const { badge_icon, description } = badge;
     const classification = BadgesTabView.badgeClassification(props);
     const badgeTitle = BadgesTabView.badgeTitle(props, classification);
+
     const linkMsg = parent && object.itemUtil.atId(context) !== parent ? (
-        <React.Fragment>
-            -- <a href={parent} data-tip="Click to visit item containing badge.">View Item</a>
-        </React.Fragment>
+        <div className="mt-02">
+            <a href={parent} className="text-500" data-tip="Click to visit item containing badge.">View Item</a>
+        </div>
     ) : null;
+
     const image = badge_icon && (
         <div className="text-center">
             <img src={badge_icon} style={{ 'maxWidth': '100%', 'maxHeight' : height }}/>
         </div>
     );
+
+    let renderedMessages = null;
+
+    if (Array.isArray(messages) && messages.length > 0){
+        if (messages.length === 1){
+            renderedMessages = <p className="mb-0 mt-0">{ messages[0] }</p>;
+        } else {
+            renderedMessages = (
+                <ul className="mb-0 mt-02" style={{ paddingLeft: 32 }}>
+                    { _.map(messages, function(msg, i){ return <li key={i}>{ msg }</li>; }) }
+                </ul>
+            );
+        }
+    }
 
     return (
         <div className="badge-item row flexrow mt-1" style={{ 'minHeight' : height }}>
@@ -254,14 +270,8 @@ function BadgeItem(props){
                         { badgeTitle }
                         { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
                     </h4>
-                    <ul>
-                        { messages ? (
-                            <p className="mb-0">
-                                { messages.map(function(item) { return (<li>{ item }</li>); }) }
-                                { linkMsg }
-                            </p>
-                        ) : linkMsg }
-                    </ul>
+                    { renderedMessages }
+                    { linkMsg }
                 </div>
             </div>
         </div>
