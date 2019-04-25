@@ -10,6 +10,7 @@ import { ItemHeader, HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassV
     FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
+import { QCMetricFromSummary } from './FileView';
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
@@ -354,44 +355,29 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                         <span>Quality Metrics</span>
                     </h3>
                     { _.map(filesByTitles, function(fileGroup, i){
-                        const columnHeaders = [
-                            // Static headers
+                        const columnHeaders = [ // Static / present-for-each-table headers
                             { columnClass: 'experiment',  title: 'Experiment',  initialWidth: 145,  className: 'text-left' },
                             { columnClass: 'file',        title: 'For File',    initialWidth: 100 }
-                        ].concat(_.map(fileGroup[0].quality_metric_summary, function(qmsItem, qmsIndex){ // Dynamic Headers
+                        ].concat(_.map(fileGroup[0].quality_metric_summary, function(sampleQMSItem, qmsIndex){ // Dynamic Headers
                             function renderColValue(file, field, colIndex, fileEntryBlockProps){
-                                var val = file.quality_metric_summary[qmsIndex].value;
-                                var tooltip = file.quality_metric_summary[qmsIndex].tooltip || null;
-                                if (qmsItem.numberType === 'percent'){
-                                    val += '%';
-                                } else if (qmsItem.numberType && ['number', 'integer'].indexOf(qmsItem.numberType) > -1) {
-                                    val = parseFloat(val);
-                                    if (!tooltip && val >= 1000) {
-                                        // Put full number into tooltip w. commas.
-                                        const chunked =  _.chunk((val + '').split('').reverse(), 3);
-                                        tooltip = _.map(chunked, function(c){
-                                            return c.reverse().join('');
-                                        }).reverse().join(',');
-                                    }
-                                    val = Schemas.Term.roundLargeNumber(val);
-                                }
-                                return (
-                                    <span className="inline-block" data-tip={tooltip}>
-                                        { val }
-                                    </span>
-                                );
+                                const qmsItem = file.quality_metric_summary[qmsIndex];
+                                const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                                return <span className="inline-block" data-tip={tooltip}>{ value }</span>;
                             }
-                            return { columnClass : 'file-detail', title : qmsItem.title, initialWidth : 80, render : renderColValue };
+                            return { columnClass : 'file-detail', title : sampleQMSItem.title, initialWidth : 80, render : renderColValue };
                         }));
-                        // Link to Report, if any files w/ one.
+
+                        // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
                         const anyFilesWithMetricURL = _.any(fileGroup, function(f){
                             return f && f.quality_metric && f.quality_metric.url;
                         });
+
                         if (anyFilesWithMetricURL){
                             columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render : renderFileQCReportLinkButton });
                         } else {
                             columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render : function(){ return ''; } });
                         }
+
                         return (
                             <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i}
                                 files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
