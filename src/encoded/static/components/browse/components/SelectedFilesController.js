@@ -16,6 +16,16 @@ import _ from 'underscore';
 export class SelectedFilesController extends React.PureComponent {
 
     /**
+     * Utility function to extract out the relevant props passed
+     * in by `SelectedFilesController` out of a props object.
+     *
+     * @public
+     */
+    static pick(props){
+        return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount');
+    }
+
+    /**
      * Includes related files that might be saved in memo values.
      *
      * @static
@@ -152,16 +162,28 @@ export class SelectedFilesController extends React.PureComponent {
     getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
 
     render(){
-        //console.log('SELTEST', this.state.selectedFiles);
-        if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
-        var propsToPass = _.extend(_.omit(this.props, 'children'), {
+        const children = this.props.children;
+        const propsToPass = _.extend(_.omit(this.props, 'children'), {
             'selectedFiles'             : this.state.selectedFiles,
             'selectedFilesUniqueCount'  : SelectedFilesController.uniqueFileCountByUUID(this.state.selectedFiles),
             'selectFile'                : this.selectFile,
             'unselectFile'              : this.unselectFile,
             'resetSelectedFiles'        : this.resetSelectedFiles
         });
-        return React.cloneElement(this.props.children, propsToPass);
+
+        if (Array.isArray(children)){
+            return React.Children.map(children, function(child){
+                if (!React.isValidElement(child)){
+                    throw new Error('SelectedFilesController expects props.children[] to be valid React component instances.');
+                }
+                return React.cloneElement(child, propsToPass);
+            });
+        } else {
+            if (!React.isValidElement(this.props.children)){
+                throw new Error('SelectedFilesController expects props.children to be a valid React component instance.');
+            }
+            return React.cloneElement(this.props.children, propsToPass);
+        }
     }
 
 }

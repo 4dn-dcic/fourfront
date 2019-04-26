@@ -253,6 +253,10 @@ export class StackedBlock extends React.PureComponent {
 /** Renders out a checkbox which controls selected state of multiple files */
 class MultipleFileCheckbox extends React.PureComponent {
 
+    static hasCheckBox(files, selectedFiles){
+        return _.every(files, function(file){ return SingleFileCheckbox.hasCheckbox(file, selectedFiles); });
+    }
+
     static propTypes = {
         'selectedFiles' : PropTypes.object,
         'onChange' : PropTypes.func,
@@ -282,8 +286,9 @@ class MultipleFileCheckbox extends React.PureComponent {
         const { files, selectedFiles, onChange } = this.props;
         const filesCount = (Array.isArray(files) && files.length) || 0;
 
-        // Don't render anything if no selectedFiles passed in.
-        if (!selectedFiles || filesCount === 0 || !onChange || !files[0].accession) return null;
+        if (filesCount === 0 || !onChange || !MultipleFileCheckbox.hasCheckBox(files, selectedFiles)){
+            return null;
+        }
 
         const accessionTriples = expFxn.filesToAccessionTriples(files, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
@@ -346,7 +351,7 @@ export class FilePairBlock extends React.PureComponent {
                 { label }
                 <div className="name-title" key="name-title">
                     { !excludeOwnCheckbox ?
-                        <MultipleFileCheckbox onChange={this.onCheckboxChange} files={files} selectedFiles={selectedFiles} />
+                        <MultipleFileCheckbox onChange={this.onCheckboxChange} {...{ files, selectedFiles }} />
                     : null }
                     { name }
                 </div>
@@ -392,12 +397,11 @@ export class FilePairBlock extends React.PureComponent {
 
 function SingleFileCheckbox(props){
     const { file, excludeCheckbox, selectedFiles, handleFileCheckboxChange } = props;
-    if (!SingleFileCheckbox.hasCheckbox(file, excludeCheckbox, selectedFiles)){
+    if (!SingleFileCheckbox.hasCheckbox(file, selectedFiles)){
         return null;
     }
     const isChecked = SingleFileCheckbox.isChecked(file, selectedFiles);
-    const accessionTriple = expFxn.fileToAccessionTriple(props.file, true);
-
+    const accessionTriple = expFxn.fileToAccessionTriple(file, true);
     return (
         <input type="checkbox" checked={isChecked} name="file-checkbox" id={'checkbox-for-' + accessionTriple}
             className='file-entry-table-checkbox' data-select-files={[accessionTriple]}
@@ -405,8 +409,12 @@ function SingleFileCheckbox(props){
     );
 }
 
-SingleFileCheckbox.hasCheckbox = function(file, excludeCheckbox, selectedFiles){
-    if (!file || !file.accession || !selectedFiles || excludeCheckbox) return false; // No file to select.
+SingleFileCheckbox.hasCheckbox = function(file, selectedFiles){
+    if (!selectedFiles) return false;
+    if (!file || !file.accession) return false;
+    // Needed to generate accessionTriple (ExpSet,Exp,File)
+    if (!file.from_experiment || !file.from_experiment.from_experiment_set) return false;
+    if (!file.from_experiment.accession || !file.from_experiment.from_experiment_set.accession) return false;
     return true;
 };
 
@@ -528,12 +536,12 @@ export class FileEntryBlock extends React.PureComponent {
 
 
     renderName(){
-        var { file, colWidthStyles, label } = this.props;
+        var { file, colWidthStyles, label, excludeCheckbox } = this.props;
         return (
             <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
                 style={colWidthStyles ? colWidthStyles.file : null}>
                 { label }
-                <SingleFileCheckbox {...this.props} />
+                { !excludeCheckbox ? <SingleFileCheckbox {...this.props} /> : null }
                 { this.renderNameInnerTitle() }
             </div>
         );

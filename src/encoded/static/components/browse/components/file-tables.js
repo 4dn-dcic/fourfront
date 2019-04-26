@@ -373,12 +373,10 @@ export class RawFilesStackedTable extends React.PureComponent {
                 }).isRequired
             })).isRequired
         }),
-        'keepCounts'                : PropTypes.bool, // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.),
         'collapseLongLists'         : PropTypes.bool
     };
 
     static defaultProps = {
-        'keepCounts'    : false,
         'fadeIn'        : true,
         'width'         : null,
         'columnHeaders'     : [
