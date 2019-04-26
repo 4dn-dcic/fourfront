@@ -18,7 +18,7 @@ import {
 } from './components';
 
 //import { BROWSE } from './../testdata/browse/4DNESYUY-test';
-
+//import { BROWSE } from './../testdata/browse/checkboxes';
 
 var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
