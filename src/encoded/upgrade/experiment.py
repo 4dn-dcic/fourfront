@@ -152,7 +152,7 @@ def experiment_capture_c_1_2(value, system):
             if target:
                 bfuuid = getbf4t(target, biofeats)
             if bfuuid:
-                tinfo = {'target': bfuuid}
+                tinfo = {'target': [bfuuid]}
                 if of:
                     tinfo['oligo_file'] = of
                 new_vals.append(tinfo)

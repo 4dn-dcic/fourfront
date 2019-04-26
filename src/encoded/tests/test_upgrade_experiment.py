@@ -136,7 +136,8 @@ def test_experiment_capture_c_target_to_biofeat(
     for a2c in aliases2chk:
         assert a2c in value.get('notes')
     for tr in trs:
-        assert tr.get('target') in uuids2chk
+        for t in tr.get('target'):
+            assert t in uuids2chk
 
 
 @pytest.fixture
