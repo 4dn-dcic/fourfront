@@ -396,7 +396,7 @@ export class FilePairBlock extends React.PureComponent {
 
 
 function SingleFileCheckbox(props){
-    const { file, excludeCheckbox, selectedFiles, handleFileCheckboxChange } = props;
+    const { file, selectedFiles, handleFileCheckboxChange } = props;
     if (!SingleFileCheckbox.hasCheckbox(file, selectedFiles)){
         return null;
     }
@@ -421,7 +421,7 @@ SingleFileCheckbox.hasCheckbox = function(file, selectedFiles){
 SingleFileCheckbox.isChecked = function(file, selectedFiles){
     if (!file || !file.accession || !selectedFiles) return null;
     var accessionTriple = expFxn.fileToAccessionTriple(file, true);
-    return selectedFiles[accessionTriple];
+    return !!(selectedFiles[accessionTriple]);
 };
 
 
@@ -664,10 +664,6 @@ export class StackedBlockTable extends React.PureComponent {
         this.colWidthStyles = this.colWidthStyles.bind(this);
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.setCollapsingState = _.throttle(this.setCollapsingState.bind(this));
-
-        this.cache = {
-            'oddExpRow' : true
-        };
 
         this.state = {
             'mounted' : false

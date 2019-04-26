@@ -606,6 +606,10 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         this.oddExpRow = false;
     }
 
+    componentDidUpdate(){
+        this.oddExpRow = false;
+    }
+
     renderFileBlocksForExperiment(filesForExperiment){
         const { href } = this.props;
         var fileBlocks = [],
