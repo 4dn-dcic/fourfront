@@ -214,7 +214,7 @@
         }
     },
     "facets": {
-        "experiment_type.title" : {
+        "experiment_type.display_title" : {
             "title" : "Experiment Type"
         },
         "biosample.biosource.individual.organism.name": {
