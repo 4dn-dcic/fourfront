@@ -253,8 +253,23 @@ export class StackedBlock extends React.PureComponent {
 /** Renders out a checkbox which controls selected state of multiple files */
 class MultipleFileCheckbox extends React.PureComponent {
 
-    static hasCheckBox(files, selectedFiles){
-        return _.every(files, function(file){ return SingleFileCheckbox.hasCheckbox(file, selectedFiles); });
+    static hasCheckBox(files){
+        if (!Array.isArray(files) || files.length === 0) return false;
+        return _.every(files, function(file){ return SingleFileCheckbox.hasCheckbox(file); });
+    }
+
+    static isChecked(accessionTriples, selectedFiles){
+        for (var i = 0; i < accessionTriples.length; i++){
+            if (typeof selectedFiles[accessionTriples[i]] === 'undefined') return false;
+        }
+        return true;
+    }
+
+    static isIndeterminate(accessionTriples, selectedFiles){
+        for (var i = 0; i < accessionTriples.length; i++){
+            if (typeof selectedFiles[accessionTriples[i]] !== 'undefined') return true;
+        }
+        return false;
     }
 
     static propTypes = {
@@ -268,32 +283,24 @@ class MultipleFileCheckbox extends React.PureComponent {
         'name' : "file-checkbox"
     };
 
-    isChecked = memoize(function(accessionTriples, selectedFiles){
-        for (var i = 0; i < accessionTriples.length; i++){
-            if (typeof selectedFiles[accessionTriples[i]] === 'undefined') return false;
-        }
-        return true;
-    })
-
-    isIndeterminate = memoize(function(accessionTriples, selectedFiles){
-        for (var i = 0; i < accessionTriples.length; i++){
-            if (typeof selectedFiles[accessionTriples[i]] !== 'undefined') return true;
-        }
-        return false;
-    });
+    constructor(props){
+        super(props);
+        this.isChecked = memoize(MultipleFileCheckbox.isChecked);
+        this.isIndeterminate = memoize(MultipleFileCheckbox.isIndeterminate);
+    }
 
     render(){
         const { files, selectedFiles, onChange } = this.props;
         const filesCount = (Array.isArray(files) && files.length) || 0;
 
-        if (filesCount === 0 || !onChange || !MultipleFileCheckbox.hasCheckBox(files, selectedFiles)){
+        if (filesCount === 0 || !onChange || !selectedFiles || !MultipleFileCheckbox.hasCheckBox(files)){
             return null;
         }
 
         const accessionTriples = expFxn.filesToAccessionTriples(files, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
-        const lineHeight = (filesCount * 36 - 14) + 'px';
+        const lineHeight = (filesCount * 35 - 14) + 'px';
 
         return (
             <div className="multiple-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
@@ -397,7 +404,7 @@ export class FilePairBlock extends React.PureComponent {
 
 function SingleFileCheckbox(props){
     const { file, selectedFiles, handleFileCheckboxChange } = props;
-    if (!SingleFileCheckbox.hasCheckbox(file, selectedFiles)){
+    if (!selectedFiles || !handleFileCheckboxChange || !SingleFileCheckbox.hasCheckbox(file)){
         return null;
     }
     const isChecked = SingleFileCheckbox.isChecked(file, selectedFiles);
@@ -409,8 +416,7 @@ function SingleFileCheckbox(props){
     );
 }
 
-SingleFileCheckbox.hasCheckbox = function(file, selectedFiles){
-    if (!selectedFiles) return false;
+SingleFileCheckbox.hasCheckbox = function(file){
     if (!file || !file.accession) return false;
     // Needed to generate accessionTriple (ExpSet,Exp,File)
     if (!file.from_experiment || !file.from_experiment.from_experiment_set) return false;
@@ -421,6 +427,7 @@ SingleFileCheckbox.hasCheckbox = function(file, selectedFiles){
 SingleFileCheckbox.isChecked = function(file, selectedFiles){
     if (!file || !file.accession || !selectedFiles) return null;
     var accessionTriple = expFxn.fileToAccessionTriple(file, true);
+    // We must return a bool here to be fed into the `checked` attribute of a checkbox.
     return !!(selectedFiles[accessionTriple]);
 };
 
@@ -502,16 +509,16 @@ export class FileEntryBlock extends React.PureComponent {
             fileTitleString;
 
         if (fileError) {
-            return <div key="name-title" className="name-title"><em>{ fileError }</em></div>;
+            return <div key="name-title" className="name-title inline-block"><em>{ fileError }</em></div>;
         }
 
         if (!file || !fileAtId) {
-            return <div key="name-title" className="name-title"><em>No file(s) or view permissions.</em></div>;
+            return <div key="name-title" className="name-title inline-block"><em>No file(s) or view permissions.</em></div>;
         }
 
         if (typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, colForFile.field || null, 0, this.props);
-            if (renderedName) return <span key="name-title" className="name-title">{ renderedName }</span>;
+            if (renderedName) return <div key="name-title" className="name-title inline-block">{ renderedName }</div>;
         }
 
         if (!fileTitleString && file.accession) {
@@ -527,11 +534,7 @@ export class FileEntryBlock extends React.PureComponent {
             fileTitleString = file.uuid || fileAtId || 'N/A';
         }
 
-        return (
-            <span className="name-title">
-                <a className="title-of-file mono-text" href={fileAtId}>{ fileTitleString }</a>
-            </span>
-        );
+        return <a className="title-of-file mono-text name-title" href={fileAtId}>{ fileTitleString }</a>;
     }
 
 

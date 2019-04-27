@@ -50,6 +50,24 @@ export class BrowseViewSelectedFilesDownloadButton extends React.PureComponent {
 }
 
 
+export class ExperimentSetViewFilesDownloadButton extends React.PureComponent {
+
+    render(){
+        const { selectedFilesUniqueCount, selectedFiles } = this.props;
+
+        return (
+            <SelectedFilesDownloadButton {...{ selectedFilesUniqueCount, selectedFiles }} filenamePrefix="metadata_" id="expset-download-files-btn">
+                <i className="icon icon-download icon-fw shift-down-1"/>
+                <span className="hidden-xs hidden-sm">Download </span>
+                <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
+                <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
+            </SelectedFilesDownloadButton>
+        );
+    }
+
+}
+
+
 /**
  * Upon clicking the button, reveal a modal popup giving users more download instructions.
  */
