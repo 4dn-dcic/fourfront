@@ -39,7 +39,11 @@
         "award": "Test-4DN",
         "badges": [{
             "badge": "e39777c6-8fe4-4424-bac1-40406342e026",
-            "message": "Biosample is missing a morphology image"
+            "messages": [
+                "Biosample is missing a morphology image",
+                "Biosample is missing culture duration",
+                "Biosample is missing passage number"
+            ]
         }],
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
@@ -109,11 +113,11 @@
         "status": "in review by lab",
         "accession": "4DNBS1234444",
         "badges": [
-                    {
-                      "badge": "dee03a23-49e5-4c33-afab-9ec90d65faf3",
-                      "message": "test badge message"
-                    }
-                  ]
+            {
+                "badge": "dee03a23-49e5-4c33-afab-9ec90d65faf3",
+                "messages": ["test badge message 1", "test badge message 2"]
+            }
+        ]
     },
     {
         "uuid": "234511bc-8535-4448-903e-854af460b255",

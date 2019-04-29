@@ -74,7 +74,7 @@ class ExperimentSet(Item):
     }
     aggregated_items = {
         "badges": [
-            "message",
+            "messages",
             "badge.commendation",
             "badge.warning",
             "badge.uuid",
@@ -90,7 +90,7 @@ class ExperimentSet(Item):
         "badges.badge.badge_classification",
         "badges.badge.description",
         "badges.badge.badge_icon",
-        "badges.message",
+        "badges.messages",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",
@@ -118,7 +118,7 @@ class ExperimentSet(Item):
         "experiments_in_set.badges.badge.badge_classification",
         "experiments_in_set.badges.badge.badge_icon",
         "experiments_in_set.badges.badge.description",
-        "experiments_in_set.badges.message",
+        "experiments_in_set.badges.messages",
 
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
@@ -141,7 +141,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.badges.badge.badge_classification",
         "experiments_in_set.biosample.badges.badge.badge_icon",
         "experiments_in_set.biosample.badges.badge.description",
-        "experiments_in_set.biosample.badges.message",
+        "experiments_in_set.biosample.badges.messages",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
@@ -179,7 +179,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.badge_classification",
         "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
-        "experiments_in_set.files.badges.message",
+        "experiments_in_set.files.badges.messages",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
