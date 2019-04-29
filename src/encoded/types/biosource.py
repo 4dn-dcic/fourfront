@@ -64,7 +64,6 @@ class Biosource(Item):
     def biosource_name(self, request, biosource_type, individual=None,
                        cell_line=None, cell_line_tier=None, tissue=None,
                        modifications=None):
-        self.upgrade_properties()
         cell_line_types = [
             'primary cell',
             'primary cell line',

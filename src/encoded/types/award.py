@@ -65,18 +65,15 @@ class Award(Item):
         "description": "A center facet for every award",
         "type": "string"
     })
-    def center_title(self, request):
+    def center_title(self, request, name, description=None, center='', pi=None):
         '''If a center is not present for award then looks for classification
            of award by checking beginning of description, adds the pi last name
            if present or defaults to required award number
         '''
-        if self.properties.get('center', None):
-            return self.properties.get('center')
-        desc = self.properties.get('description', None)
-        pi = self.properties.get('pi', None)
-        center = ''
-        if desc is not None:
-            m = re.match('[A-Z]+:', desc)
+        if center:
+            return center
+        if description is not None:
+            m = re.match('[A-Z]+:', description)
             if m:
                 center += m.group()[:-1]
         if pi is not None:
@@ -86,5 +83,5 @@ class Award(Item):
             center += pi.get('last_name')
         if not center:
             # default to award number
-            center = self.properties.get('name')
+            center = name
         return center
