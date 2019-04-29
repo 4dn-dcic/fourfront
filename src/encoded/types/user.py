@@ -101,9 +101,12 @@ class User(Item):
         "type": "string",
         "format" : "email"
     })
-    def contact_email(self):
+    def contact_email(self, email, preferred_email=None):
         """Returns `email` if `preferred_email` is not defined."""
-        return self.properties.get('preferred_email', self.properties['email'])
+        if preferred_email is not None:
+            return preferred_email
+        else:
+            return email
 
     def __ac_local_roles__(self):
         """return the owner user."""

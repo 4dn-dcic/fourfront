@@ -299,8 +299,7 @@ class File(Item):
             pass
         return outString
 
-    def generate_track_title(self, track_info):
-        props = self.properties
+    def generate_track_title(self, track_info, props):
         if not props.get('higlass_uid'):
             return None
         exp_type = track_info.get('experiment_type', None)
@@ -481,7 +480,7 @@ class File(Item):
                 if lab is not None:
                     track_info['lab_name'] = lab.get('display_title')
 
-        track_title = self.generate_track_title(track_info)
+        track_title = self.generate_track_title(track_info, props)
         if track_title is not None:
             track_info['track_title'] = track_title
         return track_info
@@ -648,7 +647,7 @@ class File(Item):
                 external = self.build_external_creds(self.registry, self.uuid, properties)
             except ClientError:
                 log.error(os.environ)
-                log.error(self.properties)
+                log.error(properties)
                 return 'UPLOAD KEY FAILED'
         return external['key']
 
@@ -837,7 +836,7 @@ class FileProcessed(File):
     })
     def workflow_run_inputs(self, request, disable_wfr_inputs=False):
         # switch this calc prop off for some processed files, i.e. control exp files
-        if not self.properties.get('disable_wfr_inputs'):
+        if not disable_wfr_inputs:
             return self.rev_link_atids(request, "workflow_run_inputs")
         else:
             return []

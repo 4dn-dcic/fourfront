@@ -90,7 +90,7 @@ class Lab(Item):
             #"linkTo" : "User"
         }
     })
-    def correspondence(self, request):
+    def correspondence(self, request, pi=None, contact_persons=None):
         """
         Definitive list of users (linkTo User) who are designated as point of contact(s) for this Lab.
 
@@ -98,14 +98,11 @@ class Lab(Item):
             List of @IDs which refer to either PI or alternate list of contacts defined in `contact_persons`.
         """
 
-        ppl = self.properties.get('contact_persons', [])
-        pi  = self.properties.get('pi', None)
-
         contact_people = None
 
-        if ppl:
-            contact_people = ppl
-        elif not ppl and pi:
+        if contact_persons:
+            contact_people = contact_persons
+        elif pi:
             contact_people = [pi]
 
         def fetch_and_pick_embedded_properties(person_at_id):
