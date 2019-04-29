@@ -902,30 +902,6 @@ export class Detail extends React.PureComponent {
         };
     });
 
-    static generatedKeyLists(props){
-        var sortKeys = _.difference(_.keys(props.context).sort(), props.excludedKeys.sort());
-
-        // Sort applicable persistent keys by original persistent keys sort order.
-        var stickyKeysObj = _.object(
-            _.intersection(sortKeys, props.stickyKeys.slice(0).sort()).map(function(key){
-                return [key, true];
-            })
-        );
-        var orderedStickyKeys = [];
-        props.stickyKeys.forEach(function (key) {
-            if (stickyKeysObj[key] === true) orderedStickyKeys.push(key);
-        });
-
-        var extraKeys = _.difference(sortKeys, props.stickyKeys.slice(0).sort());
-        var collapsibleKeys = _.intersection(extraKeys.sort(), props.alwaysCollapsibleKeys.slice(0).sort());
-        extraKeys = _.difference(extraKeys, collapsibleKeys);
-
-        return {
-            'persistentKeys' : orderedStickyKeys.concat(extraKeys),
-            'collapsibleKeys' : collapsibleKeys
-        };
-    }
-
     constructor(props){
         super(props);
         this.renderDetailRow = this.renderDetailRow.bind(this);
