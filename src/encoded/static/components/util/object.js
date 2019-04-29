@@ -26,6 +26,11 @@ export function atIdFromObject(o){
     if (!o) return null;
     if (typeof o !== 'object') return null;
     if (typeof o['@id'] === 'string') return o['@id'];
+    if (typeof o.link_id === 'string'){
+        const atId = o.link_id.replace(/~/g, "/");
+        console.warn("Found a link_id but not an @id for " + atId);
+        return atId;
+    }
     return null;
 }
 

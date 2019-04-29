@@ -23,7 +23,7 @@ import { console, object } from './../../util';
  * @prop {string} labName - Name of Lab to show if props.showLabName is true.
  * @prop {boolean} [showLabName=false] - Show lab name instead of props.user.display_title if true.
  */
-class SubmitterLink extends React.Component {
+class SubmitterLink extends React.PureComponent {
 
     render (){
         var user = this.props.user;
@@ -59,7 +59,7 @@ class SubmitterLink extends React.Component {
  * @prop {function} onMouseEnter - Callback for cursor entering icon.
  * @prop {function} onMouseLeave - Callback for cursor leaving icon.
  */
-class LabIcon extends React.Component {
+class LabIcon extends React.PureComponent {
 
     static defaultProps = {
         onMouseEnter : null,
@@ -356,7 +356,7 @@ export class FilesInSetTable extends React.Component {
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { this.props.files.map((file, i)=> <FileItemRow file={file} key={file['@id'] || i} />) }
+                { this.props.files.map((file, i)=> <FileItemRow file={file} key={object.itemUtil.atId(file) || i} />) }
             </div>
         );
     }

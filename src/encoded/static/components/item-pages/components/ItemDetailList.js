@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, object, Schemas, typedefs } from './../../util';
@@ -12,6 +13,19 @@ import { FilesInSetTable } from './FilesInSetTable';
 import JSONTree from 'react-json-tree';
 
 var { Item } = typedefs;
+
+
+
+/**
+ * This file/component is kind of a mess.
+ *
+ * @module
+ * @todo
+ * For any major-ish future work, we should replace this with an
+ * off-the-shelf NPM JSON-LD renderer (if any) and just wrap it with
+ * our own simple 'prop-feeder' component.
+ */
+
 
 /**
  * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
@@ -23,7 +37,7 @@ class SubItemTitle extends React.Component {
         'isOpen' : PropTypes.bool,
         'title' : PropTypes.string,
         'content' : PropTypes.object
-    }
+    };
 
     componentDidMount(){
         ReactTooltip.rebuild();
@@ -361,7 +375,7 @@ class SubItemTable extends React.Component {
         if (this.props.items[0] && this.props.items[0].display_title){
             tipsFromSchema = object.tipsFromSchema(Schemas.get(), this.props.items[0]);
             columnKeys = columnKeys.filter(function(k){
-                if (['@id'].indexOf(k) > -1) return false;
+                if (k === '@id') return false;
                 return true;
             });
         }
@@ -598,8 +612,8 @@ class DetailRow extends React.PureComponent {
      */
     handleToggle(e){
         e.preventDefault();
-        this.setState({
-            isOpen: !this.state.isOpen,
+        this.setState(function({ isOpen }){
+            return { 'isOpen' : !isOpen };
         });
     }
 
@@ -748,9 +762,9 @@ export class Detail extends React.PureComponent {
                 // This is a download link. Format appropriately
                 var split_item = item.split('/');
                 var attach_title = decodeURIComponent(split_item[split_item.length-1]);
-                return <a key={item} href={item} target="_blank" download>{ attach_title || item }</a>;
+                return <a key={item} href={item} target="_blank" download rel="noreferrer noopener">{ attach_title || item }</a>;
             } else if (item.charAt(0) === '/') {
-                if (popLink) return <a key={item} href={item} target="_blank">{ item }</a>;
+                if (popLink) return <a key={item} href={item} target="_blank" rel="noreferrer noopener">{ item }</a>;
                 else return <a key={item} href={item}>{ item }</a>;
             } else if (item.slice(0,4) === 'http') {
                 // Is a URL. Check if we should render it as a link/uri.
@@ -759,7 +773,7 @@ export class Detail extends React.PureComponent {
                     schemaProperty &&
                     typeof schemaProperty.format === 'string' &&
                     ['uri','url'].indexOf(schemaProperty.format.toLowerCase()) > -1
-                ) return <a key={item} href={item} target="_blank">{ item }</a>;
+                ) return <a key={item} href={item} target="_blank" rel="noreferrer noopener">{ item }</a>;
             } else {
                 return <span>{ Schemas.Term.toName(keyPrefix, item) }</span>;
             }
@@ -771,12 +785,12 @@ export class Detail extends React.PureComponent {
         return(<span>{ item }</span>); // Fallback
     }
 
-    static SubItemTitle = SubItemTitle
+    static SubItemTitle = SubItemTitle;
 
     static propTypes = {
         'context' : PropTypes.object.isRequired,
         'columnDefinitions' : PropTypes.object
-    }
+    };
 
     static defaultColumnDefinitions = {
         '@id' : {
@@ -817,7 +831,7 @@ export class Detail extends React.PureComponent {
                 return value;
             }
         }
-    }
+    };
 
     static defaultProps = {
         'excludedKeys' : [
@@ -857,13 +871,36 @@ export class Detail extends React.PureComponent {
             '@type', 'accession', 'schema_version', 'uuid', 'replicate_exps', 'dbxrefs', 'status', 'external_references', 'date_created'
         ],
         'open' : null
-    }
+    };
 
-    static columnDefinitions(props){
-        var schemas = props.schemas || Schemas.get();
-        var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, props.context) : {});
-        return _.extend(colDefsFromSchema, props.columnDefinitions || Detail.defaultColumnDefinitions || {}); // { <property> : { 'title' : ..., 'description' : ... } }
-    }
+    static columnDefinitions = memoize(function(context, schemas, columnDefinitions){
+        var colDefsFromSchema = Schemas.flattenSchemaPropertyToColumnDefinition(schemas ? object.tipsFromSchema(schemas, context) : {});
+        return _.extend(colDefsFromSchema, columnDefinitions || Detail.defaultColumnDefinitions || {}); // { <property> : { 'title' : ..., 'description' : ... } }
+    });
+
+    static generatedKeysLists = memoize(function(context, excludedKeys, stickyKeys, alwaysCollapsibleKeys){
+        const sortKeys = _.difference(_.keys(context).sort(), excludedKeys.sort());
+
+        // Sort applicable persistent keys by original persistent keys sort order.
+        const stickyKeysObj = _.object(
+            _.intersection(sortKeys, stickyKeys.slice(0).sort()).map(function(key){
+                return [key, true];
+            })
+        );
+        var orderedStickyKeys = [];
+        stickyKeys.forEach(function (key) {
+            if (stickyKeysObj[key] === true) orderedStickyKeys.push(key);
+        });
+
+        var extraKeys = _.difference(sortKeys, stickyKeys.slice(0).sort());
+        var collapsibleKeys = _.intersection(extraKeys.sort(), alwaysCollapsibleKeys.slice(0).sort());
+        extraKeys = _.difference(extraKeys, collapsibleKeys);
+
+        return {
+            'persistentKeys' : orderedStickyKeys.concat(extraKeys),
+            'collapsibleKeys' : collapsibleKeys
+        };
+    });
 
     static generatedKeyLists(props){
         var sortKeys = _.difference(_.keys(props.context).sort(), props.excludedKeys.sort());
@@ -892,39 +929,22 @@ export class Detail extends React.PureComponent {
     constructor(props){
         super(props);
         this.renderDetailRow = this.renderDetailRow.bind(this);
-        this.state = _.extend({
-            'columnDefinitions' : Detail.columnDefinitions(props)
-        }, Detail.generatedKeyLists(props));
-    }
-
-    componentWillReceiveProps(nextProps){
-        var newState = {};
-
-        if (this.props.schemas !== nextProps.schemas || this.props.columnDefinitions !== nextProps.columnDefinitions || this.props.context !== nextProps.context){
-            newState.columnDefinitions = Detail.columnDefinitions(nextProps);
-        }
-
-        if (this.props.context !== nextProps.context || this.props.excludedKeys !== nextProps.excludedKeys || this.props.stickyKeys !== nextProps.stickyKeys || this.props.alwaysCollapsibleKeys !== nextProps.alwaysCollapsibleKeys){
-            _.extend(newState, Detail.generatedKeyLists(nextProps));
-        }
-
-        if (_.keys(newState).length > 0){
-            this.setState(newState);
-        }
-
     }
 
     renderDetailRow(key, idx){
-        var context = this.props.context,
-            popLink = this.props.popLink || false; // determines whether links should be opened in a new tab
+        const { context, popLink, schemas, columnDefinitions } = this.props;
+        const colDefs = Detail.columnDefinitions(context, schemas || Schemas.get(), columnDefinitions);
 
         return (
-            <DetailRow key={key} label={Detail.formKey(this.state.columnDefinitions, key)} item={context[key]} popLink={popLink} data-key={key} itemType={context['@type'] && context['@type'][0]} columnDefinitions={this.state.columnDefinitions}/>
+            <DetailRow key={key} label={Detail.formKey(colDefs, key)} item={context[key]} popLink={popLink}
+                data-key={key} itemType={context['@type'] && context['@type'][0]} columnDefinitions={colDefs}/>
         );
     }
 
     render(){
-        return <PartialList persistent={_.map(this.state.persistentKeys, this.renderDetailRow)} collapsible={ _.map(this.state.collapsibleKeys, this.renderDetailRow)} open={this.props.open} />;
+        const { context, excludedKeys, stickyKeys, alwaysCollapsibleKeys, open } = this.props;
+        const { persistentKeys, collapsibleKeys } = Detail.generatedKeysLists(context, excludedKeys, stickyKeys, alwaysCollapsibleKeys);
+        return <PartialList persistent={_.map(persistentKeys, this.renderDetailRow)} collapsible={ _.map(collapsibleKeys, this.renderDetailRow)} open={open} />;
     }
 
 }
@@ -965,22 +985,34 @@ export class ItemDetailList extends React.Component {
 
     constructor(props){
         super(props);
+        this.handleToggleJSON = this.handleToggleJSON.bind(this);
+        this.handleToggleCollapsed = this.handleToggleCollapsed.bind(this);
         this.seeMoreButton = this.seeMoreButton.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.toggleJSONButton = this.toggleJSONButton.bind(this);
-        this.render = this.render.bind(this);
         this.state = {
             'collapsed' : true,
             'showingJSON' : false
         };
     }
 
+    handleToggleJSON(){
+        this.setState(function({ showingJSON }){
+            return { "showingJSON" : !showingJSON };
+        });
+    }
+
+    handleToggleCollapsed(){
+        this.setState(function({ collapsed }){
+            return { "collapsed" : !collapsed };
+        });
+    }
+
     seeMoreButton(){
         if (typeof this.props.collapsed === 'boolean') return null;
         return (
-            <button className="item-page-detail-toggle-button btn btn-default btn-block" onClick={()=>{
-                this.setState({ collapsed : !this.state.collapsed });
-            }}>{ this.state.collapsed ? "See advanced information" : "Hide" }</button>
+            <button type="button" className="item-page-detail-toggle-button btn btn-default btn-block" onClick={this.handleToggleCollapsed}>
+                { this.state.collapsed ? "See advanced information" : "Hide" }
+            </button>
         );
     }
 
@@ -996,9 +1028,7 @@ export class ItemDetailList extends React.Component {
 
     toggleJSONButton(){
         return (
-            <button type="button" className="btn btn-block btn-default" onClick={()=>{
-                this.setState({ 'showingJSON' : !this.state.showingJSON });
-            }}>
+            <button type="button" className="btn btn-block btn-default" onClick={this.handleToggleJSON}>
                 { this.state.showingJSON ?
                     <span><i className="icon icon-fw icon-list"/> View as List</span>
                     :
@@ -1009,10 +1039,9 @@ export class ItemDetailList extends React.Component {
     }
 
     buttonsRow(){
-        if (this.props.hideButtons){
-            return null;
-        }
-        if (!this.props.showJSONButton){
+        const { hideButtons, showJSONButton } = this.props;
+        if (hideButtons) return null;
+        if (!showJSONButton){
             return (
                 <div className="row">
                     <div className="col-xs-12">{ this.seeMoreButton() }</div>
@@ -1028,31 +1057,27 @@ export class ItemDetailList extends React.Component {
     }
 
     render(){
+        const { keyTitleDescriptionMap, columnDefinitions, minHeight, context, schemas, popLink, excludedKeys, stickyKeys } = this.props;
         var collapsed;
         if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;
         else collapsed = this.state.collapsed;
 
-        var columnDefinitions = _.extend({}, this.props.keyTitleDescriptionMap || {}, this.props.columnDefinitions || {});
+        const colDefs = _.extend({}, keyTitleDescriptionMap || {}, columnDefinitions || {});
 
         return (
-            <div className="item-page-detail" style={typeof this.props.minHeight === 'number' ? { minHeight : this.props.minHeight } : null}>
+            <div className="item-page-detail" style={typeof minHeight === 'number' ? { minHeight } : null}>
                 { !this.state.showingJSON ?
                     <div className="overflow-hidden">
-                        <Detail
-                            context={this.props.context}
-                            schemas={this.props.schemas}
-                            popLink={this.props.popLink}
-                            open={!collapsed}
-                            columnDefinitions={columnDefinitions}
-                            excludedKeys={this.props.excludedKeys || Detail.defaultProps.excludedKeys}
-                            stickyKeys={this.props.stickyKeys || Detail.defaultProps.stickyKeys}
-                        />
+                        <Detail context={context} schemas={schemas} popLink={popLink}
+                            open={!collapsed} columnDefinitions={colDefs}
+                            excludedKeys={excludedKeys || Detail.defaultProps.excludedKeys}
+                            stickyKeys={stickyKeys || Detail.defaultProps.stickyKeys} />
                         { this.buttonsRow() }
                     </div>
                     :
                     <div className="overflow-hidden">
                         <div className="json-tree-wrapper">
-                            <JSONTree data={this.props.context} />
+                            <JSONTree data={context} />
                         </div>
                         <br/>
                         <div className="row">

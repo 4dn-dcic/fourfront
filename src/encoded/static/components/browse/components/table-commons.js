@@ -70,8 +70,9 @@ export function sanitizeOutputValue(value){
     if (typeof value !== 'string' && !React.isValidElement(value)){
         if (value && typeof value === 'object'){
             if (typeof value.display_title !== 'undefined'){
-                if (typeof value['@id'] !== 'undefined'){
-                    return <a href={object.atIdFromObject(value)}>{ value.display_title }</a>;
+                const atId = object.itemUtil.atId(value);
+                if (atId){
+                    return <a href={atId}>{ value.display_title }</a>;
                 } else {
                     return value.display_title;
                 }
