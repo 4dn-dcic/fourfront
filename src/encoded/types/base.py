@@ -17,7 +17,6 @@ import snovault
 # import snovalut default post / patch stuff so we can overwrite it in this file
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.crud_views import item_edit as sno_item_edit
-from snovault.util import add_default_embeds
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
