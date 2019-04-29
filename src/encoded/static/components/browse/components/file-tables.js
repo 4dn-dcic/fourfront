@@ -369,7 +369,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 'replicate_exp'             : PropTypes.shape({
                     'accession'                 : PropTypes.string,
                     'uuid'                      : PropTypes.string,
-                    'link_id'                   : PropTypes.string
+                    '@id'                       : PropTypes.string
                 }).isRequired
             })).isRequired
         }),

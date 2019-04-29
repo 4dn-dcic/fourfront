@@ -29,7 +29,7 @@ export function mapEmbeddedFilesToStepRunDataIDs(nodes, uuidFileMap){
     return _.map(nodes, function(n){
         if (!n.meta || !n.meta.run_data || !n.meta.run_data.file) return n;
         if (typeof n.meta.run_data.file !== 'string') return n;
-        
+
         var fileUUID;
         try {
             fileUUID = object.assertUUID(n.meta.run_data.file);
@@ -81,7 +81,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value
-                        '@id' : object.itemUtil.atId(file)      // We add in '@id' since at one point this wasn't returned by back-end in lieu of link_id ('/' replaced by '~'). We keep for now just for heck of it.
+                        '@id' : object.itemUtil.atId(file)      // Outdated way to get @id. Keep for now just for heck of it.
                     })
                 ];
             }

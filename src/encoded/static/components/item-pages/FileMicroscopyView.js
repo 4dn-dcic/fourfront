@@ -48,7 +48,7 @@ class FileMicroscopyViewOverview extends React.Component {
         'context' : PropTypes.shape({
             'experiments' : PropTypes.arrayOf(PropTypes.shape({
                 'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                    'link_id' : PropTypes.string.isRequired
+                    '@id' : PropTypes.string.isRequired
                 }))
             })).isRequired
         }).isRequired
@@ -127,4 +127,3 @@ class FileMicOverViewBody extends React.PureComponent {
 
     }
 }
-
