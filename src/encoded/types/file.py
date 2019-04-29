@@ -232,7 +232,7 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        #'experiments.display_title',
+        # 'experiments.display_title',
         'experiments.accession',
         'experiments.experiment_type.display_title',
         'experiments.experiment_sets.accession',
@@ -454,7 +454,7 @@ class File(Item):
         }
     })
     def track_and_facet_info(self, request, biosource_name=None):
-        props = self.properties
+        props = self.upgrade_properties()
         fields = ['experiment_type', 'assay_info', 'lab_name', 'dataset', 'condition',
                   'biosource_name', 'replicate_info', 'experiment_bucket']
         # look for existing _props
@@ -618,22 +618,21 @@ class File(Item):
         "type": "string",
         "description": "Accession of this file"
     })
-    def title(self):
-        return self.properties.get('accession', self.properties.get('external_accession'))
+    def title(self, accession=None, external_accession=None):
+        return accession or external_accession
 
     @calculated_property(schema={
         "title": "Download URL",
         "type": "string",
         "description": "Use this link to download this file."
     })
-    def href(self, request):
-        file_format = self.properties.get('file_format')
+    def href(self, request, file_format, accession=None, external_accession=None):
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
         try:
             file_extension = '.' + fformat.get('standard_file_extension')
         except AttributeError:
             file_extension = ''
-        accession = self.properties.get('accession', self.properties.get('external_accession'))
+        accession = accession or external_accession
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
@@ -836,7 +835,7 @@ class FileProcessed(File):
             "linkTo": "WorkflowRun"
         }
     })
-    def workflow_run_inputs(self, request):
+    def workflow_run_inputs(self, request, disable_wfr_inputs=False):
         # switch this calc prop off for some processed files, i.e. control exp files
         if not self.properties.get('disable_wfr_inputs'):
             return self.rev_link_atids(request, "workflow_run_inputs")
@@ -894,7 +893,7 @@ class FileProcessed(File):
     name='files-reference',
     unique_key='accession',
     properties={
-        'title': 'Refenrence Files',
+        'title': 'Reference Files',
         'description': 'Listing of Reference Files',
     })
 class FileReference(File):
@@ -951,25 +950,23 @@ class FileVistrack(File):
             }
         }
     })
-    def track_and_facet_info(self, request, biosource_name=None):
-        return super().track_and_facet_info(request, biosource_name=self.override_biosource_name(request))
+    def track_and_facet_info(self, request, biosource_name=None, biosource=None):
+        return super().track_and_facet_info(request, biosource_name=self.override_biosource_name(request, biosource))
 
     @calculated_property(schema={
         "title": "Biosource Name",
         "type": "string"
     })
-    def override_biosource_name(self, request):
-        bios = self.properties.get('biosource')
-        if bios is not None:
-            return request.embed(bios, '@@object').get('biosource_name')
+    def override_biosource_name(self, request, biosource=None):
+        if biosource is not None:
+            return request.embed(biosource, '@@object').get('biosource_name')
 
     @calculated_property(schema={
         "title": "Display Title",
         "description": "Name of this File",
         "type": "string"
     })
-    def display_title(self, request, file_format, accession=None, external_accession=None):
-        dbxrefs = self.properties.get('dbxrefs')
+    def display_title(self, request, file_format, accession=None, external_accession=None, dbxrefs=None):
         if dbxrefs:
             acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
             if acclist:

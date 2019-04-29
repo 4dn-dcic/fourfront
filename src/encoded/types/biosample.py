@@ -125,22 +125,18 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "description": "Summary of any biosources comprising the biosample.",
         "type": "string",
     })
-    def biosource_summary(self, request, biosource=None):
-        if biosource:
-            ret_str = ''
-            for i in range(len(biosource)):
-                bios_props = request.embed(biosource[i], '@@object')
-                ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
-            if len(ret_str) > 0:
-                ret_str = ret_str[:-5]
-                cc = self.properties.get('cell_culture_details')
-                if cc:
-                    cc_props = request.embed(cc, '@@embedded')
-                    if 'differentiation_tissue' in cc_props:
-                        ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
-                return ret_str
-            else:
-                return 'None'
+    def biosource_summary(self, request, biosource, cell_culture_details=None):
+        ret_str = ''
+        for i in range(len(biosource)):
+            bios_props = request.embed(biosource[i], '@@object')
+            ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
+        if len(ret_str) > 0:
+            ret_str = ret_str[:-5]
+            if cell_culture_details:
+                cc_props = request.embed(cell_culture_details, '@@embedded')
+                if 'differentiation_tissue' in cc_props:
+                    ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
+            return ret_str
         return 'None'
 
     @calculated_property(schema={
@@ -148,10 +144,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "description": "The type of biosample used in an experiment.",
         "type": "string",
     })
-    def biosample_type(self, request):
-        biosources = self.properties.get('biosource')
+    def biosample_type(self, request, biosource, cell_culture_details=None):
         biosource_types = []
-        for bs in biosources:
+        for bs in biosource:
             # silliness in case we ever have multiple biosources
             biosource = request.embed(bs, '@@object')
             btype = biosource.get('biosource_type')
@@ -166,9 +161,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             raise "Biosource always needs type - why can't we find it"
 
         # we've got a single type of biosource
-        bcc = self.properties.get('cell_culture_details')
-        if bcc is not None:
-            cell_culture = request.embed(bcc, '@@object')
+        if cell_culture_details is not None:
+            cell_culture = request.embed(cell_culture_details, '@@object')
             ds = cell_culture.get('differentiation_state')
             dt = cell_culture.get('differentiation_term')
             if ds or dt:
