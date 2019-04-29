@@ -32,7 +32,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                             return cy.window().then((w)=>{ w.scrollTo(0,0); }).end().wrap($barPart, { force: true }).scrollToCenterElement().wait(200).trigger('mouseover', { force: true }).trigger('mousemove', { force: true }).wait(300).click({ force : true }).wait(200).end()
                                 .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click({ force: true }).end() // Browser will scroll after click itself (e.g. triggered by app)
                                 .location('search')
-                                .should('include', 'experiments_in_set.experiment_type.title=2-stage+Repli-seq')
+                                .should('include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq')
                                 .should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=human').wait(300).end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
                                 .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
@@ -58,7 +58,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
                                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
                                 .location('search').should('include', 'award.project=4DN')
-                                .should('not.include', 'experiments_in_set.experiment_type.title=2-stage+Repli-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=human');
+                                .should('not.include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=human');
                         });
                     });
             });
