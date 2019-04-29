@@ -232,9 +232,9 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'experiments.display_title',
+        #'experiments.display_title',
         'experiments.accession',
-        'experiments.experiment_type.title',
+        'experiments.experiment_type.display_title',
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
