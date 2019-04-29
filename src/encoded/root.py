@@ -6,11 +6,10 @@ from snovault import (
     Root,
     calculated_property,
     root,
-    COLLECTIONS
+    COLLECTIONS,
+    STORAGE
 )
-from snovault.interfaces import STORAGE
 from snovault.util import find_collection_subtypes
-from snovault.elasticsearch.indexer_utils import get_uuids_for_types
 from .schema_formats import is_accession
 from .search import make_search_subreq
 from pyramid.security import (
@@ -73,7 +72,8 @@ def item_counts(config):
         # must do this in two steps: get all ES counts and then subtract
         # counts from child subtypes, if applicable
         for item_type in request.registry[COLLECTIONS].by_item_type:
-            db_count = len(list(get_uuids_for_types(request.registry, types=[item_type])))
+            # use the write (DB) storage with only the specific item_type
+            db_count = request.registry[STORAGE].write.__len__(item_type)
             item_name = request.registry[COLLECTIONS][item_type].type_info.name
             es_count = es_counts.get(item_name, 0)
             db_es_counts[item_type] = [db_count, es_count] # order is important
