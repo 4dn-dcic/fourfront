@@ -6,10 +6,10 @@ from snovault import (
     Root,
     calculated_property,
     root,
-    COLLECTIONS
+    COLLECTIONS,
+    STORAGE
 )
-from snovault.interfaces import STORAGE
-from snovault.fourfront_utils import get_jsonld_types_from_collection_type
+from snovault.util import find_collection_subtypes
 from .schema_formats import is_accession
 from .search import make_search_subreq
 from pyramid.security import (
@@ -45,8 +45,6 @@ def item_counts(config):
         # how much stuff in elasticsearch (among ALL indexes)
         es = request.registry['elasticsearch']
         es_total = 0
-        # some collections may need to be adjusted because they also contain child counts
-        to_subtract = {}
         # find db and es counts for each index
         db_es_counts = OrderedDict()
         db_es_compare = OrderedDict()
@@ -71,25 +69,25 @@ def item_counts(config):
                         es_counts[term['key']] += term['doc_count']
                     else:
                         es_counts[term['key']] = term['doc_count']
-        for coll_name, collection in request.registry[COLLECTIONS].by_item_type.items():
-            db_count = request.registry[STORAGE].write.__len__(coll_name)
-            item_name = collection.type_info.name
-            # check to see if this collection contains child collections
-            check_collections = get_jsonld_types_from_collection_type(request, coll_name, [coll_name])
-            to_subtract[coll_name] = [coll for coll in check_collections if coll != coll_name]
+        # must do this in two steps: get all ES counts and then subtract
+        # counts from child subtypes, if applicable
+        for item_type in request.registry[COLLECTIONS].by_item_type:
+            # use the write (DB) storage with only the specific item_type
+            db_count = request.registry[STORAGE].write.__len__(item_type)
+            item_name = request.registry[COLLECTIONS][item_type].type_info.name
             es_count = es_counts.get(item_name, 0)
-            db_es_counts[coll_name] = [db_count, es_count] # order is important
-        for coll in db_es_counts:
-            coll_db_count, coll_es_count = db_es_counts[coll]
-            subtract_colls = to_subtract.get(coll)
-            if subtract_colls and isinstance(subtract_colls, list):
-                for sub_coll in subtract_colls:
-                    coll_es_count -= db_es_counts[sub_coll][1]
-            db_total += coll_db_count
-            es_total += coll_es_count
-            warn_str = build_warn_string(coll_db_count, coll_es_count)
-            db_es_compare[coll] = ("DB: %s   ES: %s %s" %
-                                         (str(coll_db_count), str(coll_es_count), warn_str))
+            db_es_counts[item_type] = [db_count, es_count] # order is important
+        for item_type in db_es_counts:
+            item_db_count, item_es_count = db_es_counts[item_type]
+            # check to see if this collection contains child collections
+            other_types = find_collection_subtypes(request.registry, item_type)
+            for sub_type in [other for other in other_types if other != item_type]:
+                item_es_count -= db_es_counts[sub_type][1]
+            db_total += item_db_count
+            es_total += item_es_count
+            warn_str = build_warn_string(item_db_count, item_es_count)
+            db_es_compare[item_type] = ("DB: %s   ES: %s %s" %
+                                         (str(item_db_count), str(item_es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
                        (str(db_total), str(es_total), warn_str))

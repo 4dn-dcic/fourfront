@@ -173,7 +173,7 @@ def user_page_view(context, request):
     properties = item_view_page(context, request)
     if not request.has_permission('view_details'):
         filtered = {}
-        for key in ['@id', '@type', 'uuid', 'lab', 'title', 'link_id', 'display_title']:
+        for key in ['@id', '@type', 'uuid', 'lab', 'title', 'display_title']:
             try:
                 filtered[key] = properties[key]
             except KeyError:

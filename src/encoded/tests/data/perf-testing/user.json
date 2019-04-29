@@ -4,20 +4,7 @@
         "first_name": "4dn",
         "last_name": "DCIC",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
-        "subscriptions": [
-            {
-                "url": "?submitted_by.link_id=~users~986b362f-4eb6-4a9c-8173-3ab267307e3a~&sort=-date_created",
-                "title": "My submissions"
-            },
-            {
-                "url": "?lab.link_id=~labs~4dn-dcic-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~4dn-dcic-lab~&sort=-date_created",
-                "title": "4DN DCIC Lab, HMS"
-            }
-        ],
+        "subscriptions": [],
         "submits_for": [
             "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
         ],
@@ -40,32 +27,7 @@
         "first_name": "Bin",
         "last_name": "Li",
         "uuid": "da4f53e5-4e54-4ae7-ad75-ba47316a8bfa",
-        "subscriptions": [
-            {
-                "url": "?submitted_by.link_id=~users~da4f53e5-4e54-4ae7-ad75-ba47316a8bfa~&sort=-date_created",
-                "title": "My submissions"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "Bing Ren, UCSD"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "Bing Ren, UCSD"
-            }
-        ],
+        "subscriptions": [],
         "submits_for": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ],
@@ -88,32 +50,7 @@
         "first_name": "Bing",
         "last_name": "Ren",
         "uuid": "e3159ffc-a5a9-43a1-8cfa-90b776c39788",
-        "subscriptions": [
-            {
-                "url": "?submitted_by.link_id=~users~e3159ffc-a5a9-43a1-8cfa-90b776c39788~&sort=-date_created",
-                "title": "My submissions"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "My lab"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "Bing Ren, UCSD"
-            },
-            {
-                "url": "?lab.link_id=~labs~bing-ren-lab~&sort=-date_created",
-                "title": "Bing Ren, UCSD"
-            }
-        ],
+        "subscriptions": [],
         "submits_for": [
             "795847de-20b6-4f8c-ba8d-185215469cbf"
         ],

@@ -12,8 +12,8 @@ from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
 from snovault.resource_views import collection_view_listing_db
-from snovault.fourfront_utils import (
-    get_jsonld_types_from_collection_type,
+from snovault.util import (
+    find_collection_subtypes,
     crawl_schema
 )
 from snovault.typeinfo import AbstractTypeInfo
@@ -1300,8 +1300,8 @@ def format_results(request, hits, search_frame):
 def find_index_by_doc_types(request, doc_types, ignore):
     """
     Find the correct index(es) to be search given a list of doc_types.
-    The types in doc_types are the collection names, formatted like
-    'Experiment HiC' and index names are the jsonld_types, formatted like
+    The types in doc_types are the item class names, formatted like
+    'Experiment HiC' and index names are the item types, formatted like
     'experiment_hi_c'.
     Ignore any collection names provided in the ignore param, an array.
     Formats output indexes as a string usable by elasticsearch
@@ -1311,7 +1311,7 @@ def find_index_by_doc_types(request, doc_types, ignore):
         if doc_type in ignore:
             continue
         else:
-            result = get_jsonld_types_from_collection_type(request, doc_type)
+            result = find_collection_subtypes(request.registry, doc_type)
             indexes.extend(result)
     # remove any duplicates
     indexes = list(set(indexes))
