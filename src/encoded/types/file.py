@@ -232,9 +232,9 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'experiments.display_title',
+        #'experiments.display_title',
         'experiments.accession',
-        'experiments.experiment_type.title',
+        'experiments.experiment_type.display_title',
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
@@ -249,7 +249,8 @@ class File(Item):
         'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession',
-        'quality_metric.display_title'
+        'quality_metric.display_title',
+        'quality_metric.@type'
     ]
     name_key = 'accession'
     rev = {
@@ -741,11 +742,11 @@ class FileFastq(File):
         "badges.badge.badge_classification",
         "badges.badge.description",
         "badges.badge.badge_icon",
-        "badges.message"
+        "badges.messages"
     ]
     aggregated_items = {
         "badges": [
-            "message",
+            "messages",
             "badge.commendation",
             "badge.warning",
             "badge.uuid",

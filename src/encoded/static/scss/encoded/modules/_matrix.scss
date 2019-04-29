@@ -36,8 +36,12 @@
                 border-top: 1px dotted #ddd;
                 > .inner {
                     position: relative;
+                    display: flex;
+                    height: 100%;
+                    align-items: center;
                     .label-container {
                         position: relative;
+                        width: 100%;
                         > .part-1 {
                             font-weight: 500;
                             //display: inline-block;

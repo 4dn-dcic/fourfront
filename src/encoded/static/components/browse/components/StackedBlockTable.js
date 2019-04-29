@@ -42,8 +42,8 @@ StackedBlockNameLabel.propTypes = {
     /** Subtitle/label will appear more opaque when not hovered over */
     'subtitleVisible' : PropTypes.bool,
     'className' : PropTypes.string,
-    'title' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
-    'subtitle' : PropTypes.oneOfType(PropTypes.string, PropTypes.node),
+    'title' : PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+    'subtitle' : PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
     // Pass in place of or in addition to subtitle (takes precedence).
     'accession' : PropTypes.string
 };
@@ -391,12 +391,12 @@ export class FilePairBlock extends React.PureComponent {
 
 
 function SingleFileCheckbox(props){
-    const { file, excludeCheckbox, selectedFiles, handleFileCheckboxChange } = props;
-    if (!SingleFileCheckbox.hasCheckbox(file, excludeCheckbox, selectedFiles)){
+    const { file, selectedFiles, handleFileCheckboxChange } = props;
+    if (!SingleFileCheckbox.hasCheckbox(file, selectedFiles)){
         return null;
     }
     const isChecked = SingleFileCheckbox.isChecked(file, selectedFiles);
-    const accessionTriple = expFxn.fileToAccessionTriple(props.file, true);
+    const accessionTriple = expFxn.fileToAccessionTriple(file, true);
 
     return (
         <input type="checkbox" checked={isChecked} name="file-checkbox" id={'checkbox-for-' + accessionTriple}
@@ -405,15 +405,19 @@ function SingleFileCheckbox(props){
     );
 }
 
-SingleFileCheckbox.hasCheckbox = function(file, excludeCheckbox, selectedFiles){
-    if (!file || !file.accession || !selectedFiles || excludeCheckbox) return false; // No file to select.
+SingleFileCheckbox.hasCheckbox = function(file, selectedFiles){
+    if (!selectedFiles) return false;
+    if (!file || !file.accession) return false;
+    // Needed to generate accessionTriple (ExpSet,Exp,File)
+    if (!file.from_experiment || !file.from_experiment.from_experiment_set) return false;
+    if (!file.from_experiment.accession || !file.from_experiment.from_experiment_set.accession) return false;
     return true;
 };
 
 SingleFileCheckbox.isChecked = function(file, selectedFiles){
     if (!file || !file.accession || !selectedFiles) return null;
     var accessionTriple = expFxn.fileToAccessionTriple(file, true);
-    return selectedFiles[accessionTriple];
+    return !!(selectedFiles[accessionTriple]);
 };
 
 
@@ -528,12 +532,12 @@ export class FileEntryBlock extends React.PureComponent {
 
 
     renderName(){
-        var { file, colWidthStyles, label } = this.props;
+        var { file, colWidthStyles, label, excludeCheckbox } = this.props;
         return (
             <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
                 style={colWidthStyles ? colWidthStyles.file : null}>
                 { label }
-                <SingleFileCheckbox {...this.props} />
+                { !excludeCheckbox ? <SingleFileCheckbox {...this.props} /> : null }
                 { this.renderNameInnerTitle() }
             </div>
         );
@@ -656,10 +660,6 @@ export class StackedBlockTable extends React.PureComponent {
         this.colWidthStyles = this.colWidthStyles.bind(this);
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.setCollapsingState = _.throttle(this.setCollapsingState.bind(this));
-
-        this.cache = {
-            'oddExpRow' : true
-        };
 
         this.state = {
             'mounted' : false

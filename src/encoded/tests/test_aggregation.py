@@ -45,7 +45,7 @@ def test_aggregation_view(workbook, testapp):
         if expected_path:
             assert agg_badge['embedded_path'] == expected_path
         # check fields on badge. hardcoded fields may need to be updated
-        assert 'message' in agg_badge['item']
+        assert 'messages' in agg_badge['item']
         assert 'badge' in agg_badge['item']
         assert 'commendation' in agg_badge['item']['badge']
         assert 'warning' in agg_badge['item']['badge']

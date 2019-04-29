@@ -69,6 +69,7 @@
                "Karyotyping Authentication",
                "Differentiation Authentication",
                "Cell cycle Authentication",
+               "Ploidy Authentication",
                "Instrument Authentication",
                "Antibody Authentication",
                "Tissue Preparation Methods"

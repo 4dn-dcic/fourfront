@@ -465,9 +465,9 @@ def verify_and_update_ontology(terms, ontologies):
 
 
 def _get_t_id(val):
-    # val can be: uuid string, dict with link_id, dict with uuid if fully embedded
+    # val can be: uuid string, dict with @id, dict with uuid if fully embedded
     try:
-        linkid = val.get('link_id')
+        linkid = val.get('@id')
         if linkid is None:
             linkid = val.get('term_id')
         return linkid

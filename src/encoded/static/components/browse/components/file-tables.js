@@ -25,6 +25,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         return host || null;
     });
 
+    // N.B. This map is replicated in /item-pages/FileView.js - potential todo: import from there or move to fileUtil (util/file.js)
     static epiGenomeAssemblyMapping = {
         'GRCh38' : 'hg38',
         'GRCm38' : 'mm10'
@@ -368,7 +369,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 'replicate_exp'             : PropTypes.shape({
                     'accession'                 : PropTypes.string,
                     'uuid'                      : PropTypes.string,
-                    'link_id'                   : PropTypes.string
+                    '@id'                       : PropTypes.string
                 }).isRequired
             })).isRequired
         }),
@@ -604,6 +605,10 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.oddExpRow = false;
+    }
+
+    componentDidUpdate(){
         this.oddExpRow = false;
     }
 

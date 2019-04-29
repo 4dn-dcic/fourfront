@@ -560,6 +560,15 @@
                         "title": "Info",
                         "description": "Information about why the badge was added",
                         "type": "string"
+                    },
+                    "messages": {
+                        "title": "Info",
+                        "description": "Information about why the badge was added",
+                        "type": "array",
+                        "items": {
+                            "title": "Info",
+                            "type": "string"
+                        }
                     }
                 }
             }

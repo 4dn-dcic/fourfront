@@ -20,8 +20,26 @@ export default class ExperimentView extends WorkflowRunTracingView {
         });
     });
 
+    constructor(props){
+        super(props);
+        this.shouldGraphExist = this.shouldGraphExist.bind(this);
+        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
+
+        /**
+         * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
+         * `loadingGraphSteps`, `allRuns`, `steps`, & `mounted`
+         */
+        this.state = this.state;
+    }
+
+    shouldGraphExist(){
+        const context = this.props.context;
+        const procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
+        return !!(procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0);
+    }
+
     getFilesTabs(width){
-        var context = this.props.context;
+        const context = this.props.context;
 
         var tabs = [];
 
@@ -64,6 +82,17 @@ export default class ExperimentView extends WorkflowRunTracingView {
         return tabs;
     }
 
+    isNodeCurrentContext(node){
+        const context = this.props.context;
+        if (!context) return false;
+        if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
+        if (Array.isArray(node.meta.run_data.file)) return false;
+        if (typeof node.meta.run_data.file.accession !== 'string') return false;
+        if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files === 0) return false;
+        if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
+        return false;
+    }
+
     /**
      * This function is called by base class (DefaultItemView) render method to grab list of JS Objects which describe the Tabs and their content.
      * Properties which should be on the Objects within list are:
@@ -75,31 +104,20 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {{ tab : JSX.Element, key: string, disabled: boolean, content: JSX.Element }[]} List of JSON objects representing Tabs and their content.
      */
     getTabViewContents(){
-
         var initTabs = [],
             context = this.props.context,
-            width = this.getTabViewWidth(),
-            procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
+            width = this.getTabViewWidth();
 
         if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
         }
 
-        if (Array.isArray(procesedFilesWithViewPermissions) && procesedFilesWithViewPermissions.length > 0){
+        if (this.shouldGraphExist()){
             initTabs.push(FileViewGraphSection.getTabObject(
-                _.extend({}, this.props, {
-                    'isNodeCurrentContext' : function(node){
-                        if (!context) return false;
-                        if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
-                        if (Array.isArray(node.meta.run_data.file)) return false;
-                        if (typeof node.meta.run_data.file.accession !== 'string') return false;
-                        if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files === 0) return false;
-                        if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
-                        return false;
-                    }.bind(this)
-                }),
+                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isNodeCurrentContext }),
                 this.state,
-                this.handleToggleAllRuns
+                this.handleToggleAllRuns,
+                width
             ));
         }
 
@@ -184,7 +202,7 @@ class ExperimentSetsViewOverview extends React.Component {
     static propTypes = {
         'context' : PropTypes.shape({
             'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                'link_id' : PropTypes.string.isRequired
+                '@id' : PropTypes.string.isRequired
             })).isRequired
         }).isRequired
     }

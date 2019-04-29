@@ -62,7 +62,7 @@ class Experiment(Item):
     }
     aggregated_items = {
         "badges": [
-            "message",
+            "messages",
             "badge.commendation",
             "badge.warning",
             "badge.uuid",
@@ -78,11 +78,11 @@ class Experiment(Item):
         "badges.badge.badge_classification",
         "badges.badge.description",
         "badges.badge.badge_icon",
-        "badges.message",
+        "badges.messages",
         "experiment_sets.experimentset_type",
         "experiment_sets.@type",
         "experiment_sets.accession",
-        "experiment_type.title",
+        #"experiment_type.display_title",
         "produced_in_pub.title",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
@@ -116,7 +116,7 @@ class Experiment(Item):
         "biosample.badges.badge.badge_classification",
         "biosample.badges.badge.description",
         "biosample.badges.badge.badge_icon",
-        "biosample.badges.message",
+        "biosample.badges.messages",
 
         "files.href",
         "files.accession",
@@ -132,7 +132,7 @@ class Experiment(Item):
         "files.badges.badge.badge_classification",
         "files.badges.badge.description",
         "files.badges.badge.badge_icon",
-        "files.badges.message",
+        "files.badges.messages",
 
         "processed_files.href",
         "processed_files.accession",

@@ -115,7 +115,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
 
     static defaultProps = {
         'requestHref' : function(props, state){
-            return "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type&publications_of_set.uuid=" + props.context.uuid;
+            return "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&publications_of_set.display_title=" + props.context.display_title;
         },
         'title' : function(props, state){
             var title = 'Experiment Sets Published';

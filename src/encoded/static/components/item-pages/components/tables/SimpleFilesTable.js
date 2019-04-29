@@ -13,14 +13,14 @@ export class SimpleFilesTable extends React.PureComponent {
         'results'                 : PropTypes.arrayOf(PropTypes.shape({
             'accession'             : PropTypes.string.isRequired,
             'display_title'         : PropTypes.string.isRequired,
-            'link_id'               : PropTypes.string.isRequired,
+            '@id'               : PropTypes.string.isRequired,
             'from_experiment'       : PropTypes.shape({
                 'accession'             : PropTypes.string.isRequired,
-                'link_id'               : PropTypes.string.isRequired
+                '@id'                   : PropTypes.string.isRequired
             }),
             'from_experiment_set'   : PropTypes.shape({
                 'accession'             : PropTypes.string.isRequired,
-                'link_id'               : PropTypes.string.isRequired
+                '@id'                   : PropTypes.string.isRequired
             })
         }))
     };

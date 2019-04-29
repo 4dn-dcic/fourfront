@@ -39,6 +39,7 @@ export default class WorkflowRunTracingView extends DefaultItemView {
 
     constructor(props){
         super(props);
+        this.shouldGraphExist = this.shouldGraphExist.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
         var steps = _testing_data || null;
         this.state = {
@@ -67,20 +68,17 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         }
     }
 
+    shouldGraphExist(){
+        return true;
+    }
+
     loadGraphSteps(force = false, cb = null, cache = false){
-        var context = this.props.context;
+        const context = this.props.context;
+        const steps = this.state.steps;
 
         if (typeof context.uuid !== 'string') return;
-        if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
-        if (
-            !force && (
-                Array.isArray(context['@type']) && _.contains(context['@type'], 'ExperimentSet') // If ExpSet or Exp, don't do if no processed files
-                && (!Array.isArray(context.processed_files) || context.processed_files.length === 0)
-            ) || (
-                Array.isArray(context['@type']) && _.contains(context['@type'], 'File') // If File, don't do if not output of a workflow_run.
-                && (!(Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0))
-            )
-        ) return;
+        if (!this.shouldGraphExist()) return;
+        if (!force && Array.isArray(steps) && steps.length > 0) return;
 
         var tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/',
             callback = (r) => {
