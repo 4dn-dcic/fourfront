@@ -182,6 +182,7 @@
             "title": "Workflow Arguments",
             "description": "arguments of the workflow.",
             "type": "array",
+            "exclude_from": ["FFedit-create"],
             "items": {
                 "title": "argument",
                 "description": "An argument of the workflow.",
@@ -279,6 +280,7 @@
         "steps" : {
             "title": "Workflow Steps",
             "type": "array",
+            "exclude_from": ["FFedit-create"],
             "items": {
                 "title": "Step",
                 "type": "object",
@@ -422,8 +424,9 @@
         "category": {
             "title": "Workflow Category"
         },
-        "experiment_types.experiment_type.title": {
-            "title": "Experiment Type"
+        "experiment_types": {
+            "title": "Experiment Type",
+            "comment" : "TODO: Update to `experiment_types.display_title` once becomes a linkTo"
         },
         "steps.meta.analysis_step_types" : {
             "title" : "Analysis Step Type"
@@ -444,8 +447,9 @@
             "colTitle": "Category",
             "default_hidden" : true
         },
-        "experiment_types.experiment_type.title": {
-            "title": "Experiment Types"
+        "experiment_types": {
+            "title": "Experiment Types",
+            "comment" : "TODO: Update to `experiment_types.display_title` once becomes a linkTo"
         },
         "app_name": {
             "title": "App Name"

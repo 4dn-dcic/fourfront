@@ -167,7 +167,7 @@
         "journal": {
             "title": "Journal"
         },
-        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title": {
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.display_title": {
             "title": "Experiment Types"
         }
     },
