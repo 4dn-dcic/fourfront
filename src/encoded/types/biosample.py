@@ -29,7 +29,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     # name_key = 'accession'
     aggregated_items = {
         "badges": [
-            "message",
+            "messages",
             "badge.commendation",
             "badge.warning",
             "badge.uuid",
@@ -45,7 +45,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'badges.badge.badge_classification',
         'badges.badge.description',
         'badges.badge.badge_icon',
-        'badges.message',
+        'badges.messages',
         'biosource.biosource_type',
         'biosource.individual.sex',
         'biosource.individual.organism.name',
