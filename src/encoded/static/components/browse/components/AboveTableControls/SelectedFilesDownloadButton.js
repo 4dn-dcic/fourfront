@@ -26,7 +26,8 @@ export class BrowseViewSelectedFilesDownloadButton extends React.PureComponent {
         const countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount;
 
         let countToShow = selectedFilesUniqueCount;
-        let tooltip = (
+
+        const tooltip = (
             "Download metadata TSV sheet containing download URIs for " +
             selectedFilesUniqueCount + " files" +
             (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
