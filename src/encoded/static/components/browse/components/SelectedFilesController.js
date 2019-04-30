@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { expFxn } from './../../util';
+import { expFxn, object } from './../../util';
 
 
 /**
@@ -37,10 +37,16 @@ export class SelectedFilesController extends React.PureComponent {
     }
 
     static listToObject(selectedFilesList){
-        return _.object(_.map(selectedFilesList, function(fileItem){
-            const accessionTriple = expFxn.fileToAccessionTriple(fileItem, true);
-            return [accessionTriple, fileItem];
-        }));
+        return _.object(_.map(
+            // Ensure all files have an `@id` / view permissions.
+            // Lack of view permissions is OK for when file visible in table as lack of permission
+            // is shown (without checkbox).
+            _.filter(selectedFilesList, object.itemUtil.atId),
+            function(fileItem){
+                const accessionTriple = expFxn.fileToAccessionTriple(fileItem, true);
+                return [accessionTriple, fileItem];
+            }
+        ));
     }
 
     static parseInitiallySelectedFiles(initiallySelectedFiles){

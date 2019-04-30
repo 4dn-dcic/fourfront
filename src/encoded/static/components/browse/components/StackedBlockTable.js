@@ -776,23 +776,29 @@ export class StackedBlockTable extends React.PureComponent {
  */
 export class FileHeaderWithCheckbox extends React.PureComponent {
 
+    static filesWithViewPermission(allFiles){
+        return _.filter(allFiles, object.itemUtil.atId);
+    }
+
     constructor(props){
         super(props);
         this.onChange = this.onChange.bind(this);
         this.isChecked = memoize(MultipleFileCheckbox.isChecked);
         this.isIndeterminate = memoize(MultipleFileCheckbox.isIndeterminate);
+        this.filesWithViewPermission = memoize(FileHeaderWithCheckbox.filesWithViewPermission);
     }
 
     onChange(){
         const { allFiles, handleFileCheckboxChange } = this.props;
-        const accessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
-        handleFileCheckboxChange(accessionTriples, allFiles);
+        const files = this.filesWithViewPermission(allFiles);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        handleFileCheckboxChange(accessionTriples, files);
     }
 
     render(){
         const { allFiles, selectedFiles, children } = this.props;
-
-        const accessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
+        const files = this.filesWithViewPermission(allFiles);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
 
