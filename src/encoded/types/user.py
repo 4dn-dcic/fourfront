@@ -92,18 +92,23 @@ class User(Item):
         title = u'{} {}'.format(first_name, last_name)
         return title
 
-    def display_title(self):
-        return self.title(self.properties['first_name'], self.properties['last_name'])
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, first_name, last_name):
+        return self.title(first_name, last_name)
 
     @calculated_property(schema={
         "title": "Contact Email",
         "description": "E-Mail address by which this person should be contacted.",
         "type": "string",
-        "format" : "email"
+        "format": "email"
     })
     def contact_email(self, email, preferred_email=None):
         """Returns `email` if `preferred_email` is not defined."""
-        if preferred_email is not None:
+        if preferred_email:
             return preferred_email
         else:
             return email

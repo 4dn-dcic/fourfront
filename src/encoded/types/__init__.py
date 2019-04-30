@@ -161,13 +161,14 @@ class Organism(Item):
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'taxon_id'
 
-    def display_title(self, scientific_name=None):
-        if scientific_name is not None:
+    def display_title(self, name, scientific_name=None):
+        if scientific_name:
             scientific_name_parts = scientific_name.split(' ')
             if len(scientific_name_parts) > 1:
                 return ' '.join([scientific_name_parts[0][0].upper() + '.'] + scientific_name_parts[1:])
             else:
                 return scientific_name
+        return name
 
 
 @collection(
@@ -184,12 +185,12 @@ class Protocol(Item, ItemWithAttachment):
     embedded_list = Item.embedded_list + ["award.project", "lab.title"]
 
     def display_title(self, protocol_type, attachment=None, date_created=None):
-        if attachment is not None:
+        if attachment:
             return attachment.get('download')
         else:
             if protocol_type == 'Other':
                 protocol_type = 'Protocol'
-            if date_created is not None:  # should always have this value
+            if date_created:  # should always have this value
                 protocol_type = protocol_type + " from " + date_created[:10]
             return protocol_type
 
@@ -264,7 +265,7 @@ class TrackingItem(Item):
         return ti_res
 
     def display_title(self, tracking_type, date_created=None):
-        if date_created is not None:  # should always be true
+        if date_created:  # should always be true
             date_created = date_created[:10]
         if tracking_type == 'google_analytics':
             for_date = google_analytics.get('for_date', None)

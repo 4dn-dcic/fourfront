@@ -345,7 +345,7 @@ class Item(snovault.Item):
             return False
 
         roles = {}
-        properties = self.upgrade_properties().copy()
+        properties = self.upgrade_properties()
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
             roles[lab_submitters] = 'role.lab_submitter'

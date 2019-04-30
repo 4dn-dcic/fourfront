@@ -462,7 +462,7 @@ class File(Item):
 
         # vistrack only pass in biosource_name because _biosource_name is
         # a calc prop of vistrack - from linked Biosource
-        if biosource_name is not None and 'biosource_name' not in track_info:
+        if biosource_name and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
         if len(track_info) != 8:  # if length==6 we have everything we need
@@ -474,7 +474,7 @@ class File(Item):
                 # avoid more unnecessary work if we don't have key piece
                 # return
 
-            if track_info.get('lab_name') is None:
+            if 'lab_name' not in track_info:
                 labid = props.get('lab')
                 lab = get_item_if_you_can(request, labid)
                 if lab is not None:
@@ -815,7 +815,7 @@ class FileProcessed(File):
         'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
     aggregated_items = {
-        "last_modified":[
+        "last_modified": [
             "date_modified"
         ],
     }
@@ -957,7 +957,7 @@ class FileVistrack(File):
         "type": "string"
     })
     def override_biosource_name(self, request, biosource=None):
-        if biosource is not None:
+        if biosource:
             return request.embed(biosource, '@@object').get('biosource_name')
 
     @calculated_property(schema={

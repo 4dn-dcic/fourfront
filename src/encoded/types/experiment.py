@@ -265,7 +265,7 @@ class Experiment(Item):
     def produced_in_pub(self, request, references=None):
         # references field is the boss if it exists
         # in each case selecting the first member if multiple
-        if references is not None:
+        if references:
             return references[0]
 
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
@@ -309,11 +309,11 @@ class Experiment(Item):
         if experiment_type in types4control and not targeted_factor:
             out_dict['field'] = 'Target'
             out_dict['value'] = 'None (Control)'
-        elif targeted_factor is not None:
+        elif targeted_factor:
             obj = request.embed('/', targeted_factor, '@@object')
             out_dict['field'] = 'Target'
             out_dict['value'] = obj['display_title']
-        elif digestion_enzyme is not None:
+        elif digestion_enzyme:
             obj = request.embed('/', digestion_enzyme, '@@object')
             out_dict['field'] = 'Enzyme'
             out_dict['value'] = obj['display_title']
@@ -346,7 +346,7 @@ class ExperimentHiC(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample, digestion_enzyme=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
         sum_str += (' on ' + biosource)
@@ -387,7 +387,7 @@ class ExperimentCaptureC(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample, digestion_enzyme=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -410,11 +410,11 @@ class ExperimentCaptureC(Experiment):
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request, experiment_type, biosample, targeted_regions=None, digestion_enzyme=None):
         ''' Use targeted_regions information for capture-c'''
-        if targeted_regions is not None:
+        if targeted_regions:
             regions = []
             for target in targeted_regions:
                 if target['target']:
-                    region = request.embed('/', target['target'], '@@object')['target_summary']
+                    region = request.embed('/', target['target'], '@@object')['display_title']
                     regions.append(region)
             if regions:
                 value = ', '.join(sorted(regions))
@@ -447,7 +447,7 @@ class ExperimentRepliseq(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample, cell_cycle_phase=None, stage_fraction=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
         sum_str += (' on ' + biosource)
@@ -468,9 +468,9 @@ class ExperimentRepliseq(Experiment):
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request, experiment_type, biosample, stage_fraction=None, total_fractions_in_exp=None):
         ''' Use combination of fraction and total number of fractions'''
-        if stage_fraction is not None:
+        if stage_fraction:
             value = stage_fraction + ' of '
-            if total_fractions_in_exp is None:
+            if not total_fractions_in_exp:
                 fraction = 'an unspecified number of fractions'
             else:
                 fraction = str(total_fractions_in_exp) + ' fractions'
@@ -505,7 +505,7 @@ class ExperimentAtacseq(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
         sum_str += (' on ' + biosource)
@@ -516,7 +516,7 @@ class ExperimentAtacseq(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type=None, biosample=None):
+    def display_title(self, request, experiment_type, biosample):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
@@ -541,11 +541,11 @@ class ExperimentChiapet(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample, target=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         if target:
             target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary']
+            target_summary = target_props['display_title']
             sum_str += ('against ' + target_summary)
 
         biosamp_props = request.embed(biosample, '@@object')
@@ -582,10 +582,12 @@ class ExperimentDamid(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type, biosample, fusion=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+    def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
 
-        if fusion:
+        if targeted_factor:
+            tname = request.embed(targeted_factor, '@@object')['display_title']
+            fusion = tname.split(' ')[0]
             sum_str += (' with DAM-' + fusion)
 
         biosamp_props = request.embed(biosample, '@@object')
@@ -598,8 +600,8 @@ class ExperimentDamid(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type, biosample, fusion=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, fusion))
+    def display_title(self, request, experiment_type, biosample, targeted_factor=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
 @collection(
@@ -622,12 +624,12 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type, biosample, target=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+    def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
 
-        if target:
-            target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary']
+        if targeted_factor:
+            target_props = request.embed(targeted_factor, '@@object')
+            target_summary = target_props['display_title']
             sum_str += ('against ' + target_summary)
 
         biosamp_props = request.embed(biosample, '@@object')
@@ -640,8 +642,8 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type, biosample, target=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+    def display_title(self, request, experiment_type, biosample, targeted_factor=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
 @collection(
@@ -664,12 +666,12 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type, biosample, target=None):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+    def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
+        sum_str = request.embed(experiment_type, '@@object')['diplay_title']
 
-        if target:
-            target_props = request.embed(target, '@@object')
-            target_summary = target_props['target_summary']
+        if targeted_factor:
+            target_props = request.embed(targeted_factor, '@@object')
+            target_summary = target_props['display_title']
             sum_str += ('against ' + target_summary)
 
         biosamp_props = request.embed(biosample, '@@object')
@@ -682,8 +684,8 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type, biosample, target=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+    def display_title(self, request, experiment_type, biosample, targeted_factor=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
 @collection(
@@ -715,7 +717,7 @@ class ExperimentMic(Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample):
-        sum_str = request.embed(experiment_type, '@@object')['title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
         sum_str += (' on ' + biosource)
@@ -732,12 +734,12 @@ class ExperimentMic(Experiment):
     @calculated_property(schema=EXP_CATEGORIZER_SCHEMA)
     def experiment_categorizer(self, request, experiment_type, biosample, imaging_paths=None):
         ''' Use the target(s) in the imaging path'''
-        if imaging_paths is not None:
+        if imaging_paths:
             path_targets = []
             for pathobj in imaging_paths:
                 path = request.embed('/', pathobj['path'], '@@object')
                 for target in path.get('target', []):
-                    summ = request.embed('/', target, '@@object')['target_summary']
+                    summ = request.embed('/', target, '@@object')['diplay_title']
                     path_targets.append(summ)
             if path_targets:
                 value = ', '.join(list(set(path_targets)))
