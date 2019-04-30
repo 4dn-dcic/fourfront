@@ -279,6 +279,7 @@ $small-label-accession-font-size : 0.75rem;
 
 
 		> .heading-block {
+			position: relative;
 			text-align: center;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -290,12 +291,10 @@ $small-label-accession-font-size : 0.75rem;
 			font-weight: 500;
 			font-size: 0.9rem;
 			border-top: 1px solid #e8e8e8;
+
 			.rc-tabs-tabpane & {
 				border-top-color: #ccc;
 			}
-			//&:not(:last-child){
-			//	border-right: 1px solid #ddd;
-			//}
 
 			&.text-left 	{
 				text-align: left;
@@ -309,6 +308,23 @@ $small-label-accession-font-size : 0.75rem;
 			> i.icon {
 				font-size: 1rem;
 			}
+
+			> input[type="checkbox"] {
+				margin: 0;
+			}
+
+			/** Conditionally added in JS to file column headers **/
+			&.has-checkbox {
+				padding-left: 24px; /* default: 12px */
+				padding-right: 24px;
+				> input[type="checkbox"] {
+					position: absolute;
+					top: 50%;
+					left: 6%;
+					margin-top: -6px;
+				}
+			}
+
 		}
 	}
 
@@ -714,20 +730,22 @@ $small-label-accession-font-size : 0.75rem;
 					/** Same name div as File accession/name **/
 					.name.col-file {
 
-						> .file-entry-table-checkbox {
-							margin-bottom: 0;
-							display: inline-block;
-							margin-right: 10px;
-							margin-left: 5px;
-							vertical-align: middle;
-							margin-top: -2px;
-						}
-
 						.in-stacked-table-button {
 							&.btn-xs {
 								&:only-of-type {
 									margin-right: -35px;
 								}
+							}
+						}
+
+						&.has-checkbox {
+							padding-left: 24px; /* default: 12px */
+							padding-right: 24px;
+							> .file-entry-table-checkbox {
+								position: absolute;
+								top: 50%;
+								left: 6%;
+								margin-top: -6px;
 							}
 						}
 
@@ -1488,17 +1506,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		&:focus, &:active, &.active, &.active:focus, &:active:focus {
 			outline: none;
 		}
-		i.icon:first-child + span {
-			margin-left: 5px;
-		}
-		i.icon.icon-angle-down,
-		i.icon.icon-angle-up {
-			margin-left: 5px;
-		}
 		&.btn-xs {
-			i.icon:first-child + span {
-				margin-left: 3px;
-			}
 			i.icon.icon-angle-down,
 			i.icon.icon-angle-up {
 				margin-left: 3px;

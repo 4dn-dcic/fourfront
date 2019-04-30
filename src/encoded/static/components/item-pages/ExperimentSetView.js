@@ -6,12 +6,17 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Collapse, Button } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import { ItemHeader, HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassViewConfigItem,
-    FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer } from './components';
+import {
+    HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassViewConfigItem,
+    FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer
+} from './components';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { QCMetricFromSummary } from './FileView';
-import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, SelectedFilesController } from './../browse/components';
+import {
+    RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton,
+    SelectedFilesController, SelectedFilesDownloadButton
+} from './../browse/components';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
 const { Item, File, ExperimentSet } = typedefs;
@@ -19,28 +24,6 @@ const { Item, File, ExperimentSet } = typedefs;
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
 // import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
 
-
-/**
- * Unlike nearly all other ItemViews, this ItemView component does _not_ inherit from `DefaultItemView`.
- * Instead, `ExperimentSetViewView` which is defined below, ultimately inherits from `DefaultItemView`
- * through `WorkflowRunTracingView` (which provides Graph loading functionality for this, Exp, and File Views).
- *
- * This component wraps the entire ExperimentSetViewView component to provide it with extra props that would
- * be shared between and accessible by all tabs.
- */
-export default function ExperimentSetView(props){
-    return (
-        <SelectedFilesController href={props.href} resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck}>
-            <ExperimentSetViewView {...props} />
-        </SelectedFilesController>
-    );
-}
-
-ExperimentSetView.resetSelectedFilesCheck = function(nextProps, pastProps){
-    // Preserve selected files if href changes, unlike the default setting for BrowseView
-    if (nextProps.context !== pastProps.context) return true;
-    return false;
-};
 
 
 
@@ -50,7 +33,7 @@ ExperimentSetView.resetSelectedFilesCheck = function(nextProps, pastProps){
  * @prop {Object} schemas - state.schemas passed down from app Component.
  * @prop {ExperimentSet} context - JSON representation of current ExperimentSet item.
  */
-class ExperimentSetViewView extends WorkflowRunTracingView {
+export default class ExperimentSetView extends WorkflowRunTracingView {
 
     static anyOtherProcessedFilesExist = memoize(function(context){
         var otherProcessedFilesFromExpSetExist = (Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0);
@@ -68,6 +51,12 @@ class ExperimentSetViewView extends WorkflowRunTracingView {
         }
         return true;
     });
+
+    /** Preserve selected files if href changes (due to `#tab-id`), unlike the default setting for BrowseView. */
+    static resetSelectedFilesCheck(nextProps, pastProps){
+        if (nextProps.context !== pastProps.context) return true;
+        return false;
+    }
 
     static propTypes = {
         'schemas' : PropTypes.object,
@@ -130,7 +119,11 @@ class ExperimentSetViewView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/>{ ' ' + processedFilesLen + " Processed File" + (processedFilesLen > 1 ? 's' : '') }</span>,
                 key : 'processed-files',
-                content : <ProcessedFilesStackedTableSection {...propsForTableSections} files={processedFiles} />
+                content : (
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
+                        <ProcessedFilesStackedTableSection {...propsForTableSections} files={processedFiles} />
+                    </SelectedFilesController>
+                )
             });
         }
 
@@ -139,7 +132,11 @@ class ExperimentSetViewView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
                 key : 'raw-files',
-                content : <RawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
+                content : (
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck}  initiallySelectedFiles={rawFiles}>
+                        <RawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
+                    </SelectedFilesController>
+                )
             });
         }
 
@@ -154,7 +151,7 @@ class ExperimentSetViewView extends WorkflowRunTracingView {
         }
 
         // Other Files Tab
-        if (ExperimentSetViewView.anyOtherProcessedFilesExist(context)){
+        if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
@@ -181,7 +178,6 @@ class ExperimentSetViewView extends WorkflowRunTracingView {
                     className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={function(open, props){
                         return <i className="expand-icon icon icon-th-list" />;
                     }} />
-                <h4 className="text-400">Selected: <b>{ selectedFilesUniqueCount }</b></h4>
             </React.Fragment>
         );
     }
@@ -222,15 +218,35 @@ class OverviewHeading extends React.PureComponent {
 
 
 export class RawFilesStackedTableSection extends React.PureComponent {
+
+    renderHeader(){
+        const { context, files, selectedFilesUniqueCount, selectedFiles } = this.props;
+        const fileCount = files.length;
+        const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
+
+        return (
+            <h3 className="tab-section-title">
+                <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
+                { selectedFiles ? // Make sure data structure is present (even if empty)
+                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                        <SelectedFilesDownloadButton {...{ selectedFilesUniqueCount, selectedFiles, filenamePrefix }} id="expset-raw-files-download-files-btn">
+                            <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
+                            <span className="hidden-xs hidden-sm">Download </span>
+                            <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
+                            <span className="hidden-xs hidden-sm text-400"> Raw Files</span>
+                        </SelectedFilesDownloadButton>
+                    </div>
+                : null }
+            </h3>
+        );
+    }
+
     render(){
         const { context, files } = this.props;
-        const fileCount = files.length;
         const anyFilesWithMetrics = !!(fileUtil.filterFilesWithEmbeddedMetricItem(files, true));
         return (
             <div className="overflow-hidden">
-                <h3 className="tab-section-title">
-                    <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
-                </h3>
+                { this.renderHeader() }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
                         experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} />
@@ -416,6 +432,30 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         );
     }
 
+    renderHeader(){
+        const { files, selectedFilesUniqueCount, selectedFiles, context } = this.props;
+        const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
+        return (
+            <h3 className="tab-section-title">
+                <span>
+                    <span className="text-400">{ files.length }</span> Processed Files
+                </span>
+                { selectedFiles ? // Make sure data structure is present (even if empty)
+                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                        <SelectedFilesDownloadButton {...{ selectedFilesUniqueCount, selectedFiles, filenamePrefix }} id="expset-processed-files-download-files-btn">
+                            <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
+                            <span className="hidden-xs hidden-sm">Download </span>
+                            <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
+                            <span className="hidden-xs hidden-sm text-400"> Processed Files</span>
+                        </SelectedFilesDownloadButton>
+                    </div>
+                : null }
+            </h3>
+        );
+    }
+
+
+
     render(){
         const { mounted, files } = this.props;
 
@@ -423,9 +463,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
         return (
             <div className="processed-files-table-section exp-table-section">
-                <h3 className="tab-section-title">
-                    <span><span className="text-400">{ files.length }</span> Processed Files</span>
-                </h3>
+                { this.renderHeader() }
                 { this.renderTopRow() }
                 { this.renderQCMetricsTablesRow() }
             </div>
@@ -446,7 +484,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         this.renderFilesTable = this.renderFilesTable.bind(this);
 
         this.state = {
-            'open'      : props.defaultOpen
+            'open' : props.defaultOpen
         };
     }
 
@@ -496,9 +534,7 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
     }
 }
 
-/**
-* This object renders the "Supplementary Files" section.
-*/
+/** This object renders the "Supplementary Files" section. */
 export class OtherProcessedFilesStackedTableSection extends React.PureComponent {
 
     static checkOPFCollectionPermission(opfCollection){

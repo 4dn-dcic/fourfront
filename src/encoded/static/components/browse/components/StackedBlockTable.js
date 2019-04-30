@@ -470,7 +470,6 @@ export class FileEntryBlock extends React.PureComponent {
         _.forEach(cols, (col, index)=>{
 
             const colClassName = baseClassName + ' col-' + col.columnClass + ' detail-col-' + index;
-            const title = col.valueTitle || col.title;
             const colStyle = colWidthStyles ? colWidthStyles[col.field || col.title || col.columnClass] : null;
 
             if (typeof col.render === 'function'){
@@ -539,9 +538,14 @@ export class FileEntryBlock extends React.PureComponent {
 
 
     renderName(){
-        var { file, colWidthStyles, label, excludeCheckbox } = this.props;
+        const { file, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
+        const classList = ['name', 'col-file'];
+        if (file && file.accession) classList.push('mono-text');
+        if (!excludeCheckbox && selectedFiles && SingleFileCheckbox.hasCheckbox(file)){
+            classList.push('has-checkbox');
+        }
         return (
-            <div key="file-entry-name-block" className={"name col-file" + (file && file.accession ? ' mono-text' : '')}
+            <div key="file-entry-name-block" className={classList.join(' ')}
                 style={colWidthStyles ? colWidthStyles.file : null}>
                 { label }
                 { !excludeCheckbox ? <SingleFileCheckbox {...this.props} /> : null }
@@ -551,16 +555,21 @@ export class FileEntryBlock extends React.PureComponent {
     }
 
     render(){
-        var { hideNameOnHover, keepLabelOnHover, isSingleItem, stripe } = this.props,
-            sBlockClassName = "s-block file";
+        const { hideNameOnHover, keepLabelOnHover, isSingleItem, stripe } = this.props;
+        const classList = ['s-block', 'file'];
 
-        if (hideNameOnHover)    sBlockClassName += ' hide-name-on-block-hover';
-        if (keepLabelOnHover)   sBlockClassName += ' keep-label-on-name-hover';
-        if (isSingleItem)       sBlockClassName += ' single-item';
+        if (hideNameOnHover)    classList.push('hide-name-on-block-hover');
+        if (keepLabelOnHover)   classList.push('keep-label-on-name-hover');
+        if (isSingleItem)       classList.push('single-item');
         if (typeof stripe !== 'undefined' && stripe !== null){
-            sBlockClassName += (stripe === true || stripe === 'even') ? ' even' : ' odd';
+            classList.push((stripe === true || stripe === 'even') ? ' even' : ' odd');
         }
-        return <div key="file-s-block" className={sBlockClassName}>{ this.renderName() }{ this.filledFileRow() }</div>;
+        return (
+            <div key="file-s-block" className={classList.join(' ')}>
+                { this.renderName() }
+                { this.filledFileRow() }
+            </div>
+        );
     }
 }
 
@@ -738,7 +747,7 @@ export class StackedBlockTable extends React.PureComponent {
     }
 
     render(){
-        const { width , fadeIn, columnHeaders, className, children, defaultInitialColumnWidth } = this.props;
+        const { width , fadeIn, columnHeaders, className, children, defaultInitialColumnWidth, selectedFiles, allFiles } = this.props;
         const { mounted } = this.state;
 
         if (!children){
@@ -747,32 +756,86 @@ export class StackedBlockTable extends React.PureComponent {
 
         const totalColsWidth = StackedBlockTable.totalColumnsWidth(columnHeaders, defaultInitialColumnWidth);
         const minTotalWidth = Math.max(width || 0, totalColsWidth);
-        const columnWidths = StackedBlockTable.scaledColumnWidths(width, columnHeaders, defaultInitialColumnWidth);
-
-        const headers = _.map(columnHeaders, (colHeader, index) => {
-            if (colHeader.visible === false) return null;
-            let visibleTitle = colHeader.visibleTitle || colHeader.title;
-            if (typeof visibleTitle === 'function') visibleTitle = visibleTitle(this.props);
-            const style = {
-                'width' : columnWidths[index] || colHeader.initialWidth || defaultInitialColumnWidth
-            };
-            return (
-                <div className={"heading-block col-" + colHeader.columnClass + (colHeader.className ? ' ' + colHeader.className : '')}
-                    key={colHeader.field || index} style={style} data-column-class={colHeader.columnClass}>
-                    { visibleTitle }
-                </div>
-            );
-        });
 
         return (
             <div style={{ 'width' : minTotalWidth }} className={
-                "stacked-block-table" +
-                (mounted ? ' mounted' : '') +
-                (fadeIn ? ' fade-in' : '') +
-                (typeof className === 'string' ? ' ' + className : '')}>
-                <div className="headers stacked-block-table-headers">{ headers }</div>
+                "stacked-block-table" + (mounted ? ' mounted' : '') +
+                (fadeIn ? ' fade-in' : '') + (typeof className === 'string' ? ' ' + className : '')}>
+                <TableHeaders {...{ width, columnHeaders, defaultInitialColumnWidth, selectedFiles, allFiles }} handleFileCheckboxChange={this.handleFileCheckboxChange} />
                 <div className="body clearfix">{ this.adjustedChildren() }</div>
             </div>
         );
     }
 }
+
+/**
+ * Used by `visibleTitle` functions/renderers.
+ * @see file-tables.js / renderFileHeaderWithCheckbox()
+ * @see file-tables.js / ProcessedFilesTable.defaultProps.columnHeaders
+ * @see file-tables.js / RawFilesStackedTable.builtInHeaders()
+ */
+export class FileHeaderWithCheckbox extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        this.isChecked = memoize(MultipleFileCheckbox.isChecked);
+        this.isIndeterminate = memoize(MultipleFileCheckbox.isIndeterminate);
+    }
+
+    onChange(){
+        const { allFiles, handleFileCheckboxChange } = this.props;
+        const accessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
+        handleFileCheckboxChange(accessionTriples, allFiles);
+    }
+
+    render(){
+        const { allFiles, selectedFiles, children } = this.props;
+
+        const accessionTriples = expFxn.filesToAccessionTriples(allFiles, true);
+        const checked = this.isChecked(accessionTriples, selectedFiles);
+        const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
+
+        return (
+            <React.Fragment>
+                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'children')} {...{ indeterminate, checked }}
+                    data-select-files={accessionTriples} onChange={this.onChange} />
+                { children }
+            </React.Fragment>
+        );
+    }
+}
+
+
+
+function TableHeaders(props){
+    const { columnHeaders, width, defaultInitialColumnWidth } = props;
+    const columnWidths = StackedBlockTable.scaledColumnWidths(width, columnHeaders, defaultInitialColumnWidth);
+
+    const headers = _.map(columnHeaders, function(colHeader, index){
+        let visibleTitle = colHeader.visibleTitle || colHeader.title;
+        if (typeof visibleTitle === 'function') visibleTitle = visibleTitle(props);
+        const colWidth = columnWidths[index] || colHeader.initialWidth || defaultInitialColumnWidth;
+        const key = colHeader.field || index;
+        const cls = "heading-block col-" + colHeader.columnClass + (colHeader.className ? ' ' + colHeader.className : '');
+
+        return (
+            <div className={cls} key={key} style={{ 'width' : colWidth }} data-column-class={colHeader.columnClass}>
+                { visibleTitle }
+            </div>
+        );
+    });
+
+    return <div className="headers stacked-block-table-headers">{ headers }</div>;
+}
+TableHeaders.propTypes = {
+    /** Basic props */
+    'columnHeaders' : PropTypes.array.isRequired,
+    'width' : PropTypes.number.isRequired,
+    'defaultInitialColumnWidth' : PropTypes.number,
+    /** Below needed to feed into visibleTitle func for e.g. checkbox in column title. */
+    'allFiles' : PropTypes.arrayOf(PropTypes.object),
+    'selectedFiles' : PropTypes.arrayOf(PropTypes.object),
+    'handleFileCheckboxChange' : PropTypes.func.isRequired
+};
+

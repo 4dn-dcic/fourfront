@@ -40,7 +40,7 @@ export class BrowseViewSelectedFilesDownloadButton extends React.PureComponent {
         return (
             <SelectedFilesDownloadButton selectedFilesUniqueCount={selectedFilesUniqueCount} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
                 id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={disabled ? 'btn-secondary' : 'btn-primary'}>
-                <i className="icon icon-download icon-fw shift-down-1"/>
+                <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
                 <span className="hidden-xs hidden-sm">Download </span>
                 <span className="count-to-download-integer">{ countToShow }</span>
                 <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
@@ -49,22 +49,6 @@ export class BrowseViewSelectedFilesDownloadButton extends React.PureComponent {
     }
 }
 
-/**
- * Basic/default download button which accepts `props.selectedFiles`.
- * At some point, this may (mostly) become reused for BrowseView as well
- * upon refactoring of filetype filtering.
- */
-export function ExperimentSetViewFilesDownloadButton(props){
-    const { selectedFilesUniqueCount, selectedFiles, filenamePrefix } = props;
-    return (
-        <SelectedFilesDownloadButton {...{ selectedFilesUniqueCount, selectedFiles, filenamePrefix }} id="expset-download-files-btn">
-            <i className="icon icon-download icon-fw shift-down-1"/>
-            <span className="hidden-xs hidden-sm">Download </span>
-            <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-            <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
-        </SelectedFilesDownloadButton>
-    );
-}
 
 
 /**
@@ -195,7 +179,8 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
                         <Button bsStyle="info" onClick={this.handleAcceptDisclaimer}>
-                            <i className="icon icon-fw icon-check"/>&nbsp;I have read and understand the notes.
+                            <i className="icon icon-fw icon-check mr-05"/>
+                            I have read and understand the notes.
                         </Button>
                         :
                         <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename }} />

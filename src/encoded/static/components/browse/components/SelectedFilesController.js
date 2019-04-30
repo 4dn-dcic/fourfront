@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
+import { expFxn } from './../../util';
 
 
 /**
@@ -36,16 +37,37 @@ export class SelectedFilesController extends React.PureComponent {
     }
 
     static listToObject(selectedFilesList){
-        return _.object(_.map(selectedFilesList, function(uuid){
-            return [uuid, true];
+        return _.object(_.map(selectedFilesList, function(fileItem){
+            const accessionTriple = expFxn.fileToAccessionTriple(fileItem, true);
+            return [accessionTriple, fileItem];
         }));
     }
 
     static parseInitiallySelectedFiles(initiallySelectedFiles){
-        return (
-            Array.isArray(initiallySelectedFiles) ? SelectedFilesController.listToObject(initiallySelectedFiles) :
-                initiallySelectedFiles ? initiallySelectedFiles : {}
-        );
+
+        if (initiallySelectedFiles === null){
+            return {};
+        }
+
+        if (!Array.isArray(initiallySelectedFiles) && initiallySelectedFiles && typeof initiallySelectedFiles === 'object'){
+            // Assume we got a well-formatted selectedFiles object. This is probably only case for tests, e.g. RawFilesStackedTable-test.js.
+            // This means keys must be in form of stringified accession triples, e.g. `"EXPSETACCESSION~EXPACCESSION~FILEACCESSION"`
+            // Lets validate that --
+            _.forEach(_.keys(initiallySelectedFiles), function(key){
+                const parts = key.split('~');
+                if (parts.length !== 3){
+                    throw new Error('If supply an object as initiallySelectedFiles, it must have stringified accession triples as keys.');
+                }
+            });
+            return _.clone(initiallySelectedFiles);
+        }
+
+        if (Array.isArray(initiallySelectedFiles)){
+            return SelectedFilesController.listToObject(initiallySelectedFiles);
+        }
+
+        console.error(initiallySelectedFiles);
+        throw new Error('Received unexpected props.initiallySelectedFiles -');
     }
 
     static uniqueFileCountByUUID = memoize(function(selectedFiles){

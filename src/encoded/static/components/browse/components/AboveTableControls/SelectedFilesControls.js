@@ -111,10 +111,13 @@ export class SelectAllFilesButton extends React.PureComponent {
 
     buttonContent(isAllSelected){
         if (typeof isAllSelected === 'undefined') isAllSelected = this.isAllSelected();
+        const iconClassName = "mr-05 icon icon-fw shift-down-1 icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'));
         return (
-            <span>
-                <i className={"icon icon-fw shift-down-1 icon-" + (this.state.selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'))}/> <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' }</span> <span className="text-600">All</span>
-            </span>
+            <React.Fragment>
+                <i className={iconClassName}/>
+                <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
+                <span className="text-600">All</span>
+            </React.Fragment>
         );
     }
 
@@ -285,13 +288,13 @@ export class SelectedFilesFilterByButton extends React.Component {
         return (
             <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled}
                 onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'} data-tip={tooltip} data-html>
-                <i className="icon icon-filter icon-fw" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
+                <i className="icon icon-filter icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
                 {
                     currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
                         <span className="hidden-xs hidden-sm">All </span>
                     )
                 }
-                <span className="text-400 hidden-xs hidden-sm">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>
+                <span className="text-400 hidden-xs hidden-sm mr-05">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>
                 <i className="icon icon-angle-down icon-fw"/>
             </Button>
         );

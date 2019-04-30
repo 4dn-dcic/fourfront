@@ -10,7 +10,7 @@ export { SortController } from './SortController';
 export { SelectedFilesController } from './SelectedFilesController';
 export { CustomColumnController, CustomColumnSelector } from './CustomColumnController';
 export { SearchResultTable } from './SearchResultTable';
-export { AboveTableControls } from './AboveTableControls';
+export { AboveTableControls, BrowseViewSelectedFilesDownloadButton, SelectedFilesDownloadButton } from './AboveTableControls';
 export { AboveSearchTablePanel } from './AboveSearchTablePanel';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 export { SearchResultDetailPane } from './SearchResultDetailPane';
