@@ -141,7 +141,7 @@ def main():
         if 'webprod' in env:
             if data_env != env:
                 log.info("looks like we are on staging, run create mapping without check first")
-                run_create_mapping(app, check_first=False)
+                run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
                 return
         # handle mastertest ... by blowing away all data first
         if 'mastertest' in env:
