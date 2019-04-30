@@ -667,7 +667,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         "type": "string",
     })
     def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
-        sum_str = request.embed(experiment_type, '@@object')['diplay_title']
+        sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         if targeted_factor:
             target_props = request.embed(targeted_factor, '@@object')
@@ -739,7 +739,7 @@ class ExperimentMic(Experiment):
             for pathobj in imaging_paths:
                 path = request.embed('/', pathobj['path'], '@@object')
                 for target in path.get('target', []):
-                    summ = request.embed('/', target, '@@object')['diplay_title']
+                    summ = request.embed('/', target, '@@object')['display_title']
                     path_targets.append(summ)
             if path_targets:
                 value = ', '.join(list(set(path_targets)))
