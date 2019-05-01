@@ -24,7 +24,7 @@
         "object-curly-spacing" : ["error", "always"],
         "prefer-const" : "error",
         "prefer-destructuring" : "warn",
-        "prefer-spread" : "warn",
+        "prefer-spread" : "error",
         "react/button-has-type" : "error",
         "react/destructuring-assignment" : ["warn", "always"],
         "react/jsx-closing-tag-location" : "error",

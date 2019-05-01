@@ -413,7 +413,7 @@ export function highlightTerm(
     term = 'human',
     color = ''
 ){
-    return highlightTermFxn.apply(null, arguments);
+    return highlightTermFxn(...arguments);
 }
 
 /**
