@@ -264,11 +264,17 @@ class TrackingItem(Item):
         request.remote_user = prior_remote
         return ti_res
 
-    def display_title(self, tracking_type, date_created=None):
+    @calculated_property(schema={
+        "title": "Title",
+        "type": "string",
+    })
+    def display_title(self, tracking_type, date_created=None, google_analytics=None):
         if date_created:  # should always be true
             date_created = date_created[:10]
         if tracking_type == 'google_analytics':
-            for_date = google_analytics.get('for_date', None)
+            for_date = None
+            if google_analytics:
+                for_date = google_analytics.get('for_date', None)
             if for_date:
                 return 'Google Analytics for ' + for_date
             return 'Google Analytics Item'
