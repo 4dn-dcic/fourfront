@@ -67,30 +67,28 @@ class Lab(Item):
     @calculated_property(schema={
         "title": "Correspondence",
         "description": "Point of contact(s) for this Lab.",
-        "type" : "array",
+        "type": "array",
         "uniqueItems": True,
-        "items" : {
-            "title" : "Lab Contact - Public Snippet",
+        "items": {
+            "title": "Lab Contact - Public Snippet",
             "description": "A User associated with the lab who is also a point of contact.",
-            "type" : "object",
-            "additionalProperties" : False,
-            "properties" : {
-                "display_title" : {
-                    "type" : "string"
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "display_title": {
+                    "type": "string"
                 },
-                "contact_email" : {
-                    "type" : "string",
-                    "format" : "email"
+                "contact_email": {
+                    "type": "string",
+                    "format": "email"
                 },
-                "@id" : {
-                    "type" : "string"
+                "@id": {
+                    "type": "string"
                 }
             }
-            #"type" : "string",
-            #"linkTo" : "User"
         }
     })
-    def correspondence(self, request):
+    def correspondence(self, request, pi=None, contact_persons=None):
         """
         Definitive list of users (linkTo User) who are designated as point of contact(s) for this Lab.
 
@@ -98,14 +96,11 @@ class Lab(Item):
             List of @IDs which refer to either PI or alternate list of contacts defined in `contact_persons`.
         """
 
-        ppl = self.properties.get('contact_persons', [])
-        pi  = self.properties.get('pi', None)
-
         contact_people = None
 
-        if ppl:
-            contact_people = ppl
-        elif not ppl and pi:
+        if contact_persons:
+            contact_people = contact_persons
+        elif pi:
             contact_people = [pi]
 
         def fetch_and_pick_embedded_properties(person_at_id):
@@ -116,9 +111,9 @@ class Lab(Item):
                 return None
             encoded_email = b64encode(person['contact_email'].encode('utf-8')).decode('utf-8') if person.get('contact_email') else None
             return {
-                "contact_email" : encoded_email, # Security against web scrapers
-                "@id"           : person.get('@id'),
-                "display_title" : person.get('display_title')
+                "contact_email": encoded_email,  # Security against web scrapers
+                "@id": person.get('@id'),
+                "display_title": person.get('display_title')
             }
 
         if contact_people is not None:

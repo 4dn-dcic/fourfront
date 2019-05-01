@@ -29,6 +29,24 @@ var { TabObject, Item } = typedefs;
  */
 export default class DefaultItemView extends React.PureComponent {
 
+    static className = memoize(function(context){
+        const classes = [
+            'view-detail',
+            'item-page-container',
+            'container'
+        ];
+
+        _.forEach((context['@type'] || []), function (type) {
+            classes.push('type-' + type);
+        });
+
+        if (typeof context.status === 'string'){
+            classes.push('status-' + context.status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,''));
+        }
+
+        return classes.join(' ');
+    });
+
     /**
      * Bind instance methods to `this` and creates an empty state object which may be extended by subclasses.
      * May be extended by sub-classes.
@@ -162,12 +180,10 @@ export default class DefaultItemView extends React.PureComponent {
      * Calculated width of tabview pane.
      * Alias of `layout.gridContainerWidth(this.props.windowWidth)`.
      *
-     * @returns {void}
+     * @returns {number} Width of tabview.
      */
     getTabViewWidth(){
-        var windowWidth = this.props.windowWidth,
-            width = layout.gridContainerWidth(windowWidth);
-        return width;
+        return layout.gridContainerWidth(this.props.windowWidth);
     }
 
     /**
@@ -200,7 +216,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {string} A className
      */
     itemClassName(){
-        return itemClass(this.props.context, 'view-detail item-page-container container');
+        return DefaultItemView.className(this.props.context);
     }
 
     /**
@@ -265,7 +281,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @protected
      * @returns {JSX.Element}
      */
-    tabbedView(){
+    renderTabbedView(){
         return (
             <TabbedView {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
                 contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView" />
@@ -282,7 +298,9 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * The render method which puts the above method outputs together. Do not extend; instead, extend other methods which are called in this render method.
+     * The render method which puts the above method outputs together.
+     * Should not override except for rare cases; instead, override other
+     * methods which are called in this render method.
      *
      * @private
      * @protected
@@ -291,13 +309,9 @@ export default class DefaultItemView extends React.PureComponent {
     render() {
         return (
             <div className={this.itemClassName()} id="content">
-
                 { this.itemHeader() }
                 { this.itemMidSection() }
-
-                <div className="row">
-                    <div className="col-xs-12 col-md-12 tab-view-container" children={this.tabbedView()} />
-                </div>
+                { this.renderTabbedView() }
                 <br/>
                 { this.itemFooter() }
             </div>
@@ -313,28 +327,6 @@ export default class DefaultItemView extends React.PureComponent {
 /*******************************************
  ****** Helper Components & Functions ******
  *******************************************/
-
-/**
- * @deprecated
- */
-export function itemClass(context, htmlClass) {
-    htmlClass = htmlClass || '';
-    (context['@type'] || []).forEach(function (type) {
-        htmlClass += ' type-' + type;
-    });
-    return statusClass(context.status, htmlClass);
-}
-
-/**
- * @deprecated
- */
-export function statusClass(status, htmlClass) {
-    htmlClass = htmlClass || '';
-    if (typeof status == 'string') {
-        htmlClass += ' status-' + status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,'');
-    }
-    return htmlClass;
-}
 
 
 /**

@@ -279,6 +279,7 @@ $small-label-accession-font-size : 0.75rem;
 
 
 		> .heading-block {
+			position: relative;
 			text-align: center;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -290,12 +291,10 @@ $small-label-accession-font-size : 0.75rem;
 			font-weight: 500;
 			font-size: 0.9rem;
 			border-top: 1px solid #e8e8e8;
+
 			.rc-tabs-tabpane & {
 				border-top-color: #ccc;
 			}
-			//&:not(:last-child){
-			//	border-right: 1px solid #ddd;
-			//}
 
 			&.text-left 	{
 				text-align: left;
@@ -309,6 +308,23 @@ $small-label-accession-font-size : 0.75rem;
 			> i.icon {
 				font-size: 1rem;
 			}
+
+			> input[type="checkbox"] {
+				margin: 0;
+			}
+
+			/** Conditionally added in JS to file column headers **/
+			&.has-checkbox {
+				padding-left: 24px; /* default: 12px */
+				padding-right: 24px;
+				> input[type="checkbox"] {
+					position: absolute;
+					top: 50%;
+					left: 6%;
+					margin-top: -6px;
+				}
+			}
+
 		}
 	}
 
@@ -606,8 +622,8 @@ $small-label-accession-font-size : 0.75rem;
 			> .s-block.stack-depth-1,
 			> .collapsible-s-block-ext > .s-block.stack-depth-1 { // .biosample
 
-				&:not(:last-child){
-					border-bottom: 1px solid #606060;
+				&:not(:first-child){
+					border-top: 1px solid #606060;
 				}
 
 				> .name {
@@ -629,8 +645,8 @@ $small-label-accession-font-size : 0.75rem;
 						transform: translate3d(0px,0px,0px);
 
 
-						&:not(:last-child){
-							border-bottom: 1px solid #888;
+						&:not(:first-child){
+							border-top: 1px solid #888;
 							border-color: rgba(0,0,0,0.5);
 						}
 
@@ -651,17 +667,24 @@ $small-label-accession-font-size : 0.75rem;
 			.s-block-list.stack-depth-2 {
 
 				.s-block.file-group {
-					&:not(:last-child){
-						border-bottom: 1px solid #888;
+					&:not(:first-child){
+						border-top: 1px solid #888;
 						border-color: rgba(0,0,0,0.5);
 					}
 
-					> .s-block-list.files > .s-block.file:not(:last-child) {
-						border-bottom-style: dotted;
+					> .s-block-list.files > .s-block.file:not(:first-child) {
+						border-top-style: dotted;
 					}
 
-					> .s-block-list.files > .s-block.file:last-child:not(:first-child) {
-						border-top: 1px solid transparent;
+					/* Replaced w/ below as centers text better.
+						(context - 1px offset exists re min-height: 70px of parent blocks and 34px height blocks w 1px border in between; alt., min-height can be decreased by a px).
+					> .s-block-list.files > .s-block.file:last-child {
+						border-bottom: 1px solid transparent;
+					}
+					*/
+
+					> .s-block-list.files > .s-block.file:last-child > .name.col-file {
+						line-height: 21px;
 					}
 
 					.name.col-file-group {
@@ -681,17 +704,25 @@ $small-label-accession-font-size : 0.75rem;
 
 				.s-block.file {
 
-					&:not(:last-child){
-						border-bottom: 1px solid #ccc;
+					&:not(:first-child){
+						border-top: 1px solid #ccc;
 						border-color: rgba(0,0,0,0.2);
 					}
 
+					&:hover {
+						border-color: #888;
+						+ .s-block.file {
+							border-top-color: #888;
+						}
+					}
+
 					&.single-item .name.col-file {
-						line-height: 55px;
+						line-height: 56px; /* + 14px padding = 70 == min height of parent block */
 						white-space: nowrap;
 					}
 
 					&:not(.single-item) .name.col-file {
+						/** Overriden when last child inside a file-group (above) **/
 						line-height: 20px;
 						white-space: nowrap;
 					}
@@ -699,20 +730,22 @@ $small-label-accession-font-size : 0.75rem;
 					/** Same name div as File accession/name **/
 					.name.col-file {
 
-						> .file-entry-table-checkbox {
-							margin-bottom: 0;
-							display: inline-block;
-							margin-right: 10px;
-							margin-left: 5px;
-							vertical-align: middle;
-							margin-top: -2px;
-						}
-
 						.in-stacked-table-button {
 							&.btn-xs {
 								&:only-of-type {
 									margin-right: -35px;
 								}
+							}
+						}
+
+						&.has-checkbox {
+							padding-left: 24px; /* default: 12px */
+							padding-right: 24px;
+							> .file-entry-table-checkbox {
+								position: absolute;
+								top: 50%;
+								left: 6%;
+								margin-top: -6px;
 							}
 						}
 
@@ -1473,17 +1506,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 		&:focus, &:active, &.active, &.active:focus, &:active:focus {
 			outline: none;
 		}
-		i.icon:first-child + span {
-			margin-left: 5px;
-		}
-		i.icon.icon-angle-down,
-		i.icon.icon-angle-up {
-			margin-left: 5px;
-		}
 		&.btn-xs {
-			i.icon:first-child + span {
-				margin-left: 3px;
-			}
 			i.icon.icon-angle-down,
 			i.icon.icon-angle-up {
 				margin-left: 3px;
