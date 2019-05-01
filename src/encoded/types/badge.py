@@ -30,9 +30,9 @@ class Badge(Item):
         "description": "Filled with title only if badge is positive.",
         "type": "string",
     })
-    def commendation(self):
-        if self.properties.get('badge_classification') == 'Commendation':
-            return self.properties.get('title')
+    def commendation(self, title, badge_classification=None):
+        if badge_classification == 'Commendation':
+            return title
         return
 
     @calculated_property(schema={
@@ -40,9 +40,9 @@ class Badge(Item):
         "description": "Filled with title only if badge is negative.",
         "type": "string",
     })
-    def warning(self):
-        if self.properties.get('badge_classification') == 'Warning':
-            return self.properties.get('title')
+    def warning(self, title, badge_classification=None):
+        if badge_classification == 'Warning':
+            return title
         return
 
     def _update(self, properties, sheets=None):

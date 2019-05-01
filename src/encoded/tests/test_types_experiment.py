@@ -394,7 +394,7 @@ def test_calculated_expt_produced_in_pub_for_expt_w_ref(
     # just check experiment by itself first
     expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
     assert 'produced_in_pub' in expt
-    assert publication['@id'] == '/publications/' + expt['produced_in_pub'] + '/'
+    assert publication['@id'] == expt['produced_in_pub']
     # post repset with this experiment
     replicate_experiment_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
     repset = testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data, status=201).json['@graph'][0]

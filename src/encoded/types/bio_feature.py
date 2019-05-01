@@ -32,42 +32,36 @@ class BioFeature(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request):
-        props = self.properties
-        pname = props.get('preferred_label')
-        if pname:
-            return pname
-        ft = props.get('feature_type')
-        ftype = get_item_if_you_can(request, ft)
+    def display_title(self, request, feature_type, preferred_label=None, cellular_structure=None,
+                      organism_name=None, relevant_genes=[], feature_mods=[], genome_location=[]):
+        if preferred_label:
+            return preferred_label
+        ftype = get_item_if_you_can(request, feature_type)
         if ftype is not None:
             ftype = ftype.get('preferred_name')
 
         # first pass will not assume combined fields
         if ftype == 'cellular_component':
-            struct = props.get('cellular_structure')
-            if struct is None:
-                struct = 'unspecified cellular component'
-            return struct
+            if not cellular_structure:
+                cellular_structure = 'unspecified cellular component'
+            return cellular_structure
 
         featstr = ''
         modstr = ''
         orgstr = ''
         # see if there is an organism_name
-        oname = props.get('organism_name')
-        if oname and oname != 'human':
-            orgstr = oname
+        if organism_name and organism_name != 'human':
+            orgstr = organism_name
 
         # gene trumps location
-        genes = props.get('relevant_genes', [])
-        for g in genes:
+        for g in relevant_genes:
             gene = get_item_if_you_can(request, g)
             if gene is not None:
                 symb = gene.get('display_title')
                 featstr = featstr + symb + ', '
 
         # check for mods
-        mods = props.get('feature_mods', [])
-        for mod in mods:
+        for mod in feature_mods:
             if mod.get('mod_position'):
                 modstr += (mod.get('mod_position') + ' ')
             modstr += (mod.get('mod_type') + ', ')
@@ -75,8 +69,8 @@ class BioFeature(Item):
             modstr = 'with ' + modstr[:-2]
 
         # if no genes use genome location
-        if not genes:
-            for loc in props.get('genome_location', []):
+        if not relevant_genes:
+            for loc in genome_location:
                 try:
                     locstr = get_item_if_you_can(request, loc).get('display_title')
                 except AttributeError:

@@ -45,8 +45,7 @@ class Antibody(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request):
-        dt = self.properties.get('antibody_name')
-        if self.properties.get('antibody_product_no'):
-            dt = dt + ' (' + self.properties['antibody_product_no'] + ')'
-        return dt
+    def display_title(self, antibody_name, antibody_product_no=None):
+        if antibody_product_no:
+            antibody_name += ' ({})'.format(antibody_product_no)
+        return antibody_name
