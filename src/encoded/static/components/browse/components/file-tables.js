@@ -296,7 +296,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
                     { columnClass: 'file-group',                                title: 'File Group',    initialWidth: 30,   visibleTitle : function(stackedBlockProps){
                         if (stackedBlockProps.selectedFiles && Array.isArray(stackedBlockProps.allFiles)){
-                            return <FileHeaderWithCheckbox {..._.pick(stackedBlockProps, 'selectedFiles', 'allFiles', 'handleFileCheckboxChange' )} />;
+                            return <FileHeaderWithCheckbox {..._.pick(stackedBlockProps, 'selectedFiles', 'allFiles', 'handleFileCheckboxChange' )} data-tip="Select all files in this table" />;
                         }
                         return null;
                     } },
