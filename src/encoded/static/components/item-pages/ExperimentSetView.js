@@ -377,22 +377,23 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderProcessedFilesTableAsRightPanel', 'renderTopRow', 'renderQCMetricsTablesRow', 'renderHeader');
-    }
-
-    renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
-        return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} />;
+        _.bindAll(this, 'renderTopRow', 'renderQCMetricsTablesRow', 'renderHeader');
     }
 
     renderTopRow(){
-        const { mounted, width, files, context, windowWidth, href } = this.props;
+        const { mounted, width, context, windowWidth } = this.props;
 
         if (!mounted) return null;
 
         const higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
 
         if (higlassItem && object.itemUtil.atId(higlassItem)){
-            return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem }} renderRightPanel={this.renderProcessedFilesTableAsRightPanel} />;
+            // We define/pass in new func each time (instd. of creating a reusable method) so as to trigger changes on props.selectedFiles changed and similar.
+            const renderProcessedFilesTableAsRightPanel = (rightPanelWidth, resetDivider, leftPanelCollapsed) => (
+                <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} />
+            );
+            // eslint-disable-next-line react/jsx-no-bind
+            return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem }} renderRightPanel={renderProcessedFilesTableAsRightPanel} />;
         } else {
             return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={width}/>;
         }
