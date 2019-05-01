@@ -131,7 +131,8 @@ export class FourfrontLogo extends React.PureComponent {
         'height' : '100%',
         'paddingBottom' : 10,
         'paddingTop' : 10,
-        'transition' : "padding .3s, transform .3s"
+        'transition' : "padding .3s, transform .3s",
+        'maxHeight' : 80
     };
 
     static svgBGCircleStyle = {

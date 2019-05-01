@@ -94,6 +94,7 @@ $navbar-transition-easing: ease-out;
             height: inherit;
             text-decoration: none;
             position: relative;
+            max-height: inherit;
             
             > .img-container {
                 height: inherit;
@@ -102,6 +103,7 @@ $navbar-transition-easing: ease-out;
                 float: left;
                 margin-right: 15px;
                 text-align: center;
+                max-height: inherit;
                 //> img, 
                 //> .navbar-logo-img,
                 > svg#fourfront_logo_svg {
@@ -111,9 +113,12 @@ $navbar-transition-easing: ease-out;
                     padding-bottom: 10px;
                     padding-top: 10px;
                     transition: padding $navbar-transition-length, transform $navbar-transition-length;
-                    body.scrolled-past-top & {
-                        padding-top: 6px !important;
-                        padding-bottom: 6px !important;
+                    max-height: inherit;
+                    @media screen and (min-width: $navbar-fixed-breakpoint){
+                        body.scrolled-past-top & {
+                            padding-top: 6px !important;
+                            padding-bottom: 6px !important;
+                        }
                     }
                 }
             }
@@ -126,9 +131,11 @@ $navbar-transition-easing: ease-out;
                 transform: translate3d(0px,0,0);
                 transition: font-size $navbar-transition-length, transform $navbar-transition-length;
 
-                body.scrolled-past-top & {
-                    font-size: 1.25rem;
-                    transform: translate3d(-5px,0,0);
+                @media screen and (min-width: $navbar-fixed-breakpoint){
+                    body.scrolled-past-top & {
+                        font-size: 1.25rem;
+                        transform: translate3d(-5px,0,0);
+                    }
                 }
             }
 
