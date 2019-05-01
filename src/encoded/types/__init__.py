@@ -76,9 +76,15 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, attachment=None):
-        if attachment is not None:
+        if attachment:
             return attachment.get('download')
+        return Item.display_title(self)
 
 
 @collection(
@@ -112,6 +118,11 @@ class FileFormat(Item, ItemWithAttachment):
     schema = load_schema('encoded:schemas/file_format.json')
     name_key = 'file_format'
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, file_format):
         return file_format
 
@@ -128,6 +139,11 @@ class GenomicRegion(Item):
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, genome_assembly, location_description=None,
                       start_coordinate=None, end_coordinate=None, chromosome=None):
         ''' If you have full genome coordinates use those, otherwise use a
@@ -161,6 +177,11 @@ class Organism(Item):
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'taxon_id'
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, name, scientific_name=None):
         if scientific_name:
             scientific_name_parts = scientific_name.split(' ')
@@ -184,6 +205,11 @@ class Protocol(Item, ItemWithAttachment):
     schema = load_schema('encoded:schemas/protocol.json')
     embedded_list = Item.embedded_list + ["award.project", "lab.title"]
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, protocol_type, attachment=None, date_created=None):
         if attachment:
             return attachment.get('download')
