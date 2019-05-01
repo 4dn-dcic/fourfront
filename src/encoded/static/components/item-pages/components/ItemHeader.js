@@ -103,12 +103,12 @@ export class TopRow extends React.Component {
             </div>
         );
     }
-    /**
-     * Renders Item actions for admins and submitter.
-     */
+
+    /** Renders Item actions for admins and submitter. */
     itemActions(){
-        const { itemActionsDescriptions } = this.props;
-        var actions = this.props.context && this.props.context.actions;
+        const { itemActionsDescriptions, context } = this.props;
+        const actions = context && context.actions;
+
         if (!Array.isArray(actions) || actions.length === 0) return null;
 
         return _.map(
@@ -118,11 +118,10 @@ export class TopRow extends React.Component {
                     return typeof itemActionsDescriptions[action.name] !== 'undefined';
                 }
             ),
-            function(action, i){
-                // For each action, generate a clickable element.
+            function(action, i){ // For each action, generate a clickable element.
                 return (
-                    <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i} data-tip={itemActionsDescriptions[action.name]}>
-                        <a href={action.href}>{ action.title }</a>
+                    <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
+                        <a href={action.href} data-tip={itemActionsDescriptions[action.name]}>{ action.title }</a>
                     </div>
                 );
             }

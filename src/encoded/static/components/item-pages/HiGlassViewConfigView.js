@@ -16,7 +16,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
     itemHeader(){
         const itemActionsDescriptions = {
-            'edit'      : 'Edit the properties of this Item.',
+            'edit' : 'Edit the properties of this Item.',
         };
 
         return (
