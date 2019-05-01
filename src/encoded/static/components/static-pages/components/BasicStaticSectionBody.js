@@ -132,7 +132,7 @@ export class EmbeddedHiglassActions extends React.PureComponent {
 
         return (
             // Styled as flexrow, which will keep btn-container aligned to right as long as the ".description" container is present.
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType')}>
+            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType', 'constrainDescription')}>
                 <div className={"description" + (constrainDescription ? ' text-ellipsis-container' : '')} >
                     { showDescription ? context.description : null }
                 </div>

@@ -280,7 +280,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions.bind(this), 100);
+        _.bindAll(this, 'correctHiGlassTrackDimensions', 'renderLeftPanel');
+        this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions, 100);
         this.higlassContainerRef = React.createRef();
     }
 
@@ -372,6 +373,11 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
             { 'collapseLimit' : 10, 'collapseShow' : 7 },
             SelectedFilesController.pick(sectionProps)
         );
+    }
+
+    constructor(props){
+        super(props);
+        _.bindAll(this, 'renderProcessedFilesTableAsRightPanel', 'renderTopRow', 'renderQCMetricsTablesRow', 'renderHeader');
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
