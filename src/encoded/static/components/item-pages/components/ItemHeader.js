@@ -115,7 +115,7 @@ export class TopRow extends React.Component {
             _.filter(
                 actions, // Only keep actions that are defined in the descriptions
                 function(action){
-                    return typeof itemActionsDescriptions[action.name] !== 'undefined'
+                    return typeof itemActionsDescriptions[action.name] !== 'undefined';
                 }
             ),
             function(action, i){
