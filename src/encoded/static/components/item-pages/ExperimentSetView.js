@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Collapse, Button } from 'react-bootstrap';
+import { Collapse } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
 import {
     HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassViewConfigItem,
@@ -169,7 +169,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        const { context, schemas, selectedFilesUniqueCount, selectedFiles } = this.props;
+        const { context, schemas } = this.props;
         return (
             <React.Fragment>
                 { super.itemMidSection() }
@@ -270,7 +270,11 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         'windowWidth' : PropTypes.number.isRequired,
         'higlassItem' : PropTypes.object,
         'minOpenHeight' : PropTypes.number,
-        'maxOpenHeight' : PropTypes.number
+        'maxOpenHeight' : PropTypes.number,
+        'renderLeftPanelPlaceholder' : PropTypes.func,
+        'leftPanelCollapseHeight' : PropTypes.number,
+        'leftPanelCollapseWidth' : PropTypes.number,
+        'leftPanelDefaultCollapsed' : PropTypes.bool
     };
 
     static defaultProps = {
@@ -286,7 +290,8 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        if (pastProps.width !== this.props.width){
+        const { width } = this.props;
+        if (pastProps.width !== width){
             this.correctHiGlassTrackDimensions();
         }
     }
@@ -328,12 +333,12 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, children, renderRightPanel, windowWidth, minOpenHeight, maxOpenHeight,
+        var { mounted, width, renderRightPanel, windowWidth, minOpenHeight,
             leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
         if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
-            return (renderRightPanel && renderRightPanel(width, null)) || children;
+            return (renderRightPanel && renderRightPanel(width, null));
         }
 
         return (

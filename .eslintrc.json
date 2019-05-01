@@ -5,6 +5,7 @@
         "arrow-parens" : ["error", "always"],
         "generator-star-spacing" : "error",
         "indent": [2, 4, {"SwitchCase": 1}],
+        "getter-return" :"error",
         "jsx-quotes" : ["error", "prefer-double"],
         "linebreak-style": [2, "unix"],
         "new-cap" : "error",
@@ -16,7 +17,7 @@
         "no-tabs" : "error",
         "no-trailing-spaces" : "error",
         "no-undef": 0,
-        "no-unused-vars": 1,
+        "no-unused-vars": ["warn", { "args" : "none" }],
         "no-useless-concat": "error",
         "no-useless-constructor": "error",
         "no-useless-escape" : "error",
@@ -45,9 +46,7 @@
         "react/no-typos": "error",
         "react/prop-types": [1, { "skipUndeclared" : true }],
         "semi": ["error", "always"],
-        "valid-typeof" : ["error", { "requireStringLiterals": true }],
-        "getter-return" :"error"
-        
+        "valid-typeof" : ["error", { "requireStringLiterals": true }]
     },
     "env": {
         "es6": true,
