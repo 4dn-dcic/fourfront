@@ -133,7 +133,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                 tab : <span><i className="icon icon-leaf icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
                 key : 'raw-files',
                 content : (
-                    <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck}  initiallySelectedFiles={rawFiles}>
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
                         <RawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
                     </SelectedFilesController>
                 )
@@ -159,14 +159,13 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             });
         }
 
-        return tabs.concat(this.getCommonTabs()).map((tabObj)=>{
+        return _.map(tabs.concat(this.getCommonTabs()), function(tabObj){
             return _.extend(tabObj, {
                 'style' : {
-                    'minHeight' : Math.max(this.state.mounted && !isServerSide() && (windowHeight - 180), 100) || 800
+                    'minHeight' : Math.max(mounted && !isServerSide() && (windowHeight - 180), 100) || 800
                 }
             });
         });
-
     }
 
     itemMidSection(){
@@ -174,19 +173,29 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         return (
             <React.Fragment>
                 { super.itemMidSection() }
-                <OverviewHeading context={context} schemas={schemas} key="overview"
-                    className="with-background mb-2 mt-1" title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={function(open, props){
-                        return <i className="expand-icon icon icon-th-list" />;
-                    }} />
+                <OverviewHeading context={context} schemas={schemas} key="overview" className="with-background mb-2 mt-1"
+                    title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={OverviewHeading.prependTitleIcon} />
             </React.Fragment>
         );
     }
-
 }
 
 
-
 class OverviewHeading extends React.PureComponent {
+
+    static prependTitleIcon(open, props){
+        return <i className="expand-icon icon icon-th-list" />;
+    }
+
+    static expCategorizerTitle(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+        var expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
+        expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
+        if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
+            return <span><span className="text-500">{ expCatObj.field }:</span> { expCatObj.value }</span>;
+        }
+        return OverViewBodyItem.titleRenderPresets.default(...arguments);
+    }
+
     render(){
         const { context, schemas } = this.props;
         const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
@@ -194,23 +203,16 @@ class OverviewHeading extends React.PureComponent {
         return (
             <OverviewHeadingContainer {...this.props}>
                 {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
-                <OverViewBodyItem {...commonProps} property='experimentset_type' fallbackTitle="Set Type" />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.individual.organism' fallbackTitle="Organism" />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource.biosource_type' fallbackTitle="Biosource Type" />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.biosource_summary' fallbackTitle="Biosource" />
+                <OverViewBodyItem {...commonProps} property="experimentset_type" fallbackTitle="Set Type" />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.individual.organism" fallbackTitle="Organism" />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.biosource_type" fallbackTitle="Biosource Type" />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource_summary" fallbackTitle="Biosource" />
 
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_type' fallbackTitle="Experiment Type(s)" />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.experiment_categorizer.combined' fallbackTitle="Assay Details"
-                    titleRenderFxn={function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
-                        var expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
-                        expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
-                        if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
-                            return <span><span className="text-500">{ expCatObj.field }:</span> { expCatObj.value }</span>;
-                        }
-                        return OverViewBodyItem.titleRenderPresets.default(...arguments);
-                    }} />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.modifications.modification_type' fallbackTitle="Modification Type" />
-                <OverViewBodyItem {...commonProps} property='experiments_in_set.biosample.treatments.treatment_type' fallbackTitle="Treatment Type" />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_type" fallbackTitle="Experiment Type(s)" />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_categorizer.combined" fallbackTitle="Assay Details"
+                    titleRenderFxn={OverviewHeading.expCategorizerTitle} />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.modifications.modification_type" fallbackTitle="Modification Type" />
+                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.treatments.treatment_type" fallbackTitle="Treatment Type" />
             </OverviewHeadingContainer>
         );
     }
@@ -236,7 +238,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                             <span className="hidden-xs hidden-sm text-400"> Raw Files</span>
                         </SelectedFilesDownloadButton>
                     </div>
-                : null }
+                    : null }
             </h3>
         );
     }
@@ -267,6 +269,13 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         'renderRightPanel' : PropTypes.func,
         'windowWidth' : PropTypes.number.isRequired,
         'higlassItem' : PropTypes.object,
+        'minOpenHeight' : PropTypes.number,
+        'maxOpenHeight' : PropTypes.number
+    };
+
+    static defaultProps = {
+        'minOpenHeight' : 300,
+        'maxOpenHeight' : 800
     };
 
     constructor(props){
@@ -293,8 +302,32 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
         setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
     }
 
+    renderLeftPanel(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight){
+        const { renderLeftPanelPlaceholder, leftPanelCollapseHeight, higlassItem, minOpenHeight, maxOpenHeight } = this.props;
+        if (collapsed){
+            var useHeight = leftPanelCollapseHeight || rightPanelHeight || minOpenHeight;
+            if (typeof renderLeftPanelPlaceholder === 'function'){
+                return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
+            } else {
+                return (
+                    <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
+                        data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
+                        <i className="icon icon-fw icon-television"/>
+                    </h5>
+                );
+            }
+        } else {
+            return (
+                <React.Fragment>
+                    <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
+                    <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{ 'padding-top':'10px' }} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
+                </React.Fragment>
+            );
+        }
+    }
+
     render(){
-        var { mounted, width, children, renderRightPanel, renderLeftPanelPlaceholder, windowWidth,
+        var { mounted, width, children, renderRightPanel, windowWidth, minOpenHeight, maxOpenHeight,
             leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
@@ -302,36 +335,11 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
             return (renderRightPanel && renderRightPanel(width, null)) || children;
         }
 
-        var minOpenHeight = 300,
-            maxOpenHeight = 800;
-
         return (
             <AdjustableDividerRow {...{ width, mounted, leftPanelCollapseHeight, leftPanelDefaultCollapsed, renderRightPanel, windowWidth }}
                 height={minOpenHeight} leftPanelClassName="expset-higlass-panel"
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
-                renderLeftPanel={(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight)=>{
-                    if (collapsed){
-                        var useHeight = leftPanelCollapseHeight || rightPanelHeight || minOpenHeight;
-                        if (typeof renderLeftPanelPlaceholder === 'function'){
-                            return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
-                        } else {
-                            return (
-                                <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
-                                    data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
-                                    <i className="icon icon-fw icon-television"/>
-                                </h5>
-                            );
-                        }
-                    } else {
-                        return (
-                            <React.Fragment>
-                                <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
-                                <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{'padding-top':'10px'}} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
-                            </React.Fragment>
-                        );
-                    }
-                }}
-                rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
+                renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
         );
     }
 }
@@ -358,28 +366,29 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
         return (higlassTab ? higlassTab.content : null);
     });
 
+    static tableProps(sectionProps){
+        return _.extend(
+            _.pick(sectionProps, 'files', 'windowWidth', 'href'),
+            { 'collapseLimit' : 10, 'collapseShow' : 7 },
+            SelectedFilesController.pick(sectionProps)
+        );
+    }
+
+    renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
+        return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} />;
+    }
+
     renderTopRow(){
         const { mounted, width, files, context, windowWidth, href } = this.props;
 
         if (!mounted) return null;
 
-        const processedFilesTableProps = _.extend({
-            files, windowWidth, href,
-            'collapseLimit' : 10,
-            'collapseShow' : 7
-        }, SelectedFilesController.pick(this.props));
-
         const higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
 
         if (higlassItem && object.itemUtil.atId(higlassItem)){
-            const hiGlassProps = { width, mounted, windowWidth, higlassItem };
-            return (
-                <HiGlassAdjustableWidthRow {...hiGlassProps} renderRightPanel={function(rightPanelWidth, resetDivider, leftPanelCollapsed){
-                    return <ProcessedFilesStackedTable {...processedFilesTableProps} width={Math.max(rightPanelWidth, 320)} />;
-                }} />
-            );
+            return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem }} renderRightPanel={this.renderProcessedFilesTableAsRightPanel} />;
         } else {
-            return <ProcessedFilesStackedTable {...processedFilesTableProps} width={width}/>;
+            return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={width}/>;
         }
     }
 
@@ -449,7 +458,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
                             <span className="hidden-xs hidden-sm text-400"> Processed Files</span>
                         </SelectedFilesDownloadButton>
                     </div>
-                : null }
+                    : null }
             </h3>
         );
     }
@@ -504,9 +513,8 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
 
     render(){
         const { collection, index, context, width, mounted, defaultOpen, windowWidth } = this.props;
-        const files = collection.files;
-        const open = this.state.open;
-        const higlassItem = collection.higlass_view_config;
+        const { files, higlass_view_config } = collection;
+        const { open } = this.state;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
                 <h4>
@@ -523,10 +531,10 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
                 }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                        { higlassItem ?
-                            <HiGlassAdjustableWidthRow higlassItem={higlassItem} windowWidth={windowWidth} mounted={mounted} width={width - 21}
+                        { higlass_view_config ?
+                            <HiGlassAdjustableWidthRow higlassItem={higlass_view_config} windowWidth={windowWidth} mounted={mounted} width={width - 21}
                                 renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
-                        : this.renderFilesTable(width - 21) }
+                            : this.renderFilesTable(width - 21) }
                     </div>
                 </Collapse>
             </div>

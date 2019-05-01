@@ -1,19 +1,53 @@
 {
-    "rules": {
+    "rules": {        
+        "array-callback-return" : "error",
+        "arrow-body-style" : ["error", "as-needed", { "requireReturnForObjectLiteral": true }],
+        "arrow-parens" : ["error", "always"],
+        "generator-star-spacing" : "error",
         "indent": [2, 4, {"SwitchCase": 1}],
+        "jsx-quotes" : ["error", "prefer-double"],
         "linebreak-style": [2, "unix"],
-        "semi": [2, "always"],
+        "new-cap" : "error",
+        "no-await-in-loop": "error",
         "no-console": 0,
-        "no-unused-vars": 1,
         "no-empty": 0,
+        "no-global-assign" : "error",
+        "no-invalid-this" : "error",
+        "no-tabs" : "error",
+        "no-trailing-spaces" : "error",
         "no-undef": 0,
-        "no-global-assign" :"error",
+        "no-unused-vars": 1,
+        "no-useless-concat": "error",
+        "no-useless-constructor": "error",
+        "no-useless-escape" : "error",
+        "no-whitespace-before-property" : "error",
+        "object-curly-spacing" : ["error", "always"],
+        "prefer-const" : "error",
+        "prefer-destructuring" : "warn",
+        "prefer-spread" : "warn",
         "react/button-has-type" : "error",
+        "react/destructuring-assignment" : ["warn", "always"],
+        "react/jsx-closing-tag-location" : "error",
+        "react/jsx-indent" : "error",
+        "react/jsx-indent-props" : "error",
+        "react/jsx-key" : "error",
+        "react/jsx-no-duplicate-props" : "error",
+        "react/jsx-no-bind" : ["warn", { "ignoreDOMComponents" : true }],
+        "react/jsx-pascal-case" : "error",
+        "react/jsx-props-no-multi-spaces" : "error",
         "react/no-access-state-in-setstate" : "error",
         "react/no-direct-mutation-state" : "error",
-        "react/prop-types": [1, { "skipUndeclared" : true }],
         "react/no-children-prop" : 1,
-        "no-trailing-spaces" : "error"
+        "react/no-danger-with-children" : "error",
+        "react/no-is-mounted" : "error",
+        "react/no-redundant-should-component-update" : "error",
+        "react/no-this-in-sfc" : "error",
+        "react/no-typos": "error",
+        "react/prop-types": [1, { "skipUndeclared" : true }],
+        "semi": ["error", "always"],
+        "valid-typeof" : ["error", { "requireStringLiterals": true }],
+        "getter-return" :"error"
+        
     },
     "env": {
         "es6": true,
@@ -36,7 +70,6 @@
     },
     "plugins": [
         "react",
-        "class-property",
         "cypress"
     ]
 }
