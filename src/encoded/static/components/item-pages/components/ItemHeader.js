@@ -45,6 +45,14 @@ import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
  */
 export class TopRow extends React.Component {
 
+    static defaultProps = {
+        'itemActionsDescriptions': {
+            'edit'      : 'Edit the properties of this Item.',
+            'create'    : 'Create a blank new Item of the same type.',
+            'clone'     : 'Create and edit a copy of this Item.'
+        },
+    };
+
     constructor(props){
         super(props);
         this.parsedStatus = this.parsedStatus.bind(this);
@@ -99,21 +107,26 @@ export class TopRow extends React.Component {
      * Renders Item actions for admins and submitter.
      */
     itemActions(){
+        const { itemActionsDescriptions } = this.props;
         var actions = this.props.context && this.props.context.actions;
         if (!Array.isArray(actions) || actions.length === 0) return null;
-        var descriptions = {
-            'edit'      : 'Edit the properties of this Item.',
-            'create'    : 'Create a blank new Item of the same type.',
-            'clone'     : 'Create and edit a copy of this Item.'
-        };
 
-        return _.map(actions, function(action, i){
-            return (
-                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i} data-tip={descriptions[action.name]}>
-                    <a href={action.href}>{ action.title }</a>
-                </div>
-            );
-        });
+        return _.map(
+            _.filter(
+                actions, // Only keep actions that are defined in the descriptions
+                function(action){
+                    return typeof itemActionsDescriptions[action.name] !== 'undefined'
+                }
+            ),
+            function(action, i){
+                // For each action, generate a clickable element.
+                return (
+                    <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i} data-tip={itemActionsDescriptions[action.name]}>
+                        <a href={action.href}>{ action.title }</a>
+                    </div>
+                );
+            }
+        );
     }
 
     /**
@@ -337,4 +350,3 @@ export class Wrapper extends React.PureComponent {
     }
 
 }
-

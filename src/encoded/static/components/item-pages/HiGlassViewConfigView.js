@@ -9,10 +9,24 @@ import { JWT, console, object, ajax, layout, navigate } from './../util';
 import { HiGlassPlainContainer, CollapsibleItemViewButtonToolbar } from './components';
 import { LinkToSelector } from './../forms/components';
 import DefaultItemView from './DefaultItemView';
-
+import { ItemHeader } from './components';
 
 
 export default class HiGlassViewConfigView extends DefaultItemView {
+
+    itemHeader(){
+        const itemActionsDescriptions = {
+            'edit'      : 'Edit the properties of this Item.',
+        };
+
+        return (
+            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
+                <ItemHeader.TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
+        );
+    }
 
     getTabViewContents(){
 
