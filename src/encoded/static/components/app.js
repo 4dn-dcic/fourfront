@@ -1742,13 +1742,7 @@ class BodyElement extends React.PureComponent {
      */
     getViewportDimensions(){
         if (isServerSide()) return;
-
-        var scrollElem      = (window.document && window.document.scrollingElement) || null,
-            windowWidth     = (scrollElem && (scrollElem.clientWidth || scrollElem.offsetWidth)) || window.innerWidth,
-            windowHeight    = (scrollElem && (scrollElem.clientHeight || scrollElem.offsetHeight)) || window.innerHeight;
-            //documentHeight  = (widthElem && widthElem.scrollHeight); Not relevant re: resizing.
-
-        return { windowWidth, windowHeight };
+        return { 'windowWidth' : window.innerWidth , 'windowHeight' : window.innerHeight };
     }
 
     /**

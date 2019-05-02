@@ -330,7 +330,7 @@ export class FormattedInfoBlock extends React.Component {
      * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
      * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
      * @param {function} [callback] - Optional callback.
-     * 
+     *
      * @example
      * componentDidMount : function(){
      *     if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
@@ -372,7 +372,7 @@ export class FormattedInfoBlock extends React.Component {
      *
      * @deprecated
      * @param {string} propertyName - Name/key of linkTo property to fetch.
-     * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with link_id.
+     * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with @id.
      * @param {function} cb - Callback function passed down to ajaxPropertyDetails.
      * @returns {boolean} Whether an AJAX load/fetch was initiated.
      */

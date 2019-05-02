@@ -148,7 +148,6 @@ class ResultRow extends React.PureComponent {
         'result'            : PropTypes.shape({
             '@type'             : PropTypes.arrayOf(PropTypes.string).isRequired,
             '@id'               : PropTypes.string,
-            'link_id'           : PropTypes.string,
             'lab'               : PropTypes.object,
             'display_title'     : PropTypes.string.isRequired,
             'status'            : PropTypes.string,

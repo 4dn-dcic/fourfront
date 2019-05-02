@@ -134,7 +134,7 @@ def test_find_best_date_da_only():
     assert date == '2016-11-04'
 
 
-def test_publication_diplay_title(testapp, publication_PMID):
+def test_publication_display_title(testapp, publication_PMID):
     print(publication_PMID)
     assert publication_PMID['display_title'].startswith('Kirli K et al. (2015) A deep proteomics')
 

@@ -41,9 +41,9 @@ class OntologyTerm(Item):
         "type": "string"
     })
     def display_title(self, request, term_id, preferred_name=None, term_name=None):
-        if preferred_name is not None:
+        if preferred_name:
             return preferred_name
-        if term_name is not None:
+        if term_name:
             return term_name
         return term_id
 

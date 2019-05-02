@@ -124,8 +124,10 @@ class Gene(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request):
-        return self.properties.get('preferred_symbol')
+    def display_title(self, request, geneid, preferred_symbol=None):
+        if preferred_symbol:
+            return preferred_symbol
+        return 'GENE ID:{}'.format(geneid)
 
     class Collection(Item.Collection):
         pass

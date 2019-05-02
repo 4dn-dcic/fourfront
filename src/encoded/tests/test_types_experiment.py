@@ -171,11 +171,15 @@ def test_experiment_set_default_embedded_list(registry, exp_types):
     assert type_info_embedded == embedded_list
     if 'produced_in_pub.*' in embedded_list:
         assert 'produced_in_pub.*' in embedded
-        assert 'produced_in_pub.award.link_id' in embedded
+        assert 'produced_in_pub.award.@id' in embedded
+        assert 'produced_in_pub.award.@type' in embedded
+        assert 'produced_in_pub.award.principals_allowed.*' in embedded
         assert 'produced_in_pub.award.display_title' in embedded
         assert 'produced_in_pub.award.uuid' in embedded
     assert 'experiment_sets.accession' in embedded_list
-    assert 'experiment_sets.link_id' in embedded
+    assert 'experiment_sets.@id' in embedded
+    assert 'experiment_sets.@type' in embedded
+    assert 'experiment_sets.principals_allowed.*' in embedded
     assert 'experiment_sets.display_title' in embedded
     assert 'experiment_sets.uuid' in embedded
 
@@ -390,7 +394,7 @@ def test_calculated_expt_produced_in_pub_for_expt_w_ref(
     # just check experiment by itself first
     expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
     assert 'produced_in_pub' in expt
-    assert publication['@id'] == '/publications/' + expt['produced_in_pub'] + '/'
+    assert publication['@id'] == expt['produced_in_pub']
     # post repset with this experiment
     replicate_experiment_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': expt['@id']}]
     repset = testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data, status=201).json['@graph'][0]

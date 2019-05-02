@@ -29,7 +29,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     # name_key = 'accession'
     aggregated_items = {
         "badges": [
-            "message",
+            "messages",
             "badge.commendation",
             "badge.warning",
             "badge.uuid",
@@ -45,7 +45,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'badges.badge.badge_classification',
         'badges.badge.description',
         'badges.badge.badge_icon',
-        'badges.message',
+        'badges.messages',
         'biosource.biosource_type',
         'biosource.individual.sex',
         'biosource.individual.organism.name',
@@ -125,26 +125,18 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "description": "Summary of any biosources comprising the biosample.",
         "type": "string",
     })
-    def biosource_summary(self, request, biosource=None):
-        if biosource:
-            ret_str = ''
-            for i in range(len(biosource)):
-                bios_props = request.embed(biosource[i], '@@object')
-                ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
-            if len(ret_str) > 0:
-                ret_str = ret_str[:-5]
-                bcc = self.properties.get('cell_culture_details')
-                if bcc:
-                    tissues = []
-                    for cc in bcc:
-                        cc_props = request.embed(cc, '@@embedded')
-                        if 'differentiation_tissue' in cc_props:
-                            tissues.append(cc_props['differentiation_tissue'].get('display_title'))
-                    if list(set(tissues)):
-                        ret_str = ret_str + ' differentiated to ' + ', '.join(tissues)
-                return ret_str
-            else:
-                return 'None'
+    def biosource_summary(self, request, biosource, cell_culture_details=None):
+        ret_str = ''
+        for i in range(len(biosource)):
+            bios_props = request.embed(biosource[i], '@@object')
+            ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
+        if len(ret_str) > 0:
+            ret_str = ret_str[:-5]
+            if cell_culture_details and len(cell_culture_details) == 1:
+                cc_props = request.embed(cell_culture_details[0], '@@embedded')
+                if 'differentiation_tissue' in cc_props:
+                    ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
+            return ret_str
         return 'None'
 
     @calculated_property(schema={
@@ -152,10 +144,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "description": "The type of biosample used in an experiment.",
         "type": "string",
     })
-    def biosample_type(self, request):
-        biosources = self.properties.get('biosource')
+    def biosample_type(self, request, biosource, cell_culture_details=None):
         biosource_types = []
-        for bs in biosources:
+        for bs in biosource:
             # silliness in case we ever have multiple biosources
             biosource = request.embed(bs, '@@object')
             btype = biosource.get('biosource_type')
@@ -170,14 +161,12 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             raise "Biosource always needs type - why can't we find it"
 
         # we've got a single type of biosource
-        bcc = self.properties.get('cell_culture_details')
-        if bcc is not None:
-            for cc in bcc:
-                cell_culture = request.embed(cc, '@@object')
-                ds = cell_culture.get('differentiation_state')
-                dt = cell_culture.get('differentiation_term')
-                if ds or dt:
-                    return 'in vitro differentiated cells'
+        if cell_culture_details:  # this is now an array but just check the first
+            cell_culture = request.embed(cell_culture_details[0], '@@object')
+            ds = cell_culture.get('differentiation_state')
+            dt = cell_culture.get('differentiation_term')
+            if ds or dt:
+                return 'in vitro differentiated cells'
 
         biosource_type = biosource_types[0]
         if biosource_type == 'multicellular organism':

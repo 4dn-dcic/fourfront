@@ -1,6 +1,8 @@
 import pytest
 from .datafixtures import ORDER
+from snovault import COLLECTIONS
 from encoded.types.experiment import *
+from encoded.commands.create_mapping_on_deploy import ITEM_INDEX_ORDER
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -11,7 +13,7 @@ def test_create_mapping(registry, item_type):
     Only tests the mappings generated from schemas
     """
     from snovault.elasticsearch.create_mapping import type_mapping
-    from snovault.fourfront_utils import add_default_embeds
+    from snovault.util import add_default_embeds
     from snovault import TYPES
     mapping = type_mapping(registry[TYPES], item_type)
     assert mapping
@@ -36,3 +38,12 @@ def test_create_mapping(registry, item_type):
             else:
                 assert split_ in mapping_pointer['properties']
                 mapping_pointer = mapping_pointer['properties'][split_]
+
+
+def test_create_mapping_item_order(registry):
+    # make sure every item type name is represented in the item ordering
+    for i_type in registry[COLLECTIONS].by_item_type:
+        # ignore "testing" types
+        if i_type.startswith('testing_'):
+            continue
+        assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER

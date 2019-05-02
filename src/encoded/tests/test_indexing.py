@@ -141,7 +141,8 @@ def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
     verify_item(item_uuid, indexer_testapp, testapp, registry)
 
 
-@pytest.mark.performance
+# @pytest.mark.performance
+@pytest.mark.skip(reason="need to update perf-testing inserts")
 def test_load_and_index_perf_data(testapp, indexer_testapp):
     '''
     ~~ CURRENTLY NOT WORKING ~~

@@ -131,7 +131,7 @@ export const JSON = {
             }
         }
     },
-    "field":"experiments_in_set.experiment_type.title",
+    "field":"experiments_in_set.experiment_type.display_title",
     "total":{
         "experiment_sets":134,
         "experiments":397,

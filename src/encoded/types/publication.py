@@ -198,7 +198,7 @@ class Publication(Item, ItemWithAttachment):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "exp_sets_prod_in_pub.experimentset_type",
         "exp_sets_prod_in_pub.accession",
-        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title",
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.display_title",
         "exp_sets_used_in_pub.experimentset_type",
         "exp_sets_used_in_pub.accession"
     ]
@@ -253,13 +253,13 @@ class Publication(Item, ItemWithAttachment):
     })
     def short_attribution(self, authors=None, date_published=None):
         minipub = ''
-        if authors is not None:
+        if authors:
             minipub = authors[0]
             if len(authors) > 2:
                 minipub = minipub + ' et al.'
             elif len(authors) == 2:
                 minipub = minipub + ' and ' + authors[1]
-        if date_published is not None:
+        if date_published:
             minipub = minipub + ' (' + date_published[0:4] + ')'
         return minipub
 
@@ -270,9 +270,9 @@ class Publication(Item, ItemWithAttachment):
     })
     def display_title(self, authors=None, date_published=None, title=None):
         minipub = self.short_attribution(authors, date_published)
-        if minipub and title is not None:
+        if minipub and title:
             return minipub + ' ' + title[0:100]
-        if not minipub and title is not None:
+        if not minipub and title:
             return title[0:120]
         return Item.display_title(self)
 

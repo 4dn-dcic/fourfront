@@ -83,9 +83,9 @@ def test_search_with_embedding(workbook, testapp):
     res_json = [bios for bios in res['@graph'] if bios['accession'] == '4DNBS1234567']
     assert len(res_json) == 1
     test_json = res_json[0]
-    # check defualt embedding: link_id and display_title for submitted_by
+    # check default embedding: @id and display_title for submitted_by
     assert test_json['submitted_by']['display_title'] == 'Wrangler Wrangler'
-    assert test_json['submitted_by']['link_id'] == '~users~986b362f-4eb6-4a9c-8173-3ab267307e3b~'
+    assert test_json['submitted_by']['@id'] == '/users/986b362f-4eb6-4a9c-8173-3ab267307e3b/'
     # this specific field should be embedded ('biosource.biosource_type')
     assert test_json['biosource'][0]['biosource_type'] == 'immortalized cell line'
     # this specific linked should be embedded ('biosource.biosource_vendor')
@@ -346,7 +346,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
-    from snovault.fourfront_utils import add_default_embeds
+    from snovault.util import add_default_embeds
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
@@ -512,14 +512,14 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
     # We should get back same count as from search results here.
     res = testapp.post_json('/bar_plot_aggregations', {
         "search_query_params" : { "type" : ['ExperimentSetReplicate'] },
-        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type.title", "award.project"]
+        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type.display_title", "award.project"]
     }).json
 
     # Our total count for experiment_sets should match # of exp_set_replicate inserts.abs
 
     assert (res['total']['experiment_sets'] == count_exp_set_test_inserts) or (res['total']['experiment_sets'] == search_result_count)
 
-    assert res['field'] == 'experiments_in_set.experiment_type.title' # top level field
+    assert res['field'] == 'experiments_in_set.experiment_type.display_title' # top level field
 
     assert isinstance(res['terms'], dict) is True
 

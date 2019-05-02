@@ -17,8 +17,6 @@ import snovault
 # import snovalut default post / patch stuff so we can overwrite it in this file
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.crud_views import item_edit as sno_item_edit
-from snovault.fourfront_utils import add_default_embeds
-from snovault.authentication import calc_principals
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -347,7 +345,7 @@ class Item(snovault.Item):
             return False
 
         roles = {}
-        properties = self.upgrade_properties().copy()
+        properties = self.upgrade_properties()
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
             roles[lab_submitters] = 'role.lab_submitter'
@@ -508,53 +506,21 @@ class Item(snovault.Item):
             "location_description",
             "accession",
         ]
+        properties = self.upgrade_properties()
         for field in look_for:
             # special case for user: concatenate first and last names
-            display_title = self.properties.get(field, None)
+            display_title = properties.get(field, None)
             if display_title:
                 if field != 'accession':
                     display_title = self.add_accession_to_title(display_title)
                 return display_title
         # if none of the existing terms are available, use @type + date_created
         try:
-            type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
+            type_date = self.__class__.__name__ + " from " + properties.get("date_created", None)[:10]
             return type_date
         # last resort, use uuid
         except:
-            return self.properties.get('uuid', None)
-
-    @snovault.calculated_property(schema={
-        "title": "link_id",
-        "description": "A copy of @id that can be embedded. Uses ~ instead of /",
-        "type": "string"
-    },)
-    def link_id(self, request):
-        """create the link_id field, which is a copy of @id using ~ instead of /"""
-        id_str = str(self).split(' at ')
-        path_str = id_str[-1].strip('>')
-        path_split = path_str.split('/')
-        path_str = '~'.join(path_split) + '~'
-        return path_str
-
-    @snovault.calculated_property(schema={
-        "title": "principals_allowed",
-        "description": "calced perms for ES filtering",
-        "type": "object",
-        'properties': {
-            'view': {
-                'type': 'string'
-            },
-            'edit': {
-                'type': 'string'
-            },
-            'audit': {
-                'type': 'string'
-            }
-        }
-    },)
-    def principals_allowed(self, request):
-        principals = calc_principals(self)
-        return principals
+            return properties.get('uuid', None)
 
     def rev_link_atids(self, request, rev_name):
         """
