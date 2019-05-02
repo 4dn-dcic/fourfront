@@ -408,9 +408,12 @@ export function getTitleForType(atType, schemas = null){
     }
 
     // Correct baseType to title if not in schemas.
+    // This is case for Abstract Types currently.
     switch (atType){
         case 'ExperimentSet':
             return 'Experiment Set';
+        case 'UserContent':
+            return "User Content";
         default:
             return atType;
     }
