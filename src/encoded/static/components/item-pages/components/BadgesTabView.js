@@ -311,19 +311,17 @@ class BadgeItem extends React.PureComponent {
 
         while (embedPath.length > 0){
             currEmbedProperty = embedPath.shift();
-            if (Array.isArray(currEmbedItem[currEmbedProperty])){
+            currEmbedItem = currEmbedItem[currEmbedProperty];
+            if (Array.isArray(currEmbedItem)){
                 // It's likely that the same Item is embedded for multiple Items.
                 // We should return ASAP and not dig into _every_ one.
-                for (arrIdx = 0; arrIdx < currEmbedItem[currEmbedProperty].length; arrIdx++){
-                    arrRes = BadgeItem.getParent(embedPath, parentID, currEmbedItem[currEmbedProperty][arrIdx]);
+                for (arrIdx = 0; arrIdx < currEmbedItem.length; arrIdx++){
+                    arrRes = BadgeItem.getParent(embedPath, parentID, currEmbedItem[arrIdx]);
                     if (arrRes && object.itemUtil.atId(arrRes) === parentID){
                         return arrRes;
                     }
                 }
-                // Not found.
-                return null;
-            } else {
-                currEmbedItem = currEmbedItem[currEmbedProperty];
+                return null; // Not found (likely no view permission)
             }
         }
 
@@ -355,7 +353,7 @@ class BadgeItem extends React.PureComponent {
             const parentTypeTitle = Schemas.getItemTypeTitle(parentItem, schemas);
             const parentDisplayTitle = parentItem.display_title;
             if (parentTypeTitle && parentDisplayTitle){ // These two props are default embeds. If not present is most likely due to lack of view permissions.
-                titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-500">{ parentDisplayTitle }</span></React.Fragment>;
+                titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-600">{ parentDisplayTitle }</span></React.Fragment>;
                 tooltip = parentItem.description || tooltip;
             }
             linkMsg = <div className="mt-02"><a href={parentID} data-tip={tooltip}>View { titleToShow }</a></div>;
