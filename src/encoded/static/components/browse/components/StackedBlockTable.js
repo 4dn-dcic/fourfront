@@ -31,9 +31,9 @@ export function StackedBlockNameLabel(props){
                 <div className={"ext" + (accession ? ' is-accession' : '')}>
                     { accession ?
                         <object.CopyWrapper value={accession} key="copy-accession">{ accession || subtitle }</object.CopyWrapper>
-                    : subtitle }
+                        : subtitle }
                 </div>
-            : null }
+                : null }
         </div>
     );
 }
@@ -359,7 +359,7 @@ export class FilePairBlock extends React.PureComponent {
                 <div className="name-title" key="name-title">
                     { !excludeOwnCheckbox ?
                         <MultipleFileCheckbox onChange={this.onCheckboxChange} {...{ files, selectedFiles }} />
-                    : null }
+                        : null }
                     { name }
                 </div>
             </div>
@@ -411,7 +411,7 @@ function SingleFileCheckbox(props){
     const accessionTriple = expFxn.fileToAccessionTriple(file, true);
     return (
         <input type="checkbox" checked={isChecked} name="file-checkbox" id={'checkbox-for-' + accessionTriple}
-            className='file-entry-table-checkbox' data-select-files={[accessionTriple]}
+            className="file-entry-table-checkbox" data-select-files={[accessionTriple]}
             onChange={handleFileCheckboxChange.bind(handleFileCheckboxChange, accessionTriple, file)} />
     );
 }
