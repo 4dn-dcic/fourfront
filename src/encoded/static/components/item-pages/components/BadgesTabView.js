@@ -124,6 +124,7 @@ export class BadgesTabView extends React.PureComponent {
         const badgeList = BadgesTabView.getBadgesList(context);
         const badgeListLen = (badgeList && badgeList.length) || 0;
         const badgesByClassification = BadgesTabView.badgesByClassification(context);
+        const classificationsCount = _.keys(badgesByClassification).length;
 
         if (!badgeListLen) return <h4>No Badges</h4>; // Shouldn't happen unless `#badges` is in URL.
 
@@ -137,9 +138,10 @@ export class BadgesTabView extends React.PureComponent {
                 const badgesForClassification = badgesByClassification[badgeClassification];
                 const badgesLen = badgesForClassification.length;
                 const heading = badgeListLen === 1 ? badgeClassification : badgesLen + ' ' + badgeClassification + (badgesLen > 1 ? 's' : '');
+                const className = "badge-classification-group" + (classificationsCount > 1 ? ' col-lg-6' : '');
                 return (
-                    <div className="badge-classification-group mb-3 mt-15" data-badge-classification={badgeClassification} key={badgeClassification}>
-                        <h5 className="text-400 mt-0">{ heading }</h5>
+                    <div className={className} data-badge-classification={badgeClassification} key={badgeClassification}>
+                        <h5 className="text-500 mt-0">{ heading }</h5>
                         { _.map(badgesForClassification, function(badge, idx){
                             const atId = badge && badge.item && badge.item.badge && object.itemUtil.atId(badge.item.badge);
                             const parent = badge && badge.parent;
@@ -157,7 +159,7 @@ export class BadgesTabView extends React.PureComponent {
                     <span className="text-400">{ badgeListLen }</span>{ " Badge" + (badgeListLen > 1 ? 's' : '') }
                 </h3>
                 <hr className="tab-section-title-horiz-divider mb-1"/>
-                { body }
+                { classificationsCount > 1 ? <div className="row">{ body }</div> : body }
             </div>
         );
     }
@@ -350,8 +352,8 @@ class BadgeItem extends React.PureComponent {
             let titleToShow = "Item";
             let tooltip = "Click to visit item containing badge.";
             const parentItem = this.getParent(embedded_path, parentID, context);
-            const parentTypeTitle = Schemas.getItemTypeTitle(parentItem, schemas);
-            const parentDisplayTitle = parentItem.display_title;
+            const parentTypeTitle = parentItem && Schemas.getItemTypeTitle(parentItem, schemas);
+            const parentDisplayTitle = parentItem && parentItem.display_title;
             if (parentTypeTitle && parentDisplayTitle){ // These two props are default embeds. If not present is most likely due to lack of view permissions.
                 titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-600">{ parentDisplayTitle }</span></React.Fragment>;
                 tooltip = parentItem.description || tooltip;
@@ -359,11 +361,7 @@ class BadgeItem extends React.PureComponent {
             linkMsg = <div className="mt-02"><a href={parentID} data-tip={tooltip}>View { titleToShow }</a></div>;
         }
 
-        const image = badge_icon && (
-            <div className="text-center">
-                <img src={badge_icon} style={{ 'maxWidth': '100%', 'maxHeight' : height }}/>
-            </div>
-        );
+        const image = badge_icon && (<div className="text-center icon-container"><img src={badge_icon} /></div>);
 
         let renderedMessages = null;
 
@@ -372,7 +370,7 @@ class BadgeItem extends React.PureComponent {
                 renderedMessages = <p className="mb-0 mt-0">{ messages[0] }</p>;
             } else {
                 renderedMessages = (
-                    <ul className="mb-0 mt-02" style={{ paddingLeft: 32 }}>
+                    <ul className="mb-0 mt-01 messages-list">
                         { _.map(messages, function(msg, i){ return <li key={i}>{ msg }</li>; }) }
                     </ul>
                 );
@@ -380,16 +378,18 @@ class BadgeItem extends React.PureComponent {
         }
 
         return (
-            <div className="badge-item row flexrow mt-1" style={{ 'minHeight' : height }}>
-                <div className="col-xs-12 col-sm-2">{ image }</div>
-                <div className="col-xs-12 col-sm-10" style={{ alignItems : "center", display: "flex" }}>
-                    <div className="inner mb-05">
-                        <h4 className="text-500 mb-0 mt-0">
-                            { badgeTitle }
-                            { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
-                        </h4>
-                        { renderedMessages }
-                        { linkMsg }
+            <div className="badge-item">
+                <div className="row flexrow">
+                    <div className="col-xs-12 col-sm-2 icon-col">{ image }</div>
+                    <div className="col-xs-12 col-sm-10 title-col">
+                        <div className="inner mb-05">
+                            <h4 className="text-500 mb-0 mt-0">
+                                { badgeTitle }
+                                { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
+                            </h4>
+                            { renderedMessages }
+                            { linkMsg }
+                        </div>
                     </div>
                 </div>
             </div>
