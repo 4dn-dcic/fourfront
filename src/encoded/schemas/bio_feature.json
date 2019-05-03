@@ -60,7 +60,9 @@
                 "fruit fly",
                 "roundworm",
                 "chicken",
-                "multiple organisms"
+                "multiple organisms",
+                "unspecified",
+                "engineered reagent"
             ]
         },
         "genome_location": {
