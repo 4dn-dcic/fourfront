@@ -31,7 +31,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "accession": {
             "accessionType": "BS"
@@ -74,11 +74,16 @@
         },
         "cell_culture_details": {
             "title": "Cell Culture Information",
-            "description": "Link to biosample_cell_culture object that carries all cell culture related parameters",
-            "type": "string",
+            "description": "Link to biosample_cell_culture Items that carry cell culture related parameters",
+            "type": "array",
             "lookup": 70,
-            "ff_flag": "clear clone",
-            "linkTo": "BiosampleCellCulture"
+            "items": {
+                "title": "Culture Details",
+                "description": "Specific information for specific batches of cells",
+                "type": "string",
+                "linkTo": "BiosampleCellCulture"
+            },
+            "ff_flag": "clear clone"
         },
         "modifications": {
             "title": "Stable Genomic Modifications",
