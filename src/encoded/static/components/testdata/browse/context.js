@@ -61,7 +61,7 @@ module.exports = {
                         "alternate_accessions":[],
                         "description":"GM12878 prepared for Hi-C",
                         "biosample_protocols":["/protocols/131106bc-8535-4448-903e-854af460b244/"],
-                        "cell_culture_details":"/biosample-cell-culture/131106bc-8535-4448-903e-854af460b212/"
+                        "cell_culture_details":["/biosample-cell-culture/131106bc-8535-4448-903e-854af460b212/"]
                     },
                     "references":[],
                     "lab":{"status":"in review by lab","pi":"/users/986b362f-4eb6-4a9c-8173-3ab267307e3a/","country":"USA","fax":"000-000-0000","schema_version":"1","address1":"Biomedical Bioinfomatics","uuid":"828cd4fe-ebb0-4b36-a94a-d2e3a36cc989","@id":"/labs/4dn-dcic-lab/","awards":["/awards/1U01CA200059-01/"],"name":"4dn-dcic-lab","phone1":"000-000-0000","title":"4DN DCIC Lab, HMS","state":"MA","@type":["Lab","Item"],"address2":"10 Schattuck Street","institute_label":"HMS","city":"Boston","phone2":"000-000-0000","postal_code":"02115","institute_name":"Harvard Medical School","date_created":"2016-09-29T20:16:06.052088+00:00"},

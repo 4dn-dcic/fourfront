@@ -26,6 +26,7 @@ ORDER = [
     'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
 ]
 
+
 @pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, wrangler['uuid'])
@@ -166,6 +167,26 @@ def lung_biosource(testapp, lab, award, lung_oterm):
         'lab': lab['@id'],
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def de_term(testapp, lab, award):
+    item = {
+        "term_id": "UBERON:0005439",
+        "term_name": "definitive endoderm",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biosample_cc_wo_diff(testapp, de_term, lab, award):
+    item = {
+        "culture_start_date": "2018-01-01",
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
 
 
 @pytest.fixture

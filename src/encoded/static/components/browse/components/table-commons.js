@@ -389,10 +389,11 @@ export const columnsToColumnDefinitions = memoize(function(columns, columnDefini
         }
     );
 
-    _.forEach(uninishedColumnDefinitions, function(colDef, i){
+    var columnDefinitions = _.map(uninishedColumnDefinitions, function(colDef, i){
         var colDefOverride = columnDefinitionMap && columnDefinitionMap[colDef.field];
         if (colDefOverride){
-            _.extend(colDef, colDefOverride, colDef);
+            var colDef2 = _.extend({}, colDefOverride, colDef);
+            colDef = colDef2;
         }
         // Add defaults for any required-for-view but not-present properties.
         if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
@@ -401,9 +402,11 @@ export const columnsToColumnDefinitions = memoize(function(columns, columnDefini
         colDef.widthMap = colDef.widthMap || defaultWidthMap;
         colDef.render   = colDef.render || defaultColumnBlockRenderFxn;
         colDef.order    = typeof colDef.order === 'number' ? colDef.order : i;
+
+        return colDef;
     });
 
-    return _.sortBy(uninishedColumnDefinitions, 'order');
+    return _.sortBy(columnDefinitions, 'order');
 });
 
 

@@ -4,26 +4,6 @@ pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def de_term(testapp, lab, award):
-    item = {
-        "term_id": "UBERON:0005439",
-        "term_name": "definitive endoderm",
-        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439"
-    }
-    return testapp.post_json('/ontology_term', item).json['@graph'][0]
-
-
-@pytest.fixture
-def biosample_cc_wo_diff(testapp, de_term, lab, award):
-    item = {
-        "culture_start_date": "2018-01-01",
-        'award': award['@id'],
-        'lab': lab['@id']
-    }
-    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
-
-
-@pytest.fixture
 def biosample_cc_w_diff(testapp, de_term, lab, award):
     item = {
         "culture_start_date": "2018-01-01",
@@ -89,19 +69,19 @@ def test_biosample_biosource_summary_two_biosource(testapp, biosample_1, human_b
 
 
 def test_biosample_biosource_summary_w_differentiation(testapp, biosample_1, human_biosource, biosample_cc_w_diff, de_term):
-    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_w_diff['@id']}).json['@graph'][0]
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': [biosample_cc_w_diff['@id']]}).json['@graph'][0]
     assert human_biosource['biosource_name'] in res['biosource_summary']
     assert ' differentiated to ' in res['biosource_summary']
     assert de_term['display_title'] in res['biosource_summary']
 
 
 def test_biosample_sample_type_w_differentiation(testapp, biosample_1, biosample_cc_w_diff):
-    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_w_diff['@id']}).json['@graph'][0]
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': [biosample_cc_w_diff['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'in vitro differentiated cells'
 
 
 def test_biosample_sample_type_immortalized_wo_differentiation(testapp, biosample_1, biosample_cc_wo_diff):
-    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': biosample_cc_wo_diff['@id']}).json['@graph'][0]
+    res = testapp.patch_json(biosample_1['@id'], {'cell_culture_details': [biosample_cc_wo_diff['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'immortalized cells'
 
 
