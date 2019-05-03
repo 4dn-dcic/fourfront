@@ -76,9 +76,15 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, attachment=None):
-        if attachment is not None:
+        if attachment:
             return attachment.get('download')
+        return Item.display_title(self)
 
 
 @collection(
@@ -112,6 +118,11 @@ class FileFormat(Item, ItemWithAttachment):
     schema = load_schema('encoded:schemas/file_format.json')
     name_key = 'file_format'
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, file_format):
         return file_format
 
@@ -128,6 +139,11 @@ class GenomicRegion(Item):
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, genome_assembly, location_description=None,
                       start_coordinate=None, end_coordinate=None, chromosome=None):
         ''' If you have full genome coordinates use those, otherwise use a
@@ -161,13 +177,19 @@ class Organism(Item):
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'taxon_id'
 
-    def display_title(self, scientific_name=None):
-        if scientific_name is not None:
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
+    def display_title(self, name, scientific_name=None):
+        if scientific_name:
             scientific_name_parts = scientific_name.split(' ')
             if len(scientific_name_parts) > 1:
                 return ' '.join([scientific_name_parts[0][0].upper() + '.'] + scientific_name_parts[1:])
             else:
                 return scientific_name
+        return name
 
 
 @collection(
@@ -183,13 +205,18 @@ class Protocol(Item, ItemWithAttachment):
     schema = load_schema('encoded:schemas/protocol.json')
     embedded_list = Item.embedded_list + ["award.project", "lab.title"]
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
     def display_title(self, protocol_type, attachment=None, date_created=None):
-        if attachment is not None:
+        if attachment:
             return attachment.get('download')
         else:
             if protocol_type == 'Other':
                 protocol_type = 'Protocol'
-            if date_created is not None:  # should always have this value
+            if date_created:  # should always have this value
                 protocol_type = protocol_type + " from " + date_created[:10]
             return protocol_type
 
@@ -263,11 +290,17 @@ class TrackingItem(Item):
         request.remote_user = prior_remote
         return ti_res
 
-    def display_title(self, tracking_type, date_created=None):
-        if date_created is not None:  # should always be true
+    @calculated_property(schema={
+        "title": "Title",
+        "type": "string",
+    })
+    def display_title(self, tracking_type, date_created=None, google_analytics=None):
+        if date_created:  # should always be true
             date_created = date_created[:10]
         if tracking_type == 'google_analytics':
-            for_date = google_analytics.get('for_date', None)
+            for_date = None
+            if google_analytics:
+                for_date = google_analytics.get('for_date', None)
             if for_date:
                 return 'Google Analytics for ' + for_date
             return 'Google Analytics Item'

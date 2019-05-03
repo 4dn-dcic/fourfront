@@ -170,6 +170,26 @@ def lung_biosource(testapp, lab, award, lung_oterm):
 
 
 @pytest.fixture
+def de_term(testapp, lab, award):
+    item = {
+        "term_id": "UBERON:0005439",
+        "term_name": "definitive endoderm",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biosample_cc_wo_diff(testapp, de_term, lab, award):
+    item = {
+        "culture_start_date": "2018-01-01",
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
+
+
+@pytest.fixture
 def tissue_biosample(testapp, lung_biosource, lab, award):
     item = {
         'description': "Tissue Biosample",

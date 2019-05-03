@@ -132,8 +132,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
         if len(ret_str) > 0:
             ret_str = ret_str[:-5]
-            if cell_culture_details:
-                cc_props = request.embed(cell_culture_details, '@@embedded')
+            if cell_culture_details and len(cell_culture_details) == 1:
+                cc_props = request.embed(cell_culture_details[0], '@@embedded')
                 if 'differentiation_tissue' in cc_props:
                     ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
             return ret_str
@@ -161,8 +161,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             raise "Biosource always needs type - why can't we find it"
 
         # we've got a single type of biosource
-        if cell_culture_details is not None:
-            cell_culture = request.embed(cell_culture_details, '@@object')
+        if cell_culture_details:  # this is now an array but just check the first
+            cell_culture = request.embed(cell_culture_details[0], '@@object')
             ds = cell_culture.get('differentiation_state')
             dt = cell_culture.get('differentiation_term')
             if ds or dt:

@@ -72,11 +72,11 @@ class Award(Item):
         '''
         if center:
             return center
-        if description is not None:
+        if description:
             m = re.match('[A-Z]+:', description)
             if m:
                 center += m.group()[:-1]
-        if pi is not None:
+        if pi:
             pi = request.embed(pi, '@@object')
             if center:
                 center += ' - '

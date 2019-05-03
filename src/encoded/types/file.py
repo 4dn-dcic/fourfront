@@ -299,8 +299,7 @@ class File(Item):
             pass
         return outString
 
-    def generate_track_title(self, track_info):
-        props = self.properties
+    def generate_track_title(self, track_info, props):
         if not props.get('higlass_uid'):
             return None
         exp_type = track_info.get('experiment_type', None)
@@ -463,7 +462,7 @@ class File(Item):
 
         # vistrack only pass in biosource_name because _biosource_name is
         # a calc prop of vistrack - from linked Biosource
-        if biosource_name is not None and 'biosource_name' not in track_info:
+        if biosource_name and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
         if len(track_info) != 8:  # if length==6 we have everything we need
@@ -475,13 +474,13 @@ class File(Item):
                 # avoid more unnecessary work if we don't have key piece
                 # return
 
-            if track_info.get('lab_name') is None:
+            if 'lab_name' not in track_info:
                 labid = props.get('lab')
                 lab = get_item_if_you_can(request, labid)
                 if lab is not None:
                     track_info['lab_name'] = lab.get('display_title')
 
-        track_title = self.generate_track_title(track_info)
+        track_title = self.generate_track_title(track_info, props)
         if track_title is not None:
             track_info['track_title'] = track_title
         return track_info
@@ -648,7 +647,7 @@ class File(Item):
                 external = self.build_external_creds(self.registry, self.uuid, properties)
             except ClientError:
                 log.error(os.environ)
-                log.error(self.properties)
+                log.error(properties)
                 return 'UPLOAD KEY FAILED'
         return external['key']
 
@@ -816,7 +815,7 @@ class FileProcessed(File):
         'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
     aggregated_items = {
-        "last_modified":[
+        "last_modified": [
             "date_modified"
         ],
     }
@@ -837,7 +836,7 @@ class FileProcessed(File):
     })
     def workflow_run_inputs(self, request, disable_wfr_inputs=False):
         # switch this calc prop off for some processed files, i.e. control exp files
-        if not self.properties.get('disable_wfr_inputs'):
+        if not disable_wfr_inputs:
             return self.rev_link_atids(request, "workflow_run_inputs")
         else:
             return []
@@ -958,7 +957,7 @@ class FileVistrack(File):
         "type": "string"
     })
     def override_biosource_name(self, request, biosource=None):
-        if biosource is not None:
+        if biosource:
             return request.embed(biosource, '@@object').get('biosource_name')
 
     @calculated_property(schema={

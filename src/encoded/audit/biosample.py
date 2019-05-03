@@ -26,19 +26,19 @@ def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value
         #    if cell_cult_info['passage_number'] >= 10:
         #        # they need karyotype image so add to required
         #        required.append('karyotype')
-
-        for prop in required:
-            if prop not in cell_cult_info:
-                if ':' in prop:
-                    orred = prop.split(':')
-                    ok = None
-                    for choice in orred:
-                        if choice in cell_cult_info:
-                            ok = True
-                    if not ok:
-                        missing.extend(orred)
-                else:
-                    missing.append(prop)
+        for ccinfo in cell_cult_info:
+            for prop in required:
+                if prop not in ccinfo:
+                    if ':' in prop:
+                        orred = prop.split(':')
+                        ok = None
+                        for choice in orred:
+                            if choice in ccinfo:
+                                ok = True
+                                if not ok:
+                                    missing.extend(orred)
+                    else:
+                        missing.append(prop)
 
     if missing:
         detail = 'In Biosample {}'.format(value['@id']) + \

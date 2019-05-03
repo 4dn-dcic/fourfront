@@ -46,6 +46,6 @@ class Antibody(Item):
         "type": "string"
     })
     def display_title(self, antibody_name, antibody_product_no=None):
-        if antibody_product_no is not None:
+        if antibody_product_no:
             antibody_name += ' ({})'.format(antibody_product_no)
         return antibody_name

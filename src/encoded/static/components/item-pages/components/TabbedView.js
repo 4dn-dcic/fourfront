@@ -286,8 +286,8 @@ export class TabbedView extends React.PureComponent {
     }
 
     additionalTabs(){
-        var { context, contents } = this.props,
-            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
+        const { context, contents } = this.props;
+        const staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
 
         if (staticContentList.length === 0) return []; // No content defined for Item.
 
@@ -295,14 +295,14 @@ export class TabbedView extends React.PureComponent {
     }
 
     render(){
-        var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
+        const { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
 
         var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
             tabsProps = {
                 onChange, destroyInactiveTabPane,
                 'renderTabBar'          : () => (
-                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent} className="extra-style-2"
-                        tabBarGutter={0} />
+                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
+                        className="extra-style-2" tabBarGutter={0} />
                 ),
                 'renderTabContent'      : () => <TabContent animated={animated} />,
                 'ref'                   : this.tabsRef,

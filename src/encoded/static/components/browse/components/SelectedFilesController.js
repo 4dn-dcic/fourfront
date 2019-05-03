@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
+import { expFxn, object } from './../../util';
 
 
 /**
@@ -16,6 +17,16 @@ import _ from 'underscore';
 export class SelectedFilesController extends React.PureComponent {
 
     /**
+     * Utility function to extract out the relevant props passed
+     * in by `SelectedFilesController` out of a props object.
+     *
+     * @public
+     */
+    static pick(props){
+        return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount');
+    }
+
+    /**
      * Includes related files that might be saved in memo values.
      *
      * @static
@@ -26,16 +37,43 @@ export class SelectedFilesController extends React.PureComponent {
     }
 
     static listToObject(selectedFilesList){
-        return _.object(_.map(selectedFilesList, function(uuid){
-            return [uuid, true];
-        }));
+        return _.object(_.map(
+            // Ensure all files have an `@id` / view permissions.
+            // Lack of view permissions is OK for when file visible in table as lack of permission
+            // is shown (without checkbox).
+            _.filter(selectedFilesList, object.itemUtil.atId),
+            function(fileItem){
+                const accessionTriple = expFxn.fileToAccessionTriple(fileItem, true);
+                return [accessionTriple, fileItem];
+            }
+        ));
     }
 
     static parseInitiallySelectedFiles(initiallySelectedFiles){
-        return (
-            Array.isArray(initiallySelectedFiles) ? SelectedFilesController.listToObject(initiallySelectedFiles) :
-                initiallySelectedFiles ? initiallySelectedFiles : {}
-        );
+
+        if (initiallySelectedFiles === null){
+            return {};
+        }
+
+        if (!Array.isArray(initiallySelectedFiles) && initiallySelectedFiles && typeof initiallySelectedFiles === 'object'){
+            // Assume we got a well-formatted selectedFiles object. This is probably only case for tests, e.g. RawFilesStackedTable-test.js.
+            // This means keys must be in form of stringified accession triples, e.g. `"EXPSETACCESSION~EXPACCESSION~FILEACCESSION"`
+            // Lets validate that --
+            _.forEach(_.keys(initiallySelectedFiles), function(key){
+                const parts = key.split('~');
+                if (parts.length !== 3){
+                    throw new Error('If supply an object as initiallySelectedFiles, it must have stringified accession triples as keys.');
+                }
+            });
+            return _.clone(initiallySelectedFiles);
+        }
+
+        if (Array.isArray(initiallySelectedFiles)){
+            return SelectedFilesController.listToObject(initiallySelectedFiles);
+        }
+
+        console.error(initiallySelectedFiles);
+        throw new Error('Received unexpected props.initiallySelectedFiles -');
     }
 
     static uniqueFileCountByUUID = memoize(function(selectedFiles){
@@ -152,16 +190,28 @@ export class SelectedFilesController extends React.PureComponent {
     getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
 
     render(){
-        //console.log('SELTEST', this.state.selectedFiles);
-        if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
-        var propsToPass = _.extend(_.omit(this.props, 'children'), {
+        const children = this.props.children;
+        const propsToPass = _.extend(_.omit(this.props, 'children'), {
             'selectedFiles'             : this.state.selectedFiles,
             'selectedFilesUniqueCount'  : SelectedFilesController.uniqueFileCountByUUID(this.state.selectedFiles),
             'selectFile'                : this.selectFile,
             'unselectFile'              : this.unselectFile,
             'resetSelectedFiles'        : this.resetSelectedFiles
         });
-        return React.cloneElement(this.props.children, propsToPass);
+
+        if (Array.isArray(children)){
+            return React.Children.map(children, function(child){
+                if (!React.isValidElement(child)){
+                    throw new Error('SelectedFilesController expects props.children[] to be valid React component instances.');
+                }
+                return React.cloneElement(child, propsToPass);
+            });
+        } else {
+            if (!React.isValidElement(this.props.children)){
+                throw new Error('SelectedFilesController expects props.children to be a valid React component instance.');
+            }
+            return React.cloneElement(this.props.children, propsToPass);
+        }
     }
 
 }
