@@ -110,10 +110,9 @@ export class BadgesTabView extends React.PureComponent {
         if (!badges) return null;
 
         const groupedBadges = _.groupBy(badges, function(badge){ return BadgesTabView.badgeClassification(badge, classificationPropMapping); });
-        const badgeLists = _.values(groupedBadges);
 
         // Sort (in-place) grouped lists by depth from current/top-level Item
-        _.forEach(badgeLists, function(badgeGroupList){
+        _.forEach(_.values(groupedBadges), function(badgeGroupList){
             badgeGroupList.sort(BadgesTabView.sortBadgesFxn);
         });
 
