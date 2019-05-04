@@ -4,9 +4,10 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { pie, arc } from 'd3-shape';
-import { object, layout, Schemas } from './../../util';
+import { object, Schemas } from './../../util';
 import PropTypes from 'prop-types';
 
+// eslint-disable-next-line no-unused-vars
 import { Item } from '../../util/typedefs';
 
 
@@ -120,7 +121,7 @@ export class BadgesTabView extends React.PureComponent {
     });
 
     render(){
-        const { context, windowWidth, schemas } = this.props;
+        const { context, schemas } = this.props;
         const badgeList = BadgesTabView.getBadgesList(context);
         const badgeListLen = (badgeList && badgeList.length) || 0;
         const badgesByClassification = BadgesTabView.badgesByClassification(context);
@@ -146,7 +147,7 @@ export class BadgesTabView extends React.PureComponent {
                             const atId = badge && badge.item && badge.item.badge && object.itemUtil.atId(badge.item.badge);
                             const parent = badge && badge.parent;
                             const key = (atId && parent ? parent + " / " + atId : idx);
-                            return <BadgeItem {...badge} {...{ context, windowWidth, schemas, key }} />;
+                            return <BadgeItem {...badge} {...{ context, schemas, key }} />;
                         }) }
                     </div>
                 );
@@ -262,7 +263,6 @@ class SummaryIcon extends React.PureComponent {
         const { context, classificationSingleItemMap } = this.props;
         const classificationRatios = SummaryIcon.getClassificationRatios(context);
         const classificationRatioPairs = _.pairs(classificationRatios);
-        var singleClassification;
 
         if (!classificationRatios){
             // Shouldn't happen unless BadgesTabView is present on Item w/o any badges.
@@ -270,9 +270,9 @@ class SummaryIcon extends React.PureComponent {
         }
 
         if (classificationRatioPairs.length === 1){
-            singleClassification = classificationRatioPairs[0][0];
-            if (singleClassification && classificationSingleItemMap && classificationSingleItemMap[singleClassification]){
-                return classificationSingleItemMap[singleClassification](this.props);
+            const [ [ singleClassificationTitle ] ] = classificationRatioPairs;
+            if (singleClassificationTitle && classificationSingleItemMap && classificationSingleItemMap[singleClassificationTitle]){
+                return classificationSingleItemMap[singleClassificationTitle](this.props);
             }
         }
 
@@ -330,17 +330,13 @@ class BadgeItem extends React.PureComponent {
         return currEmbedItem;
     }
 
-    static defaultProps = {
-        'height' : 90
-    };
-
     constructor(props){
         super(props);
         this.getParent = memoize(BadgeItem.getParent);
     }
 
     render(){
-        const { item, parent : parentID, embedded_path, windowWidth, height, context, schemas } = this.props;
+        const { item, parent : parentID, embedded_path, context, schemas } = this.props;
         const { messages, badge } = item;
         const { badge_icon, description } = badge;
         const classification = BadgesTabView.badgeClassification(this.props);
