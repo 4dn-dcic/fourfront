@@ -544,13 +544,15 @@ class ExperimentChiapet(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type, biosample, target=None):
+    def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
-        if target:
-            target_props = request.embed(target, '@@object')
-            target_summary = target_props['display_title']
-            sum_str += ('against ' + target_summary)
+        if targeted_factor:
+            tstring = ''
+            for tf in targeted_factor:
+                target_props = request.embed(tf, '@@object')
+                tstring += ', {}'.format(target_props['display_title'])
+            sum_str += ('against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -562,7 +564,7 @@ class ExperimentChiapet(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type, biosample, target=None):
+    def display_title(self, request, experiment_type, biosample, targeted_factor=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
 
 
@@ -639,7 +641,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
             for tf in targeted_factor:
                 target_props = request.embed(tf, '@@object')
                 tstring += ', {}'.format(target_props['display_title'])
-            sum_str += ('against ' + tstring[2:])
+            sum_str += (' against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -683,7 +685,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
             for tf in targeted_factor:
                 target_props = request.embed(tf, '@@object')
                 tstring += ', {}'.format(target_props['display_title'])
-            sum_str += ('against ' + tstring[2:])
+            sum_str += (' against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
