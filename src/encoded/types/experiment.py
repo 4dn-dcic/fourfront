@@ -631,14 +631,6 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
     def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
-    @calculated_property(schema={
-        "title": "Experiment summary",
-        "description": "Summary of the experiment, including type and biosource.",
-        "type": "string",
-    })
-    def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
-        sum_str = request.embed(experiment_type, '@@object')['display_title']
-
         if targeted_factor:
             tstring = ''
             for tf in targeted_factor:
