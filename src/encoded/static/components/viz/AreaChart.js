@@ -3,12 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import memoize from 'memoize-one';
-import { stringify } from 'query-string';
+import url from 'url';
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
-import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
+import { console, layout, ajax, DateUtility } from'./../util';
 
 /**
  * Various utilities for helping to draw area charts.
@@ -63,9 +62,10 @@ export class StatsViewController extends React.PureComponent {
     }
 
     performAggRequests(){
-        const { searchURIs } = this.props;
-
+        const { searchURIs, href } = this.props;
         const resultStateToSet = {};
+        const hrefParts = href && url.parse(href); // href may not be passed in.
+        const ownHost = hrefParts && hrefParts.host;
 
         const chartUrisAsPairs = _.pairs(searchURIs);
         const chartUrisLen = chartUrisAsPairs.length;
@@ -91,7 +91,13 @@ export class StatsViewController extends React.PureComponent {
 
         _.forEach(chartUrisAsPairs, ([key, uri]) => {
             if (typeof uri === 'function') uri = uri(this.props);
-            ajax.load(uri, (r) => uponSingleRequestsCompleteCallback(key, uri, r), 'GET', failureCallback);
+            const uriHost = ownHost && url.parse(uri).host;
+            ajax.load(
+                uri, (r) => uponSingleRequestsCompleteCallback(key, uri, r), 'GET', failureCallback,
+                // If testing from localhost and connecting to data.4dn (e.g. for testing), clear out some headers
+                // to enable CORS
+                null, {}, ownHost && uriHost !== ownHost ? ['Authorization', 'Content-Type'] : []
+            );
         });
 
     }
@@ -250,15 +256,13 @@ export class GroupByController extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleGroupByChange = this.handleGroupByChange.bind(this);
-        this.state = {
-            'currentGroupBy' : props.initialGroupBy
-        };
+        this.state = { 'currentGroupBy' : props.initialGroupBy };
     }
 
     handleGroupByChange(field){
         this.setState(function(currState){
             if (currState.currentGroupBy === field){
-                return;
+                return null;
             }
             return { 'currentGroupBy' : field };
         });
@@ -288,10 +292,7 @@ export class GroupByDropdown extends React.PureComponent {
             'textAlign' : 'left'
         },
         'outerClassName' : "dropdown-container mb-15",
-        'valueTitleTransform' : function(jsx){
-            // Use this prop to optionally prepend or append an icon or something.
-            return jsx;
-        }
+        'id' : "select_primary_charts_group_by"
     }
 
     constructor(props){
@@ -300,23 +301,26 @@ export class GroupByDropdown extends React.PureComponent {
     }
 
     onSelect(eventKey, evt){
-        if (typeof this.props.handleGroupByChange !== 'function'){
+        const { handleGroupByChange } = this.props;
+        if (typeof handleGroupByChange !== 'function'){
             throw new Error("No handleGroupByChange function passed to GroupByDropdown.");
         }
-        this.props.handleGroupByChange(eventKey);
+        handleGroupByChange(eventKey);
     }
 
     render(){
-        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, valueTitleTransform, children } = this.props,
-            optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
-                <MenuItem eventKey={field} key={field} children={title} active={field === currentGroupBy} />
-            ),
-            selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : valueTitleTransform(groupByOptions[currentGroupBy]);
+        const { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, children, id } = this.props;
+        const optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
+            <MenuItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</MenuItem>
+        );
+        const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
 
         return (
             <div className={outerClassName}>
                 <span className="text-500">{ title }</span>
-                <DropdownButton id="select_primary_charts_group_by" title={selectedValueTitle} onSelect={this.onSelect} children={optionItems} style={buttonStyle} />
+                <DropdownButton id={id} title={selectedValueTitle} onSelect={this.onSelect} style={buttonStyle} disabled={optionItems.length < 2}>
+                    { optionItems }
+                </DropdownButton>
                 { children }
             </div>
         );
@@ -548,6 +552,13 @@ export class AreaChart extends React.PureComponent {
         return yExtents;
     }
 
+    static childKeysFromData(data){
+        return Array.from(_.reduce(data, function(m,d){
+            _.forEach(d.children || [], function(child){ m.add(child.term); });
+            return m;
+        }, new Set()));
+    }
+
     static getDerivedStateFromProps(props, state){
         return {
             'colorScale' : props.colorScale || state.colorScale || d3.scaleOrdinal(d3.schemeCategory10)
@@ -583,7 +594,6 @@ export class AreaChart extends React.PureComponent {
     constructor(props){
         super(props);
         this.correctDatesInData = this.correctDatesInData.bind(this);
-        this.childKeysFromData = this.childKeysFromData.bind(this);
         this.updateDataInState = this.updateDataInState.bind(this);
         this.getInnerChartWidth = this.getInnerChartWidth.bind(this);
         this.getInnerChartHeight = this.getInnerChartHeight.bind(this);
@@ -601,12 +611,13 @@ export class AreaChart extends React.PureComponent {
             if (currChild) return currChild.total;
             return 0;
         });
-        this.stack.keys(this.childKeysFromData(props.data));
+
+        this.stack.keys(AreaChart.childKeysFromData(props.data));
 
         // Will be cached here later from d3.select(this.refs..)
         this.svg     = null;
 
-        var stackedData             = this.stack(this.correctDatesInData(props.data)),
+        var stackedData             = this.stack(this.correctDatesInData()),
             mergedDataForExtents    = AreaChart.mergeStackedDataForExtents(stackedData),
             xExtents                = AreaChart.calculateXAxisExtents(mergedDataForExtents, props.xDomain),
             yExtents                = AreaChart.calculateYAxisExtents(mergedDataForExtents, props.yDomain);
@@ -647,7 +658,7 @@ export class AreaChart extends React.PureComponent {
     }
 
     getXAxisGenerator(useChartWidth = null){
-        const { xDomain, width } = this.props;
+        const { xDomain } = this.props;
         const { mergedDataForExtents } = this.state;
         var chartWidth = useChartWidth || this.innerWidth || this.getInnerChartWidth(),
             xExtents  = AreaChart.calculateXAxisExtents(mergedDataForExtents, xDomain),
@@ -699,17 +710,10 @@ export class AreaChart extends React.PureComponent {
         });
     }
 
-    childKeysFromData(data = this.props.data){
-        return Array.from(_.reduce(data, function(m,d){
-            _.forEach(d.children || [], function(child){ m.add(child.term); });
-            return m;
-        }, new Set()));
-    }
-
     updateDataInState(callback = null){
         const { xDomain, yDomain } = this.props;
         const data = this.correctDatesInData();
-        this.stack.keys(this.childKeysFromData(data));
+        this.stack.keys(AreaChart.childKeysFromData(data));
 
         this.isDataUpdating = true;
 
@@ -751,34 +755,34 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, yAxisScale, yAxisPower, xDomain, yDomain, curveFxn } = this.props,
-            { stackedData, mergedDataForExtents } = this.state,
-            svg         = this.svg || d3.select(this.svgRef.current),
-            width       = this.getInnerChartWidth(),
-            height      = this.getInnerChartHeight(),
-            x           = this.xScale(width),
-            y           = this.yScale(height),
-            bottomAxisGenerator = this.getXAxisGenerator(width)(x),
-            area        = d3.area()
-                .x ( function(d){ return x(d.date || d.data.date);  } )
-                .curve(curveFxn)
-                //.x0 ( function(d){ return x(d.date || d.data.date);  } )
-                //.x1 ( function(d){ return x(d.date || d.data.date) + 10;  } )
-                .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
-                .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
+        const { curveFxn } = this.props;
+        const { stackedData } = this.state;
+        const svg         = this.svg || d3.select(this.svgRef.current);
+        const width       = this.getInnerChartWidth();
+        const height      = this.getInnerChartHeight();
+        const x           = this.xScale(width);
+        const y           = this.yScale(height);
+        const bottomAxisGenerator = this.getXAxisGenerator(width)(x);
+        const area        = d3.area()
+            .x ( function(d){ return x(d.date || d.data.date);  } )
+            .curve(curveFxn)
+            //.x0 ( function(d){ return x(d.date || d.data.date);  } )
+            //.x1 ( function(d){ return x(d.date || d.data.date) + 10;  } )
+            .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
+            .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
 
-        var leftAxisGenerator   = d3.axisLeft(y),
-            rightAxisGenerator  = d3.axisRight(y).tickSize(width),
-            rightAxisFxn        = function(g){
-                g.call(rightAxisGenerator);
-                g.select('.domain').remove();
-                g.selectAll('.tick > text').remove();
-                g.selectAll('.tick > line')
-                    .attr("class", "right-axis-tick-line")
-                    .attr('opacity', 0.2)
-                    .attr("stroke", "#777")
-                    .attr("stroke-dasharray", "2,2");
-            };
+        const leftAxisGenerator   = d3.axisLeft(y);
+        const rightAxisGenerator  = d3.axisRight(y).tickSize(width);
+        const rightAxisFxn        = function(g){
+            g.call(rightAxisGenerator);
+            g.select('.domain').remove();
+            g.selectAll('.tick > text').remove();
+            g.selectAll('.tick > line')
+                .attr("class", "right-axis-tick-line")
+                .attr('opacity', 0.2)
+                .attr("stroke", "#777")
+                .attr("stroke-dasharray", "2,2");
+        };
 
         this.svg = svg;
 

@@ -80,15 +80,15 @@ export default class StatisticsPageView extends React.PureComponent {
     renderSubmissionsSection(){
         // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
         const { browseBaseState } = this.props;
-        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span> };
+        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw icon-institution mr-05"/>Project</span> };
 
         let initialGroupBy = 'award.project';
 
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
-                'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
-                'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
-                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+                'award.center_title'                 : <span><i className="icon icon-fw icon-institution mr-05"/>Center</span>,
+                'lab.display_title'                  : <span><i className="icon icon-fw icon-users mr-05"/>Lab</span>,
+                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart mr-05"/>Experiment Type</span>
             });
             initialGroupBy = 'award.center_title';
         }
@@ -102,13 +102,13 @@ export default class StatisticsPageView extends React.PureComponent {
     }
 
     renderUsageSection(){
-        var groupByOptions = {
+        const groupByOptions = {
             'monthly'   : <span>Previous 12 Months</span>,
             'daily'     : <span>Previous 30 Days</span>
         };
         return (
             <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
-                <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth')}>
+                <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth', 'href')}>
                     <UsageStatsView/>
                 </UsageStatsViewController>
             </GroupByController>
@@ -116,23 +116,23 @@ export default class StatisticsPageView extends React.PureComponent {
     }
 
     renderTopMenu(){
-        var currentTab          = this.state.currentTab,
-            submissionsObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'submissions' }),
-            usageObj            = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'usage' });
+        const { currentTab } = this.state;
+        const submissionsObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'submissions' });
+        const usageObj            = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'usage' });
 
         return (
             <div className="chart-section-control-wrapper row">
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
                         href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
-                        { submissionsObj.icon ? <React.Fragment><i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/>&nbsp;&nbsp;</React.Fragment> : '' }
+                        { submissionsObj.icon ? <i className={"mr-07 text-medium icon icon-fw icon-" + submissionsObj.icon}/> : null }
                         { submissionsObj.title }
                     </a>
                 </div>
                 <div className="col-sm-6">
                     <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
                         href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
-                        { usageObj.icon ? <React.Fragment><i className={"text-medium icon icon-fw icon-" + usageObj.icon}/>&nbsp;&nbsp;</React.Fragment> : '' }
+                        { usageObj.icon ? <i className={"mr-07 text-medium icon icon-fw icon-" + usageObj.icon}/> : null }
                         { usageObj.title }
                     </a>
                 </div>
@@ -158,19 +158,30 @@ class UsageStatsViewController extends React.PureComponent {
     static defaultProps = {
         'searchURIs' : {
             'TrackingItem' : function(props) {
-                let uri = 'https://data.4dnucleome.org/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
+                let uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
+
                 if (props.currentGroupBy === 'monthly'){
                     uri += '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
                 } else if (props.currentGroupBy === 'daily'){
                     uri += '&google_analytics.date_increment=daily&limit=30'; // 30 days
                 }
-                uri += '&format=json';
+
+                if (props.href && props.href.indexOf('http://localhost') > -1){
+                    uri = 'https://data.4dnucleome.org' + uri;
+                }
                 return uri;
             },
             'TrackingItemDownload' : function(props) {
                 var untilDate = moment.utc(), fromDate;
-                let uri = 'https://data.4dnucleome.org/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
-                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
+                let uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
+                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.file_format';
+
+                if (props.includePartialRequests){ // Include download_tracking.range_query w/ any val and do a group-by agg for it.
+                    uri += '&group_by=download_tracking.range_query';
+                } else { // Filter out download_tracking.range_query = true items.
+                    uri += '&download_tracking.range_query!=true';
+                }
+
                 if (props.currentGroupBy === 'monthly'){
                     untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
                     fromDate = untilDate.clone();
@@ -182,24 +193,47 @@ class UsageStatsViewController extends React.PureComponent {
                     fromDate.subtract(30, 'day'); // Go back 30 days
                     uri += '&date_histogram_interval=daily&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
                 }
-                uri += '&format=json';
+
+                if (props.href && props.href.indexOf('http://localhost') > -1){
+                    uri = 'https://data.4dnucleome.org' + uri;
+                }
                 return uri;
             }
         },
 
         /**
-         * Return a boolean to refetch all, or list of strings to refetch specific searchURIs.
+         * Return a boolean to determine whether to refetch (all) aggs from ES.
          *
-         * @returns {boolean|string[]}
+         * @returns {boolean}
          */
         'shouldRefetchAggs' : function(pastProps, nextProps){
             return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
                 pastProps.currentGroupBy !== nextProps.currentGroupBy
+            ) || (
+                pastProps.includePartialRequests !== nextProps.includePartialRequests
             );
         }
     };
 
-    render(){ return <StatsViewController {...this.props} />; }
+    constructor(props){
+        super(props);
+        this.handleTogglePartialReqs = this.handleTogglePartialReqs.bind(this);
+        this.state = { 'includePartialRequests' : true }; // aka include range queries for download tracking
+    }
+
+    handleTogglePartialReqs(nextIncludePartialRequests){
+        this.setState(function({ includePartialRequests }){
+            if (typeof nextIncludePartialRequests !== 'boolean'){
+                return { 'includePartialRequests' : !includePartialRequests };
+            } else if (nextIncludePartialRequests !== includePartialRequests) {
+                return { 'includePartialRequests' : nextIncludePartialRequests };
+            } else {
+                return null;
+            }
+        });
+    }
+
+    render(){ return <StatsViewController {...this.props} {...this.state} onTogglePartialReqs={this.handleTogglePartialReqs} />; }
 }
 
 
@@ -708,6 +742,19 @@ class UsageStatsView extends StatsChartViewBase {
         //}
     };
 
+    static getDerivedStateFromProps(props, state){
+        const { countBy } = state;
+        const { includePartialRequests } = props;
+        const fileDownloadsCountBy = countBy.file_downloads;
+        if (!includePartialRequests && fileDownloadsCountBy === "download_tracking.range_query"){
+            // Reset to some other option
+            const nextCountBy = _.clone(countBy);
+            nextCountBy.file_downloads = "download_tracking.experiment_type";
+            return { 'countBy' : nextCountBy };
+        }
+        return null;
+    }
+
 
     constructor(props){
         super(props);
@@ -729,45 +776,45 @@ class UsageStatsView extends StatsChartViewBase {
         setTimeout(()=>{
             // This might take some noticeable amount of time (not enough to justify a worker, tho) so we defer/deprioritize its execution to prevent blocking UI thread.
             this.setState((currState)=>{
-                var countBy = _.clone(currState.countBy);
-                countBy[chartID] = nextCountBy;
-                var nextState = _.extend({}, currState, { countBy });
-                _.extend(nextState, this.generateAggsToState(this.props, nextState));
-                return nextState;
+                var nextCountByObj = _.clone(currState.countBy);
+                nextCountByObj[chartID] = nextCountBy;
+                var nextState = _.extend({}, currState, { 'countBy' : nextCountByObj });
+                return _.extend({ 'countBy' : nextCountByObj }, this.generateAggsToState(this.props, nextState));
             });
         }, 0);
     }
 
-    renderCountByDropdown(chartID, tooltip=null){
-        var currCountBy = this.state.countBy[chartID],
-            titles      = {
-                'views'     : <React.Fragment><i className="icon icon-fw icon-eye"/>&nbsp; View</React.Fragment>,
-                'sessions'  : <React.Fragment><i className="icon icon-fw icon-user"/>&nbsp; User Session</React.Fragment>
-            },
-            ddtitle     = titles[currCountBy];
+    renderCountByDropdown(chartID){
+        const { includePartialRequests } = this.props;
+        const { countBy } = this.state;
+        const currCountBy = countBy[chartID];
+
+        const menuOptions = new Map(); // Preserves order more consistently than plain object.
 
         if (chartID === 'experiment_set_views' || chartID === 'file_views'){
-            titles = {
-                'views'         : <React.Fragment><i className="icon icon-fw icon-eye"/>&nbsp; Detail View</React.Fragment>,
-                'list_views'    : <React.Fragment><i className="icon icon-fw icon-list"/>&nbsp; Appearance within first 25 Search Results</React.Fragment>,
-                'clicks'        : <React.Fragment><i className="icon icon-fw icon-hand-o-up"/>&nbsp; Search Result Click</React.Fragment>
-            };
-            ddtitle = titles[currCountBy];
+            menuOptions.set('views',        <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>Detail View</React.Fragment>);
+            menuOptions.set('list_views',   <React.Fragment><i className="icon icon-fw icon-list mr-05"/>Appearance within first 25 Search Results</React.Fragment>);
+            menuOptions.set('clicks',       <React.Fragment><i className="icon icon-fw icon-hand-o-up mr-05"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
-            titles = {
-                'download_tracking.experiment_type'     : <React.Fragment><i className="icon icon-fw icon-folder-o"/>&nbsp; Experiment Type</React.Fragment>,
-                'download_tracking.geo_country'         : <React.Fragment><i className="icon icon-fw icon-globe"/>&nbsp; Country</React.Fragment>,
-                'download_tracking.range_query'    : <React.Fragment><i className="icon icon-fw icon-television"/>&nbsp; Downloads as part of visualization</React.Fragment>,
-                'download_tracking.file_format'         : <React.Fragment><i className="icon icon-fw icon-file-text-o"/>&nbsp; File Format</React.Fragment>,
-            };
-            ddtitle = titles[currCountBy];
+            menuOptions.set('download_tracking.experiment_type', <React.Fragment><i className="icon icon-fw icon-folder-o mr-05"/>Experiment Type</React.Fragment>);
+            menuOptions.set('download_tracking.geo_country',     <React.Fragment><i className="icon icon-fw icon-globe mr-05"/>Country</React.Fragment>);
+            menuOptions.set('download_tracking.range_query',     <React.Fragment><i className="icon icon-fw icon-television mr-05"/>Downloads as part of visualization</React.Fragment>);
+            menuOptions.set('download_tracking.file_format',     <React.Fragment><i className="icon icon-fw icon-file-text-o mr-05"/>File Format</React.Fragment>);
+        } else {
+            menuOptions.set('views',    <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>View</React.Fragment>);
+            menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw icon-user mr-05"/>User Session</React.Fragment>);
         }
 
+        const dropdownTitle = menuOptions.get(currCountBy);
+
         return (
-            <div className="inline-block" style={{ 'marginRight' : 5 }}>
-                <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID} onSelect={(ek, e) => this.changeCountByForChart(chartID, ek)} title={ddtitle}>
-                    {_.map(_.keys(titles), function(k){ return <MenuItem eventKey={k} key={k} children={titles[k]} />; })}
+            <div className="inline-block mr-05">
+                <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID}
+                    onSelect={(evtKey, evt) => this.changeCountByForChart(chartID, evtKey)} title={dropdownTitle}>
+                    {_.map([ ...menuOptions.entries() ], function([ k, title ]){
+                        const disabled = (k === "download_tracking.range_query" && !includePartialRequests);
+                        return <MenuItem eventKey={k} key={k} disabled={disabled}>{ title }</MenuItem>;
+                    })}
                 </DropdownButton>
             </div>
         );
@@ -788,11 +835,15 @@ class UsageStatsView extends StatsChartViewBase {
     }
     */
     render(){
-        var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem, windowWidth } = this.props,
-            { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
-                other_search_queries, experiment_set_views, file_downloads, countBy, smoothEdges
-            } = this.state,
-            width = this.getRefWidth() || null;
+        const {
+            loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem, windowWidth,
+            includePartialRequests, onTogglePartialReqs
+        } = this.props;
+        const {
+            sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
+            other_search_queries, experiment_set_views, file_downloads, countBy, smoothEdges
+        } = this.state;
+        const width = this.getRefWidth() || null;
 
         if (loadingStatus === 'failed'){
             return <div className="stats-charts-container" key="charts" ref={this.elemRef} id="usage"><ErrorIcon/></div>;
@@ -801,7 +852,9 @@ class UsageStatsView extends StatsChartViewBase {
             return <div className="stats-charts-container" key="charts" ref={this.elemRef} id="usage"><LoadingIcon/></div>;
         }
 
-        var anyExpandedCharts       = _.any(_.values(this.state.chartToggles)),
+        console.log('TTTTT5',includePartialRequests, onTogglePartialReqs );
+
+        var anyExpandedCharts       = _.any(_.values(chartToggles)),
             commonXDomain           = [ null, null ],
             lastDateStr             = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][0] && respTrackingItem['@graph'][0].google_analytics && respTrackingItem['@graph'][0].google_analytics.for_date,
             firstReportIdx          = respTrackingItem && respTrackingItem['@graph'] && (respTrackingItem['@graph'].length - 1),
@@ -846,9 +899,11 @@ class UsageStatsView extends StatsChartViewBase {
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                     title="Show" outerClassName="dropdown-container mb-0">
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <div className="inline-block">
-                        <Checkbox value={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
+                    <div className="inline-block ml-15">
+                        <Checkbox checked={includePartialRequests} onChange={onTogglePartialReqs}>Include Partial Requests</Checkbox>
+                    </div>
+                    <div className="inline-block ml-15">
+                        <Checkbox checked={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
                     </div>
                 </GroupByDropdown>
 
@@ -1052,9 +1107,8 @@ class SubmissionsStatsView extends StatsChartViewBase {
                 <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
 
                     <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <div className="inline-block">
-                            <Checkbox value={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
+                        <div className="inline-block ml-15">
+                            <Checkbox checked={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
                         </div>
                     </GroupByDropdown>
 
