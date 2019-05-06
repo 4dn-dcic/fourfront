@@ -24,7 +24,7 @@ def test_calculated_modification_name(testapp, modifications):
             assert modname == 'Crispr deletion' and short == 'deletion'
         elif name == 'mod_w_target':
             assert modname == 'Crispr for RAD21 gene'
-            assert short == 'RAD21 gene Crispr'
+            assert short == 'RAD21 Crispr'
         elif name == 'mod_w_both':
             assert modname == 'Crispr deletion for RAD21 gene'
-            assert short == 'RAD21 gene deletion'
+            assert short == 'RAD21 deletion'
