@@ -565,7 +565,7 @@ class ExperimentChiapet(Experiment):
         "type": "string"
     })
     def display_title(self, request, experiment_type, biosample, targeted_factor=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
 @collection(

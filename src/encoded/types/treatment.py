@@ -122,7 +122,6 @@ class TreatmentRnai(Treatment):
     embedded_list = Treatment.embedded_list + [
         'rnai_vendor.name',
         'rnai_constructs.designed_to_target',
-        'target.display_title'
     ]
 
     @calculated_property(schema={
