@@ -65,6 +65,22 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
 }
 
 
+/**
+ * Convert an ES6 Map to an object literal.
+ * @see https://gist.github.com/lukehorvat/133e2293ba6ae96a35ba#gistcomment-2655752 re: performance
+ */
+export function mapToObject(esMap){
+    const retObj = {};
+    for (var [key, val] of esMap){
+        retObj[key] = val;
+    }
+    return retObj;
+}
+
+
+
+/** TODO: Move these 3 functions to Schemas.js */
+
 /** Return the properties dictionary from a schema for use as tooltips */
 export function tipsFromSchema(schemas, content){
     if (content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
@@ -432,9 +448,11 @@ export function TooltipInfoIconContainer(props){
     return React.createElement(elementType || 'div', {
         'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
     }, (
-        <span>{ title || children }&nbsp;{ typeof tooltip === 'string' ?
-            <i data-tip={tooltip} className="icon icon-info-circle"/>
-        : null }</span>
+        <span>{ title || children }&nbsp;
+            { typeof tooltip === 'string' ?
+                <i data-tip={tooltip} className="icon icon-info-circle"/>
+                : null }
+        </span>
     ));
 }
 
@@ -447,7 +465,8 @@ export class TooltipInfoIconContainerAuto extends React.Component {
             '@type' : PropTypes.array.isRequired
         }).isRequired,
         'itemType' : PropTypes.string,
-        'schemas' : PropTypes.object
+        'schemas' : PropTypes.object,
+        'elementType' : PropTypes.string
     }
 
     render(){
@@ -494,7 +513,7 @@ export class CopyWrapper extends React.PureComponent {
         'includeIcon' : true,
         'flashActiveTransform' : 'scale3d(1.2, 1.2, 1.2) translate3d(0, 0, 0)',
         'flashInactiveTransform' : 'translate3d(0, 0, 0)'
-    }
+    };
 
     static copyToClipboard(value, successCallback = null, failCallback = null){
         var textArea = document.createElement('textarea');
@@ -533,13 +552,16 @@ export class CopyWrapper extends React.PureComponent {
     constructor(props){
         super(props);
         this.flashEffect = this.flashEffect.bind(this);
-        if (typeof props.mounted !== 'boolean') this.state = { 'mounted' : false };
+        if (typeof props.mounted !== 'boolean'){
+            this.state = { 'mounted' : false };
+        }
 
         this.wrapperRef = React.createRef();
     }
 
     componentDidMount(){
-        if (typeof this.props.mounted !== 'boolean') this.setState({ 'mounted' : true });
+        const { mounted } = this.props;
+        if (typeof mounted !== 'boolean') this.setState({ 'mounted' : true });
         ReactTooltip.rebuild();
     }
 
@@ -548,10 +570,11 @@ export class CopyWrapper extends React.PureComponent {
     }
 
     flashEffect(){
+        const { flash, wrapperElement, flashActiveTransform, flashInactiveTransform } = this.props;
         var wrapper = this.wrapperRef.current;
-        if (!this.props.flash || !wrapper) return null;
+        if (!flash || !wrapper) return null;
 
-        if (typeof this.props.wrapperElement === 'function'){
+        if (typeof wrapperElement === 'function'){
             // Means we have a React component vs a React/JSX element.
             // This approach will be deprecated soon so we should look into forwarding refs
             // ... I think
@@ -560,24 +583,27 @@ export class CopyWrapper extends React.PureComponent {
 
         if (!wrapper) return null;
 
-        wrapper.style.transform = this.props.flashActiveTransform;
+        wrapper.style.transform = flashActiveTransform;
         setTimeout(()=>{
-            wrapper.style.transform = this.props.flashInactiveTransform;
+            wrapper.style.transform = flashInactiveTransform;
         }, 100);
     }
 
     onCopy(){
+        const { onCopy } = this.props;
         this.flashEffect();
-        if (typeof this.props.onCopy === 'function') this.props.onCopy();
+        if (typeof onCopy === 'function') onCopy();
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
+        const { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
         if (!value) return null;
-        var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
-        var copy = (e) => {
-            return CopyWrapper.copyToClipboard(value, (v)=>{
+        // eslint-disable-next-line react/destructuring-assignment
+        const isMounted = (mounted || (this.state && this.state.mounted)) || false;
+
+        const copy = (e) =>
+            CopyWrapper.copyToClipboard(value, (v)=>{
                 this.onCopy();
                 analytics.event('CopyWrapper', 'Copy', {
                     'eventLabel' : 'Value',
@@ -589,14 +615,13 @@ export class CopyWrapper extends React.PureComponent {
                     'name' : v
                 });
             });
-        };
 
-        var elemsToWrap = [];
+        const elemsToWrap = [];
         if (children)                   elemsToWrap.push(children);
         if (children && isMounted)      elemsToWrap.push(' ');
         if (isMounted && includeIcon)   elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy" title="Copy to clipboard" />);
 
-        var wrapperProps = _.extend(
+        const wrapperProps = _.extend(
             {
                 'ref'       : this.wrapperRef,
                 'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
@@ -765,6 +790,7 @@ export const itemUtil = {
              * @public
              * @constant
              */
+            // eslint-disable-next-line no-useless-escape
             email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
             /**
              * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and
