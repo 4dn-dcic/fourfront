@@ -590,9 +590,12 @@ class ExperimentDamid(Experiment):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         if targeted_factor:
-            tname = request.embed(targeted_factor, '@@object')['display_title']
-            fusion = tname.split(' ')[0]
-            sum_str += (' with DAM-' + fusion)
+            if len(targeted_factor) == 1:
+                tname = request.embed(targeted_factor[0], '@@object')['display_title']
+                fusion = tname.split(' ')[0]
+                sum_str += (' with DAM-' + fusion)
+            else:
+                sum_str += (' with mulitiple DAM fusions')
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
