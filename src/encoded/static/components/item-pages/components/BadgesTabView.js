@@ -35,8 +35,8 @@ export class BadgesTabView extends React.PureComponent {
 
     /** ES6 Maps preserve order, Objects' keys' order may not be preserved depending on JS interpreter/version. */
     static classificationMap = new Map([
-        [ "warning",        "Warning" ],
-        [ "commendation",   "Commendation" ]
+        [ "commendation",   "Commendation" ],
+        [ "warning",        "Warning" ]
     ]);
 
     static classificationMapAsObject = memoize(function(classificationMap = BadgesTabView.classificationMap){
