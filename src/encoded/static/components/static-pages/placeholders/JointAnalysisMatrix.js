@@ -164,14 +164,15 @@ export class JointAnalysisMatrix extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        if (this.props.session !== pastProps.session){
+        const { session } = this.props;
+        if (session !== pastProps.session){
             this.loadSearchQueryResults();
         }
     }
 
     loadSearchQueryResults(){
 
-        function commonCallback(source_name, result){
+        const commonCallback = (source_name, result) => {
             var updatedState = {};
             updatedState[source_name] = result['@graph'] || [];
             if (source_name === 'encode_results') {
@@ -180,13 +181,13 @@ export class JointAnalysisMatrix extends React.PureComponent {
                 updatedState[source_name] = _.map(updatedState[source_name], this.standardize4DNResult);
             }
             this.setState(updatedState);
-        }
+        };
 
-        function commonFallback(source_name, result){
+        const commonFallback = (source_name, result) => {
             var updatedState = {};
             updatedState[source_name] = false;
             this.setState(updatedState);
-        }
+        };
 
         var dataSetNames = ['self_planned_results', 'self_results', 'encode_results'];
 
@@ -211,9 +212,9 @@ export class JointAnalysisMatrix extends React.PureComponent {
                     }
 
                     if (source_name === 'encode_results' || req_url.slice(0, 4) === 'http'){ // Exclude 'Authorization' header for requests to different domains (not allowed).
-                        ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name), null, {}, ['Authorization', 'Content-Type']);
+                        ajax.load(req_url, (r) => commonCallback(source_name, r), 'GET', (r) => commonFallback(source_name, r), null, {}, ['Authorization', 'Content-Type']);
                     } else {
-                        ajax.load(req_url, commonCallback.bind(this, source_name), 'GET', commonFallback.bind(this, source_name));
+                        ajax.load(req_url, (r) => commonCallback(source_name, r), 'GET', (r) => commonFallback(source_name, r));
                     }
 
                 });
@@ -222,10 +223,12 @@ export class JointAnalysisMatrix extends React.PureComponent {
     }
 
     render() {
-        var { groupingProperties4DN, groupingPropertiesEncode } = this.props;
+        const { groupingProperties4DN, groupingPropertiesEncode, self_results_url } = this.props;
+        const { self_planned_results, self_results, encode_results } = this.state;
 
-        var isLoading = _.any(
+        const isLoading = _.any(
             _.pairs(_.pick(this.state, 'self_planned_results', 'self_results', 'encode_results')),
+            // eslint-disable-next-line react/destructuring-assignment
             ([key, resultsForKey]) => resultsForKey === null && this.props[key + '_url'] !== null
         );
 
@@ -237,47 +240,45 @@ export class JointAnalysisMatrix extends React.PureComponent {
             );
         }
 
-        var resultList4DN = ((Array.isArray(this.state.self_planned_results) && this.state.self_planned_results) || []).concat(
-            ((Array.isArray(this.state.self_results) && this.state.self_results) || [])
+        const resultList4DN = ((Array.isArray(self_planned_results) && self_planned_results) || []).concat(
+            ((Array.isArray(self_results) && self_results) || [])
         );
-
-        var resultListEncode = this.state.encode_results;
 
         return (
             <div className="static-section joint-analysis-matrix">
                 <div className="row">
-                    <div className={"col-xs-12 col-md-" + (resultListEncode ? '6' : '12')}>
+                    <div className={"col-xs-12 col-md-" + (encode_results ? '6' : '12')}>
                         <h3 className="mt-2 mb-0 text-300">4DN</h3>
                         <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
-                            <a href={this.props.self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
+                            <a href={self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
                         </h5>
                         <VisualBody
                             {..._.pick(this.props, 'groupingPropertiesSearchParamMap', 'cellTypeNameMap4DN', 'self_planned_results_url',
                                 'self_results_url', 'headerColumnsOrder', 'titleMap')}
                             groupingProperties={groupingProperties4DN}
-                            columnGrouping='cell_type'
+                            columnGrouping="cell_type"
                             duplicateHeaders={false}
-                            columnSubGrouping='state'
+                            columnSubGrouping="state"
                             results={resultList4DN}
                             //defaultDepthsOpen={[true, false, false]}
                             //keysToInclude={[]}
                         />
                     </div>
-                    { resultListEncode ?
-                    <div className="col-xs-12 col-md-6">
-                        <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
-                        <VisualBody
-                            {..._.pick(this.props, 'groupingPropertiesSearchParamMap', 'encode_results_url', 'headerColumnsOrder', 'titleMap')}
-                            groupingProperties={groupingPropertiesEncode}
-                            columnGrouping='cell_type'
-                            columnSubGrouping='state'
-                            results={resultListEncode}
-                            duplicateHeaders={false}
-                            //defaultDepthsOpen={[false, false, false]}
-                            //keysToInclude={[]}
-                        />
-                    </div>
-                    : null }
+                    { encode_results ?
+                        <div className="col-xs-12 col-md-6">
+                            <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
+                            <VisualBody
+                                {..._.pick(this.props, 'groupingPropertiesSearchParamMap', 'encode_results_url', 'headerColumnsOrder', 'titleMap')}
+                                groupingProperties={groupingPropertiesEncode}
+                                columnGrouping="cell_type"
+                                columnSubGrouping="state"
+                                results={encode_results}
+                                duplicateHeaders={false}
+                                //defaultDepthsOpen={[false, false, false]}
+                                //keysToInclude={[]}
+                            />
+                        </div>
+                        : null }
                 </div>
             </div>
         );
@@ -452,12 +453,11 @@ class VisualBody extends React.PureComponent {
     }
 
     render(){
+        const { results } = this.props;
         return (
-            <StackedBlockVisual {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap',
-                'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder')}
-                data={this.props.results}
-                checkCollapsibility
-                groupValue={VisualBody.groupValue}
+            <StackedBlockVisual data={results} groupValue={VisualBody.groupValue} checkCollapsibility
+                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap',
+                    'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder')}
                 blockPopover={this.blockPopover}
                 blockClassName={VisualBody.blockClassName}
                 blockRenderedContents={VisualBody.blockRenderedContents}
