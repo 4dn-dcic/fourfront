@@ -4,26 +4,39 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { Button, DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
-import ReactTooltip from 'react-tooltip';
+import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import url from 'url';
 import { console, navigate, ajax, analytics, DateUtility } from './../util';
 import { StatsViewController, StatsChartViewBase, GroupByController, GroupByDropdown, GroupOfCharts,
-    AreaChart, AreaChartContainer, loadingIcon, errorIcon, HorizontalD3ScaleLegend } from './../viz/AreaChart';
+    AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend } from './../viz/AreaChart';
 import StaticPage from './StaticPage';
 import * as d3 from 'd3';
 import moment from 'moment';
 
 
-export default class StatisticsPageView extends StaticPage {
+
+
+
+
+export default class StatisticsPageView extends React.PureComponent {
 
     static defaultProps = {
         'defaultTab' : 'submissions'
     };
 
     static viewOptions = [
-        { 'id' : 'submissions', 'title' : "Submissions Statistics", 'icon' : 'upload', 'tip' : "View statistics related to submission and release of Experiment Set" },
-        { 'id' : 'usage', 'title' : "Usage Statistics", 'icon' : 'users', 'tip' : "View statistics related to usage of the 4DN Data Portal" }
+        {
+            'id' : 'submissions',
+            'title' : "Submissions Statistics",
+            'icon' : 'upload',
+            'tip' : "View statistics related to submission and release of Experiment Set"
+        },
+        {
+            'id' : 'usage',
+            'title' : "Usage Statistics",
+            'icon' : 'users',
+            'tip' : "View statistics related to usage of the 4DN Data Portal"
+        }
     ];
 
     constructor(props){
@@ -32,7 +45,6 @@ export default class StatisticsPageView extends StaticPage {
         this.onDropdownChange = this.onDropdownChange.bind(this);
         this.renderSubmissionsSection = this.renderSubmissionsSection.bind(this);
         this.renderUsageSection = this.renderUsageSection.bind(this);
-        this.renderDropdown = this.renderDropdown.bind(this);
         this.renderTopMenu = this.renderTopMenu.bind(this);
         this.state = { 'currentTab' : props.defaultTab };
     }
@@ -41,21 +53,24 @@ export default class StatisticsPageView extends StaticPage {
         this.maybeUpdateCurrentTabFromHref();
     }
 
-    componentWillReceiveProps(nextProps){
-        if (this.props.href !== nextProps.href){
-            this.maybeUpdateCurrentTabFromHref(nextProps);
+    componentDidUpdate(pastProps){
+        const { href } = this.props;
+        if (href !== pastProps.href){
+            this.maybeUpdateCurrentTabFromHref();
         }
     }
 
-    maybeUpdateCurrentTabFromHref(props = this.props){
-        var hrefParts = props.href && url.parse(props.href),
-            hash = hrefParts && hrefParts.hash && hrefParts.hash.replace('#', '');
-
-        if (hash && hash !== this.state.currentTab && hash.charAt(0) !== '!'){
-            if (_.pluck(StatisticsPageView.viewOptions, 'id').indexOf(hash) > -1){
-                this.setState({ 'currentTab' : hash });
+    maybeUpdateCurrentTabFromHref(){
+        const { href } = this.props;
+        this.setState(function({ currentTab }){
+            const hrefParts = href && url.parse(href);
+            const hash = hrefParts && hrefParts.hash && hrefParts.hash.replace('#', '');
+            if (hash && hash !== currentTab && hash.charAt(0) !== '!'){
+                if (_.pluck(StatisticsPageView.viewOptions, 'id').indexOf(hash) > -1){
+                    return { 'currentTab' : hash };
+                }
             }
-        }
+        });
     }
 
     onDropdownChange(currentTab){
@@ -64,17 +79,17 @@ export default class StatisticsPageView extends StaticPage {
 
     renderSubmissionsSection(){
         // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
-        var groupByOptions = {
-                'award.project'                      : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span>
-            },
-            initialGroupBy = 'award.project';
+        const { browseBaseState } = this.props;
+        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span> };
 
-        if (this.props.browseBaseState !== 'all'){
+        let initialGroupBy = 'award.project';
+
+        if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
                 'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
                 'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
                 'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
-            }),
+            });
             initialGroupBy = 'award.center_title';
         }
         return (
@@ -97,36 +112,6 @@ export default class StatisticsPageView extends StaticPage {
                     <UsageStatsView/>
                 </UsageStatsViewController>
             </GroupByController>
-        );
-    }
-
-    /**
-     * Old dropdown for selecting 'Usage' or 'Submissions' view. May be removed after design iteration.
-     *
-     * @deprecated
-     */
-    renderDropdown(){
-        var currentTab          = this.state.currentTab,
-            currSectionObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : currentTab }),
-            currSectionTitle    = (
-                <h4 className="text-400 mb-07 mt-07">
-                    { currSectionObj.icon ? <i className={"text-medium icon icon-fw icon-" + currSectionObj.icon}/> : '' }
-                    { currSectionObj.icon ? <span>&nbsp;&nbsp;</span> : null }
-                    { currSectionObj.title }&nbsp;
-                </h4>
-            );
-
-        return (
-            <div className="chart-section-control-wrapper">
-                <h5 className="text-400 mb-08">Currently viewing</h5>
-                <DropdownButton id="section-select-dropdown" title={currSectionTitle} children={_.map(StatisticsPageView.viewOptions, function({ title, id, icon }){
-                    return (
-                        <MenuItem {...{ title, 'key': id, 'eventKey' : id }} active={id === currentTab}>
-                            { icon ? <React.Fragment><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</React.Fragment> : '' }{ title }
-                        </MenuItem>
-                    );
-                })} onSelect={this.onDropdownChange} />
-            </div>
         );
     }
 
@@ -156,37 +141,35 @@ export default class StatisticsPageView extends StaticPage {
     }
 
     render(){
-        var currentTab          = this.state.currentTab,
-            renderFxn           = currentTab === 'usage' ? this.renderUsageSection : this.renderSubmissionsSection;
-
+        const { currentTab } = this.state;
         return (
             <StaticPage.Wrapper>
                 { this.renderTopMenu() }
                 <hr/>
-                { renderFxn() }
+                { currentTab === 'usage' ? this.renderUsageSection() : this.renderSubmissionsSection() }
             </StaticPage.Wrapper>
         );
     }
 }
 
 
+class UsageStatsViewController extends React.PureComponent {
 
-class UsageStatsViewController extends StatsViewController {
     static defaultProps = {
         'searchURIs' : {
             'TrackingItem' : function(props) {
-                var uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
+                let uri = 'https://data.4dnucleome.org/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
                 if (props.currentGroupBy === 'monthly'){
                     uri += '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
                 } else if (props.currentGroupBy === 'daily'){
                     uri += '&google_analytics.date_increment=daily&limit=30'; // 30 days
                 }
+                uri += '&format=json';
                 return uri;
             },
             'TrackingItemDownload' : function(props) {
-                var untilDate   = moment.utc(),
-                    fromDate,
-                    uri         = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
+                var untilDate = moment.utc(), fromDate;
+                let uri = 'https://data.4dnucleome.org/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
                 uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
                 if (props.currentGroupBy === 'monthly'){
                     untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
@@ -199,9 +182,11 @@ class UsageStatsViewController extends StatsViewController {
                     fromDate.subtract(30, 'day'); // Go back 30 days
                     uri += '&date_histogram_interval=daily&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
                 }
+                uri += '&format=json';
                 return uri;
             }
         },
+
         /**
          * Return a boolean to refetch all, or list of strings to refetch specific searchURIs.
          *
@@ -209,14 +194,18 @@ class UsageStatsViewController extends StatsViewController {
          */
         'shouldRefetchAggs' : function(pastProps, nextProps){
             return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
-                pastProps.currentGroupBy  !== nextProps.currentGroupBy
+                pastProps.currentGroupBy !== nextProps.currentGroupBy
             );
         }
     };
+
+    render(){ return <StatsViewController {...this.props} />; }
 }
 
 
-class SubmissionStatsViewController extends StatsViewController {
+
+
+class SubmissionStatsViewController extends React.PureComponent {
 
     static defaultProps = {
         'searchURIs' : {
@@ -244,41 +233,37 @@ class SubmissionStatsViewController extends StatsViewController {
     constructor(props){
         super(props);
         this.fetchAndGenerateExternalTermMap = this.fetchAndGenerateExternalTermMap.bind(this);
-        this.state.externalTermMap = null;
+        this.state = { "externalTermMap" : null };
     }
 
     componentDidMount(){
-        var nextState = { 'mounted' : true };
-        setTimeout(()=>{
-            this.fetchAndGenerateExternalTermMap();
-            this.performAggRequests();
-        }, 100);
-        this.setState(nextState);
+        this.fetchAndGenerateExternalTermMap();
     }
 
     componentDidUpdate(pastProps){
-        if (this.props.shouldRefetchAggs(pastProps, this.props)){
-            this.setState({ 'loadingStatus' : 'loading' });
-            this.performAggRequests();
-            if (pastProps.session !== this.props.session){ // Avoid triggering extra re-aggregation from new/unnecessary term map being loaded.
+        const { shouldRefetchAggs, session } = this.props;
+        if (shouldRefetchAggs(pastProps, this.props)){
+            if (pastProps.session !== session){
+                // Avoid triggering extra re-aggregation from new/unnecessary term map being loaded.
                 this.fetchAndGenerateExternalTermMap(true);
             }
         }
     }
 
     fetchAndGenerateExternalTermMap(refresh = false){
-        if (!refresh && this.state.externalTermMap && _.keys(this.state.externalTermMap).length > 0) return;
+        const { externalTermMap } = this.state;
+        if (!refresh && externalTermMap && _.keys(externalTermMap).length > 0) return;
 
         ajax.load('/search/?type=Award&limit=all', (resp)=>{
-            if (this && this.state.mounted){
-                this.setState({
-                    'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
-                        return [ award.center_title, award.project !== '4DN' ];
-                    }))
-                });
-            }
+            this.setState({
+                'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
+                    return [ award.center_title, award.project !== '4DN' ];
+                }))
+            });
         });
     }
+
+    render(){ return <StatsViewController {...this.props} {...this.state} />; }
 
 }
 
@@ -803,17 +788,17 @@ class UsageStatsView extends StatsChartViewBase {
     }
     */
     render(){
-        var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
+        var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem, windowWidth } = this.props,
             { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
                 other_search_queries, experiment_set_views, file_downloads, countBy, smoothEdges
             } = this.state,
             width = this.getRefWidth() || null;
 
         if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ errorIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref={this.elemRef} id="usage"><ErrorIcon/></div>;
         }
         if (!mounted || (loadingStatus === 'loading' && (!file_downloads && !sessions_by_country))){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ loadingIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref={this.elemRef} id="usage"><LoadingIcon/></div>;
         }
 
         var anyExpandedCharts       = _.any(_.values(this.state.chartToggles)),
@@ -822,7 +807,7 @@ class UsageStatsView extends StatsChartViewBase {
             firstReportIdx          = respTrackingItem && respTrackingItem['@graph'] && (respTrackingItem['@graph'].length - 1),
             firstDateStr            = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][firstReportIdx] && respTrackingItem['@graph'][firstReportIdx].google_analytics && respTrackingItem['@graph'][firstReportIdx].google_analytics.for_date,
             commonContainerProps    = {
-                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
+                'onToggle' : this.handleToggle, chartToggles, windowWidth,
                 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
             },
             dateRoundInterval       = 'day';
@@ -857,7 +842,7 @@ class UsageStatsView extends StatsChartViewBase {
         var commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
 
         return (
-            <div className="stats-charts-container" key="charts" ref="elem" id="usage">
+            <div className="stats-charts-container" key="charts" ref={this.elemRef} id="usage">
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                     title="Show" outerClassName="dropdown-container mb-0">
@@ -889,7 +874,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                     </GroupOfCharts>
 
-                : null }
+                    : null }
 
                 { sessions_by_country ?
 
@@ -907,7 +892,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                     </GroupOfCharts>
 
-                : null }
+                    : null }
 
                 {/* browse_search_queries || other_search_queries ?
 
@@ -958,7 +943,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                     </GroupOfCharts>
 
-                : null }
+                    : null }
 
                 { session && fields_faceted ?
 
@@ -987,7 +972,7 @@ class UsageStatsView extends StatsChartViewBase {
 
                     </GroupOfCharts>
 
-                : null }
+                    : null }
 
             </div>
         );
@@ -1017,32 +1002,38 @@ class SubmissionsStatsView extends StatsChartViewBase {
     }
 
     static defaultProps = {
-        'aggregationsToChartData' : aggregationsToChartData
+        'aggregationsToChartData' : _.pick(
+            aggregationsToChartData,
+            'expsets_released', 'expsets_released_internal',
+            'expsets_released_vs_internal', 'files_released',
+            'file_volume_released'
+        )
     };
 
     render(){
-        var { loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange } = this.props,
+        var { loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth } = this.props,
             { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country, expsets_released_vs_internal,
                 expsets_created, chartToggles, smoothEdges } = this.state,
             width = this.getRefWidth() || null;
 
         if (!mounted || (!expsets_released)){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="submissions" children={ loadingIcon() }/>;
-        }
-        if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="submissions" children={ errorIcon() }/>;
+            return <div className="stats-charts-container" key="charts" ref={this.elemRef} id="submissions"><LoadingIcon/></div>;
         }
 
-        var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
-            commonContainerProps = {
-                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
-                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
-            },
-            showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal,
-            commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+        if (loadingStatus === 'failed'){
+            return <div className="stats-charts-container" key="charts" ref={this.elemRef} id="submissions"><ErrorIcon/></div>;
+        }
+
+        const anyExpandedCharts = _.any(_.values(chartToggles));
+        const commonContainerProps = {
+            'onToggle' : this.handleToggle, chartToggles, windowWidth,
+            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
+        };
+        const showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal;
+        const commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
 
         return (
-            <div className="stats-charts-container" key="charts" ref="elem" id="submissions">
+            <div className="stats-charts-container" key="charts" ref={this.elemRef} id="submissions">
 
                 { showInternalReleaseCharts ?
 
@@ -1056,7 +1047,7 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                     </GroupOfCharts>
 
-                : null }
+                    : null }
 
                 <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
 
@@ -1072,10 +1063,10 @@ class SubmissionsStatsView extends StatsChartViewBase {
                     <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
-                            <React.Fragment>
-                                <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
-                            </React.Fragment>
-                        }>
+                        <React.Fragment>
+                            <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
+                        </React.Fragment>
+                    }>
                         <AreaChart {...commonChartProps} data={expsets_released} />
                     </AreaChartContainer>
 
@@ -1087,27 +1078,27 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                     { showInternalReleaseCharts ?
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
-                                <React.Fragment>
-                                    <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
-                                </React.Fragment>
-                            }>
-                            <AreaChart {...commonChartProps} data={expsets_released_internal} />
-                        </AreaChartContainer>
-                    : null }
-
-                    <AreaChartContainer {...commonContainerProps} id="files_released" title={
                             <React.Fragment>
-                                <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
+                                <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
                             </React.Fragment>
                         }>
+                            <AreaChart {...commonChartProps} data={expsets_released_internal} />
+                        </AreaChartContainer>
+                        : null }
+
+                    <AreaChartContainer {...commonContainerProps} id="files_released" title={
+                        <React.Fragment>
+                            <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
+                        </React.Fragment>
+                    }>
                         <AreaChart {...commonChartProps} data={files_released} />
                     </AreaChartContainer>
 
                     <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
-                            <React.Fragment>
-                                <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
-                            </React.Fragment>
-                        }>
+                        <React.Fragment>
+                            <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
+                        </React.Fragment>
+                    }>
                         <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                     </AreaChartContainer>
 
