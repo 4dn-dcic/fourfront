@@ -15,9 +15,19 @@ export class BadgesTabView extends React.PureComponent {
 
     static getTabObject(props){
         const { context } = props;
+
+        let badgeSingularTitle = "Badge";
+
+        const badgesByClassification = BadgesTabView.badgesByClassification(context);
+        const classifications = _.keys(badgesByClassification);
+
+        if (classifications.length === 1){
+            [ badgeSingularTitle ] = classifications;
+        }
+
         const badgeList = BadgesTabView.getBadgesList(context);
         const badgeListLen = (badgeList && badgeList.length) || 0;
-        const titleStr = " " + badgeListLen + " Badge" + (badgeListLen > 1 ? "s" : "");
+        const titleStr = " " + badgeSingularTitle + (badgeListLen > 1 ? "s" : "");
 
         return {
             tab : <span><SummaryIcon context={context} />{ titleStr }</span>,
@@ -395,13 +405,6 @@ class BadgeItem extends React.PureComponent {
 }
 
 
-/**
- * @todo:
- * Improve & make use of possibly.
- * Currently blocker is that the path dimensions specified in `d` attribute(s)
- * are in context of SVG having 124 height and width. We need these to be correctly resized
- * re: `props.size` somehow.
- */
 export class EmbeddableSVGBadgeIcon extends React.PureComponent {
 
     static linearGradientDefinition(type = "gold"){ // TODO: Implement other colors/types
