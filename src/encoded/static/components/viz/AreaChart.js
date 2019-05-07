@@ -130,7 +130,8 @@ export class StatsChartViewAggregator extends React.PureComponent {
 
     static propTypes = {
         'aggregationsToChartData' : PropTypes.object.isRequired,
-        'shouldReaggregate' : PropTypes.func
+        'shouldReaggregate' : PropTypes.func,
+        'children' : PropTypes.node.isRequired
     };
 
     constructor(props){
@@ -788,7 +789,6 @@ export class AreaChart extends React.PureComponent {
             .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
             .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
 
-        const leftAxisGenerator   = d3.axisLeft(y);
         const rightAxisGenerator  = d3.axisRight(y).tickSize(width);
         const rightAxisFxn        = function(g){
             g.call(rightAxisGenerator);
@@ -803,7 +803,7 @@ export class AreaChart extends React.PureComponent {
 
         this.svg = svg;
 
-        return { svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn, 'data' : stackedData };
+        return { svg, x, y, width, height, area, bottomAxisGenerator, rightAxisFxn, 'data' : stackedData };
     }
 
     /**
@@ -824,7 +824,7 @@ export class AreaChart extends React.PureComponent {
         }
 
         const { yAxisLabel, margin, updateColorStore } = this.props;
-        const { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        const { data, svg, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
         const drawn = { svg };
         const { colorScale } = this.state;
 
@@ -1043,10 +1043,10 @@ export class AreaChart extends React.PureComponent {
             throw new Error('No existing elements to transition.');
         }
 
-        var { yAxisLabel, margin, transitionDuration } = this.props;
-        var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        const { transitionDuration } = this.props;
+        const { data, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
 
-        var drawn = this.drawnD3Elements;
+        const drawn = this.drawnD3Elements;
 
         requestAnimationFrame(()=>{
 
@@ -1062,7 +1062,7 @@ export class AreaChart extends React.PureComponent {
             drawn.rightAxis.remove();
             drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
 
-            var allLayers = drawn.root.selectAll('.layer')
+            drawn.root.selectAll('.layer')
                 .data(data)
                 .selectAll('path.area')
                 .transition()

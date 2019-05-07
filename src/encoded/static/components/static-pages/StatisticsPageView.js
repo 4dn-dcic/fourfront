@@ -8,7 +8,7 @@ import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import url from 'url';
 import { console, navigate, ajax, analytics, DateUtility } from './../util';
 import {
-    StatsViewController, StatsChartViewBase, GroupByController, GroupByDropdown, GroupOfCharts,
+    StatsViewController, GroupByController, GroupByDropdown, GroupOfCharts,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
 } from './../viz/AreaChart';
 import StaticPage from './StaticPage';
@@ -792,14 +792,23 @@ class SubmissionStatsViewController extends React.PureComponent {
 
 
 
+class UsageChartsCountByDropdown extends React.PureComponent {
 
-class UsageStatsView extends React.PureComponent {
+    constructor(props){
+        super(props);
+        this.handleSelection = this.handleSelection.bind(this);
+    }
 
-    renderCountByDropdown(chartID){
-        const { includePartialRequests, countBy, changeCountByForChart } = this.props;
+    handleSelection(evtKey, evt){
+        const { changeCountByForChart, chartID } = this.props;
+        changeCountByForChart(chartID, evtKey);
+    }
+
+    render(){
+        const { includePartialRequests, countBy, chartID } = this.props;
         const currCountBy = countBy[chartID];
 
-        const menuOptions = new Map(); // Preserves order more consistently than plain object.
+        const menuOptions = new Map();
 
         if (chartID === 'experiment_set_views' || chartID === 'file_views'){
             menuOptions.set('views',        <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>Detail View</React.Fragment>);
@@ -823,7 +832,7 @@ class UsageStatsView extends React.PureComponent {
         return (
             <div className="inline-block mr-05">
                 <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID}
-                    onSelect={(evtKey, evt) => changeCountByForChart(chartID, evtKey)} title={dropdownTitle}>
+                    onSelect={this.handleSelection} title={dropdownTitle}>
                     {_.map([ ...menuOptions.entries() ], function([ k, title ]){
                         return <MenuItem eventKey={k} key={k}>{ title }</MenuItem>;
                     })}
@@ -831,14 +840,18 @@ class UsageStatsView extends React.PureComponent {
             </div>
         );
     }
+}
+
+
+class UsageStatsView extends React.PureComponent {
 
     render(){
         const {
             loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem, windowWidth,
-            includePartialRequests, onTogglePartialReqs,
+            includePartialRequests, onTogglePartialReqs, changeCountByForChart, countBy,
             // Passed in from StatsChartViewAggregator:
-            sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
-            other_search_queries, experiment_set_views, file_downloads, countBy, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
+            sessions_by_country, chartToggles, fields_faceted, /* fields_faceted_group_by, browse_search_queries, other_search_queries, */
+            experiment_set_views, file_downloads, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
         } = this.props;
 
         if (loadingStatus === 'failed'){
@@ -887,7 +900,8 @@ class UsageStatsView extends React.PureComponent {
             dateRoundInterval = 'year';
         }
 
-        var commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+        const commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+        const countByDropdownProps = { countBy, changeCountByForChart };
 
         return (
             <div className="stats-charts-container" key="charts" id="usage">
@@ -919,7 +933,9 @@ class UsageStatsView extends React.PureComponent {
                                     <small><em>Download tracking started in August 2018</em></small>
                                 </React.Fragment>
                             }
-                            extraButtons={this.renderCountByDropdown('file_downloads')}>
+                            extraButtons={
+                                <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_downloads" includePartialRequests={includePartialRequests} />
+                            }>
                             <AreaChart {...commonChartProps} data={file_downloads} />
                         </AreaChartContainer>
 
@@ -937,7 +953,7 @@ class UsageStatsView extends React.PureComponent {
 
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                             title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
-                            extraButtons={this.renderCountByDropdown('sessions_by_country')}>
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}>
                             <AreaChart {...commonChartProps} data={sessions_by_country} />
                         </AreaChartContainer>
 
@@ -988,7 +1004,7 @@ class UsageStatsView extends React.PureComponent {
                                         countBy.experiment_set_views === 'clicks' ? '- clicks from browse results' : '- page detail views' }
                                 </span>
                             }
-                            extraButtons={this.renderCountByDropdown('experiment_set_views')}>
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_view" />}>
                             <AreaChart {...commonChartProps} data={experiment_set_views} />
                         </AreaChartContainer>
 
@@ -1017,7 +1033,7 @@ class UsageStatsView extends React.PureComponent {
 
                         <AreaChartContainer {...commonContainerProps} id="fields_faceted"
                             title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
-                            extraButtons={this.renderCountByDropdown('fields_faceted')}>
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="fields_faceted" />}>
                             <AreaChart {...commonChartProps} data={fields_faceted} />
                         </AreaChartContainer>
 
@@ -1058,8 +1074,8 @@ class SubmissionsStatsView extends React.PureComponent {
         const {
             loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth,
             // Passed in from StatsChartViewAggregator:
-            expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country,
-            expsets_released_vs_internal, expsets_created, chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
+            expsets_released, expsets_released_internal, files_released, file_volume_released,
+            expsets_released_vs_internal, /* expsets_created, */ chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
         } = this.props;
 
         if (!mounted || (!expsets_released)){
