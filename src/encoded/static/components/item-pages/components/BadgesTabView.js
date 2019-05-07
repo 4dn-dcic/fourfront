@@ -134,7 +134,8 @@ export class BadgesTabView extends React.PureComponent {
         const badgeList = BadgesTabView.getBadgesList(context);
         const badgeListLen = (badgeList && badgeList.length) || 0;
         const badgesByClassification = BadgesTabView.badgesByClassification(context);
-        const classificationsCount = _.keys(badgesByClassification).length;
+        const badgeClassificationList = _.keys(badgesByClassification);
+        const classificationsCount = badgeClassificationList.length;
 
         if (!badgeListLen) return <h4>No Badges</h4>; // Shouldn't happen unless `#badges` is in URL.
 
@@ -147,11 +148,12 @@ export class BadgesTabView extends React.PureComponent {
             function(badgeClassification){
                 const badgesForClassification = badgesByClassification[badgeClassification];
                 const badgesLen = badgesForClassification.length;
-                const heading = badgeListLen === 1 ? badgeClassification : badgesLen + ' ' + badgeClassification + (badgesLen > 1 ? 's' : '');
                 const className = "badge-classification-group" + (classificationsCount > 1 ? ' col-lg-6' : '');
                 return (
                     <div className={className} data-badge-classification={badgeClassification} key={badgeClassification}>
-                        <h5 className="text-500 mt-0">{ heading }</h5>
+                        { classificationsCount > 1 ?
+                            <h5 className="text-500 mt-0">{ badgesLen + ' ' + badgeClassification + (badgesLen > 1 ? 's' : '') }</h5>
+                            : null }
                         { _.map(badgesForClassification, function(badge, idx){
                             const atId = badge && badge.item && badge.item.badge && object.itemUtil.atId(badge.item.badge);
                             const parent = badge && badge.parent;
@@ -163,10 +165,12 @@ export class BadgesTabView extends React.PureComponent {
             }
         );
 
+        const badgeSingularTitle = classificationsCount > 1 ? "Badge" : badgeClassificationList[0];
+
         return (
             <div className="overflow-hidden">
                 <h3 className="tab-section-title">
-                    <span className="text-400">{ badgeListLen }</span>{ " Badge" + (badgeListLen > 1 ? 's' : '') }
+                    <span className="text-400">{ badgeListLen }</span>{ " " + badgeSingularTitle + (badgeListLen > 1 ? 's' : '') }
                 </h3>
                 <hr className="tab-section-title-horiz-divider mb-1"/>
                 { classificationsCount > 1 ? <div className="row">{ body }</div> : body }
@@ -213,9 +217,13 @@ class SummaryIcon extends React.PureComponent {
         },
         'classificationSingleItemMap' : {
             "Commendation" : function commendationBadge(props){
-                const { size } = props;
+                const { size, context } = props;
+                const badgesByClassification = BadgesTabView.badgesByClassification(context);
+                // We know implicitly that only 1 classification exists here.
+                const countCommendations = badgesByClassification.Commendation.length;
+                const tooltip = countCommendations + " Commendation" + (countCommendations > 1 ? "s" : "");
                 return (
-                    <div className="inline-block pie-chart-icon-container mr-08" data-tip="Commendation">
+                    <div className="inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
                         <svg height={size} width={size} style={{ verticalAlign : 'middle' }}>
                             <EmbeddableSVGBadgeIcon badgeType="gold" size={size} />
                         </svg>
@@ -223,9 +231,14 @@ class SummaryIcon extends React.PureComponent {
                 );
             },
             "Warning" : function warningBadge(props){
+                const { context } = props;
+                const badgesByClassification = BadgesTabView.badgesByClassification(context);
+                // We know implicitly that only 1 classification exists here.
+                const countWarnings = badgesByClassification.Warning.length;
+                const tooltip = countWarnings + " Warning" + (countWarnings > 1 ? "s" : "");
                 return (
                     <span className="active">
-                        <i className="icon icon-fw icon-warning" data-tip="Warning"/>
+                        <i className="icon icon-fw icon-warning" data-tip={tooltip}/>
                     </span>
                 );
             }
@@ -253,10 +266,16 @@ class SummaryIcon extends React.PureComponent {
     }
 
     generatePieChart(classificationRatioPairs){
-        const { size } = this.props;
+        const { size, context } = this.props;
+        const badgesByClassification = BadgesTabView.badgesByClassification(context);
+
         const outerRadius = size / 2;
         const tooltip = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ]){
-            return (Math.round(classificationRatio * 10000) / 100) + '% ' + classificationTitle + 's';
+            const badgesForClassificationLen = badgesByClassification[classificationTitle].length;
+            return (
+                badgesForClassificationLen + " " + classificationTitle + (badgesForClassificationLen > 1 ? 's' : '') +
+                ' (' + (Math.round(classificationRatio * 10000) / 100) + '%)'
+            );
         }).join(' + ');
 
         return (
