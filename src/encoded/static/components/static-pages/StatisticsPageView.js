@@ -1062,8 +1062,6 @@ class SubmissionsStatsView extends React.PureComponent {
             expsets_released_vs_internal, expsets_created, chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
         } = this.props;
 
-        console.log('TTTT', this.props);
-
         if (!mounted || (!expsets_released)){
             return <div className="stats-charts-container" key="charts" id="submissions"><LoadingIcon/></div>;
         }
