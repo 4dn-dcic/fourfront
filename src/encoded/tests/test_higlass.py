@@ -1967,7 +1967,7 @@ def test_custom_display_height(testapp, higlass_blank_viewconf, bedGraph_file_js
     tracks = default_height_viewconf_json2["views"][0]["tracks"]
     assert_true(len(tracks["top"]) == 3)
 
-    for index, track in enumerate([ t for t in tracks["top"] if "-divergent-bar" in t["type"] ]):
+    for track in [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ]:
         assert_true(
             (track["height"] - 83 > -5 and track["height"] - 83 < 5),
             "1D file is too big: height should be around 83, got {actual} instead.".format(
@@ -1997,7 +1997,7 @@ def test_custom_display_height(testapp, higlass_blank_viewconf, bedGraph_file_js
     tracks = big_height_viewconf_json2["views"][0]["tracks"]
     assert_true(len(tracks["top"]) == 3)
 
-    for index, track in enumerate([ t for t in tracks["top"] if "-divergent-bar" in t["type"] ]):
+    for track in [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ]:
         assert_true(
             (track["height"] - 125 > -5 and track["height"] - 125 < 5),
             "1D file is too big: height should be around 125, got {actual} instead.".format(
