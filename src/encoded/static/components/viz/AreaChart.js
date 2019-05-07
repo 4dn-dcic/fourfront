@@ -126,7 +126,7 @@ export class StatsViewController extends React.PureComponent {
 
 
 /** Extend & implement own render method. */
-export class StatsChartViewBase extends React.PureComponent {
+export class StatsChartViewAggregator extends React.PureComponent {
 
     static propTypes = {
         'aggregationsToChartData' : PropTypes.object.isRequired,
@@ -216,6 +216,22 @@ export class StatsChartViewBase extends React.PureComponent {
                 )
             ]
         ));
+    }
+
+    render(){
+        const { children } = this.props;
+        const width = this.getRefWidth() || null;
+        const childProps = _.extend(
+            { width, 'onChartToggle' : this.handleToggle, 'onSmoothEdgeToggle' : this.handleToggleSmoothEdges },
+            this.props, this.state
+        );
+        let extendedChildren;
+        if (Array.isArray(children)){
+            extendedChildren = React.Children.map(children, (child) => React.cloneElement(child, childProps));
+        } else {
+            extendedChildren = React.cloneElement(children, childProps);
+        }
+        return <div className="stats-aggregation-container" ref={this.elemRef}>{ extendedChildren }</div>;
     }
 
 }
@@ -332,7 +348,7 @@ export class GroupByDropdown extends React.PureComponent {
 /**
  * Wraps AreaCharts or AreaChartContainers in order to provide shared scales.
  */
-export class GroupOfCharts extends React.Component {
+export class GroupOfCharts extends React.PureComponent {
 
     static defaultProps = {
         'className'             : 'chart-group clearfix',
@@ -585,6 +601,7 @@ export class AreaChart extends React.PureComponent {
 
             if (pastProps.data !== nextProps.data) shouldDrawNewChart = true;
             if (pastProps.curveFxn !== nextProps.curveFxn) shouldDrawNewChart = true;
+            if (pastProps.colorScale !== nextProps.colorScale) shouldDrawNewChart = true;
             if (shouldDrawNewChart) console.info('Will redraw chart');
 
             return shouldDrawNewChart;
