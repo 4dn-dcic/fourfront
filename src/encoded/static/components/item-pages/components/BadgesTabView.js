@@ -272,10 +272,7 @@ class SummaryIcon extends React.PureComponent {
         const outerRadius = size / 2;
         const tooltip = _.map(classificationRatioPairs, function([ classificationTitle, classificationRatio ]){
             const badgesForClassificationLen = badgesByClassification[classificationTitle].length;
-            return (
-                badgesForClassificationLen + " " + classificationTitle + (badgesForClassificationLen > 1 ? 's' : '') +
-                ' (' + (Math.round(classificationRatio * 10000) / 100) + '%)'
-            );
+            return badgesForClassificationLen + " " + classificationTitle + (badgesForClassificationLen > 1 ? 's' : '');
         }).join(' + ');
 
         return (
