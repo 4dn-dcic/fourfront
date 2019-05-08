@@ -19,6 +19,7 @@ import {
 } from './../browse/components';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
+// eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
 
 // import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
@@ -77,7 +78,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
     }
 
     shouldGraphExist(){
-        const context = this.props.context;
+        const { context } = this.props;
         const processedFiles = this.allProcessedFilesFromExperimentSet(context);
         const processedFilesLen = (processedFiles && processedFiles.length) || 0;
         return processedFilesLen > 0;
@@ -99,7 +100,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
      */
     getTabViewContents(){
         const { context, schemas, windowWidth, windowHeight, href } = this.props;
-        const mounted = this.state.mounted;
+        const { mounted } = this.state;
 
         //context = SET; // Use for testing along with _testing_data
 
@@ -333,17 +334,18 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, renderRightPanel, windowWidth, minOpenHeight,
-            leftPanelDefaultCollapsed, leftPanelCollapseHeight, leftPanelCollapseWidth, higlassItem } = this.props;
+        const { mounted, width, renderRightPanel, minOpenHeight, leftPanelCollapseWidth, higlassItem } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
         if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
             return (renderRightPanel && renderRightPanel(width, null));
         }
 
+        // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
+        const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
+
         return (
-            <AdjustableDividerRow {...{ width, mounted, leftPanelCollapseHeight, leftPanelDefaultCollapsed, renderRightPanel, windowWidth }}
-                height={minOpenHeight} leftPanelClassName="expset-higlass-panel"
+            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel"
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
         );
@@ -382,23 +384,21 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderTopRow', 'renderQCMetricsTablesRow', 'renderHeader');
+        _.bindAll(this, 'renderTopRow', 'renderQCMetricsTablesRow', 'renderHeader', 'renderProcessedFilesTableAsRightPanel');
+    }
+
+    renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
+        return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} />;
     }
 
     renderTopRow(){
-        const { mounted, width, context, windowWidth } = this.props;
-
-        if (!mounted) return null;
+        const { mounted, width, context, windowWidth, selectedFiles } = this.props;
 
         const higlassItem = ProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
 
         if (higlassItem && object.itemUtil.atId(higlassItem)){
-            // We define/pass in new func each time (instd. of creating a reusable method) so as to trigger changes on props.selectedFiles changed and similar.
-            const renderProcessedFilesTableAsRightPanel = (rightPanelWidth, resetDivider, leftPanelCollapsed) => (
-                <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} />
-            );
-            // eslint-disable-next-line react/jsx-no-bind
-            return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem }} renderRightPanel={renderProcessedFilesTableAsRightPanel} />;
+            // selectedFiles passed in to re-render panel if changes.
+            return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem, selectedFiles }} renderRightPanel={this.renderProcessedFilesTableAsRightPanel} />;
         } else {
             return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={width}/>;
         }
@@ -478,10 +478,6 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
 
     render(){
-        const { mounted, files } = this.props;
-
-        if (!mounted) return null;
-
         return (
             <div className="processed-files-table-section exp-table-section">
                 { this.renderHeader() }
