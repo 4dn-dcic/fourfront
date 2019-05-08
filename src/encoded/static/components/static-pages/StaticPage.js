@@ -8,7 +8,7 @@ import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
-import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, BasicUserContentBody, EmbeddedHiglassActions } from './components';
+import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, EmbeddedHiglassActions } from './components';
 import { HiGlassPlainContainer } from './../item-pages/components';
 import { layout, console, object, isServerSide } from './../util';
 import { replaceString as replacePlaceholderString } from './placeholders';
@@ -21,7 +21,7 @@ import { replaceString as replacePlaceholderString } from './placeholders';
  *
  * @param {Object} context - Context provided from back-end, including all properties.
  */
-export const parseSectionsContent = memoize(function(context = this.props.context){
+export const parseSectionsContent = memoize(function(context){
 
     const markdownCompilerOptions = {
         // Override basic header elements with MarkdownHeading to allow it to be picked up by TableOfContents
@@ -147,44 +147,37 @@ class Wrapper extends React.PureComponent {
     };
 
     contentColSize(){
-        return Math.min(
-            this.props.tableOfContents ? 9 : 12,
-            Math.max(6, this.props.contentColSize) // Min 6.
-        );
+        const { tableOfContents, contentColSize } = this.props;
+        return Math.min(tableOfContents ? 9 : 12, Math.max(6, contentColSize)); // Min 6.
     }
 
     renderToC(){
-        const { context, tableOfContents, href } = this.props;
+        const { context, tableOfContents, title } = this.props;
+
         if (!tableOfContents || tableOfContents.enabled === false) return null;
 
-        var contentColSize = this.contentColSize(),
-            toc = context['table-of-contents'] || (tableOfContents && typeof tableOfContents === 'object' ? tableOfContents : {}),
-            title = this.props.title || (context && context.title) || null;
+        const contentColSize = this.contentColSize();
+        const toc = context['table-of-contents'] || (tableOfContents && typeof tableOfContents === 'object' ? tableOfContents : {});
+        const pageTitle = title || (context && context.title) || null;
 
         return (
             <div key="toc-wrapper" className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
-                <TableOfContents pageTitle={title} fixedGridWidth={12 - contentColSize}
-                    maxHeaderDepth={toc['header-depth'] || 6}
+                <TableOfContents pageTitle={pageTitle} fixedGridWidth={12 - contentColSize} maxHeaderDepth={toc['header-depth'] || 6}
                     {..._.pick(this.props, 'navigate', 'windowWidth', 'windowHeight', 'context', 'href', 'registerWindowOnScrollHandler')}
-                    //skipDepth={1}
-                    //includeTop={toc['include-top-link']}
-                    //listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
+                    // skipDepth={1} includeTop={toc['include-top-link']} listStyleTypes={['none'].concat((toc && toc['list-styles']) || this.props.tocListStyles)}
                 />
             </div>
         );
     }
 
     render(){
-
-        var title = this.props.title || (this.props.context && this.props.context.title) || null,
-            contentColSize = this.contentColSize(),
-            mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
-
+        const { children } = this.props;
+        const mainColClassName = "col-xs-12 col-sm-12 col-lg-" + this.contentColSize();
         return (
             <div className="container" id="content">
                 <div className="static-page row" key="wrapper">
                     { this.renderToC() }
-                    <div key="main-column" className={mainColClassName} children={this.props.children}/>
+                    <div key="main-column" className={mainColClassName}>{ children }</div>
                 </div>
             </div>
         );
@@ -275,7 +268,7 @@ export class StaticEntry extends React.PureComponent {
                             <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus')}/>&nbsp;&nbsp;
                             { section.title }
                         </HeaderWithLink>
-                    : null }
+                        : null }
                     <Collapse in={open}>
                         <div className="inner">
                             { (open || closing) ? this.renderEntryContent(className) : null }
@@ -289,7 +282,7 @@ export class StaticEntry extends React.PureComponent {
             <div className={outerClassName} id={id}>
                 { section && section.title ?
                     <HeaderWithLink className="section-title" link={id} context={context}>{ section.title }</HeaderWithLink>
-                : null }
+                    : null }
                 { this.renderEntryContent(className) }
             </div>
         );
@@ -360,12 +353,14 @@ export default class StaticPage extends React.PureComponent {
             "content" : PropTypes.any.isRequired,
             "table-of-contents" : PropTypes.object
         }).isRequired,
-        'entryRenderFxn' : PropTypes.func
+        'entryRenderFxn' : PropTypes.func,
+        'href' : PropTypes.string
     }
 
     constructor(props){
         super(props);
-        this.entryRenderFxn = typeof this.entryRenderFxn === 'function' ? this.entryRenderFxn.bind(this) : this.props.entryRenderFxn;
+        // Allow a sub-class to override if needed.
+        this.entryRenderFxn = typeof this.entryRenderFxn === 'function' ? this.entryRenderFxn.bind(this) : props.entryRenderFxn;
     }
 
     componentDidMount(){
@@ -376,9 +371,10 @@ export default class StaticPage extends React.PureComponent {
      * A simpler form (minus AJAX request) of DefaultItemView's similar method.
      */
     maybeSetRedirectedAlert(){
-        if (!this.props.href) return;
+        const { href } = this.props;
+        if (!href) return;
 
-        var hrefParts = url.parse(this.props.href, true),
+        var hrefParts = url.parse(href, true),
             redirected_from = hrefParts.query && hrefParts.query.redirected_from;
 
         if (redirected_from){
@@ -393,20 +389,22 @@ export default class StaticPage extends React.PureComponent {
     }
 
     render(){
-        var parsedContent;
+        const { context } = this.props;
+        let parsedContent = null;
         try {
-            parsedContent = parseSectionsContent(this.props.context);
+            parsedContent = parseSectionsContent(context);
         } catch (e) {
             console.dir(e);
-            parsedContent = _.extend({}, this.props.context, { 'content' : [ { 'content' : '<h4>Error - ' + e.message + '</h4>Check Page content/sections.', 'name' : 'error' } ] });
+            parsedContent = _.extend({}, context, { 'content' : [ { 'content' : '<h4>Error - ' + e.message + '</h4>Check Page content/sections.', 'name' : 'error' } ] });
         }
-        var tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
+        const tableOfContents = (parsedContent && parsedContent['table-of-contents'] && parsedContent['table-of-contents'].enabled) ? parsedContent['table-of-contents'] : false;
         return (
             <Wrapper
                 {..._.pick(this.props, 'navigate', 'windowWidth', 'windowHeight', 'registerWindowOnScrollHandler', 'href')}
                 key="page-wrapper" title={parsedContent.title}
-                tableOfContents={tableOfContents} context={parsedContent}
-                children={StaticPage.renderSections(this.entryRenderFxn, parsedContent, this.props)} />
+                tableOfContents={tableOfContents} context={parsedContent}>
+                { StaticPage.renderSections(this.entryRenderFxn, parsedContent, this.props) }
+            </Wrapper>
         );
     }
 }

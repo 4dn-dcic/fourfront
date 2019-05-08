@@ -4,283 +4,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { Button, DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
-import ReactTooltip from 'react-tooltip';
+import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import url from 'url';
 import { console, navigate, ajax, analytics, DateUtility } from './../util';
-import { StatsViewController, StatsChartViewBase, GroupByController, GroupByDropdown, GroupOfCharts,
-    AreaChart, AreaChartContainer, loadingIcon, errorIcon, HorizontalD3ScaleLegend } from './../viz/AreaChart';
+import {
+    StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
+    AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
+} from './../viz/AreaChart';
 import StaticPage from './StaticPage';
 import * as d3 from 'd3';
 import moment from 'moment';
 
 
-export default class StatisticsPageView extends StaticPage {
-
-    static defaultProps = {
-        'defaultTab' : 'submissions'
-    };
-
-    static viewOptions = [
-        { 'id' : 'submissions', 'title' : "Submissions Statistics", 'icon' : 'upload', 'tip' : "View statistics related to submission and release of Experiment Set" },
-        { 'id' : 'usage', 'title' : "Usage Statistics", 'icon' : 'users', 'tip' : "View statistics related to usage of the 4DN Data Portal" }
-    ];
-
-    constructor(props){
-        super(props);
-        this.maybeUpdateCurrentTabFromHref = this.maybeUpdateCurrentTabFromHref.bind(this);
-        this.onDropdownChange = this.onDropdownChange.bind(this);
-        this.renderSubmissionsSection = this.renderSubmissionsSection.bind(this);
-        this.renderUsageSection = this.renderUsageSection.bind(this);
-        this.renderDropdown = this.renderDropdown.bind(this);
-        this.renderTopMenu = this.renderTopMenu.bind(this);
-        this.state = { 'currentTab' : props.defaultTab };
-    }
-
-    componentDidMount(){
-        this.maybeUpdateCurrentTabFromHref();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (this.props.href !== nextProps.href){
-            this.maybeUpdateCurrentTabFromHref(nextProps);
-        }
-    }
-
-    maybeUpdateCurrentTabFromHref(props = this.props){
-        var hrefParts = props.href && url.parse(props.href),
-            hash = hrefParts && hrefParts.hash && hrefParts.hash.replace('#', '');
-
-        if (hash && hash !== this.state.currentTab && hash.charAt(0) !== '!'){
-            if (_.pluck(StatisticsPageView.viewOptions, 'id').indexOf(hash) > -1){
-                this.setState({ 'currentTab' : hash });
-            }
-        }
-    }
-
-    onDropdownChange(currentTab){
-        this.setState({ currentTab });
-    }
-
-    renderSubmissionsSection(){
-        // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
-        var groupByOptions = {
-                'award.project'                      : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span>
-            },
-            initialGroupBy = 'award.project';
-
-        if (this.props.browseBaseState !== 'all'){
-            _.extend(groupByOptions, {
-                'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
-                'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
-                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
-            }),
-            initialGroupBy = 'award.center_title';
-        }
-        return (
-            <GroupByController {...{ groupByOptions, initialGroupBy }}>
-                <SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
-                    <SubmissionsStatsView />
-                </SubmissionStatsViewController>
-            </GroupByController>
-        );
-    }
-
-    renderUsageSection(){
-        var groupByOptions = {
-            'monthly'   : <span>Previous 12 Months</span>,
-            'daily'     : <span>Previous 30 Days</span>
-        };
-        return (
-            <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
-                <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth')}>
-                    <UsageStatsView/>
-                </UsageStatsViewController>
-            </GroupByController>
-        );
-    }
-
-    /**
-     * Old dropdown for selecting 'Usage' or 'Submissions' view. May be removed after design iteration.
-     *
-     * @deprecated
-     */
-    renderDropdown(){
-        var currentTab          = this.state.currentTab,
-            currSectionObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : currentTab }),
-            currSectionTitle    = (
-                <h4 className="text-400 mb-07 mt-07">
-                    { currSectionObj.icon ? <i className={"text-medium icon icon-fw icon-" + currSectionObj.icon}/> : '' }
-                    { currSectionObj.icon ? <span>&nbsp;&nbsp;</span> : null }
-                    { currSectionObj.title }&nbsp;
-                </h4>
-            );
-
-        return (
-            <div className="chart-section-control-wrapper">
-                <h5 className="text-400 mb-08">Currently viewing</h5>
-                <DropdownButton id="section-select-dropdown" title={currSectionTitle} children={_.map(StatisticsPageView.viewOptions, function({ title, id, icon }){
-                    return (
-                        <MenuItem {...{ title, 'key': id, 'eventKey' : id }} active={id === currentTab}>
-                            { icon ? <React.Fragment><i className={"icon icon-fw icon-" + icon}/>&nbsp;&nbsp;</React.Fragment> : '' }{ title }
-                        </MenuItem>
-                    );
-                })} onSelect={this.onDropdownChange} />
-            </div>
-        );
-    }
-
-    renderTopMenu(){
-        var currentTab          = this.state.currentTab,
-            submissionsObj      = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'submissions' }),
-            usageObj            = _.findWhere(StatisticsPageView.viewOptions, { 'id' : 'usage' });
-
-        return (
-            <div className="chart-section-control-wrapper row">
-                <div className="col-sm-6">
-                    <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
-                        href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
-                        { submissionsObj.icon ? <React.Fragment><i className={"text-medium icon icon-fw icon-" + submissionsObj.icon}/>&nbsp;&nbsp;</React.Fragment> : '' }
-                        { submissionsObj.title }
-                    </a>
-                </div>
-                <div className="col-sm-6">
-                    <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
-                        href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
-                        { usageObj.icon ? <React.Fragment><i className={"text-medium icon icon-fw icon-" + usageObj.icon}/>&nbsp;&nbsp;</React.Fragment> : '' }
-                        { usageObj.title }
-                    </a>
-                </div>
-            </div>
-        );
-    }
-
-    render(){
-        var currentTab          = this.state.currentTab,
-            renderFxn           = currentTab === 'usage' ? this.renderUsageSection : this.renderSubmissionsSection;
-
-        return (
-            <StaticPage.Wrapper>
-                { this.renderTopMenu() }
-                <hr/>
-                { renderFxn() }
-            </StaticPage.Wrapper>
-        );
-    }
-}
-
-
-
-class UsageStatsViewController extends StatsViewController {
-    static defaultProps = {
-        'searchURIs' : {
-            'TrackingItem' : function(props) {
-                var uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
-                if (props.currentGroupBy === 'monthly'){
-                    uri += '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
-                } else if (props.currentGroupBy === 'daily'){
-                    uri += '&google_analytics.date_increment=daily&limit=30'; // 30 days
-                }
-                return uri;
-            },
-            'TrackingItemDownload' : function(props) {
-                var untilDate   = moment.utc(),
-                    fromDate,
-                    uri         = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
-                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
-                if (props.currentGroupBy === 'monthly'){
-                    untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
-                    fromDate = untilDate.clone();
-                    fromDate.subtract(12, 'month'); // Go back 12 months
-                    uri += '&date_histogram_interval=monthly&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
-                } else if (props.currentGroupBy === 'daily'){
-                    fromDate = untilDate.clone();
-                    untilDate.subtract(1, 'day');
-                    fromDate.subtract(30, 'day'); // Go back 30 days
-                    uri += '&date_histogram_interval=daily&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
-                }
-                return uri;
-            }
-        },
-        /**
-         * Return a boolean to refetch all, or list of strings to refetch specific searchURIs.
-         *
-         * @returns {boolean|string[]}
-         */
-        'shouldRefetchAggs' : function(pastProps, nextProps){
-            return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
-                pastProps.currentGroupBy  !== nextProps.currentGroupBy
-            );
-        }
-    };
-}
-
-
-class SubmissionStatsViewController extends StatsViewController {
-
-    static defaultProps = {
-        'searchURIs' : {
-            'ExperimentSetReplicate' : function(props) {
-                var params = navigate.getBrowseBaseParams(props.browseBaseState || null);
-                if (props.currentGroupBy){
-                    params['group_by'] = props.currentGroupBy;
-                }
-                //if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
-                var uri = '/date_histogram_aggregations/?' + stringify(params) + '&limit=0&format=json';
-
-                // For local dev/debugging; don't forget to comment out if using.
-                //uri = 'https://data.4dnucleome.org' + uri;
-                return uri;
-            }
-        },
-        'shouldRefetchAggs' : function(pastProps, nextProps){
-            return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
-                pastProps.browseBaseState !== nextProps.browseBaseState ||
-                pastProps.currentGroupBy  !== nextProps.currentGroupBy
-            );
-        }
-    };
-
-    constructor(props){
-        super(props);
-        this.fetchAndGenerateExternalTermMap = this.fetchAndGenerateExternalTermMap.bind(this);
-        this.state.externalTermMap = null;
-    }
-
-    componentDidMount(){
-        var nextState = { 'mounted' : true };
-        setTimeout(()=>{
-            this.fetchAndGenerateExternalTermMap();
-            this.performAggRequests();
-        }, 100);
-        this.setState(nextState);
-    }
-
-    componentDidUpdate(pastProps){
-        if (this.props.shouldRefetchAggs(pastProps, this.props)){
-            this.setState({ 'loadingStatus' : 'loading' });
-            this.performAggRequests();
-            if (pastProps.session !== this.props.session){ // Avoid triggering extra re-aggregation from new/unnecessary term map being loaded.
-                this.fetchAndGenerateExternalTermMap(true);
-            }
-        }
-    }
-
-    fetchAndGenerateExternalTermMap(refresh = false){
-        if (!refresh && this.state.externalTermMap && _.keys(this.state.externalTermMap).length > 0) return;
-
-        ajax.load('/search/?type=Award&limit=all', (resp)=>{
-            if (this && this.state.mounted){
-                this.setState({
-                    'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
-                        return [ award.center_title, award.project !== '4DN' ];
-                    }))
-                });
-            }
-        });
-    }
-
-}
 
 
 
@@ -453,19 +188,24 @@ export const commonParsingFxn = {
     'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey){
         var subBucketKeysToDate = new Set();
 
-        // Notably, we do NOT sum up total here.
-        var aggsList =  _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
+        // De-dupe -- not particularly necessary as D3 handles this, however nice to have well-formatted data.
+        const trackingItems = _.uniq(resp['@graph'], true, function(trackingItem){
+            return trackingItem.google_analytics.for_date;
+        });
 
-            var totalSessions = _.reduce(trackingItem.google_analytics.reports[reportName], function(sum, trackingItemItem){
+        // Notably, we do NOT sum up total here.
+        const aggsList =  _.map(trackingItems, function(trackingItem, index, allTrackingItems){
+
+            const totalSessions = _.reduce(trackingItem.google_analytics.reports[reportName], function(sum, trackingItemItem){
                 return sum + trackingItemItem[countKey];
             }, 0);
 
-            var currItem = {
+            const currItem = {
                 'date'      : trackingItem.google_analytics.for_date,
                 'count'     : totalSessions,
                 'total'     : totalSessions,
                 'children'  : _.map(trackingItem.google_analytics.reports[reportName], function(trackingItemItem){
-                    var term = typeof termBucketField === 'function' ? termBucketField(trackingItemItem) : trackingItemItem[termBucketField];
+                    const term = typeof termBucketField === 'function' ? termBucketField(trackingItemItem) : trackingItemItem[termBucketField];
                     subBucketKeysToDate.add(term);
                     return {
                         'term'      : term,
@@ -708,34 +448,274 @@ export const aggregationsToChartData = {
 
 
 
-class UsageStatsView extends StatsChartViewBase {
+export default class StatisticsPageView extends React.PureComponent {
 
     static defaultProps = {
-        'aggregationsToChartData' : _.pick(
-            aggregationsToChartData,
-            'sessions_by_country', 'fields_faceted', /* 'browse_search_queries', 'other_search_queries', */
-            'experiment_set_views', 'file_downloads'
-        ),
-        //'shouldReaggregate' : function(pastProps, nextProps, state){
-        //    if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
-        //    //if (pastProps.currentGroupBy !== nextProps.currentGroupBy) return true;
-        //    return false;
-        //}
+        'defaultTab' : 'submissions'
     };
 
+    static viewOptions = {
+        'submissions' : {
+            'title' : "Submissions Statistics",
+            'icon' : 'upload',
+            'tip' : "View statistics related to submission and release of Experiment Set",
+            'aggregationsToChartData' : _.pick(aggregationsToChartData,
+                'expsets_released', 'expsets_released_internal',
+                'expsets_released_vs_internal', 'files_released',
+                'file_volume_released'
+            )
+        },
+        'usage' : {
+            'title' : "Usage Statistics",
+            'icon' : 'users',
+            'tip' : "View statistics related to usage of the 4DN Data Portal",
+            'aggregationsToChartData' : _.pick(aggregationsToChartData,
+                'sessions_by_country', 'fields_faceted', /* 'browse_search_queries', 'other_search_queries', */
+                'experiment_set_views', 'file_downloads'
+            ),
+            'shouldReaggregate' : function(pastProps, nextProps){
+                // Compare object references
+                if (pastProps.countBy !== nextProps.countBy) return true;
+            }
+        }
+    };
 
     constructor(props){
         super(props);
-        this.changeCountByForChart = this.changeCountByForChart.bind(this);
-        this.state.countBy = {};
-        _.forEach(_.keys(this.state), (k)=>{
-            if (k === 'countBy' || k === 'chartToggles' || k === 'smoothEdges') {
-                return;
+        this.maybeUpdateCurrentTabFromHref = this.maybeUpdateCurrentTabFromHref.bind(this);
+        this.renderSubmissionsSection = this.renderSubmissionsSection.bind(this);
+        this.renderUsageSection = this.renderUsageSection.bind(this);
+        this.renderTopMenu = this.renderTopMenu.bind(this);
+        this.state = { 'currentTab' : props.defaultTab };
+    }
+
+    componentDidMount(){
+        this.maybeUpdateCurrentTabFromHref();
+    }
+
+    componentDidUpdate(pastProps){
+        const { href } = this.props;
+        if (href !== pastProps.href){
+            this.maybeUpdateCurrentTabFromHref();
+        }
+    }
+
+    maybeUpdateCurrentTabFromHref(){
+        const { href } = this.props;
+        this.setState(function({ currentTab }){
+            const hrefParts = href && url.parse(href);
+            const hash = hrefParts && hrefParts.hash && hrefParts.hash.replace('#', '');
+            if (hash && hash !== currentTab && hash.charAt(0) !== '!'){
+                if (typeof StatisticsPageView.viewOptions[hash] !== 'undefined'){
+                    return { 'currentTab' : hash };
+                }
             }
+        });
+    }
+
+    renderSubmissionsSection(){
+        // GroupByController is on outside here because SubmissionStatsViewController detects if props.currentGroupBy has changed in orded to re-fetch aggs.
+        const { browseBaseState } = this.props;
+        const { aggregationsToChartData } = StatisticsPageView.viewOptions.submissions;
+
+        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw icon-institution mr-05"/>Project</span> };
+
+        let initialGroupBy = 'award.project';
+
+        if (browseBaseState !== 'all'){
+            _.extend(groupByOptions, {
+                'award.center_title'                 : <span><i className="icon icon-fw icon-institution mr-05"/>Center</span>,
+                'lab.display_title'                  : <span><i className="icon icon-fw icon-users mr-05"/>Lab</span>,
+                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart mr-05"/>Experiment Type</span>
+            });
+            initialGroupBy = 'award.center_title';
+        }
+        return (
+            <GroupByController {...{ groupByOptions, initialGroupBy }}>
+                <SubmissionStatsViewController {..._.pick(this.props, 'session', 'browseBaseState', 'windowWidth')}>
+                    <StatsChartViewAggregator {...{ aggregationsToChartData }}>
+                        <SubmissionsStatsView />
+                    </StatsChartViewAggregator>
+                </SubmissionStatsViewController>
+            </GroupByController>
+        );
+    }
+
+    renderUsageSection(){
+        const { aggregationsToChartData, shouldReaggregate } = StatisticsPageView.viewOptions.usage;
+        const groupByOptions = {
+            'monthly'   : <span>Previous 12 Months</span>,
+            'daily'     : <span>Previous 30 Days</span>
+        };
+        return (
+            <GroupByController groupByOptions={groupByOptions} initialGroupBy="daily">
+                <UsageStatsViewController {..._.pick(this.props, 'session', 'windowWidth', 'href')}>
+                    <StatsChartViewAggregator {...{ aggregationsToChartData, shouldReaggregate }}>
+                        <UsageStatsView/>
+                    </StatsChartViewAggregator>
+                </UsageStatsViewController>
+            </GroupByController>
+        );
+    }
+
+    renderTopMenu(){
+        const { currentTab } = this.state;
+        const submissionsObj = StatisticsPageView.viewOptions.submissions;
+        const usageObj = StatisticsPageView.viewOptions.usage;
+
+        return (
+            <div className="chart-section-control-wrapper row">
+                <div className="col-sm-6">
+                    <a className={"select-section-btn" + (currentTab === 'submissions' ? ' active' : '')}
+                        href="#submissions" data-tip={currentTab === 'submissions' ? null : submissionsObj.tip} data-target-offset={110}>
+                        { submissionsObj.icon ? <i className={"mr-07 text-medium icon icon-fw icon-" + submissionsObj.icon}/> : null }
+                        { submissionsObj.title }
+                    </a>
+                </div>
+                <div className="col-sm-6">
+                    <a className={"select-section-btn" + (currentTab === 'usage' ? ' active' : '')}
+                        href="#usage" data-tip={currentTab === 'usage' ? null : usageObj.tip} data-target-offset={100}>
+                        { usageObj.icon ? <i className={"mr-07 text-medium icon icon-fw icon-" + usageObj.icon}/> : null }
+                        { usageObj.title }
+                    </a>
+                </div>
+            </div>
+        );
+    }
+
+    render(){
+        const { currentTab } = this.state;
+        return (
+            <StaticPage.Wrapper>
+                { this.renderTopMenu() }
+                <hr/>
+                { currentTab === 'usage' ? this.renderUsageSection() : this.renderSubmissionsSection() }
+            </StaticPage.Wrapper>
+        );
+    }
+}
+
+
+class UsageStatsViewController extends React.PureComponent {
+
+    static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily"){
+        const untilDate = moment.utc();
+        let fromDate;
+        if (currentGroupBy === 'monthly'){ // 1 yr (12 mths)
+            untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
+            fromDate = untilDate.clone();
+            fromDate.subtract(12, 'month'); // Go back 12 months
+        } else if (currentGroupBy === 'daily'){ // 30 days
+            untilDate.subtract(1, 'day');
+            fromDate = untilDate.clone();
+            fromDate.subtract(30, 'day'); // Go back 30 days
+        }
+        return { fromDate, untilDate };
+    }
+
+    static defaultProps = {
+        'searchURIs' : {
+            'TrackingItem' : function(props) {
+                const { currentGroupBy, href } = props;
+                const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+                let uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
+
+                uri += '&limit=all&google_analytics.date_increment=' + currentGroupBy;
+                uri += '&google_analytics.for_date.from=' + fromDate.format('YYYY-MM-DD') + '&google_analytics.for_date.to=' + untilDate.format('YYYY-MM-DD');
+
+                // For simpler testing & debugging -- if on localhost, connects to data.4dn by default.
+                if (href && href.indexOf('http://localhost') > -1){
+                    uri = 'https://data.4dnucleome.org' + uri;
+                }
+                return uri;
+            },
+            'TrackingItemDownload' : function(props) {
+                const { currentGroupBy, href, includePartialRequests } = props;
+                const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+
+                let uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
+                uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.file_format';
+
+                if (includePartialRequests){ // Include download_tracking.range_query w/ any val and do a group-by agg for it.
+                    uri += '&group_by=download_tracking.range_query';
+                } else { // Filter out download_tracking.range_query = true items.
+                    uri += '&download_tracking.range_query!=true';
+                }
+
+                uri += '&date_histogram_interval=' + currentGroupBy;
+                uri += '&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
+
+                // For simpler testing & debugging -- if on localhost, connects to data.4dn by default.
+                if (href && href.indexOf('http://localhost') > -1){
+                    uri = 'https://data.4dnucleome.org' + uri;
+                }
+                return uri;
+            }
+        },
+
+        /**
+         * Return a boolean to determine whether to refetch (all) aggs from ES.
+         *
+         * @returns {boolean}
+         */
+        'shouldRefetchAggs' : function(pastProps, nextProps){
+            return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
+                pastProps.currentGroupBy !== nextProps.currentGroupBy
+            ) || (
+                pastProps.includePartialRequests !== nextProps.includePartialRequests
+            );
+        }
+    };
+
+    static getDerivedStateFromProps(props, state){
+        const { countBy, includePartialRequests } = state;
+        const fileDownloadsCountBy = countBy.file_downloads;
+        if (!includePartialRequests && fileDownloadsCountBy === "download_tracking.range_query"){
+            // Reset to some other option
+            const nextCountBy = _.clone(countBy);
+            nextCountBy.file_downloads = "download_tracking.experiment_type";
+            return { 'countBy' : nextCountBy };
+        }
+        return null;
+    }
+
+    constructor(props){
+        super(props);
+        this.handleTogglePartialReqs = this.handleTogglePartialReqs.bind(this);
+        this.changeCountByForChart = this.changeCountByForChart.bind(this);
+
+        const countBy = {};
+
+        _.forEach(_.keys(StatisticsPageView.viewOptions.usage.aggregationsToChartData), (k)=>{
             if (k === 'file_downloads'){
-                this.state.countBy[k] = 'download_tracking.experiment_type';
+                countBy[k] = 'download_tracking.experiment_type';
             } else {
-                this.state.countBy[k] = 'views';
+                countBy[k] = 'views';
+            }
+        });
+
+        this.state = { countBy, 'includePartialRequests' : false }; // aka include range queries for download tracking
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        const { includePartialRequests } = this.state;
+        if (includePartialRequests && !pastState.includePartialRequests){
+            this.setState(function({ countBy: pastCountBy }){
+                const countBy = _.clone(pastCountBy);
+                countBy.file_downloads = "download_tracking.range_query";
+                return { countBy };
+            });
+        }
+    }
+
+    handleTogglePartialReqs(nextIncludePartialRequests){
+        this.setState(function({ includePartialRequests }){
+            if (typeof nextIncludePartialRequests !== 'boolean'){
+                return { 'includePartialRequests' : !includePartialRequests };
+            } else if (nextIncludePartialRequests !== includePartialRequests) {
+                return { 'includePartialRequests' : nextIncludePartialRequests };
+            } else {
+                return null;
             }
         });
     }
@@ -744,174 +724,252 @@ class UsageStatsView extends StatsChartViewBase {
         setTimeout(()=>{
             // This might take some noticeable amount of time (not enough to justify a worker, tho) so we defer/deprioritize its execution to prevent blocking UI thread.
             this.setState((currState)=>{
-                var countBy = _.clone(currState.countBy);
-                countBy[chartID] = nextCountBy;
-                var nextState = _.extend({}, currState, { countBy });
-                _.extend(nextState, this.generateAggsToState(this.props, nextState));
-                return nextState;
+                var nextCountByObj = _.clone(currState.countBy);
+                nextCountByObj[chartID] = nextCountBy;
+                return { 'countBy' : nextCountByObj };
             });
         }, 0);
     }
 
-    renderCountByDropdown(chartID, tooltip=null){
-        var currCountBy = this.state.countBy[chartID],
-            titles      = {
-                'views'     : <React.Fragment><i className="icon icon-fw icon-eye"/>&nbsp; View</React.Fragment>,
-                'sessions'  : <React.Fragment><i className="icon icon-fw icon-user"/>&nbsp; User Session</React.Fragment>
-            },
-            ddtitle     = titles[currCountBy];
+    render(){
+        return (
+            <StatsViewController {...this.props} {...this.state} onTogglePartialReqs={this.handleTogglePartialReqs}
+                changeCountByForChart={this.changeCountByForChart}/>
+        );
+    }
+}
+
+
+
+
+class SubmissionStatsViewController extends React.PureComponent {
+
+    static defaultProps = {
+        'searchURIs' : {
+            'ExperimentSetReplicate' : function(props) {
+                var params = navigate.getBrowseBaseParams(props.browseBaseState || null);
+                if (props.currentGroupBy){
+                    params['group_by'] = props.currentGroupBy;
+                }
+                //if (props.browseBaseState === 'all') params['group_by'] = ['award.project'];
+                var uri = '/date_histogram_aggregations/?' + stringify(params) + '&limit=0&format=json';
+
+                // For local dev/debugging; don't forget to comment out if using.
+                //uri = 'https://data.4dnucleome.org' + uri;
+                return uri;
+            }
+        },
+        'shouldRefetchAggs' : function(pastProps, nextProps){
+            return StatsViewController.defaultProps.shouldRefetchAggs(pastProps, nextProps) || (
+                pastProps.browseBaseState !== nextProps.browseBaseState ||
+                pastProps.currentGroupBy  !== nextProps.currentGroupBy
+            );
+        }
+    };
+
+    constructor(props){
+        super(props);
+        this.fetchAndGenerateExternalTermMap = this.fetchAndGenerateExternalTermMap.bind(this);
+        this.state = { "externalTermMap" : null };
+    }
+
+    componentDidMount(){
+        this.fetchAndGenerateExternalTermMap();
+    }
+
+    componentDidUpdate(pastProps){
+        const { shouldRefetchAggs, session } = this.props;
+        if (shouldRefetchAggs(pastProps, this.props)){
+            if (pastProps.session !== session){
+                // Avoid triggering extra re-aggregation from new/unnecessary term map being loaded.
+                this.fetchAndGenerateExternalTermMap(true);
+            }
+        }
+    }
+
+    fetchAndGenerateExternalTermMap(refresh = false){
+        const { externalTermMap } = this.state;
+        if (!refresh && externalTermMap && _.keys(externalTermMap).length > 0) return;
+
+        ajax.load('/search/?type=Award&limit=all', (resp)=>{
+            this.setState({
+                'externalTermMap' : _.object(_.map(resp['@graph'] || [], function(award){
+                    return [ award.center_title, award.project !== '4DN' ];
+                }))
+            });
+        });
+    }
+
+    render(){ return <StatsViewController {...this.props} {...this.state} />; }
+
+}
+
+
+
+class UsageChartsCountByDropdown extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.handleSelection = this.handleSelection.bind(this);
+    }
+
+    handleSelection(evtKey, evt){
+        const { changeCountByForChart, chartID } = this.props;
+        changeCountByForChart(chartID, evtKey);
+    }
+
+    render(){
+        const { includePartialRequests, countBy, chartID } = this.props;
+        const currCountBy = countBy[chartID];
+
+        const menuOptions = new Map();
 
         if (chartID === 'experiment_set_views' || chartID === 'file_views'){
-            titles = {
-                'views'         : <React.Fragment><i className="icon icon-fw icon-eye"/>&nbsp; Detail View</React.Fragment>,
-                'list_views'    : <React.Fragment><i className="icon icon-fw icon-list"/>&nbsp; Appearance within first 25 Search Results</React.Fragment>,
-                'clicks'        : <React.Fragment><i className="icon icon-fw icon-hand-o-up"/>&nbsp; Search Result Click</React.Fragment>
-            };
-            ddtitle = titles[currCountBy];
+            menuOptions.set('views',        <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>Detail View</React.Fragment>);
+            menuOptions.set('list_views',   <React.Fragment><i className="icon icon-fw icon-list mr-05"/>Appearance within first 25 Search Results</React.Fragment>);
+            menuOptions.set('clicks',       <React.Fragment><i className="icon icon-fw icon-hand-o-up mr-05"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.range_query&group_by=download_tracking.file_format';
-            titles = {
-                'download_tracking.experiment_type'     : <React.Fragment><i className="icon icon-fw icon-folder-o"/>&nbsp; Experiment Type</React.Fragment>,
-                'download_tracking.geo_country'         : <React.Fragment><i className="icon icon-fw icon-globe"/>&nbsp; Country</React.Fragment>,
-                'download_tracking.range_query'    : <React.Fragment><i className="icon icon-fw icon-television"/>&nbsp; Downloads as part of visualization</React.Fragment>,
-                'download_tracking.file_format'         : <React.Fragment><i className="icon icon-fw icon-file-text-o"/>&nbsp; File Format</React.Fragment>,
-            };
-            ddtitle = titles[currCountBy];
+            menuOptions.set('download_tracking.experiment_type', <React.Fragment><i className="icon icon-fw icon-folder-o mr-05"/>Experiment Type</React.Fragment>);
+            menuOptions.set('download_tracking.geo_country',     <React.Fragment><i className="icon icon-fw icon-globe mr-05"/>Country</React.Fragment>);
+            if (includePartialRequests){
+                // No point showing if not included. @see getDerivedStateFromProps which unsets this value if set previously.
+                menuOptions.set('download_tracking.range_query', <React.Fragment><i className="icon icon-fw icon-television mr-05"/>Downloads as part of visualization</React.Fragment>);
+            }
+            menuOptions.set('download_tracking.file_format',     <React.Fragment><i className="icon icon-fw icon-file-text-o mr-05"/>File Format</React.Fragment>);
+        } else {
+            menuOptions.set('views',    <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>View</React.Fragment>);
+            menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw icon-user mr-05"/>User Session</React.Fragment>);
         }
 
+        const dropdownTitle = menuOptions.get(currCountBy);
+
         return (
-            <div className="inline-block" style={{ 'marginRight' : 5 }}>
-                <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID} onSelect={(ek, e) => this.changeCountByForChart(chartID, ek)} title={ddtitle}>
-                    {_.map(_.keys(titles), function(k){ return <MenuItem eventKey={k} key={k} children={titles[k]} />; })}
+            <div className="inline-block mr-05">
+                <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID}
+                    onSelect={this.handleSelection} title={dropdownTitle}>
+                    {_.map([ ...menuOptions.entries() ], function([ k, title ]){
+                        return <MenuItem eventKey={k} key={k}>{ title }</MenuItem>;
+                    })}
                 </DropdownButton>
             </div>
         );
     }
+}
 
-    /*
-    changeFieldFacetedByGrouping(toState){
-        if (_.keys(UsageStatsView.fieldsFacetedByOptions).indexOf(toState) === -1){
-            throw new Error('Must be one of allowable keys.');
-        }
-        setTimeout(()=>{ // This might take some noticeable amount of time (not enough to justify a worker, tho) so we defer/deprioritize its execution to prevent blocking UI thread.
-            this.setState((currState)=>{
-                var nextState = _.extend({}, currState, { 'fields_faceted_group_by' : toState });
-                _.extend(nextState, this.generateAggsToState(this.props, nextState));
-                return nextState;
-            });
-        }, 0);
-    }
-    */
+
+class UsageStatsView extends React.PureComponent {
+
     render(){
-        var { loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem } = this.props,
-            { sessions_by_country, chartToggles, fields_faceted, fields_faceted_group_by, browse_search_queries,
-                other_search_queries, experiment_set_views, file_downloads, countBy, smoothEdges
-            } = this.state,
-            width = this.getRefWidth() || null;
+        const {
+            loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem, windowWidth,
+            includePartialRequests, onTogglePartialReqs, changeCountByForChart, countBy,
+            // Passed in from StatsChartViewAggregator:
+            sessions_by_country, chartToggles, fields_faceted, /* fields_faceted_group_by, browse_search_queries, other_search_queries, */
+            experiment_set_views, file_downloads, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
+        } = this.props;
 
         if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ errorIcon() }/>;
+            return <div className="stats-charts-container" key="charts" id="usage"><ErrorIcon/></div>;
         }
+
         if (!mounted || (loadingStatus === 'loading' && (!file_downloads && !sessions_by_country))){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="usage" children={ loadingIcon() }/>;
+            return <div className="stats-charts-container" key="charts" id="usage"><LoadingIcon/></div>;
         }
 
-        var anyExpandedCharts       = _.any(_.values(this.state.chartToggles)),
-            commonXDomain           = [ null, null ],
-            lastDateStr             = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][0] && respTrackingItem['@graph'][0].google_analytics && respTrackingItem['@graph'][0].google_analytics.for_date,
-            firstReportIdx          = respTrackingItem && respTrackingItem['@graph'] && (respTrackingItem['@graph'].length - 1),
-            firstDateStr            = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][firstReportIdx] && respTrackingItem['@graph'][firstReportIdx].google_analytics && respTrackingItem['@graph'][firstReportIdx].google_analytics.for_date,
-            commonContainerProps    = {
-                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
-                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
-            },
-            dateRoundInterval       = 'day';
+        const anyExpandedCharts = _.any(_.values(chartToggles));
+        const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+        let dateRoundInterval;
 
-        // Prevent needing to calculate for each chart
-        if (lastDateStr){
-            var lastDateMoment = moment.utc(lastDateStr, 'YYYY-MM-DD');
-            if (currentGroupBy === 'daily'){
-                lastDateMoment.endOf('day').subtract(45, 'minute');
-            } else if (currentGroupBy === 'monthly') {
-                lastDateMoment.endOf('month').subtract(1, 'day');
-            }
-            commonXDomain[1] = lastDateMoment.toDate();
-        }
-
-        if (firstDateStr){
-            var firstDateMoment = moment.utc(firstDateStr, 'YYYY-MM-DD');
-            if (currentGroupBy === 'daily'){
-                firstDateMoment.startOf('day').add(15, 'minute');
-            } else if (currentGroupBy === 'monthly') {
-                firstDateMoment.startOf('month').add(1, 'hour');
-            }
-            commonXDomain[0] = firstDateMoment.toDate();
-        }
-
-        if (currentGroupBy === 'monthly'){
+        // We want all charts to share the same x axis. Here we round to date boundary.
+        // Minor issue is that file downloads are stored in UTC/GMT while analytics are in EST timezone..
+        // TODO improve on this somehow, maybe pass prop to FileDownload chart re: timezone parsing of some sort.
+        if (currentGroupBy === 'daily'){
+            fromDate.startOf('day').add(15, 'minute');
+            untilDate.endOf('day').subtract(45, 'minute');
+            dateRoundInterval = 'day';
+        } else if (currentGroupBy === 'monthly') {
+            fromDate.endOf('month'); // Not rly needed.
+            untilDate.endOf('month').subtract(1, 'day');
             dateRoundInterval = 'month';
         } else if (currentGroupBy === 'yearly'){ // Not yet implemented
             dateRoundInterval = 'year';
         }
 
-        var commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+        const commonXDomain = [ fromDate.toDate(), untilDate.toDate() ];
+
+        const commonContainerProps = { 'onToggle' : onChartToggle, chartToggles, windowWidth, 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250 };
+        const commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+        const countByDropdownProps = { countBy, changeCountByForChart };
 
         return (
-            <div className="stats-charts-container" key="charts" ref="elem" id="usage">
+            <div className="stats-charts-container" key="charts" id="usage">
 
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                     title="Show" outerClassName="dropdown-container mb-0">
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <div className="inline-block">
-                        <Checkbox value={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
+                    <div className="inline-block ml-15">
+                        <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                     </div>
                 </GroupByDropdown>
 
                 { file_downloads ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={file_downloads}>
+                    <ColorScaleProvider resetScalesWhenChange={file_downloads}>
 
                         <hr/>
 
                         <AreaChartContainer {...commonContainerProps} id="file_downloads"
                             title={
-                                <React.Fragment>
-                                    <span className="text-500">File Downloads</span>
-                                    <br/>
-                                    <small><em>Download tracking started in August 2018</em></small>
-                                </React.Fragment>
+                                <div>
+                                    <h4 className="text-500 mt-0 mb-0">File Downloads</h4>
+                                    <div className="mb-1">
+                                        <small>
+                                            <em>Download tracking started in August 2018</em>
+                                            <label className="inline-block ml-15 text-400 clickable">
+                                                <input type="checkbox" className="mr-07" checked={includePartialRequests} onChange={onTogglePartialReqs} />
+                                                Include Partial Requests
+                                                { width > 500 ? ' (e.g. IGV, JuiceBox)' : null }
+                                            </label>
+                                        </small>
+                                    </div>
+                                </div>
                             }
-                            extraButtons={this.renderCountByDropdown('file_downloads')}>
+                            extraButtons={
+                                <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_downloads" includePartialRequests={includePartialRequests} />
+                            }>
                             <AreaChart {...commonChartProps} data={file_downloads} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
-                : null }
+                    : null }
 
                 { sessions_by_country ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={sessions_by_country}>
+                    <ColorScaleProvider resetScaleLegendWhenChange={sessions_by_country}>
 
                         <hr/>
 
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
-                            title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
-                            extraButtons={this.renderCountByDropdown('sessions_by_country')}>
+                            title={
+                                <h4 className="text-300 mt-0">
+                                    <span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country
+                                </h4>
+                            }
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}>
                             <AreaChart {...commonChartProps} data={sessions_by_country} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
-                : null }
+                    : null }
 
                 {/* browse_search_queries || other_search_queries ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
+                    <ColorScaleProvider resetScalesWhenChange={browse_search_queries}>
 
                         <hr className="mt-3"/>
 
@@ -931,38 +989,38 @@ class UsageStatsView extends StatsChartViewBase {
                             </AreaChartContainer>
                         : null }
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
 
                 : null */}
 
                 { session && experiment_set_views ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={experiment_set_views}>
+                    <ColorScaleProvider resetScaleLegendWhenChange={experiment_set_views}>
 
                         <hr className="mt-3"/>
 
                         <AreaChartContainer {...commonContainerProps} id="experiment_set_views"
                             title={
-                                <span>
+                                <h4 className="text-300 mt-0">
                                     <span className="text-500">Experiment Set Detail Views</span>{' '}
                                     { countBy.experiment_set_views === 'list_views' ? '- appearances within initial 25 browse results' :
                                         countBy.experiment_set_views === 'clicks' ? '- clicks from browse results' : '- page detail views' }
-                                </span>
+                                </h4>
                             }
-                            extraButtons={this.renderCountByDropdown('experiment_set_views')}>
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_views" />}>
                             <AreaChart {...commonChartProps} data={experiment_set_views} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
-                : null }
+                    : null }
 
                 { session && fields_faceted ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={fields_faceted}>
+                    <ColorScaleProvider resetScaleLegendWhenChange={fields_faceted}>
 
                         <hr className="mt-3"/>
                         {/*
@@ -978,16 +1036,20 @@ class UsageStatsView extends StatsChartViewBase {
                         */}
 
                         <AreaChartContainer {...commonContainerProps} id="fields_faceted"
-                            title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
-                            extraButtons={this.renderCountByDropdown('fields_faceted')}>
+                            title={
+                                <h4 className="text-300 mt-0">
+                                    <span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }
+                                </h4>
+                            }
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="fields_faceted" />}>
                             <AreaChart {...commonChartProps} data={fields_faceted} />
                         </AreaChartContainer>
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
-                : null }
+                    : null }
 
             </div>
         );
@@ -997,7 +1059,7 @@ class UsageStatsView extends StatsChartViewBase {
 
 }
 
-class SubmissionsStatsView extends StatsChartViewBase {
+class SubmissionsStatsView extends React.PureComponent {
 
     /**
      * Use this only for charts with child terms 'Internal Release' and 'Public Release', which are
@@ -1016,54 +1078,53 @@ class SubmissionsStatsView extends StatsChartViewBase {
         }
     }
 
-    static defaultProps = {
-        'aggregationsToChartData' : aggregationsToChartData
-    };
-
     render(){
-        var { loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange } = this.props,
-            { expsets_released, expsets_released_internal, files_released, file_volume_released, sessions_by_country, expsets_released_vs_internal,
-                expsets_created, chartToggles, smoothEdges } = this.state,
-            width = this.getRefWidth() || null;
+        const {
+            loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth,
+            // Passed in from StatsChartViewAggregator:
+            expsets_released, expsets_released_internal, files_released, file_volume_released,
+            expsets_released_vs_internal, /* expsets_created, */ chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
+        } = this.props;
 
         if (!mounted || (!expsets_released)){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="submissions" children={ loadingIcon() }/>;
-        }
-        if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" key="charts" ref="elem" id="submissions" children={ errorIcon() }/>;
+            return <div className="stats-charts-container" key="charts" id="submissions"><LoadingIcon/></div>;
         }
 
-        var anyExpandedCharts = _.any(_.values(this.state.chartToggles)),
-            commonContainerProps = {
-                'onToggle' : this.handleToggle, 'gridState' : this.currGridState, 'chartToggles' : chartToggles,
-                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
-            },
-            showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal,
-            commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+        if (loadingStatus === 'failed'){
+            return <div className="stats-charts-container" key="charts" id="submissions"><ErrorIcon/></div>;
+        }
+
+        const anyExpandedCharts = _.any(_.values(chartToggles));
+        const commonContainerProps = {
+            'onToggle' : onChartToggle, chartToggles, windowWidth,
+            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
+        };
+        const showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal;
+        const commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
 
         return (
-            <div className="stats-charts-container" key="charts" ref="elem" id="submissions">
+            <div className="stats-charts-container" key="charts" id="submissions">
 
                 { showInternalReleaseCharts ?
 
-                    <GroupOfCharts width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
+                    <ColorScaleProvider width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
 
-                        <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal" title={<span><span className="text-500">Experiment Sets</span> - internal vs public release</span>}>
+                        <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal"
+                            title={<h4 className="text-300 mt-0"><span className="text-500">Experiment Sets</span> - internal vs public release</h4>}>
                             <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
                         </AreaChartContainer>
 
                         <hr/>
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
-                : null }
+                    : null }
 
-                <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
+                <ColorScaleProvider width={width} resetScalesWhenChange={expsets_released}>
 
                     <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <div className="inline-block">
-                            <Checkbox value={smoothEdges} onChange={this.handleToggleSmoothEdges}>Smooth Edges</Checkbox>
+                        <div className="inline-block ml-15">
+                            <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                         </div>
                     </GroupByDropdown>
 
@@ -1072,10 +1133,10 @@ class SubmissionsStatsView extends StatsChartViewBase {
                     <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
-                            <React.Fragment>
-                                <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
-                            </React.Fragment>
-                        }>
+                        <h4 className="text-300 mt-0">
+                            <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
+                        </h4>
+                    }>
                         <AreaChart {...commonChartProps} data={expsets_released} />
                     </AreaChartContainer>
 
@@ -1087,31 +1148,31 @@ class SubmissionsStatsView extends StatsChartViewBase {
 
                     { showInternalReleaseCharts ?
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
-                                <React.Fragment>
-                                    <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
-                                </React.Fragment>
-                            }>
+                            <h4 className="text-300 mt-0">
+                                <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
+                            </h4>
+                        }>
                             <AreaChart {...commonChartProps} data={expsets_released_internal} />
                         </AreaChartContainer>
-                    : null }
+                        : null }
 
                     <AreaChartContainer {...commonContainerProps} id="files_released" title={
-                            <React.Fragment>
-                                <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
-                            </React.Fragment>
-                        }>
+                        <h4 className="text-300 mt-0">
+                            <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
+                        </h4>
+                    }>
                         <AreaChart {...commonChartProps} data={files_released} />
                     </AreaChartContainer>
 
                     <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
-                            <React.Fragment>
-                                <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
-                            </React.Fragment>
-                        }>
+                        <h4 className="text-300 mt-0">
+                            <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
+                        </h4>
+                    }>
                         <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                     </AreaChartContainer>
 
-                </GroupOfCharts>
+                </ColorScaleProvider>
 
             </div>
         );
