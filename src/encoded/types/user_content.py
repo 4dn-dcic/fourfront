@@ -54,7 +54,7 @@ class UserContent(Item):
         return None
 
     @calculated_property(schema={
-        "title": "FileType",
+        "title": "File Type",
         "description": "Type of this Item (unused)",
         "type": "string"
     })
@@ -195,7 +195,7 @@ class HiglassViewConfig(UserContent):
     #    return None
 
     @calculated_property(schema={
-        "title": "FileType",
+        "title": "File Type",
         "description": "Type of this Item (unused)",
         "type": "string"
     })
