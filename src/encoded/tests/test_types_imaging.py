@@ -14,19 +14,18 @@ def img_path_blank(testapp, lab, award):
     return testapp.post_json('/imaging_path', item).json['@graph'][0]
 
 
-def test_imgpath_displaytitle_target_probe(testapp, img_path_blank, histone_target):
-    res = testapp.patch_json(img_path_blank['@id'], {'target': [histone_target['@id']],
+def test_imgpath_displaytitle_target_probe(testapp, img_path_blank, prot_bio_feature):
+    res = testapp.patch_json(img_path_blank['@id'], {'target': [prot_bio_feature['@id']],
                                                      'labeled_probe': 'secondary antibody'}).json['@graph'][0]
-    assert res['display_title'] == 'Protein:H2B1C_HUMAN targeted by secondary antibody'
+    assert res['display_title'] == 'RAD21 protein targeted by secondary antibody'
 
 
-def test_imgpath_displaytitle(testapp, img_path_blank, histone_target):
-    #res = testapp.patch_json(img_path_blank['@id'], {}).json['@graph'][0]
+def test_imgpath_displaytitle(testapp, img_path_blank, prot_bio_feature):
     assert img_path_blank['display_title'] == 'not enough information'
-    res = testapp.patch_json(img_path_blank['@id'], {'target': [histone_target['@id']],
+    res = testapp.patch_json(img_path_blank['@id'], {'target': [prot_bio_feature['@id']],
                                                      'labels': ['GFP', 'RFP']}).json['@graph'][0]
-    assert res['display_title'] == 'Protein:H2B1C_HUMAN targeted by GFP,RFP'
+    assert res['display_title'] == 'RAD21 protein targeted by GFP,RFP'
     res = testapp.patch_json(img_path_blank['@id'], {'labeled_probe': 'secondary antibody'}).json['@graph'][0]
-    assert res['display_title'] == 'Protein:H2B1C_HUMAN targeted by GFP,RFP-labeled secondary antibody'
+    assert res['display_title'] == 'RAD21 protein targeted by GFP,RFP-labeled secondary antibody'
     res = testapp.patch_json(img_path_blank['@id'], {'other_probes': ['primary Ab 1', 'primary Ab 2']}).json['@graph'][0]
-    assert res['display_title'] == 'Protein:H2B1C_HUMAN targeted by GFP,RFP-labeled secondary antibody (with primary Ab 1, primary Ab 2)'
+    assert res['display_title'] == 'RAD21 protein targeted by GFP,RFP-labeled secondary antibody (with primary Ab 1, primary Ab 2)'

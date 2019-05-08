@@ -45,7 +45,7 @@
     },
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "3"
         },
         "rna_tag": {
             "title": "Biotinylated RNA base",
@@ -68,9 +68,13 @@
                     "target": {
                         "title": "Target",
                         "description": "The genes or region that is specifically targeted",
-                        "type": "string",
+                        "type": "array",
                         "lookup": 310,
-                        "linkTo": "Target"
+                        "items": {
+                            "title": "Feature",
+                            "type": "string",
+                            "linkTo": "BioFeature"
+                        }
                     },
                     "oligo_file": {
                         "title": "Oligonucleotide Fasta File",

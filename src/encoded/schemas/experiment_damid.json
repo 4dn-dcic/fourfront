@@ -37,14 +37,18 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "4"
         },
         "targeted_factor": {
             "title": "Target Fusion Protein",
             "description": "The protein that is fused to the DAM enzyme, that for which the genomic targets of interaction are being probed.",
-            "type": "string",
-            "lookup": 100,
-            "linkTo": "Target"
+            "type": "array",
+            "lookup": 95,
+            "items": {
+                "title": "Feature",
+                "type": "string",
+                "linkTo": "BioFeature"
+            }
         },
         "sap_treatment": {
             "title": "SAP Treatment",

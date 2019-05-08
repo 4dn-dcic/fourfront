@@ -45,3 +45,21 @@ def finalizer(value, system, version):
 
 def run_finalizer(value, system):
     pass
+
+
+def _get_biofeat_for_target(target, biofeats):
+    ''' helper method shared by all experiment target upgrades
+    '''
+    try:
+        targ_aliases = target.properties.get('aliases', [])
+    except AttributeError:
+        return
+    biof = None
+    for ta in targ_aliases:
+        biof = biofeats.get(ta + '_bf')
+        if biof is not None:
+            try:
+                return str(biof.uuid)
+            except AttributeError:
+                continue
+    return None

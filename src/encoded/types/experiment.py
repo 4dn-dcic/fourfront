@@ -310,9 +310,12 @@ class Experiment(Item):
             out_dict['field'] = 'Target'
             out_dict['value'] = 'None (Control)'
         elif targeted_factor:
-            obj = request.embed('/', targeted_factor, '@@object')
+            tstring = ''
+            for tf in targeted_factor:
+                target_props = request.embed(tf, '@@object')
+                tstring += ', {}'.format(target_props['display_title'])
             out_dict['field'] = 'Target'
-            out_dict['value'] = obj['display_title']
+            out_dict['value'] = tstring[2:]
         elif digestion_enzyme:
             obj = request.embed('/', digestion_enzyme, '@@object')
             out_dict['field'] = 'Enzyme'
@@ -377,7 +380,7 @@ class ExperimentCaptureC(Experiment):
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
     embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
-                                                "targeted_regions.target.target_summary",
+                                                "targeted_regions.target.display_title",
                                                 "targeted_regions.oligo_file.href"]
     name_key = 'accession'
 
@@ -412,9 +415,10 @@ class ExperimentCaptureC(Experiment):
         ''' Use targeted_regions information for capture-c'''
         if targeted_regions:
             regions = []
-            for target in targeted_regions:
-                if target['target']:
-                    region = request.embed('/', target['target'], '@@object')['display_title']
+            for tregion in targeted_regions:
+                targetfeats = tregion.get('target', [])
+                for feat in targetfeats:
+                    region = request.embed(feat, '@@object')['display_title']
                     regions.append(region)
             if regions:
                 value = ', '.join(sorted(regions))
@@ -540,13 +544,15 @@ class ExperimentChiapet(Experiment):
         "description": "Summary of the experiment, including type and biosource.",
         "type": "string",
     })
-    def experiment_summary(self, request, experiment_type, biosample, target=None):
+    def experiment_summary(self, request, experiment_type, biosample, targeted_factor=None):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
-        if target:
-            target_props = request.embed(target, '@@object')
-            target_summary = target_props['display_title']
-            sum_str += ('against ' + target_summary)
+        if targeted_factor:
+            tstring = ''
+            for tf in targeted_factor:
+                target_props = request.embed(tf, '@@object')
+                tstring += ', {}'.format(target_props['display_title'])
+            sum_str += ('against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -558,8 +564,8 @@ class ExperimentChiapet(Experiment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, experiment_type, biosample, target=None):
-        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, target))
+    def display_title(self, request, experiment_type, biosample, targeted_factor=None):
+        return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
 @collection(
@@ -586,9 +592,12 @@ class ExperimentDamid(Experiment):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         if targeted_factor:
-            tname = request.embed(targeted_factor, '@@object')['display_title']
-            fusion = tname.split(' ')[0]
-            sum_str += (' with DAM-' + fusion)
+            if len(targeted_factor) == 1:
+                tname = request.embed(targeted_factor[0], '@@object')['display_title']
+                fusion = tname.split(' ')[0]
+                sum_str += (' with DAM-' + fusion)
+            else:
+                sum_str += (' with mulitiple DAM fusions')
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -628,9 +637,11 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         if targeted_factor:
-            target_props = request.embed(targeted_factor, '@@object')
-            target_summary = target_props['display_title']
-            sum_str += ('against ' + target_summary)
+            tstring = ''
+            for tf in targeted_factor:
+                target_props = request.embed(tf, '@@object')
+                tstring += ', {}'.format(target_props['display_title'])
+            sum_str += (' against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -670,9 +681,11 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         sum_str = request.embed(experiment_type, '@@object')['display_title']
 
         if targeted_factor:
-            target_props = request.embed(targeted_factor, '@@object')
-            target_summary = target_props['display_title']
-            sum_str += ('against ' + target_summary)
+            tstring = ''
+            for tf in targeted_factor:
+                target_props = request.embed(tf, '@@object')
+                tstring += ', {}'.format(target_props['display_title'])
+            sum_str += (' against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
