@@ -188,19 +188,24 @@ export const commonParsingFxn = {
     'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey){
         var subBucketKeysToDate = new Set();
 
-        // Notably, we do NOT sum up total here.
-        var aggsList =  _.map(resp['@graph'], function(trackingItem, index, allTrackingItems){
+        // De-dupe -- not particularly necessary as D3 handles this, however nice to have well-formatted data.
+        const trackingItems = _.uniq(resp['@graph'], true, function(trackingItem){
+            return trackingItem.google_analytics.for_date;
+        });
 
-            var totalSessions = _.reduce(trackingItem.google_analytics.reports[reportName], function(sum, trackingItemItem){
+        // Notably, we do NOT sum up total here.
+        const aggsList =  _.map(trackingItems, function(trackingItem, index, allTrackingItems){
+
+            const totalSessions = _.reduce(trackingItem.google_analytics.reports[reportName], function(sum, trackingItemItem){
                 return sum + trackingItemItem[countKey];
             }, 0);
 
-            var currItem = {
+            const currItem = {
                 'date'      : trackingItem.google_analytics.for_date,
                 'count'     : totalSessions,
                 'total'     : totalSessions,
                 'children'  : _.map(trackingItem.google_analytics.reports[reportName], function(trackingItemItem){
-                    var term = typeof termBucketField === 'function' ? termBucketField(trackingItemItem) : trackingItemItem[termBucketField];
+                    const term = typeof termBucketField === 'function' ? termBucketField(trackingItemItem) : trackingItemItem[termBucketField];
                     subBucketKeysToDate.add(term);
                     return {
                         'term'      : term,
@@ -593,46 +598,55 @@ export default class StatisticsPageView extends React.PureComponent {
 
 class UsageStatsViewController extends React.PureComponent {
 
+    static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily"){
+        const untilDate = moment.utc();
+        let fromDate;
+        if (currentGroupBy === 'monthly'){ // 1 yr (12 mths)
+            untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
+            fromDate = untilDate.clone();
+            fromDate.subtract(12, 'month'); // Go back 12 months
+        } else if (currentGroupBy === 'daily'){ // 30 days
+            untilDate.subtract(1, 'day');
+            fromDate = untilDate.clone();
+            fromDate.subtract(30, 'day'); // Go back 30 days
+        }
+        return { fromDate, untilDate };
+    }
+
     static defaultProps = {
         'searchURIs' : {
             'TrackingItem' : function(props) {
+                const { currentGroupBy, href } = props;
+                const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
                 let uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
 
-                if (props.currentGroupBy === 'monthly'){
-                    uri += '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
-                } else if (props.currentGroupBy === 'daily'){
-                    uri += '&google_analytics.date_increment=daily&limit=30'; // 30 days
-                }
+                uri += '&limit=all&google_analytics.date_increment=' + currentGroupBy;
+                uri += '&google_analytics.for_date.from=' + fromDate.format('YYYY-MM-DD') + '&google_analytics.for_date.to=' + untilDate.format('YYYY-MM-DD');
 
-                if (props.href && props.href.indexOf('http://localhost') > -1){
+                // For simpler testing & debugging -- if on localhost, connects to data.4dn by default.
+                if (href && href.indexOf('http://localhost') > -1){
                     uri = 'https://data.4dnucleome.org' + uri;
                 }
                 return uri;
             },
             'TrackingItemDownload' : function(props) {
-                var untilDate = moment.utc(), fromDate;
+                const { currentGroupBy, href, includePartialRequests } = props;
+                const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+
                 let uri = '/date_histogram_aggregations/?date_histogram=date_created&type=TrackingItem&tracking_type=download_tracking';
                 uri += '&group_by=download_tracking.experiment_type&group_by=download_tracking.geo_country&group_by=download_tracking.file_format';
 
-                if (props.includePartialRequests){ // Include download_tracking.range_query w/ any val and do a group-by agg for it.
+                if (includePartialRequests){ // Include download_tracking.range_query w/ any val and do a group-by agg for it.
                     uri += '&group_by=download_tracking.range_query';
                 } else { // Filter out download_tracking.range_query = true items.
                     uri += '&download_tracking.range_query!=true';
                 }
 
-                if (props.currentGroupBy === 'monthly'){
-                    untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
-                    fromDate = untilDate.clone();
-                    fromDate.subtract(12, 'month'); // Go back 12 months
-                    uri += '&date_histogram_interval=monthly&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD'); // '&google_analytics.date_increment=monthly&limit=12'; // 1 yr (12 mths)
-                } else if (props.currentGroupBy === 'daily'){
-                    fromDate = untilDate.clone();
-                    untilDate.subtract(1, 'day');
-                    fromDate.subtract(30, 'day'); // Go back 30 days
-                    uri += '&date_histogram_interval=daily&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
-                }
+                uri += '&date_histogram_interval=' + currentGroupBy;
+                uri += '&date_created.from=' + fromDate.format('YYYY-MM-DD') + '&date_created.to=' + untilDate.format('YYYY-MM-DD');
 
-                if (props.href && props.href.indexOf('http://localhost') > -1){
+                // For simpler testing & debugging -- if on localhost, connects to data.4dn by default.
+                if (href && href.indexOf('http://localhost') > -1){
                     uri = 'https://data.4dnucleome.org' + uri;
                 }
                 return uri;
@@ -862,44 +876,29 @@ class UsageStatsView extends React.PureComponent {
             return <div className="stats-charts-container" key="charts" id="usage"><LoadingIcon/></div>;
         }
 
-        var anyExpandedCharts       = _.any(_.values(chartToggles)),
-            commonXDomain           = [ null, null ],
-            lastDateStr             = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][0] && respTrackingItem['@graph'][0].google_analytics && respTrackingItem['@graph'][0].google_analytics.for_date,
-            firstReportIdx          = respTrackingItem && respTrackingItem['@graph'] && (respTrackingItem['@graph'].length - 1),
-            firstDateStr            = respTrackingItem && respTrackingItem['@graph'] && respTrackingItem['@graph'][firstReportIdx] && respTrackingItem['@graph'][firstReportIdx].google_analytics && respTrackingItem['@graph'][firstReportIdx].google_analytics.for_date,
-            commonContainerProps    = {
-                'onToggle' : onChartToggle, chartToggles, windowWidth,
-                'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
-            },
-            dateRoundInterval       = 'day';
+        const anyExpandedCharts = _.any(_.values(chartToggles));
+        const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+        let dateRoundInterval;
 
-        // Prevent needing to calculate for each chart
-        if (lastDateStr){
-            var lastDateMoment = moment.utc(lastDateStr, 'YYYY-MM-DD');
-            if (currentGroupBy === 'daily'){
-                lastDateMoment.endOf('day').subtract(45, 'minute');
-            } else if (currentGroupBy === 'monthly') {
-                lastDateMoment.endOf('month').subtract(1, 'day');
-            }
-            commonXDomain[1] = lastDateMoment.toDate();
-        }
 
-        if (firstDateStr){
-            var firstDateMoment = moment.utc(firstDateStr, 'YYYY-MM-DD');
-            if (currentGroupBy === 'daily'){
-                firstDateMoment.startOf('day').add(15, 'minute');
-            } else if (currentGroupBy === 'monthly') {
-                firstDateMoment.startOf('month').add(1, 'hour');
-            }
-            commonXDomain[0] = firstDateMoment.toDate();
-        }
-
-        if (currentGroupBy === 'monthly'){
+        // We want all charts to share the same x axis.
+        // Minor issue is that file downloads are stored in UTC/GMT while analytics are in EST timezone..
+        // TODO improve on this somehow, maybe pass prop to FileDownload chart re: timezone parsing of some sort.
+        if (currentGroupBy === 'daily'){
+            fromDate.startOf('day').add(15, 'minute');
+            untilDate.endOf('day').subtract(45, 'minute');
+            dateRoundInterval = 'day';
+        } else if (currentGroupBy === 'monthly') {
+            fromDate.startOf('month').add(1, 'hour');
+            untilDate.endOf('month').subtract(1, 'day');
             dateRoundInterval = 'month';
         } else if (currentGroupBy === 'yearly'){ // Not yet implemented
             dateRoundInterval = 'year';
         }
 
+        const commonXDomain = [ fromDate.toDate(), untilDate.toDate() ];
+
+        const commonContainerProps = { 'onToggle' : onChartToggle, chartToggles, windowWidth, 'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250 };
         const commonChartProps = { dateRoundInterval, 'xDomain' : commonXDomain, 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
         const countByDropdownProps = { countBy, changeCountByForChart };
 
@@ -954,7 +953,11 @@ class UsageStatsView extends React.PureComponent {
                         <hr/>
 
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
-                            title={<span><span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country</span>}
+                            title={
+                                <h4 className="text-300">
+                                    <span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country
+                                </h4>
+                            }
                             extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="sessions_by_country" />}>
                             <AreaChart {...commonChartProps} data={sessions_by_country} />
                         </AreaChartContainer>
