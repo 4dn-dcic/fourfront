@@ -56,45 +56,43 @@ class PublicationSummary extends React.PureComponent {
 
     attribution(){
         const { context } = this.props;
-        const { url } = context;
-        const authors         = Array.isArray(context.authors) && context.authors.length > 0 && context.authors;
+        const { url, authors } = context;
         const authorsLastIdx  = authors && (authors.length - 1);
-        const retArr          = [];
 
-        if (authors){
-            retArr.push(
-                <React.Fragment>
-                    <h4 className="mt-2 mb-15 text-500">
-                        Author{ authors.length > 1 ? 's' : null }
-                    </h4>
-                    <p>
-                        { _.map(authors, function(author, i){
-                            return (
-                                <React.Fragment>
-                                    <span className="no-wrap">
-                                        { author }
-                                    </span>
-                                    { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }
-                                </React.Fragment>
-                            );
-                        }) }
-                    </p>
-                </React.Fragment>
-            );
-        }
+        return (
+            <div id="publication-details">
 
-        if (url){
-            retArr.push(
-                <React.Fragment>
-                    <h4 className={"mt-" + (authors ? '3' : '2') + " mb-1 text-500"}>
-                        Link
-                    </h4>
-                    <p><a href={url} target="_blank" rel="noopener noreferrer">{ url }</a></p>
-                </React.Fragment>
-            );
-        }
+                { Array.isArray(authors) && authors.length > 0 ?
+                    <React.Fragment>
+                        <h4 className="mt-2 mb-15 text-500">
+                            Author{ authors.length > 1 ? 's' : null }
+                        </h4>
+                        <p>
+                            { _.map(authors, function(author, i){
+                                return (
+                                    <React.Fragment>
+                                        <span className="no-wrap">
+                                            { author }
+                                        </span>
+                                        { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }
+                                    </React.Fragment>
+                                );
+                            }) }
+                        </p>
+                    </React.Fragment>
+                    : null }
 
-        return <div id="publication-details">{ retArr }</div>;
+                { url ?
+                    <React.Fragment>
+                        <h4 className={"mt-" + (Array.isArray(authors) && authors.length > 0 ? '3' : '2') + " mb-1 text-500"}>
+                            Link
+                        </h4>
+                        <p><a href={url} target="_blank" rel="noopener noreferrer">{ url }</a></p>
+                    </React.Fragment>
+                    : null }
+
+            </div>
+        );
     }
 
     abstract(){
