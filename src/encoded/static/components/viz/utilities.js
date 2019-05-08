@@ -131,7 +131,8 @@ export class FourfrontLogo extends React.PureComponent {
         'height' : '100%',
         'paddingBottom' : 10,
         'paddingTop' : 10,
-        'transition' : "padding .3s, transform .3s"
+        'transition' : "padding .3s, transform .3s",
+        'maxHeight' : 80
     };
 
     static svgBGCircleStyle = {
@@ -261,9 +262,8 @@ export class FourfrontLogo extends React.PureComponent {
     }
 
     render(){
-        var { id, circlePathDefinitionOrig, circlePathDefinitionHover, textTransformOrig,
-            textTransformHover, fgCircleTransformOrig, onClick, title } = this.props,
-            hover = this.state.hover;
+        const { id, circlePathDefinitionOrig, textTransformOrig, fgCircleTransformOrig, onClick, title } = this.props;
+        const { hover } = this.state;
 
         return (
             <Navbar.Brand>
@@ -365,10 +365,11 @@ const highlightTermFxn = _.debounce(function(
 
     requestAnimationFrame(function(){
 
-        var colorIsSet =
+        var colorIsSet = (
             (color === null || color === false) ? false :
-            (typeof color === 'string') ? color.length > 0 :
-            (typeof color === 'object') ? true : false;
+                (typeof color === 'string') ? color.length > 0 :
+                    (typeof color === 'object') ? true : false
+        );
 
         _.each(document.querySelectorAll('[data-field]:not(.no-highlight)'), function(fieldContainerElement){
             setHighlightClass(fieldContainerElement, true);
@@ -412,7 +413,7 @@ export function highlightTerm(
     term = 'human',
     color = ''
 ){
-    return highlightTermFxn.apply(this, arguments);
+    return highlightTermFxn(...arguments);
 }
 
 /**

@@ -4,23 +4,23 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { pie, arc } from 'd3-shape';
-import { object, layout } from './../../util';
+import { object, Schemas } from './../../util';
 import PropTypes from 'prop-types';
+
+// eslint-disable-next-line no-unused-vars
+import { Item } from '../../util/typedefs';
 
 
 export class BadgesTabView extends React.PureComponent {
 
     static getTabObject(props){
-        var context = props.context,
-            badgeList = BadgesTabView.getBadgesList(context),
-            badgeListLen = (badgeList && badgeList.length) || 0;
+        const { context } = props;
+        const badgeList = BadgesTabView.getBadgesList(context);
+        const badgeListLen = (badgeList && badgeList.length) || 0;
+        const titleStr = " " + badgeListLen + " Badge" + (badgeListLen > 1 ? "s" : "");
 
         return {
-            tab : (
-                <span>
-                    <SummaryIcon context={context} /> { badgeListLen } Badge{ badgeListLen > 1 ? 's' : '' }
-                </span>
-            ),
+            tab : <span><SummaryIcon context={context} />{ titleStr }</span>,
             disabled : badgeListLen === 0,
             key : "badges",
             content : <BadgesTabView {...props} />
@@ -33,21 +33,21 @@ export class BadgesTabView extends React.PureComponent {
         return badges;
     });
 
-    static propMapping = {
-        'commendation'  : "Commendation",
-        'warning'       : "Warning"
-    };
+    /** ES6 Maps preserve order, Objects' keys' order may not be preserved depending on JS interpreter/version. */
+    static classificationMap = new Map([
+        [ "commendation",   "Commendation" ],
+        [ "warning",        "Warning" ]
+    ]);
 
-    static badgeClassification(badge, propMapping = BadgesTabView.propMapping){
+    static classificationMapAsObject = memoize(function(classificationMap = BadgesTabView.classificationMap){
+        return object.mapToObject(classificationMap);
+    })
+
+    static badgeClassification(badge, propMapping = BadgesTabView.classificationMap){
         var badgeItem = badge && badge.item && badge.item.badge,
-            propMappingKeys = _.keys(propMapping),
-            propMappingLen = propMappingKeys.length,
-            i, propertyToTestPresenceOf , classificationTitle;
+            propertyToTestPresenceOf, classificationTitle;
 
-        for (i = 0; i < propMappingLen; i++){
-            propertyToTestPresenceOf = propMappingKeys[i];
-            classificationTitle = propMapping[propertyToTestPresenceOf];
-
+        for ([propertyToTestPresenceOf, classificationTitle] of propMapping){
             if (typeof badgeItem[propertyToTestPresenceOf] === 'string' && badgeItem[propertyToTestPresenceOf]){
                 return classificationTitle;
             }
@@ -55,13 +55,48 @@ export class BadgesTabView extends React.PureComponent {
         throw new Error('Badge classification cannot be determined.');
     }
 
-    static badgeTitle(badge, badgeClassification = null, propMapping = BadgesTabView.propMapping){
+    static badgeTitle(badge, badgeClassification = null, propMapping = BadgesTabView.classificationMap){
         const badgeItem = badge && badge.item && badge.item.badge;
         if (!badgeClassification){
             badgeClassification = BadgesTabView.badgeClassification(badge, propMapping);
         }
-        const inversedPropMapping = _.invert(propMapping);
+        const inversedPropMapping = _.invert(BadgesTabView.classificationMapAsObject(propMapping));
         return badgeItem[inversedPropMapping[badgeClassification]];
+    }
+
+    static sortBadgesFxn(a, b){
+        const embedPathA = (a.embedded_path || "a");
+        const embedPathB = (b.embedded_path || "b");
+        const embedPartsA = embedPathA.split('.');
+        const embedPartsB = embedPathB.split('.');
+        const parentA = a.parent || 'a';
+        const parentB = b.parent || 'b';
+
+        const depthA = embedPartsA.length;
+        const depthB = embedPartsB.length;
+        const depthDiff = depthA - depthB;
+
+        if (depthDiff !== 0) return depthDiff;
+
+        if (embedPathA !== embedPathB){
+            // Same depth, dif path -- try to put them closer together. Should rarely happen.
+            if (embedPathA < embedPathB) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        if (parentA !== parentB){
+            // Relatively more common. Group items w/ same parent closer together.
+            if (parentA < parentB) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     /**
@@ -70,42 +105,61 @@ export class BadgesTabView extends React.PureComponent {
      *
      * @param {Item} context - Item representation with an `aggregated-items` property containing badges.
      */
-    static badgesByClassification = memoize(function(context, classificationPropMapping = BadgesTabView.propMapping){
+    static badgesByClassification = memoize(function(context, classificationPropMapping = BadgesTabView.classificationMap){
         const badges = BadgesTabView.getBadgesList(context);
         if (!badges) return null;
-        return _.groupBy(badges, function(b){ return BadgesTabView.badgeClassification(b, classificationPropMapping); });
+
+        const groupedBadges = _.groupBy(badges, function(badge){ return BadgesTabView.badgeClassification(badge, classificationPropMapping); });
+
+        // Sort (in-place) grouped lists by depth from current/top-level Item
+        _.forEach(_.values(groupedBadges), function(badgeGroupList){
+            badgeGroupList.sort(BadgesTabView.sortBadgesFxn);
+        });
+
+        return groupedBadges;
     });
 
     render(){
-        const { context, windowWidth } = this.props;
+        const { context, schemas } = this.props;
         const badgeList = BadgesTabView.getBadgesList(context);
         const badgeListLen = (badgeList && badgeList.length) || 0;
         const badgesByClassification = BadgesTabView.badgesByClassification(context);
+        const classificationsCount = _.keys(badgesByClassification).length;
 
         if (!badgeListLen) return <h4>No Badges</h4>; // Shouldn't happen unless `#badges` is in URL.
 
-        const body = _.map(_.keys(badgesByClassification), function(badgeClassification){
-            const badgesForClassification = badgesByClassification[badgeClassification];
-            const badgesLen = badgesForClassification.length;
-            const heading = badgeListLen === 1 ? badgeClassification : badgesLen + ' ' + badgeClassification + (badgesLen > 1 ? 's' : '');
-            return (
-                <div className="badge-classification-group mb-3 mt-15" data-badge-classification={badgeClassification} key={badgeClassification}>
-                    <h5 className="text-400 mt-0">{ heading }</h5>
-                    { _.map(badgesForClassification, function(badge, idx){
-                        var atId = badge && badge.item && badge.item.badge && object.itemUtil.atId(badge.item.badge);
-                        return <BadgeItem {...badge} key={atId || idx} {...{ context, windowWidth }} />;
-                    }) }
-                </div>
-            );
-        });
+        const body = _.map(
+            // We use predefined order for 'groups of badges' (by classification)
+            // as defined in `BadgesTabView.classificationMap`.
+            _.filter([ ...BadgesTabView.classificationMap.values() ], function(classificationTitle){
+                return typeof badgesByClassification[classificationTitle] !== 'undefined';
+            }),
+            function(badgeClassification){
+                const badgesForClassification = badgesByClassification[badgeClassification];
+                const badgesLen = badgesForClassification.length;
+                const heading = badgeListLen === 1 ? badgeClassification : badgesLen + ' ' + badgeClassification + (badgesLen > 1 ? 's' : '');
+                const className = "badge-classification-group" + (classificationsCount > 1 ? ' col-lg-6' : '');
+                return (
+                    <div className={className} data-badge-classification={badgeClassification} key={badgeClassification}>
+                        <h5 className="text-500 mt-0">{ heading }</h5>
+                        { _.map(badgesForClassification, function(badge, idx){
+                            const atId = badge && badge.item && badge.item.badge && object.itemUtil.atId(badge.item.badge);
+                            const parent = badge && badge.parent;
+                            const key = (atId && parent ? parent + " / " + atId : idx);
+                            return <BadgeItem {...badge} {...{ context, schemas, key }} />;
+                        }) }
+                    </div>
+                );
+            }
+        );
 
         return (
             <div className="overflow-hidden">
                 <h3 className="tab-section-title">
-                    <span className="text-400">{ badgeListLen }</span> Badge{ badgeListLen > 1 ? 's' : '' }
+                    <span className="text-400">{ badgeListLen }</span>{ " Badge" + (badgeListLen > 1 ? 's' : '') }
                 </h3>
                 <hr className="tab-section-title-horiz-divider mb-1"/>
-                { body }
+                { classificationsCount > 1 ? <div className="row">{ body }</div> : body }
             </div>
         );
     }
@@ -170,12 +224,12 @@ class SummaryIcon extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.generateArcs = this.generateArcs.bind(this);
-        this.generatePieChart = this.generatePieChart.bind(this);
+        _.bindAll(this, 'generateArcs', 'generatePieChart');
+        this.generateArcs = memoize(this.generateArcs);
         this.pieGenerator = pie();
     }
 
-    generateArcs = memoize(function(classificationRatioPairs){
+    generateArcs(classificationRatioPairs){ // memoized in constructor
         const { innerRadius, classificationColorMap, size } = this.props;
         const outerRadius = size / 2;
         const pieChartDims = this.pieGenerator(  _.pluck(classificationRatioPairs, 1)   );
@@ -186,7 +240,7 @@ class SummaryIcon extends React.PureComponent {
                     style={{ 'fill' : classificationColorMap[classificationTitle] || '#ccc' }} />
             );
         });
-    });
+    }
 
     generatePieChart(classificationRatioPairs){
         const { size } = this.props;
@@ -208,7 +262,6 @@ class SummaryIcon extends React.PureComponent {
         const { context, classificationSingleItemMap } = this.props;
         const classificationRatios = SummaryIcon.getClassificationRatios(context);
         const classificationRatioPairs = _.pairs(classificationRatios);
-        var singleClassification;
 
         if (!classificationRatios){
             // Shouldn't happen unless BadgesTabView is present on Item w/o any badges.
@@ -216,9 +269,9 @@ class SummaryIcon extends React.PureComponent {
         }
 
         if (classificationRatioPairs.length === 1){
-            singleClassification = classificationRatioPairs[0][0];
-            if (singleClassification && classificationSingleItemMap && classificationSingleItemMap[singleClassification]){
-                return classificationSingleItemMap[singleClassification](this.props);
+            const [ [ singleClassificationTitle ] ] = classificationRatioPairs;
+            if (singleClassificationTitle && classificationSingleItemMap && classificationSingleItemMap[singleClassificationTitle]){
+                return classificationSingleItemMap[singleClassificationTitle](this.props);
             }
         }
 
@@ -228,60 +281,118 @@ class SummaryIcon extends React.PureComponent {
 }
 
 
-function BadgeItem(props){
-    const { item, parent, windowWidth, height, context } = props;
-    const { messages, badge } = item;
-    const { badge_icon, description } = badge;
-    const classification = BadgesTabView.badgeClassification(props);
-    const badgeTitle = BadgesTabView.badgeTitle(props, classification);
+class BadgeItem extends React.PureComponent {
 
-    const linkMsg = parent && object.itemUtil.atId(context) !== parent ? (
-        <div className="mt-02">
-            <a href={parent} className="text-500" data-tip="Click to visit item containing badge.">View Item</a>
-        </div>
-    ) : null;
+    /**
+     * Function to get/find the embedded Item to which this badge applies.
+     *
+     * @param {string|string[]} embedded_path - Path to the embedded item / parent ID either as dot-delimited string or array (must not have 'badges').
+     * @param {string} parentID - The @id of the parent Item to which badge belongs to.
+     * @param {Item} context - The root Item from which we grab the emebdded Item.
+     * @returns {Item|null} Embedded Item to which Badge with embedded_path and parentID belongs to, or null if not found / no view permissions.
+     */
+    static getParent(embedded_path, parentID, context){
+        // "badges" is implicitly the last item of each `embedded_path` so we clear it out
+        const embedPath = (
+            Array.isArray(embedded_path) ? embedded_path.slice(0) // Assume has been called recursively, without 'badges' already.
+                : _.without(embedded_path.split('.'), "badges")
+        );
 
-    const image = badge_icon && (
-        <div className="text-center">
-            <img src={badge_icon} style={{ 'maxWidth': '100%', 'maxHeight' : height }}/>
-        </div>
-    );
-
-    let renderedMessages = null;
-
-    if (Array.isArray(messages) && messages.length > 0){
-        if (messages.length === 1){
-            renderedMessages = <p className="mb-0 mt-0">{ messages[0] }</p>;
-        } else {
-            renderedMessages = (
-                <ul className="mb-0 mt-02" style={{ paddingLeft: 32 }}>
-                    { _.map(messages, function(msg, i){ return <li key={i}>{ msg }</li>; }) }
-                </ul>
-            );
+        if (embedPath.length === 0) {
+            // Badge is on root context item itself.
+            if (object.itemUtil.atId(context) === parentID){
+                return context;
+            } else {
+                return null;
+            }
         }
+
+        var currEmbedItem = context,
+            currEmbedProperty, arrIdx, arrRes;
+
+        while (embedPath.length > 0){
+            currEmbedProperty = embedPath.shift();
+            currEmbedItem = currEmbedItem[currEmbedProperty];
+            if (Array.isArray(currEmbedItem)){
+                // It's likely that the same Item is embedded for multiple Items.
+                // We should return ASAP and not dig into _every_ one.
+                for (arrIdx = 0; arrIdx < currEmbedItem.length; arrIdx++){
+                    arrRes = BadgeItem.getParent(embedPath, parentID, currEmbedItem[arrIdx]);
+                    if (arrRes && object.itemUtil.atId(arrRes) === parentID){
+                        return arrRes;
+                    }
+                }
+                return null; // Not found (likely no view permission)
+            }
+        }
+
+        return currEmbedItem;
     }
 
-    return (
-        <div className="badge-item row flexrow mt-1" style={{ 'minHeight' : height }}>
-            <div className="col-xs-12 col-sm-2">{ image }</div>
-            <div className="col-xs-12 col-sm-10" style={{ alignItems : "center", display: "flex" }}>
-                <div className="inner mb-05">
-                    <h4 className="text-500 mb-0 mt-0">
-                        { badgeTitle }
-                        { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
-                    </h4>
-                    { renderedMessages }
-                    { linkMsg }
+    constructor(props){
+        super(props);
+        this.getParent = memoize(BadgeItem.getParent);
+    }
+
+    render(){
+        const { item, parent : parentID, embedded_path, context, schemas } = this.props;
+        const { messages, badge } = item;
+        const { badge_icon, description } = badge;
+        const classification = BadgesTabView.badgeClassification(this.props);
+        const badgeTitle = BadgesTabView.badgeTitle(this.props, classification);
+
+        let linkMsg = null;
+
+        if (parentID && object.itemUtil.atId(context) !== parentID){
+            let titleToShow = "Item";
+            let tooltip = "Click to visit item containing badge.";
+            const parentItem = this.getParent(embedded_path, parentID, context);
+            const parentTypeTitle = parentItem && Schemas.getItemTypeTitle(parentItem, schemas);
+            const parentDisplayTitle = parentItem && parentItem.display_title;
+            if (parentTypeTitle && parentDisplayTitle){ // These two props are default embeds. If not present is most likely due to lack of view permissions.
+                titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-600">{ parentDisplayTitle }</span></React.Fragment>;
+                tooltip = parentItem.description || tooltip;
+            }
+            linkMsg = <div className="mt-02"><a href={parentID} data-tip={tooltip}>View { titleToShow }</a></div>;
+        }
+
+        const image = badge_icon && (<div className="text-center icon-container"><img src={badge_icon} /></div>);
+
+        let renderedMessages = null;
+
+        if (Array.isArray(messages) && messages.length > 0){
+            if (messages.length === 1){
+                renderedMessages = <p className="mb-0 mt-0">{ messages[0] }</p>;
+            } else {
+                renderedMessages = (
+                    <ul className="mb-0 mt-01 messages-list">
+                        { _.map(messages, function(msg, i){ return <li key={i}>{ msg }</li>; }) }
+                    </ul>
+                );
+            }
+        }
+
+        return (
+            <div className="badge-item">
+                <div className="row flexrow">
+                    <div className="col-xs-12 col-sm-2 icon-col">{ image }</div>
+                    <div className="col-xs-12 col-sm-10 title-col">
+                        <div className="inner mb-05">
+                            <h4 className="text-500 mb-0 mt-0">
+                                { badgeTitle }
+                                { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
+                            </h4>
+                            { renderedMessages }
+                            { linkMsg }
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+
+    }
 
 }
-
-BadgeItem.defaultProps = {
-    'height' : 90
-};
 
 
 /**

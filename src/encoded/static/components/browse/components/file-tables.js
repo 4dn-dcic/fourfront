@@ -6,7 +6,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
-import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock } from './StackedBlockTable';
+import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox } from './StackedBlockTable';
 import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs, fileUtil, navigate } from './../../util';
 
 var { Item, ExperimentSet } = typedefs;
@@ -260,6 +260,18 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
     );
 }
 
+function renderFileHeaderWithCheckbox(stackedBlockProps){
+    if (stackedBlockProps.selectedFiles && Array.isArray(stackedBlockProps.allFiles)){
+        return (
+            <FileHeaderWithCheckbox {..._.pick(stackedBlockProps, 'selectedFiles', 'allFiles', 'handleFileCheckboxChange')}
+                data-tip="Select all files in this table">
+                File
+            </FileHeaderWithCheckbox>
+        );
+    }
+    return null;
+}
+
 /**
  * To be used within Experiments Set View/Page, or
  * within a collapsible row on the browse page.
@@ -283,8 +295,8 @@ export class RawFilesStackedTable extends React.PureComponent {
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
                     { columnClass: 'file-group',                                title: 'File Group',    initialWidth: 30,   visibleTitle : function(stackedBlockProps){
-                        if (stackedBlockProps.selectedFiles && typeof stackedBlockProps.selectFile === 'function' && typeof stackedBlockProps.unselectFile === 'function'){
-                            return <i className="icon icon-download"/>;
+                        if (stackedBlockProps.selectedFiles && Array.isArray(stackedBlockProps.allFiles)){
+                            return <FileHeaderWithCheckbox {..._.pick(stackedBlockProps, 'selectedFiles', 'allFiles', 'handleFileCheckboxChange' )} data-tip="Select all files in this table" />;
                         }
                         return null;
                     } },
@@ -294,7 +306,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
-                    { columnClass: 'file',                                      title: 'File',          initialWidth: 125,  render: renderFileTitleColumn}
+                    { columnClass: 'file',          className: 'has-checkbox',  title: 'File',          initialWidth: 125,  render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox }
                 ];
         }
 
@@ -373,12 +385,10 @@ export class RawFilesStackedTable extends React.PureComponent {
                 }).isRequired
             })).isRequired
         }),
-        'keepCounts'                : PropTypes.bool, // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.),
         'collapseLongLists'         : PropTypes.bool
     };
 
     static defaultProps = {
-        'keepCounts'    : false,
         'fadeIn'        : true,
         'width'         : null,
         'columnHeaders'     : [
@@ -555,9 +565,11 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         const fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet);
 
+        const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
+
         return (
             <StackedBlockTable {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'collapseLongLists', 'width')}
-                columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn>
+                columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn allFiles={allRawFiles}>
                 <StackedBlockList className="biosamples" showMoreExtTitle={showMoreExtTitle} title="Biosamples">
                     { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
                 </StackedBlockList>
@@ -577,9 +589,9 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static defaultProps = {
         'columnHeaders' : [
-            { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
+            { columnClass: 'experiment',  className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
-            { columnClass: 'file',        title: 'File',      initialWidth: 135, render: renderFileTitleColumn },
+            { columnClass: 'file',        className: 'has-checkbox',  title: 'File',      initialWidth: 135, render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 135, render: renderFileTypeSummaryColumn },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
         ],
@@ -695,7 +707,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         const filesGroupedByExperimentOrGlobal = ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
         return (
-            <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn>
+            <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn allFiles={files}>
                 <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{ experimentBlocks }</StackedBlockList>
             </StackedBlockTable>
         );

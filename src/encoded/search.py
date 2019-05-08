@@ -325,6 +325,8 @@ def normalize_query(request, types, doc_types):
                 pass
         if field_schema and 'linkTo' in field_schema:
             # add display_title to terminal linkTo query fields
+            if key.endswith('!'): # handle NOT
+                return (key[:-1] + '.display_title!', val)
             return (key + '.display_title', val)
         else:
             return (key, val)

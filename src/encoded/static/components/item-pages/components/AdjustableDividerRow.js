@@ -98,20 +98,26 @@ export class AdjustableDividerRow extends React.PureComponent {
         }
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.width !== this.props.width){
-            if (!(nextProps.leftPanelDefaultCollapsed && this.draggableBounds && (this.state.xOffset - (nextProps.leftPanelCollapseWidth || nextProps.minLeftPanelWidth)) <= this.draggableBounds.left)){
-                this.setState({ 'xOffset' : 0 });
+    componentDidUpdate(pastProps, pastState){
+        const { leftPanelDefaultCollapsed, leftPanelCollapseWidth, leftPanelCollapseHeight, minLeftPanelWidth, width, renderRightPanel } = this.props;
+        const { xOffset, rightPanelHeight } = this.state;
+        const stateChange = {};
+
+        if (pastProps.width !== width){
+            if (!(leftPanelDefaultCollapsed && this.draggableBounds && (xOffset - (leftPanelCollapseWidth || minLeftPanelWidth)) <= this.draggableBounds.left)){
+                stateChange.xOffset = 0;
             }
         }
-    }
 
-    componentDidUpdate(pastProps, pastState){
-        if (typeof this.props.leftPanelCollapseHeight !== 'number' && pastProps.width !== this.props.width || this.props.renderRightPanel !== pastProps.renderRightPanel){
+        if (typeof leftPanelCollapseHeight !== 'number' && pastProps.width !== width || renderRightPanel !== pastProps.renderRightPanel){
             var newRightPanelHeight = this.getRightPanelHeight();
-            if (!(newRightPanelHeight === null && this.state.rightPanelHeight !== null)) { // newRightPanelHeight may be 0 if currently invisible or something. For now, lets just skip over it.
-                this.setState({ 'rightPanelHeight' : newRightPanelHeight });
+            if (!(newRightPanelHeight === null && rightPanelHeight !== null)) { // newRightPanelHeight may be 0 if currently invisible or something. For now, lets just skip over it.
+                stateChange.rightPanelHeight = newRightPanelHeight;
             }
+        }
+
+        if (_.keys(stateChange).length > 0){
+            this.setState(stateChange);
         }
     }
 
@@ -191,7 +197,7 @@ export class AdjustableDividerRow extends React.PureComponent {
                     { (layoutSize === 'lg' || layoutSize === 'md') ?
                         <DraggableVerticalBorder xOffset={xOffset} height={height || null} left={this.leftPanelWidth}
                             onStop={this.handleStopDrag} onDrag={this.handleDrag} bounds={this.draggableBounds} />
-                    : null }
+                        : null }
                 </div>
                 <div className={"right-panel col-xs-12 col-md-" + rightPanelDefaultSizeMD + " col-lg-" + rightPanelDefaultSizeLG + (rightPanelClassName ? ' ' + rightPanelClassName : '')}
                     ref={this.rightPanelRef} style={(layoutSize === 'lg' || layoutSize === 'md') ? { width : (this.rightPanelWidth + 30) - xOffset } : null} children={rightPanel} />
