@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import url from 'url';
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as d3 from 'd3';
@@ -346,10 +347,8 @@ export class GroupByDropdown extends React.PureComponent {
 
 
 
-/**
- * Wraps AreaCharts or AreaChartContainers in order to provide shared scales.
- */
-export class GroupOfCharts extends React.PureComponent {
+/** Wraps AreaCharts or AreaChartContainers in order to provide shared color scales. */
+export class ColorScaleProvider extends React.PureComponent {
 
     static defaultProps = {
         'className'             : 'chart-group clearfix',
@@ -412,7 +411,7 @@ export class GroupOfCharts extends React.PureComponent {
     }
 
     render(){
-        const { children, className, width, chartMargin, xDomain } = this.props;
+        const { children, className } = this.props;
         const newChildren = React.Children.map(children, (child, childIndex) => {
             if (!child) return null;
             if (typeof child.type === 'string') {
@@ -420,7 +419,7 @@ export class GroupOfCharts extends React.PureComponent {
             }
             return React.cloneElement(
                 child,
-                _.extend({}, _.omit(this.props, 'children'), { width, chartMargin, xDomain, 'updateColorStore' : this.updateColorStore }, this.state)
+                _.extend({}, _.omit(this.props, 'children'), { 'updateColorStore' : this.updateColorStore }, this.state)
             );
         });
         return <div className={className || null}>{ newChildren }</div>;
@@ -576,6 +575,31 @@ export class AreaChart extends React.PureComponent {
         }, new Set()));
     }
 
+    /** Convert timestamps to D3 date objects.  */
+    static correctDatesInData(origData, d3TimeFormat = '%Y-%m-%d'){
+        const parseTime = d3.utcParse(d3TimeFormat);
+        return _.map(origData, (d) => {
+            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
+            return _.extend({}, d, {
+                'date' : parseTime(formattedDate),
+                'origDate' : formattedDate
+            });
+        });
+    }
+
+    static stackData(origData, d3TimeFormat = '%Y-%m-%d'){
+        const stackGen = d3.stack().value(function(d, key){
+            var currChild = _.findWhere(d.children || [], { 'term' : key });
+            if (currChild) return currChild.total;
+            return 0;
+        });
+
+        stackGen.keys(AreaChart.childKeysFromData(origData));
+
+        const formattedDateData = AreaChart.correctDatesInData(origData, d3TimeFormat);
+        return stackGen(formattedDateData);
+    }
+
     static getDerivedStateFromProps(props, state){
         return {
             'colorScale' : props.colorScale || state.colorScale || d3.scaleOrdinal(d3.schemeCategory10)
@@ -585,7 +609,7 @@ export class AreaChart extends React.PureComponent {
     static defaultProps = {
         'chartMargin'           : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
         'data'                  : null,
-        'd3TimeFormat'          : '%Y-%m-%d',
+        'd3TimeFormat'          : '%Y-%m-%d', // TODO: Remove prop?
         'stackChildren'         : true,
         'height'                : 300,
         'yAxisLabel'            : 'Count',
@@ -611,40 +635,25 @@ export class AreaChart extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.correctDatesInData = this.correctDatesInData.bind(this);
-        this.updateDataInState = this.updateDataInState.bind(this);
-        this.getInnerChartWidth = this.getInnerChartWidth.bind(this);
-        this.getInnerChartHeight = this.getInnerChartHeight.bind(this);
-        this.xScale = this.xScale.bind(this);
-        this.yScale = this.yScale.bind(this);
-        this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
-        this.drawNewChart = this.drawNewChart.bind(this);
-        this.updateTooltip = this.updateTooltip.bind(this);
-        this.removeTooltip = this.removeTooltip.bind(this);
-        this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
+        _.bindAll(this, 'getInnerChartWidth', 'getInnerChartHeight', 'xScale', 'yScale',
+            'commonDrawingSetup', 'drawNewChart', 'updateTooltip', 'removeTooltip', 'updateExistingChart'
+        );
 
-        // D3 things
-        this.stack = d3.stack().value(function(d, key){
-            var currChild = _.findWhere(d.children || [], { 'term' : key });
-            if (currChild) return currChild.total;
-            return 0;
-        });
+        this.updateExistingChart = _.debounce(this.updateExistingChart, 500);
 
-        this.stack.keys(AreaChart.childKeysFromData(props.data));
+        // Tiny performance boost via memoizing
+        this.mergeStackedDataForExtents = memoize(AreaChart.mergeStackedDataForExtents);
+        this.calculateXAxisExtents      = memoize(AreaChart.calculateXAxisExtents);
+        this.calculateYAxisExtents      = memoize(AreaChart.calculateYAxisExtents);
+        this.childKeysFromData          = memoize(AreaChart.childKeysFromData);
+        this.stackData                  = memoize(AreaChart.stackData);
 
         // Will be cached here later from d3.select(this.refs..)
-        this.svg     = null;
-
-        var stackedData             = this.stack(this.correctDatesInData()),
-            mergedDataForExtents    = AreaChart.mergeStackedDataForExtents(stackedData),
-            xExtents                = AreaChart.calculateXAxisExtents(mergedDataForExtents, props.xDomain),
-            yExtents                = AreaChart.calculateYAxisExtents(mergedDataForExtents, props.yDomain);
+        this.svg = null;
 
         this.state = {
             'drawingError'  : false,
-            'drawn'         : false,
-            stackedData, mergedDataForExtents,
-            xExtents, yExtents
+            'drawn'         : false
         };
 
         this.svgRef = React.createRef();
@@ -656,32 +665,30 @@ export class AreaChart extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps, pastState){
-        var shouldDrawNewChart = this.props.shouldDrawNewChart(pastProps, this.props);
+        const { shouldDrawNewChart : shouldDrawNewChartFxn } = this.props;
+        const shouldDrawNewChart = shouldDrawNewChartFxn(pastProps, this.props);
 
         if (shouldDrawNewChart){
             setTimeout(()=>{ // Wait for other UI stuff to finish updating, e.g. element widths.
-                this.updateDataInState(()=>{
-                    requestAnimationFrame(()=>{
-                        this.destroyExistingChart();
-                        this.drawNewChart();
-                    });
+                requestAnimationFrame(()=>{
+                    this.destroyExistingChart();
+                    this.drawNewChart();
                 });
             }, 300);
-        } else if (this.isDataUpdating) {
-            this.isDataUpdating = false;
-            // Skip below else condition.
         } else {
             setTimeout(this.updateExistingChart, 300);
         }
     }
 
     getXAxisGenerator(useChartWidth = null){
-        const { xDomain } = this.props;
-        const { mergedDataForExtents } = this.state;
-        var chartWidth = useChartWidth || this.innerWidth || this.getInnerChartWidth(),
-            xExtents  = AreaChart.calculateXAxisExtents(mergedDataForExtents, xDomain),
-            yearDiff  = (xExtents[1] - xExtents[0]) / (60 * 1000 * 60 * 24 * 365),
-            widthPerYear = chartWidth / yearDiff;
+        const { xDomain, data, d3TimeFormat } = this.props;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const mergedDataForExtents = this.mergeStackedDataForExtents(stackedData);
+        const xExtents = this.calculateXAxisExtents(mergedDataForExtents, xDomain);
+
+        const chartWidth = useChartWidth || this.innerWidth || this.getInnerChartWidth();
+        const yearDiff  = (xExtents[1] - xExtents[0]) / (60 * 1000 * 60 * 24 * 365);
+        const widthPerYear = chartWidth / yearDiff;
 
 
         if (widthPerYear < 3600){
@@ -715,34 +722,6 @@ export class AreaChart extends React.PureComponent {
         }
     }
 
-    /** Convert timestamps to D3 date objects.  */
-    correctDatesInData(){
-        const { d3TimeFormat, data } = this.props;
-        const parseTime = d3.utcParse(d3TimeFormat);
-        return _.map(data, (d) => {
-            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
-            return _.extend({}, d, {
-                'date' : parseTime(formattedDate),
-                'origDate' : formattedDate
-            });
-        });
-    }
-
-    updateDataInState(callback = null){
-        const { xDomain, yDomain } = this.props;
-        const data = this.correctDatesInData();
-        this.stack.keys(AreaChart.childKeysFromData(data));
-
-        this.isDataUpdating = true;
-
-        var stackedData          = this.stack(data),
-            mergedDataForExtents = AreaChart.mergeStackedDataForExtents(stackedData),
-            xExtents             = AreaChart.calculateXAxisExtents(mergedDataForExtents, xDomain),
-            yExtents             = AreaChart.calculateYAxisExtents(mergedDataForExtents, yDomain);
-
-        this.setState({ stackedData, mergedDataForExtents, xExtents, yExtents }, callback);
-    }
-
     getInnerChartWidth(){
         var { width, margin } = this.props;
         this.svg = this.svg || d3.select(this.svgRef.current);
@@ -758,13 +737,20 @@ export class AreaChart extends React.PureComponent {
     }
 
     xScale(width){
-        const { xExtents } = this.state;
+        const { xDomain, data, d3TimeFormat } = this.props;
+        //const { stackedData } = this.state;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const mergedDataForExtents = this.mergeStackedDataForExtents(stackedData);
+        const xExtents = this.calculateXAxisExtents(mergedDataForExtents, xDomain);
         return d3.scaleUtc().rangeRound([0, width]).domain(xExtents);
     }
 
     yScale(height){
-        const { yAxisScale, yAxisPower } = this.props;
-        const { yExtents } = this.state;
+        const { yAxisScale, yAxisPower, yDomain, data, d3TimeFormat } = this.props;
+        //const { stackedData } = this.state;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const mergedDataForExtents = this.mergeStackedDataForExtents(stackedData);
+        const yExtents = this.calculateYAxisExtents(mergedDataForExtents, yDomain);
         const scale = d3['scale' + yAxisScale]().rangeRound([height, 0]).domain(yExtents);
         if (yAxisScale === 'Pow' && yAxisPower !== null){
             scale.exponent(yAxisPower);
@@ -773,8 +759,8 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        const { curveFxn } = this.props;
-        const { stackedData } = this.state;
+        const { curveFxn, data, d3TimeFormat } = this.props;
+        const stackedData = this.stackData(data, d3TimeFormat);
         const svg         = this.svg || d3.select(this.svgRef.current);
         const width       = this.getInnerChartWidth();
         const height      = this.getInnerChartHeight();
@@ -803,7 +789,7 @@ export class AreaChart extends React.PureComponent {
 
         this.svg = svg;
 
-        return { svg, x, y, width, height, area, bottomAxisGenerator, rightAxisFxn, 'data' : stackedData };
+        return { svg, x, y, width, height, area, bottomAxisGenerator, rightAxisFxn, stackedData };
     }
 
     /**
@@ -824,15 +810,14 @@ export class AreaChart extends React.PureComponent {
         }
 
         const { yAxisLabel, margin, updateColorStore } = this.props;
-        const { data, svg, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        const { stackedData, svg, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
         const drawn = { svg };
         const { colorScale } = this.state;
-
 
         drawn.root = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
 
         drawn.layers = drawn.root.selectAll('.layer')
-            .data(data)
+            .data(stackedData)
             .enter()
             .append('g')
             .attr('class', 'layer');
@@ -862,21 +847,18 @@ export class AreaChart extends React.PureComponent {
     }
 
     updateTooltip(evt){
-        const { chartMargin, yAxisLabel, dateRoundInterval, tooltipDataProperty } = this.props;
-        const { colorScale, stackedData } = this.state;
+        const { chartMargin, yAxisLabel, dateRoundInterval, tooltipDataProperty, data, d3TimeFormat } = this.props;
+        const { colorScale } = this.state;
+        const stackedData   = this.stackData(data, d3TimeFormat);
         const svg           = this.svg || d3.select(this.svgRef.current); // SHOULD be same as evt.target.
         const tooltip       = this.tooltipRef.current;
-        const mouseCoords   = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
+        let [ mX, mY ]      = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
         const chartWidth    = this.innerWidth || this.getInnerChartWidth();
         const chartHeight   = this.innerHeight || this.getInnerChartHeight();
         const currentTerm   = (evt && evt.target.getAttribute('data-term')) || null;
         const tdp           = tooltipDataProperty || 'total';
 
         let dateFormatFxn = function(aDate){ return DateUtility.format(aDate, 'date-sm'); };
-
-        if (!mouseCoords) {
-            throw new Error("Could not get mouse coordinates.");
-        }
 
         if (dateRoundInterval === 'month'){
             dateFormatFxn = function(aDate){
@@ -890,101 +872,98 @@ export class AreaChart extends React.PureComponent {
             };
         }
 
-        mouseCoords[0] -= (chartMargin.left || 0);
-        mouseCoords[1] -= (chartMargin.top  || 0);
+        mX -= (chartMargin.left || 0);
+        mY -= (chartMargin.top  || 0);
 
-        if (mouseCoords[0] < 0 || mouseCoords[1] < 0 || mouseCoords[0] > chartWidth + 1 || mouseCoords[1] > chartHeight + 1){
+        if (mX < 0 || mY < 0 || mX > chartWidth + 1 || mY > chartHeight + 1){
             return this.removeTooltip();
         }
 
-        requestAnimationFrame(()=>{
+        var xScale              = this.xScale(chartWidth),
+            yScale              = this.yScale(chartHeight),
+            hovDate             = xScale.invert(mX),
+            dateString          = dateFormatFxn(hovDate),
+            leftPosition        = xScale(hovDate),
+            isToLeft            = leftPosition > (chartWidth / 2),
+            maxTermsVisible     = Math.floor((chartHeight - 60) / 18),
+            stackedLegendItems  = _.filter(_.map(stackedData, function(sD){
+                return _.find(sD, function(stackedDatum, i, all){
+                    var curr = stackedDatum.data,
+                        next = (all[i + 1] && all[i + 1].data) || null;
 
-            var xScale              = this.xScale(chartWidth),
-                yScale              = this.yScale(chartHeight),
-                hovDate             = xScale.invert(mouseCoords[0]),
-                dateString          = dateFormatFxn(hovDate),
-                leftPosition        = xScale(hovDate),
-                isToLeft            = leftPosition > (chartWidth / 2),
-                maxTermsVisible     = Math.floor((chartHeight - 60) / 18),
-                stackedLegendItems  = _.filter(_.map(stackedData, function(sD){
-                    return _.find(sD, function(stackedDatum, i, all){
-                        var curr = stackedDatum.data,
-                            next = (all[i + 1] && all[i + 1].data) || null;
-
-                        if (hovDate > curr.date && (!next || next.date >= hovDate)){
-                            return true;
-                        }
-                        return false;
-                    });
-                })),
-                total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
-                termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
-                    if (c.term === null) return false;
-                    return c && c[tdp] > 0;
-                }), function(c){ return -c[tdp]; }),
-                isEmpty             = termChildren.length === 0,
-                topPosition         = yScale(total);
-
-            // It's anti-pattern for component to update its children using setState instead of passing props as done here.
-            // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
-            // so performance/clarity-wise this approach seems more desirable.
-            tooltip.setState({
-                leftPosition, topPosition, chartWidth, chartHeight,
-                'visible'       : true,
-                'contentFxn'    : function(tProps, tState){
-
-                    if (termChildren.length > maxTermsVisible){
-                        var lastTermIdx             = maxTermsVisible - 1,
-                            currentActiveItemIndex  = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
-
-                        if (currentActiveItemIndex && currentActiveItemIndex > lastTermIdx){
-                            var temp = termChildren[lastTermIdx];
-                            termChildren[lastTermIdx] = termChildren[currentActiveItemIndex];
-                            termChildren[currentActiveItemIndex] = temp;
-                        }
-                        var termChildrenRemainder = termChildren.slice(maxTermsVisible),
-                            totalForRemainder = 0;
-
-                        _.forEach(termChildrenRemainder, function(r){
-                            totalForRemainder += r[tdp];
-                        });
-                        termChildren = termChildren.slice(0, maxTermsVisible);
-                        var newChild = { 'term' : termChildrenRemainder.length + " More...", "noColor" : true };
-                        newChild[tdp] = totalForRemainder;
-                        termChildren.push(newChild);
+                    if (hovDate > curr.date && (!next || next.date >= hovDate)){
+                        return true;
                     }
+                    return false;
+                });
+            })),
+            total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
+            termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
+                if (c.term === null) return false;
+                return c && c[tdp] > 0;
+            }), function(c){ return -c[tdp]; }),
+            isEmpty             = termChildren.length === 0,
+            topPosition         = yScale(total);
 
-                    return (
-                        <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
-                            <h5 className={"text-500 mt-0 clearfix" + (isEmpty ? ' mb-0' : ' mb-11')}>
-                                { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
-                            </h5>
-                            { !isEmpty ?
-                                <table className="current-legend">
-                                    <tbody>
-                                        { _.map(termChildren, function(c, i){
-                                            return (
-                                                <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
-                                                    <td className="patch-cell">
-                                                        <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
-                                                    </td>
-                                                    <td className="term-name-cell">{ c.term }</td>
-                                                    <td className="term-name-total">
-                                                        { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
-                                                        { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
-                                                    </td>
-                                                </tr>
-                                            );
-                                        }) }
-                                    </tbody>
-                                </table>
-                                : null }
-                        </div>
-                    );
+        // It's anti-pattern for component to update its children using setState instead of passing props as done here.
+        // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
+        // so performance/clarity-wise this approach seems more desirable.
+        tooltip.setState({
+            leftPosition, topPosition, chartWidth, chartHeight,
+            'visible'       : true,
+            'contentFxn'    : function(tProps, tState){
+
+                if (termChildren.length > maxTermsVisible){
+                    var lastTermIdx             = maxTermsVisible - 1,
+                        currentActiveItemIndex  = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
+
+                    if (currentActiveItemIndex && currentActiveItemIndex > lastTermIdx){
+                        var temp = termChildren[lastTermIdx];
+                        termChildren[lastTermIdx] = termChildren[currentActiveItemIndex];
+                        termChildren[currentActiveItemIndex] = temp;
+                    }
+                    var termChildrenRemainder = termChildren.slice(maxTermsVisible),
+                        totalForRemainder = 0;
+
+                    _.forEach(termChildrenRemainder, function(r){
+                        totalForRemainder += r[tdp];
+                    });
+                    termChildren = termChildren.slice(0, maxTermsVisible);
+                    var newChild = { 'term' : termChildrenRemainder.length + " More...", "noColor" : true };
+                    newChild[tdp] = totalForRemainder;
+                    termChildren.push(newChild);
                 }
-            });
 
+                return (
+                    <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
+                        <h5 className={"text-500 mt-0 clearfix" + (isEmpty ? ' mb-0' : ' mb-11')}>
+                            { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
+                        </h5>
+                        { !isEmpty ?
+                            <table className="current-legend">
+                                <tbody>
+                                    { _.map(termChildren, function(c, i){
+                                        return (
+                                            <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
+                                                <td className="patch-cell">
+                                                    <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
+                                                </td>
+                                                <td className="term-name-cell">{ c.term }</td>
+                                                <td className="term-name-total">
+                                                    { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
+                                                    { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) }
+                                </tbody>
+                            </table>
+                            : null }
+                    </div>
+                );
+            }
         });
+
 
     }
 
@@ -1044,7 +1023,7 @@ export class AreaChart extends React.PureComponent {
         }
 
         const { transitionDuration } = this.props;
-        const { data, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        const { stackedData, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
 
         const drawn = this.drawnD3Elements;
 
@@ -1063,7 +1042,7 @@ export class AreaChart extends React.PureComponent {
             drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
 
             drawn.root.selectAll('.layer')
-                .data(data)
+                .data(stackedData)
                 .selectAll('path.area')
                 .transition()
                 .duration(transitionDuration)
@@ -1140,14 +1119,19 @@ export class AreaChartContainer extends React.Component {
     }
 
     componentDidMount(){
+        const { width } = this.props;
+        if (typeof width === 'number' && width) return;
         setTimeout(()=>{ // Update w. new width.
             this.forceUpdate();
         }, 0);
     }
 
     componentDidUpdate(pastProps){
-        const { defaultColSize } = this.props;
-        if (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isExpanded(pastProps) !== AreaChartContainer.isExpanded(this.props)){
+        const { defaultColSize, width } = this.props;
+        if (
+            !(typeof width === 'number' && width) &&
+            (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isExpanded(pastProps) !== AreaChartContainer.isExpanded(this.props))
+        ){
             setTimeout(()=>{ // Update w. new width.
                 this.forceUpdate();
             }, 0);
@@ -1209,7 +1193,10 @@ export class AreaChartContainer extends React.Component {
 
         return (
             <div className="mt-2">
-                <h4 className="text-300 clearfix">{ title } { this.buttonSection() }</h4>
+                <div className="text-300 clearfix">
+                    { this.buttonSection() }
+                    { title }
+                </div>
                 <div ref={this.elemRef} style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
                     { visualToShow }
                 </div>

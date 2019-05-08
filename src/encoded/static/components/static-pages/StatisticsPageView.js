@@ -8,7 +8,7 @@ import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import url from 'url';
 import { console, navigate, ajax, analytics, DateUtility } from './../util';
 import {
-    StatsViewController, GroupByController, GroupByDropdown, GroupOfCharts,
+    StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
 } from './../viz/AreaChart';
 import StaticPage from './StaticPage';
@@ -909,29 +909,31 @@ class UsageStatsView extends React.PureComponent {
                 <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                     title="Show" outerClassName="dropdown-container mb-0">
                     <div className="inline-block ml-15">
-                        <Checkbox checked={includePartialRequests} onChange={onTogglePartialReqs}>
-                            Include Partial Requests
-                            { width > 500 ? ' (e.g. IGV, JuiceBox)' : null }
-                        </Checkbox>
-                    </div>
-                    <div className="inline-block ml-15">
                         <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                     </div>
                 </GroupByDropdown>
 
                 { file_downloads ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={file_downloads}>
+                    <ColorScaleProvider resetScalesWhenChange={file_downloads}>
 
                         <hr/>
 
                         <AreaChartContainer {...commonContainerProps} id="file_downloads"
                             title={
-                                <React.Fragment>
-                                    <span className="text-500">File Downloads</span>
-                                    <br/>
-                                    <small><em>Download tracking started in August 2018</em></small>
-                                </React.Fragment>
+                                <div>
+                                    <h4 className="text-500 mt-0 mb-0">File Downloads</h4>
+                                    <div className="mb-1">
+                                        <small>
+                                            <em>Download tracking started in August 2018</em>
+                                            <label className="inline-block ml-15 text-400 clickable">
+                                                <input type="checkbox" className="mr-07" checked={includePartialRequests} onChange={onTogglePartialReqs} />
+                                                Include Partial Requests
+                                                { width > 500 ? ' (e.g. IGV, JuiceBox)' : null }
+                                            </label>
+                                        </small>
+                                    </div>
+                                </div>
                             }
                             extraButtons={
                                 <UsageChartsCountByDropdown {...countByDropdownProps} chartID="file_downloads" includePartialRequests={includePartialRequests} />
@@ -941,13 +943,13 @@ class UsageStatsView extends React.PureComponent {
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
                     : null }
 
                 { sessions_by_country ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={sessions_by_country}>
+                    <ColorScaleProvider resetScaleLegendWhenChange={sessions_by_country}>
 
                         <hr/>
 
@@ -959,13 +961,13 @@ class UsageStatsView extends React.PureComponent {
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
                     : null }
 
                 {/* browse_search_queries || other_search_queries ?
 
-                    <GroupOfCharts width={width} resetScalesWhenChange={browse_search_queries}>
+                    <ColorScaleProvider resetScalesWhenChange={browse_search_queries}>
 
                         <hr className="mt-3"/>
 
@@ -985,14 +987,14 @@ class UsageStatsView extends React.PureComponent {
                             </AreaChartContainer>
                         : null }
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
 
                 : null */}
 
                 { session && experiment_set_views ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={experiment_set_views}>
+                    <ColorScaleProvider resetScaleLegendWhenChange={experiment_set_views}>
 
                         <hr className="mt-3"/>
 
@@ -1010,13 +1012,13 @@ class UsageStatsView extends React.PureComponent {
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
                     : null }
 
                 { session && fields_faceted ?
 
-                    <GroupOfCharts width={width} resetScaleLegendWhenChange={fields_faceted}>
+                    <ColorScaleProvider resetScaleLegendWhenChange={fields_faceted}>
 
                         <hr className="mt-3"/>
                         {/*
@@ -1039,7 +1041,7 @@ class UsageStatsView extends React.PureComponent {
 
                         <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
                     : null }
 
@@ -1099,7 +1101,7 @@ class SubmissionsStatsView extends React.PureComponent {
 
                 { showInternalReleaseCharts ?
 
-                    <GroupOfCharts width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
+                    <ColorScaleProvider width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
 
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal" title={<span><span className="text-500">Experiment Sets</span> - internal vs public release</span>}>
                             <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
@@ -1107,11 +1109,11 @@ class SubmissionsStatsView extends React.PureComponent {
 
                         <hr/>
 
-                    </GroupOfCharts>
+                    </ColorScaleProvider>
 
                     : null }
 
-                <GroupOfCharts width={width} resetScalesWhenChange={expsets_released}>
+                <ColorScaleProvider width={width} resetScalesWhenChange={expsets_released}>
 
                     <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
                         <div className="inline-block ml-15">
@@ -1163,7 +1165,7 @@ class SubmissionsStatsView extends React.PureComponent {
                         <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                     </AreaChartContainer>
 
-                </GroupOfCharts>
+                </ColorScaleProvider>
 
             </div>
         );
