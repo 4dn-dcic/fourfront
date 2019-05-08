@@ -176,6 +176,7 @@ static_content_embed_list = [
     "static_content.content.lab",
     "static_content.content.contributing_labs",
     "static_content.content.award",
+    "static_content.content.filetype"
 ]
 
 lab_award_attribution_embed_list = [

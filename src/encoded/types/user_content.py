@@ -177,6 +177,8 @@ class HiglassViewConfig(UserContent):
     #    TODO: Calculate which tilesetUids are defined in viewconfig, if any.
     #    '''
     #    return None
+
+    ## TODO Move this and filetype properties to UserContent base class maybe.
     @calculated_property(schema={
         "title": "Content",
         "description": "Content for HiGlass Item (unused)",
@@ -184,6 +186,14 @@ class HiglassViewConfig(UserContent):
     })
     def content(self, request):
         return None
+
+    @calculated_property(schema={
+        "title": "FileType",
+        "description": "Type of this Item (unused)",
+        "type": "string"
+    })
+    def filetype(self, request):
+        return "HiglassViewConfig"
 
     class Collection(Item.Collection):
         '''
