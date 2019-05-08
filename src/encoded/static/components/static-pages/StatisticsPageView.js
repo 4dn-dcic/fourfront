@@ -880,8 +880,7 @@ class UsageStatsView extends React.PureComponent {
         const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
         let dateRoundInterval;
 
-
-        // We want all charts to share the same x axis.
+        // We want all charts to share the same x axis. Here we round to date boundary.
         // Minor issue is that file downloads are stored in UTC/GMT while analytics are in EST timezone..
         // TODO improve on this somehow, maybe pass prop to FileDownload chart re: timezone parsing of some sort.
         if (currentGroupBy === 'daily'){
@@ -889,7 +888,7 @@ class UsageStatsView extends React.PureComponent {
             untilDate.endOf('day').subtract(45, 'minute');
             dateRoundInterval = 'day';
         } else if (currentGroupBy === 'monthly') {
-            fromDate.startOf('month').add(1, 'hour');
+            fromDate.endOf('month'); // Not rly needed.
             untilDate.endOf('month').subtract(1, 'day');
             dateRoundInterval = 'month';
         } else if (currentGroupBy === 'yearly'){ // Not yet implemented
@@ -954,7 +953,7 @@ class UsageStatsView extends React.PureComponent {
 
                         <AreaChartContainer {...commonContainerProps} id="sessions_by_country"
                             title={
-                                <h4 className="text-300">
+                                <h4 className="text-300 mt-0">
                                     <span className="text-500">{ countBy.sessions_by_country === 'sessions' ? 'User Sessions' : 'Page Views' }</span> - by country
                                 </h4>
                             }
@@ -1003,13 +1002,13 @@ class UsageStatsView extends React.PureComponent {
 
                         <AreaChartContainer {...commonContainerProps} id="experiment_set_views"
                             title={
-                                <span>
+                                <h4 className="text-300 mt-0">
                                     <span className="text-500">Experiment Set Detail Views</span>{' '}
                                     { countBy.experiment_set_views === 'list_views' ? '- appearances within initial 25 browse results' :
                                         countBy.experiment_set_views === 'clicks' ? '- clicks from browse results' : '- page detail views' }
-                                </span>
+                                </h4>
                             }
-                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_view" />}>
+                            extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="experiment_set_views" />}>
                             <AreaChart {...commonChartProps} data={experiment_set_views} />
                         </AreaChartContainer>
 
@@ -1037,7 +1036,11 @@ class UsageStatsView extends React.PureComponent {
                         */}
 
                         <AreaChartContainer {...commonContainerProps} id="fields_faceted"
-                            title={<span><span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }</span>}
+                            title={
+                                <h4 className="text-300 mt-0">
+                                    <span className="text-500">Fields Faceted</span> { countBy.fields_faceted === 'sessions' ? '- by user session' : '- by search result instance' }
+                                </h4>
+                            }
                             extraButtons={<UsageChartsCountByDropdown {...countByDropdownProps} chartID="fields_faceted" />}>
                             <AreaChart {...commonChartProps} data={fields_faceted} />
                         </AreaChartContainer>
@@ -1106,7 +1109,8 @@ class SubmissionsStatsView extends React.PureComponent {
 
                     <ColorScaleProvider width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
 
-                        <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal" title={<span><span className="text-500">Experiment Sets</span> - internal vs public release</span>}>
+                        <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal"
+                            title={<h4 className="text-300 mt-0"><span className="text-500">Experiment Sets</span> - internal vs public release</h4>}>
                             <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
                         </AreaChartContainer>
 
@@ -1129,9 +1133,9 @@ class SubmissionsStatsView extends React.PureComponent {
                     <HorizontalD3ScaleLegend {...{ loadingStatus }} />
 
                     <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
-                        <React.Fragment>
+                        <h4 className="text-300 mt-0">
                             <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
-                        </React.Fragment>
+                        </h4>
                     }>
                         <AreaChart {...commonChartProps} data={expsets_released} />
                     </AreaChartContainer>
@@ -1144,26 +1148,26 @@ class SubmissionsStatsView extends React.PureComponent {
 
                     { showInternalReleaseCharts ?
                         <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
-                            <React.Fragment>
+                            <h4 className="text-300 mt-0">
                                 <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
-                            </React.Fragment>
+                            </h4>
                         }>
                             <AreaChart {...commonChartProps} data={expsets_released_internal} />
                         </AreaChartContainer>
                         : null }
 
                     <AreaChartContainer {...commonContainerProps} id="files_released" title={
-                        <React.Fragment>
+                        <h4 className="text-300 mt-0">
                             <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
-                        </React.Fragment>
+                        </h4>
                     }>
                         <AreaChart {...commonChartProps} data={files_released} />
                     </AreaChartContainer>
 
                     <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
-                        <React.Fragment>
+                        <h4 className="text-300 mt-0">
                             <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
-                        </React.Fragment>
+                        </h4>
                     }>
                         <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
                     </AreaChartContainer>
