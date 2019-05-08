@@ -11,7 +11,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "status": "in review by lab",
-        "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55",
+        "target_of_mod": ["a8ab8bca-4840-41b7-88d7-04cc19a54657"],
         "genomic_change": "deletion"
     },
     {
@@ -25,7 +25,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "status": "in review by lab",
-        "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
+        "target_of_mod": ["a8ab8bca-4840-41b7-88d7-04cc19a54657"]
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b276",

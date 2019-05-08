@@ -129,6 +129,7 @@ def test_bio_feature_display_title_genomic_region_w_preferred_label(testapp, gen
 
 def test_bio_feature_display_title_protein_transcript(
         testapp, gene_item, gene_bio_feature, protein_term, transcript_term):
+    ''' gene_bio_feature is in datafixtures '''
     types = [protein_term, transcript_term]
     for t in types:
         res = testapp.patch_json(gene_bio_feature['@id'], {'feature_type': t['@id']}, status=200)
@@ -137,6 +138,7 @@ def test_bio_feature_display_title_protein_transcript(
 
 def test_bio_feature_display_title_modfied_protein(
         testapp, gene_item, gene_bio_feature, protein_term):
+    ''' gene_bio_feature is in datafixtures '''
     res = testapp.patch_json(
         gene_bio_feature['@id'],
         {

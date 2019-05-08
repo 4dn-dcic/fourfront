@@ -1,4 +1,5 @@
 from snovault import upgrade_step
+from . import _get_biofeat_for_target as getbf4t
 
 
 @upgrade_step('experiment_repliseq', '1', '2')
@@ -109,3 +110,57 @@ def experiment_1_2(value, system):
             note = value['notes'] + '; ' + note
         value['notes'] = note
     value['experiment_type'] = exptype_uuid
+
+
+@upgrade_step('experiment_seq', '4', '5')
+@upgrade_step('experiment_chiapet', '4', '5')
+@upgrade_step('experiment_damid', '3', '4')
+@upgrade_step('experiment_tsaseq', '2', '3')
+def experiment_targeted_factor_upgrade(value, system):
+    factor = value.get('targeted_factor')
+    if factor:
+        del value['targeted_factor']
+        note = 'Old Target: {}'.format(factor)
+        targets = system['registry']['collections']['Target']
+        biofeats = system['registry']['collections']['BioFeature']
+        target = targets.get(factor)
+        if target:
+            bfuuid = getbf4t(target, biofeats)
+        if bfuuid:
+            value['targeted_factor'] = [bfuuid]
+        else:
+            note = 'UPDATE NEEDED: ' + note
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note
+
+
+@upgrade_step('experiment_capture_c', '2', '3')
+def experiment_capture_c_1_2(value, system):
+    tregions = value.get('targeted_regions')
+    if tregions:
+        new_vals = []
+        del value['targeted_regions']
+        targets = system['registry']['collections']['Target']
+        biofeats = system['registry']['collections']['BioFeature']
+        note = ''
+        for tr in tregions:
+            t = tr.get('target')  # it's required
+            of = tr.get('oligo_file', '')
+            tstr = 'Old Target: {} {}'.format(t, of)
+            target = targets.get(t)
+            if target:
+                bfuuid = getbf4t(target, biofeats)
+            if bfuuid:
+                tinfo = {'target': [bfuuid]}
+                if of:
+                    tinfo['oligo_file'] = of
+                new_vals.append(tinfo)
+            else:
+                tstr = 'UPDATE NEEDED: ' + tstr
+            note += tstr
+        if new_vals:
+            value['targeted_regions'] = new_vals
+        if 'notes' in value:
+            note = value['notes'] + '; ' + note
+        value['notes'] = note

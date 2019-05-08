@@ -67,7 +67,7 @@ def test_calculated_biological_treatment_display_title(testapp, viral_treatment)
     assert res.json['@graph'][0]['display_title'] == 'Virus treatment (2 MOI, 3.5h)'
 
 
-def test_calculated_rnai_treatment_display_title(testapp, rnai, target_w_genes):
+def test_calculated_rnai_treatment_display_title(testapp, rnai, gene_bio_feature):
     assert rnai['display_title'] == 'shRNA treatment'
-    res = testapp.patch_json(rnai['@id'], {'target': target_w_genes['@id']})
-    assert res.json['@graph'][0]['display_title'] == 'shRNA of Gene:eeny,meeny'
+    res = testapp.patch_json(rnai['@id'], {'target': [gene_bio_feature['@id']]})
+    assert res.json['@graph'][0]['display_title'] == 'shRNA of RAD21 gene'
