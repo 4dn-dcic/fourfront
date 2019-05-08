@@ -164,19 +164,25 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
         received.extend(received_batch)
     to_replace = []
     to_delete = []
-    found_rel = False
+    found_fp_sid = None
+    found_rel_sid = None
+    # keep track of the PATCH of the original file and the associated PATCH
+    # of the related file. Compare uuids
     for msg in received:
         json_body = json.loads(msg.get('Body', {}))
-        # we do not want to use the POST msg, but rather the one from _update
-        if json_body.get('uuid') == rel_uuid and json_body.get('method') == 'PATCH':
-            assert json_body.get('info') == "queued from %s _update" % test_fp_uuid
-            found_rel = True
+        if json_body['uuid'] == test_fp_uuid and json_body['method'] == 'PATCH':
+            found_fp_sid = json_body['sid']
+            to_delete.append(msg)
+        elif json_body['uuid'] == rel_uuid and json_body['method'] == 'PATCH':
+            assert json_body['info'] == "queued from %s _update" % test_fp_uuid
+            found_rel_sid = json_body['sid']
             to_delete.append(msg)
         else:
             to_replace.append(msg)
     indexer_queue.delete_messages(to_delete)
     indexer_queue.replace_messages(to_replace, vis_timeout=0)
-    assert found_rel
+    assert found_fp_sid is not None and found_rel_sid is not None
+    assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
 # @pytest.mark.performance
