@@ -2,16 +2,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {  Button, Fade } from 'react-bootstrap';
+import { Fade } from 'react-bootstrap';
 import _ from 'underscore';
-import * as store from '../store';
+import { store } from './../store';
 import { typedefs } from './util';
 
 var { AlertObj } = typedefs;
 
 const defaultNavigateDisappearThreshold = 1;
 
-let alertNavigatationCountMap = {};
+const alertNavigatationCountMap = {};
 
 
 /**

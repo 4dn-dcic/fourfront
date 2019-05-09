@@ -14,7 +14,7 @@ import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './footer';
-import * as store from '../store';
+import { store } from './../store';
 import * as origin from '../libs/origin';
 import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
@@ -83,10 +83,9 @@ class Timeout {
     constructor(timeout) {
         /**
          * Internal promise object which resolves after length of time as specified by `timeout`.
-         *
          * @private
          */
-        this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
+        this.promise = new Promise((resolve) => setTimeout(resolve.bind(null, this), timeout));
     }
 }
 
@@ -98,7 +97,7 @@ class Timeout {
  * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/server.js
  * @see https://github.com/4dn-dcic/fourfront/blob/master/src/encoded/static/browser.js
  */
-export default class App extends React.Component {
+export default class App extends React.PureComponent {
 
     /**
      * Defines time before a 'slow loading' indicator appears on page.
@@ -114,7 +113,7 @@ export default class App extends React.Component {
      * @returns {void} Nothing
      */
     static scrollTo() {
-        var hash = window.location.hash;
+        var { hash } = window.location;
         if (hash && document.getElementById(hash.slice(1))) {
             window.location.replace(hash);
         } else {
@@ -131,27 +130,26 @@ export default class App extends React.Component {
      * @returns {Object} Object keyed by field name with collected value as value.
      */
     static getRenderedPropValues(document, filter = null){
-        var returnObj = {};
-        var script_props;
-        if (typeof filter === 'string') script_props = document.querySelectorAll('script[data-prop-name="' + filter + '"]');
-        else script_props = document.querySelectorAll('script[data-prop-name]');
-        for (var i = 0; i < script_props.length; i++) {
-            var elem = script_props[i];
-            var prop_name = elem.getAttribute('data-prop-name');
+        var returnObj = {}, script_props;
+        if (typeof filter === 'string'){
+            script_props = document.querySelectorAll('script[data-prop-name="' + filter + '"]');
+        } else {
+            script_props = document.querySelectorAll('script[data-prop-name]');
+        }
+        _.forEach(script_props, function(elem){
+            const prop_name = elem.getAttribute('data-prop-name');
             if (filter && Array.isArray(filter)){
-                if (filter.indexOf(prop_name) === -1) continue;
+                if (filter.indexOf(prop_name) === -1){
+                    return;
+                }
             }
-            var elem_value = elem.text;
-            var elem_type = elem.getAttribute('type') || '';
-            if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
+            let elem_value = elem.text;
+            const elem_type = elem.getAttribute('type') || '';
+            if (elem_type === 'application/json' || elem_type.slice(-5) === '+json') {
                 elem_value = JSON.parse(elem_value);
             }
-            //if (elem.getAttribute('data-prop-name') === 'user_details' && !filter){
-                // pass; don't include as is not a redux prop
-            //} else {
             returnObj[prop_name] = elem_value;
-            //}
-        }
+        });
         return returnObj;
     }
 
@@ -169,25 +167,10 @@ export default class App extends React.Component {
     }
 
     /**
-     * @type {Object} propTypes
-     * @property {*} [propTypes.sessionMayBeSet] - PropTypes definition.
-     * @public
-     * @constant
-     * @member
-     */
-    static propTypes = {
-        "sessionMayBeSet" : PropTypes.any,    // Whether Auth0 session exists or not.
-    };
-
-    /**
-     * @type {Object} defaultProps
-     * @property {boolean} [defaultProps.sessionMayBeSet=null] Whether user is currently likely to be logged in as determined by browser.js
-     * @public
-     * @constant
-     * @member
+     * @property {boolean} sessionMayBeSet Whether user is currently likely to be logged in.
      */
     static defaultProps = {
-        'sessionMayBeSet' : null
+        'sessionMayBeSet' : false
     };
 
     static debouncedOnNavigationTooltipRebuild = _.debounce(ReactTooltip.rebuild, 500);
@@ -317,7 +300,7 @@ export default class App extends React.Component {
         queryHref = globals.windowHref(queryHref);
         if (href !== queryHref){
             store.dispatch({
-                type: {'href':queryHref}
+                type: { 'href' : queryHref }
             });
         }
 
@@ -824,7 +807,7 @@ export default class App extends React.Component {
      */
     onHashChange(event) {
         store.dispatch({
-            type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
+            type: { 'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') }
         });
     }
 
@@ -997,7 +980,7 @@ export default class App extends React.Component {
             this.requestCurrent = true; // Remember we have an outstanding GET request
             var timeout = new Timeout(App.SLOW_REQUEST_TIME);
 
-            Promise.race([request, timeout.promise]).then(v => {
+            Promise.race([request, timeout.promise]).then((v) => {
                 if (v instanceof Timeout) {
                     console.log('TIMEOUT!!!');
                     // TODO: implement some other type of slow? A: YES

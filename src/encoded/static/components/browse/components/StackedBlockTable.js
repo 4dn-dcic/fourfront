@@ -3,13 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
-import { Button, Collapse } from 'react-bootstrap';
+import { Collapse } from 'react-bootstrap';
 import _ from 'underscore';
-import url from 'url';
 import { IndeterminateCheckbox } from './../../forms/components/IndeterminateCheckbox';
-import { expFxn, console, isServerSide, analytics, object, Schemas, fileUtil, typedefs } from './../../util';
-import * as store from './../../../store';
+import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
 
+
+// eslint-disable-next-line no-unused-vars
 var { Item } = typedefs;
 
 

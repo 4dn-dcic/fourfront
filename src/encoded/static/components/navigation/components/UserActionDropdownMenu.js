@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import { Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
 import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './../../util';
-import * as store from './../../../store';
+import { store } from './../../../store';
 import { LoginNavItem } from './LoginNavItem';
 
 

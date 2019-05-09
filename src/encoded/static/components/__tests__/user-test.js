@@ -25,7 +25,7 @@ describe('Testing user.js', function() {
         var { Provider, connect } = require('react-redux');
         User = require('./../item-pages/UserView').default;
         context = require('../testdata/submitter');
-        store = require('../../store');
+        store = require('../../store').store;
         getNestedProperty = require('../util').object.getNestedProperty;
         var dispatch_vals = {
             'context' : context

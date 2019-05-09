@@ -230,7 +230,8 @@ export function changeFilter(
  * @returns {void}
  */
 export function saveChangedFilters(newExpSetFilters, href=null, callback=null){
-    if (!store)   store = require('./../../store');
+    // eslint-disable-next-line prefer-destructuring
+    if (!store)  store = require('./../../store').store;
     if (!Alerts) Alerts = require('../alerts').default;
 
     var originalReduxState = store.getState();
@@ -449,7 +450,7 @@ export const NON_FILTER_URL_PARAMS = [
  */
 export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseState = null){
     if (!contextFilters){ // Grab context.filters from Redux store if not supplied.
-        if (!store) store = require('./../../store');
+        if (!store) store = require('./../../store').store;
         var storeState = store.getState();
         contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
     }

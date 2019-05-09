@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import { Button } from 'react-bootstrap';
-import * as store from './../../store';
+import { store } from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
 import { ExperimentSetTablesLoaded, OverviewHeadingContainer } from './components';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
