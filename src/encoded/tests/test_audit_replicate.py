@@ -235,74 +235,74 @@ def more_invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_fi
     return rep_sets
 
 
-def test_audit_replicate_set_no_audit_if_no_replicates(testapp, empty_replicate_set):
-    res = testapp.get(empty_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(errors)
-
-
-def test_audit_replicate_set_warning_if_one_experiment(testapp, one_experiment_replicate_set):
-    res = testapp.get(one_experiment_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert any(error['category'] == 'missing replicate' for error in errors)
-
-
-def test_audit_replicate_set_warning_if_one_biorep(testapp, two_experiment_replicate_set):
-    res = testapp.get(two_experiment_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert any(error['category'] == 'missing replicate' for error in errors)
-
-
-def test_audit_replicate_set_warning_if_out_of_sequence(testapp, out_of_sequence_experiment_replicate_set):
-    res = testapp.get(out_of_sequence_experiment_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert any(error['category'] == 'missing replicate' for error in errors)
-    assert any('biological replicate numbers are not in sequence' in error['detail'] for error in errors)
-    assert any('technical replicate numbers for bioreplicate number' in error['detail'] for error in errors)
-
-
-def test_audit_replicate_set_no_warning_if_in_sequence(testapp, valid_replicate_set):
-    res = testapp.get(valid_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(error['category'] == 'missing replicate' for error in errors)
-
-
-def test_audit_replicate_set_consistency_check(testapp, valid_replicate_set):
-    res = testapp.get(valid_replicate_set['@id'] + '/@@audit-self')
-    errors = res.json['audit']
-    assert not any(errors)
-
-
-def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_sets):
-    #import pdb; pdb.set_trace()
-    for i, rep in enumerate(invalid_replicate_sets):
-        res = testapp.get(rep['@id'] + '/@@audit-self')
-        errors = res.json['audit']
-        print(errors)
-        assert any(error['category'] == 'inconsistent replicate data' for error in errors)
-        if i == 0:
-            assert any('Experiment field' in error['detail'] for error in errors)
-        elif i == 1:
-            assert any('Biosample field' in error['detail'] for error in errors)
-        else:
-            assert any('Cell Culture Detail field' in error['detail'] for error in errors)
-
-def test_audit_more_replicate_set_inconsistency_checks(testapp, more_invalid_replicate_sets):
-    #import pdb; pdb.set_trace()
-    for i, rep in enumerate(more_invalid_replicate_sets):
-        res = testapp.get(rep['@id'] + '/@@audit-self')
-        errors = res.json['audit']
-        print(errors)
-        if i == 0:
-            assert 'Experiment field' not in (error['detail'] for error in errors)
-        else:
-            assert any(error['category'] == 'inconsistent replicate data' for error in errors)
-            if i == 2:
-                assert any('Biosample field' in error['detail'] for error in errors)
-                assert 'Experiment field' not in (error['detail'] for error in errors)
-                assert any(error['level_name'] == 'ERROR' for error in errors)
-            else:
-                assert any('Experiment field' in error['detail'] for error in errors)
+# def test_audit_replicate_set_no_audit_if_no_replicates(testapp, empty_replicate_set):
+#     res = testapp.get(empty_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert not any(errors)
+#
+#
+# def test_audit_replicate_set_warning_if_one_experiment(testapp, one_experiment_replicate_set):
+#     res = testapp.get(one_experiment_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert any(error['category'] == 'missing replicate' for error in errors)
+#
+#
+# def test_audit_replicate_set_warning_if_one_biorep(testapp, two_experiment_replicate_set):
+#     res = testapp.get(two_experiment_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert any(error['category'] == 'missing replicate' for error in errors)
+#
+#
+# def test_audit_replicate_set_warning_if_out_of_sequence(testapp, out_of_sequence_experiment_replicate_set):
+#     res = testapp.get(out_of_sequence_experiment_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert any(error['category'] == 'missing replicate' for error in errors)
+#     assert any('biological replicate numbers are not in sequence' in error['detail'] for error in errors)
+#     assert any('technical replicate numbers for bioreplicate number' in error['detail'] for error in errors)
+#
+#
+# def test_audit_replicate_set_no_warning_if_in_sequence(testapp, valid_replicate_set):
+#     res = testapp.get(valid_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert not any(error['category'] == 'missing replicate' for error in errors)
+#
+#
+# def test_audit_replicate_set_consistency_check(testapp, valid_replicate_set):
+#     res = testapp.get(valid_replicate_set['@id'] + '/@@audit-self')
+#     errors = res.json['audit']
+#     assert not any(errors)
+#
+#
+# def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_sets):
+#     #import pdb; pdb.set_trace()
+#     for i, rep in enumerate(invalid_replicate_sets):
+#         res = testapp.get(rep['@id'] + '/@@audit-self')
+#         errors = res.json['audit']
+#         print(errors)
+#         assert any(error['category'] == 'inconsistent replicate data' for error in errors)
+#         if i == 0:
+#             assert any('Experiment field' in error['detail'] for error in errors)
+#         elif i == 1:
+#             assert any('Biosample field' in error['detail'] for error in errors)
+#         else:
+#             assert any('Cell Culture Detail field' in error['detail'] for error in errors)
+#
+# def test_audit_more_replicate_set_inconsistency_checks(testapp, more_invalid_replicate_sets):
+#     #import pdb; pdb.set_trace()
+#     for i, rep in enumerate(more_invalid_replicate_sets):
+#         res = testapp.get(rep['@id'] + '/@@audit-self')
+#         errors = res.json['audit']
+#         print(errors)
+#         if i == 0:
+#             assert 'Experiment field' not in (error['detail'] for error in errors)
+#         else:
+#             assert any(error['category'] == 'inconsistent replicate data' for error in errors)
+#             if i == 2:
+#                 assert any('Biosample field' in error['detail'] for error in errors)
+#                 assert 'Experiment field' not in (error['detail'] for error in errors)
+#                 assert any(error['level_name'] == 'ERROR' for error in errors)
+#             else:
+#                 assert any('Experiment field' in error['detail'] for error in errors)
 
 
 # def test_audit_external_experiment_set_no_pub_warns(testapp, external_exp_set):
