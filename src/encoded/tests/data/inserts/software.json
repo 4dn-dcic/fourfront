@@ -699,7 +699,7 @@
         "software_type": [
             "Tile generator for big data"
         ],
-        "name": "Clodius",
+        "name": "clodius",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "version": "0.9.4",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -753,5 +753,33 @@
         "uuid": "5de38570-68bf-4545-98b6-d7d51ae08db9",
         "source_url": "https://github.com/higlass/clodius",
         "title": "clodius_0.10.2"
+    },
+    {
+        "uuid": "d064191c-b2fc-4c7b-971f-5e2034dc902d",
+        "title": "clodius_0.10.2",
+        "description": "Clodius is a tool for breaking up large data sets into smaller tiles that can subsequently be displayed using an appropriate viewer.",
+        "project_release": "2019-01-31",
+        "software_type": [
+            "Tile generator for big data"
+        ],
+        "name": "clodius",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "0.10.2",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "status": "released",
+        "source_url": "https://github.com/higlass/clodius"
+    },
+    {
+        "uuid": "fbf26cdc-a507-4a2a-b09d-107e5e86c70d",
+        "title": "cooltools_0.2.0",
+        "software_type": [
+            "feature calling"
+        ],
+        "name": "clodius",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "version": "0.2.0",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "status": "released",
+        "source_url": "https://github.com/mirnylab/cooltools"
     }
 ]
