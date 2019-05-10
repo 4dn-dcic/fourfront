@@ -34,7 +34,7 @@
         "react/jsx-key" : "error",
         "react/jsx-no-duplicate-props" : "error",
         "react/jsx-no-bind" : ["warn", { "ignoreDOMComponents" : true }],
-        "react/jsx-pascal-case" : "error",
+        "react/jsx-pascal-case" : ["error", { "allowAllCaps" : true }],
         "react/jsx-props-no-multi-spaces" : "error",
         "react/no-access-state-in-setstate" : "error",
         "react/no-direct-mutation-state" : "error",

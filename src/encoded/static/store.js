@@ -36,10 +36,6 @@ export const reducers = {
         return (action.type && action.type.lastCSSBuildTime) || state;
     },
 
-    'contextRequest' : function(state={}, action) {
-        return (action.type && action.type.contextRequest) || state;
-    },
-
     'slow' : function(state=false, action) {
         if (action.type && typeof action.type.slow === 'boolean'){
             return action.type.slow;
