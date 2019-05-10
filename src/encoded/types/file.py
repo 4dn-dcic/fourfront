@@ -41,9 +41,9 @@ import json
 import pytz
 import os
 from pyramid.traversal import resource_path
-
 from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
+from copy import deepcopy
 from . import TrackingItem
 from ..authentication import session_properties
 import structlog
@@ -561,6 +561,10 @@ class File(Item):
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
+
+        # handle related_files. This is quite janky; must manually invalidate
+        # the relation made on `related_fl` item because we are calling its
+        # update() method directly, which circumvents snovault.crud_view.item_edit
         DicRefRelation = {
             "derived from": "parent of",
             "parent of": "derived from",
@@ -568,34 +572,52 @@ class File(Item):
             "is superceded by": "supercedes",
             "paired with": "paired with"
         }
-        acc = str(self.uuid)
 
-        if 'related_files' in properties.keys():
+        if 'related_files' in properties:
+            my_uuid = str(self.uuid)
+            # save these values
+            curr_txn = None
+            curr_request = None
             for relation in properties["related_files"]:
                 try:
                     switch = relation["relationship_type"]
                     rev_switch = DicRefRelation[switch]
                     related_fl = relation["file"]
-                    relationship_entry = {"relationship_type": rev_switch, "file": acc}
-                    rel_dic = {'related_files': [relationship_entry, ]}
+                    relationship_entry = {"relationship_type": rev_switch, "file": my_uuid}
                 except:
-                    print("invalid data, can't update correctly")
-                    return
+                    log.error('Error updating related_files on %s _update. %s'
+                              % (my_uuid, relation))
+                    continue
 
                 target_fl = self.collection.get(related_fl)
-                # case one we don't have relations
-                if 'related_files' not in target_fl.properties.keys():
-                    target_fl.properties.update(rel_dic)
-                    target_fl.update(target_fl.properties)
+                target_fl_props = deepcopy(target_fl.properties)
+                # This is a cool python feature. If break is not hit in the loop,
+                # go to the `else` statement. Works for empty lists as well
+                for target_relation in target_fl_props.get('related_files', []):
+                    if (target_relation.get('file') == my_uuid and
+                        target_relation.get('relationship_type') == rev_switch):
+                        break
                 else:
-                    # case two we have relations but not the one we need
-                    for target_relation in target_fl.properties['related_files']:
-                        if target_relation.get('file') == acc:
-                            break
-                    else:
-                        # make data for new related_files
-                        target_fl.properties['related_files'].append(relationship_entry)
-                        target_fl.update(target_fl.properties)
+                    import transaction
+                    from pyramid.threadlocal import get_current_request
+                    from snovault.invalidation import add_to_indexing_queue
+                    # Get the current request in order to queue the forced
+                    # update for indexing. This is bad form.
+                    # Don't do this anywhere else, please!
+                    if curr_txn is None:
+                        curr_txn = transaction.get()
+                    if curr_request is None:
+                        curr_request = get_current_request()
+                    # handle related_files whether or not any currently exist
+                    target_related_files = target_fl_props.get('related_files', [])
+                    target_related_files.append(relationship_entry)
+                    target_fl_props.update({'related_files': target_related_files})
+                    target_fl._update(target_fl_props)
+                    to_queue = {'uuid': str(target_fl.uuid), 'sid': target_fl.sid,
+                                'info': 'queued from %s _update' % my_uuid}
+                    curr_txn.addAfterCommitHook(add_to_indexing_queue,
+                                                args=(curr_request, to_queue, 'edit'))
+
 
     @property
     def __name__(self):
