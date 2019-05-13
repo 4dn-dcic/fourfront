@@ -4,7 +4,7 @@ from snovault import (
 )
 
 
-@audit_checker('biosample', frame=['biosource', 'cell_culture_details'])
+#@audit_checker('biosample', frame=['biosource', 'cell_culture_details'])
 def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value, system):
     '''
     tier1 cell lines have required fields from biosample_cell_culture

@@ -32,12 +32,13 @@ export function isHiglassViewConfigItem(context){
  * @param {{ icon: string, title: JSX.Element|string }} props Props passed into this Component.
  */
 export function HiGlassLoadingIndicator(props) {
+    const { icon, title } = props;
     return (
         <React.Fragment>
             <h3>
-                <i className={"icon icon-lg icon-" + (props.icon || "television")}/>
+                <i className={"icon icon-lg icon-" + (icon || "television")}/>
             </h3>
-            { props.title || "Initializing" }
+            { title || "Initializing" }
         </React.Fragment>
     );
 }
@@ -86,7 +87,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-
+        const { mountDelay } = this.props;
         const finish = () => {
             this.setState(function(currState){
                 return { 'mounted' : true, 'mountCount' : currState.mountCount + 1 };
@@ -121,7 +122,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
                 finish();
             }
 
-        }, this.props.mountDelay || 500);
+        }, mountDelay || 500);
 
     }
 
@@ -175,12 +176,10 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     render(){
-        var { disabled, isValidating, tilesetUid, height, width, options, style,
-            className, viewConfig, placeholder
-            } = this.props,
-            hiGlassInstance = null,
-            mounted         = (this.state && this.state.mounted) || false,
-            outerKey        = "mount-number-" + this.state.mountCount;
+        const { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig, placeholder } = this.props;
+        const { mounted, mountCount, hasRuntimeError } = this.state;
+        let hiGlassInstance = null;
+        const outerKey = "mount-number-" + mountCount;
 
         if (isValidating || !mounted){
             var placeholderStyle = {};
@@ -195,7 +194,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
                     <h4 className="text-400">Not Available</h4>
                 </div>
             );
-        } else if (this.state.hasRuntimeError) {
+        } else if (hasRuntimeError) {
             hiGlassInstance = (
                 <div className="text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Runtime Error</h4>
@@ -203,7 +202,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             );
         } else {
             hiGlassInstance = (
-                <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
+                <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
                     <HiGlassComponent {...{ options, viewConfig, width, height }} ref={this.hgcRef} />
                 </div>
             );
@@ -215,7 +214,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.8/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.5.7/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper row">{ hiGlassInstance }</div>
             </div>

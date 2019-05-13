@@ -431,6 +431,7 @@ def add_files_to_higlass_viewconf(request):
             files(array)                                : A list of file uuids to add.
             firstViewLocationAndZoom(array, optional)   : A list of three numbers indicating the location and zoom levels of the first existing view.
             remove_unneeded_tracks(boolean, optional, default=False): If True, we'll remove tracks that are not needed for the view.
+            height(integer, optional, default=300)     : Maximum Height the viewconfig can occupy.
 
     Returns:
         A dictionary.
@@ -467,6 +468,16 @@ def add_files_to_higlass_viewconf(request):
     first_view_location_and_zoom = request.json_body.get('firstViewLocationAndZoom', [None, None, None])
     remove_unneeded_tracks = request.json_body.get('remove_unneeded_tracks', None)
     genome_assembly = request.json_body.get('genome_assembly', None)
+    maximum_height = request.json_body.get('height', 300)
+
+    # Check the height of the display.
+    if maximum_height < 100:
+        return {
+            "success" : False,
+            "errors" : "Height cannot be below 100.",
+            "new_viewconfig": None,
+            "new_genome_assembly" : None
+        }
 
     # Collect more info on each file.
     files_info, errors = get_file_higlass_information(request, file_uuids)
@@ -495,7 +506,7 @@ def add_files_to_higlass_viewconf(request):
     # For each file
     for current_file in files_info:
         # Try to add this file to the current views.
-        views, errors = add_single_file_to_higlass_viewconf(views, current_file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom)
+        views, errors = add_single_file_to_higlass_viewconf(views, current_file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom, maximum_height)
 
         if errors:
             return {
@@ -642,7 +653,7 @@ def validate_higlass_file_sources(files_info, expected_genome_assembly):
         "genome_assembly": expected_genome_assembly or list(files_by_genome_assembly.keys())[0]
     }
 
-def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom):
+def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_viewconfig, first_view_location_and_zoom, maximum_height):
     """ Add a single file to the list of views.
     Args:
         views(list)             : All of the views from the view config.
@@ -650,6 +661,7 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         genome_assembly(str)    : A string showing the new genome assembly.
         higlass_viewconfig(dict): View config description.
         first_view_location_and_zoom(list): 3 numbers (or 3 None) used to describe the camera position of the first view.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -735,7 +747,8 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         {
             "higlass_viewconfig": higlass_viewconfig,
             "first_view_location_and_zoom": first_view_location_and_zoom,
-        }
+        },
+        maximum_height,
     )
 
 def get_initial_domains_by_genome_assembly(genome_assembly):
@@ -809,13 +822,14 @@ def get_view_content_info(view):
         "center_chromsize_index" : view_center_chromsize_index,
     }
 
-def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info):
+def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info, maximum_height):
     """ Add the bedGraph, bed, or bigwig file to add to the given views.
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
         viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -841,7 +855,7 @@ def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info):
     if file["file_format"] == "/file-formats/bed/":
         new_track_base["type"] = "bedlike"
 
-    return add_1d_file(views, new_track_base, genome_assembly)
+    return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
 def get_title(file):
     """ Returns a string containing the title for the given file.
@@ -856,13 +870,14 @@ def get_title(file):
     title = file.get("track_and_facet_info", {}).get("track_title", file["display_title"])
     return title
 
-def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
+def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_height):
     """ Use the bigbed file to add to the given views.
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
         viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -970,14 +985,15 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info):
             )
         )
 
-    return add_1d_file(views, new_track_base, genome_assembly)
+    return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
-def add_1d_file(views, new_track, genome_assembly):
+def add_1d_file(views, new_track, genome_assembly, maximum_height):
     """ Use file to add to all of view's tracks.
     Args:
         views(list)         : All of the views from the view config.
         new_track(dict)     : The track to add.
         genome_assembly(str): A string showing the new genome assembly.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -996,10 +1012,10 @@ def add_1d_file(views, new_track, genome_assembly):
         else:
             view["tracks"]["top"].insert(0, new_track_to_add)
 
-    views, error = resize_1d_tracks(views)
+    views, error = resize_1d_tracks(views, maximum_height)
     return views, error
 
-def resize_1d_tracks(views):
+def resize_1d_tracks(views, maximum_height):
     """ For each view, resize the top 1D tracks (excluding gene-annotation and chromosome)
     Args:
         views(list)         : All of the views from the view config.
@@ -1007,6 +1023,7 @@ def resize_1d_tracks(views):
     Returns:
         views(list) : A list of the modified views. None if there is an error.
         error(str) : A string explaining the error. This is None if there is no error.
+        maximum_height(integer): Maximum height for the viewconf to hold all tracks.
     """
 
     for view in views:
@@ -1027,7 +1044,7 @@ def resize_1d_tracks(views):
         horizontal_vector_heatmap_tracks = [ t for t in view["tracks"]["top"] if t["type"] in ("horizontal-vector-heatmap") ]
 
         # Get the height allocated for all of the top tracks.
-        remaining_height = 250
+        remaining_height = maximum_height - 50
         # If there is a central view, the top rows will have less height to work with.
         if view_info["has_center_content"]:
             remaining_height = 100
@@ -1052,6 +1069,9 @@ def resize_1d_tracks(views):
             # The height should be no more than half the height
             if height_per_track > remaining_height / 2:
                 height_per_track = remaining_height / 2
+            # Cap the height to about 125
+            if height_per_track > 125:
+                height_per_track = 125
 
         # Minimum height is 20.
         if height_per_track < 20:
@@ -1063,13 +1083,14 @@ def resize_1d_tracks(views):
                 track["height"] = int(height_per_track)
     return views, ""
 
-def add_beddb_file(views, file, genome_assembly, viewconfig_info):
+def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height):
     """ Use the beddb file to add to the given view.
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
         viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -1146,13 +1167,14 @@ def update_genome_position_search_box(view, new_file):
 
     view["genomePositionSearchBox"]["visible"] = True
 
-def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
+def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_height):
     """ Use the chromsizes file to add to the given view.
     Args:
         views(list)         : All of the views from the view config.
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
         viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -1211,7 +1233,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info):
                 view["tracks"]["center"][0]["contents"].append(new_tracks_by_side["center"])
     return views, ""
 
-def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info):
+def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info, maximum_height):
     """ Use the mcool or hic file to add to the given view.
 
     Args:
@@ -1219,6 +1241,7 @@ def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info):
         file(dict)          : The file to add.
         genome_assembly(str): A string showing the new genome assembly.
         viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -1227,14 +1250,15 @@ def add_mcool_hic_file(views, file, genome_assembly, viewconfig_info):
 
     # Make 2D content.
     new_content = create_2d_content(file, "heatmap")
-    return add_2d_file(views, new_content, viewconfig_info)
+    return add_2d_file(views, new_content, viewconfig_info, maximum_height)
 
-def add_2d_file(views, new_content, viewconfig_info):
+def add_2d_file(views, new_content, viewconfig_info, maximum_height):
     """ Add the new 2D content generated by the file to add to the first available view (create a new view if needed.)
     Args:
         views(list)         : All of the views from the view config.
         new_content(dict)   : Description of the new center track.
         viewconfig_info(dict): Information for the viewconfig, including the view parameters and view locks.
+        maximum_height(integer) : All of the tracks should fit within this much height or less.
 
     Returns:
         views(list) : A list of the modified views. None if there is an error.
@@ -1278,7 +1302,7 @@ def add_2d_file(views, new_content, viewconfig_info):
                 # The grid should be the last item to draw so it is always visible.
                 views[0]["tracks"]["center"][0]["contents"].append(contents)
         # Resize 1d tracks.
-        views, error = resize_1d_tracks(views)
+        views, error = resize_1d_tracks(views, maximum_height)
         return views, error
 
     # If there is central content, then we need to make a new view.
@@ -1314,7 +1338,7 @@ def add_2d_file(views, new_content, viewconfig_info):
             add_zoom_lock_if_needed(viewconfig_info["higlass_viewconfig"], view, viewconfig_info["first_view_location_and_zoom"])
 
     # Resize 1d tracks.
-    views, error = resize_1d_tracks(views)
+    views, error = resize_1d_tracks(views, maximum_height)
     return views, error
 
 def create_2d_content(file, viewtype):
