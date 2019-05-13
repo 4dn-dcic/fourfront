@@ -431,7 +431,9 @@ def exp_types(testapp, lab, award):
         'repliseq': ('2-stage Repli-seq', ["ExperimentRepliseq"]),
         'multi': ('Multi-stage Repli-seq', ["ExperimentRepliseq"]),
         'chipseq': ('ChIP-seq', ["ExperimentSeq"]),
-        'dilution': ('Dilution Hi-C', ["ExperimentHiC"])
+        'dilution': ('Dilution Hi-C', ["ExperimentHiC"]),
+        'atacseq': ('ATAC-seq', ["ExperimentAtacseq"]),
+        'tsaseq': ('TSA-seq', ["ExperimentTsaseq"])
     }
     for k, v in title_dict.items():
         data = {

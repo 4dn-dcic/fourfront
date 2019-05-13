@@ -135,7 +135,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 if 'differentiation_tissue' in cc_props:
                     ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
             return ret_str
-        return 'None'
+        return 'None'  # pragma: no cover
 
     @calculated_property(schema={
         "title": "Sample type",
@@ -148,7 +148,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             # silliness in case we ever have multiple biosources
             biosource = request.embed(bs, '@@object')
             btype = biosource.get('biosource_type')
-            if btype is not None:
+            if btype is not None:  # pragma: no cover
                 biosource_types.append(btype)
         biosource_types = list(set(biosource_types))
         if len(biosource_types) > 1:

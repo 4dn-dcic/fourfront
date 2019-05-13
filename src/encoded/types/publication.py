@@ -18,7 +18,6 @@ from pyramid.view import (
     view_config
 )
 from html.parser import HTMLParser
-from encoded.types.experiment_set import invalidate_linked_items
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
