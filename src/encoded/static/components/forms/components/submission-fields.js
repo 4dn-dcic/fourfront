@@ -1228,7 +1228,7 @@ export class AliasInputField extends React.Component {
         // const userEmailAsPrefix = AliasInputField.emailToString(currentSubmittingUser.email); // TODO - maybe have as dropdown option
         let firstPartSelect;
 
-        if (currentSubmittingUser && Array.isArray(currentSubmittingUser.groups) && currentSubmittingUser.groups.indexOf('admin2') > -1){
+        if (currentSubmittingUser && Array.isArray(currentSubmittingUser.groups) && currentSubmittingUser.groups.indexOf('admin') > -1){
             // Render an ordinary input box for admins (can specify any lab).
             firstPartSelect = (
                 <FormControl type="text" inputMode="latin" id="firstPartSelect" // Todo append index to id if in array
