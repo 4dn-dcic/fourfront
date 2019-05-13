@@ -1235,8 +1235,6 @@ export class AliasInputField extends React.Component {
                     value={currFirstPartValue || ''} placeholder={"Lab (default: " + initialDefaultFirstPartValue + ")"}
                     onChange={this.onAliasFirstPartChangeTyped} style={{ 'paddingRight' : 8, 'borderRight' : 'none' }} />
             );
-        } else if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ currFirstPartValue }</InputGroup.Addon>;
         } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
                 <DropdownButton className="alias-lab-select form-control alias-first-part-input" id="firstPartSelect"
@@ -1254,11 +1252,8 @@ export class AliasInputField extends React.Component {
                     )}
                 </DropdownButton>
             );
-        } else { // No submits_for -- fallback to staticy thingy
-            firstPartSelect = (
-                <FormControl id="firstPartSelect" type="text" inputMode="latin" disabled
-                    value={currFirstPartValue} style={{ 'paddingRight' : 8, 'borderRight' : 'none' }} />
-            );
+        } else { // Only 1 submits_for lab or 0 submits_for -- fallback to staticy thingy
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ currFirstPartValue }</InputGroup.Addon>;
         }
         return (
             <FormGroup className="mb-0" validationState={errorMessage ? 'error' : null}>
