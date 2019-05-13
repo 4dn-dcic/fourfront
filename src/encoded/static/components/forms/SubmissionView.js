@@ -246,11 +246,11 @@ export default class SubmissionView extends React.PureComponent{
         var existingAlias = false;
 
         // Step A : Get labs from User, in order to autogenerate alias.
-        var userInfo = JWT.getUserInfo();
+        var userInfo = JWT.getUserInfo(); // Should always succeed, else no edit permission..
         var userHref = null;
         if (userInfo && Array.isArray(userInfo.user_actions)){
             userHref = _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href;
-        } else if (userInfo) {
+        } else {
             userHref = '/me';
         }
 
@@ -314,14 +314,9 @@ export default class SubmissionView extends React.PureComponent{
         };
 
         // Grab current user via AJAX and store to state. To use for alias auto-generation using current user's top submits_for lab name.
-        if (userHref){
-            ajax.load(userHref + '?frame=embedded', (r)=>{
-                this.setState({ 'currentSubmittingUser' : r }, continueInitProcess);
-            }, 'GET', continueInitProcess);
-        } else {
-            continueInitProcess();
-        }
-
+        ajax.load(userHref + '?frame=embedded', (r)=>{
+            this.setState({ 'currentSubmittingUser' : r }, continueInitProcess);
+        }, 'GET', continueInitProcess);
     }
 
     /**
@@ -1022,60 +1017,65 @@ export default class SubmissionView extends React.PureComponent{
     submitObject(inKey, test=false, suppressWarnings=false){
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
-        var stateToSet = {}; // hold state
-        var keyValid = this.state.keyValid;
-        var currType = this.state.keyTypes[inKey];
-        var currSchema = this.props.schemas[currType];
-        var propContext = this.props.context;
+        const { context, schemas, setIsSubmitting, navigate } = this.props;
+        const { keyValid, keyTypes, errorCount, currentSubmittingUser, edit, roundTwo, keyComplete,
+            keyContext, keyDisplay, file, keyHierarchy, keyLinks, roundTwoKeys } = this.state;
+        const stateToSet = {}; // hold next state
+        const currType = keyTypes[inKey];
+        const currSchema = schemas[currType];
+
         // this will always be reset when stateToSet is implemented
         stateToSet.processingFetch = false;
         stateToSet.keyValid = keyValid;
-        var lab;
-        var award;
-        var finalizedContext = this.removeNullsFromContext(inKey);
+
+        const finalizedContext = this.removeNullsFromContext(inKey);
+
         var i;
         // get rid of any hanging errors
-        for(i=0; i<this.state.errorCount; i++){
+        for (i=0; i < errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
             stateToSet.errorCount = 0;
         }
+
         this.setState({ 'processingFetch': true });
 
+        const submitProcess = () => {
 
-        var submitProcess = function(me_data){ // me_data = current user fields
-
-            if(!me_data){
-                console.error('Could not get user account info.');
+            if (!currentSubmittingUser){
+                console.error('No user account info.');
                 keyValid[inKey] = 2;
                 this.setState(stateToSet);
                 return;
             }
 
-
             const submitProcessContd = (userLab = null, userAward = null) => {
 
                 // if editing, use pre-existing award, lab, and submitted_by
                 // this should only be done on the primary object
-                if (this.state.edit && inKey === 0 && propContext.award && propContext.lab){
-                    if(currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.itemUtil.atId(propContext.award);
+                if (edit && inKey === 0 && context.award && context.lab){
+
+                    if (currSchema.properties.award && !('award' in finalizedContext)){
+                        finalizedContext.award = object.itemUtil.atId(context.award);
                     }
-                    if(currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = object.itemUtil.atId(propContext.lab);
+
+                    if (currSchema.properties.lab && !('lab' in finalizedContext)){
+                        finalizedContext.lab = object.itemUtil.atId(context.lab);
                     }
+
                     // an admin is editing. Use the pre-existing submitted_by
                     // otherwise, permissions won't let us change this field
-                    if (me_data.groups && _.contains(me_data.groups, 'admin')){
-                        if(propContext.submitted_by){
-                            finalizedContext.submitted_by = object.itemUtil.atId(propContext.submitted_by);
-                        }else{
+                    if (currentSubmittingUser.groups && _.contains(currentSubmittingUser.groups, 'admin')){
+                        if (context.submitted_by){
+                            finalizedContext.submitted_by = object.itemUtil.atId(context.submitted_by);
+                        } else {
                             // use current user
-                            finalizedContext.submitted_by = object.itemUtil.atId(me_data);
+                            finalizedContext.submitted_by = object.itemUtil.atId(currentSubmittingUser);
                         }
                     }
-                // Otherwise, use lab/award of user submitting unless values present
-                // Skip this is we are working on a User object
+
                 } else if (userLab && userAward && currType !== 'User') {
+                    // Otherwise, use lab/award of user submitting unless values present
+                    // Skip this is we are working on a User object
                     if (currSchema.properties.award && !('award' in finalizedContext)){
                         finalizedContext.award = object.itemUtil.atId(userAward);
                     }
@@ -1090,15 +1090,16 @@ export default class SubmissionView extends React.PureComponent{
                 // used to keep track of fields to delete with PATCH for edit/round two; comma-separated string
                 let deleteFields;
                 // change actionMethod and destination based on edit/round two
-                if (this.state.roundTwo){
-                    destination = this.state.keyComplete[inKey];
+                if (roundTwo){
+                    destination = keyComplete[inKey];
                     actionMethod = 'PATCH';
-                    const alreadySubmittedContext = this.state.keyContext[destination];
+                    const alreadySubmittedContext = keyContext[destination];
                     // roundTwo flag set to true for second round
                     deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
-                } else if (this.state.edit && inKey === 0){
-                    destination = object.itemUtil.atId(propContext);
+                } else if (edit && inKey === 0){
+                    destination = object.itemUtil.atId(context);
                     actionMethod = 'PATCH';
+                    deleteFields = this.buildDeleteFields(finalizedContext, context, currSchema);
                 } else {
                     destination = '/' + currType + '/';
                     actionMethod = 'POST';
@@ -1111,13 +1112,16 @@ export default class SubmissionView extends React.PureComponent{
                     console.log('DELETE FIELDS:', deleteFields);
                 }
 
-                var payload = JSON.stringify(finalizedContext);
+                const payload = JSON.stringify(finalizedContext);
+
                 // add delete_fields parameter to request if necessary
                 if (deleteFields && Array.isArray(deleteFields) && deleteFields.length > 0){
                     var deleteString = deleteFields.join();
                     destination = destination + '?delete_fields=' + deleteString;
                     console.log('DESTINATION:', destination);
                 }
+
+                // Perform request
                 ajax.promise(destination, actionMethod, {}, payload).then((response) => {
                     if (response.status && response.status !== 'success'){ // error
                         keyValid[inKey] = 2;
@@ -1127,10 +1131,10 @@ export default class SubmissionView extends React.PureComponent{
                             stateToSet.errorCount = errorList.length;
                             for(i = 0; i<errorList.length; i++){
                                 var detail = errorList[i].description || errorList[i] || "Unidentified error";
-                                if(errorList[i].name && errorList[i].name.length > 0){
-                                    detail += ('. See ' + errorList[i].name[0] + ' in ' + this.state.keyDisplay[inKey]);
-                                }else{
-                                    detail += ('. See ' + this.state.keyDisplay[inKey]);
+                                if (errorList[i].name && errorList[i].name.length > 0){
+                                    detail += ('. See ' + errorList[i].name[0] + ' in ' + keyDisplay[inKey]);
+                                } else {
+                                    detail += ('. See ' + keyDisplay[inKey]);
                                 }
                                 Alerts.queue({
                                     'title' : "Validation error " + parseInt(i + 1),
@@ -1141,29 +1145,29 @@ export default class SubmissionView extends React.PureComponent{
                             setTimeout(layout.animateScrollTo(0), 100);
                         }
                         this.setState(stateToSet);
-                    }else{
-                        var responseData;
-                        var submitted_at_id;
-                        if(test){
+                    } else {
+                        let responseData;
+                        let submitted_at_id;
+                        if (test){
                             keyValid[inKey] = 3;
                             this.setState(stateToSet);
                             return;
-                        }else{
-                            responseData = response['@graph'][0];
-                            submitted_at_id = responseData['@id'];
+                        } else {
+                            [ responseData ] = response['@graph'];
+                            submitted_at_id = object.itemUtil.atId(responseData);
                         }
                         // handle submission for round two
-                        if(this.state.roundTwo){
+                        if (roundTwo){
                             // there is a file
-                            if(this.state.file && responseData['upload_credentials']){
+                            if (file && responseData.upload_credentials){
                                 // add important info to result from finalizedContext
                                 // that is not added from /types/file.py get_upload
-                                var creds = responseData['upload_credentials'];
+                                var creds = responseData.upload_credentials;
 
                                 require.ensure(['../util/aws'], (require)=>{
 
                                     var awsUtil = require('../util/aws'),
-                                        upload_manager = awsUtil.s3UploadFile(this.state.file, creds);
+                                        upload_manager = awsUtil.s3UploadFile(file, creds);
 
                                     if (upload_manager === null){
                                         // bad upload manager. Cause an alert
@@ -1184,23 +1188,23 @@ export default class SubmissionView extends React.PureComponent{
                                 this.finishRoundTwo();
                                 this.setState(stateToSet);
                             }
-                        }else{
+                        } else {
                             keyValid[inKey] = 4;
                             // Perform final steps when object is submitted
                             // *** SHOULD THIS STUFF BE BROKEN OUT INTO ANOTHER FXN?
                             // find key of parent object, starting from top of hierarchy
-                            var parentKey = parseInt(findParentFromHierarchy(this.state.keyHierarchy, inKey));
+                            var parentKey = parseInt(findParentFromHierarchy(keyHierarchy, inKey));
                             // navigate to parent obj if it was found. Else, go to top level
                             stateToSet.currKey = (parentKey !== null && !isNaN(parentKey) ? parentKey : 0);
-                            var typesCopy = this.state.keyTypes;
-                            var keyComplete = this.state.keyComplete;
-                            var linksCopy = this.state.keyLinks;
-                            var displayCopy = this.state.keyDisplay;
+                            var typesCopy = _.clone(keyTypes);
+                            var keyCompleteCopy = _.clone(keyComplete);
+                            var linksCopy = _.clone(keyLinks);
+                            var displayCopy = _.clone(keyDisplay);
                             // set contextCopy to returned data from POST
-                            var contextCopy = this.state.keyContext;
-                            var roundTwoCopy = this.state.roundTwoKeys.slice();
+                            var contextCopy = _.clone(keyContext);
+                            var roundTwoCopy = roundTwoKeys.slice();
                             // update the state storing completed objects.
-                            keyComplete[inKey] = submitted_at_id;
+                            keyCompleteCopy[inKey] = submitted_at_id;
                             // represent the submitted object with its new path
                             // rather than old keyIdx.
                             linksCopy[submitted_at_id] = linksCopy[inKey];
@@ -1210,38 +1214,40 @@ export default class SubmissionView extends React.PureComponent{
                             contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false);
                             stateToSet.keyLinks = linksCopy;
                             stateToSet.keyTypes = typesCopy;
-                            stateToSet.keyComplete = keyComplete;
+                            stateToSet.keyComplete = keyCompleteCopy;
                             stateToSet.keyDisplay = displayCopy;
                             stateToSet.keyContext = contextCopy;
+
                             // update roundTwoKeys if necessary
-                            var needsRoundTwo = this.checkRoundTwo(currSchema);
-                            if(needsRoundTwo && !_.contains(roundTwoCopy, inKey)){
+                            const needsRoundTwo = this.checkRoundTwo(currSchema);
+                            if (needsRoundTwo && !_.contains(roundTwoCopy, inKey)){
                                 // was getting an error where this could be str
                                 roundTwoCopy.push(parseInt(inKey));
                                 stateToSet.roundTwoKeys = roundTwoCopy;
                             }
+
                             // inKey is 0 for the primary object
-                            if(inKey === 0){
+                            if (inKey === 0){
                                 // see if we need to go into round two submission
-                                if(roundTwoCopy.length === 0){
+                                if (roundTwoCopy.length === 0){
                                     // we're done!
-                                    this.props.setIsSubmitting(false, ()=>{
-                                        this.props.navigate(submitted_at_id);
+                                    setIsSubmitting(false, ()=>{
+                                        navigate(submitted_at_id);
                                     });
-                                }else{
+                                } else {
                                     // break this out into another fxn?
                                     // roundTwo initiation
                                     stateToSet.roundTwo = true;
                                     stateToSet.currKey = roundTwoCopy[0];
                                     // reset validation state for all round two keys
-                                    for(i = 0; i < roundTwoCopy.length; i++){
+                                    for (i = 0; i < roundTwoCopy.length; i++){
                                         keyValid[roundTwoCopy[i]] = 0;
                                     }
                                     alert('Success! All objects were submitted. However, one or more have additional fields that can be only filled in second round submission. You will now be guided through this process for each object.');
                                     this.setState(stateToSet);
                                 }
-                            }else{
-                                alert(this.state.keyDisplay[inKey] + ' was successfully submitted.');
+                            } else {
+                                alert(keyDisplay[inKey] + ' was successfully submitted.');
                                 this.setState(stateToSet);
                             }
                         }
@@ -1251,9 +1257,9 @@ export default class SubmissionView extends React.PureComponent{
             };
 
 
-            if (me_data && Array.isArray(me_data.submits_for) && me_data.submits_for.length > 0){
+            if (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0){
                 // use first lab for now
-                ajax.promise(object.itemUtil.atId(me_data.submits_for[0])).then((myLab) => {
+                ajax.promise(object.itemUtil.atId(currentSubmittingUser.submits_for[0])).then((myLab) => {
                     // use first award for now
                     var myAward = (myLab && Array.isArray(myLab.awards) && myLab.awards.length > 0 && myLab.awards[0]) || null;
                     submitProcessContd(myLab, myAward);
@@ -1262,15 +1268,10 @@ export default class SubmissionView extends React.PureComponent{
                 submitProcessContd();
             }
 
-        }.bind(this);
+        };
 
-        if (this.state.currentSubmittingUser){
-            // We've already loaded user during initPrincipal().
-            submitProcess(this.state.currentSubmittingUser);
-        } else {
-            ajax.promise('/me?frame=embedded').then(submitProcess);
-        }
-
+        // We've already loaded user during initPrincipal().
+        submitProcess(currentSubmittingUser);
     }
 
     /**
@@ -1308,36 +1309,37 @@ export default class SubmissionView extends React.PureComponent{
     }
 
     cancelCreateNewObject(){
-        if (!this.state.creatingIdx) return;
-        var exIdx = this.state.creatingIdx;
-        var keyContext = this.state.keyContext;
-        var currentContextPointer = this.state.keyContext[this.state.currKey];
-        var parentFieldToClear = typeof this.state.creatingLinkForField === 'string' && this.state.creatingLinkForField;
-        _.pairs(currentContextPointer).forEach(function(p){
-            if (p[0] === parentFieldToClear){
-                // Unset value to null
-                if (p[1] === exIdx){
-                    currentContextPointer[p[0]] = null;
-                }
-                // Remove value from array.
-                if (Array.isArray(p[1])){
-                    var idxInArray = p[1].indexOf(exIdx);
-                    if (idxInArray > -1){
-                        currentContextPointer[p[0]].splice(idxInArray, 1);
+        this.setState(function({ creatingIdx, keyContext, currKey, creatingLinkForField }){
+            if (!creatingIdx) return null;
+            const nextKeyContext = _.clone(keyContext);
+            const currentContextPointer = nextKeyContext[currKey];
+            const parentFieldToClear = typeof creatingLinkForField === 'string' && creatingLinkForField;
+            _.pairs(currentContextPointer).forEach(function([field, idx]){
+                if (field === parentFieldToClear){
+                    // Unset value to null
+                    if (idx === creatingIdx){
+                        currentContextPointer[field] = null;
+                    }
+                    // Remove value from array.
+                    if (Array.isArray(idx)){
+                        const idxInArray = idx.indexOf(creatingIdx);
+                        if (idxInArray > -1){
+                            currentContextPointer[field].splice(idxInArray, 1);
+                        }
                     }
                 }
-            }
-        });
-        this.setState({
-            'ambiguousIdx': null,
-            'ambiguousType': null,
-            'ambiguousSelected': null,
-            'creatingAlias' : '',
-            'creatingIdx': null,
-            'creatingType': null,
-            'creatingLink': null,
-            'keyContext' : keyContext,
-            'creatingLinkForField' : null
+            });
+            return {
+                'ambiguousIdx': null,
+                'ambiguousType': null,
+                'ambiguousSelected': null,
+                'creatingAlias' : '',
+                'creatingIdx': null,
+                'creatingType': null,
+                'creatingLink': null,
+                'keyContext' : nextKeyContext,
+                'creatingLinkForField' : null
+            };
         });
     }
 
