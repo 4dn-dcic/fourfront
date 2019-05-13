@@ -66,16 +66,29 @@ export default class SubmissionView extends React.PureComponent{
         return validationReturn;
     }
 
+    static principalTitle(context, edit, create, itemType=null){
+        let principalDisplay; // Name of our current Item being created.
+        if (create === true && !edit){
+            principalDisplay = 'New ' + itemType;
+        } else if (edit === true && !create){
+            if (context && typeof context.accession === 'string'){
+                principalDisplay = context.accession;
+            } else {
+                principalDisplay = itemType;
+            }
+        }
+        return principalDisplay;
+    }
+
     constructor(props){
         super(props);
 
-        _.bindAll(this, 'modifyKeyContext', 'principalTitle', 'initializePrincipal', 'initCreateObj',
+        _.bindAll(this, 'modifyKeyContext', 'initializePrincipal', 'initCreateObj',
             'initCreateAlias', 'submitAmbiguousType', 'buildAmbiguousEnumEntry', 'handleTypeSelection',
             'handleAliasChange', 'handleAliasLabChange', 'submitAlias', 'modifyAlias', 'createObj', 'removeObj',
             'initExistingObj', 'addExistingObj', 'setSubmissionState', 'updateUpload', 'generateValidationButton',
             'generateSubmitButton', 'testPostNewContext', 'realPostNewContext', 'removeNullsFromContext', 'checkRoundTwo',
-            'buildDeleteFields', 'modifyMD5Progess', 'submitObject', 'finishRoundTwo', 'cancelCreateNewObject', 'cancelCreatePrimaryObject',
-
+            'buildDeleteFields', 'modifyMD5Progess', 'submitObject', 'finishRoundTwo', 'cancelCreateNewObject', 'cancelCreatePrimaryObject'
         );
 
         /**
@@ -201,23 +214,6 @@ export default class SubmissionView extends React.PureComponent{
         }, ReactTooltip.rebuild);
     }
 
-    principalTitle(context = null, itemType = null){
-        const { context: propContext } = this.props;
-        const { edit, create } = this.state;
-        context = context || propContext;
-        let principalDisplay; // Name of our current Item being created.
-        if (create === true && !edit){
-            principalDisplay = 'New ' + itemType;
-        } else if (edit === true && !create){
-            if (context && typeof context.accession === 'string'){
-                principalDisplay = context.accession;
-            } else {
-                principalDisplay = itemType;
-            }
-        }
-        return principalDisplay;
-    }
-
     /**
      * Initialize state for the principal object (i.e. the primary object we
      * are creating/editing/cloning). It has the index of 0.
@@ -243,7 +239,7 @@ export default class SubmissionView extends React.PureComponent{
         }
         var initType = { 0 : principalTypes[0] };
         var initValid = { 0 : 1 };
-        var initDisplay = { 0 : this.principalTitle(context, principalTypes[0]) };
+        var initDisplay = { 0 : SubmissionView.principalTitle(context, edit, create, principalTypes[0]) };
         var initBookmarks = {};
         var bookmarksList = [];
         var schema = schemas[principalTypes[0]];
@@ -502,20 +498,22 @@ export default class SubmissionView extends React.PureComponent{
      * use the lasst alias in the aliases field (an array).
      */
     modifyAlias(){
-        const { keyDisplay, keyTypes, currKey, keyContext } = this.state;
-        const currAlias = keyDisplay[currKey];
-        const aliases = keyContext[currKey].aliases || null;
-
-        // Try to get 'alias' > 'name' > 'title' > then fallback to 'My ItemType currKey'
-        const name = (( Array.isArray(aliases) && aliases.length > 1 && aliases[aliases.length - 2] ) || keyContext[currKey].name || keyContext[currKey].title || null);
-        if (name) {
-            keyDisplay[currKey] = name;
-        } else if (currKey === 0) {
-            keyDisplay[currKey] = this.principalTitle(null, keyTypes[currKey]);
-        } else {
-            keyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
-        }
-        this.setState({ 'keyDisplay': keyDisplay });
+        this.setState(function({ keyDisplay, keyTypes, currKey, keyContext, edit, create }){
+            const currAlias = keyDisplay[currKey];
+            const aliases = keyContext[currKey].aliases || null;
+            // Try to get 'alias' > 'name' > 'title' > then fallback to 'My ItemType currKey'
+            const name = (( Array.isArray(aliases) && aliases.length > 1 && aliases[aliases.length - 2] ) || keyContext[currKey].name || keyContext[currKey].title || null);
+            const nextKeyDisplay = _.clone(keyDisplay);
+            if (name) {
+                nextKeyDisplay[currKey] = name;
+            } else if (currKey === 0) {
+                nextKeyDisplay[currKey] = SubmissionView.principalTitle(null, edit, create, keyTypes[currKey]);
+            } else {
+                nextKeyDisplay[currKey] = 'My ' + keyTypes[currKey] + ' ' + currKey;
+            }
+            if (nextKeyDisplay[currKey] === currAlias) return null;
+            return { 'keyDisplay': nextKeyDisplay };
+        });
     }
 
     /**
@@ -605,65 +603,70 @@ export default class SubmissionView extends React.PureComponent{
      * @param {number} key - Key of item to remove.
      */
     removeObj(key){
-        var contextCopy = object.deepClone(this.state.keyContext);
-        var validCopy = object.deepClone(this.state.keyValid);
-        var typesCopy = object.deepClone(this.state.keyTypes);
-        var keyComplete = _.clone(this.state.keyComplete);
-        var bookmarksCopy = _.clone(this.state.keyLinkBookmarks);
-        var linksCopy = _.clone(this.state.keyLinks);
-        var roundTwoCopy = this.state.roundTwoKeys.slice();
-        var hierarchy = _.clone(this.state.keyHierarchy);
-        var dummyHierarchy = object.deepClone(hierarchy);
-        var hierKey = key;
+        this.setState(function({ keyContext, keyValid, keyTypes, keyComplete, keyLinkBookmarks, keyLinks, roundTwoKeys, keyHierarchy }){
+            const contextCopy = object.deepClone(keyContext);
+            const validCopy = object.deepClone(keyValid);
+            const typesCopy = object.deepClone(keyTypes);
+            const keyCompleteCopy = object.deepClone(keyComplete);
+            const bookmarksCopy = _.clone(keyLinkBookmarks);
+            const linksCopy = _.clone(keyLinks);
+            const roundTwoCopy = roundTwoKeys.slice();
+            const hierarchy = _.clone(keyHierarchy);
+            let dummyHierarchy = object.deepClone(hierarchy);
+            let hierKey = key;
 
-        // the key may be a @id string and not keyIdx if already submitted
-        _.keys(keyComplete).forEach(function(compKey) {
-            if (keyComplete[compKey] === key) {
-                hierKey = compKey;
-            }
-        });
-
-        // find hierachy below the object being deleted
-        dummyHierarchy = searchHierarchy(dummyHierarchy, hierKey);
-        if(dummyHierarchy === null){
-            // occurs when keys cannot be found to delete
-            return;
-        }
-
-        // get a list of all keys to remove
-        var toDelete = flattenHierarchy(dummyHierarchy);
-        toDelete.push(key); // add this key
-        // trimming the hierarchy effectively removes objects from creation process
-        var newHierarchy = trimHierarchy(hierarchy, hierKey);
-
-        // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyComplete
-        _.forEach(toDelete, (keyToDelete)=>{
-            if (isNaN(keyToDelete)) return; // only remove creation data for non-sumbitted, non-preexisiting objs
-
-            // remove key from roundTwoKeys if necessary
-            // NOTE: submitted custom objects will NOT be removed from this
-            // after deletion. Still give user opportunity for second round edits
-            if(_.contains(roundTwoCopy, keyToDelete)){
-                var rmIdx = roundTwoCopy.indexOf(keyToDelete);
-                if(rmIdx > -1){
-                    roundTwoCopy.splice(rmIdx,1);
+            // the key may be a @id string and not keyIdx if already submitted
+            _.keys(keyCompleteCopy).forEach(function(compKey) {
+                if (keyCompleteCopy[compKey] === key) {
+                    hierKey = compKey;
                 }
+            });
+
+            // find hierachy below the object being deleted
+            dummyHierarchy = searchHierarchy(dummyHierarchy, hierKey);
+            if (dummyHierarchy === null){
+                // occurs when keys cannot be found to delete
+                return null;
             }
-            delete typesCopy[keyToDelete];
-            delete validCopy[keyToDelete];
-            delete contextCopy[keyToDelete];
-            delete linksCopy[keyToDelete];
-            delete bookmarksCopy[keyToDelete];
-            delete keyComplete[keyToDelete];
-        });
-        this.setState({
-            'keyHierarchy': newHierarchy,
-            'keyContext': contextCopy,
-            'keyValid': validCopy,
-            'keyTypes': typesCopy,
-            'keyLinks': linksCopy,
-            'keyLinkBookmarks': bookmarksCopy,
-            'roundTwoKeys': roundTwoCopy
+
+            // get a list of all keys to remove
+            const toDelete = flattenHierarchy(dummyHierarchy);
+            toDelete.push(key); // add this key
+
+            // trimming the hierarchy effectively removes objects from creation process
+            const newHierarchy = trimHierarchy(hierarchy, hierKey);
+
+            // for housekeeping, remove the keys from keyLinkBookmarks, keyLinks, and keyCompleteCopy
+            _.forEach(toDelete, function(keyToDelete){
+                if (isNaN(keyToDelete)) return; // only remove creation data for non-sumbitted, non-preexisiting objs
+
+                // remove key from roundTwoKeys if necessary
+                // NOTE: submitted custom objects will NOT be removed from this
+                // after deletion. Still give user opportunity for second round edits
+                if(_.contains(roundTwoCopy, keyToDelete)){
+                    var rmIdx = roundTwoCopy.indexOf(keyToDelete);
+                    if(rmIdx > -1){
+                        roundTwoCopy.splice(rmIdx,1);
+                    }
+                }
+                delete typesCopy[keyToDelete];
+                delete validCopy[keyToDelete];
+                delete contextCopy[keyToDelete];
+                delete linksCopy[keyToDelete];
+                delete bookmarksCopy[keyToDelete];
+                delete keyCompleteCopy[keyToDelete];
+            });
+
+            return {
+                'keyHierarchy': newHierarchy,
+                'keyContext': contextCopy,
+                'keyValid': validCopy,
+                'keyTypes': typesCopy,
+                'keyLinks': linksCopy,
+                'keyLinkBookmarks': bookmarksCopy,
+                'roundTwoKeys': roundTwoCopy,
+                'keyComplete' : keyCompleteCopy
+            };
         });
     }
 
@@ -694,7 +697,7 @@ export default class SubmissionView extends React.PureComponent{
         const keyHierarchy = modifyHierarchy(_.clone(prevKeyHierarchy), path, parentKeyIdx);
         keyDisplay[path] = display;
         keyTypes[path] = type;
-        linksCopy[path] = newLink;
+        keyLinks[path] = newLink;
         this.setState({ keyHierarchy, keyDisplay, keyTypes, keyLinks });
     }
 
