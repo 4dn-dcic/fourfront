@@ -1026,252 +1026,244 @@ export default class SubmissionView extends React.PureComponent{
 
         // this will always be reset when stateToSet is implemented
         stateToSet.processingFetch = false;
-        stateToSet.keyValid = keyValid;
+        stateToSet.keyValid = _.clone(keyValid);
 
         const finalizedContext = this.removeNullsFromContext(inKey);
 
         var i;
         // get rid of any hanging errors
         for (i=0; i < errorCount; i++){
-            Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
+            Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1) });
             stateToSet.errorCount = 0;
         }
 
         this.setState({ 'processingFetch': true });
 
-        const submitProcess = () => {
+        if (!currentSubmittingUser){
+            console.error('No user account info.');
+            stateToSet.keyValid[inKey] = 2;
+            this.setState(stateToSet);
+            return;
+        }
 
-            if (!currentSubmittingUser){
-                console.error('No user account info.');
-                keyValid[inKey] = 2;
-                this.setState(stateToSet);
-                return;
-            }
+        const submitProcessContd = (userLab = null, userAward = null) => {
 
-            const submitProcessContd = (userLab = null, userAward = null) => {
+            // if editing, use pre-existing award, lab, and submitted_by
+            // this should only be done on the primary object
+            if (edit && inKey === 0 && context.award && context.lab){
 
-                // if editing, use pre-existing award, lab, and submitted_by
-                // this should only be done on the primary object
-                if (edit && inKey === 0 && context.award && context.lab){
-
-                    if (currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.itemUtil.atId(context.award);
-                    }
-
-                    if (currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = object.itemUtil.atId(context.lab);
-                    }
-
-                    // an admin is editing. Use the pre-existing submitted_by
-                    // otherwise, permissions won't let us change this field
-                    if (currentSubmittingUser.groups && _.contains(currentSubmittingUser.groups, 'admin')){
-                        if (context.submitted_by){
-                            finalizedContext.submitted_by = object.itemUtil.atId(context.submitted_by);
-                        } else {
-                            // use current user
-                            finalizedContext.submitted_by = object.itemUtil.atId(currentSubmittingUser);
-                        }
-                    }
-
-                } else if (userLab && userAward && currType !== 'User') {
-                    // Otherwise, use lab/award of user submitting unless values present
-                    // Skip this is we are working on a User object
-                    if (currSchema.properties.award && !('award' in finalizedContext)){
-                        finalizedContext.award = object.itemUtil.atId(userAward);
-                    }
-                    if (currSchema.properties.lab && !('lab' in finalizedContext)){
-                        finalizedContext.lab = object.itemUtil.atId(userLab);
-                    }
+                if (currSchema.properties.award && !('award' in finalizedContext)){
+                    finalizedContext.award = object.itemUtil.atId(context.award);
                 }
 
-                // if testing validation, use check_only=True (see /types/base.py)'
-                let destination;
-                let actionMethod;
-                // used to keep track of fields to delete with PATCH for edit/round two; comma-separated string
-                let deleteFields;
-                // change actionMethod and destination based on edit/round two
-                if (roundTwo){
-                    destination = keyComplete[inKey];
-                    actionMethod = 'PATCH';
-                    const alreadySubmittedContext = keyContext[destination];
-                    // roundTwo flag set to true for second round
-                    deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
-                } else if (edit && inKey === 0){
-                    destination = object.itemUtil.atId(context);
-                    actionMethod = 'PATCH';
-                    deleteFields = this.buildDeleteFields(finalizedContext, context, currSchema);
-                } else {
-                    destination = '/' + currType + '/';
-                    actionMethod = 'POST';
+                if (currSchema.properties.lab && !('lab' in finalizedContext)){
+                    finalizedContext.lab = object.itemUtil.atId(context.lab);
                 }
 
-                if (test){
-                    destination += '?check_only=True';
-                } else {
-                    console.log('FINALIZED PAYLOAD:', finalizedContext);
-                    console.log('DELETE FIELDS:', deleteFields);
-                }
-
-                const payload = JSON.stringify(finalizedContext);
-
-                // add delete_fields parameter to request if necessary
-                if (deleteFields && Array.isArray(deleteFields) && deleteFields.length > 0){
-                    var deleteString = deleteFields.join();
-                    destination = destination + '?delete_fields=' + deleteString;
-                    console.log('DESTINATION:', destination);
-                }
-
-                // Perform request
-                ajax.promise(destination, actionMethod, {}, payload).then((response) => {
-                    if (response.status && response.status !== 'success'){ // error
-                        keyValid[inKey] = 2;
-                        if(!suppressWarnings){
-                            var errorList = response.errors || [response.detail] || [];
-                            // make an alert for each error description
-                            stateToSet.errorCount = errorList.length;
-                            for(i = 0; i<errorList.length; i++){
-                                var detail = errorList[i].description || errorList[i] || "Unidentified error";
-                                if (errorList[i].name && errorList[i].name.length > 0){
-                                    detail += ('. See ' + errorList[i].name[0] + ' in ' + keyDisplay[inKey]);
-                                } else {
-                                    detail += ('. See ' + keyDisplay[inKey]);
-                                }
-                                Alerts.queue({
-                                    'title' : "Validation error " + parseInt(i + 1),
-                                    'message': detail,
-                                    'style': 'danger'
-                                });
-                            }
-                            setTimeout(layout.animateScrollTo(0), 100);
-                        }
-                        this.setState(stateToSet);
+                // an admin is editing. Use the pre-existing submitted_by
+                // otherwise, permissions won't let us change this field
+                if (currentSubmittingUser.groups && _.contains(currentSubmittingUser.groups, 'admin')){
+                    if (context.submitted_by){
+                        finalizedContext.submitted_by = object.itemUtil.atId(context.submitted_by);
                     } else {
-                        let responseData;
-                        let submitted_at_id;
-                        if (test){
-                            keyValid[inKey] = 3;
-                            this.setState(stateToSet);
-                            return;
-                        } else {
-                            [ responseData ] = response['@graph'];
-                            submitted_at_id = object.itemUtil.atId(responseData);
-                        }
-                        // handle submission for round two
-                        if (roundTwo){
-                            // there is a file
-                            if (file && responseData.upload_credentials){
-                                // add important info to result from finalizedContext
-                                // that is not added from /types/file.py get_upload
-                                var creds = responseData.upload_credentials;
-
-                                require.ensure(['../util/aws'], (require)=>{
-
-                                    var awsUtil = require('../util/aws'),
-                                        upload_manager = awsUtil.s3UploadFile(file, creds);
-
-                                    if (upload_manager === null){
-                                        // bad upload manager. Cause an alert
-                                        alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
-                                    } else {
-                                        // this will set off a chain of aync events.
-                                        // first, md5 will be calculated and then the
-                                        // file will be uploaded to s3. If all of this
-                                        // is succesful, call finishRoundTwo.
-                                        stateToSet.uploadStatus = null;
-                                        this.setState(stateToSet);
-                                        this.updateUpload(upload_manager);
-                                    }
-                                }, "aws-utils-bundle");
-
-                            } else {
-                                // state cleanup for this key
-                                this.finishRoundTwo();
-                                this.setState(stateToSet);
-                            }
-                        } else {
-                            keyValid[inKey] = 4;
-                            // Perform final steps when object is submitted
-                            // *** SHOULD THIS STUFF BE BROKEN OUT INTO ANOTHER FXN?
-                            // find key of parent object, starting from top of hierarchy
-                            var parentKey = parseInt(findParentFromHierarchy(keyHierarchy, inKey));
-                            // navigate to parent obj if it was found. Else, go to top level
-                            stateToSet.currKey = (parentKey !== null && !isNaN(parentKey) ? parentKey : 0);
-                            var typesCopy = _.clone(keyTypes);
-                            var keyCompleteCopy = _.clone(keyComplete);
-                            var linksCopy = _.clone(keyLinks);
-                            var displayCopy = _.clone(keyDisplay);
-                            // set contextCopy to returned data from POST
-                            var contextCopy = _.clone(keyContext);
-                            var roundTwoCopy = roundTwoKeys.slice();
-                            // update the state storing completed objects.
-                            keyCompleteCopy[inKey] = submitted_at_id;
-                            // represent the submitted object with its new path
-                            // rather than old keyIdx.
-                            linksCopy[submitted_at_id] = linksCopy[inKey];
-                            typesCopy[submitted_at_id] = currType;
-                            displayCopy[submitted_at_id] = displayCopy[inKey];
-                            contextCopy[submitted_at_id] = responseData;
-                            contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false);
-                            stateToSet.keyLinks = linksCopy;
-                            stateToSet.keyTypes = typesCopy;
-                            stateToSet.keyComplete = keyCompleteCopy;
-                            stateToSet.keyDisplay = displayCopy;
-                            stateToSet.keyContext = contextCopy;
-
-                            // update roundTwoKeys if necessary
-                            const needsRoundTwo = this.checkRoundTwo(currSchema);
-                            if (needsRoundTwo && !_.contains(roundTwoCopy, inKey)){
-                                // was getting an error where this could be str
-                                roundTwoCopy.push(parseInt(inKey));
-                                stateToSet.roundTwoKeys = roundTwoCopy;
-                            }
-
-                            // inKey is 0 for the primary object
-                            if (inKey === 0){
-                                // see if we need to go into round two submission
-                                if (roundTwoCopy.length === 0){
-                                    // we're done!
-                                    setIsSubmitting(false, ()=>{
-                                        navigate(submitted_at_id);
-                                    });
-                                } else {
-                                    // break this out into another fxn?
-                                    // roundTwo initiation
-                                    stateToSet.roundTwo = true;
-                                    stateToSet.currKey = roundTwoCopy[0];
-                                    // reset validation state for all round two keys
-                                    for (i = 0; i < roundTwoCopy.length; i++){
-                                        keyValid[roundTwoCopy[i]] = 0;
-                                    }
-                                    alert('Success! All objects were submitted. However, one or more have additional fields that can be only filled in second round submission. You will now be guided through this process for each object.');
-                                    this.setState(stateToSet);
-                                }
-                            } else {
-                                alert(keyDisplay[inKey] + ' was successfully submitted.');
-                                this.setState(stateToSet);
-                            }
-                        }
-                        ReactTooltip.rebuild();
+                        // use current user
+                        finalizedContext.submitted_by = object.itemUtil.atId(currentSubmittingUser);
                     }
-                });
-            };
+                }
 
-
-            if (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0){
-                // use first lab for now
-                ajax.promise(object.itemUtil.atId(currentSubmittingUser.submits_for[0])).then((myLab) => {
-                    // use first award for now
-                    var myAward = (myLab && Array.isArray(myLab.awards) && myLab.awards.length > 0 && myLab.awards[0]) || null;
-                    submitProcessContd(myLab, myAward);
-                });
-            } else {
-                submitProcessContd();
+            } else if (userLab && userAward && currType !== 'User') {
+                // Otherwise, use lab/award of user submitting unless values present
+                // Skip this is we are working on a User object
+                if (currSchema.properties.award && !('award' in finalizedContext)){
+                    finalizedContext.award = object.itemUtil.atId(userAward);
+                }
+                if (currSchema.properties.lab && !('lab' in finalizedContext)){
+                    finalizedContext.lab = object.itemUtil.atId(userLab);
+                }
             }
 
+            // if testing validation, use check_only=True (see /types/base.py)'
+            let destination;
+            let actionMethod;
+            // used to keep track of fields to delete with PATCH for edit/round two; comma-separated string
+            let deleteFields;
+            // change actionMethod and destination based on edit/round two
+            if (roundTwo){
+                destination = keyComplete[inKey];
+                actionMethod = 'PATCH';
+                const alreadySubmittedContext = keyContext[destination];
+                // roundTwo flag set to true for second round
+                deleteFields = this.buildDeleteFields(finalizedContext, alreadySubmittedContext, currSchema);
+            } else if (edit && inKey === 0){
+                destination = object.itemUtil.atId(context);
+                actionMethod = 'PATCH';
+                deleteFields = this.buildDeleteFields(finalizedContext, context, currSchema);
+            } else {
+                destination = '/' + currType + '/';
+                actionMethod = 'POST';
+            }
+
+            if (test){
+                destination += '?check_only=True';
+            } else {
+                console.log('FINALIZED PAYLOAD:', finalizedContext);
+                console.log('DELETE FIELDS:', deleteFields);
+            }
+
+            const payload = JSON.stringify(finalizedContext);
+
+            // add delete_fields parameter to request if necessary
+            if (deleteFields && Array.isArray(deleteFields) && deleteFields.length > 0){
+                var deleteString = deleteFields.join();
+                destination = destination + '?delete_fields=' + deleteString;
+                console.log('DESTINATION:', destination);
+            }
+
+            // Perform request
+            ajax.promise(destination, actionMethod, {}, payload).then((response) => {
+                if (response.status && response.status !== 'success'){ // error
+                    stateToSet.keyValid[inKey] = 2;
+                    if(!suppressWarnings){
+                        var errorList = response.errors || [response.detail] || [];
+                        // make an alert for each error description
+                        stateToSet.errorCount = errorList.length;
+                        for(i = 0; i<errorList.length; i++){
+                            var detail = errorList[i].description || errorList[i] || "Unidentified error";
+                            if (errorList[i].name && errorList[i].name.length > 0){
+                                detail += ('. See ' + errorList[i].name[0] + ' in ' + keyDisplay[inKey]);
+                            } else {
+                                detail += ('. See ' + keyDisplay[inKey]);
+                            }
+                            Alerts.queue({
+                                'title' : "Validation error " + parseInt(i + 1),
+                                'message': detail,
+                                'style': 'danger'
+                            });
+                        }
+                        setTimeout(layout.animateScrollTo(0), 100);
+                    }
+                    this.setState(stateToSet);
+                } else {
+                    let responseData;
+                    let submitted_at_id;
+                    if (test){
+                        stateToSet.keyValid[inKey] = 3;
+                        this.setState(stateToSet);
+                        return;
+                    } else {
+                        [ responseData ] = response['@graph'];
+                        submitted_at_id = object.itemUtil.atId(responseData);
+                    }
+                    // handle submission for round two
+                    if (roundTwo){
+                        // there is a file
+                        if (file && responseData.upload_credentials){
+                            // add important info to result from finalizedContext
+                            // that is not added from /types/file.py get_upload
+                            var creds = responseData.upload_credentials;
+
+                            require.ensure(['../util/aws'], (require)=>{
+
+                                var awsUtil = require('../util/aws'),
+                                    upload_manager = awsUtil.s3UploadFile(file, creds);
+
+                                if (upload_manager === null){
+                                    // bad upload manager. Cause an alert
+                                    alert("Something went wrong initializing the upload. Please contact the 4DN-DCIC team.");
+                                } else {
+                                    // this will set off a chain of aync events.
+                                    // first, md5 will be calculated and then the
+                                    // file will be uploaded to s3. If all of this
+                                    // is succesful, call finishRoundTwo.
+                                    stateToSet.uploadStatus = null;
+                                    this.setState(stateToSet);
+                                    this.updateUpload(upload_manager);
+                                }
+                            }, "aws-utils-bundle");
+
+                        } else {
+                            // state cleanup for this key
+                            this.finishRoundTwo();
+                            this.setState(stateToSet);
+                        }
+                    } else {
+                        stateToSet.keyValid[inKey] = 4;
+                        // Perform final steps when object is submitted
+                        // *** SHOULD THIS STUFF BE BROKEN OUT INTO ANOTHER FXN?
+                        // find key of parent object, starting from top of hierarchy
+                        var parentKey = parseInt(findParentFromHierarchy(keyHierarchy, inKey));
+                        // navigate to parent obj if it was found. Else, go to top level
+                        stateToSet.currKey = (parentKey !== null && !isNaN(parentKey) ? parentKey : 0);
+                        var typesCopy = _.clone(keyTypes);
+                        var keyCompleteCopy = _.clone(keyComplete);
+                        var linksCopy = _.clone(keyLinks);
+                        var displayCopy = _.clone(keyDisplay);
+                        // set contextCopy to returned data from POST
+                        var contextCopy = _.clone(keyContext);
+                        var roundTwoCopy = roundTwoKeys.slice();
+                        // update the state storing completed objects.
+                        keyCompleteCopy[inKey] = submitted_at_id;
+                        // represent the submitted object with its new path
+                        // rather than old keyIdx.
+                        linksCopy[submitted_at_id] = linksCopy[inKey];
+                        typesCopy[submitted_at_id] = currType;
+                        displayCopy[submitted_at_id] = displayCopy[inKey];
+                        contextCopy[submitted_at_id] = responseData;
+                        contextCopy[inKey] = buildContext(responseData, currSchema, null, true, false);
+                        stateToSet.keyLinks = linksCopy;
+                        stateToSet.keyTypes = typesCopy;
+                        stateToSet.keyComplete = keyCompleteCopy;
+                        stateToSet.keyDisplay = displayCopy;
+                        stateToSet.keyContext = contextCopy;
+
+                        // update roundTwoKeys if necessary
+                        const needsRoundTwo = this.checkRoundTwo(currSchema);
+                        if (needsRoundTwo && !_.contains(roundTwoCopy, inKey)){
+                            // was getting an error where this could be str
+                            roundTwoCopy.push(parseInt(inKey));
+                            stateToSet.roundTwoKeys = roundTwoCopy;
+                        }
+
+                        // inKey is 0 for the primary object
+                        if (inKey === 0){
+                            // see if we need to go into round two submission
+                            if (roundTwoCopy.length === 0){
+                                // we're done!
+                                setIsSubmitting(false, ()=>{
+                                    navigate(submitted_at_id);
+                                });
+                            } else {
+                                // break this out into another fxn?
+                                // roundTwo initiation
+                                stateToSet.roundTwo = true;
+                                stateToSet.currKey = roundTwoCopy[0];
+                                // reset validation state for all round two keys
+                                for (i = 0; i < roundTwoCopy.length; i++){
+                                    stateToSet.keyValid[roundTwoCopy[i]] = 0;
+                                }
+                                alert('Success! All objects were submitted. However, one or more have additional fields that can be only filled in second round submission. You will now be guided through this process for each object.');
+                                this.setState(stateToSet);
+                            }
+                        } else {
+                            alert(keyDisplay[inKey] + ' was successfully submitted.');
+                            this.setState(stateToSet);
+                        }
+                    }
+                    ReactTooltip.rebuild();
+                }
+            });
         };
 
-        // We've already loaded user during initPrincipal().
-        submitProcess(currentSubmittingUser);
+        if (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0){
+            // use first lab for now
+            ajax.promise(object.itemUtil.atId(currentSubmittingUser.submits_for[0])).then((myLab) => {
+                // use first award for now
+                var myAward = (myLab && Array.isArray(myLab.awards) && myLab.awards.length > 0 && myLab.awards[0]) || null;
+                submitProcessContd(myLab, myAward);
+            });
+        } else {
+            submitProcessContd();
+        }
     }
 
     /**
@@ -1345,9 +1337,10 @@ export default class SubmissionView extends React.PureComponent{
 
     /** Navigate to version of same page we're on, minus the `currentAction` URI parameter. */
     cancelCreatePrimaryObject(skipAskToLeave = false){
+        const { href, navigate, setIsSubmitting } = this.props;
         var leaveFunc = () =>{
             // Navigate out.
-            var parts = url.parse(this.props.href, true),
+            var parts = url.parse(href, true),
                 modifiedQuery = _.omit(parts.query, 'currentAction'),
                 modifiedSearch = queryString.stringify(modifiedQuery),
                 nextURI;
@@ -1356,11 +1349,11 @@ export default class SubmissionView extends React.PureComponent{
             parts.search = (modifiedSearch.length > 0 ? '?' : '') + modifiedSearch;
             nextURI = url.format(parts);
 
-            this.props.navigate(nextURI, { skipRequest : true });
+            navigate(nextURI, { skipRequest : true });
         };
 
         if (skipAskToLeave === true){
-            return this.props.setIsSubmitting(false, leaveFunc);
+            return setIsSubmitting(false, leaveFunc);
         } else {
             return leaveFunc();
         }
@@ -1525,11 +1518,13 @@ class DetailTitleBanner extends React.PureComponent {
 
     toggleOpen(e){
         e.preventDefault();
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
     }
 
     generateCrumbTitle(numKey, i = 0, hierarchyKeyList = null){
-        var { currKey, keyTypes, keyDisplay, hierarchy, schemas, fullScreen, actionButtons, keyContext } = this.props;
+        var { keyTypes, keyDisplay, hierarchy, schemas, fullScreen, actionButtons, keyContext } = this.props;
         if (hierarchyKeyList === null){
             hierarchyKeyList = [numKey];
         }
@@ -1552,7 +1547,7 @@ class DetailTitleBanner extends React.PureComponent {
                         <span onClick={this.handleClick.bind(this, numKey)}>
                             { icon }
                             { parentPropertyName ? <span className="next-property-name">{ parentPropertyName }: </span> : null }
-                            <span className='working-subtitle'>{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
+                            <span className="working-subtitle">{ Schemas.getTitleForType(keyTypes[numKey], schemas || Schemas.get()) }</span> <span>{ keyDisplay[numKey] }</span>
                         </span>
                     </div>
                 </div>
@@ -1566,16 +1561,17 @@ class DetailTitleBanner extends React.PureComponent {
     }
 
     render(){
-        var { fullScreen, currKey } = this.props;
+        const { fullScreen, currKey } = this.props;
+        const { open } = this.state;
         if (fullScreen) return null;
         return (
             <h3 className="crumbs-title mb-2">
                 <div className="subtitle-heading form-section-heading mb-08">
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        Currently Editing { currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (this.state.open ? 'down' : 'right')} /> : null }
+                        Currently Editing { currKey > 0 ? <i className={"icon icon-fw icon-caret-" + (open ? 'down' : 'right')} /> : null }
                     </span>
                 </div>
-                { this.state.open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(currKey) }
+                { open ? this.generateHierarchicalTitles() : this.generateCrumbTitle(currKey) }
             </h3>
         );
     }
@@ -1590,12 +1586,13 @@ class TypeSelectModal extends React.Component {
     }
 
     onHide(){
-        if (this.props.creatingIdx === 0){
+        const { creatingIdx, cancelCreatePrimaryObject, cancelCreateNewObject } = this.props;
+        if (creatingIdx === 0 || creatingIdx === null){
             // If just starting (creating first item / idx), navigate to non-edit version of page we are currently on.
-            this.props.cancelCreatePrimaryObject(true);
-        } else if (this.props.creatingIdx > 0){
+            cancelCreatePrimaryObject(true);
+        } else if (creatingIdx > 0){
             // Else cancel creating new object by unsetting temporary state & values.
-            this.props.cancelCreateNewObject();
+            cancelCreateNewObject();
         }
     }
 
@@ -1622,20 +1619,19 @@ class TypeSelectModal extends React.Component {
                 </Modal.Header>
                 <Modal.Body>
                     <div onKeyDown={this.onContainerKeyDown.bind(this, submitAmbiguousType)}>
-                        <p style={{'marginBottom':'15px'}}>
+                        <p className="mb-15">
                             {'Please select a specific object type from the menu below.'}
                         </p>
-                        <div className="input-wrapper" style={{'marginBottom':'15px'}}>
+                        <div className="input-wrapper mb-15">
                             <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={ambiguousSelected || "No value"}>
-                                {ambiguousType !== null ?
+                                { ambiguousType !== null ?
                                     itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
-                                    :
-                                    null
+                                    : null
                                 }
                             </DropdownButton>
                         </div>
                         <Collapse in={ambiguousDescrip !== null}>
-                            <div style={{'marginBottom':'15px', 'fontSize':'1.2em'}}>
+                            <div className="mb-15 text-larger">
                                 {'Description: ' + ambiguousDescrip}
                             </div>
                         </Collapse>
