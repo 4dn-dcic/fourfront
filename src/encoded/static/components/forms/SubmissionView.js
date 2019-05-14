@@ -1029,8 +1029,6 @@ export default class SubmissionView extends React.PureComponent{
 
         const finalizedContext = this.removeNullsFromContext(inKey);
 
-        console.log('TTTT', context, finalizedContext);
-
         var i;
         // get rid of any hanging errors
         for (i=0; i < errorCount; i++){
