@@ -911,9 +911,8 @@ export default class SubmissionView extends React.PureComponent{
      * with a null value.
      */
     removeNullsFromContext(inKey){
-        var finalizedContext = object.deepClone(this.state.keyContext[inKey]);
-        var noNulls = removeNulls(finalizedContext);
-        return noNulls;
+        const { keyContext } = this.state;
+        return removeNulls(object.deepClone(keyContext[inKey]));
     }
 
     /**
@@ -1082,13 +1081,10 @@ export default class SubmissionView extends React.PureComponent{
                 }
             }
 
-            // if testing validation, use check_only=True (see /types/base.py)'
             let destination;
             let actionMethod;
-            // used to keep track of fields to delete with PATCH for edit/round two; comma-separated string
-            let deleteFields;
-            // change actionMethod and destination based on edit/round two
-            if (roundTwo){
+            let deleteFields;   // used to keep track of fields to delete with PATCH for edit/round two; will become comma-separated string
+            if (roundTwo){      // change actionMethod and destination based on edit/round two
                 destination = keyComplete[inKey];
                 actionMethod = 'PATCH';
                 const alreadySubmittedContext = keyContext[destination];
@@ -1104,6 +1100,7 @@ export default class SubmissionView extends React.PureComponent{
             }
 
             if (test){
+                // if testing validation, use check_only=True (see /types/base.py)'
                 destination += '?check_only=True';
             } else {
                 console.log('FINALIZED PAYLOAD:', finalizedContext);
@@ -1114,8 +1111,8 @@ export default class SubmissionView extends React.PureComponent{
 
             // add delete_fields parameter to request if necessary
             if (deleteFields && Array.isArray(deleteFields) && deleteFields.length > 0){
-                var deleteString = deleteFields.join();
-                destination = destination + '?delete_fields=' + deleteString;
+                var deleteString = deleteFields.join(',');
+                destination = destination + (test ? '&' : '?') + 'delete_fields=' + deleteString;
                 console.log('DESTINATION:', destination);
             }
 
