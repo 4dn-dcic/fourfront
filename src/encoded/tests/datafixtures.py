@@ -201,13 +201,17 @@ def tissue_biosample(testapp, lung_biosource, lab, award):
 
 
 @pytest.fixture
-def protocol(testapp, lab, award):
-    item = {'description': 'A Protocol',
+def protocol_data(lab, award):
+    return {'description': 'A Protocol',
             'protocol_type': 'Experimental protocol',
             'award': award['@id'],
             'lab': lab['@id']
             }
-    return testapp.post_json('/protocol', item).json['@graph'][0]
+
+
+@pytest.fixture
+def protocol(testapp, protocol_data):
+    return testapp.post_json('/protocol', protocol_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -603,14 +607,18 @@ def attachment():
 
 
 @pytest.fixture
-def image(testapp, attachment, lab, award):
-    item = {
+def image_data(attachment, lab, award):
+    return {
         'attachment': attachment,
         'caption': 'Test image',
-        'award': award['@id'],
-        'lab': lab['@id'],
+        'award': award['uuid'],
+        'lab': lab['uuid'],
     }
-    return testapp.post_json('/image', item).json['@graph'][0]
+
+
+@pytest.fixture
+def image(testapp, image_data):
+    return testapp.post_json('/image', image_data).json['@graph'][0]
 
 
 @pytest.fixture

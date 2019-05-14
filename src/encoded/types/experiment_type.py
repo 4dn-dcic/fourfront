@@ -65,7 +65,7 @@ class ExperimentType(Item):
         elif assay_subclassification in subclass_dict:
             return subclass_dict[assay_subclassification]
         else:
-            return assay_subclassification
+            return 'Unclassified'
 
     @calculated_property(schema={
         "title": "Other Protocols",

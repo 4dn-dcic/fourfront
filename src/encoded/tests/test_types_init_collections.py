@@ -275,3 +275,11 @@ def test_vendor_alias_wrong_format(testapp, vendor_data_alias):
 def test_genomic_region_display_title(testapp, dt4genomic_regions):
     for dt, region in dt4genomic_regions.items():
         assert region.get('display_title') == dt
+
+
+def test_image_unique_key(registry, image_data):
+    from encoded.types.image import Image
+    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+    image = Image.create(registry, uuid, image_data)
+    keys = image.unique_keys(image.properties)
+    assert 'red-dot.png' in keys['image:filename']
