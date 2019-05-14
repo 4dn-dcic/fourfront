@@ -1029,6 +1029,8 @@ export default class SubmissionView extends React.PureComponent{
 
         const finalizedContext = this.removeNullsFromContext(inKey);
 
+        console.log('TTTT', context, finalizedContext);
+
         var i;
         // get rid of any hanging errors
         for (i=0; i < errorCount; i++){
@@ -1687,9 +1689,11 @@ class AliasSelectModal extends TypeSelectModal {
  * the context for this specific object and create custom and/or pre-existing
  * objects. Render changes slightly for RoundTwo.
  *
- * @class IndividualObjectView
  * @see SubmissionView
  * @prop {number} currKey - Current key being edited.
+ *
+ * @todo
+ * Use _.bindAll, make sure setState is using functional updater anywhere state update may derive from other state.
  */
 class IndividualObjectView extends React.Component{
 
@@ -1716,13 +1720,14 @@ class IndividualObjectView extends React.Component{
     }
 
     /** Fade the JSX rendered by this and scroll to top when this.props.currKey changes. */
-    UNSAFE_componentWillReceiveProps(nextProps){
+    componentDidUpdate(pastProps){
+        const { currKey } = this.props;
         // scroll to top if worked-on object changes
-        if(this.props.currKey !== nextProps.currKey){
+        if (currKey !== pastProps.currKey){
             //setTimeout(layout.animateScrollTo(0), 100);
-            this.setState({'fadeState': true});
-        }else{
-            this.setState({'fadeState': false});
+            this.setState({ 'fadeState': true });
+        } else {
+            this.setState({ 'fadeState': false });
         }
     }
 
@@ -2052,17 +2057,17 @@ class IndividualObjectView extends React.Component{
      * object.
      */
     render(){
-        var { currContext, keyComplete, keyContext, currKey, schemas, roundTwo } = this.props;
-        var fields = currContext ? _.keys(currContext) : [],
-            fieldJSXComponents = sortPropFields(_.filter( // Sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
-                _.map(fields, this.initiateField),
-                function(f){ return !!f; } // Removes falsy (e.g. null) items.
-            )),
-            roundTwoDetailContext = roundTwo && keyComplete[currKey] && keyContext[keyComplete[currKey]];
+        const { currContext, keyComplete, keyContext, currKey, schemas, roundTwo } = this.props;
+        const fields = currContext ? _.keys(currContext) : [];
+        const fieldJSXComponents = sortPropFields(_.filter( // Sort fields first by requirement and secondly alphabetically. These are JSX BuildField components.
+            _.map(fields, this.initiateField),
+            function(f){ return !!f; } // Removes falsy (e.g. null) items.
+        ));
+        const roundTwoDetailContext = roundTwo && keyComplete[currKey] && keyContext[keyComplete[currKey]];
 
         return(
             <div>
-                <FormFieldsContainer currKey={currKey} children={fieldJSXComponents}/>
+                <FormFieldsContainer currKey={currKey}>{ fieldJSXComponents }</FormFieldsContainer>
                 { roundTwo ? <RoundTwoDetailPanel schemas={schemas} context={roundTwoDetailContext} open={true} /> : null }
             </div>
         );
@@ -2070,53 +2075,55 @@ class IndividualObjectView extends React.Component{
 }
 
 
-class FormFieldsContainer extends React.PureComponent {
-
-    static defaultProps = {
-        'title' : 'Fields & Dependencies',
-        'currKey' : 0
-    }
-
-    render(){
-        if(React.Children.count(this.props.children) === 0) return null;
-        return(
-            <div className="form-fields-container">
-                <h4 className="clearfix page-subtitle form-section-heading submission-field-header">{ this.props.title }</h4>
-                <div className="form-section-body">{ this.props.children }</div>
-            </div>
-        );
-    }
-}
+const FormFieldsContainer = React.memo(function FormFieldsContainer(props){
+    const { children, title } = props;
+    if (React.Children.count(children) === 0) return null;
+    return (
+        <div className="form-fields-container">
+            <h4 className="clearfix page-subtitle form-section-heading submission-field-header">{ title }</h4>
+            <div className="form-section-body">{ children }</div>
+        </div>
+    );
+});
+FormFieldsContainer.defaultProps = {
+    'title' : 'Fields & Dependencies',
+    'currKey' : 0
+};
 
 /**
  * Simple Component that opens/closes and renders a Detail panel using the context
  * and schemas passed to it.
  */
-class RoundTwoDetailPanel extends React.Component{
+class RoundTwoDetailPanel extends React.PureComponent {
     constructor(props){
         super(props);
+        this.handleToggle = this.handleToggle.bind(this);
         this.state = {
-            'open': this.props.open || false
+            'open': props.open || false
         };
     }
 
-    handleToggle = (e) => {
+    handleToggle(e){
         e.preventDefault();
-        this.setState({'open': !this.state.open});
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
     }
 
     render(){
+        const { context, schemas } = this.props;
+        const { open } = this.state;
         return(
             <div className="current-item-properties round-two-panel">
                 <h4 className="clearfix page-subtitle submission-field-header">
                     <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
-                        <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
+                        <i className={"icon " + (open ? "icon-minus" : "icon-plus")}></i>
                     </Button>
                     <span>Object Attributes</span>
                 </h4>
-                <Collapse in={this.state.open}>
+                <Collapse in={open}>
                     <div className="item-page-detail">
-                        <Detail excludedKeys={Detail.defaultProps.excludedKeys.concat('upload_credentials')} context={this.props.context} schemas={this.props.schemas} open={false} popLink={true}/>
+                        <Detail excludedKeys={Detail.defaultProps.excludedKeys.concat('upload_credentials')} context={context} schemas={schemas} open={false} popLink={true}/>
                     </div>
                 </Collapse>
             </div>
@@ -2379,15 +2386,19 @@ var flattenHierarchy = function myself(hierarchy){
  * @param {Object} context - Object representing an Item, with properties & values.
  * @returns {Object} The same context which was passed in, minus null-y values.
  */
-var removeNulls = function myself(context){
+function removeNulls(context){
     _.keys(context).forEach(function(key, index){
         if (isValueNull(context[key])){
             delete context[key];
         } else if (Array.isArray(context[key])){
             context[key] = _.filter(context[key], function(v){ return !isValueNull(v); });
+            // Recurse for any objects
+            context[key] = _.map(context[key], function(v){
+                return (v && typeof v === 'object') ? removeNulls(v) : v;
+            });
         } else if (context[key] instanceof Object) {
-            context[key] = myself(context[key]);
+            context[key] = removeNulls(context[key]);
         }
     });
     return context;
-};
+}
