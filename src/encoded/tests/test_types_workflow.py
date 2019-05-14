@@ -1,7 +1,7 @@
 import pytest
 import json
 from dcicutils.ff_utils import patch_metadata
-pytestmark = [pytest.mark.working]
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 @pytest.fixture()

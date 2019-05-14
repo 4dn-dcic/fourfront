@@ -54,7 +54,6 @@ def invalidate_linked_items(item, field, updates=None):
             registry.notify(AfterModified(linked_item, request))
 
 
-
 @collection(
     name='experiment-sets',
     unique_key='accession',
@@ -73,7 +72,15 @@ class ExperimentSet(Item):
         'publications_produced': ('Publication', 'exp_sets_prod_in_pub'),
     }
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": [
+            "messages",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -81,7 +88,8 @@ class ExperimentSet(Item):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
-        "badges.message",
+        "badges.badge.badge_icon",
+        "badges.messages",
 
         "produced_in_pub.title",
         "produced_in_pub.abstract",
@@ -95,18 +103,21 @@ class ExperimentSet(Item):
         "publications_of_set.authors",
         "publications_of_set.date_published",
 
-        "experiments_in_set.experiment_type",
+        "experiments_in_set.@type",
+        "experiments_in_set.experiment_type.display_title",
         "experiments_in_set.accession",
         "experiments_in_set.status",
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
+
         "experiments_in_set.badges.badge.title",
         "experiments_in_set.badges.badge.commendation",
         "experiments_in_set.badges.badge.warning",
         "experiments_in_set.badges.badge.badge_classification",
+        "experiments_in_set.badges.badge.badge_icon",
         "experiments_in_set.badges.badge.description",
-        "experiments_in_set.badges.message",
+        "experiments_in_set.badges.messages",
 
         "experiments_in_set.biosample.accession",
         "experiments_in_set.biosample.modifications_summary",
@@ -127,11 +138,13 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.badges.badge.commendation",
         "experiments_in_set.biosample.badges.badge.warning",
         "experiments_in_set.biosample.badges.badge.badge_classification",
+        "experiments_in_set.biosample.badges.badge.badge_icon",
         "experiments_in_set.biosample.badges.badge.description",
-        "experiments_in_set.biosample.badges.message",
+        "experiments_in_set.biosample.badges.messages",
 
         "experiments_in_set.digestion_enzyme.name",
         "experiments_in_set.filesets.files_in_set.accession",
+        "experiments_in_set.last_modified.date_modified",
 
         # Files - For common embeds (href, file_format, etc) we could programatically get rid of a bunch of similar lines - e.g.:
         # for f in ['href', 'accession', 'file_size, ...]:
@@ -158,12 +171,14 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
+        "experiments_in_set.files.quality_metric_summary.*",  # This may not yet be enabled on raw files.
         "experiments_in_set.files.badges.badge.title",
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
         "experiments_in_set.files.badges.badge.badge_classification",
+        "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
-        "experiments_in_set.files.badges.message",
+        "experiments_in_set.files.badges.messages",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -186,19 +201,17 @@ class ExperimentSet(Item):
         "processed_files.extra_files.file_format",
         "processed_files.higlass_uid",
         "processed_files.genome_assembly",
+        "processed_files.last_modified.date_modified",
+        "processed_files.static_content.location",
+        "processed_files.static_content.description",
+        "processed_files.static_content.content.@type",
 
-        #"processed_files.quality_metric.Total reads",
-        #"processed_files.quality_metric.Total Sequences",
-        #"processed_files.quality_metric.Sequence length",
-        "processed_files.quality_metric.display_title",
+        # "processed_files.quality_metric.Total reads",
+        # "processed_files.quality_metric.Total Sequences",
+        # "processed_files.quality_metric.Sequence length",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
-
-        "processed_files.quality_metric.Total reads",
-        "processed_files.quality_metric.Trans reads",
-        "processed_files.quality_metric.Cis reads (>20kb)",
-        "processed_files.quality_metric.Short cis reads (<20kb)",
-        #"processed_files.@type",
+        "processed_files.quality_metric_summary.*",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
@@ -216,14 +229,14 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
         "experiments_in_set.processed_files.extra_files.file_format",
-        "experiments_in_set.processed_files.quality_metric.display_title",
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
-        "experiments_in_set.processed_files.quality_metric.Total reads",
-        "experiments_in_set.processed_files.quality_metric.Trans reads",
-        "experiments_in_set.processed_files.quality_metric.Cis reads (>20kb)",
-        "experiments_in_set.processed_files.quality_metric.Short cis reads (<20kb)",
-        #"experiments_in_set.processed_files.@type"
+        "experiments_in_set.processed_files.quality_metric_summary.*",
+        "experiments_in_set.processed_files.static_content.location",
+        "experiments_in_set.processed_files.static_content.description",
+        "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
+        "experiments_in_set.processed_files.last_modified.date_modified",
+        # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
@@ -232,6 +245,10 @@ class ExperimentSet(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.href",
+        "other_processed_files.files.status",
+        "other_processed_files.files.last_modified.date_modified",
+        "other_processed_files.higlass_view_config.description",
+        "other_processed_files.higlass_view_config.last_modified.date_modified",
 
         "experiments_in_set.other_processed_files.files.href",
         "experiments_in_set.other_processed_files.title",
@@ -242,7 +259,9 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.file_format",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
-        "experiments_in_set.other_processed_files.files.genome_assembly"
+        "experiments_in_set.other_processed_files.files.genome_assembly",
+        "experiments_in_set.other_processed_files.files.status",
+        "experiments_in_set.other_processed_files.files.last_modified.date_modified"
     ]
 
     @calculated_property(schema={
@@ -281,7 +300,6 @@ class ExperimentSet(Item):
     def number_of_experiments(self, request, experiments_in_set=None):
         if experiments_in_set:
             return len(experiments_in_set)
-
 
 
 @collection(

@@ -27,9 +27,9 @@ var render = function (Component, body, res) {
             'lastCSSBuildTime'  : lastCSSBuildTime
         };
 
-    // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
+    // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request.
     // JWT 'localStorage' uses 'dummyStorage' plain object on server-side
-    JWT.remove(); 
+    JWT.remove();
 
     // Grab JWT token if available to inform session
     var jwtToken = res.getHeader('X-Request-JWT'), // Only returned if successfully authenticated
@@ -43,7 +43,7 @@ var render = function (Component, body, res) {
             JWT.saveUserInfoLocalStorage(userInfo);
         }
     } else if (
-        /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 
+        /* (disp_dict.context.code === 403 || res.statusCode === 403) && */
         // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)
         jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token."
     ){
@@ -92,6 +92,6 @@ var render = function (Component, body, res) {
 };
 
 
-module.exports.build = function (Component) {
+export function build(Component) {
     return transformResponse(render.bind(render, Component));
-};
+}

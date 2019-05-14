@@ -153,7 +153,7 @@ def configure_dbsession(config, clear_data=False):
     config.registry[DBSESSION] = DBSession
 
 
-def load_workbook(app, workbook_filename, docsdir, test=False):
+def load_workbook(app, workbook_filename, docsdir):
     from .loadxl import load_all
     from webtest import TestApp
     environ = {
@@ -161,7 +161,7 @@ def load_workbook(app, workbook_filename, docsdir, test=False):
         'REMOTE_USER': 'IMPORT',
     }
     testapp = TestApp(app, environ)
-    load_all(testapp, workbook_filename, docsdir, test=test)
+    load_all(testapp, workbook_filename, docsdir)
 
 
 def json_from_path(path, default=None):
@@ -261,8 +261,6 @@ def add_schemas_to_html_responses(config):
                                 del schema['properties']['@type']
                             if schema['properties'].get('display_title') is not None:
                                 del schema['properties']['display_title']
-                            if schema['properties'].get('link_id') is not None:
-                                del schema['properties']['link_id']
                             if schema['properties'].get('schema_version') is not None:
                                 del schema['properties']['schema_version']
                             if schema['properties'].get('uuid') is not None:
@@ -289,6 +287,11 @@ def main(global_config, **local_config):
     # set auth0 keys
     settings['auth0.secret'] = os.environ.get("Auth0Secret")
     settings['auth0.client'] = os.environ.get("Auth0Client")
+    # set google reCAPTCHA keys
+    settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
+    settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+    # set mirrored Elasticsearch location (for webprod/webprod2)
+    settings['mirror.env.es'] = os.environ.get('mirrorEnvEs')
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
@@ -350,7 +353,7 @@ def main(global_config, **local_config):
     if docsdir is not None:
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
     if workbook_filename:
-        load_workbook(app, workbook_filename, docsdir, test=load_test_only)
+        load_workbook(app, workbook_filename, docsdir)
 
 
     return app

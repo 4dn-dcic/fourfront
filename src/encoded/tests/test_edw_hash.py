@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 TEST_HASHES = {

@@ -6,7 +6,6 @@ import _ from 'underscore';
 import url from 'url';
 import {  Collapse, Table } from 'react-bootstrap';
 import { console, object, ajax, JWT, analytics, isServerSide } from'./../util';
-import * as globals from './../globals';
 import StaticPage from './StaticPage';
 import { BasicStaticSectionBody } from './components';
 
@@ -22,7 +21,6 @@ export default class ReleaseUpdates extends React.Component {
             'updateTag': null,
             'updateParam': null
         };
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.loadSection = this.loadSection.bind(this);
         this.loadUpdates = this.loadUpdates.bind(this);
         this.viewUpdates = this.viewUpdates.bind(this);
@@ -142,7 +140,6 @@ export default class ReleaseUpdates extends React.Component {
     }
 
 }
-globals.content_views.register(ReleaseUpdates, 'Release-updatesPage');
 
 
 class SingleUpdate extends React.Component {
@@ -165,7 +162,9 @@ class SingleUpdate extends React.Component {
     }
 
     toggle(){
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function({ open }){
+            return { "open" : !open };
+        });
     }
 
     buildItem(item){
@@ -191,7 +190,7 @@ class SingleUpdate extends React.Component {
         return (
             <tr key={item.primary_id.uuid} >
                 <td><a href={atId}>{ item.primary_id.display_title }</a></td>
-                <td>{ firstExp.experiment_type }</td>
+                <td>{ firstExp.experiment_type && firstExp.experiment_type.display_title }</td>
                 <td>{ firstExp.biosample.biosource_summary }</td>
                 <td>{ categorizer }</td>
                 <td>{ this.buildSecondary(atId, item.secondary_ids) }</td>
@@ -241,7 +240,7 @@ class SingleUpdate extends React.Component {
                 styleObj.backgroundColor = "#dff0d8"; // Green-ish
         }
 
-        return(
+        return (
             <div className={"overview-blocks-header with-background mb-1" + (open ? ' is-open' : ' is-closed')} style={styleObj}>
                 <h5 className="release-section-title clickable with-accent" onClick={this.toggle}>
                     <span><i className={"expand-icon icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>{ updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>

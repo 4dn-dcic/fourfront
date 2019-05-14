@@ -215,12 +215,12 @@ def step_run(testapp, lab, award):
 
 
 @pytest.fixture
-def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample):
+def expt_w_cont_lab_item(lab, remc_lab, award, human_biosample, exp_types):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': exp_types['microc']['@id'],
         'contributing_labs': [remc_lab['@id']]
     }
 
@@ -291,9 +291,9 @@ def test_submitter_cant_post_non_lab_collection(submitter_testapp):
     return submitter_testapp.post_json('/organism', item, status=403)
 
 
-def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_biosample):
+def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_biosample, exp_types):
     experiment = {'lab': lab['@id'], 'award': award['@id'],
-                  'experiment_type': 'micro-C', 'biosample': human_biosample['@id']}
+                  'experiment_type': exp_types['microc']['@id'], 'biosample': human_biosample['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=201)
     location = res.location
     res = submitter_testapp.get(location + '@@testing-allowed?permission=edit', status=200)
@@ -302,21 +302,21 @@ def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_b
     submitter_testapp.patch_json(location, {'description': 'My experiment'}, status=200)
 
 
-def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award):
-    experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': 'micro-C'}
+def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award, exp_types):
+    experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': exp_types['microc']['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=422)
     assert "not in user submits_for" in res.json['errors'][0]['description']
 
 
-def test_wrangler_post_other_lab(wrangler_testapp, other_lab, award, human_biosample):
+def test_wrangler_post_other_lab(wrangler_testapp, other_lab, award, human_biosample, exp_types):
     experiment = {'lab': other_lab['@id'], 'award': award['@id'],
-                  'experiment_type': 'micro-C', 'biosample': human_biosample['@id']}
+                  'experiment_type': exp_types['microc']['@id'], 'biosample': human_biosample['@id']}
     wrangler_testapp.post_json('/experiments-hi-c', experiment, status=201)
 
 
-def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, human_biosample):
+def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, human_biosample, exp_types):
     experiment = {'lab': lab['@id'], 'award': award['@id'],
-                  'experiment_type': 'micro-C', 'biosample': human_biosample['@id']}
+                  'experiment_type': exp_types['microc']['@id'], 'biosample': human_biosample['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=201)
 
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
@@ -1126,3 +1126,20 @@ def test_ready_to_process_set_status_others_can_not_view(
     assert res2['status'] == 'pre-release'
     # others can not view
     viewing_group_member_testapp.get(res1['@id'], status=403)
+
+
+@pytest.fixture
+def static_section_item():
+    return {
+        'name': 'static-section.test_ss',
+        'title': 'Test Static Section',
+        'body': 'This is a test section'
+    }
+
+
+def test_static_section_with_lab_view_by_lab_member(
+        wrangler_testapp, lab_viewer_testapp, lab, static_section_item):
+    static_section_item['lab'] = lab['@id']
+    static_section_item['status'] = 'released to lab'
+    res = wrangler_testapp.post_json('/static_section', static_section_item).json['@graph'][0]
+    lab_viewer_testapp.get(res['@id'], status=200)

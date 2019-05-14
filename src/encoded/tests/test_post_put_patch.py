@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 targets = [
     {'name': 'one', 'uuid': '775795d3-4410-4114-836b-8eeecf1d0c2f'},
@@ -298,28 +298,32 @@ def test_patch_delete_fields_non_string(content, testapp):
     assert res.json['@graph'][0]['schema_version'] == '1'
 
 
-def test_patch_delete_fields_still_works_with_no_validation(content, testapp):
+def test_patch_delete_fields_fails_with_no_validation(content, testapp):
     url = content['@id']
     res = testapp.get(url)
     assert res.json['simple1'] == 'simple1 default'
     assert res.json['simple2'] == 'simple2 default'
     assert res.json['field_no_default'] == 'test'
 
-    # with validate=false, then defaults are not populated so default fields are also deleted
-    res = testapp.patch_json(url + "?delete_fields=simple1,field_no_default&validate=false", {}, status=200)
-    assert 'field_no_default' not in res.json['@graph'][0].keys()
-    assert 'simple1' not in res.json['@graph'][0].keys()
+    # using delete_fields with validate=False will now raise a validation err
+    res = testapp.patch_json(url + "?delete_fields=simple1,field_no_default&validate=false", {}, status=422)
+    assert res.json['description'] == "Failed validation"
+    assert 'Cannot delete fields' in res.json['errors'][0]['description']
 
 
 def test_patch_delete_fields_bad_param(content, testapp):
+    """
+    delete_fields should not fail with a bad fieldname, but simply ignore
+    """
     url = content['@id']
     res = testapp.get(url)
     assert res.json['simple1'] == 'simple1 default'
     assert res.json['simple2'] == 'simple2 default'
     assert res.json['field_no_default'] == 'test'
-    res = testapp.patch_json(url + "?delete_fields=simple1,bad_fieldname", {}, status=422)
-    assert res.json['description'] == "Failed validation"
-    assert res.json['errors'][0]['description'] == "Additional properties are not allowed ('bad_fieldname' was unexpected)"
+    res = testapp.patch_json(url + "?delete_fields=simple1,bad_fieldname", {}, status=200)
+    # default value
+    assert res.json['@graph'][0]['simple1'] == 'simple1 default'
+    assert 'bad_fieldname' not in res.json['@graph'][0]
 
 
 def test_patch_delete_fields_import_items_admin(link_targets, testapp):
@@ -329,19 +333,48 @@ def test_patch_delete_fields_import_items_admin(link_targets, testapp):
     res = testapp.patch_json(url + "?delete_fields=protected_link", {}, status=200)
 
 
-def test_patch_delete_fields_import_items_submitter(content, submitter_testapp):
-    testapp = submitter_testapp
+def test_patch_delete_fields_import_items_submitter(content, testapp, submitter_testapp):
+    """
+    Since the deleted protected field has a default value in the schema, there
+    are two cases for this test:
+    1. No validation problems if previous value == default value (allow delete
+       to happen, since it will effectively do nothing)
+    2. ValidationFailure if previous protected value != default value
+    """
     url = content['@id']
     res = testapp.get(url)
-    assert res.json['protected']
-    res = testapp.patch_json(url + "?delete_fields=protected", {}, status=422)
+    assert res.json['protected'] == 'protected default'
+    res1 = submitter_testapp.patch_json(url + "?delete_fields=protected", {}, status=200)
+    assert res1.json['@graph'][0]['protected'] == 'protected default'
+
+    # change protected value
+    res = testapp.patch_json(url, {'protected': 'protected new'}, status=200)
+    assert res.json['@graph'][0]['protected'] == 'protected new'
+
+    res2 = submitter_testapp.patch_json(url + "?delete_fields=protected", {}, status=422)
+    perm_errs = [err['description'] for err in res2.json['errors'] if err['name'] == ['protected']]
+    assert len(perm_errs) == 1
+    assert perm_errs[0] == "permission 'import_items' required"
 
 
 def test_patch_delete_fields_required(content, testapp):
     url = content['@id']
-    res = testapp.get(url)
-
-    # with validate=false, then defaults are not populated so default fields are also deleted
     res = testapp.patch_json(url + "?delete_fields=required", {}, status=422)
     assert res.json['description'] == "Failed validation"
     assert res.json['errors'][0]['description'] == "'required' is a required property"
+
+
+def test_name_key_validation(link_targets, testapp):
+    # name_key
+    target_data = {'name': 'one#name'}
+    res = testapp.post_json('/testing-link-targets/', target_data, status=422)
+    assert res.json['description'] == 'Failed validation'
+    res_error = res.json['errors'][0]
+    assert "Forbidden character(s) {'#'}" in res_error['description']
+
+    # unique_key
+    source_data = {'name': 'two@*name', 'target': targets[0]['uuid']}
+    res = testapp.post_json('/testing-link-sources/', source_data, status=422)
+    assert res.json['description'] == 'Failed validation'
+    res_error = res.json['errors'][0]
+    assert "Forbidden character(s) {'*'}" in res_error['description']

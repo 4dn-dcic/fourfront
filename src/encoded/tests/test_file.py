@@ -3,7 +3,7 @@ from encoded.types.file import FileFastq, post_upload, force_beanstalk_env
 from pyramid.httpexceptions import HTTPForbidden
 import os
 import boto3
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_processed_file_unique_md5(testapp, mcool_file_json):
@@ -187,6 +187,11 @@ def test_range_download(testapp, registry, proc_file_json):
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
+    # ensure some basic fields are on the tracking items
+    for ti in tracking_items:
+        assert ti.properties['status'] == 'in review by lab'
+        assert 'schema_version' in ti.properties
+        assert 'date_created' in ti.properties
     tracked_rng_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items
                              if ti.properties.get('download_tracking', {}).get('range_query') is True]
     assert download_filename in tracked_rng_filenames
@@ -199,7 +204,7 @@ def test_range_download(testapp, registry, proc_file_json):
     assert resp.headers['Content-Range'] == 'bytes 2-5/12'
 
 
-def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, experiment_data, file_formats):
+def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, experiment_data, file_formats, exp_types):
     res = testapp.post_json('/file_processed', proc_file_json, status=201)
     resobj = res.json['@graph'][0]
     experiment_data['processed_files'] = [resobj['@id']]
@@ -213,18 +218,24 @@ def test_file_rev_linked_to_exp_download(testapp, registry, proc_file_json, expe
 
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
+    et_coll = registry['collections']['ExperimentType']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
     tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
                             if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
     assert len(tracked_exp_file_dls) > 0
     for dl_tracking in tracked_exp_file_dls:
-        assert dl_tracking['experiment_type'] == experiment_data['experiment_type']
+        ex_type_atid = experiment_data['experiment_type']
+        ex_type_name = ex_type_atid.replace('/experiment-types/', '')
+        ex_type_name = ex_type_name.replace('/', '')
+        dl_type = et_coll.get(dl_tracking['experiment_type'])
+        ex_type = et_coll.get(ex_type_name)
+        assert dl_type.properties.get('title') == ex_type.properties.get('title')
         assert 'file_format' in dl_tracking
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
         assert dl_tracking['range_query'] is False
-        assert dl_tracking['is_visualization'] is False
         assert dl_tracking['user_uuid'] == 'anonymous'
+        assert isinstance(dl_tracking['request_headers'], type(''))
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
@@ -238,7 +249,7 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
     testapp.patch_json(two_experiment_replicate_set['@id'],
                        {'other_processed_files': [{'title': 'Test', 'files': [resobj['@id']]}]})
     # hard-coded for convenience; should match experiment_data in datafixtures
-    expected_exp_type = 'micro-C'
+    expected_exp_type = '/experiment-types/in-situ-hi-c/'
     s3 = boto3.client('s3')
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'],
                   Body=str.encode('12346789abcd'))
@@ -248,17 +259,22 @@ def test_file_rev_linked_to_exp_set_download(testapp, registry, proc_file_json,
 
     # ensure that the download tracking item was created
     ti_coll = registry['collections']['TrackingItem']
+    et_coll = registry['collections']['ExperimentType']
     tracking_items = [ti_coll.get(id) for id in ti_coll]
     tracked_exp_file_dls = [ti.properties.get('download_tracking') for ti in tracking_items
                             if ti.properties.get('download_tracking', {}).get('experiment_type') is not 'None']
     assert len(tracked_exp_file_dls) > 0
     for dl_tracking in tracked_exp_file_dls:
-        assert dl_tracking['experiment_type'] == expected_exp_type
+        ex_type_atid = expected_exp_type
+        ex_type_name = ex_type_atid.replace('/experiment-types/', '')
+        ex_type_name = ex_type_name.replace('/', '')
+        dl_type = et_coll.get(dl_tracking['experiment_type'])
+        expected_exp_type = et_coll.get(ex_type_name)
+        assert dl_type.properties.get('title') == expected_exp_type.properties.get('title')
         assert 'file_format' in dl_tracking
         # this needs to be updated if the proc_file_json fixture is
         assert dl_tracking['file_format'] == file_formats.get('pairs').get('file_format')
         assert dl_tracking['range_query'] is False
-        assert dl_tracking['is_visualization'] is False
         assert dl_tracking['user_uuid'] == 'anonymous'
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
@@ -1051,8 +1067,11 @@ def custom_experiment_set_data(lab, award):
 
 
 def test_track_and_file_facet_info_no_link_to_exp_or_eset(testapp, proc_file_json):
+    # should only have lab_name
     res = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    assert 'track_and_facet_info' not in res
+    tf_info = res.get('track_and_facet_info')
+    assert 'lab_name' in tf_info
+    assert len(tf_info) == 1
 
 
 def test_track_and_file_facet_info_file_link_to_multi_expts(
@@ -1064,7 +1083,9 @@ def test_track_and_file_facet_info_file_link_to_multi_expts(
     assert pfile['@id'] in expt1['processed_files']
     assert pfile['@id'] in expt2['processed_files']
     res = testapp.get(pfile['@id']).json
-    assert 'track_and_facet_info' not in res
+    tf_info = res.get('track_and_facet_info')
+    assert 'lab_name' in tf_info
+    assert len(tf_info) == 1
 
 
 def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
@@ -1074,7 +1095,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_cat_rep_type_pfbucket(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'processed file'
     assert tf_info['assay_info'] == 'MboI'
 
@@ -1086,7 +1107,7 @@ def test_track_and_file_facet_info_file_link_to_expt_opfbucket(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'some other files'
 
 
@@ -1098,7 +1119,7 @@ def test_track_and_file_facet_info_file_link_to_expt_pf_and_opf_buckets(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'processed file'
 
 
@@ -1111,7 +1132,7 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep(
     testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
 
 
@@ -1126,14 +1147,14 @@ def test_track_and_file_facet_info_file_link_to_expt_w_rep_and_custom_eset(
     testapp.post_json('/experiment_set', custom_experiment_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['replicate_info'] == 'Biorep 1, Techrep 1'
 
 
 def test_track_and_file_facet_info_file_link_to_expt_no_cat_or_rep(
-        testapp, proc_file_json, experiment_data):
+        testapp, proc_file_json, experiment_data, exp_types):
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
-    experiment_data['experiment_type'] = 'RNA-seq'
+    experiment_data['experiment_type'] = exp_types['rnaseq']['@id']
     experiment_data['processed_files'] = [pfile['@id']]
     del experiment_data['digestion_enzyme']
     testapp.post_json('/experiment_seq', experiment_data, status=201)
@@ -1151,7 +1172,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_cell(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['biosource_name'] == 'GM12878'
 
 
@@ -1163,7 +1184,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_tissue(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['biosource_name'] == 'lung'
 
 
@@ -1185,7 +1206,9 @@ def test_track_and_file_facet_info_file_link_to_multi_repsets(
     assert pfile['@id'] in repset1['processed_files']
     assert pfile['@id'] in repset2['processed_files']
     res = testapp.get(pfile['@id']).json
-    assert 'track_and_facet_info' not in res
+    tf_info = res.get('track_and_facet_info')
+    assert 'lab_name' in tf_info
+    assert len(tf_info) == 1
 
 
 def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
@@ -1197,7 +1220,7 @@ def test_track_and_file_facet_info_file_link_to_repset_w_one_expt(
     testapp.post_json('/experiment_set_replicate', rep_set_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     assert tf_info['experiment_bucket'] == 'processed file'
     assert tf_info['assay_info'] == 'MboI'
     assert tf_info['biosource_name'] == 'GM12878'
@@ -1302,7 +1325,7 @@ def test_track_and_file_facet_info_file_patch_override_fields(
     testapp.post_json('/experiment_hi_c', experiment_data, status=201)
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
-    assert tf_info['experiment_type'] == 'micro-C'
+    assert tf_info['experiment_type'] == 'in situ Hi-C'
     # make sure it does change
     testapp.patch_json(pfile['@id'], {'override_experiment_type': 'new type'}, status=200)
     res2 = testapp.get(pfile['@id']).json

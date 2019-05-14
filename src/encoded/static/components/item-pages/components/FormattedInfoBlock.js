@@ -27,11 +27,12 @@ export class FormattedInfoWrapper extends React.PureComponent {
         'isSingleItem'  : false,
         'singularTitle' : 'Publication',
         'iconClass'     : 'book',
-        'className'     : null
+        'className'     : null,
+        'noDetails'     : false
     }
 
     render(){
-        var { isSingleItem, className, singularTitle, iconClass, children } = this.props;
+        var { isSingleItem, className, singularTitle, iconClass, children, noDetails } = this.props;
         var outerClassName = (
             "publications-block formatted-info-panel formatted-wrapper" +
             (isSingleItem ? ' single-item' : '') +
@@ -44,7 +45,7 @@ export class FormattedInfoWrapper extends React.PureComponent {
                     <div className="icon-container col-xs-2 col-lg-1">
                         <i className={"icon icon-" + iconClass} />
                     </div>
-                    <div className="col-xs-10 col-lg-11" children={children}/>
+                    <div className={"col-xs-10 col-lg-11" + (isSingleItem && noDetails ? ' no-more-details' : '')} children={children}/>
                 </div>
             </div>
         );
@@ -81,8 +82,8 @@ export class WrappedCollapsibleList extends React.Component {
     constructor(props){
         super(props);
         this.itemRenderFxnFallback = this.itemRenderFxnFallback.bind(this);
+        this.onToggle = this.onToggle.bind(this);
         this.renderItems = this.renderItems.bind(this);
-        this.render = this.render.bind(this);
         this.state = {
             'open' : false
         };
@@ -90,6 +91,12 @@ export class WrappedCollapsibleList extends React.Component {
 
     itemRenderFxnFallback(item, idx, all){
         return <WrappedListBlock className={this.props.itemClassName} context={item} key={object.itemUtil.atId(item) || idx} />;
+    }
+
+    onToggle(){
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
     }
 
     renderItems(){
@@ -122,9 +129,9 @@ export class WrappedCollapsibleList extends React.Component {
                 <div>
                     { this.renderItems() }
                     { items.length > persistentCount ?
-                        <Button bsStyle="default" bsSize="small" onClick={()=>{
-                            this.setState({ open : !this.state.open });
-                        }}>{ this.state.open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }</Button>
+                        <Button bsStyle="default" bsSize="small" onClick={this.onToggle}>
+                            { this.state.open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }
+                        </Button>
                     : null }
                 </div>
             </FormattedInfoWrapper>
@@ -151,7 +158,7 @@ class FormattedInfoBlockList extends React.Component {
     /**
      * Same functionality as @see FormattedInfoBlock.ajaxPropertyDetails, catered to a list.
      * Use (FormattedInfoBlock.List.ajaxPropertyDetails.)bind/call/apply and from another (e.g. parent) React component.
-     * 
+     *
      * @param {string[]} endpoints - Array of endpoints to get data from.
      * @param {string} propertyName - A unique id to use as state property suffix for saving results, e.g. 'labs' for state.details_labs.
      * @param {function} [callback] - Optional callback, takes results as parameter.
@@ -323,7 +330,7 @@ export class FormattedInfoBlock extends React.Component {
      * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
      * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
      * @param {function} [callback] - Optional callback.
-     * 
+     *
      * @example
      * componentDidMount : function(){
      *     if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
@@ -365,7 +372,7 @@ export class FormattedInfoBlock extends React.Component {
      *
      * @deprecated
      * @param {string} propertyName - Name/key of linkTo property to fetch.
-     * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with link_id.
+     * @param {string|Object} contextProperty - What we have as value in context, e.g. uuid or object with @id.
      * @param {function} cb - Callback function passed down to ajaxPropertyDetails.
      * @returns {boolean} Whether an AJAX load/fetch was initiated.
      */
@@ -531,10 +538,7 @@ export class FormattedInfoBlock extends React.Component {
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.outerClassName = this.outerClassName.bind(this);
-        this.render = this.render.bind(this);
         this.state = {
             transitionDelayElapsed : !props.loading,
             mounted : false
@@ -549,14 +553,14 @@ export class FormattedInfoBlock extends React.Component {
     componentDidUpdate(prevProps, prevState){
         if (prevProps.loading === true && this.props.loading === false && !this.state.transitionDelayElapsed){
             if (this.props.debug) console.info('FormattedInfoBlock > updated this.props.loading');
-            
+
             if (this.state.mounted && !isServerSide()){
                 setTimeout(()=>{
                     if (this.props.debug) console.info('FormattedInfoBlock > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
                 }, 100);
             }
-            
+
         }
     }
 

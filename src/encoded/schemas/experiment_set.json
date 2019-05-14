@@ -118,7 +118,7 @@
         }
     },
     "facets": {
-        "experiments_in_set.experiment_type": {
+        "experiments_in_set.experiment_type.display_title": {
           "title": "Experiment Type"
         },
         "dataset_label" : {
@@ -177,7 +177,7 @@
             "description" : "Total number of files contained in an Experiment Set.",
             "default_hidden" : true
         },
-        "experiments_in_set.experiment_type" : {
+        "experiments_in_set.experiment_type.display_title" : {
             "title" : "Experiment Type",
             "widthMap" : {
                 "lg" : 140,

@@ -94,6 +94,7 @@ $navbar-transition-easing: ease-out;
             height: inherit;
             text-decoration: none;
             position: relative;
+            max-height: inherit;
             
             > .img-container {
                 height: inherit;
@@ -102,6 +103,7 @@ $navbar-transition-easing: ease-out;
                 float: left;
                 margin-right: 15px;
                 text-align: center;
+                max-height: inherit;
                 //> img, 
                 //> .navbar-logo-img,
                 > svg#fourfront_logo_svg {
@@ -111,15 +113,12 @@ $navbar-transition-easing: ease-out;
                     padding-bottom: 10px;
                     padding-top: 10px;
                     transition: padding $navbar-transition-length, transform $navbar-transition-length;
-                    body.scrolled-past-top & {
-                        padding-top: 6px;
-                        padding-bottom: 6px;
-                    }
-                    > text.fourfront-logo-text {
-                        transition: letter-spacing 1s, opacity .7s, stroke .7s, stroke-width .7s, fill .7s;
-                    }
-                    .fourfront-logo-foreground-circle {
-                        transition: opacity 1.2s;
+                    max-height: inherit;
+                    @media screen and (min-width: $navbar-fixed-breakpoint){
+                        body.scrolled-past-top & {
+                            padding-top: 6px !important;
+                            padding-bottom: 6px !important;
+                        }
                     }
                 }
             }
@@ -132,9 +131,11 @@ $navbar-transition-easing: ease-out;
                 transform: translate3d(0px,0,0);
                 transition: font-size $navbar-transition-length, transform $navbar-transition-length;
 
-                body.scrolled-past-top & {
-                    font-size: 1.25rem;
-                    transform: translate3d(-5px,0,0);
+                @media screen and (min-width: $navbar-fixed-breakpoint){
+                    body.scrolled-past-top & {
+                        font-size: 1.25rem;
+                        transform: translate3d(-5px,0,0);
+                    }
                 }
             }
 
@@ -493,7 +494,6 @@ $navbar-transition-easing: ease-out;
         padding-bottom: 12px;
     }
 
-    //@include background-image(linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%));
     //background-image: -ms-linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%);
 
     p, div {
@@ -759,32 +759,42 @@ $navbar-transition-easing: ease-out;
 // User Actions Dropwdown
 
 .navbar-acct {
-    @media screen and (min-width: $screen-md-min) {
+    @media screen and (min-width: $screen-sm-min) {
         margin-left: 10px;
         margin-right: 0px; // Align w/ right-most container edge.
     }
 }
 
-#user_actions_dropdown {
-    max-width: 115px;
-    //width: 115px;
-    min-width: 65px;
+#user_account_nav_button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 25px;
-    > span.caret {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        margin-top: -3px;
+
+    .is-dropdown & {
+
+        &.dropdown-toggle {
+            padding-right: 25px;
+        }
+
+        > span.caret {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            margin-top: -3px;
+        }
+
     }
+
+    // screen-md size:
+    max-width: 145px;
+    min-width: 80px;
+
     @media screen and (min-width: $screen-lg-min) {
-        max-width: 150px;
-        min-width: 115px;
+        max-width: 210px;
+        min-width: 120px;
     }
     @media screen and (max-width: $screen-sm-max) {
-        max-width: 150px;
+        max-width: 200px;
         //width: 150px;
     }
     @media screen and (max-width: $screen-xs-max) {

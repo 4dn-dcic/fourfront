@@ -143,5 +143,6 @@ h5.modal-title, h4.modal-title, h3.modal-title {
 }
 
 @media (min-width: $screen-md-min) {
-  .modal-lg { width: $modal-lg; }
+  // Edited to append .modal-dialog to override hglib.css style overrides... 
+  .modal-lg.modal-dialog { width: $modal-lg; }
 }

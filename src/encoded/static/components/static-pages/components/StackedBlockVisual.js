@@ -142,31 +142,20 @@ export class StackedBlockVisual extends React.PureComponent {
             return tip;
         },
         'blockRenderedContents' : function(data, groupingTitle, groupingPropertyTitle){
-
-            var defaultOutput = <span>&nbsp;</span>;
-            var experimentsCountExpected = 0;
-
-            function getCount(num){
-                try {
-                    var n = parseInt(num);
-                    if (isNaN(n)) return 0;
-                    return n;
-                } catch (e){
-                    return 0;
-                }
-            }
-
+            var count = 0;
             if (Array.isArray(data)) {
-                experimentsCountExpected = sumPropertyFromList(data, 'experiments_expected_2017');
+                count = data.length;
             } else if (data) {
-                experimentsCountExpected = getCount(data.experiments_expected_2017);
+                count = 1;
             }
-
-            return experimentsCountExpected || defaultOutput;
+            if (count > 100){
+                return <span style={{ 'fontSize' : '0.95rem', 'position' : 'relative', 'top' : -1 }}>{ count }</span>;
+            }
+            return <span>{ count }</span>;
 
         },
         'groupValue' : function(data, groupingTitle, groupingPropertyTitle){
-            return sumPropertyFromList(StackedBlockGroupedRow.flattenChildBlocks(data), 'experiments_expected_2017');
+            return StackedBlockVisual.Row.flattenChildBlocks(data).length;
         }
     };
 
@@ -410,7 +399,7 @@ export class StackedBlockVisual extends React.PureComponent {
         } else {
             // TODO: Render ... plain blocks w/o left column?
         }
-        
+
     }
 
 }
@@ -452,7 +441,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         } else {
             allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
         }
-        
+
         if (typeof props.columnSubGrouping !== 'string' && !Array.isArray(data)) {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
@@ -461,12 +450,14 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         }
 
         //console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
-        
+
         var commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
                 'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
                 'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover'),
+            width = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1,
             containerGroupStyle = {
-                'width'         : (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1, // Width for each column
+                'width'         : width, // Width for each column
+                'minWidth'      : width,
                 'minHeight'     : props.blockHeight + props.blockVerticalSpacing,               // Height for each row
                 'paddingLeft'   : props.blockHorizontalSpacing,
                 'paddingRight'  : props.blockHorizontalSpacing,
@@ -582,7 +573,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
     constructor(props){
         super(props);
-        //console.log('BOOTUIP', props);
         this.toggleOpen = this.toggleOpen.bind(this);
         var initOpen = (Array.isArray(props.defaultDepthsOpen) && props.defaultDepthsOpen[props.depth]) || false;
         this.state = { 'open' : initOpen };
@@ -593,11 +583,14 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     }
 
     toggleOpen(){
-        this.setState({ open : !this.state.open });
+        this.setState(function({ open }){
+            return { "open" : !open };
+        });
     }
 
     render(){
-        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility } = this.props;
+        var { groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, groupValue,
+            groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility } = this.props;
         var groupingPropertyTitle = null;
         if (Array.isArray(groupingProperties) && groupingProperties[depth]){
             groupingPropertyTitle = titleMap[groupingProperties[depth]] || groupingProperties[depth];
@@ -617,7 +610,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         } else {
             toggleIcon = <i className={"icon icon-fw"} />;
         }
-        
+
         var totalCount = null;
         if (depth === 0 && groupValue && typeof groupValue === 'function'){
             totalCount = groupValue(data, group, groupingPropertyTitle);
@@ -626,7 +619,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         var header = null;
         if (depth === 0 && groupedDataIndices && ((isOpen && duplicateHeaders) || index === 0)){
             var minColumnWidth = StackedBlockVisual.minColumnWidth(this.props);
-            var headerItemStyle = { 'width' : minColumnWidth };
+            var headerItemStyle = { 'width' : minColumnWidth, 'minWidth' : minColumnWidth };
 
             var columnKeys = _.keys(groupedDataIndices);
             if (Array.isArray(this.props.headerColumnsOrder)){
@@ -647,15 +640,17 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             );
         }
 
-        var childBlocks = !isOpen ? this.childBlocksCollapsed() : null,
-            maxBlocksInRow  = childBlocks && Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count')),
-            blockHeightFull = blockHeight + blockVerticalSpacing,
-            rowHeight       = blockHeight + (blockVerticalSpacing * 2) + 1;
+        var blockHeightFull = blockHeight + blockVerticalSpacing,
+            rowHeight       = blockHeight + (blockVerticalSpacing * 2) + 1,
+            partRowHeight   = parseInt(rowHeight / 3),
+            childBlocks     = !isOpen ? this.childBlocksCollapsed() : <div className="open-empty-placeholder" style={{ 'marginTop' : partRowHeight, 'height' : rowHeight - partRowHeight, 'marginLeft' : blockHorizontalSpacing }}/>,
+            maxBlocksInRow  = childBlocks && Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count'));
+
 
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
-                <div className="row">
-                    <div className="col col-sm-4 label-section" style={depth === 0 && index === 0 ? { 'paddingTop' : Math.max(0, (isOpen ? 95 : 135) - rowHeight) } : null}>
+                <div className="row grouping-row">
+                    <div className="col col-xs-4 label-section" style={depth === 0 && index === 0 ? { 'paddingTop' : Math.max(0, (isOpen ? 95 : 135) - rowHeight) } : null}>
                         <div className="label-container" style={{ 'minHeight' : rowHeight }}>
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
@@ -668,7 +663,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         </div>
                         {/* this.childLabels() */}
                     </div>
-                    <div className={"col col-sm-8 list-section" + (header ? ' has-header' : '')}>
+                    <div className={"col col-xs-8 list-section" + (header ? ' has-header' : '')}>
                         { header }
                         { childBlocks }
                     </div>
@@ -683,7 +678,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         <StackedBlockGroupedRow {...this.props} data={data[k]} key={k} group={k} depth={depth + 1} />
                     ) }
                 </div>
-                
+
             </div>
         );
     }
@@ -715,8 +710,7 @@ export class StackedBlock extends React.PureComponent {
         var style = {
             'height' : blockHeight,
             'width' : blockHeight,
-            "lineHeight" : blockHeight + 'px',
-            //'marginRight' : blockHorizontalSpacing,
+            'lineHeight' : blockHeight + 'px',
             'marginBottom' : blockVerticalSpacing
         };
 

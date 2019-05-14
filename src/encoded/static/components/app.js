@@ -18,7 +18,7 @@ import * as store from '../store';
 import * as origin from '../libs/origin';
 import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
-import { FacetCharts } from './facetcharts';
+import { FacetCharts } from './browse/components/FacetCharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import PageTitle from './PageTitle';
@@ -65,11 +65,6 @@ const portal = {
                 { id: 'about-menu-item',            title: 'About',                             url: '/about' }
             ]
         }
-    ],
-    "user_section": [
-        {id: 'login-menu-item', title: 'Log in', url: '/'},
-        {id: 'accountactions-menu-item', title: 'Register', url: '/help/user-guide/account-creation'}
-        // Remove context actions for now{id: 'contextactions-menu-item', title: 'Actions', url: '/'}
     ]
 };
 
@@ -94,8 +89,6 @@ class Timeout {
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
     }
 }
-
-
 
 /**
  * The root and top-most React component for our application.
@@ -197,6 +190,8 @@ export default class App extends React.Component {
         'sessionMayBeSet' : null
     };
 
+    static debouncedOnNavigationTooltipRebuild = _.debounce(ReactTooltip.rebuild, 500);
+
     /**
      * Does some initialization, checks if browser HistoryAPI is supported,
      * sets state.session according to JWT in current cookie, etc.
@@ -206,9 +201,6 @@ export default class App extends React.Component {
      */
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillUpdate = this.componentWillUpdate.bind(this);
-        this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.listActionsFor = this.listActionsFor.bind(this);
         this.currentAction = this.currentAction.bind(this);
         this.loadSchemas = this.loadSchemas.bind(this);
@@ -369,7 +361,8 @@ export default class App extends React.Component {
                 'message' : (
                     <div>
                         <p className="mb-0">
-                            <a href="https://www.google.com/chrome/" target="_blank" className="text-500">Google Chrome</a> or <a href="https://www.mozilla.org/en-US/firefox/" target="_blank" className="text-500">Mozilla Firefox</a> are
+                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank" className="text-500">Google Chrome</a>
+                            or <a href="https://www.mozilla.org/en-US/firefox/" rel="noopener noreferrer" target="_blank" className="text-500">Mozilla Firefox</a> are
                             the recommended browser(s) for using the 4DN Data Portal.
                         </p>
                         <p className="mb-0">
@@ -419,7 +412,7 @@ export default class App extends React.Component {
     }
 
     /** @ignore */
-    componentWillUpdate(nextProps, nextState){
+    UNSAFE_componentWillUpdate(nextProps, nextState){
         if (nextState.schemas !== this.state.schemas){
             Schemas.set(nextState.schemas);
         }
@@ -435,8 +428,8 @@ export default class App extends React.Component {
             analytics.registerPageView(this.props.href, this.props.context);
 
             // We need to rebuild tooltips after navigation to a different page.
-            ReactTooltip.rebuild();
-
+            // Add a debounce so it runs again after a delay, so other components get a chance to mount.
+            App.debouncedOnNavigationTooltipRebuild();
         }
 
 
@@ -466,15 +459,12 @@ export default class App extends React.Component {
      *
      * @todo Potentially remove. Or document more.
      * @public
-     * @param {string} category - Usually one of "user", "context", "user_section", "global_sections".
+     * @param {string} category - Usually one of "user", "context", "global_sections".
      * @returns {{ href: string }[]} - List of actions available for category.
      */
     listActionsFor(category) {
         if (category === 'context') {
             return (this.props.context && this.props.context.actions) || [];
-        }
-        if (category === 'user_section') {
-            return portal.user_section;
         }
         if (category === 'user') {
             if (!this.state.mounted) return [];
@@ -1376,7 +1366,7 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-        var { canonical, currentAction, context, listActionsFor, status } = this.props,
+        var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
             title;
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1385,7 +1375,7 @@ class HTMLTitle extends React.PureComponent {
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context, currentAction);
+            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
@@ -1417,7 +1407,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf } = this.props,
+        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props,
             contextAtID     = object.itemUtil.atId(context),
             key             = contextAtID && contextAtID.split('?')[0], // Switching between collections may leave component in place
             content; // Output
@@ -1439,7 +1429,7 @@ class ContentRenderer extends React.PureComponent {
             content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
 
-            var ContentView = globals.content_views.lookup(context, currentAction);
+            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
@@ -1459,7 +1449,11 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return content;
+        return (
+            //<div className="container" id="content">
+                <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>
+            //</div>
+        );
     }
 }
 
@@ -1546,6 +1540,16 @@ class BodyElement extends React.PureComponent {
          * Used to unset the `top` and `left` positions after hover out.
          */
         this.tooltipRef = React.createRef();
+
+        /**
+         * Reference to overlays container.
+         * Used for React.createPortal in whichever components
+         * may need to make one.
+         *
+         * Eventually, this will be used to supercede React-Bootstraps
+         * Modal Components.
+         */
+        this.overlaysContainerRef = React.createRef();
     }
 
     /**
@@ -1738,13 +1742,7 @@ class BodyElement extends React.PureComponent {
      */
     getViewportDimensions(){
         if (isServerSide()) return;
-
-        var scrollElem      = (window.document && window.document.scrollingElement) || null,
-            windowWidth     = (scrollElem && (scrollElem.clientWidth || scrollElem.offsetWidth)) || window.innerWidth,
-            windowHeight    = (scrollElem && (scrollElem.clientHeight || scrollElem.offsetHeight)) || window.innerHeight;
-            //documentHeight  = (widthElem && widthElem.scrollHeight); Not relevant re: resizing.
-
-        return { windowWidth, windowHeight };
+        return { 'windowWidth' : window.innerWidth , 'windowHeight' : window.innerHeight };
     }
 
     /**
@@ -1850,7 +1848,8 @@ class BodyElement extends React.PureComponent {
             registerWindowOnScrollHandler = this.registerWindowOnScrollHandler,
             addToBodyClassList            = this.addToBodyClassList,
             removeFromBodyClassList       = this.removeFromBodyClassList,
-            toggleFullScreen              = this.toggleFullScreen;
+            toggleFullScreen              = this.toggleFullScreen,
+            overlaysContainer             = this.overlaysContainerRef.current;
 
         if (hasError) return this.renderErrorState();
 
@@ -1879,14 +1878,13 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen }}
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
                                     'context', 'updateUserInfo', 'listActionsFor')} />
 
                             <div id="pre-content-placeholder"/>
 
-                            <PageTitle {..._.pick(this.props, 'context', 'href', 'alerts', 'session', 'schemas', 'currentAction')}
-                                windowWidth={windowWidth} />
+                            <PageTitle {...this.props} windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
@@ -1895,7 +1893,8 @@ class BodyElement extends React.PureComponent {
 
                             <ContentErrorBoundary canonical={canonical}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
-                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen } } />
+                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
+                                    overlaysContainer } } />
                             </ContentErrorBoundary>
 
                             <div id="layout-footer"/>
@@ -1903,6 +1902,8 @@ class BodyElement extends React.PureComponent {
                         <Footer version={context.app_version} />
                     </div>
                 </div>
+
+                <div id="overlays-container" ref={this.overlaysContainerRef}/>
 
                 <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 
@@ -1967,6 +1968,6 @@ class ContentErrorBoundary extends React.Component {
             return ContentErrorBoundary.errorNotice();
         }
 
-        return <div className="container" id="content">{ this.props.children }</div>;
+        return this.props.children; //<div className="container" id="content">{ this.props.children }</div>;
     }
 }

@@ -70,8 +70,9 @@ export function sanitizeOutputValue(value){
     if (typeof value !== 'string' && !React.isValidElement(value)){
         if (value && typeof value === 'object'){
             if (typeof value.display_title !== 'undefined'){
-                if (typeof value.link_id !== 'undefined' || typeof value['@id'] !== 'undefined'){
-                    return <a href={object.atIdFromObject(value)}>{ value.display_title }</a>;
+                const atId = object.itemUtil.atId(value);
+                if (atId){
+                    return <a href={atId}>{ value.display_title }</a>;
                 } else {
                     return value.display_title;
                 }
@@ -87,7 +88,7 @@ export class TableRowToggleOpenButton extends React.PureComponent {
     render(){
         return (
             <div className="inline-block toggle-detail-button-container">
-                <button className="toggle-detail-button" onClick={this.props.onClick || this.props.toggleDetailOpen}>
+                <button type="button" className="toggle-detail-button" onClick={this.props.onClick || this.props.toggleDetailOpen}>
                     <div className="icon-container">
                         <i className={"icon icon-fw icon-" + (this.props.open ? 'minus' : 'plus') }/>
                     </div>
@@ -182,12 +183,12 @@ export const defaultColumnExtensionMap = {
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : {'lg' : 200, 'md' : 180, 'sm' : 160},
-        'render' : function(result, columnDefinition, props, width, popLink = false){
+        'render' : function labTitle(result, columnDefinition, props, width, popLink = false){
             var labItem = result.lab;
             if (!labItem) return null;
             var labLink;
             if (popLink){
-                labLink = <a href={object.atIdFromObject(labItem)} target='_blank'>{ labItem.display_title }</a>;
+                labLink = <a href={object.atIdFromObject(labItem)} target='_blank' rel="noopener noreferrer">{ labItem.display_title }</a>;
             }else{
                 labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
             }
@@ -219,7 +220,7 @@ export const defaultColumnExtensionMap = {
         'title' : 'Date Created',
         'colTitle' : 'Created',
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function dateCreatedTitle(result, columnDefinition, props, width){
             if (!result.date_created) return null;
             return <DateUtility.LocalizedTime timestamp={result.date_created} formatType='date-sm' />;
         },
@@ -228,7 +229,7 @@ export const defaultColumnExtensionMap = {
     'last_modified.date_modified' : {
         'title' : 'Date Modified',
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function lastModifiedDate(result, columnDefinition, props, width){
             if (!result.last_modified) return null;
             if (!result.last_modified.date_modified) return null;
             return <DateUtility.LocalizedTime timestamp={result.last_modified.date_modified} formatType='date-sm' />;
@@ -245,7 +246,7 @@ export const defaultColumnExtensionMap = {
     },
     'public_release' : {
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function publicRelease(result, columnDefinition, props, width){
             if (!result.public_release) return null;
             return <DateUtility.LocalizedTime timestamp={result.public_release} formatType='date-sm' />;
         },
@@ -254,7 +255,7 @@ export const defaultColumnExtensionMap = {
     'number_of_experiments' : {
         'title' : '# of Experiments',
         'widthMap' : {'lg' : 68, 'md' : 68, 'sm' : 50},
-        'render' : function(expSet, columnDefinition, props, width){
+        'render' : function numberOfExperiments(expSet, columnDefinition, props, width){
             var number_of_experiments = parseInt(expSet.number_of_experiments);
 
             if (isNaN(number_of_experiments) || !number_of_experiments){
@@ -271,7 +272,7 @@ export const defaultColumnExtensionMap = {
         'title' : '# of Files',
         'noSort' : true,
         'widthMap' : {'lg' : 60, 'md' : 50, 'sm' : 50},
-        'render' : function(expSet, columnDefinition, props, width){
+        'render' : function numberOfFiles(expSet, columnDefinition, props, width){
 
             var number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
 
@@ -289,7 +290,7 @@ export const defaultColumnExtensionMap = {
     'google_analytics.for_date' : {
         'title' : 'Analytics Date',
         'widthMap' : {'lg' : 140, 'md' : 120, 'sm' : 120},
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function googleAnalyticsDate(result, columnDefinition, props, width){
             if (!result.google_analytics || !result.google_analytics.for_date) return null;
             return <DateUtility.LocalizedTime timestamp={result.google_analytics.for_date} formatType='date-sm' localize={false} />;
         }
@@ -298,7 +299,7 @@ export const defaultColumnExtensionMap = {
         'title' : 'Status',
         'widthMap' : {'lg' : 120, 'md' : 120, 'sm' : 100},
         'order' : 501,
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function statusIndicator(result, columnDefinition, props, width){
             var statusFormatted = Schemas.Term.toName('status', result.status);
             return (
                 <React.Fragment>
@@ -310,7 +311,7 @@ export const defaultColumnExtensionMap = {
     },
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function experimentCategorizer(result, columnDefinition, props, width){
             // We have arrays here because experiments_in_set is array.
             var cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value', true)).join('; ');
             var cat_field = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field', true))[0];
@@ -388,10 +389,11 @@ export const columnsToColumnDefinitions = memoize(function(columns, columnDefini
         }
     );
 
-    _.forEach(uninishedColumnDefinitions, function(colDef, i){
+    var columnDefinitions = _.map(uninishedColumnDefinitions, function(colDef, i){
         var colDefOverride = columnDefinitionMap && columnDefinitionMap[colDef.field];
         if (colDefOverride){
-            _.extend(colDef, colDefOverride, colDef);
+            var colDef2 = _.extend({}, colDefOverride, colDef);
+            colDef = colDef2;
         }
         // Add defaults for any required-for-view but not-present properties.
         if (colDef.widthMap && colDef.widthMap.sm && typeof colDef.widthMap.xs !== 'number'){
@@ -400,9 +402,11 @@ export const columnsToColumnDefinitions = memoize(function(columns, columnDefini
         colDef.widthMap = colDef.widthMap || defaultWidthMap;
         colDef.render   = colDef.render || defaultColumnBlockRenderFxn;
         colDef.order    = typeof colDef.order === 'number' ? colDef.order : i;
+
+        return colDef;
     });
 
-    return _.sortBy(uninishedColumnDefinitions, 'order');
+    return _.sortBy(columnDefinitions, 'order');
 });
 
 
@@ -421,8 +425,10 @@ export const defaultHiddenColumnMapFromColumns = memoize(function(columns){
     return !haveContextColumnsChanged(lastArgs[0], newArgs[0]);
 });
 
-
-export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
+/**
+ * Adds a `baseWidth` property to each columnDefinition based off widthMap or default value (100).
+ */
+export const columnDefinitionsToScaledColumnDefinitions = memoize(function(columnDefinitions){
     return _.map(columnDefinitions, function(colDef){
         var colDef2 = _.clone(colDef);
         colDef2.baseWidth = colDef.widthMap.sm || colDef.widthMap.md || colDef.widthMap.lg || 100;
@@ -431,7 +437,7 @@ export function columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
         }
         return colDef2;
     });
-}
+});
 
 
 /**
@@ -510,27 +516,39 @@ export class ResultRowColumnBlockValue extends React.Component {
 
 
 
-export class HeadersRow extends React.PureComponent {
+export class HeadersRow extends React.Component {
+
+    static fullRowWidth = memoize(function(columnDefinitions, mounted=true, dynamicWidths=null, windowWidth=null){
+        return _.reduce(columnDefinitions, function(fw, colDef, i){
+            var w;
+            if (typeof colDef === 'number') w = colDef;
+            else {
+                if (Array.isArray(dynamicWidths) && dynamicWidths[i]) w = dynamicWidths[i];
+                else w = getColumnWidthFromDefinition(colDef, mounted, windowWidth);
+            }
+            if (typeof w !== 'number') w = 0;
+            return fw + w;
+        }, 0);
+    });
 
     static propTypes = {
         'columnDefinitions' : PropTypes.array.isRequired,//ResultRow.propTypes.columnDefinitions,
         'mounted' : PropTypes.bool.isRequired
-    }
+    };
 
     constructor(props){
         super(props);
         this.throttledSetHeaderWidths = _.debounce(_.throttle(this.setHeaderWidths.bind(this), 1000), 350);
         this.setHeaderWidths = this.setHeaderWidths.bind(this);
         this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
-        this.render = this.render.bind(this);
         this.state = {
-            widths : (props.headerColumnWidths && props.headerColumnWidths.slice(0)) || null
+            'widths' : (props.headerColumnWidths && props.headerColumnWidths.slice(0)) || null
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.headerColumnWidths !== this.props.headerColumnWidths){
-            this.setState({ 'widths' : nextProps.headerColumnWidths });
+    componentDidUpdate(pastProps){
+        if (pastProps.headerColumnWidths !== this.props.headerColumnWidths){
+            this.setState({ 'widths' : this.props.headerColumnWidths.slice(0) });
         }
     }
 
@@ -548,14 +566,17 @@ export class HeadersRow extends React.PureComponent {
     }
 
     onAdjusterDrag(idx, evt, r){
-        var widths = this.state.widths.slice(0);
-        widths[idx] = Math.max(this.props.columnDefinitions[idx].minColumnWidth || this.props.defaultMinColumnWidth || 55, r.x );
-        this.setState({ 'widths' : widths });
+        this.setState(({ widths }, { columnDefinitions, defaultMinColumnWidth })=>{
+            var nextWidths = widths.slice(0);
+            nextWidths[idx] = Math.max(columnDefinitions[idx].minColumnWidth || defaultMinColumnWidth || 55, r.x);
+            return { 'widths' : nextWidths };
+        });
     }
 
     render(){
         var { isSticky, stickyStyle, tableLeftOffset, tableContainerWidth, columnDefinitions, stickyHeaderTopOffset, renderDetailPane, headerColumnWidths } = this.props,
             isAdjustable = headerColumnWidths && this.state.widths;
+
         return (
             <div className={
                     "search-headers-row"
@@ -563,8 +584,13 @@ export class HeadersRow extends React.PureComponent {
                     + (isSticky ? ' stickied' : '')
                     + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')
                 } style={
-                    isSticky ? _.extend({}, stickyStyle, { 'top' : -stickyHeaderTopOffset, 'left' : tableLeftOffset, 'width' : tableContainerWidth })
-                : null}>
+                    isSticky ? _.extend({}, stickyStyle, {
+                        'top'   : -stickyHeaderTopOffset,
+                        'left'  : tableLeftOffset,
+                        'width' : tableContainerWidth
+                    }) : {
+                        'width' : this.props.width || null // Only passed in from ItemPage
+                    }}>
                 <div className="columns clearfix" style={{
                     'left'  : isSticky ? (stickyStyle.left || 0) - (tableLeftOffset || 0) : null,
                     'width' : (stickyStyle && stickyStyle.width) || null
@@ -575,7 +601,7 @@ export class HeadersRow extends React.PureComponent {
                             w = this.getWidthFor(i),
                             sorterIcon;
 
-                        if (!colDef.noSort && typeof sortBy === 'function' && w >= 50){                            
+                        if (!colDef.noSort && typeof sortBy === 'function' && w >= 50){
                             sorterIcon = <ColumnSorterIcon sortByFxn={sortBy} currentSortColumn={sortColumn} descend={sortReverse} value={colDef.field} />;
                         }
                         return (

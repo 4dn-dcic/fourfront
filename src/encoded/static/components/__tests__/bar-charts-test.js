@@ -17,10 +17,10 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
     beforeAll(function() {
         var { Provider, connect } = require('react-redux');
-        FacetCharts = require('./../facetcharts').FacetCharts;
+        FacetCharts = require('../browse/components/FacetCharts').FacetCharts;
         ChartDataController = require('./../viz/chart-data-controller').ChartDataController;
 
-        propInitialFields = ['experiments_in_set.experiment_type','experiments_in_set.biosample.biosource.biosource_type'];
+        propInitialFields = ['experiments_in_set.experiment_type.display_title','experiments_in_set.biosample.biosource.biosource_type'];
 
         //context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
         fieldEndpointResult = require('../testdata/bar_plot_aggregations_1').JSON;
@@ -48,7 +48,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
                 initialFields={propInitialFields}
             />
         );
-        
+
     });
 
     afterAll(function(){
@@ -87,7 +87,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         expect(bar_counts_total).toEqual(fieldEndpointResult.total.experiment_sets); // Should add up to what we have as the total.
 
         console.log("CHARTS-TEST: Counts of items per bar - ", bar_counts )
-        
+
     });
 
 });

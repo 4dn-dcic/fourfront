@@ -25,6 +25,9 @@
         { "$ref": "workflow_run.json#/facets" }
     ],
     "properties": {
+        "schema_version": {
+            "default": "3"
+        },
         "run_platform": {
             "title": "Run Platform",
             "type": "string",

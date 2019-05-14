@@ -1,5 +1,5 @@
 import pytest
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
@@ -11,6 +11,7 @@ def other_mod(testapp, lab, award):
         "description": "second modification"
     }
     return testapp.post_json('/modification', data).json['@graph'][0]
+
 
 @pytest.fixture
 def GM12878_mod_biosource(testapp, lab, award, gm12878_oterm, basic_modification):
@@ -74,7 +75,7 @@ def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target)
             # used not real type here to test modification addition to name
             assert name == 'GM12878 with Crispr'
             res = testapp.patch_json(biosource['@id'], {'modifications': [mod_w_change_and_target['@id']]})
-            assert res.json['@graph'][0]['biosource_name'] == 'GM12878 with eeny,meeny deletion'
+            assert res.json['@graph'][0]['biosource_name'] == 'GM12878 with RAD21 deletion'
         elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
             assert name == 'GM12878 with Crispr, Stable Transfection'
         elif biotype == 'tissue':

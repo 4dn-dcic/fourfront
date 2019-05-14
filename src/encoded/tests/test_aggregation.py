@@ -1,6 +1,6 @@
 import pytest
 from .features.conftest import app_settings, workbook
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 def test_aggregation_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
@@ -28,8 +28,24 @@ def test_aggregation_view(workbook, testapp):
     agg = res['aggregated_items']
     assert 'badges' in agg.keys()
     assert len(agg['badges']) >= 3
-    keys = [badge.keys() for badge in agg['badges']]
-    assert all('parent' in item for item in keys)
-    badge_keys = [badge['item'].keys() for badge in agg['badges']]
-    assert all('message' in badge_key for badge_key in badge_keys)
-    assert all('badge' in badge_key for badge_key in badge_keys)
+    for agg_badge in agg['badges']:
+        assert 'parent' in agg_badge
+        assert 'embedded_path' in agg_badge
+        # check the embedded_path based off of parent
+        expected_path = None
+        if '/experiment-set' in agg_badge['parent']:
+            expected_path = 'badges'
+        elif '/experiments' in agg_badge['parent']:
+            expected_path = 'experiments_in_set.badges'
+        elif '/biosample' in agg_badge['parent']:
+            expected_path = 'experiments_in_set.biosample.badges'
+        elif '/files' in agg_badge['parent']:
+            expected_path = 'experiments_in_set.files.badges'
+        # let's not make this test too brittle; handle unexpected test data
+        if expected_path:
+            assert agg_badge['embedded_path'] == expected_path
+        # check fields on badge. hardcoded fields may need to be updated
+        assert 'messages' in agg_badge['item']
+        assert 'badge' in agg_badge['item']
+        assert 'commendation' in agg_badge['item']['badge']
+        assert 'warning' in agg_badge['item']['badge']

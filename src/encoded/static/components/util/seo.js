@@ -3,9 +3,7 @@
 import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
-import url from 'url';
 import queryString from 'query-string';
-import jsonScriptEscape from './../../libs/jsonScriptEscape';
 import { navigate } from './navigate';
 import { isServerSide } from './misc';
 import { getNestedProperty } from './object';
@@ -131,7 +129,7 @@ export class CurrentContext extends React.PureComponent {
                     return CurrentContext.labToSchema(cLab, baseDomain);
                 }),
                 publication = context.produced_in_pub && context.produced_in_pub.short_attribution && context.produced_in_pub.journal && context.produced_in_pub.title && context.produced_in_pub,
-                experimentTypes = getNestedProperty(context, 'experiments_in_set.experiment_type');
+                experimentTypes = getNestedProperty(context, 'experiments_in_set.experiment_type.display_title');
 
             if (experimentTypes && Array.isArray(experimentTypes)){
                 experimentTypes = _.uniq(experimentTypes);
@@ -257,9 +255,12 @@ export class CurrentContext extends React.PureComponent {
 }
 
 
-export class FullSite extends React.PureComponent {
 
-    static logo4DN(baseDomain = 'https://data.4dnucleome.org'){
+
+const FullSite = {
+
+
+    "logo4DN" : function(baseDomain = 'https://data.4dnucleome.org'){
         return {
             "@type" : "ImageObject",
             "caption" : "Logo for the 4DN Data Portal",
@@ -276,9 +277,10 @@ export class FullSite extends React.PureComponent {
             //"url" : "https://data.4dnucleome.org/static/img/4dn_logo.svg" // TODO: Update to .png version
             "url" : baseDomain + "/static/img/4dn-logo-raster.png" // TODO: Update to .png version
         };
-    }
+    },
 
-    static dcicOrganization(portalBaseDomain, short = true){
+
+    "dcicOrganization" : function(portalBaseDomain, short = true){
         var shortVersion = {
             "@type" : "EducationalOrganization",
             "name" : "4DN Data Coordination and Integration Center",
@@ -326,9 +328,10 @@ export class FullSite extends React.PureComponent {
                 "https://commonfund.nih.gov/4dnucleome"
             ]
         });
-    }
+    },
 
-    static catalog4DN(baseDomain = 'https://data.4dnucleome.org'){
+
+    "catalog4DN" : function(baseDomain = 'https://data.4dnucleome.org'){
         var dcicOrg = FullSite.dcicOrganization(baseDomain);
         return {
             "@type": "DataCatalog",
@@ -339,9 +342,10 @@ export class FullSite extends React.PureComponent {
             "isAccessibleForFree" : true,
             "url" : baseDomain + "/browse/?" + queryString.stringify(navigate.getBrowseBaseParams('only_4dn'))
         };
-    }
+    },
 
-    static generate(baseDomain){
+
+    "generate" : function(baseDomain){
         return shouldDisplayStructuredData(baseDomain) && {
             "@context": "http://schema.org",
             "@type": "WebSite",
@@ -369,19 +373,6 @@ export class FullSite extends React.PureComponent {
         };
     }
 
-    /**
-     * @deprecated
-     */
-    render(){
-        var baseDomain = this.props.baseDomain || "https://data.4dnucleome.org",
-            structuredDataJSON = FullSite.generate(baseDomain);
 
-        if (!structuredDataJSON) return null;
-        return (
-            <script type="application/ld+json" dangerouslySetInnerHTML={{
-                __html: '\n' + JSON.stringify(structuredDataJSON, null, 4) + '\n'
-            }} />
-        );
-    }
+};
 
-}

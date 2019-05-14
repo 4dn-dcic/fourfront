@@ -5,13 +5,13 @@ from snovault import (
 from collections import defaultdict
 
 
-@audit_checker(
-    'experiment_set_replicate',
-    frame=[
-        'replicate_exps',
-        'replicate_exps.replicate_exp',
-    ]
-)
+# @audit_checker(
+#     'experiment_set_replicate',
+#     frame=[
+#         'replicate_exps',
+#         'replicate_exps.replicate_exp',
+#     ]
+# )
 def audit_replicate_sets_have_replicate_experiments(value, system):
     '''
     the experiments present in a replicate set must be consistent
@@ -85,17 +85,17 @@ def audit_replicate_sets_have_replicate_experiments(value, system):
     return
 
 
-@audit_checker(
-    'experiment_set_replicate',
-    frame=[
-        'replicate_exps',
-        'replicate_exps.replicate_exp',
-        'replicate_exps.replicate_exp.files',
-        'replicate_exps.replicate_exp',
-        'replicate_exps.replicate_exp.biosample',
-        'replicate_exps.replicate_exp.biosample.cell_culture_details'
-    ]
-)
+# @audit_checker(
+#     'experiment_set_replicate',
+#     frame=[
+#         'replicate_exps',
+#         'replicate_exps.replicate_exp',
+#         'replicate_exps.replicate_exp.files',
+#         'replicate_exps.replicate_exp',
+#         'replicate_exps.replicate_exp.biosample',
+#         'replicate_exps.replicate_exp.biosample.cell_culture_details'
+#     ]
+# )
 def audit_replicate_sets_consistency_check(value, system):
     '''
     the experiments present in a replicate set must be consistent
@@ -221,8 +221,9 @@ def audit_replicate_sets_consistency_check(value, system):
                     for bfield, bvalues in merged_biosamples.items():
                         if bfield == 'cell_culture_details':
                             merged_cc_details = defaultdict(list)
-                            for cc in bvalues:
-                                merged_cc_details = merge_items(merged_cc_details, cc)
+                            for ccl in bvalues:
+                                for cc in ccl:
+                                    merged_cc_details = merge_items(merged_cc_details, cc)
                             for cfield, cvalues in merged_cc_details.items():
                                 conflict = find_conflict(cfield, cvalues)
                                 if conflict is not None:

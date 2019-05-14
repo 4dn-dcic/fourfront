@@ -1,6 +1,6 @@
 import pytest
 from encoded.types.publication import find_best_date
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
@@ -99,41 +99,53 @@ def test_find_best_date_dp_misformat_yr():
 
 
 def test_find_best_date_dp_unknown_month():
-        date_info = {'DP': '2018 22', 'DEP': '20170122', 'DA': '20170111'}
-        date = find_best_date(date_info)
-        assert date == '2018'
+    date_info = {'DP': '2018 22', 'DEP': '20170122', 'DA': '20170111'}
+    date = find_best_date(date_info)
+    assert date == '2018'
 
 
 def test_find_best_date_dp_misformated_day():
-        date_info = {'DP': '2018 Jan 222', 'DEP': '20170122', 'DA': '20170111'}
-        date = find_best_date(date_info)
-        assert date == '2018-01'
+    date_info = {'DP': '2018 Jan 222', 'DEP': '20170122', 'DA': '20170111'}
+    date = find_best_date(date_info)
+    assert date == '2018-01'
 
 
 def test_find_best_date_no_dp():
-        date_info = {'DEP': '20170122', 'DA': '20170111'}
-        date = find_best_date(date_info)
-        assert date == '2017-01-22'
+    date_info = {'DEP': '20170122', 'DA': '20170111'}
+    date = find_best_date(date_info)
+    assert date == '2017-01-22'
 
 
 def test_find_best_date_misformatted_dp_w_da():
-        date_info = {'DEP': '2017012', 'DA': '20170111'}
-        date = find_best_date(date_info)
-        assert date == '2017-01-11'
+    date_info = {'DEP': '2017012', 'DA': '20170111'}
+    date = find_best_date(date_info)
+    assert date == '2017-01-11'
 
 
 def test_find_best_date_misformatted_dp_only():
-        date_info = {'DEP': '2017012'}
-        date = find_best_date(date_info)
-        assert date is None
+    date_info = {'DEP': '2017012'}
+    date = find_best_date(date_info)
+    assert date is None
 
 
 def test_find_best_date_da_only():
-        date_info = {'DA': '20161104'}
-        date = find_best_date(date_info)
-        assert date == '2016-11-04'
+    date_info = {'DA': '20161104'}
+    date = find_best_date(date_info)
+    assert date == '2016-11-04'
 
 
-def test_publication_diplay_title(testapp, publication_PMID):
+def test_publication_display_title(testapp, publication_PMID):
     print(publication_PMID)
     assert publication_PMID['display_title'].startswith('Kirli K et al. (2015) A deep proteomics')
+
+
+def test_publication_unique_ID(testapp, publication_doi_pubmed, publication_doi_biorxiv):
+    # POST again with same ID and expect a ValidationError
+    new_pub = {fld: publication_doi_pubmed[fld] for fld in ['ID', 'lab', 'award']}
+    res = testapp.post_json('/publication', new_pub, status=422)
+    expected_val_err = "%s already exists with ID '%s'" % (publication_doi_pubmed['uuid'], new_pub['ID'])
+    assert expected_val_err in res.json['errors'][0]['description']
+
+    # also test PATCH of an existing publication with another pub's ID
+    res = testapp.patch_json(publication_doi_biorxiv['@id'], {'ID': new_pub['ID']}, status=422)
+    assert expected_val_err in res.json['errors'][0]['description']

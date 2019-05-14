@@ -5,35 +5,40 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
+import memoize from 'memoize-one';
 import parseDOM from 'html-dom-parser/lib/html-to-dom-server';
 import domToReact from 'html-react-parser/lib/dom-to-react';
+import md5 from 'js-md5';
 import patchedConsoleInstance from './patched-console';
 import { Field, Term } from './Schemas';
 import * as analytics from './analytics';
-import { isServerSide } from './misc';
 import url from 'url';
 
 var console = patchedConsoleInstance;
 
 /**
- * Convert a link_id, if one exists on param 'object', to an '@id' link.
- * If an '@id' exists already, gets that.
+ * Get '@id' from param 'object' if it exists
  *
- * @param {Object} o - Must have a 'link_id' or '@id' property. Else will return null.
+ * @param {Object} o - Must have an'@id' property. Else will return null.
  * @returns {string|null} The Item's '@id'.
  */
 export function atIdFromObject(o){
     if (!o) return null;
     if (typeof o !== 'object') return null;
     if (typeof o['@id'] === 'string') return o['@id'];
-    if (typeof o.link_id === 'string') return o.link_id.replace(/~/g, "/");
+    if (typeof o.link_id === 'string'){
+        const atId = o.link_id.replace(/~/g, "/");
+        console.warn("Found a link_id but not an @id for " + atId);
+        return atId;
+    }
     return null;
 }
 
 
-export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps = {}, suppressErrors = false){
-    var href = atIdFromObject(item);
-    var title = (propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href;
+export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 'display_title', elementProps = {}, suppressErrors = true){
+    var href = atIdFromObject(item),
+        title =  item && typeof item === 'object' && ((propertyForTitle && item[propertyForTitle]) || item.display_title || item.title || item.name || href);
+
     if (!href || !title){
         if (item && typeof item === 'object' && typeof item.error === 'string'){
             return <em>{ item.error }</em>;
@@ -42,36 +47,45 @@ export function linkFromItem(item, addDescriptionTip = true, propertyForTitle = 
         if (!suppressErrors) console.error("Could not get atId for Item", item);
         return null;
     }
-    
+
     var propsToInclude = elementProps && _.clone(elementProps);
 
     if (typeof propsToInclude.key === 'undefined'){
         propsToInclude.key = href;
     }
-    
+
     if (addDescriptionTip && typeof propsToInclude['data-tip'] === 'undefined' && item.description){
         propsToInclude['data-tip'] = item.description;
         propsToInclude.className = (propsToInclude.className || '') + ' inline-block';
     }
-    
+
     return (
         <a href={href} {...propsToInclude}>{ title }</a>
     );
 }
 
 
+/**
+ * Convert an ES6 Map to an object literal.
+ * @see https://gist.github.com/lukehorvat/133e2293ba6ae96a35ba#gistcomment-2655752 re: performance
+ */
+export function mapToObject(esMap){
+    const retObj = {};
+    for (var [key, val] of esMap){
+        retObj[key] = val;
+    }
+    return retObj;
+}
+
+
+
+/** TODO: Move these 3 functions to Schemas.js */
+
 /** Return the properties dictionary from a schema for use as tooltips */
 export function tipsFromSchema(schemas, content){
     if (content['@type'] && Array.isArray(content['@type']) && content['@type'].length > 0){
         var type = content['@type'][0];
         return tipsFromSchemaByType(schemas, content['@type'][0]);
-    //} else if (content['@id'] && typeof content['@id'] === 'string'){
-    //    const lowerCaseType = _.filter(content['@id'].split('/'))[0].replace(/\-/g, '_');
-    //    const schemasKeyedByLowerType = _.object(_.map(_.filter(_.values(schemas), function(schm){ return !!(schm.id); }), function(schm){
-    //        let schmLowerKey = schm.id.replace('/profiles/', '').replace('.json', '');
-    //        return [schmLowerKey, schm];
-    //    }));
-    //    return tipsFromSchemaByType(schemasKeyedByLowerType, lowerCaseType);
     }
     return {};
 }
@@ -111,7 +125,7 @@ export function listFromTips(tips){
  */
 export function getNestedProperty(object, propertyName, suppressNotFoundError = false){
     var errorMsg;
-    if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
+    if (typeof propertyName === 'string') propertyName = propertyName.split('.');
     if (!Array.isArray(propertyName)){
         errorMsg = 'Using improper propertyName "' + propertyName + '" in object.getNestedProperty.';
         console.error(errorMsg);
@@ -196,6 +210,7 @@ export function generateSparseNestedProperty(field, value){
 
 /**
  * Performs an IN-PLACE 'deep merge' of a small object (one property per level, max) into a host object.
+ * Arrays are not allowed, for simplicity.
  *
  * @param {Object} hostObj           Object to merge/insert into.
  * @param {Object} nestedObj         Object whose value to insert into hostObj.
@@ -211,14 +226,21 @@ export function deepExtend(hostObj, nestedObj, maxDepth = 10, currentDepth = 0){
     }
     if (typeof hostObj[nKey] !== 'undefined'){
         if (typeof nestedObj[nKey] === 'object' && !Array.isArray(hostObj[nKey]) ){
-            return deepExtend(hostObj[nKey], nestedObj[nKey], currentDepth + 1);
-        } else {
-            // No more nested objects, insert here.
+            return deepExtend(hostObj[nKey], nestedObj[nKey], maxDepth, currentDepth + 1);
+        } else { // No more nested objects, insert here.
+            if (typeof nestedObj[nKey] === 'undefined'){
+                // Delete the field
+                delete hostObj[nKey];
+                return true;
+            }
             hostObj[nKey] = nestedObj[nKey];
             return true;
         }
     } else if (typeof nestedObj[nKey] !== 'undefined') {
         // Field doesn't exist on hostObj, but does on nestedObj, == new field.
+        // N.B. this might extend _more_ than anticipated -- TODO: address this later if this function
+        // gets re-used somewhere else.
+        // Or like... see if underscore has some function for this already.
         hostObj[nKey] = nestedObj[nKey];
         return true;
     } else {
@@ -348,7 +370,7 @@ export function isValidAtIDFormat(value){
 /**
  * Performs a rudimentary check on an object to determine whether it is an Item.
  * Checks for presence of properties 'display_title' and '@id'.
- * 
+ *
  * @param {Object} content - Object to check.
  * @returns {boolean} Whether 'content' param is (likely to be) an Item.
  */
@@ -375,7 +397,7 @@ export function randomId() {
 
 /**
  * Assert that param passed in & returned is in UUID format.
- * 
+ *
  * @param {string} uuid - UUID string to be asserted.
  * @returns {string} Original UUID string (uuid param) if in valid form.
  * @throws Error if not in valid UUID format.
@@ -421,17 +443,17 @@ export function singleTreatment(treatment) {
 }
 
 
-export class TooltipInfoIconContainer extends React.Component {
-    render(){
-        var { elementType, title, tooltip, className } = this.props;
-        return React.createElement(elementType || 'div', {
-            'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
-        }, (
-            <span>{ title }&nbsp;{ typeof tooltip === 'string' ?
+export function TooltipInfoIconContainer(props){
+    const { elementType, title, tooltip, className, children } = props;
+    return React.createElement(elementType || 'div', {
+        'className' : "tooltip-info-container" + (typeof className === 'string' ? ' ' + className : '')
+    }, (
+        <span>{ title || children }&nbsp;
+            { typeof tooltip === 'string' ?
                 <i data-tip={tooltip} className="icon icon-info-circle"/>
-            : null }</span>
-        ));
-    }
+                : null }
+        </span>
+    ));
 }
 
 export class TooltipInfoIconContainerAuto extends React.Component {
@@ -443,7 +465,8 @@ export class TooltipInfoIconContainerAuto extends React.Component {
             '@type' : PropTypes.array.isRequired
         }).isRequired,
         'itemType' : PropTypes.string,
-        'schemas' : PropTypes.object
+        'schemas' : PropTypes.object,
+        'elementType' : PropTypes.string
     }
 
     render(){
@@ -467,16 +490,14 @@ export class TooltipInfoIconContainerAuto extends React.Component {
             tooltip = (schemaProperty && schemaProperty.description) || null;
             if (!title) title = (schemaProperty && schemaProperty.title) || null;
         }
-        
-        
 
-        return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={this.props.elementType} />;
+        return <TooltipInfoIconContainer {...this.props} tooltip={tooltip} title={title || fallbackTitle || property} elementType={elementType} />;
     }
 }
 
 /**
  * Use this Component to generate a 'copy' button.
- * 
+ *
  * @prop {string} value - What to copy to clipboard upon clicking the button.
  * @prop {boolean} [flash=true] - Whether to do a 'flash' effect of the button and children wrapper on click.
  * @prop {JSX.Element[]} [children] - What to wrap and present to the right of the copy button. Optional. Should be some formatted version of 'value' string, e.g. <span className="accession">{ accession }</span>.
@@ -492,7 +513,7 @@ export class CopyWrapper extends React.PureComponent {
         'includeIcon' : true,
         'flashActiveTransform' : 'scale3d(1.2, 1.2, 1.2) translate3d(0, 0, 0)',
         'flashInactiveTransform' : 'translate3d(0, 0, 0)'
-    }
+    };
 
     static copyToClipboard(value, successCallback = null, failCallback = null){
         var textArea = document.createElement('textarea');
@@ -531,13 +552,16 @@ export class CopyWrapper extends React.PureComponent {
     constructor(props){
         super(props);
         this.flashEffect = this.flashEffect.bind(this);
-        if (typeof props.mounted !== 'boolean') this.state = { 'mounted' : false };
+        if (typeof props.mounted !== 'boolean'){
+            this.state = { 'mounted' : false };
+        }
 
         this.wrapperRef = React.createRef();
     }
 
     componentDidMount(){
-        if (typeof this.props.mounted !== 'boolean') this.setState({ 'mounted' : true });
+        const { mounted } = this.props;
+        if (typeof mounted !== 'boolean') this.setState({ 'mounted' : true });
         ReactTooltip.rebuild();
     }
 
@@ -546,10 +570,11 @@ export class CopyWrapper extends React.PureComponent {
     }
 
     flashEffect(){
+        const { flash, wrapperElement, flashActiveTransform, flashInactiveTransform } = this.props;
         var wrapper = this.wrapperRef.current;
-        if (!this.props.flash || !wrapper) return null;
+        if (!flash || !wrapper) return null;
 
-        if (typeof this.props.wrapperElement === 'function'){
+        if (typeof wrapperElement === 'function'){
             // Means we have a React component vs a React/JSX element.
             // This approach will be deprecated soon so we should look into forwarding refs
             // ... I think
@@ -558,24 +583,27 @@ export class CopyWrapper extends React.PureComponent {
 
         if (!wrapper) return null;
 
-        wrapper.style.transform = this.props.flashActiveTransform;
+        wrapper.style.transform = flashActiveTransform;
         setTimeout(()=>{
-            wrapper.style.transform = this.props.flashInactiveTransform;
+            wrapper.style.transform = flashInactiveTransform;
         }, 100);
     }
 
     onCopy(){
+        const { onCopy } = this.props;
         this.flashEffect();
-        if (typeof this.props.onCopy === 'function') this.props.onCopy();
+        if (typeof onCopy === 'function') onCopy();
     }
 
     render(){
-        var { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
+        const { value, children, mounted, wrapperElement, iconProps, includeIcon, className } = this.props;
         if (!value) return null;
-        var isMounted = (mounted || (this.state && this.state.mounted)) || false;
 
-        var copy = (e) => {
-            return CopyWrapper.copyToClipboard(value, (v)=>{
+        // eslint-disable-next-line react/destructuring-assignment
+        const isMounted = (mounted || (this.state && this.state.mounted)) || false;
+
+        const copy = (e) =>
+            CopyWrapper.copyToClipboard(value, (v)=>{
                 this.onCopy();
                 analytics.event('CopyWrapper', 'Copy', {
                     'eventLabel' : 'Value',
@@ -587,14 +615,13 @@ export class CopyWrapper extends React.PureComponent {
                     'name' : v
                 });
             });
-        };
 
-        var elemsToWrap = [];
+        const elemsToWrap = [];
         if (children)                   elemsToWrap.push(children);
         if (children && isMounted)      elemsToWrap.push(' ');
         if (isMounted && includeIcon)   elemsToWrap.push(<i {...iconProps} key="copy-icon" className="icon icon-fw icon-copy" title="Copy to clipboard" />);
 
-        var wrapperProps = _.extend(
+        const wrapperProps = _.extend(
             {
                 'ref'       : this.wrapperRef,
                 'style'     : { 'transition' : 'transform .4s', 'transformOrigin' : '50% 50%' },
@@ -607,6 +634,19 @@ export class CopyWrapper extends React.PureComponent {
         return React.createElement(wrapperElement, wrapperProps, elemsToWrap);
     }
 }
+
+
+/**
+ * md5() sometimes throws an error for some reason. Lets memoize the result and catch exceptions.
+ */
+export const saferMD5 = memoize(function(val){
+    try {
+        return md5(val);
+    } catch (e){
+        console.error(e);
+        return 'Error';
+    }
+});
 
 
 
@@ -628,7 +668,7 @@ export const itemUtil = {
 
     /**
      * Function to determine title for each Item object.
-     * 
+     *
      * @param {Object} props - Object containing props commonly supplied to Item page. At minimum, must have a 'context' property.
      * @returns {string} Title string to use.
      */
@@ -642,7 +682,7 @@ export const itemUtil = {
 
     /**
      * Get Item title string from a context object (JSON representation of Item).
-     * 
+     *
      * @param {Object} context - JSON representation of an Item object.
      * @returns {string} The title.
      */
@@ -663,7 +703,7 @@ export const itemUtil = {
     /**
      * Determine whether the title which is displayed is an accession or not.
      * Use for determining whether to include accession in ItemHeader.TopRow.
-     * 
+     *
      * @param {Object} context          JSON representation of an Item object.
      * @param {string} [displayTitle]   Display title of Item object. Gets it from context if not provided.
      * @returns {boolean} If title is an accession (or contains it).
@@ -678,7 +718,7 @@ export const itemUtil = {
     /**
      * Compare two arrays of Items to check if they contain the same Items, by their @id.
      * Does _NOT_ compare the fields within each Item (e.g. to detect changed or more 'complete').
-     * 
+     *
      * @param {Object[]} listA      1st list of Items to compare.
      * @param {Object[]} listB      2nd list of Items to compare.
      * @returns {boolean} True if equal.
@@ -717,9 +757,7 @@ export const itemUtil = {
          * @returns {string} A URL.
          */
         buildGravatarURL : function(email, size=null, defaultImg='retro'){
-            var md5 = require('js-md5');
-            if (defaultImg === 'kanye') defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif'; // Easter egg-ish option.
-            var url = 'https://www.gravatar.com/avatar/' + md5(email);
+            var url = 'https://www.gravatar.com/avatar/' + saferMD5(email);
             url += "?d=" + defaultImg;
             if (size) url += '&s=' + size;
             return url;
@@ -752,6 +790,7 @@ export const itemUtil = {
              * @public
              * @constant
              */
+            // eslint-disable-next-line no-useless-escape
             email : '^[a-Z0-9][a-Z0-9._%+-]{0,63}@(?:(?=[a-Z0-9-]{1,63}\.)[a-Z0-9]+(?:-[a-Z0-9]+)*\.){1,8}[a-Z]{2,63}$',
             /**
              * Digits only, with optional extension (space + x, ext, extension + [space?] + 1-7 digits) and

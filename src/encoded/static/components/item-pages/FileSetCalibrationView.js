@@ -38,5 +38,3 @@ export default class FileSetCalibrationView extends DefaultItemView {
     }
 
 }
-
-globals.content_views.register(FileSetCalibrationView, 'FileSetCalibration');

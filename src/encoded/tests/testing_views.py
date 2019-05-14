@@ -95,7 +95,7 @@ class TestingKey(Item):
     }
 
 
-@collection('testing-link-sources')
+@collection('testing-link-sources', unique_key='testing_link_sources:name')
 class TestingLinkSource(Item):
     item_type = 'testing_link_source'
     schema = {
@@ -103,6 +103,7 @@ class TestingLinkSource(Item):
         'properties': {
             'name': {
                 'type': 'string',
+                'uniqueKey': True,
             },
             'uuid': {
                 'type': 'string',

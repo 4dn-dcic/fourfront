@@ -1,3 +1,6 @@
+import pytest
+pytestmark = [pytest.mark.setone, pytest.mark.working]
+
 '''
 FF-701
 Multiple ontologies get imported to form each of the three ontologies that we are currently using

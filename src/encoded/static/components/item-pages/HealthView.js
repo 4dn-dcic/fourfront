@@ -4,14 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import { Button } from 'react-bootstrap';
-import { content_views } from './../globals';
-import { ajax, console, object, Filters, JWT, DateUtility, layout, navigate } from './../util';
-import { ItemPageTitle, ItemDetailList } from './components';
+import { ajax, layout, navigate } from './../util';
+import { ItemDetailList } from './components';
 import ReactTooltip from 'react-tooltip';
-import * as vizUtil from './../viz/utilities';
 import * as d3 from 'd3';
 import _ from 'underscore';
-import JSONTree from 'react-json-tree';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -21,7 +18,7 @@ import JSONTree from 'react-json-tree';
  * @class Item
  * @extends {React.Component}
  */
-export class HealthView extends React.Component {
+export default class HealthView extends React.PureComponent {
 
     static notFinishedIndexing(db_es_total){
         return db_es_total && (db_es_total.indexOf('< DB has') > -1 || db_es_total.indexOf('loading') > -1) ? true : false;
@@ -33,8 +30,6 @@ export class HealthView extends React.Component {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
-        this.componentDidMount = this.componentDidMount.bind(this);
         this.getCounts = _.throttle(this.getCounts.bind(this), 1000);
         this.state = {
             'db_es_total' : "loading...",
@@ -48,7 +43,6 @@ export class HealthView extends React.Component {
     }
 
     getCounts(){
-        var pastState = _.clone(this.state);
         this.setState({
             'db_es_total' : "loading...",
         }, ()=>{
@@ -74,7 +68,7 @@ export class HealthView extends React.Component {
             width = layout.gridContainerWidth(windowWidth);
 
         return (
-            <div className="view-item">
+            <div className="view-item container" id="content">
                 <hr/>
                 <h3 className="text-400 mb-2 mt-3">Configuration</h3>
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
@@ -143,8 +137,6 @@ export class HealthView extends React.Component {
     }
 }
 
-content_views.register(HealthView, 'Health');
-
 /**
  * This is a React wrapper around a D3 visualization.
  * It is not super performant but is used on a single page, so should be OK / low-priority.
@@ -175,7 +167,7 @@ class HealthChart extends React.PureComponent {
         this.svgRef = React.createRef();
     }
 
-    componentDidUpdate(pastProps, pastState){      
+    componentDidUpdate(pastProps, pastState){
         this.drawTreeMap();
         this.transitionSize();
         setTimeout(function(){ ReactTooltip.rebuild(); }, 1000);

@@ -4,35 +4,34 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { console, object, ajax, navigate } from'./../util';
+import { console, object } from'./../util';
 import StaticPage, { StaticEntry, parseSectionsContent } from './StaticPage';
 import { NextPreviousPageSection } from './components';
-import * as globals from './../globals';
 
 
 export default class DirectoryPage extends React.Component {
 
     render(){
-        var { context } = this.props;
-        var atId = object.itemUtil.atId(context);
-        var childrenHaveChildren = _.any(context.children || [], function(c){
-            return c && c.children && c.children.length > 0;
-        });
-
-        var content = (context.content || []).length > 0 ? StaticPage.renderSections(StaticPage.defaultProps.entryRenderFxn, parseSectionsContent(context)) : null;
+        var { context } = this.props,
+            atId = object.itemUtil.atId(context),
+            childrenHaveChildren = _.any(context.children || [], function(c){
+                return c && c.children && c.children.length > 0;
+            }),
+            content = (context.content || []).length > 0 ? StaticPage.renderSections(StaticPage.defaultProps.entryRenderFxn, parseSectionsContent(context)) : null;
 
         return (
-            <div className={"static-page static-directory-page" + (childrenHaveChildren ? " directory-page-of-directories" : " leaf-directory")} key="wrapper">
-                <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
-                { !childrenHaveChildren ? <NextPreviousPageSection context={context} nextTitle="Next Section" previousTitle="Previous Section" /> : null }
-                { content }
+            <div id="content" className="container">
+                <div className={"static-page static-directory-page" + (childrenHaveChildren ? " directory-page-of-directories" : " leaf-directory")} key="wrapper">
+                    <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
+                    { !childrenHaveChildren ? <NextPreviousPageSection context={context} nextTitle="Next Section" previousTitle="Previous Section" /> : null }
+                    { content }
+                </div>
             </div>
         );
     }
 
 }
 
-globals.content_views.register(DirectoryPage, 'DirectoryPage');
 
 
 export class DirectoryBodyGrid extends React.Component {

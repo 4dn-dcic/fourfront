@@ -236,7 +236,8 @@
             "default_hidden" : true
         },
         "workflow.experiment_types": {
-            "title": "Experiment Types"
+            "title": "Experiment Types",
+            "comment" : "TODO: Update to `workflow.experiment_types.display_title` once becomes a linkTo"
         },
         "workflow.app_name": {
             "title": "Application Name",

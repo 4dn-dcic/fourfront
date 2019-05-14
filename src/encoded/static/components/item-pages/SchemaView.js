@@ -52,7 +52,7 @@ export default class SchemaView extends React.Component {
         var context = this.props.context,
             title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
         return (
-            <div className="view-item type-JSONSchema">
+            <div className="view-item type-JSONSchema container" id="content">
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
                 <ItemDetailList
                     context={context}
@@ -66,28 +66,3 @@ export default class SchemaView extends React.Component {
     }
 }
 
-globals.content_views.register(SchemaView, 'JSONSchema');
-
-/*
-Might need for later
-var Markdown = module.exports.Markdown = React.createClass({
-    render: function() {
-        var marked = require('marked');
-        var html = marked(this.props.source, {sanitize: true});
-        return <div dangerouslySetInnerHTML={{__html: html}} />;
-    }
-});
-
-
-var ChangeLog = module.exports.ChangeLog = React.createClass({
-    render: function() {
-        return (
-            <section className="view-detail panel">
-                <div className="container">
-                    <Markdown source={this.props.source} />
-                </div>
-            </section>
-        );
-    }
-});
-*/

@@ -1,10 +1,10 @@
 'use strict';
 
 import _ from 'underscore';
-import url from 'url';
 import React from 'react';
 import { linkFromItem } from './object';
 import { LocalizedTime, format as dateFormat } from './date-utility';
+import { itemTypeHierarchy } from './itemTypeHierarchy';
 
 let cachedSchemas = null;
 
@@ -22,40 +22,6 @@ export function set(schemas){
     return true;
 }
 
-export const itemTypeHierarchy = {
-    'Experiment': [
-        'ExperimentAtacseq', 'ExperimentCaptureC', 'ExperimentChiapet', 'ExperimentDamid', 'ExperimentHiC',
-        'ExperimentMic', 'ExperimentRepliseq', 'ExperimentSeq', 'ExperimentTsaseq'
-    ],
-    'ExperimentSet': [
-        'ExperimentSetReplicate'
-    ],
-    'File': [
-        'FileCalibration', 'FileFastq', 'FileProcessed', 'FileReference', 'FileMicroscopy', 'FileVistrack'
-    ],
-    'FileSet': [
-        'FileSet', 'FileSetCalibration', 'FileSetMicroscopeQc'
-    ],
-    'Individual': [
-        'IndividualHuman', 'IndividualMouse', 'IndividualFly', 'IndividualChicken'
-    ],
-    'Treatment': [
-        'TreatmentAgent', 'TreatmentRnai'
-    ],
-    'QualityMetric' : [
-        'QualityMetricFastqc', 'QualityMetricBamqc', 'QualityMetricPairsqc',
-        'QualityMetricDedupqcRepliseq'
-    ],
-    'WorkflowRun' : [
-        'WorkflowRun', 'WorkflowRunSbg', 'WorkflowRunAwsem'
-    ],
-    'MicroscopeSetting' : [
-        'MicroscopeSettingA1', 'MicroscopeSettingA2', 'MicroscopeSettingD1', 'MicroscopeSettingD2'
-    ],
-    'UserContent' : [
-        'StaticSection', 'HiglassViewConfig' //, 'JupyterNotebook'
-    ]
-};
 
 export const Term = {
 
@@ -122,8 +88,8 @@ export const Term = {
                     name = null;
                 }
                 break;
-            case 'link_id':
-                name = term.replace(/~/g, "/");
+            case '@id':
+                name = term;
                 break;
             default:
                 name = null;
@@ -137,10 +103,13 @@ export const Term = {
             if (field.slice(-14) === 'Sequence length') return Term.roundLargeNumber(term);
             if (field.slice(-15) === 'Cis/Trans ratio') return Term.roundDecimal(term) + '%';
             if (field.slice(-35) === '% Long-range intrachromosomal reads') return Term.roundDecimal(term) + '%';
-            if (field.slice(-4) === '.url' && allowJSXOutput && term.indexOf('http') > -1) {
-                var linkTitle = term.split('/');
-                linkTitle = linkTitle.pop();
-                return <a href={term} target="_blank">{ linkTitle }</a>;
+            if (field.slice(-4) === '.url' && term.indexOf('http') > -1) {
+                var linkTitle = Term.hrefToFilename(term); // Filename most likely for quality_metric.url case(s).
+                if (allowJSXOutput){
+                    return <a href={term} target="_blank" rel="noopener noreferrer">{ linkTitle }</a>;
+                } else {
+                    return linkTitle;
+                }
             }
         }
 
@@ -184,6 +153,21 @@ export const Term = {
         if (isNaN(parseInt(num))) throw Error('Not a Number - ', num);
         const multiplier = Math.pow(10, decimalsVisible);
         return Math.round(num * multiplier) / multiplier;
+    },
+
+    decorateNumberWithCommas : function(num){
+        if (!num || typeof num !== 'number' || num < 1000) return num;
+        // Put full number into tooltip w. commas.
+        const chunked =  _.chunk((num + '').split('').reverse(), 3);
+        return _.map(chunked, function(c){
+            return c.reverse().join('');
+        }).reverse().join(',');
+    },
+
+    /** Only use where filename is expected. */
+    hrefToFilename : function(href){
+        var linkTitle = href.split('/');
+        return linkTitle = linkTitle.pop();
     }
 
 };
@@ -198,8 +182,9 @@ export const Field = {
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',
         'experiments_in_set.lab.title' : 'Lab',
         'experiments_in_set.experiment_type' : 'Experiment Type',
+        'experiments_in_set.experiment_type.display_title' : 'Experiment Type',
         'experimentset_type' : 'Set Type',
-        'link_id' : "Link",
+        '@id' : "Link",
         'display_title' : "Title"
     },
 
@@ -423,9 +408,12 @@ export function getTitleForType(atType, schemas = null){
     }
 
     // Correct baseType to title if not in schemas.
+    // This is case for Abstract Types currently.
     switch (atType){
         case 'ExperimentSet':
             return 'Experiment Set';
+        case 'UserContent':
+            return "User Content";
         default:
             return atType;
     }

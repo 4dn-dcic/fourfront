@@ -63,7 +63,7 @@ var state = {
         //},
         //{ title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
         //{ title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+        { title : "Experiment Type", field : 'experiments_in_set.experiment_type.display_title' },
         {
             title : "Digestion Enzyme",
             field : 'experiments_in_set.digestion_enzyme.name',
@@ -143,6 +143,12 @@ var providerCallbacks = {};
  * @ignore
  */
 var providerLoadStartCallbacks = {};
+
+/**
+ * @private
+ * @ignore
+ */
+var currentRequests = { filtered: null, unfiltered: null };
 
 /**
  * After load & update, called to start any registered 'on update' callbacks.
@@ -334,32 +340,34 @@ export const ChartDataController = {
             refs.browseBaseState    = reduxStoreState.browseBaseState;
             refs.contextFilters     = (reduxStoreState.context && reduxStoreState.context.filters) || {}; // Use empty obj instead of null so Filters.contextFiltersToExpSetFilters doesn't grab current ones.
 
-            var prevExpSetFilters = Filters.contextFiltersToExpSetFilters(prevContextFilters, prevBrowseBaseState),
-                nextExpSetFilters = Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState), // We don't need to pass 'current' params, but we do for clarity of differences.
-                searchQuery = Filters.searchQueryStringFromHref(refs.href),
-                didFiltersChange = (
-                    !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
-                    (prevHref && Filters.searchQueryStringFromHref(prevHref) !== searchQuery)
-                ) && (
-                    // if we are not on the browse page, no need to get chart info
-                    prevHref.indexOf('/browse/') !== -1 || refs.href.indexOf('/browse/') !== -1
-                );
-
-            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState && !didFiltersChange){
-                return; // Nothing relevant has changed. Exit.
-            }
-
-            // Step 1. Check if need to refetch both unfiltered & filtered data.
-            if (refs.browseBaseState !== prevBrowseBaseState){
-                setTimeout(function(){
-                    ChartDataController.sync(null, { 'searchQuery' : searchQuery });
-                }, 0);
+            if (refs.href === prevHref && refs.browseBaseState === prevBrowseBaseState){
+                // Nothing relevant has changed. Exit.
                 return;
             }
 
+            var prevSearchQuery = Filters.searchQueryStringFromHref(prevHref),
+                nextSearchQuery = Filters.searchQueryStringFromHref(refs.href);
+
+            // Step 1. Check if need to refetch both unfiltered & filtered data.
+            if (refs.browseBaseState !== prevBrowseBaseState){
+                ChartDataController.sync(null, { 'searchQuery' : nextSearchQuery });
+                return;
+            }
+
+            // We treat expSetFilters as being empty if we're not on browse page --
+            // if we are not on the browse page, no need to get chart info
+            var isBrowseHrefPrev = prevHref.indexOf('/browse/') !== -1,
+                isBrowseHrefNext = refs.href.indexOf('/browse/') !== -1,
+                prevExpSetFilters = isBrowseHrefPrev ? Filters.contextFiltersToExpSetFilters(prevContextFilters,  prevBrowseBaseState ) : {},
+                nextExpSetFilters = isBrowseHrefNext ? Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState) : {},
+                didFiltersChange = (
+                    !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
+                    (prevHref && (prevSearchQuery !== nextSearchQuery))
+                );
+
             // Step 2. Check if need to refresh filtered data only.
             if (didFiltersChange) {
-                ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { searchQuery });
+                ChartDataController.handleUpdatedFilters(nextExpSetFilters, notifyUpdateCallbacks, { 'searchQuery' : nextSearchQuery });
             }
         });
 
@@ -578,19 +586,23 @@ export const ChartDataController = {
 
         notifyLoadStartCallbacks();
 
-        ajax.load(
+        if (currentRequests.unfiltered !== null){
+            currentRequests.unfiltered.abort && currentRequests.unfiltered.abort();
+        }
+        currentRequests.unfiltered = ajax.load(
             refs.baseSearchPath,
             function(unfiltered_result){
                 barplot_data_unfiltered = unfiltered_result;
+                currentRequests.unfiltered = null;
                 cb();
             }, 'POST', function(errResp){
                 opts.error = true;
-
                 if (errResp && typeof errResp === 'object'){
                     if (typeof errResp.total === 'object' && errResp.total){
                         barplot_data_unfiltered = errResp;
                     }
                 }
+                currentRequests.unfiltered = null;
                 console.warn('Some error, refetching context.');
                 reFetchContext();
                 cb();
@@ -600,18 +612,24 @@ export const ChartDataController = {
             })
         );
 
+        if (currentRequests.filtered !== null){
+            currentRequests.filtered.abort && currentRequests.filtered.abort();
+            currentRequests.filtered = null;
+        }
         if (filtersSet){
             var filteredSearchParams = navigate.mergeObjectsOfLists(
                 { 'q' : searchQuery || null },
                 baseSearchParams,
                 Filters.expSetFiltersToJSON(currentExpSetFilters)
             );
-            ajax.load(
+            currentRequests.filtered = ajax.load(
                 refs.baseSearchPath,
                 function(filtered_result){
                     barplot_data_filtered = filtered_result;
+                    currentRequests.filtered = null;
                     cb();
-                }, 'POST', function(){
+                }, 'POST', function(errResp){
+                    currentRequests.filtered = null;
                     cb();
                 }, JSON.stringify({
                     "search_query_params" : filteredSearchParams,
@@ -647,10 +665,14 @@ export const ChartDataController = {
             Filters.expSetFiltersToJSON(currentExpSetFilters)
         );
 
+        if (currentRequests.filtered !== null){
+            currentRequests.filtered.abort && currentRequests.filtered.abort();
+        }
         notifyLoadStartCallbacks();
-        ajax.load(
+        currentRequests.filtered = ajax.load(
             refs.baseSearchPath,
             function(filteredContext){
+                currentRequests.filtered = null;
                 ChartDataController.setState({
                     'barplot_data_filtered' : filteredContext,
                     'isLoadingChartData' : false
@@ -659,11 +681,11 @@ export const ChartDataController = {
             'POST',
             function(){
                 // Fallback (no results or lost connection)
+                currentRequests.filtered = null;
                 ChartDataController.setState({
                     'barplot_data_filtered' : null,
                     'isLoadingChartData' : false
                 }, callback, opts);
-                if (typeof callback === 'function') callback();
             },
             JSON.stringify({
                 "search_query_params" : filteredSearchParams,

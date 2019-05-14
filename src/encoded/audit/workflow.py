@@ -3,10 +3,11 @@ from snovault import (
     audit_checker,
 )
 
-@audit_checker(
-    'Workflow',
-    frame=['steps']
-)
+
+# @audit_checker(
+#     'Workflow',
+#     frame=['steps']
+# )
 def audit_workflow_steps(value, system):
     '''
     Ensure that this Workflow has steps property in the proper form.

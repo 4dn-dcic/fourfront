@@ -1,7 +1,7 @@
 import pytest
-from ..loadxl import ORDER
+from .datafixtures import ORDER
 
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 targets = [
     {'name': 'one', 'uuid': '775795d3-4410-4114-836b-8eeecf1d0c2f'},
@@ -86,7 +86,7 @@ def test_add_default_embeds(registry, item_type):
     """
     Ensure default embedding matches the schema for each object
     """
-    from snovault.fourfront_utils import add_default_embeds, crawl_schemas_by_embeds
+    from snovault.util import add_default_embeds, crawl_schemas_by_embeds
     from snovault import TYPES
     type_info = registry[TYPES].by_item_type[item_type]
     schema = type_info.schema
@@ -107,7 +107,7 @@ def test_manual_embeds(registry, item_type):
     """
     Ensure manual embedding in the types files are valid
     """
-    from snovault.fourfront_utils import crawl_schemas_by_embeds
+    from snovault.util import crawl_schemas_by_embeds
     from snovault import TYPES
     type_info = registry[TYPES].by_item_type[item_type]
     schema = type_info.schema
@@ -126,7 +126,7 @@ def test_fictitous_embed(registry):
     the organism subpath should be in the added_embeds even though it is
     not a terminal object
     """
-    from snovault.fourfront_utils import crawl_schemas_by_embeds
+    from snovault.util import crawl_schemas_by_embeds
     from snovault import TYPES
     type_info = registry[TYPES].by_item_type['biosample']
     schema = type_info.schema

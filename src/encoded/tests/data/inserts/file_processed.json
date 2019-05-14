@@ -263,6 +263,31 @@
     "notes" : "A processed file output from a workflow run.",
     "accession": "4DNFIAAAAAA3",
     "quality_metric": "131106bc-8535-4448-903e-854abbbbbbbb",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "109380000",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "55.645",
+            "tooltip": "Percent of total reads (=60.86m)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20.673",
+            "tooltip": "Percent of total reads (=22.61m)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Trans Reads",
+            "value": "23.682",
+            "tooltip": "Percent of total reads (=25.9m)",
+            "numberType": "percent"
+        }
+    ],
     "extra_files" : [
         {
             "file_format" : "pairs_px2",
@@ -541,4 +566,21 @@
     "genome_assembly": "GRCm38",
     "override_biosource_name" : "Biosource"
 }
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "higlass_uid": "Mk9TiuoCRpi93LNA73GjSg",
+    "file_format": "bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
+    "uuid": "9072874a-2b47-453f-9b14-4be28e609152",
+    "date_created": "2019-02-25T21:48:18.755856+00:00",
+    "accession": "4DNFIWQJFZHS",
+    "genome_assembly": "GRCh38",
+    "file_type": "conservative peaks",
+    "file_classification": "processed file",
+    "override_experiment_type": "Dataset",
+    "override_assay_info": "Assay",
+    "override_biosource_name" : "Biosource"
+}
+
 ]

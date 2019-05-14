@@ -3,11 +3,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { stringify } from 'query-string';
+import memoize from 'memoize-one';
+import url from 'url';
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
-import { console, layout, navigate, ajax, isServerSide, analytics, DateUtility } from'./../util';
+import { console, layout, ajax, DateUtility } from'./../util';
 
 /**
  * Various utilities for helping to draw area charts.
@@ -34,71 +35,69 @@ export class StatsViewController extends React.PureComponent {
         this.performAggRequests  = this.performAggRequests.bind(this);
         this.stateToChildProps      = this.stateToChildProps.bind(this);
         this.state = _.extend(
-            { 'mounted' : false, 'loadingStatus' : 'loading' },
-            _.object(_.map(_.keys(props.searchURIs), function(k){ return ['resp' + k,null]; }))
+            {
+                'mounted' : false,
+                'loadingStatus' : 'loading'
+            },
+            _.object(_.map(_.keys(props.searchURIs), function(k){ return [ 'resp' + k, null ]; }))
         );
     }
 
     componentDidMount(){
-        var nextState = { 'mounted' : true };
         setTimeout(()=>{
             this.performAggRequests();
         }, 100);
-        this.setState(nextState);
+        this.setState({ 'mounted' : true });
     }
 
     componentWillUnmount(){
         this.setState({ 'mounted' : false });
     }
 
-    /* Enabling this would temporarily replace charts w loading icon. It's too big of a jumpy visual change to people to be good UI IMO.
-    componentWillReceiveProps(nextProps){
-        if (nextProps.shouldRefetchAggs((this.props, nextProps)){
-            this.setState({ 'loadingStatus' : 'loading' });
-        }
-    }
-    */
-
     componentDidUpdate(pastProps){
-        if (this.props.shouldRefetchAggs(pastProps, this.props)){
+        const { shouldRefetchAggs } = this.props;
+        if (shouldRefetchAggs(pastProps, this.props)){
             this.setState({ 'loadingStatus' : 'loading' });
             this.performAggRequests();
         }
     }
 
-    performAggRequests(chartUris = this.props.searchURIs){ // TODO: Perhaps make search uris a prop.
+    performAggRequests(){
+        const { searchURIs, href } = this.props;
+        const resultStateToSet = {};
+        const hrefParts = href && url.parse(href); // href may not be passed in.
+        const ownHost = hrefParts && hrefParts.host;
 
-        var resultStateToSet = {};
+        const chartUrisAsPairs = _.pairs(searchURIs);
+        const chartUrisLen = chartUrisAsPairs.length;
 
-        var chartUrisAsPairs = _.pairs(chartUris),
-            failureCallback = () => {
-                this.setState({ 'loadingStatus' : 'failed' });
-            },
-            uponAllRequestsCompleteCallback = (state = resultStateToSet) => {
-                if (this && this.state.mounted){
-                    this.setState(_.extend({ 'loadingStatus' : 'complete' }, state));
-                }
-            },
-            uponSingleRequestsCompleteCallback = function(key, uri, resp){
-                if (resp && resp.code === 404){
-                    failureCallback();
-                    return;
-                }
-                resultStateToSet['resp' + key] = resp;
-                uponAllRequestsCompleteCallback(resultStateToSet);
-            };
+        const failureCallback = () => this.setState({ 'loadingStatus' : 'failed' });
 
-        if (chartUrisAsPairs.length > 1) {
-            uponAllRequestsCompleteCallback = _.after(chartUrisAsPairs.length, uponAllRequestsCompleteCallback);
+        let uponAllRequestsCompleteCallback = () => {
+            this.setState(_.extend({ 'loadingStatus' : 'complete' }, resultStateToSet));
+        };
+
+        if (chartUrisLen > 1) {
+            uponAllRequestsCompleteCallback = _.after(chartUrisLen, uponAllRequestsCompleteCallback);
         }
 
-        _.forEach(_.pairs(chartUris), ([key, uri]) => {
+        const uponSingleRequestsCompleteCallback = function(key, uri, resp){
+            if (resp && resp.code === 404){
+                failureCallback();
+                return;
+            }
+            resultStateToSet['resp' + key] = resp;
+            uponAllRequestsCompleteCallback();
+        };
+
+        _.forEach(chartUrisAsPairs, ([key, uri]) => {
             if (typeof uri === 'function') uri = uri(this.props);
+            const uriHost = ownHost && url.parse(uri).host;
             ajax.load(
-                uri,
-                uponSingleRequestsCompleteCallback.bind(this, key, uri),
-                'GET',
-                failureCallback
+                uri, (r) => uponSingleRequestsCompleteCallback(key, uri, r), 'GET', failureCallback,
+                // If testing from localhost and connecting to data.4dn (e.g. for testing), clear out some headers
+                // to enable CORS
+                null, {}, ownHost && uriHost !== ownHost ? ['Authorization', 'Content-Type'] : []
             );
         });
 
@@ -127,14 +126,13 @@ export class StatsViewController extends React.PureComponent {
 }
 
 
-/**
- * Extend & implement own render method.
- */
-export class StatsChartViewBase extends React.Component {
+/** Extend & implement own render method. */
+export class StatsChartViewAggregator extends React.PureComponent {
 
     static propTypes = {
         'aggregationsToChartData' : PropTypes.object.isRequired,
-        'shouldReaggregate' : PropTypes.function
+        'shouldReaggregate' : PropTypes.func,
+        'children' : PropTypes.node.isRequired
     };
 
     constructor(props){
@@ -147,40 +145,45 @@ export class StatsChartViewBase extends React.Component {
             'chartToggles' : {},
             'smoothEdges' : false
         });
+
+        this.elemRef = React.createRef();
     }
 
-    componentWillReceiveProps(nextProps){
+    componentDidUpdate(pastProps){
+        const { shouldReaggregate } = this.props;
         var updateState = false,
-            keys        = _.keys(nextProps),
+            keys        = _.keys(this.props),
             i, k;
 
         for (i = 0; i < keys.length; i++){
             k = keys[i];
-            if (nextProps[k] !== this.props[k]){
+            // eslint-disable-next-line react/destructuring-assignment
+            if (pastProps[k] !== this.props[k]){
                 if (k !== 'aggregationsToChartData' && k !== 'externalTermMap'){
                     var k4 = k.slice(0,4);
                     if (k4 !== 'resp'){
                         continue;
                     }
                 }
-                if (!nextProps[k]) continue;
+                // eslint-disable-next-line react/destructuring-assignment
+                if (!this.props[k]) continue;
                 console.warn('StatsChartViewBase > Will re-aggregate chart data based on change of ', k);
                 updateState = true;
                 break;
             }
         }
 
-        if (typeof nextProps.shouldReaggregate === 'function' && !updateState){
-            updateState = nextProps.shouldReaggregate(this.props, nextProps);
+        if (typeof shouldReaggregate === 'function' && !updateState){
+            updateState = shouldReaggregate(pastProps, this.props);
         }
 
         if (updateState){
-            this.setState((currState) => this.generateAggsToState(nextProps, currState));
+            this.setState((currState) => this.generateAggsToState(this.props, currState));
         }
     }
 
     getRefWidth(){
-        return this.refs && this.refs.elem && this.refs.elem.clientWidth;
+        return this.elemRef && this.elemRef.current && this.elemRef.current.clientWidth;
     }
 
     handleToggle(key, cb){
@@ -205,12 +208,6 @@ export class StatsChartViewBase extends React.Component {
         });
     }
 
-    componentWillUpdate(nextProps, nextState){
-        if (!isServerSide()){
-            this.currGridState = layout.responsiveGridState(nextProps.windowWidth);
-        }
-    }
-
     generateAggsToState(props, state){
         return _.object(_.map(_.keys(props.aggregationsToChartData), (key) =>
             [
@@ -221,6 +218,22 @@ export class StatsChartViewBase extends React.Component {
                 )
             ]
         ));
+    }
+
+    render(){
+        const { children } = this.props;
+        const width = this.getRefWidth() || null;
+        const childProps = _.extend(
+            { width, 'onChartToggle' : this.handleToggle, 'onSmoothEdgeToggle' : this.handleToggleSmoothEdges },
+            this.props, this.state
+        );
+        let extendedChildren;
+        if (Array.isArray(children)){
+            extendedChildren = React.Children.map(children, (child) => React.cloneElement(child, childProps));
+        } else {
+            extendedChildren = React.cloneElement(children, childProps);
+        }
+        return <div className="stats-aggregation-container" ref={this.elemRef}>{ extendedChildren }</div>;
     }
 
 }
@@ -234,13 +247,26 @@ export class StatsChartViewBase extends React.Component {
  */
 export class GroupByController extends React.PureComponent {
 
+    static getDerivedStateFromProps(props, state){
+        const { groupByOptions, initialGroupBy } = props;
+        const { currentGroupBy } = state;
+        if (typeof groupByOptions[currentGroupBy] === 'undefined'){
+            if (typeof groupByOptions[initialGroupBy] === 'undefined'){
+                throw new Error('Changed props.groupByOptions but state.currentGroupBy and props.initialGroupBy are now both invalid.');
+            } else {
+                return { 'currentGroupBy' : initialGroupBy };
+            }
+        }
+        return null;
+    }
+
     static defaultProps = {
         'groupByOptions' : {
             'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
             'award.project'                      : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span>,
             'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
             //'status'                             : <span><i className="icon icon-fw icon-circle"/>&nbsp; <span className="text-600">Current</span> Status</span>,
-            'experiments_in_set.experiment_type' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+            'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
         },
         'initialGroupBy' : 'award.center_title'
     }
@@ -248,39 +274,20 @@ export class GroupByController extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleGroupByChange = this.handleGroupByChange.bind(this);
-        this.state = {
-            'currentGroupBy' : props.initialGroupBy
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (this.props.groupByOptions !== nextProps.groupByOptions){
-
-            var nextGroupByKeys = _.keys(nextProps.groupByOptions);
-
-            if (nextGroupByKeys.indexOf(this.state.currentGroupBy) === -1){
-                if (nextGroupByKeys.indexOf(nextProps.initialGroupBy) === -1){
-                    throw new Error('Changed props.groupByOptions but state.currentGroupBy and props.initialGroupBy are now both invalid.');
-                } else {
-                    this.setState({ 'currentGroupBy' : nextProps.initialGroupBy });
-                    return;
-                }
-            }
-
-        }
+        this.state = { 'currentGroupBy' : props.initialGroupBy };
     }
 
     handleGroupByChange(field){
         this.setState(function(currState){
             if (currState.currentGroupBy === field){
-                return;
+                return null;
             }
             return { 'currentGroupBy' : field };
         });
     }
 
     render(){
-        var { children, groupByOptions } = this.props,
+        var { children } = this.props,
             { currentGroupBy } = this.state,
             childProps = _.extend(_.omit(this.props, 'children', 'initialGroupBy'),{ currentGroupBy, 'handleGroupByChange' : this.handleGroupByChange });
 
@@ -303,10 +310,7 @@ export class GroupByDropdown extends React.PureComponent {
             'textAlign' : 'left'
         },
         'outerClassName' : "dropdown-container mb-15",
-        'valueTitleTransform' : function(jsx){
-            // Use this prop to optionally prepend or append an icon or something.
-            return jsx;
-        }
+        'id' : "select_primary_charts_group_by"
     }
 
     constructor(props){
@@ -315,23 +319,26 @@ export class GroupByDropdown extends React.PureComponent {
     }
 
     onSelect(eventKey, evt){
-        if (typeof this.props.handleGroupByChange !== 'function'){
+        const { handleGroupByChange } = this.props;
+        if (typeof handleGroupByChange !== 'function'){
             throw new Error("No handleGroupByChange function passed to GroupByDropdown.");
         }
-        this.props.handleGroupByChange(eventKey);
+        handleGroupByChange(eventKey);
     }
 
     render(){
-        var { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, valueTitleTransform, children } = this.props,
-            optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
-                <MenuItem eventKey={field} key={field} children={title} active={field === currentGroupBy} />
-            ),
-            selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : valueTitleTransform(groupByOptions[currentGroupBy]);
+        const { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, children, id } = this.props;
+        const optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
+            <MenuItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</MenuItem>
+        );
+        const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
 
         return (
             <div className={outerClassName}>
                 <span className="text-500">{ title }</span>
-                <DropdownButton id="select_primary_charts_group_by" title={selectedValueTitle} onSelect={this.onSelect} children={optionItems} style={buttonStyle} />
+                <DropdownButton id={id} title={selectedValueTitle} onSelect={this.onSelect} style={buttonStyle} disabled={optionItems.length < 2}>
+                    { optionItems }
+                </DropdownButton>
                 { children }
             </div>
         );
@@ -340,10 +347,8 @@ export class GroupByDropdown extends React.PureComponent {
 
 
 
-/**
- * Wraps AreaCharts or AreaChartContainers in order to provide shared scales.
- */
-export class GroupOfCharts extends React.Component {
+/** Wraps AreaCharts or AreaChartContainers in order to provide shared color scales. */
+export class ColorScaleProvider extends React.PureComponent {
 
     static defaultProps = {
         'className'             : 'chart-group clearfix',
@@ -353,7 +358,7 @@ export class GroupOfCharts extends React.Component {
         'resetScalesWhenChange' : null,
         'resetScaleLegendWhenChange' : null,
         'colorScale'            : null
-    }
+    };
 
     constructor(props){
         super(props);
@@ -364,27 +369,29 @@ export class GroupOfCharts extends React.Component {
         this.state = { colorScale, 'colorScaleStore' : {} };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (this.props.resetScalesWhenChange !== nextProps.resetScalesWhenChange){
+    componentDidUpdate(pastProps){
+        const { resetScalesWhenChange, resetScaleLegendWhenChange } = this.props;
+        if (resetScalesWhenChange !== pastProps.resetScalesWhenChange){
             console.warn("Color scale reset");
             this.resetColorScale();
-        } else if (this.props.resetScaleLegendWhenChange !== nextProps.resetScaleLegendWhenChange){
+        } else if (resetScaleLegendWhenChange !== pastProps.resetScaleLegendWhenChange){
             console.warn("Color scale reset (LEGEND ONLY)");
             this.resetColorScale(true);
         }
     }
 
     resetColorScale(onlyResetLegend=false){
-
         if (onlyResetLegend){
             this.setState({ 'colorScaleStore' : {} });
             return;
         }
 
-        var colorScale, colorScaleStore = {};
+        const { colorScale : propColorScale } = this.props;
+        let colorScale;
+        const colorScaleStore = {};
 
-        if (typeof this.props.colorScale === 'function'){
-            colorScale = this.props.colorScale; // Does nothing.
+        if (typeof propColorScale === 'function'){
+            colorScale = propColorScale; // Does nothing.
         } else {
             colorScale = d3.scaleOrdinal(d3.schemeCategory10.concat(d3.schemePastel1));
         }
@@ -393,22 +400,29 @@ export class GroupOfCharts extends React.Component {
     }
 
     updateColorStore(term, color){
-        var nextColorScaleStore = _.clone(this.state.colorScaleStore);
-        nextColorScaleStore[term] = color;
-        this.setState({ 'colorScaleStore' : nextColorScaleStore });
+        this.setState(function({ colorScaleStore }){
+            if (colorScaleStore && colorScaleStore[term] && colorScaleStore[term] === color){
+                return null;
+            }
+            var nextColorScaleStore = _.clone(colorScaleStore);
+            nextColorScaleStore[term] = color;
+            return { 'colorScaleStore' : nextColorScaleStore };
+        });
     }
 
     render(){
-        var { children, className, width, chartMargin, xDomain } = this.props,
-            newChildren = React.Children.map(children, (child, childIndex) => {
-                if (!child) return null;
-                if (typeof child.type === 'string') {
-                    return child; // Not component instance
-                }
-                return React.cloneElement(child, _.extend({}, _.omit(this.props, 'children'), { width, chartMargin, xDomain, 'updateColorStore' : this.updateColorStore }, this.state));
-            });
-
-        return <div className={className || null} children={newChildren}/>;
+        const { children, className } = this.props;
+        const newChildren = React.Children.map(children, (child, childIndex) => {
+            if (!child) return null;
+            if (typeof child.type === 'string') {
+                return child; // Not component instance
+            }
+            return React.cloneElement(
+                child,
+                _.extend({}, _.omit(this.props, 'children'), { 'updateColorStore' : this.updateColorStore }, this.state)
+            );
+        });
+        return <div className={className || null}>{ newChildren }</div>;
     }
 
 }
@@ -423,9 +437,10 @@ export class HorizontalD3ScaleLegend extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
+        const { colorScaleStore } = this.props;
         //if (nextProps.colorScale !== this.props.colorScale){
-        if (nextProps.colorScaleStore !== this.props.colorScaleStore){
-            var currTerms = _.keys(this.props.colorScaleStore),
+        if (nextProps.colorScaleStore !== colorScaleStore){
+            var currTerms = _.keys(colorScaleStore),
                 nextTerms = _.keys(nextProps.colorScaleStore);
 
             // Don't update if no terms in next props; most likely means colorScale[Store] has been reset and being repopulated.
@@ -438,6 +453,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
         // Emulates PureComponent
         var propKeys = _.keys(nextProps);
         for (var i = 0; i < propKeys.length; i++){
+            // eslint-disable-next-line react/destructuring-assignment
             if (nextProps[propKeys[i]] !== this.props[propKeys[i]]) {
                 return true;
             }
@@ -459,7 +475,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
         if (!colorScale || !colorScaleStore) return null;
         return (
             <div className="legend mb-27">
-                <div className="row" children={_.map(_.sortBy(_.pairs(colorScaleStore), function(p){ return p[0].toLowerCase(); }), this.renderColorItem)}/>
+                <div className="row">{ _.map(_.sortBy(_.pairs(colorScaleStore), function([term, color]){ return term.toLowerCase(); }), this.renderColorItem) }</div>
             </div>
         );
     }
@@ -482,20 +498,11 @@ export class ChartTooltip extends React.PureComponent {
         }, props.initialState || {});
     }
 
-    componentDidMount(){
-        this.tooltip = d3.select(this.refs.tooltipContainer);
-        this.setState({ 'mounted': true });
-    }
-
-    componentWillUnmount(){
-        delete this.tooltip;
-    }
-
     render(){
         var { margin } = this.props,
             { leftPosition, visible, contentFxn, topPosition, chartWidth, chartHeight } = this.state;
         return (
-            <div className="chart-tooltip" ref="tooltipContainer" style={_.extend(_.pick(margin, 'left', 'top'), {
+            <div className="chart-tooltip" style={_.extend(_.pick(margin, 'left', 'top'), {
                 'transform' : 'translate(' + Math.min(leftPosition, chartWidth - 5) + 'px, 0px)',
                 'display' : visible ? 'block' : 'none',
                 'bottom' : margin.bottom + 5
@@ -525,10 +532,84 @@ export class AreaChart extends React.PureComponent {
         }));
     }
 
+    static calculateXAxisExtents(mergedData, xDomain){
+        var xExtents = [null, null];
+
+        if (xDomain && xDomain[0]){
+            xExtents[0] = xDomain[0];
+        } else {
+            xExtents[0] = d3.min(mergedData, function(d){ return d.date; });
+        }
+
+        if (xDomain && xDomain[1]){
+            xExtents[1] = xDomain[1];
+        } else {
+            xExtents[1] = d3.max(mergedData, function(d){ return d.date; });
+        }
+
+        return xExtents;
+    }
+
+    static calculateYAxisExtents(mergedData, yDomain){
+        var yExtents = [null, null];
+
+        if (yDomain && typeof yDomain[0] === 'number'){
+            yExtents[0] = yDomain[0];
+        } else {
+            yExtents[0] = d3.min(mergedData, function(d){ return d.total; });
+        }
+
+        if (yDomain && typeof yDomain[1] === 'number'){
+            yExtents[1] = yDomain[1];
+        } else {
+            yExtents[1] = d3.max(mergedData, function(d){ return d.total; });
+        }
+
+        return yExtents;
+    }
+
+    static childKeysFromData(data){
+        return Array.from(_.reduce(data, function(m,d){
+            _.forEach(d.children || [], function(child){ m.add(child.term); });
+            return m;
+        }, new Set()));
+    }
+
+    /** Convert timestamps to D3 date objects.  */
+    static correctDatesInData(origData, d3TimeFormat = '%Y-%m-%d'){
+        const parseTime = d3.utcParse(d3TimeFormat);
+        return _.map(origData, (d) => {
+            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
+            return _.extend({}, d, {
+                'date' : parseTime(formattedDate),
+                'origDate' : formattedDate
+            });
+        });
+    }
+
+    static stackData(origData, d3TimeFormat = '%Y-%m-%d'){
+        const stackGen = d3.stack().value(function(d, key){
+            var currChild = _.findWhere(d.children || [], { 'term' : key });
+            if (currChild) return currChild.total;
+            return 0;
+        });
+
+        stackGen.keys(AreaChart.childKeysFromData(origData));
+
+        const formattedDateData = AreaChart.correctDatesInData(origData, d3TimeFormat);
+        return stackGen(formattedDateData);
+    }
+
+    static getDerivedStateFromProps(props, state){
+        return {
+            'colorScale' : props.colorScale || state.colorScale || d3.scaleOrdinal(d3.schemeCategory10)
+        };
+    }
+
     static defaultProps = {
         'chartMargin'           : { 'top': 30, 'right': 2, 'bottom': 30, 'left': 50 },
         'data'                  : null,
-        'd3TimeFormat'          : '%Y-%m-%d',
+        'd3TimeFormat'          : '%Y-%m-%d', // TODO: Remove prop?
         'stackChildren'         : true,
         'height'                : 300,
         'yAxisLabel'            : 'Count',
@@ -545,6 +626,7 @@ export class AreaChart extends React.PureComponent {
 
             if (pastProps.data !== nextProps.data) shouldDrawNewChart = true;
             if (pastProps.curveFxn !== nextProps.curveFxn) shouldDrawNewChart = true;
+            if (pastProps.colorScale !== nextProps.colorScale) shouldDrawNewChart = true;
             if (shouldDrawNewChart) console.info('Will redraw chart');
 
             return shouldDrawNewChart;
@@ -553,90 +635,60 @@ export class AreaChart extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.correctDatesInData = this.correctDatesInData.bind(this);
-        this.childKeysFromData = this.childKeysFromData.bind(this);
-        this.updateDataInState = this.updateDataInState.bind(this);
-        this.getInnerChartWidth = this.getInnerChartWidth.bind(this);
-        this.getInnerChartHeight = this.getInnerChartHeight.bind(this);
-        this.calculateXAxisExtents = this.calculateXAxisExtents.bind(this);
-        this.calculateYAxisExtents = this.calculateYAxisExtents.bind(this);
-        this.xScale = this.xScale.bind(this);
-        this.yScale = this.yScale.bind(this);
-        this.commonDrawingSetup = this.commonDrawingSetup.bind(this);
-        this.drawNewChart = this.drawNewChart.bind(this);
-        this.updateTooltip = this.updateTooltip.bind(this);
-        this.removeTooltip = this.removeTooltip.bind(this);
-        this.updateExistingChart = _.debounce(this.updateExistingChart.bind(this), 300);
+        _.bindAll(this, 'getInnerChartWidth', 'getInnerChartHeight', 'xScale', 'yScale',
+            'commonDrawingSetup', 'drawNewChart', 'updateTooltip', 'removeTooltip', 'updateExistingChart'
+        );
 
-        // D3 things
-        this.parseTime = d3.utcParse(props.d3TimeFormat);
-        this.stack = d3.stack().value(function(d, key){
-            var currChild = _.findWhere(d.children || [], { 'term' : key });
-            if (currChild) return currChild.total;
-            return 0;
-        });
-        this.stack.keys(this.childKeysFromData(props.data));
-        if (!this.props.colorScale){
-            this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-        }
+        this.updateExistingChart = _.debounce(this.updateExistingChart, 500);
+
+        // Tiny performance boost via memoizing
+        this.mergeStackedDataForExtents = memoize(AreaChart.mergeStackedDataForExtents);
+        this.calculateXAxisExtents      = memoize(AreaChart.calculateXAxisExtents);
+        this.calculateYAxisExtents      = memoize(AreaChart.calculateYAxisExtents);
+        this.childKeysFromData          = memoize(AreaChart.childKeysFromData);
+        this.stackData                  = memoize(AreaChart.stackData);
 
         // Will be cached here later from d3.select(this.refs..)
-        this.svg     = null;
-        this.tooltip = null;
-
-        var stackedData             = this.stack(this.correctDatesInData(props.data)),
-            mergedDataForExtents    = AreaChart.mergeStackedDataForExtents(stackedData),
-            xExtents                = this.calculateXAxisExtents(mergedDataForExtents, props.xDomain),
-            yExtents                = this.calculateYAxisExtents(mergedDataForExtents, props.yDomain);
+        this.svg = null;
 
         this.state = {
             'drawingError'  : false,
-            'drawn'         : false,
-            stackedData, mergedDataForExtents,
-            xExtents, yExtents
+            'drawn'         : false
         };
 
+        this.svgRef = React.createRef();
+        this.tooltipRef = React.createRef();
     }
 
     componentDidMount(){
         requestAnimationFrame(this.drawNewChart);
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.d3TimeFormat !== this.props.d3TimeFormat){
-            this.parseTime = d3.timeParse(nextProps.d3TimeFormat);
-        }
-        if (this.props.colorScale && !nextProps.colorScale){
-            this.colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-        }
-    }
-
     componentDidUpdate(pastProps, pastState){
-        var shouldDrawNewChart = this.props.shouldDrawNewChart(pastProps, this.props);
+        const { shouldDrawNewChart : shouldDrawNewChartFxn } = this.props;
+        const shouldDrawNewChart = shouldDrawNewChartFxn(pastProps, this.props);
 
         if (shouldDrawNewChart){
             setTimeout(()=>{ // Wait for other UI stuff to finish updating, e.g. element widths.
-                this.updateDataInState(this.props, ()=>{
-                    requestAnimationFrame(()=>{
-                        this.destroyExistingChart();
-                        this.drawNewChart();
-                    });
+                requestAnimationFrame(()=>{
+                    this.destroyExistingChart();
+                    this.drawNewChart();
                 });
             }, 300);
-        } else if (this.isDataUpdating) {
-            this.isDataUpdating = false;
-            // Skip below else condition.
         } else {
             setTimeout(this.updateExistingChart, 300);
         }
     }
 
     getXAxisGenerator(useChartWidth = null){
-        var { width } = this.props,
-            chartWidth = useChartWidth || this.innerWidth || this.getInnerChartWidth(),
-            xExtents  = this.calculateXAxisExtents(),
-            yearDiff  = (xExtents[1] - xExtents[0]) / (60 * 1000 * 60 * 24 * 365),
-            widthPerYear = chartWidth / yearDiff;
+        const { xDomain, data, d3TimeFormat } = this.props;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const mergedDataForExtents = this.mergeStackedDataForExtents(stackedData);
+        const xExtents = this.calculateXAxisExtents(mergedDataForExtents, xDomain);
+
+        const chartWidth = useChartWidth || this.innerWidth || this.getInnerChartWidth();
+        const yearDiff  = (xExtents[1] - xExtents[0]) / (60 * 1000 * 60 * 24 * 365);
+        const widthPerYear = chartWidth / yearDiff;
 
 
         if (widthPerYear < 3600){
@@ -670,97 +722,36 @@ export class AreaChart extends React.PureComponent {
         }
     }
 
-    /**
-     * Convert timestamps to D3 date objects.
-     */
-    correctDatesInData(data = this.props.data){
-        return _.map(data, (d) => {
-            var formattedDate = (new Date(d.date.slice(0,10))).toISOString().slice(0,10);
-            return _.extend({}, d, {
-                'date' : this.parseTime(formattedDate),
-                'origDate' : formattedDate
-            });
-        });
-    }
-
-    childKeysFromData(data = this.props.data){
-        return Array.from(_.reduce(data, function(m,d){
-            _.forEach(d.children || [], function(child){ m.add(child.term); });
-            return m;
-        }, new Set()));
-    }
-
-    updateDataInState(props = this.props, callback = null){
-        var data = this.correctDatesInData(props.data);
-        this.stack.keys(this.childKeysFromData(data));
-
-        this.isDataUpdating = true;
-
-        var stackedData          = this.stack(data),
-            mergedDataForExtents = AreaChart.mergeStackedDataForExtents(stackedData),
-            xExtents             = this.calculateXAxisExtents(mergedDataForExtents, props.xDomain),
-            yExtents             = this.calculateYAxisExtents(mergedDataForExtents, props.yDomain);
-
-        this.setState({ stackedData, mergedDataForExtents, xExtents, yExtents }, callback);
-    }
-
     getInnerChartWidth(){
         var { width, margin } = this.props;
-        this.svg = this.svg || d3.select(this.refs.svg);
-        this.innerWidth = (  width || parseInt( this.refs.svg.clientWidth || this.svg.style('width') )  ) - margin.left - margin.right;
+        this.svg = this.svg || d3.select(this.svgRef.current);
+        this.innerWidth = (  width || parseInt( this.svg.style('width') )  ) - margin.left - margin.right;
         return this.innerWidth;
     }
 
     getInnerChartHeight(){
         var { height, margin } = this.props;
-        this.svg = this.svg || d3.select(this.refs.svg);
-        this.innerHeight = (  height || parseInt( this.refs.svg.clientHeight || this.svg.style('height') )  ) - margin.top - margin.bottom;
+        this.svg = this.svg || d3.select(this.svgRef.current);
+        this.innerHeight = (  height || parseInt( this.svg.style('height') )  ) - margin.top - margin.bottom;
         return this.innerHeight;
     }
 
-    calculateXAxisExtents(mergedData = this.state.mergedDataForExtents, xDomain = this.props.xDomain){
-        var xExtents = [null, null];
-
-        if (xDomain && xDomain[0]){
-            xExtents[0] = xDomain[0];
-        } else {
-            xExtents[0] = d3.min(mergedData, function(d){ return d.date; });
-        }
-
-        if (xDomain && xDomain[1]){
-            xExtents[1] = xDomain[1];
-        } else {
-            xExtents[1] = d3.max(mergedData, function(d){ return d.date; });
-        }
-
-        return xExtents;
-    }
-
-    calculateYAxisExtents(mergedData = this.state.mergedDataForExtents, yDomain = this.props.yDomain){
-        var yExtents = [null, null];
-
-        if (yDomain && typeof yDomain[0] === 'number'){
-            yExtents[0] = yDomain[0];
-        } else {
-            yExtents[0] = d3.min(mergedData, function(d){ return d.total; });
-        }
-
-        if (yDomain && typeof yDomain[1] === 'number'){
-            yExtents[1] = yDomain[1];
-        } else {
-            yExtents[1] = d3.max(mergedData, function(d){ return d.total; });
-        }
-
-        return yExtents;
-    }
-
-    xScale(width, xExtents = this.state.xExtents){
+    xScale(width){
+        const { xDomain, data, d3TimeFormat } = this.props;
+        //const { stackedData } = this.state;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const mergedDataForExtents = this.mergeStackedDataForExtents(stackedData);
+        const xExtents = this.calculateXAxisExtents(mergedDataForExtents, xDomain);
         return d3.scaleUtc().rangeRound([0, width]).domain(xExtents);
     }
 
-    yScale(height, yExtents = this.state.yExtents){
-        var { yAxisScale, yAxisPower } = this.props;
-        var scale = d3['scale' + yAxisScale]().rangeRound([height, 0]).domain(yExtents);
+    yScale(height){
+        const { yAxisScale, yAxisPower, yDomain, data, d3TimeFormat } = this.props;
+        //const { stackedData } = this.state;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const mergedDataForExtents = this.mergeStackedDataForExtents(stackedData);
+        const yExtents = this.calculateYAxisExtents(mergedDataForExtents, yDomain);
+        const scale = d3['scale' + yAxisScale]().rangeRound([height, 0]).domain(yExtents);
         if (yAxisScale === 'Pow' && yAxisPower !== null){
             scale.exponent(yAxisPower);
         }
@@ -768,38 +759,37 @@ export class AreaChart extends React.PureComponent {
     }
 
     commonDrawingSetup(){
-        var { margin, yAxisScale, yAxisPower, xDomain, yDomain, curveFxn } = this.props,
-            { stackedData, mergedDataForExtents } = this.state,
-            svg         = this.svg || d3.select(this.refs.svg),
-            width       = this.getInnerChartWidth(),
-            height      = this.getInnerChartHeight(),
-            x           = this.xScale(width),
-            y           = this.yScale(height),
-            bottomAxisGenerator = this.getXAxisGenerator(width)(x),
-            area        = d3.area()
-                .x ( function(d){ return x(d.date || d.data.date);  } )
-                .curve(curveFxn)
-                //.x0 ( function(d){ return x(d.date || d.data.date);  } )
-                //.x1 ( function(d){ return x(d.date || d.data.date) + 10;  } )
-                .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
-                .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
+        const { curveFxn, data, d3TimeFormat } = this.props;
+        const stackedData = this.stackData(data, d3TimeFormat);
+        const svg         = this.svg || d3.select(this.svgRef.current);
+        const width       = this.getInnerChartWidth();
+        const height      = this.getInnerChartHeight();
+        const x           = this.xScale(width);
+        const y           = this.yScale(height);
+        const bottomAxisGenerator = this.getXAxisGenerator(width)(x);
+        const area        = d3.area()
+            .x ( function(d){ return x(d.date || d.data.date);  } )
+            .curve(curveFxn)
+            //.x0 ( function(d){ return x(d.date || d.data.date);  } )
+            //.x1 ( function(d){ return x(d.date || d.data.date) + 10;  } )
+            .y0( function(d){ return Array.isArray(d) ? y(d[0]) : y(0); } )
+            .y1( function(d){ return Array.isArray(d) ? y(d[1]) : y(d.total || d.data.total); } );
 
-        var leftAxisGenerator   = d3.axisLeft(y),
-            rightAxisGenerator  = d3.axisRight(y).tickSize(width),
-            rightAxisFxn        = function(g){
-                g.call(rightAxisGenerator);
-                g.select('.domain').remove();
-                g.selectAll('.tick > text').remove();
-                g.selectAll('.tick > line')
-                    .attr("class", "right-axis-tick-line")
-                    .attr('opacity', 0.2)
-                    .attr("stroke", "#777")
-                    .attr("stroke-dasharray", "2,2");
-            };
+        const rightAxisGenerator  = d3.axisRight(y).tickSize(width);
+        const rightAxisFxn        = function(g){
+            g.call(rightAxisGenerator);
+            g.select('.domain').remove();
+            g.selectAll('.tick > text').remove();
+            g.selectAll('.tick > line')
+                .attr("class", "right-axis-tick-line")
+                .attr('opacity', 0.2)
+                .attr("stroke", "#777")
+                .attr("stroke-dasharray", "2,2");
+        };
 
         this.svg = svg;
 
-        return { svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn, 'data' : stackedData };
+        return { svg, x, y, width, height, area, bottomAxisGenerator, rightAxisFxn, stackedData };
     }
 
     /**
@@ -809,7 +799,7 @@ export class AreaChart extends React.PureComponent {
      * But this can probably wait (?).
      */
     drawNewChart(){
-        if (!this.refs || !this.refs.svg) {
+        if (!this.svgRef.current) {
             this.setState({ 'drawingError' : true });
             return;
         }
@@ -819,16 +809,15 @@ export class AreaChart extends React.PureComponent {
             return;
         }
 
-        var { yAxisLabel, margin, updateColorStore } = this.props,
-            { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup(),
-            drawn = { svg },
-            colorScale = this.props.colorScale || this.colorScale;
-
+        const { yAxisLabel, margin, updateColorStore } = this.props;
+        const { stackedData, svg, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        const drawn = { svg };
+        const { colorScale } = this.state;
 
         drawn.root = svg.append("g").attr('transform', "translate(" + margin.left + "," + margin.top + ")");
 
         drawn.layers = drawn.root.selectAll('.layer')
-            .data(data)
+            .data(stackedData)
             .enter()
             .append('g')
             .attr('class', 'layer');
@@ -858,24 +847,18 @@ export class AreaChart extends React.PureComponent {
     }
 
     updateTooltip(evt){
-        var svg                 = this.svg      || d3.select(this.refs.svg), // SHOULD be same as evt.target.
-            tooltip             = this.refs.tooltip,
-            //tooltip           = this.tooltip  || d3.select(this.refs.tooltipContainer),
-            chartMargin         = this.props.chartMargin,
-            mouseCoords         = d3.clientPoint(svg.node(), evt), // [x: number, y: number]
-            stackedData         = this.state.stackedData,
-            colorScale          = this.props.colorScale || this.colorScale,
-            chartWidth          = this.innerWidth || this.getInnerChartWidth(),
-            chartHeight         = this.innerHeight || this.getInnerChartHeight(),
-            currentTerm         = (evt && evt.target.getAttribute('data-term')) || null,
-            yAxisLabel          = this.props.yAxisLabel,
-            dateRoundInterval   = this.props.dateRoundInterval,
-            tdp                 = this.props.tooltipDataProperty || 'total',
-            dateFormatFxn       = function(aDate){ return DateUtility.format(aDate, 'date-sm'); };
+        const { chartMargin, yAxisLabel, dateRoundInterval, tooltipDataProperty, data, d3TimeFormat } = this.props;
+        const { colorScale } = this.state;
+        const stackedData   = this.stackData(data, d3TimeFormat);
+        const svg           = this.svg || d3.select(this.svgRef.current); // SHOULD be same as evt.target.
+        const tooltip       = this.tooltipRef.current;
+        let [ mX, mY ]      = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
+        const chartWidth    = this.innerWidth || this.getInnerChartWidth();
+        const chartHeight   = this.innerHeight || this.getInnerChartHeight();
+        const currentTerm   = (evt && evt.target.getAttribute('data-term')) || null;
+        const tdp           = tooltipDataProperty || 'total';
 
-        if (!mouseCoords) {
-            throw new Error("Could not get mouse coordinates.");
-        }
+        let dateFormatFxn = function(aDate){ return DateUtility.format(aDate, 'date-sm'); };
 
         if (dateRoundInterval === 'month'){
             dateFormatFxn = function(aDate){
@@ -889,106 +872,103 @@ export class AreaChart extends React.PureComponent {
             };
         }
 
-        mouseCoords[0] -= (chartMargin.left || 0);
-        mouseCoords[1] -= (chartMargin.top  || 0);
+        mX -= (chartMargin.left || 0);
+        mY -= (chartMargin.top  || 0);
 
-        if (mouseCoords[0] < 0 || mouseCoords[1] < 0 || mouseCoords[0] > chartWidth + 1 || mouseCoords[1] > chartHeight + 1){
+        if (mX < 0 || mY < 0 || mX > chartWidth + 1 || mY > chartHeight + 1){
             return this.removeTooltip();
         }
 
-        requestAnimationFrame(()=>{
+        var xScale              = this.xScale(chartWidth),
+            yScale              = this.yScale(chartHeight),
+            hovDate             = xScale.invert(mX),
+            dateString          = dateFormatFxn(hovDate),
+            leftPosition        = xScale(hovDate),
+            isToLeft            = leftPosition > (chartWidth / 2),
+            maxTermsVisible     = Math.floor((chartHeight - 60) / 18),
+            stackedLegendItems  = _.filter(_.map(stackedData, function(sD){
+                return _.find(sD, function(stackedDatum, i, all){
+                    var curr = stackedDatum.data,
+                        next = (all[i + 1] && all[i + 1].data) || null;
 
-            var xScale              = this.xScale(chartWidth),
-                yScale              = this.yScale(chartHeight),
-                hovDate             = xScale.invert(mouseCoords[0]),
-                dateString          = dateFormatFxn(hovDate),
-                leftPosition        = xScale(hovDate),
-                isToLeft            = leftPosition > (chartWidth / 2),
-                maxTermsVisible     = Math.floor((chartHeight - 60) / 18),
-                stackedLegendItems  = _.filter(_.map(stackedData, function(sD){
-                    return _.find(sD, function(stackedDatum, i, all){
-                        var curr = stackedDatum.data,
-                            next = (all[i + 1] && all[i + 1].data) || null;
-
-                        if (hovDate > curr.date && (!next || next.date >= hovDate)){
-                            return true;
-                        }
-                        return false;
-                    });
-                })),
-                total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
-                termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
-                    if (c.term === null) return false;
-                    return c && c[tdp] > 0;
-                }), function(c){ return -c[tdp]; }),
-                isEmpty             = termChildren.length === 0,
-                topPosition         = yScale(total);
-
-            // It's anti-pattern for component to update its children using setState instead of passing props as done here.
-            // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
-            // so performance/clarity-wise this approach seems more desirable.
-            tooltip.setState({
-                leftPosition, topPosition, chartWidth, chartHeight,
-                'visible'       : true,
-                'contentFxn'    : function(tProps, tState){
-
-                    if (termChildren.length > maxTermsVisible){
-                        var lastTermIdx             = maxTermsVisible - 1,
-                            currentActiveItemIndex  = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
-
-                        if (currentActiveItemIndex && currentActiveItemIndex > lastTermIdx){
-                            var temp = termChildren[lastTermIdx];
-                            termChildren[lastTermIdx] = termChildren[currentActiveItemIndex];
-                            termChildren[currentActiveItemIndex] = temp;
-                        }
-                        var termChildrenRemainder = termChildren.slice(maxTermsVisible),
-                            totalForRemainder = 0;
-
-                        _.forEach(termChildrenRemainder, function(r){
-                            totalForRemainder += r[tdp];
-                        });
-                        termChildren = termChildren.slice(0, maxTermsVisible);
-                        var newChild = { 'term' : termChildrenRemainder.length + " More...", "noColor" : true };
-                        newChild[tdp] = totalForRemainder;
-                        termChildren.push(newChild);
+                    if (hovDate > curr.date && (!next || next.date >= hovDate)){
+                        return true;
                     }
+                    return false;
+                });
+            })),
+            total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
+            termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
+                if (c.term === null) return false;
+                return c && c[tdp] > 0;
+            }), function(c){ return -c[tdp]; }),
+            isEmpty             = termChildren.length === 0,
+            topPosition         = yScale(total);
 
-                    return (
-                        <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
-                            <h5 className={"text-500 mt-0 clearfix" + (isEmpty ? ' mb-0' : ' mb-11')}>
-                                { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
-                            </h5>
-                            { isEmpty ? null :
-                                <table className="current-legend">
-                                    <tbody>
-                                        { _.map(termChildren, function(c, i){
-                                            return (
-                                                <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
-                                                    <td className="patch-cell">
-                                                        <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
-                                                    </td>
-                                                    <td className="term-name-cell">{ c.term }</td>
-                                                    <td className="term-name-total">
-                                                        { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
-                                                        { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
-                                                    </td>
-                                                </tr>
-                                            );
-                                        }) }
-                                    </tbody>
-                                </table>
-                            }
-                        </div>
-                    );
+        // It's anti-pattern for component to update its children using setState instead of passing props as done here.
+        // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,
+        // so performance/clarity-wise this approach seems more desirable.
+        tooltip.setState({
+            leftPosition, topPosition, chartWidth, chartHeight,
+            'visible'       : true,
+            'contentFxn'    : function(tProps, tState){
+
+                if (termChildren.length > maxTermsVisible){
+                    var lastTermIdx             = maxTermsVisible - 1,
+                        currentActiveItemIndex  = _.findIndex(termChildren, function(c){ return c.term === currentTerm; });
+
+                    if (currentActiveItemIndex && currentActiveItemIndex > lastTermIdx){
+                        var temp = termChildren[lastTermIdx];
+                        termChildren[lastTermIdx] = termChildren[currentActiveItemIndex];
+                        termChildren[currentActiveItemIndex] = temp;
+                    }
+                    var termChildrenRemainder = termChildren.slice(maxTermsVisible),
+                        totalForRemainder = 0;
+
+                    _.forEach(termChildrenRemainder, function(r){
+                        totalForRemainder += r[tdp];
+                    });
+                    termChildren = termChildren.slice(0, maxTermsVisible);
+                    var newChild = { 'term' : termChildrenRemainder.length + " More...", "noColor" : true };
+                    newChild[tdp] = totalForRemainder;
+                    termChildren.push(newChild);
                 }
-            });
 
+                return (
+                    <div className={"label-bg" + (isToLeft ? ' to-left' : '')}>
+                        <h5 className={"text-500 mt-0 clearfix" + (isEmpty ? ' mb-0' : ' mb-11')}>
+                            { dateString }{ total ? <span className="text-700 text-large pull-right" style={{ marginTop: -2 }}>&nbsp;&nbsp; { total }</span> : null }
+                        </h5>
+                        { !isEmpty ?
+                            <table className="current-legend">
+                                <tbody>
+                                    { _.map(termChildren, function(c, i){
+                                        return (
+                                            <tr key={c.term || i} className={currentTerm === c.term ? 'active' : null}>
+                                                <td className="patch-cell">
+                                                    <div className="color-patch" style={{ 'backgroundColor' : c.noColor ? 'transparent' : colorScale(c.term) }}/>
+                                                </td>
+                                                <td className="term-name-cell">{ c.term }</td>
+                                                <td className="term-name-total">
+                                                    { c[tdp] % 1 > 0 ?  Math.round(c[tdp] * 100) / 100 : c[tdp] }
+                                                    { yAxisLabel && yAxisLabel !== 'Count' ? ' ' + yAxisLabel : null }
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) }
+                                </tbody>
+                            </table>
+                            : null }
+                    </div>
+                );
+            }
         });
+
 
     }
 
     removeTooltip(){
-        var tooltip     = this.refs.tooltip;
+        const tooltip = this.tooltipRef.current;
         tooltip.setState({ 'visible' : false });
     }
 
@@ -1042,10 +1022,10 @@ export class AreaChart extends React.PureComponent {
             throw new Error('No existing elements to transition.');
         }
 
-        var { yAxisLabel, margin, transitionDuration } = this.props;
-        var { data, svg, x, y, width, height, area, leftAxisGenerator, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
+        const { transitionDuration } = this.props;
+        const { stackedData, y, height, area, bottomAxisGenerator, rightAxisFxn } = this.commonDrawingSetup();
 
-        var drawn = this.drawnD3Elements;
+        const drawn = this.drawnD3Elements;
 
         requestAnimationFrame(()=>{
 
@@ -1061,8 +1041,8 @@ export class AreaChart extends React.PureComponent {
             drawn.rightAxis.remove();
             drawn.rightAxis = drawn.root.append('g').call(rightAxisFxn);
 
-            var allLayers = drawn.root.selectAll('.layer')
-                .data(data)
+            drawn.root.selectAll('.layer')
+                .data(stackedData)
                 .selectAll('path.area')
                 .transition()
                 .duration(transitionDuration)
@@ -1079,11 +1059,11 @@ export class AreaChart extends React.PureComponent {
         }
         return (
             <div className="area-chart-inner-container" onMouseMove={this.updateTooltip} onMouseOut={this.removeTooltip}>
-                <svg ref="svg" className="area-chart" width={width || "100%"} height={height || null} style={{
+                <svg ref={this.svgRef} className="area-chart" width={width || "100%"} height={height || null} style={{
                     height, 'width' : width || '100%',
                     'transition' : 'height ' + (transitionDuration / 1000) + 's' + (height >= 500 ? ' .75s' : ' 1.025s')
                 }} />
-                <ChartTooltip margin={margin} ref="tooltip" />
+                <ChartTooltip margin={margin} ref={this.tooltipRef} />
             </div>
         );
     }
@@ -1091,54 +1071,67 @@ export class AreaChart extends React.PureComponent {
 }
 
 
-export function loadingIcon(label = "Loading Chart Data"){
+export function LoadingIcon(props){
+    const { children } = props;
     return (
         <div className="mt-5 mb-5 text-center">
             <i className="icon icon-fw icon-spin icon-circle-o-notch icon-2x" style={{ opacity : 0.5 }}/>
-            <h5 className="text-400">{ label }</h5>
+            <h5 className="text-400">{ children }</h5>
         </div>
     );
 }
+LoadingIcon.defaultProps = { 'children' : "Loading Chart Data" };
 
-export function errorIcon(label = "Loading failed. Please try again later."){
+export function ErrorIcon(props){
+    const { children } = props;
     return (
         <div className="mt-5 mb-5 text-center">
             <i className="icon icon-fw icon-times icon-2x"/>
-            <h5 className="text-400">{ label }</h5>
+            <h5 className="text-400">{ children }</h5>
         </div>
     );
 }
+ErrorIcon.defaultProps = { 'children' : "Loading failed. Please try again later." };
 
 
 
 export class AreaChartContainer extends React.Component {
 
+    static isExpanded(props){
+        const { windowWidth, chartToggles, id } = props;
+        const gridState = layout.responsiveGridState(windowWidth);
+        if (gridState && gridState !== 'lg') return false;
+        return !!((chartToggles || {})[id]);
+    }
+
     static defaultProps = {
         'colorScale' : null,
         'extraButtons' : []
-    }
+    };
 
     constructor(props){
         super(props);
         this.buttonSection = this.buttonSection.bind(this);
-        this.isExpanded = this.isExpanded.bind(this);
         this.toggleExpanded = _.throttle(this.toggleExpanded.bind(this), 1000);
         this.expandButton = this.expandButton.bind(this);
-    }
 
-    isExpanded(props = this.props){
-        if (this.props.gridState && this.props.gridState !== 'lg') return false;
-        return !!((props.chartToggles || {})[props.id]);
+        this.elemRef = React.createRef();
     }
 
     componentDidMount(){
+        const { width } = this.props;
+        if (typeof width === 'number' && width) return;
         setTimeout(()=>{ // Update w. new width.
             this.forceUpdate();
         }, 0);
     }
 
     componentDidUpdate(pastProps){
-        if (pastProps.defaultColSize !== this.props.defaultColSize || this.isExpanded(pastProps) !== this.isExpanded(this.props)){
+        const { defaultColSize, width } = this.props;
+        if (
+            !(typeof width === 'number' && width) &&
+            (pastProps.defaultColSize !== defaultColSize || AreaChartContainer.isExpanded(pastProps) !== AreaChartContainer.isExpanded(this.props))
+        ){
             setTimeout(()=>{ // Update w. new width.
                 this.forceUpdate();
             }, 0);
@@ -1146,39 +1139,45 @@ export class AreaChartContainer extends React.Component {
     }
 
     toggleExpanded(e){
-        return typeof this.props.onToggle === 'function' && this.props.id && this.props.onToggle(this.props.id);
+        const { onToggle, id } = this.props;
+        return typeof onToggle === 'function' && id && onToggle(id);
     }
 
     getRefWidth(){
-        return this.refs && this.refs.elem && this.refs.elem.clientWidth;
+        return this.elemRef && this.elemRef.current && this.elemRef.current.clientWidth;
     }
 
-    expandButton(expanded, className){
-        if (this.props.gridState && this.props.gridState !== 'lg') return null;
+    expandButton(){
+        const { windowWidth } = this.props;
+        const gridState = layout.responsiveGridState(windowWidth);
+        if (gridState !== 'lg') return null;
+        const expanded = AreaChartContainer.isExpanded(this.props);
         return (
-            <Button className={className} bsSize="sm" onClick={this.toggleExpanded}>
+            <Button bsSize="sm" onClick={this.toggleExpanded}>
                 <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
             </Button>
         );
     }
 
-    buttonSection(expanded){
+    buttonSection(){
+        const { extraButtons } = this.props;
         return (
             <div className="pull-right">
-                { this.props.extraButtons }
-                { this.expandButton(expanded) }
+                { extraButtons }
+                { this.expandButton() }
             </div>
         );
     }
 
     render(){
-        var { title, children, width, defaultHeight, colorScale, chartMargin, updateColorStore } = this.props,
-            expanded            = this.isExpanded(),
-            useWidth            = width || this.getRefWidth(),
-            chartInnerWidth     = expanded ? useWidth * 3 : useWidth,
-            className           = 'mt-2',
-            useHeight           = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height),
-            visualToShow;
+        const { title, children, width, defaultHeight, colorScale, chartMargin, updateColorStore } = this.props;
+
+        const expanded = AreaChartContainer.isExpanded(this.props);
+        const useWidth = width || this.getRefWidth();
+        const chartInnerWidth = expanded ? useWidth * 3 : useWidth;
+        const useHeight = expanded ? 500 : (defaultHeight || AreaChart.defaultProps.height);
+
+        let visualToShow;
 
         if (typeof useWidth === 'number' && useWidth){
             visualToShow = React.cloneElement(children, {
@@ -1187,16 +1186,21 @@ export class AreaChartContainer extends React.Component {
                 'height'            : useHeight,
                 'margin'            : chartMargin || children.props.margin || null
             });
-        } else { // If no width yet, just for stylistic purposes, don't render chart itself.
-            visualToShow = loadingIcon("Initializing...");
+        } else {
+            // If no width yet, just for stylistic purposes, don't render chart itself.
+            visualToShow = <LoadingIcon>Initializing...</LoadingIcon>;
         }
 
         return (
-            <div className={className}>
-                <h4 className="text-300 clearfix">{ title } { this.buttonSection(expanded) }</h4>
-                <div ref="elem" style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }} children={visualToShow} />
+            <div className="mt-2">
+                <div className="text-300 clearfix">
+                    { this.buttonSection() }
+                    { title }
+                </div>
+                <div ref={this.elemRef} style={{ 'overflowX' : expanded ? 'scroll' : 'auto', 'overflowY' : 'hidden' }}>
+                    { visualToShow }
+                </div>
             </div>
         );
     }
 }
-

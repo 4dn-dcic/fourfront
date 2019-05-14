@@ -1,6 +1,6 @@
 import pytest
 from encoded.types.user import User
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 @pytest.fixture
 def user_w_lab(testapp, lab):

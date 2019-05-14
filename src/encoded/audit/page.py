@@ -4,7 +4,7 @@ from snovault import (
 )
 
 
-@audit_checker('page', frame=['children'])
+# @audit_checker('page', frame=['children'])
 def audit_page_children_routes(value, system):
     '''
     Ensure that each children has a path in its 'name' field which is a 1-level-deep sub-path of this Page's own 'name' path.

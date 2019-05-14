@@ -4,8 +4,11 @@ The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
 import pytest
+import json
+import time
 from encoded.verifier import verify_item
-from pyramid.paster import get_appsettings
+from snovault.elasticsearch.interfaces import INDEXER_QUEUE
+from .features.conftest import app_settings, app as conf_app
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
@@ -13,36 +16,13 @@ pytestmark = [pytest.mark.working, pytest.mark.indexing]
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.fixture(scope='session')
-def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
-    from .conftest import _app_settings
-    settings = _app_settings.copy()
-    settings['create_tables'] = True
-    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
-    settings['elasticsearch.server'] = elasticsearch_server
-    settings['sqlalchemy.url'] = postgresql_server
-    settings['collection_datastore'] = 'elasticsearch'
-    settings['item_datastore'] = 'elasticsearch'
-    settings['indexer'] = True
-    settings['indexer.processes'] = 2
-
-    # use aws auth to access elasticsearch
-    if aws_auth:
-        settings['elasticsearch.aws_auth'] = aws_auth
-    return settings
-
-
 @pytest.yield_fixture(scope='session')
-def app(app_settings):
-    from encoded import main
-    app = main({}, **app_settings)
-
-    yield app
-
-    from snovault import DBSESSION
-    DBSession = app.registry[DBSESSION]
-    # Dispose connections so postgres can tear down.
-    DBSession.bind.pool.dispose()
+def app(app_settings, use_collections=TEST_COLLECTIONS):
+    """
+    Use to pass kwargs for create_mapping to conftest app
+    """
+    for app in conf_app(app_settings, collections=use_collections, skip_indexing=True):
+        yield app
 
 
 @pytest.fixture(autouse=True)
@@ -52,6 +32,9 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
+    from .conftest import indexer_testapp
+    # index and then run create mapping to clear things out
+    indexer_testapp(app).post_json('/index', {'record': True})
     create_mapping.run(app, collections=use_collections, skip_indexing=True)
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
@@ -68,12 +51,11 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
 
 @pytest.mark.slow
 def test_indexing_simple(app, testapp, indexer_testapp):
-    import time
     es = app.registry['elasticsearch']
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
     assert doc_count == 0
     # First post a single item so that subsequent indexing is incremental
-    res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
+    testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexing_count'] == 1
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
@@ -140,7 +122,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
 
 
 @pytest.fixture
-def item_uuid(testapp, award, experiment, lab, file_formats):
+def test_fp_uuid(testapp, award, experiment, lab, file_formats):
     # this is a processed file
     item = {
         'accession': '4DNFIO67APU2',
@@ -155,12 +137,56 @@ def item_uuid(testapp, award, experiment, lab, file_formats):
     return res.json['@graph'][0]['uuid']
 
 
-def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
+def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
+                                 award, lab, file_formats):
     # Todo, input a list of accessions / uuids:
-    verify_item(item_uuid, indexer_testapp, testapp, registry)
+    verify_item(test_fp_uuid, indexer_testapp, testapp, app.registry)
+    # While we're here, test that _update of the file properly
+    # queues the file with given relationship
+    indexer_queue = app.registry[INDEXER_QUEUE]
+    rel_file = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('pairs').get('@id')
+    }
+    rel_res = testapp.post_json('/file_processed', rel_file)
+    rel_uuid = rel_res.json['@graph'][0]['uuid']
+    # now update the original file with the relationship
+    # ensure rel_file is properly queued
+    related_files = [{'relationship_type': 'derived from', 'file': rel_uuid}]
+    testapp.patch_json('/' + test_fp_uuid, {'related_files': related_files}, status=200)
+    time.sleep(2)
+    # may need to make multiple calls to indexer_queue.receive_messages
+    received = []
+    received_batch = None
+    while received_batch is None or len(received_batch) > 0:
+        received_batch = indexer_queue.receive_messages()
+        received.extend(received_batch)
+    to_replace = []
+    to_delete = []
+    found_fp_sid = None
+    found_rel_sid = None
+    # keep track of the PATCH of the original file and the associated PATCH
+    # of the related file. Compare uuids
+    for msg in received:
+        json_body = json.loads(msg.get('Body', {}))
+        if json_body['uuid'] == test_fp_uuid and json_body['method'] == 'PATCH':
+            found_fp_sid = json_body['sid']
+            to_delete.append(msg)
+        elif json_body['uuid'] == rel_uuid and json_body['method'] == 'PATCH':
+            assert json_body['info'] == "queued from %s _update" % test_fp_uuid
+            found_rel_sid = json_body['sid']
+            to_delete.append(msg)
+        else:
+            to_replace.append(msg)
+    indexer_queue.delete_messages(to_delete)
+    indexer_queue.replace_messages(to_replace, vis_timeout=0)
+    assert found_fp_sid is not None and found_rel_sid is not None
+    assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
-@pytest.mark.performance
+# @pytest.mark.performance
+@pytest.mark.skip(reason="need to update perf-testing inserts")
 def test_load_and_index_perf_data(testapp, indexer_testapp):
     '''
     ~~ CURRENTLY NOT WORKING ~~
@@ -177,7 +203,6 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
     from os import listdir
     from os.path import isfile, join
-    from encoded import loadxl
     from unittest import mock
     from timeit import default_timer as timer
     from pkg_resources import resource_filename
@@ -190,7 +215,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     test_inserts = []
     for insert in inserts:
         type_name = insert.split('.')[0]
-        json_inserts[type_name] = loadxl.read_single_sheet(insert_dir, type_name)
+        json_inserts[type_name] = json.loads(open(insert_dir + insert).read())
         # pluck a few uuids for testing
         if type_name in test_types:
             test_inserts.append({'type_name': type_name, 'data': json_inserts[type_name][0]})
@@ -199,7 +224,9 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     start = timer()
     with mock.patch('encoded.loadxl.get_app') as mocked_app:
         mocked_app.return_value = testapp.app
-        res = testapp.post_json('/load_data', json_inserts, status=200)
+        data = {'store': json_inserts}
+        res = testapp.post_json('/load_data', data,  # status=200
+                                )
         assert res.json['status'] == 'success'
     stop_insert = timer()
     print("PERFORMANCE: Time to load data is %s" % (stop_insert - start))

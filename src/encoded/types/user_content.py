@@ -45,6 +45,22 @@ class UserContent(Item):
         # 'archived to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
     }
 
+    @calculated_property(schema={
+        "title": "Content",
+        "description": "Content (unused)",
+        "type": "string"
+    })
+    def content(self, request):
+        return None
+
+    @calculated_property(schema={
+        "title": "File Type",
+        "description": "Type of this Item (unused)",
+        "type": "string"
+    })
+    def filetype(self, request):
+        return None
+
     def _update(self, properties, sheets=None):
         if properties.get('name') is None and self.uuid is not None:
             properties['name'] = str(self.uuid)
@@ -177,6 +193,14 @@ class HiglassViewConfig(UserContent):
     #    TODO: Calculate which tilesetUids are defined in viewconfig, if any.
     #    '''
     #    return None
+
+    @calculated_property(schema={
+        "title": "File Type",
+        "description": "Type of this Item (unused)",
+        "type": "string"
+    })
+    def filetype(self, request):
+        return "HiglassViewConfig"
 
     class Collection(Item.Collection):
         '''

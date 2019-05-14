@@ -1,6 +1,6 @@
 import pytest
 from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json, beddb_file_json, chromsizes_file_json
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 # Test Higlass display endpoints.
 
@@ -171,7 +171,7 @@ def higlass_mcool_viewconf(testapp):
                                         "name":"4DNFI1TBYKV3.mcool",
                                         "options":{
                                             "backgroundColor":"#eeeeee",
-                                            "labelPosition":"bottomRight",
+                                            "labelPosition":"topLeft",
                                             "coordSystem":"GRCm38",
                                             "colorRange":[
                                                 "white",
@@ -495,6 +495,15 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf, bedGraph_file_jso
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
 
+    # The new top track should not be very tall, since there is a 2D file in the center.
+    bedGraph_track = [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ][0]
+    assert_true(
+        bedGraph_track["height"] < 100,
+        "1D file is too big: height should be less than 100, got {actual} instead.".format(
+            actual=bedGraph_track["height"],
+        )
+    )
+
 def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file_json):
     """ Given a viewconf with an mcool file, the viewconf should add a bedGraph on top.
 
@@ -533,6 +542,19 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 1)
 
+    assert_true(isinstance(new_higlass_json["views"][0]["tracks"]["top"][0]["height"], int), "Not an integer")
+
+    # The new top track should be tall, since there are no other tracks. But not too tall.
+    assert_true(
+        new_higlass_json["views"][0]["tracks"]["top"][0]["height"] >= 100 and new_higlass_json["views"][0]["tracks"]["top"][0]["height"] < 600,
+        "1D file is wrong size: height should be at least 100 and less than 600, got {actual} instead.".format(
+            actual=new_higlass_json["views"][0]["tracks"]["top"][0]["height"],
+        )
+    )
+
+    # Make sure there is a label.
+    assert_true(new_higlass_json["views"][0]["tracks"]["top"][0]["options"]["labelPosition"] != "hidden")
+
     # Add another bedGraph file. Make sure the bedGraphs are stacked atop each other.
     response = testapp.post_json("/add_files_to_higlass_viewconf/", {
         'higlass_viewconfig': new_higlass_json,
@@ -544,6 +566,16 @@ def test_add_bedGraph_to_bedGraph(testapp, higlass_blank_viewconf, bedGraph_file
 
     assert_true(len(new_higlass_json["views"]) == 1)
     assert_true(len(new_higlass_json["views"][0]["tracks"]["top"]) == 2)
+
+    # The new top tracks should be very tall, since there are no other tracks.
+    bedGraph_tracks = [ t for t in new_higlass_json["views"][0]["tracks"]["top"] if "-divergent-bar" in t["type"] ]
+    for t in bedGraph_tracks:
+        assert_true(
+            t["height"] >= 100,
+            "1D file is too small: height should be at least 100, got {actual} instead.".format(
+                actual=t["height"],
+            )
+        )
 
 def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     """ Given a viewconf with a mcool file, the viewconf should add anohter mcool on the side.
@@ -614,6 +646,39 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     assert_true(layout1["y"] == 0)
     assert_true(layout1["w"] == 6)
     assert_true(layout1["h"] == 12)
+
+    # mcools have locked views
+    for lock_name in ("locationLocks", "zoomLocks"):
+        locks = new_higlass_json[lock_name]
+
+        view0_uid = new_higlass_json["views"][0]["uid"]
+        view1_uid = new_higlass_json["views"][1]["uid"]
+
+        # The same lock applies to both views
+        assert_true(view0_uid in locks["locksByViewUid"])
+        assert_true(view1_uid in locks["locksByViewUid"])
+        assert_true(locks["locksByViewUid"][view0_uid] == locks["locksByViewUid"][view1_uid])
+
+        lockUuid = locks["locksByViewUid"][view0_uid]
+        # The locks have non-None values
+        for view_uid in (view0_uid, view1_uid):
+            for index, lock_value in enumerate(locks["locksDict"][lockUuid][view_uid]):
+                assert_true(lock_value != None, "{lock_name} for view  {view_uid} should not be None: {actual}".format(
+                    lock_name=lock_name,
+                    view_uid=view_uid,
+                    actual=locks["locksDict"][lockUuid][view_uid],
+                ))
+
+        # Locks should have the same values
+        assert_true(len(locks["locksDict"][lockUuid][view0_uid]) == len(locks["locksDict"][lockUuid][view1_uid]) )
+
+        for index, lock_value in enumerate(locks["locksDict"][lockUuid][view0_uid]):
+            assert_true(lock_value == locks["locksDict"][lockUuid][view0_uid][index], "{lock_name} values do not match for index {index}. Expected {lock_value}, Actual {actual}".format(
+                lock_name=lock_name,
+                lock_value=lock_value,
+                index=index,
+                actual=locks["locksDict"][lockUuid][view_uid],
+            ))
 
 def test_correct_duplicate_tracks(testapp, higlass_mcool_viewconf, mcool_file_json):
     """When creating new views, make sure the correct number of 2D tracks are copied over.
@@ -1169,7 +1234,7 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bigwig_file_json):
         AssertionError if the test fails.
     """
 
-    # Get a bedGraph file to add.
+    # Get a bigwig file to add.
     bigwig_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
     bigwig_file_json['md5sum'] = '00000000000000000000000000000001'
     bigwig_file_json['genome_assembly'] = "GRCm38"
@@ -1278,6 +1343,8 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
             assert_true(track["type"] == "horizontal-vector-heatmap")
 
+            assert_true(track["height"] < 20)
+
             assert_true("options" in track)
             options = track["options"]
             assert_true("valueScaling" in options)
@@ -1285,6 +1352,9 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
             assert_true("colorRange" in options)
             assert_true(len(options["colorRange"]) == 256)
+
+            assert_true("labelPosition" in options)
+            assert_true(options["labelPosition"] == "topLeft")
 
     assert_true(found_annotation_track == True)
     assert_true(found_chromosome_track == True)
@@ -1416,8 +1486,6 @@ def test_add_beddb(testapp, higlass_mcool_viewconf, beddb_file_json):
     assert_true(left_track["type"] == "vertical-gene-annotations")
 
     # uids should be different
-    print(track)
-    print(left_track)
     assert_true(left_track["uid"] != track["uid"])
 
     # The searchbar needs to be updated, too
@@ -1787,7 +1855,6 @@ def test_2d_chromsize_always_last_track(testapp, higlass_blank_viewconf, mcool_f
     assert_true(response.json["success"])
 
     mcool_first_viewconf = response.json["new_viewconfig"]
-    print(mcool_first_viewconf)
     assert_true(len(mcool_first_viewconf["views"]) == 1)
     assert_true(len(mcool_first_viewconf["views"][0]['tracks']['center']) == 1)
     assert_true(len(mcool_first_viewconf["views"][0]['tracks']['center'][0]["contents"]) == 2)
@@ -1816,3 +1883,124 @@ def test_2d_chromsize_always_last_track(testapp, higlass_blank_viewconf, mcool_f
     assert_true(len(mcool_two_viewconf["views"][1]['tracks']['center'][0]["contents"]) == 2)
     assert_true(mcool_two_viewconf["views"][1]['tracks']['center'][0]["contents"][0]["type"] == "heatmap")
     assert_true(mcool_two_viewconf["views"][1]['tracks']['center'][0]["contents"][1]["type"] == "2d-chromosome-grid")
+
+def test_custom_display_height(testapp, higlass_blank_viewconf, bedGraph_file_json):
+    """ Add an mcool file to a higlass display, given a default height.
+    Make sure the view has an expected height.
+    """
+
+    # Get a bedGraph file to add.
+    bedGraph_file_json['higlass_uid'] = "Y08H_toDQ-OxidYJAzFPXA"
+    bedGraph_file_json['md5sum'] = '00000000000000000000000000000001'
+    bedGraph_file_json['genome_assembly'] = "GRCm38"
+    bg_file = testapp.post_json('/file_processed', bedGraph_file_json).json['@graph'][0]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
+    response = testapp.get("/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the bedGraph to the viewconf.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=bg_file['uuid'])]
+    })
+
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    # Get the new json.
+    default_height_viewconf_json = response.json["new_viewconfig"]
+
+    assert_true(len(default_height_viewconf_json["views"]) == 1)
+    tracks = default_height_viewconf_json["views"][0]["tracks"]
+
+    # Make sure the default height for a 1d track is correct.
+    bedGraph_track = [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ][0]
+    assert_true(
+        (bedGraph_track["height"] - 125 > -5 and bedGraph_track["height"] - 125 < 5),
+        "1D file is too big: height should be less than 125, got {actual} instead.".format(
+            actual=bedGraph_track["height"],
+        )
+    )
+
+    # Create a new display with a large height. The 1D track should still be capped (we don't want it to be too big.)
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': ["{uuid}".format(uuid=bg_file['uuid'])],
+        'height': 600,
+    })
+
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    # Get the new json.
+    big_height_viewconf_json = response.json["new_viewconfig"]
+    tracks = big_height_viewconf_json["views"][0]["tracks"]
+    bedGraph_track = [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ][0]
+    assert_true(
+        (bedGraph_track["height"] - 125 > -5 and bedGraph_track["height"] - 125 < 5),
+        "1D file is too big: height should be less than 125, got {actual} instead.".format(
+            actual=bedGraph_track["height"],
+        )
+    )
+
+    # Create a default height display with multiple 1D tracks. The heights of each track should be smaller.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': [
+            "{uuid}".format(uuid=bg_file['uuid']),
+            "{uuid}".format(uuid=bg_file['uuid']),
+            "{uuid}".format(uuid=bg_file['uuid']),
+        ],
+    })
+
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    # Get the new json.
+    default_height_viewconf_json2 = response.json["new_viewconfig"]
+    assert_true(len(default_height_viewconf_json2["views"]) == 1)
+    tracks = default_height_viewconf_json2["views"][0]["tracks"]
+    assert_true(len(tracks["top"]) == 3)
+
+    for track in [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ]:
+        assert_true(
+            (track["height"] - 83 > -5 and track["height"] - 83 < 5),
+            "1D file is too big: height should be around 83, got {actual} instead.".format(
+                actual=track["height"],
+            )
+        )
+
+
+    # Create a large height display with multiple 1D tracks. The heights of each track should be the normal size since the display is large enough.
+    response = testapp.post_json("/add_files_to_higlass_viewconf/", {
+        'higlass_viewconfig': higlass_json["viewconfig"],
+        'genome_assembly' : higlass_json["genome_assembly"],
+        'files': [
+            "{uuid}".format(uuid=bg_file['uuid']),
+            "{uuid}".format(uuid=bg_file['uuid']),
+            "{uuid}".format(uuid=bg_file['uuid']),
+        ],
+        'height': 600,
+    })
+
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    # Get the new json.
+    big_height_viewconf_json2 = response.json["new_viewconfig"]
+    assert_true(len(big_height_viewconf_json2["views"]) == 1)
+    tracks = big_height_viewconf_json2["views"][0]["tracks"]
+    assert_true(len(tracks["top"]) == 3)
+
+    for track in [ t for t in tracks["top"] if "-divergent-bar" in t["type"] ]:
+        assert_true(
+            (track["height"] - 125 > -5 and track["height"] - 125 < 5),
+            "1D file is too big: height should be around 125, got {actual} instead.".format(
+                actual=track["height"],
+            )
+        )

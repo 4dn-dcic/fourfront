@@ -6,12 +6,12 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import Tabs, { TabPane } from 'rc-tabs';
+import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate, layout } from './../../util';
-import { BasicUserContentBody, UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
+import { navigate } from './../../util';
+import { UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
 
 
 
@@ -20,7 +20,12 @@ export function getIconForCustomTab(tabName){
         case 'summary':
         case 'overview':
         case 'experiment-summaries':
+        case 'experiment_summaries':
             return 'file-text';
+        case 'data_processing':
+            return 'area-chart';
+        case 'processed_files':
+            return 'microchip';
         case 'higlass':
         case 'higlass_displays':
             return 'television';
@@ -67,10 +72,11 @@ export class TabbedView extends React.PureComponent {
                 key={tabObj.key || tabObj.tab || tabIndex}
                 data-tab-key={tabObj.key}
                 id={'tab:' + tabObj.key}
-                tab={<span className="tab" data-tab-key={tabObj.key} children={tabObj.tab}/>}
-                children={tabObj.content}
+                tab={<span className="tab" data-tab-key={tabObj.key}>{ tabObj.tab }</span>}
                 placeholder={tabObj.placeholder || <TabPlaceHolder/> }
-                disabled={tabObj.disabled} style={tabObj.style} />
+                disabled={tabObj.disabled} style={tabObj.style}>
+                { tabObj.content }
+            </Tabs.TabPane>
         );
     }
 
@@ -94,6 +100,13 @@ export class TabbedView extends React.PureComponent {
     }
 
     static calculateAdditionalTabs = memoize(function(staticContentList, contents){
+
+        // If func, run it to return contents.
+        // Do this here so that memoization is useful, else will always be new instance
+        // of a `contents` array.
+        if (typeof contents === 'function') contents = contents();
+
+
         var resultArr = [];
         //
         // PART 1
@@ -161,6 +174,7 @@ export class TabbedView extends React.PureComponent {
     });
 
     static combineSystemAndCustomTabs = memoize(function(additionalTabs, contents){
+        if (typeof contents === 'function') contents = contents();
         var allTabs;
         if (additionalTabs.length === 0){
             allTabs = contents;
@@ -238,15 +252,21 @@ export class TabbedView extends React.PureComponent {
         var { contents, href } = props,
             hrefParts       = url.parse(href),
             hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            contentObjs     = hash && (typeof contents === 'function' ? contents() : contents),
-            foundContent    = Array.isArray(contentObjs) && _.findWhere(contentObjs, { 'key' : hash }),
-            currKey         = foundContent && this.getActiveKey();
+            currKey         = this.getActiveKey();
 
-        if (!foundContent || currKey === hash){
+        if (currKey === hash){
             console.log('Already on tab', hash);
             return false;
         }
-    
+
+        var allContentObjs  = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
+            foundContent    = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
+
+        if (!foundContent){
+            console.error('Could not find', hash);
+            return false;
+        }
+
         this.setActiveKey(foundContent.key); // Same as `hash`
         return true;
     }
@@ -266,28 +286,23 @@ export class TabbedView extends React.PureComponent {
     }
 
     additionalTabs(){
-        var { context, contents } = this.props,
-            resultArr = [],
-            staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
+        const { context, contents } = this.props;
+        const staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
 
         if (staticContentList.length === 0) return []; // No content defined for Item.
-
-        if (typeof contents === 'function') contents = contents();
 
         return TabbedView.calculateAdditionalTabs(staticContentList, contents);
     }
 
     render(){
-        var { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
-        if (typeof contents === 'function') contents = contents();
-        if (!Array.isArray(contents)) return null;
+        const { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
 
         var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
             tabsProps = {
                 onChange, destroyInactiveTabPane,
                 'renderTabBar'          : () => (
-                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent} className="extra-style-2"
-                        tabBarGutter={0} />
+                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
+                        className="extra-style-2" tabBarGutter={0} />
                 ),
                 'renderTabContent'      : () => <TabContent animated={animated} />,
                 'ref'                   : this.tabsRef,
@@ -313,4 +328,3 @@ class TabPlaceHolder extends React.PureComponent {
         );
     }
 }
-

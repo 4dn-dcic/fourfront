@@ -7,8 +7,6 @@ import _ from 'underscore';
 import { ButtonToolbar, Collapse, Button, DropdownButton } from 'react-bootstrap';
 import { layout } from './../../util';
 
-
-
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
 
     static defaultProps = {
@@ -41,7 +39,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
     wrapChildForMobile(elem, idx = 0){
         var className = (
             "mobile-size-elem mb-05"
-            + (idx !== 0 ? ' mt-05' : '') 
+            + (idx !== 0 ? ' mt-05' : '')
         );
 
         return <div className={className}>{ elem }</div>;
@@ -56,7 +54,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
             );
         }
 
-        var { children, windowWidth, collapseButtonTitle } = this.props,
+        var { children, windowWidth, collapseButtonTitle, tooltip } = this.props,
             gridState       = this.state.mounted && layout.responsiveGridState(windowWidth),
             isMobileSize    = gridState && gridState !== 'lg',
             isOpen          = !isMobileSize || this.state.open;
@@ -64,7 +62,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
         return (
             <div className="pull-right tabview-title-controls-container">
                 { isMobileSize ?
-                    <Collapse in={isOpen}>
+                    <Collapse in={isOpen} data-tip={tooltip}>
                         <div className="inner-panel" key="inner-collapsible-panel">
                             { Array.isArray(children) ? _.map(children, this.wrapChildForMobile) : this.wrapChildForMobile(children) }
                             <hr/>
@@ -72,7 +70,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                     </Collapse>
                 : null }
                 <div className="toolbar-wrapper pull-right" key="toolbar">
-                    <ButtonToolbar>
+                    <ButtonToolbar data-tip={ isMobileSize ? null : tooltip }>
                         { !isMobileSize && this.props.children }
                         <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
                             { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }

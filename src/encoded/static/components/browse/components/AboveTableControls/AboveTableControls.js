@@ -138,8 +138,9 @@ export class AboveTableControls extends React.Component {
         );
     }
 
-    renderPanel(selectedFiles){
-        var { open, reallyOpen } = this.state;
+    renderPanel(){
+        const { open, reallyOpen } = this.state;
+        const filteredSelectedFiles = this.filteredSelectedFiles();
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
                 <Collapse in={!!(open)} appear>
@@ -156,8 +157,8 @@ export class AboveTableControls extends React.Component {
                 <Collapse in={!!(open)} appear>
                     <div>
                         <SelectedFilesFilterByContent
-                            {..._.pick(this.props, 'selectedFiles', 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
-                            subSelectedFiles={selectedFiles} closeButtonClickHandler={this.handleClose}
+                            {..._.pick(this.props, 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
+                            selectedFiles={filteredSelectedFiles} closeButtonClickHandler={this.handleClose}
                             currentFileTypeFilters={this.state.fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
                     </div>
                 </Collapse>
@@ -166,8 +167,9 @@ export class AboveTableControls extends React.Component {
         return null;
     }
 
-    leftSection(filteredSelectedFiles){
+    leftSection(){
         var { showSelectedFileCount, selectedFiles, context, currentAction, showTotalResults } = this.props;
+        var filteredSelectedFiles = this.filteredSelectedFiles();
 
         // Case if on BrowseView, but not on SearchView
         // TODO: Modularize?
@@ -227,9 +229,8 @@ export class AboveTableControls extends React.Component {
         return (
             <div className="pull-right right-buttons">
                 <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
-                    <i className="icon icon-gear icon-fw"/>
-                    <span className="hidden-xs hidden-sm">Columns</span>
-                    <i className="icon icon-fw icon-angle-down"/>
+                    <i className="icon icon-fw icon-table" />
+                    <i className="icon icon-fw icon-angle-down ml-03"/>
                 </Button>
                 <Button bsStyle="info" key="toggle-expand-layout" className={"expand-layout-button" + (!isFullscreen ? '' : ' expanded')}
                     onClick={this.handleLayoutToggle} data-tip={(!isFullscreen ? 'Expand' : 'Collapse') + " table width"}>
@@ -241,14 +242,13 @@ export class AboveTableControls extends React.Component {
 
 
     render(){
-        var selectedFiles = this.filteredSelectedFiles();
         return (
             <div className="above-results-table-row">
                 <div className="clearfix">
-                    { this.leftSection(selectedFiles) }
+                    { this.leftSection() }
                     { this.rightButtons() }
                 </div>
-                { this.renderPanel(selectedFiles) }
+                { this.renderPanel() }
             </div>
         );
     }

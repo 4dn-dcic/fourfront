@@ -3,38 +3,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import moment from 'moment';
-import * as globals from './../globals';
 import { Button, Collapse } from 'react-bootstrap';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide, DateUtility } from './../util';
-import { FormattedInfoBlock, ExperimentSetTablesLoadedFromSearch } from './components';
-import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
+import { console, object, DateUtility } from './../util';
+import { ExperimentSetTableTabView } from './components';
+import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
 
 
 export default class PublicationView extends DefaultItemView {
 
     getTabViewContents(){
+        const { context } = this.props;
+        const tabs = [];
+        const width = this.getTabViewWidth();
 
-        var initTabs    = [],
-            windowWidth = this.props.windowWidth,
-            width       = this.getTabViewWidth(),
-            context     = this.props.context;
-
-        initTabs.push(PublicationSummary.getTabObject(this.props, width));
+        tabs.push(PublicationSummary.getTabObject(this.props, width));
 
         if ((context.exp_sets_used_in_pub || []).length > 0 || (context.exp_sets_prod_in_pub || []).length > 0){
-            initTabs.push(PublicationExperimentSets.getTabObject(this.props, width));
+            tabs.push(ExperimentSetTableTabView.getTabObject(this.props, width));
         }
 
-        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
+        return tabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
     }
 
 }
-
-globals.content_views.register(PublicationView, 'Publication');
-
-
 
 
 class PublicationSummary extends React.PureComponent {
@@ -63,46 +55,44 @@ class PublicationSummary extends React.PureComponent {
     }
 
     attribution(){
-        var { context }     = this.props,
-            authors         = Array.isArray(context.authors) && context.authors.length > 0 && context.authors,
-            authorsLastIdx  = authors && (authors.length - 1),
-            url             = context.url,
-            retArr          = [];
+        const { context } = this.props;
+        const { url, authors } = context;
+        const authorsLastIdx  = authors && (authors.length - 1);
 
-        if (authors){
-            retArr.push(
-                <React.Fragment>
-                    <h4 className="mt-2 mb-15 text-500">
-                        Author{ authors.length > 1 ? 's' : null }
-                    </h4>
-                    <p>
-                    { _.map(authors, function(author, i){
-                        return (
-                            <React.Fragment>
-                                <span className="no-wrap">
-                                    { author }
-                                </span>
-                                { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }
-                            </React.Fragment>
-                        );
-                    }) }
-                    </p>
-                </React.Fragment>
-            );
-        }
+        return (
+            <div id="publication-details">
 
-        if (url){
-            retArr.push(
-                <React.Fragment>
-                    <h4 className={"mt-" + (authors ? '3' : '2') + " mb-1 text-500"}>
-                        Link
-                    </h4>
-                    <p><a href={url} target="_blank">{ url }</a></p>
-                </React.Fragment>
-            );
-        }
+                { Array.isArray(authors) && authors.length > 0 ?
+                    <React.Fragment>
+                        <h4 className="mt-2 mb-15 text-500">
+                            Author{ authors.length > 1 ? 's' : null }
+                        </h4>
+                        <p>
+                            { _.map(authors, function(author, i){
+                                return (
+                                    <React.Fragment>
+                                        <span className="no-wrap">
+                                            { author }
+                                        </span>
+                                        { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }
+                                    </React.Fragment>
+                                );
+                            }) }
+                        </p>
+                    </React.Fragment>
+                    : null }
 
-        return <div id="publication-details">{ retArr }</div>;
+                { url ?
+                    <React.Fragment>
+                        <h4 className={"mt-" + (Array.isArray(authors) && authors.length > 0 ? '3' : '2') + " mb-1 text-500"}>
+                            Link
+                        </h4>
+                        <p><a href={url} target="_blank" rel="noopener noreferrer">{ url }</a></p>
+                    </React.Fragment>
+                    : null }
+
+            </div>
+        );
     }
 
     abstract(){
@@ -119,12 +109,9 @@ class PublicationSummary extends React.PureComponent {
     }
 
     details(){
-        var { context }     = this.props,
-            journal         = context.journal,
-            categories      = Array.isArray(context.categories) && context.categories.length > 0 && context.categories,
-            datePublished   = context.date_published && DateUtility.formatPublicationDate(context.date_published),
-            id              = context.ID,
-            retArr          = [];
+        const { context } = this.props;
+        const { journal, categories, date_published, ID } = context;
+        const datePublished = DateUtility.formatPublicationDate(date_published);
 
         return (
             <React.Fragment>
@@ -137,9 +124,9 @@ class PublicationSummary extends React.PureComponent {
                                     Journal
                                 </h4>
                                 <h5 className="mb-02 text-400">{ journal }</h5>
-                                { id ? <p className="text-small">{ id }</p> : null }
+                                { ID ? <p className="text-small">{ ID }</p> : null }
                             </React.Fragment>
-                        : null }
+                            : null }
                         { datePublished ?
                             <React.Fragment>
                                 <h5 className="mt-2 mb-02 text-500">
@@ -147,10 +134,10 @@ class PublicationSummary extends React.PureComponent {
                                 </h5>
                                 <p>{ datePublished }</p>
                             </React.Fragment>
-                        : null }
+                            : null }
                     </div>
                     <div className="col-xs-12 col-md-4">
-                        { categories ?
+                        { Array.isArray(categories) && categories.length > 0 ?
                             <React.Fragment>
                                 <h4 className="mt-2 mb-15 text-500">
                                     { categories.length > 1 ? 'Categories' : 'Category' }
@@ -158,11 +145,13 @@ class PublicationSummary extends React.PureComponent {
                                 {
                                     _.map(categories, (cat)=>
                                         <Button bsSize="xs" bsStyle="info" className="mr-02 mb-02 text-capitalize"
-                                            children={cat} href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }/>
+                                            href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
+                                            { cat }
+                                        </Button>
                                     )
                                 }
                             </React.Fragment>
-                        : null }
+                            : null }
                     </div>
                 </div>
             </React.Fragment>
@@ -204,7 +193,7 @@ class PublicationSummary extends React.PureComponent {
                 <h4 className="mt-2 mb-15 text-500">
                     { contributingLabs.length > 1 ? 'Contributing Labs' : 'Contributing Lab' }
                 </h4>
-                <ul children={ _.map(contributingLabs, labListItem) } />
+                <ul>{ _.map(contributingLabs, labListItem) }</ul>
             </div>
         );
     }
@@ -223,7 +212,7 @@ class PublicationSummary extends React.PureComponent {
                         <div className="col-xs-12 col-md-8">
                             { abstractCol }
                         </div>
-                    : null }
+                        : null }
                     <div className={"col-xs-12 col-md-" + (abstractCol ? '4' : '12' )}>
                         { this.attribution() }
                     </div>
@@ -239,67 +228,3 @@ class PublicationSummary extends React.PureComponent {
         );
     }
 }
-
-
-class PublicationExperimentSets extends React.PureComponent {
-
-    /**
-     * Get overview tab object for tabpane.
-     *
-     * @param {Object} props - Parent Component props, as passed down from app.js
-     * @param {number} width - Width of tab container.
-     */
-    static getTabObject(props, width){
-        return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
-            'key' : 'pub-expsets',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <PublicationExperimentSets {...props} width={width} />
-                </div>
-            )
-        };
-    }
-
-    constructor(props){
-        super(props);
-        this.getCountCallback = this.getCountCallback.bind(this);
-        this.state = {
-            'totalCount' : null
-        };
-    }
-
-    getCountCallback(resp){
-        if (resp && typeof resp.total === 'number'){
-            this.setState({ 'totalCount' : resp.total });
-        }
-    }
-
-
-    render(){
-        var { windowWidth, context } = this.props,
-            { totalCount } = this.state,
-            requestHref = (
-                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type&publications_of_set.uuid=" + context.uuid
-            ),
-            title = 'Experiment Sets Published';
-
-        if (totalCount){
-            title = totalCount + ' Experiment Sets Published';
-        }
-
-        return (
-            <div>
-                <ExperimentSetTablesLoadedFromSearch requestHref={requestHref} windowWidth={windowWidth} onLoad={this.getCountCallback} title={title} />
-                { totalCount && totalCount > 25 ?
-                    <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
-                        View all Experiment Sets ({ totalCount - 25 + ' more' })
-                    </Button>
-                : null }
-            </div>
-        );
-    }
-
-}
-

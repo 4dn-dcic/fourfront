@@ -78,7 +78,7 @@ describe('Testing ExperimentSetView', function() {
         ).toEqual(checkIfHaveHeaders);
 
         // Then ensure they're rendered.
-        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testView, 'expset-headers');
+        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testView, 'stacked-block-table-headers');
         var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         expect(
             _.intersection(

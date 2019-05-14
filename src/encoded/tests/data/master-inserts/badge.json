@@ -1,65 +1,5 @@
 [
     {
-        "title": "Bronze Experiment",
-        "badge_name": "bronze-experiment",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
-        "schema_version": "1",
-        "foursight_checks": [
-            "good_experiments"
-        ],
-        "badge_classification": "Commendation",
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "description": "Bronze experiment",
-        "badge_category": "Experiment",
-        "status": "released",
-        "uuid": "fd8befb3-c633-4f33-bd31-a2b291b64a19"
-    },
-    {
-        "title": "Silver Experiment",
-        "badge_name": "silver-experiment",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
-        "schema_version": "1",
-        "foursight_checks": [
-            "good_experiments"
-        ],
-        "badge_classification": "Commendation",
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "description": "Silver experiment",
-        "badge_category": "Experiment",
-        "status": "released",
-        "uuid": "b62ef24e-7d35-4bc3-abe9-276442cbbc58"
-    },
-    {
-        "title": "Gold Experiment",
-        "badge_name": "gold-experiment",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
-        "schema_version": "1",
-        "foursight_checks": [
-            "good_experiments"
-        ],
-        "badge_classification": "Commendation",
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "description": "Gold experiment",
-        "badge_category": "Experiment",
-        "status": "released",
-        "uuid": "6c2b7409-4478-4e15-aabc-1a0df9b883e9"
-    },
-    {
-        "title": "Bronze Biosample",
-        "badge_name": "bronze-biosample",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
-        "schema_version": "1",
-        "foursight_checks": [
-            "good_biosamples"
-        ],
-        "badge_classification": "Commendation",
-        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "description": "Bronze biosample",
-        "badge_category": "Biosample",
-        "status": "released",
-        "uuid": "fd8befb3-c633-4f33-bd31-a2b291b64a10"
-    },
-    {
         "title": "Silver Biosample",
         "badge_name": "silver-biosample",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
@@ -71,7 +11,7 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Silver biosample",
         "badge_category": "Biosample",
-        "status": "released",
+        "status": "deleted",
         "uuid": "b62ef24e-7d35-4bc3-abe2-276442cbbc58"
     },
     {
@@ -83,6 +23,7 @@
             "good_biosamples"
         ],
         "badge_classification": "Commendation",
+        "badge_icon" : "/static/img/badges/biosample-badge-gold-star.svg",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Gold biosample",
         "badge_category": "Biosample",
@@ -113,6 +54,7 @@
             "tier1_metadata_present"
         ],
         "badge_classification": "Warning",
+        "badge_icon" : "/static/img/badges/biosample-orange-circle.svg",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Tier 1 biosample missing required metadata",
         "badge_category": "Biosample",
@@ -131,22 +73,24 @@
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "description": "Issues with replicate numbers",
         "badge_category": "Experiment Set - Replicate",
+        "badge_icon" : "/static/img/badges/replicates-orange-circle.svg",
         "status": "released",
         "uuid": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"
     },
     {
-        "title": "Paired Ends Inconsistent",
-        "badge_name": "paired-ends-inconsistent",
+        "title": "Inconsistent Replicate Info",
+        "badge_name": "inconsistent-replicate-info",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "schema_version": "1",
         "foursight_checks": [
-            "paired_end_info_consistent"
+            "consistent_replicate_info"
         ],
         "badge_classification": "Warning",
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
-        "description": "Inconsistency in FileFastq paired end information",
-        "badge_category": "File",
+        "description": "Experiment Set has replicate experiments with inconsistent metadata",
+        "badge_category": "ExperimentSetReplicate",
+        "badge_icon" : "/static/img/badges/replicates-orange-circle.svg",
         "status": "released",
-        "uuid": "95088391-4332-46d2-ac3e-1fa2e7230092"
+        "uuid": "a4df9ff7-fe85-4672-86ac-7c38b5d9c853"
     }
 ]
