@@ -68,7 +68,8 @@
                 "Ligation-free Multi-fragment 3C",
                 "RNA Quantification",
                 "RNA-DNA Proximity Capture",
-                "Fluorescence Localization"
+                "Fluorescence Localization",
+                "Electron Microscopy"
             ]
         },
         "assay_subclassification": {
@@ -91,7 +92,9 @@
                 "RNA-DNA Pairwise Interactions",
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
-                "Single Particle Tracking"
+                "Single Particle Tracking",
+                "Scanning Electron Microscopy",
+                "Transmission Electron Microscopy"
             ]
         },
         "other_tags": {
