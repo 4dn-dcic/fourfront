@@ -1707,26 +1707,12 @@ class IndividualObjectView extends React.Component{
          * @prop {!string} selectType           Type of existing object being selected (i.e. ExperimentHiC).
          * @prop {!string} selectField          Actual fieldname that we're selecting the existing obj for. May be nested in the case of subobjects, e.g. experiments_in_set.experiment
          * @prop {!number[]} selectArrayIdx     List of int numbers keeping track of list positions of the object we're selecting for. Since you can have arrays within arrays, one int won't do. Example: [1,2] would mean the current field is the second item within the first item of the array given by the top level field. When null, no arrays involved.
-         * @prop {boolean} fadeState            Controls whether a fade animation should be triggered in render
          */
         this.state = {
             'selectType'    : null,
             'selectField'   : null,
-            'selectArrayIdx': null,
-            'fadeState'     : false
+            'selectArrayIdx': null
         };
-    }
-
-    /** Fade the JSX rendered by this and scroll to top when this.props.currKey changes. */
-    componentDidUpdate(pastProps){
-        const { currKey } = this.props;
-        // scroll to top if worked-on object changes
-        if (currKey !== pastProps.currKey){
-            //setTimeout(layout.animateScrollTo(0), 100);
-            this.setState({ 'fadeState': true });
-        } else {
-            this.setState({ 'fadeState': false });
-        }
     }
 
     /**
