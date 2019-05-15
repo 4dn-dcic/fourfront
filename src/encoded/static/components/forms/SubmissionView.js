@@ -257,11 +257,10 @@ export default class SubmissionView extends React.PureComponent{
         // Step B : Callback for after grabbing user w/ submits_for
         const continueInitProcess = () => {
             // if @id cannot be found or we are creating from scratch, start with empty fields
-            if(!contextID || create){
+            if (!contextID || create){
                 // We may not have schema (if Abstract type). If so, leave empty and allow initCreateObj ... -> createObj() to create it.
                 if (schema) initContext[0] = buildContext({}, schema, bookmarksList, edit, create);
                 initBookmarks[0] = bookmarksList;
-
                 this.setState({
                     'keyContext': initContext,
                     'keyValid': initValid,
@@ -269,9 +268,10 @@ export default class SubmissionView extends React.PureComponent{
                     'keyDisplay': initDisplay,
                     'currKey': 0,
                     'keyLinkBookmarks': initBookmarks
+                }, () => {
+                    this.initCreateObj(principalTypes[0], 0, 'Primary Object');
                 });
-                this.initCreateObj(principalTypes[0], 0, 'Primary Object');
-            }else{
+            } else {
                 // get the DB result to avoid any possible indexing hang-ups
                 ajax.promise(contextID + '?frame=object&datastore=database').then((response) => {
                     const reponseAtID = object.itemUtil.atId(response);
@@ -285,11 +285,12 @@ export default class SubmissionView extends React.PureComponent{
                             initDisplay[0] = response.aliases[0];
                             existingAlias = true;
                         }
-                    }else{
+                    } else {
                         // something went wrong with fetching context. Just use an empty object
                         initContext[0] = buildContext({}, schema, bookmarksList, edit, create);
                         initBookmarks[0] = bookmarksList;
                     }
+
                     this.setState({
                         'keyContext': initContext,
                         'keyValid': initValid,
@@ -297,16 +298,18 @@ export default class SubmissionView extends React.PureComponent{
                         'keyDisplay': initDisplay,
                         'currKey': 0,
                         'keyLinkBookmarks': initBookmarks
+                    }, ()=>{
+                        if (initObjs.length > 0){
+                            _.forEach(initObjs, (initObj, idx) => this.initExistingObj(initObj));
+                        }
+                        // if we are cloning and there is not an existing alias
+                        // never prompt alias creation on edit
+                        // do not initiate ambiguous type lookup on edit or create
+                        if (!edit && !existingAlias){
+                            this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
+                        }
                     });
-                    if(initObjs.length > 0){
-                        initObjs.forEach((initObj, idx) => this.initExistingObj(initObj));
-                    }
-                    // if we are cloning and there is not an existing alias
-                    // never prompt alias creation on edit
-                    // do not initiate ambiguous type lookup on edit or create
-                    if(!edit && !existingAlias){
-                        this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
-                    }
+
                 });
             }
             // set state in app to prevent accidental mid-submission navigation
@@ -331,18 +334,15 @@ export default class SubmissionView extends React.PureComponent{
         // check to see if we have an ambiguous linkTo type.
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
-        if(this.props.schemas){
-            if(type in itemTypeHierarchy && !init){
-                // ambiguous linkTo type found
-                this.setState({
-                    'ambiguousIdx': newIdx,
-                    'ambiguousType': type,
-                    'ambiguousSelected': null,
-                    'creatingLink': newLink
-                });
-            }else{
-                this.initCreateAlias(type, newIdx, newLink, parentField);
-            }
+        if (type in itemTypeHierarchy && !init){ // ambiguous linkTo type found
+            this.setState({
+                'ambiguousIdx': newIdx,
+                'ambiguousType': type,
+                'ambiguousSelected': null,
+                'creatingLink': newLink
+            });
+        } else {
+            this.initCreateAlias(type, newIdx, newLink, parentField);
         }
     }
 
@@ -360,7 +360,7 @@ export default class SubmissionView extends React.PureComponent{
         if (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for[0] && typeof currentSubmittingUser.submits_for[0].name === 'string'){
             autoSuggestedAlias = AliasInputField.getInitialSubmitsForFirstPart(currentSubmittingUser) + ':';
         }
-        if(schema && schema.properties.aliases){
+        if (schema && schema.properties.aliases){
             this.setState(_.extend({
                 'creatingAlias' : autoSuggestedAlias,
                 'creatingIdx': newIdx,
@@ -368,7 +368,7 @@ export default class SubmissionView extends React.PureComponent{
                 'creatingLink': newLink,
                 'creatingLinkForField' : parentField
             }, extraState));
-        }else{ // schema doesn't support aliases
+        } else { // schema doesn't support aliases
             var fallbackAlias = 'My ' + type + ' ' + newIdx;
             this.createObj(type, newIdx, newLink, fallbackAlias, extraState);
         }
@@ -524,65 +524,69 @@ export default class SubmissionView extends React.PureComponent{
      * so the view changes to it.
      */
     createObj(type, newIdx, newLink, alias, extraState={}){
-        const { schemas } = this.props;
-        const { keyTypes, currKey, keyHierarchy, keyIter, keyContext, keyValid, keyLinkBookmarks, keyLinks, keyDisplay : prevKeyDisplay, errorCount } = this.state;
-        var contextCopy     = _.clone(keyContext),
-            validCopy       = _.clone(keyValid),
-            typesCopy       = _.clone(keyTypes),
-            parentKeyIdx    = currKey,
-            bookmarksCopy   = _.clone(keyLinkBookmarks),
-            linksCopy       = object.deepClone(keyLinks),
-            keyDisplay      = _.clone(prevKeyDisplay),
-            bookmarksList   = [],
-            keyIdx,
-            newHierarchy;
-
-
-        if (newIdx === 0){ // initial object creation
-            keyIdx = 0;
-            newHierarchy = _.clone(keyHierarchy);
-        } else {
-            keyIdx = keyIter + 1; // increase key iter by 1 for a new unique key
-            if (newIdx !== keyIdx) {
-                console.error('ERROR: KEY INDEX INCONSISTENCY!');
-                return;
-            }
-            newHierarchy = modifyHierarchy(_.clone(keyHierarchy), keyIdx, parentKeyIdx);
-            validCopy[keyIdx] = 1; // new object has no incomplete children yet
-            validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
-        }
-
-        typesCopy[keyIdx] = type;
-        var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
-        if (contextWithAlias.aliases) {
-            contextWithAlias.aliases.push(alias);
-        } else {
-            contextWithAlias.aliases = [alias];
-        }
-
-        contextCopy[keyIdx] = buildContext(contextWithAlias, schemas[type], bookmarksList, true, false);
-        bookmarksCopy[keyIdx] = bookmarksList;
-        linksCopy[keyIdx] = newLink;
-        keyDisplay[keyIdx] = alias;
+        const { errorCount } = this.state;
 
         // get rid of any hanging errors
         for (var i=0; i < errorCount; i++){
             Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
         }
 
-        this.setState(_.extend({
-            'keyContext': contextCopy,
-            'keyValid': validCopy,
-            'keyTypes': typesCopy,
-            'keyDisplay': keyDisplay,
-            'currKey': keyIdx,
-            'keyIter': keyIdx,
-            'keyHierarchy': newHierarchy,
-            'keyLinkBookmarks': bookmarksCopy,
-            'keyLinks': linksCopy,
-            'processingFetch': false,
-            'errorCount': 0
-        }, extraState));
+        this.setState(function(currState, currProps){
+            const { schemas } = currProps;
+            const { keyTypes, currKey, keyHierarchy, keyIter, keyContext, keyValid, keyLinkBookmarks, keyLinks, keyDisplay : prevKeyDisplay } = currState;
+
+            const contextCopy     = _.clone(keyContext);
+            const validCopy       = _.clone(keyValid);
+            const typesCopy       = _.clone(keyTypes);
+            const parentKeyIdx    = currKey;
+            const bookmarksCopy   = _.clone(keyLinkBookmarks);
+            const linksCopy       = object.deepClone(keyLinks);
+            const keyDisplay      = _.clone(prevKeyDisplay);
+            const bookmarksList   = [];
+            let keyIdx;
+            let newHierarchy;
+
+            if (newIdx === 0){ // initial object creation
+                keyIdx = 0;
+                newHierarchy = _.clone(keyHierarchy);
+            } else {
+                keyIdx = keyIter + 1; // increase key iter by 1 for a new unique key
+                if (newIdx !== keyIdx) {
+                    console.error('ERROR: KEY INDEX INCONSISTENCY!');
+                    return;
+                }
+                newHierarchy = modifyHierarchy(_.clone(keyHierarchy), keyIdx, parentKeyIdx);
+                validCopy[keyIdx] = 1; // new object has no incomplete children yet
+                validCopy[parentKeyIdx] = 0; // parent is now not ready for validation
+            }
+
+            typesCopy[keyIdx] = type;
+            var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
+            if (contextWithAlias.aliases) {
+                contextWithAlias.aliases.push(alias);
+            } else {
+                contextWithAlias.aliases = [alias];
+            }
+
+            contextCopy[keyIdx] = buildContext(contextWithAlias, schemas[type], bookmarksList, true, false);
+            bookmarksCopy[keyIdx] = bookmarksList;
+            linksCopy[keyIdx] = newLink;
+            keyDisplay[keyIdx] = alias;
+
+            return _.extend({
+                'keyContext': contextCopy,
+                'keyValid': validCopy,
+                'keyTypes': typesCopy,
+                'keyDisplay': keyDisplay,
+                'currKey': keyIdx,
+                'keyIter': keyIdx,
+                'keyHierarchy': newHierarchy,
+                'keyLinkBookmarks': bookmarksCopy,
+                'keyLinks': linksCopy,
+                'processingFetch': false,
+                'errorCount': 0
+            }, extraState);
+        });
     }
 
     /**

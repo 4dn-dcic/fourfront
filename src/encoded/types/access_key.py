@@ -115,7 +115,7 @@ def access_key_add(context, request):
         result['secret_access_key'] = password
 
     result['access_key_id'] = request.validated['access_key_id']
-    result['description'] = request.validated['description']
+    result['description'] = request.validated.get('description', "")
     return result
 
 

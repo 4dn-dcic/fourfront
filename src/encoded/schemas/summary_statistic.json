@@ -25,7 +25,6 @@
             "title": "Description",
             "description": "A short description of the summary statistic",
             "type": "string",
-            "default": "",
             "formInput": "textarea"
         },
         "attachment": {

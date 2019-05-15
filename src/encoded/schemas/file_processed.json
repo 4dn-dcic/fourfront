@@ -57,7 +57,20 @@
                 "compartments",
                 "insulation score - diamond",
                 "insulation score - potential",
-                "other"
+                "other",
+                "domains",
+                "boundaries",
+                "loci distances",
+                "counts",
+                "normalized counts",
+                "lads",
+                "coordinates",
+                "juicebox norm vector",
+                "read positions",
+                "spt results",
+                "conservative peaks",
+                "signal fold change",
+                "segregation table"
             ]
         },
         "file_classification": {
