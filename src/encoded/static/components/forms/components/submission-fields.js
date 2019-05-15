@@ -652,11 +652,7 @@ class ArrayField extends React.Component{
                 )
             )
         ){
-            if (field !== 'aliases') {
-                return true;
-            } else {
-                if (currentArr && currentArr.length >= 1) return true;
-            }
+            return true;
         }
         return false;
     }
