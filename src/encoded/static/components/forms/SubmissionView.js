@@ -275,7 +275,8 @@ export default class SubmissionView extends React.PureComponent{
                 // get the DB result to avoid any possible indexing hang-ups
                 ajax.promise(contextID + '?frame=object&datastore=database').then((response) => {
                     const reponseAtID = object.itemUtil.atId(response);
-                    var initObjs = [];
+                    const initObjs = []; // Gets modified/added-to in-place by buildContext.
+
                     if (reponseAtID && reponseAtID === contextID){
                         initContext[0] = buildContext(response, schema, bookmarksList, edit, create, initObjs);
                         initBookmarks[0] = bookmarksList;
@@ -299,9 +300,7 @@ export default class SubmissionView extends React.PureComponent{
                         'currKey': 0,
                         'keyLinkBookmarks': initBookmarks
                     }, ()=>{
-                        if (initObjs.length > 0){
-                            _.forEach(initObjs, (initObj, idx) => this.initExistingObj(initObj));
-                        }
+                        _.forEach(initObjs, (initObj, idx) => this.initExistingObj(initObj));
                         // if we are cloning and there is not an existing alias
                         // never prompt alias creation on edit
                         // do not initiate ambiguous type lookup on edit or create
@@ -309,7 +308,6 @@ export default class SubmissionView extends React.PureComponent{
                             this.initCreateObj(principalTypes[0], 0, 'Primary Object', true);
                         }
                     });
-
                 });
             }
             // set state in app to prevent accidental mid-submission navigation
@@ -334,7 +332,8 @@ export default class SubmissionView extends React.PureComponent{
         // check to see if we have an ambiguous linkTo type.
         // this means there could be multiple types of linked objects for a
         // given type. let the user choose one.
-        if (type in itemTypeHierarchy && !init){ // ambiguous linkTo type found
+        if (type in itemTypeHierarchy && !init){
+            // ambiguous linkTo type found
             this.setState({
                 'ambiguousIdx': newIdx,
                 'ambiguousType': type,
@@ -528,7 +527,7 @@ export default class SubmissionView extends React.PureComponent{
 
         // get rid of any hanging errors
         for (var i=0; i < errorCount; i++){
-            Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1)});
+            Alerts.deQueue({ 'title' : "Validation error " + parseInt(i + 1) });
         }
 
         this.setState(function(currState, currProps){
@@ -674,8 +673,8 @@ export default class SubmissionView extends React.PureComponent{
      * objects in the principal object initializing process when cloning/editing.
      * Exclusively called from initializePrincipal. Calls addExistingObj
      */
-    initExistingObj(objData){
-        this.addExistingObj(objData.path, objData.display, objData.type, objData.newLink, true);
+    initExistingObj({ path, display, type, field }){
+        this.addExistingObj(path, display, type, field, true);
     }
 
     /**
@@ -686,18 +685,24 @@ export default class SubmissionView extends React.PureComponent{
      * keyHierarchy. The key for pre-existing objects are their @id path. Thus,
      * isNan() for the key of a pre-existing object will return true.
      */
-    addExistingObj(path, display, type, newLink, init=false){
-        const { currKey, keyHierarchy : prevKeyHierarchy, keyDisplay : prevKeyDisplay, keyTypes : prevKeyTypes, keyLinks : prevKeyLinks } = this.state;
-        // on init=true, all objects are children of the principal object (keyIdx = 0)
-        const parentKeyIdx = init ? 0 : currKey;
-        const keyDisplay = _.clone(prevKeyDisplay);
-        const keyTypes = _.clone(prevKeyTypes);
-        const keyLinks = _.clone(prevKeyLinks);
-        const keyHierarchy = modifyHierarchy(_.clone(prevKeyHierarchy), path, parentKeyIdx);
-        keyDisplay[path] = display;
-        keyTypes[path] = type;
-        keyLinks[path] = newLink;
-        this.setState({ keyHierarchy, keyDisplay, keyTypes, keyLinks });
+    addExistingObj(path, display, type, field, init=false){
+        this.setState(function({
+            currKey,
+            keyHierarchy : prevKeyHierarchy,
+            keyDisplay : prevKeyDisplay,
+            keyTypes : prevKeyTypes,
+            keyLinks : prevKeyLinks
+        }){
+            const parentKeyIdx = init ? 0 : currKey;
+            const keyDisplay = _.clone(prevKeyDisplay);
+            const keyTypes = _.clone(prevKeyTypes);
+            const keyLinks = _.clone(prevKeyLinks);
+            const keyHierarchy = modifyHierarchy(_.clone(prevKeyHierarchy), path, parentKeyIdx);
+            keyDisplay[path] = display;
+            keyTypes[path] = type;
+            keyLinks[path] = field;
+            return { keyHierarchy, keyDisplay, keyTypes, keyLinks };
+        });
     }
 
     /**
@@ -1370,7 +1375,7 @@ export default class SubmissionView extends React.PureComponent{
         const { schemas } = this.props;
         const { currKey, keyContext, ambiguousIdx, ambiguousType, creatingType, creatingIdx, keyTypes, fullScreen, keyDisplay, keyHierarchy } = this.state;
         // see if initialized
-        if(!keyContext || currKey === null){
+        if (!keyContext || currKey === null){
             return null;
         }
         var showAmbiguousModal = ambiguousIdx !== null && ambiguousType !== null;
@@ -1383,10 +1388,10 @@ export default class SubmissionView extends React.PureComponent{
         // remove context and navigate from this.props
         const { context, navigate, ...propsToPass } = this.props;
         var currObjDisplay = keyDisplay[currKey] || currType;
-        return(
+        return (
             <div className="submission-view-page-container container" id="content">
                 <TypeSelectModal
-                    show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={schemas}
+                    show={showAmbiguousModal} {..._.pick(this.state, 'ambiguousIdx', 'ambiguousType', 'ambiguousSelected', 'currKey', 'creatingIdx')} schemas={schemas}
                     buildAmbiguousEnumEntry={this.buildAmbiguousEnumEntry} submitAmbiguousType={this.submitAmbiguousType} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
                 />
                 <AliasSelectModal
@@ -1587,11 +1592,11 @@ class TypeSelectModal extends React.Component {
     }
 
     onHide(){
-        const { creatingIdx, cancelCreatePrimaryObject, cancelCreateNewObject } = this.props;
-        if (creatingIdx === 0 || creatingIdx === null){
+        const { ambiguousIdx, cancelCreatePrimaryObject, cancelCreateNewObject } = this.props;
+        if (ambiguousIdx === null || ambiguousIdx === 0){
             // If just starting (creating first item / idx), navigate to non-edit version of page we are currently on.
             cancelCreatePrimaryObject(true);
-        } else if (creatingIdx > 0){
+        } else if (ambiguousIdx > 0){
             // Else cancel creating new object by unsetting temporary state & values.
             cancelCreateNewObject();
         }
@@ -1606,7 +1611,7 @@ class TypeSelectModal extends React.Component {
     }
 
     render(){
-        var { show, ambiguousType, ambiguousSelected, buildAmbiguousEnumEntry, submitAmbiguousType, schemas } = this.props;
+        const { show, ambiguousType, ambiguousSelected, buildAmbiguousEnumEntry, submitAmbiguousType, schemas } = this.props;
         if (!show) return null;
 
         var ambiguousDescrip = null;
@@ -1615,7 +1620,7 @@ class TypeSelectModal extends React.Component {
         }
         return (
             <Modal show onHide={this.onHide} className="submission-view-modal">
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>{'Multiple object types found for your new ' + ambiguousType}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -1655,7 +1660,7 @@ class AliasSelectModal extends TypeSelectModal {
 
         return (
             <Modal show onHide={this.onHide} className="submission-view-modal">
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Give your new { creatingType } an alias</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -1671,8 +1676,10 @@ class AliasSelectModal extends TypeSelectModal {
                             </div>
                         </Collapse>
                         <div className="text-right">
+                            {/*
                             <Button type="button" bsStyle="danger" onClick={this.onHide}>Cancel / Exit</Button>
                             {' '}
+                            */}
                             <Button type="button" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
                         </div>
                     </div>
@@ -1701,9 +1708,9 @@ class IndividualObjectView extends React.Component{
 
     constructor(props){
         super(props);
-        this.modifyNewContext = this.modifyNewContext.bind(this);
-        this.initiateField = this.initiateField.bind(this);
-        this.selectCancel = this.selectCancel.bind(this);
+        _.bindAll(this, 'modifyNewContext', 'fetchAndValidateItem', 'checkObjectRemoval',
+            'selectObj', 'selectComplete', 'selectCancel', 'initiateField'
+        );
 
         /**
          * State in this component mostly has to do with selection of existing objs
@@ -1803,16 +1810,6 @@ class IndividualObjectView extends React.Component{
         }
     }
 
-    /** Simple function, return the currContext. Used in BuildField */
-    getCurrContext = () => {
-        return this.props.currContext;
-    }
-
-    /** Simple function, return the current schema. Used in BuildField */
-    getCurrSchema = () => {
-        return this.props.schemas[this.props.currType];
-    }
-
     /**
      * Use ajax to get the display_title for an existing object. Use that to kicks
      * of the addExistingObj process; if a title can't be found, use the object
@@ -1822,30 +1819,32 @@ class IndividualObjectView extends React.Component{
      * @param {string} type     The Item type of value.
      * @param {any} newLink     No idea what this is.
      */
-    fetchAndValidateItem = (value, field, type, arrayIdx, newLink = null) => {
-        var hrefToFetch = value,
-            failureAlertTitle = "Validation error for field '" + field + "'" + (typeof arrayIdx === 'number' ? ' [' + arrayIdx + ']' : ''),
-            failureCallback = ()=>{
-                Alerts.queue({
-                    "title"     : failureAlertTitle,
-                    "message"   : "Could not find valid" + (type ? " '" + type + "'" : '') + " Item in database for value '" + value + "'.",
-                    "style"     : "danger"
-                });
-                layout.animateScrollTo(0); // Scroll to top of page so alert b visible to end-user.
-                this.modifyNewContext(field, null, 'existing linked object', null, arrayIdx);
-            },
-            successCallback = (result)=>{
-                Alerts.deQueue({ 'title' : failureAlertTitle });
-                this.modifyNewContext(field, value, 'existing linked object', null, arrayIdx);
-                this.props.addExistingObj(value, result.display_title, type, newLink);
-            };
+    fetchAndValidateItem(itemAtID, field, type, arrayIdx, newLink = null){
+        const { addExistingObj } = this.props;
+
+        let hrefToFetch = itemAtID;
+        const failureAlertTitle = "Validation error for field '" + field + "'" + (typeof arrayIdx === 'number' ? ' [' + arrayIdx + ']' : '');
+        const failureCallback = () => {
+            Alerts.queue({
+                "title"     : failureAlertTitle,
+                "message"   : "Could not find valid" + (type ? " '" + type + "'" : '') + " Item in database for value '" + itemAtID + "'.",
+                "style"     : "danger"
+            });
+            layout.animateScrollTo(0); // Scroll to top of page so alert b visible to end-user.
+            this.modifyNewContext(field, null, 'existing linked object', null, arrayIdx);
+        };
+        const successCallback = (result)=>{
+            Alerts.deQueue({ 'title' : failureAlertTitle });
+            this.modifyNewContext(field, itemAtID, 'existing linked object', null, arrayIdx);
+            addExistingObj(itemAtID, result.display_title, type, field);
+        };
 
         if (typeof hrefToFetch !== 'string') {
             failureCallback();
             return;
         }
 
-        if (hrefToFetch.charAt(0) !== '/'){ // Pre-pend slash so will request hostname + '/' + value.
+        if (hrefToFetch.charAt(0) !== '/'){ // Pre-pend slash so will request hostname + '/' + itemAtID.
             hrefToFetch = '/' + hrefToFetch;
         }
 
@@ -1866,61 +1865,22 @@ class IndividualObjectView extends React.Component{
     }
 
     /**
-     * If a value is null that was previously non-null, remove the linked object
+     * If a itemAtID is null that was previously non-null, remove the linked object
      * from the current context and change state in SubmissionView accordingly.
      */
-    checkObjectRemoval = (value, prevValue) => {
-        if(value === null){
-            this.props.removeObj(prevValue);
+    checkObjectRemoval(value, prevValue){
+        const { removeObj } = this.props;
+        if (value === null){
+            removeObj(prevValue);
         }
     }
-
-    /**
-     * Navigation function passed to Search so that faceting can be done in-place
-     * through ajax. If no results are returned from the search, abort.
-     */
-    /*
-    inPlaceNavigate = (destination, options, callback) => {
-        if(this.state.selectQuery){
-            var dest = destination;
-            // ensure destination is formatted correctly when clearing/removing filters
-            if(destination == '/'){
-                dest = '/search/?type=' + this.state.selectType;
-            }else if(destination.slice(0,8) != '/search/' && destination.slice(0,1) == '?'){
-                dest = '/search/' + destination;
-            }
-            ajax.promise(dest).then(data => {
-                if (data && data['@graph']){
-                    this.setState({
-                        'selectData': data,
-                        'selectQuery': dest
-                    });
-                }else{
-                    this.setState({
-                        'selectType': null,
-                        'selectData': null,
-                        'selectQuery': null,
-                        'selectField': null,
-                        'selectLink': null,
-                        'selectArrayIdx': null
-                    });
-                    this.props.setSubmissionState('fullScreen', false);
-                }
-            }).then(data => {
-                if (typeof callback === 'function'){
-                    callback(data);
-                }
-            });
-        }
-    }
-    */
 
     /**
      * Initializes the first search (with just type=<type>) and sets state
      * accordingly. Set the fullScreen state in SubmissionView to alter its render
      * and hide the object navigation tree.
      */
-    selectObj = (collection, field, newLink, arrayIdx=null) => {
+    selectObj(collection, field, arrayIdx=null){
         this.setState({ 'selectField' : field, 'selectArrayIdx': arrayIdx, 'selectType' : collection });
     }
 
@@ -1929,11 +1889,13 @@ class IndividualObjectView extends React.Component{
      * object selection state, modifies context, and initializes the fetchAndValidateItem
      * process.
      */
-    selectComplete = (value) => {
-        var { selectField, selectArrayIdx, selectType } = this.state;
+    selectComplete(value){
+        const { currContext } = this.props;
+        const { selectField, selectArrayIdx, selectType } = this.state;
         if (!selectField) throw new Error('No field being selected for');
-        var current = selectField && this.props.currContext[selectField],
-            isRepeat = (Array.isArray(current) && _.contains(current, value));
+
+        const current = selectField && currContext[selectField];
+        const isRepeat = (Array.isArray(current) && _.contains(current, value));
 
         if (!isRepeat) {
             //this.modifyNewContext(selectField, value, 'existing linked object', null, selectArrayIdx);
@@ -1941,6 +1903,7 @@ class IndividualObjectView extends React.Component{
         } else {
             this.modifyNewContext(selectField, null, 'existing linked object', null, selectArrayIdx);
         }
+
         this.setState({ 'selectField': null, 'selectArrayIdx': null, 'selectType': null });
     }
 
@@ -1996,7 +1959,7 @@ class IndividualObjectView extends React.Component{
             linked      = fieldSchemaLinkToType(fieldSchema);
 
         // check if this is an enum
-        if(fieldType === 'enum'){
+        if (fieldType === 'enum'){
             enumValues = fieldSchema.enum || fieldSchema.suggested_enum;
         }
 
@@ -2027,10 +1990,10 @@ class IndividualObjectView extends React.Component{
         }
         return (
             <BuildField
-                {...{ field, fieldType, fieldTip, enumValues, isLinked, currType }}
+                {...{ field, fieldType, fieldTip, enumValues, isLinked, currType, currContext }}
                 {..._.pick(this.props, 'md5Progress', 'edit', 'create', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'upload', 'uploadStatus', 'updateUpload', 'currentSubmittingUser', 'roundTwo')}
                 value={fieldValue} key={field} schema={fieldSchema} nestedField={field} title={fieldTitle} modifyFile={null} linkType={linked} disabled={false}
-                getCurrContext={this.getCurrContext} getCurrSchema={this.getCurrSchema} arrayIdx={null} required={_.contains(currSchema.required, field)}
+                arrayIdx={null} required={_.contains(currSchema.required, field)}
                 modifyNewContext={this.modifyNewContext} selectObj={this.selectObj} selectComplete={this.selectComplete} selectCancel={this.selectCancel}
                 fieldBeingSelected={this.state.selectField} fieldBeingSelectedArrayIdx={this.state.selectArrayIdx} />
         );
@@ -2132,69 +2095,79 @@ class RoundTwoDetailPanel extends React.PureComponent {
  * @returns {Object} A new object represent context.
  */
 export function buildContext(context, itemSchema, objList=null, edit=false, create=true, initObjs=null){
-    var built = {};
-    var userGroups = JWT.getUserGroups();
-    var fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
-    for (var i=0; i<fields.length; i++){
-        if(itemSchema.properties[fields[i]]){
-            var fieldSchema = object.getNestedProperty(itemSchema, ['properties', fields[i]], true);
-            if (!fieldSchema){
-                continue;
-            }
-            if (fieldSchema.exclude_from && (_.contains(fieldSchema.exclude_from,'FFedit-create') || fieldSchema.exclude_from == 'FFedit-create')){
-                continue;
-            }
-            // check to see if this field is a calculated prop
-            if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
-                continue;
-            }
-            // check to see if permission == import items
-            // if admin, allow import_items fields
-            if (fieldSchema.permission && fieldSchema.permission == "import_items"){
-                if(!_.contains(userGroups, 'admin')){
-                    continue;
-                }
-            }
-            // set value to context value if editing/cloning.
-            // if creating or value not present, set to null
-            if (edit){
-                if (context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear edit")){
-                    built[fields[i]] = null;
-                } else {
-                    built[fields[i]] = context[fields[i]] || null;
-                }
-            } else if (!create){ //clone
-                if (context[fields[i]] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear clone")){
-                    built[fields[i]] = null;
-                } else {
-                    built[fields[i]] = context[fields[i]] || null;
-                }
-            } else {
-                built[fields[i]] = null;
-            }
+    const built = {};
+    const userGroups = JWT.getUserGroups();
+    const fields = itemSchema.properties ? _.keys(itemSchema.properties) : [];
 
-            if (objList !== null) {
-                var linkedProperty = fieldSchemaLinkToPath(fieldSchema), // Is it a linkTo (recursively or not)?
-                    roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
-                if((linkedProperty !== null && typeof linkedProperty !== 'undefined') && !roundTwoExclude){ // If linkTo, add to our list, selecting a nice name for it first.
-                    //var listTerm = fieldSchema.title ? fieldSchema.title : linked;
-                    var fieldToStore = fields[i];
-                    linkedProperty = _.reject(linkedProperty, function(p){ return p === 'items' || p === 'properties'; });
-                    if (linkedProperty.length > 0){
-                        fieldToStore += '.' + linkedProperty.join('.');
-                    }
-                    if(!_.contains(objList, fieldToStore)){
-                        objList.push(fieldToStore);
-                    }
-                    // add pre-existing linkTo objects
-                    if(initObjs !== null && built[fields[i]] !== null){
-                        delvePreExistingObjects(initObjs, built[fields[i]], fieldSchema, fields[i]);
-                    }
-                }
-                objList.sort();
+    _.forEach(fields, function(field, i){
+        const fieldSchema = object.getNestedProperty(itemSchema, ['properties', field], true);
+
+        if (!fieldSchema){
+            return;
+        }
+
+        if (fieldSchema.exclude_from && ((Array.isArray(fieldSchema.exclude_from) && _.contains(fieldSchema.exclude_from,'FFedit-create')) || fieldSchema.exclude_from === 'FFedit-create')){
+            return;
+        }
+
+        // check to see if this field is a calculated prop
+        if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
+            return;
+        }
+
+        // check to see if permission == import items; if admin, allow import_items fields
+        if (fieldSchema.permission && fieldSchema.permission == "import_items"){
+            if (!_.contains(userGroups, 'admin')){
+                return;
             }
         }
-    }
+
+        // set value to context value if editing/cloning.
+        // if creating or value not present, set to null
+        if (edit){
+            if (context[field] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear edit")){
+                built[field] = null;
+            } else {
+                built[field] = context[field] || null;
+            }
+        } else if (!create){ //clone
+            if (context[field] === null || (fieldSchema.ff_flag && fieldSchema.ff_flag === "clear clone")){
+                built[field] = null;
+            } else {
+                built[field] = context[field] || null;
+            }
+        } else {
+            built[field] = null;
+        }
+
+        if (objList !== null) {
+
+            let linkedProperty = fieldSchemaLinkToPath(fieldSchema); // Is it a linkTo (recursively or not)?
+            const roundTwoExclude = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
+
+            if ((linkedProperty !== null && typeof linkedProperty !== 'undefined') && !roundTwoExclude){ // If linkTo, add to our list, selecting a nice name for it first.
+                //var listTerm = fieldSchema.title ? fieldSchema.title : linked;
+                let fieldToStore = field;
+
+                linkedProperty = _.reject(linkedProperty, function(p){ return p === 'items' || p === 'properties'; });
+
+                if (linkedProperty.length > 0){
+                    fieldToStore += '.' + linkedProperty.join('.');
+                }
+
+                if (!_.contains(objList, fieldToStore)){
+                    objList.push(fieldToStore);
+                }
+
+                // add pre-existing linkTo objects
+                if (initObjs !== null && built[field] !== null){
+                    delvePreExistingObjects(initObjs, built[field], fieldSchema, fieldToStore);
+                }
+            }
+            objList.sort();
+        }
+    });
+
     return built;
 }
 
@@ -2204,14 +2177,14 @@ export function buildContext(context, itemSchema, objList=null, edit=false, crea
  * object in an edit/clone situation. json is json content for the field,
  * schema is the individual fields schema. Recursively handles objects and arrays
  */
-var delvePreExistingObjects = function myself(initObjs, json, fieldSchema, listTerm){
-    if(Array.isArray(json)){
-        for(var j=0; j < json.length; j++){
-            if(fieldSchema.items){
+function delvePreExistingObjects(initObjs, json, fieldSchema, listTerm){
+    if (Array.isArray(json)){
+        for (var j=0; j < json.length; j++){
+            if (fieldSchema.items){
                 delvePreExistingObjects(initObjs, json[j], fieldSchema.items, listTerm);
             }
         }
-    }else if (json instanceof Object && json){
+    } else if (json instanceof Object && json){
         if(fieldSchema.properties){
             _.keys(json).forEach(function(key, idx){
                 if(fieldSchema.properties[key]){
@@ -2223,11 +2196,11 @@ var delvePreExistingObjects = function myself(initObjs, json, fieldSchema, listT
         initObjs.push({
             'path'      : json,
             'display'   : json,
-            'newLink'   : listTerm,
+            'field'     : listTerm,
             'type'      : fieldSchemaLinkToType(fieldSchema)
         });
     }
-};
+}
 
 /** Sort a list of BuildFields first by required status, then by schema lookup order, then by title */
 function sortPropFields(fields){

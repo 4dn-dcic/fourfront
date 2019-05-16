@@ -3,14 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, Button, MenuItem, Panel, Table, Collapse} from 'react-bootstrap';
+import { Collapse } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
-import globals from './../../globals';
-import { ajax, console, object, isServerSide } from './../../util';
+import { console, object, isServerSide } from './../../util';
 
 // Create a custom tree to represent object hierarchy in front end submission.
 // Each leaf is clickable and will bring you to a view of the new object
-export class SubmissionTree extends React.Component {
+export class SubmissionTree extends React.PureComponent {
 
     static propTypes = {
         'keyHierarchy'      : PropTypes.object.isRequired,
@@ -23,25 +22,18 @@ export class SubmissionTree extends React.Component {
         'keyLinks'          : PropTypes.object.isRequired,
         'setSubmissionState': PropTypes.func.isRequired,
         'schemas'           : PropTypes.object,
-    }
-
-    constructor(props){
-        super(props);
-    }
+    };
 
     componentDidMount(){
         ReactTooltip.rebuild();
     }
 
     render() {
-        var infoTip = '<h5>This panel is for navigating between objects in the creation process</h5> Click on Item/dependency titles to navigate around and edit each individually. Dependencies must be submitted before their parent can be.';
-        const{
-            keyIdx,
-            ...others
-        } = this.props;
+        const infoTip = '<h5>This panel is for navigating between objects in the creation process</h5> Click on Item/dependency titles to navigate around and edit each individually. Dependencies must be submitted before their parent can be.';
+        const { keyIdx, ...others } = this.props;
         return(
             <div className="submission-view-navigation-tree">
-                <h3 className="form-section-heading mb-08">Navigation <InfoIcon children={infoTip} /></h3>
+                <h3 className="form-section-heading mb-08">Navigation <InfoIcon>{infoTip}</InfoIcon></h3>
                 <SubmissionLeaf {...others} keyIdx={0} open />
             </div>
         );
@@ -54,55 +46,56 @@ class SubmissionProperty extends React.Component {
         super(props);
         this.handleToggle = _.throttle(this.handleToggle.bind(this), 500, { 'trailing' : false });
         this.generateChild = this.generateChild.bind(this);
-        this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
+        this.state = { 'open' : typeof props.open === 'boolean' ? props.open : true };
     }
 
     handleToggle(e){
         e.preventDefault();
         e.stopPropagation();
-        this.setState({'open': !this.state.open});
+        this.setState(function({ open }){
+            return { "open" : !open };
+        });
     }
 
     generateChild(childKey){
-        if(!isNaN(childKey)) childKey = parseInt(childKey);
+        const { keyIdx, depth, hierarchy } = this.props;
+        if (!isNaN(childKey)) childKey = parseInt(childKey);
 
         // replace key and hierarchy in props
-        return(
-            <SubmissionLeaf
-                {...this.props}
-                key={childKey}
-                keyIdx={childKey}
-                hierarchy={this.props.hierarchy[this.props.keyIdx]}
-                open
-                depth={this.props.depth + 1}
-            />
-        );
+        return <SubmissionLeaf {...this.props} key={childKey} keyIdx={childKey} hierarchy={hierarchy[keyIdx]} open depth={depth + 1} />;
     }
 
     render(){
-        var { field, schemas, keyTypes, keyIdx, hierarchy, keyLinks, depth } = this.props;
+        const { field, schemas, keyTypes, keyIdx, hierarchy, keyLinks, depth } = this.props;
+        const { open } = this.state;
 
-        var itemSchema = schemas[keyTypes[keyIdx]];
+        // Item currently being edited
+        const itemSchema = schemas[keyTypes[keyIdx]];
         if (!itemSchema) return null;
-        var isRequired = Array.isArray(itemSchema.required) && _.contains(itemSchema.required, field);
-        var fieldBase = field.split('.')[0];
-        var fieldSchema = itemSchema.properties[fieldBase];
 
-        var bookmark = (fieldSchema && fieldSchema.title) || fieldSchemaLinkToType(fieldSchema);
-        var children = _.map(
-            _.filter(
-                _.keys(hierarchy[keyIdx]),
-                function(childKey){ return keyLinks[childKey] === field; }
-            ),
+        const isRequired = Array.isArray(itemSchema.required) && _.contains(itemSchema.required, field);
+        const [ fieldBase ] = field.split('.');
+        const fieldSchema = itemSchema.properties[fieldBase];
+        const bookmark = (fieldSchema && fieldSchema.title) || fieldSchemaLinkToType(fieldSchema);
+
+        const children = _.map(
+            _.filter(_.keys(hierarchy[keyIdx]), function(childKey){
+                return keyLinks[childKey] === field;
+            }),
             this.generateChild
         );
+
+        const noChildren = children.length === 0;
+
         return(
-            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + depth + (isRequired ? ' is-required' : '') + (children.length > 0 ? ' has-children' : '' )}>
-                <div className="clearfix inner-title">
-                    <i className={"icon property-expand-icon clickable icon-" + (this.state.open ? 'minus' : 'plus')} onClick={this.handleToggle}/>
+            <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + depth + (isRequired ? ' is-required' : '') + (!noChildren ? ' has-children' : '' )}>
+                <div className={"clearfix inner-title" + (!noChildren ? ' clickable' : '')} onClick={!noChildren && this.handleToggle}>
+                    <i className={"icon property-expand-icon icon-" + (open ? 'minus' : 'plus')}/>
                     <span>{ children.length } { bookmark || field }</span>
                 </div>
-                { children.length > 0 ? <Collapse in={this.state.open}><div className="children-container" children={children} /></Collapse> : null }
+                { !noChildren ?
+                    <Collapse in={open}><div className="children-container">{ children }</div></Collapse>
+                    : null }
             </div>
         );
     }
@@ -118,7 +111,7 @@ class SubmissionLeaf extends React.Component{
 
     static defaultProps = {
         'depth' : 0
-    }
+    };
 
     constructor(props){
         super(props);
@@ -126,30 +119,23 @@ class SubmissionLeaf extends React.Component{
         this.generateAllPlaceholders = this.generateAllPlaceholders.bind(this);
         this.placeholderSortFxn = this.placeholderSortFxn.bind(this);
         this.generateChild = this.generateChild.bind(this);
-        this.state = { 'open' : typeof this.props.open === 'boolean' ? this.props.open : true };
+        this.state = { 'open' : typeof props.open === 'boolean' ? props.open : true };
     }
 
     generateChild(childKey){
-        if(!isNaN(childKey)) childKey = parseInt(childKey);
+        if (!isNaN(childKey)) childKey = parseInt(childKey);
+        const { hierarchy, keyIdx, depth } = this.props;
 
         // replace key and hierarchy in props
-        return(
-            <SubmissionLeaf
-                {...this.props}
-                key={childKey}
-                keyIdx={childKey}
-                hierarchy={this.props.hierarchy[this.props.keyIdx]}
-                open
-                depth={this.props.depth + 1}
-            />
-        );
+        return <SubmissionLeaf {...this.props} key={childKey} keyIdx={childKey} hierarchy={hierarchy[keyIdx]} open depth={depth + 1} />;
     }
 
     placeholderSortFxn(fieldA, fieldB){
-        var itemSchema = this.props.schemas[this.props.keyTypes[this.props.keyIdx]];
+        const { schemas, keyTypes, keyIdx } = this.props;
+        const itemSchema = schemas[keyTypes[keyIdx]];
         if (!itemSchema) return 0;
-        var fieldABase = fieldA.split('.')[0];
-        var fieldBBase = fieldB.split('.')[0];
+        const [ fieldABase ] = fieldA.split('.');
+        const [ fieldBBase ] = fieldB.split('.');
 
         if (Array.isArray(itemSchema.required)){
             if (_.contains(itemSchema.required, fieldA)) return -1;
@@ -158,14 +144,13 @@ class SubmissionLeaf extends React.Component{
             if (_.contains(itemSchema.required, fieldBBase)) return -1;
         }
 
-        var fieldASchema = itemSchema.properties[fieldABase];
-        var fieldBSchema = itemSchema.properties[fieldBBase];
+        const fieldASchema = itemSchema.properties[fieldABase];
+        const fieldBSchema = itemSchema.properties[fieldBBase];
 
-        if (fieldASchema.lookup || 750 > fieldBSchema.lookup || 750) return -1;
-        if (fieldASchema.lookup || 750 < fieldBSchema.lookup || 750) return 1;
+        if ((fieldASchema.lookup || 750) > (fieldBSchema.lookup || 750)) return -1;
+        if ((fieldASchema.lookup || 750) < (fieldBSchema.lookup || 750)) return 1;
 
         return 0;
-
     }
 
     /**
@@ -176,33 +161,31 @@ class SubmissionLeaf extends React.Component{
      * @returns {JSX.Element} Visible leaf/branch-representing element.
      */
     generateAllPlaceholders(){
-        var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
-        var placeholders;
-
-        var fieldsWithLinkTosToShow = this.props.keyLinkBookmarks[keyIdx].sort(this.placeholderSortFxn);
-
-        return _.map(fieldsWithLinkTosToShow, (field) => <SubmissionProperty {...this.props} field={field} /> );
+        const { keyIdx, keyLinkBookmarks } = this.props;
+        const fieldsWithLinkTosToShow = keyLinkBookmarks[keyIdx].sort(this.placeholderSortFxn);
+        return _.map(fieldsWithLinkTosToShow, (field) => <SubmissionProperty {...this.props} field={field} key={field} /> );
     }
 
     /** Change the currKey of submissionView to that of props.keyIdx */
     handleClick(e){
+        const { setSubmissionState, keyIdx } = this.props;
         e.preventDefault();
-        this.props.setSubmissionState('currKey', this.props.keyIdx);
+        setSubmissionState('currKey', keyIdx);
     }
 
     render() {
-        var { keyValid, keyIdx, keyTypes, keyComplete, schemas } = this.props;
-        var itemSchema = schemas[keyTypes[keyIdx]];
+        const { keyValid, keyIdx, keyTypes, keyDisplay, keyComplete, schemas, hierarchy, currKey, depth } = this.props;
 
-        var placeholders;
+        let placeholders;
         if (!isNaN(keyIdx)) {
             placeholders = this.generateAllPlaceholders();
         } else {
             // must be a submitted object - plot directly
-            placeholders = _.keys(this.props.hierarchy[keyIdx]).map(this.generateChild);
+            placeholders = _.keys(hierarchy[keyIdx]).map(this.generateChild);
         }
+
         var extIcon;
-        var titleText = this.props.keyDisplay[keyIdx] || keyIdx;
+        var titleText = keyDisplay[keyIdx] || keyIdx;
         var statusClass = null;
         var isCurrentlySelected = false;
         var tip = null;
@@ -212,7 +195,7 @@ class SubmissionLeaf extends React.Component{
         // if key is not a number (i.e. path), the object is not a custom one.
         // format the leaf as the following if pre-existing obj or submitted
         // custom object.
-        if(isNaN(keyIdx) || (keyValid[keyIdx] === 4 && keyComplete[keyIdx])){
+        if (isNaN(keyIdx) || (keyValid[keyIdx] === 4 && keyComplete[keyIdx])){
 
             statusClass = 'existing-item';
             /** Open a new tab on click */
@@ -259,13 +242,13 @@ class SubmissionLeaf extends React.Component{
         }
 
         var icon;
-        if (keyIdx === this.props.currKey){ // We're currently on this Item
+        if (keyIdx === currKey){ // We're currently on this Item
             isCurrentlySelected = true;
             extIcon = <i className="icon icon-pencil pull-right" data-tip="Item which you are currently editing." />;
         }
 
         return(
-            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (this.props.depth) + (isCurrentlySelected ? ' active' : '')}>
+            <div className={"submission-nav-leaf linked-item-title leaf-depth-" + (depth) + (isCurrentlySelected ? ' active' : '')}>
                 <div className={"clearfix inner-title " + statusClass} onClick={clickHandler} data-tip={tip} data-html>
                     {extIcon}{icon}<span className="title-text">{titleText}</span>
                 </div>

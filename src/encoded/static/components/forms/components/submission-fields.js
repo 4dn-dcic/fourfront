@@ -85,7 +85,7 @@ export class BuildField extends React.PureComponent {
      * @returns {JSX.Element} A JSX `<input>` element, a Bootstrap input element component, or custom React component which will render input fields.
      */
     displayField(fieldType){
-        const { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, currType, getCurrContext, fieldType : propFieldType } = this.props;
+        const { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, currType, currContext, fieldType : propFieldType } = this.props;
         fieldType = fieldType || propFieldType;
         const inputProps = {
             'key'       :        field,
@@ -103,7 +103,6 @@ export class BuildField extends React.PureComponent {
 
         if (currType === 'StaticSection' && field === 'body'){
             // Static section preview
-            const currContext = getCurrContext(); // Make sure we have a filetype.
             const filetype = currContext && currContext.options && currContext.options.filetype;
             if (filetype === 'md' || filetype === 'html'){
                 return <PreviewField {...this.props} filetype={filetype} onChange={this.handleChange} />;
@@ -434,13 +433,12 @@ class LinkedObj extends React.PureComponent {
 
     handleStartSelectItem(e){
         e.preventDefault();
-
         if (!window) return;
 
-        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props,
-            itemType = schema.linkTo;
+        const { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+        const itemType = schema.linkTo;
 
-        selectObj(itemType, nestedField, linkType, arrayIdx);
+        selectObj(itemType, nestedField, arrayIdx);
     }
 
     /**
@@ -449,8 +447,9 @@ class LinkedObj extends React.PureComponent {
      * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
      */
     handleFinishSelectItem(atId, itemContext){
-        var isValidAtId     = object.isValidAtIDFormat(atId),
-            invalidTitle    = "Invalid Item Selected";
+        const { selectComplete } = this.props;
+        const isValidAtId     = object.isValidAtIDFormat(atId);
+        const invalidTitle    = "Invalid Item Selected";
 
         if (!atId || !isValidAtId) {
             Alerts.queue({
@@ -463,12 +462,12 @@ class LinkedObj extends React.PureComponent {
             Alerts.deQueue({ 'title' : invalidTitle });
         }
 
-        this.props.selectComplete(atId);
+        selectComplete(atId);
     }
 
     handleCreateNewItemClick(e){
         e.preventDefault();
-        var { fieldBeingSelected, selectCancel, modifyNewContext, nestedField, linkType, arrayIdx, schema } = this.props;
+        const { fieldBeingSelected, selectCancel, modifyNewContext, nestedField, linkType, arrayIdx, schema } = this.props;
         if (fieldBeingSelected !== null) selectCancel();
         modifyNewContext(nestedField, null, 'new linked object', linkType, arrayIdx, schema.linkTo);
     }
@@ -501,10 +500,10 @@ class LinkedObj extends React.PureComponent {
                     'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
                     'message' : (
                         <div>
-                            <p class="mb-0">
+                            <p className="mb-0">
                                 Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
                             </p>
-                            <p class="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
+                            <p className="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
                         </div>
                     ),
                     'style' : 'info'
@@ -528,7 +527,7 @@ class LinkedObj extends React.PureComponent {
                     { canShowAcceptTypedInput ?
                         <SquareButton show onClick={this.handleAcceptTypedID} icon="check"
                             bsStyle="success" tip="Accept typed identifier and look it up in database." />
-                    : null }
+                        : null }
                     <SquareButton show onClick={selectCancel} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
                 </div>
                 <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} onCloseChildWindow={selectCancel}
@@ -538,7 +537,6 @@ class LinkedObj extends React.PureComponent {
     }
 
     renderEmptyField(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState } = this.props;
         return (
             <div className="linked-object-buttons-container">
                 <Button className="select-create-linked-item-button" onClick={this.handleStartSelectItem}>
@@ -552,8 +550,8 @@ class LinkedObj extends React.PureComponent {
     }
 
     render(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel, currType } = this.props,
-            isSelecting = this.isInSelectionField();
+        const { value, keyDisplay, keyComplete } = this.props;
+        const isSelecting = this.isInSelectionField();
 
         if (isSelecting){
             return this.renderSelectInputField();
@@ -566,8 +564,8 @@ class LinkedObj extends React.PureComponent {
                 return(
                     <div className="submitted-linked-object-display-container text-ellipsis-container">
                         <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
-                        <a href={value} target="_blank" data-tip={"This Item, '" + thisDisplay + "' is already in the database"} children={thisDisplay} />
-                        &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-external-link"/>
+                        <a href={value} target="_blank" data-tip={"This Item, '" + thisDisplay + "' is already in the database"}>{ thisDisplay }</a>
+                        &nbsp;<i style={{ 'fontSize' : '0.85rem' }} className="icon icon-fw icon-external-link ml-05"/>
                     </div>
                 );
             } else {
@@ -579,16 +577,16 @@ class LinkedObj extends React.PureComponent {
                 if (keyComplete[intKey]){
                     return(
                         <div>
-                            <a href={keyComplete[intKey]} target="_blank" children={thisDisplay}/>
-                            <i style={{'marginLeft': 5}} className="icon icon-fw icon-external-link"/>
+                            <a href={keyComplete[intKey]} target="_blank" children>{ thisDisplay }</a>
+                            <i className="icon icon-fw icon-external-link ml-05"/>
                         </div>
                     );
                 } else {
                     return(
                         <div className="incomplete-linked-object-display-container text-ellipsis-container">
                             <i className="icon icon-fw icon-sticky-note-o" />&nbsp;&nbsp;
-                            <a href="#" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting" children={thisDisplay} />
-                            &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-pencil"/>
+                            <a href="#" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting">{ thisDisplay }</a>
+                            &nbsp;<i style={{ 'fontSize' : '0.85rem' }} className="icon icon-fw icon-pencil ml-05"/>
                         </div>
                     );
                 }
@@ -964,7 +962,7 @@ class S3FileInput extends React.Component{
     the filename context using modifyNewContext
     */
     handleChange = (e) => {
-        var { modifyNewContext, nestedField, linkType, arrayIdx } = this.props,
+        var { modifyNewContext, nestedField, linkType, arrayIdx, currContext } = this.props,
             file = e.target.files[0];
 
         if (!file) return; // No file was chosen.
@@ -972,7 +970,7 @@ class S3FileInput extends React.Component{
         var filename = file.name ? file.name : "unknown";
 
         // check Extensions
-        var fileFormat = this.props.getCurrContext().file_format;
+        var fileFormat = currContext.file_format;
         if(!fileFormat.startsWith('/')){
             fileFormat = '/' + fileFormat;
         }
