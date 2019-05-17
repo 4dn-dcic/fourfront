@@ -14,6 +14,7 @@ import StaticPage               from './static-pages/StaticPage';
 import DirectoryPage            from './static-pages/DirectoryPage';
 
 import HomePage                 from './static-pages/HomePage';
+import MicroscopyDemoPage       from "./static-pages/MicroscopyDemoPage";
 import PlannedSubmissionsPage   from './static-pages/PlannedSubmissionsPage';
 import ReleaseUpdates           from './static-pages/ReleaseUpdates';
 import StatisticsPageView       from './static-pages/StatisticsPageView';
@@ -48,7 +49,8 @@ import SubscriptionsView        from './browse/SubscriptionsView';
 content_views.register(StaticPage,    'StaticPage');
 content_views.register(DirectoryPage, 'DirectoryPage');
 
-content_views.register(HomePage,                'HomePage');
+//content_views.register(HomePage,                'HomePage');
+content_views.register(MicroscopyDemoPage,      'HomePage');
 content_views.register(PlannedSubmissionsPage,  'Planned-submissionsPage');
 content_views.register(ReleaseUpdates,          'Release-updatesPage');
 content_views.register(StatisticsPageView,      'StatisticsPage');
