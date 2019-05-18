@@ -1886,10 +1886,13 @@ class BodyElement extends React.PureComponent {
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
 
+                            {/*
+                            HIDDEN FOR NOW ON MICROSCOPY BRANCH ONLY
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
+                            */}
 
                             <ContentErrorBoundary canonical={canonical}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
