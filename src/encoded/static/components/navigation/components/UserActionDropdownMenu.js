@@ -4,9 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap';
-import { JWT, console, layout, isServerSide, navigate, Filters, object, ajax } from './../../util';
-import { store } from './../../../store';
+import { Nav, NavDropdown, MenuItem } from 'react-bootstrap';
+import { JWT, isServerSide, navigate, object } from './../../util';
 import { LoginNavItem } from './LoginNavItem';
 
 

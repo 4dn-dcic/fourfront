@@ -2,7 +2,6 @@
 // Entry point for browser, compiled into bundle[.chunkHash].js.
 
 import React from 'react';
-import _ from 'underscore';
 import ReactDOM from 'react-dom';
 
 import App from './components';

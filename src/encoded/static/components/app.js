@@ -14,7 +14,7 @@ import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './footer';
 import { store } from './../store';
 import * as origin from '../libs/origin';
-import { Filters, ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
+import { ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
 import { FacetCharts } from './browse/components/FacetCharts';
 import { requestAnimationFrame } from './viz/utilities';
@@ -1301,14 +1301,14 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        var { hrefParts, canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props,
-            contextAtID     = object.itemUtil.atId(context),
-            key             = contextAtID && contextAtID.split('?')[0], // Switching between collections may leave component in place
-            content; // Output
+        const { canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props;
+        const contextAtID     = object.itemUtil.atId(context);
+        const key             = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
 
+        let content; // Output
 
         // Object of common props passed to all content_views.
-        var commonContentViewProps = _.pick(this.props,
+        const commonContentViewProps = _.pick(this.props,
             // Props from App:
             'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'listActionsFor',
             'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
@@ -1465,7 +1465,8 @@ class BodyElement extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        if (pastProps.href !== this.props.href){
+        const { href } = this.props;
+        if (pastProps.href !== href){
             // Remove tooltip if still lingering from previous page
             this.tooltipRef && this.tooltipRef.current && this.tooltipRef.current.hideTooltip();
         }
@@ -1568,17 +1569,16 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     addToBodyClassList(className, callback){
-        this.setState(function(currState){
-            var classList   = currState.classList,
-                foundIdx    = classList.indexOf(className);
+        this.setState(function({ classList }){
+            const foundIdx = classList.indexOf(className);
             if (foundIdx > -1){
                 console.warn('ClassName already set', className);
                 return null;
             } else {
-                classList = classList.slice(0);
-                classList.push(className);
+                const nextClassList = classList.slice(0);
+                nextClassList.push(className);
                 console.info('Adding "' + className + '" to body classList');
-                return { classList };
+                return { "classList" : nextClassList };
             }
         }, callback);
     }
@@ -1593,17 +1593,16 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     removeFromBodyClassList(className, callback){
-        this.setState(function(currState){
-            var classList   = currState.classList,
-                foundIdx    = classList.indexOf(className);
+        this.setState(function({ classList }){
+            const foundIdx = classList.indexOf(className);
             if (foundIdx === -1){
                 console.warn('ClassName not in list', className);
                 return null;
             } else {
-                classList = classList.slice(0);
-                classList.splice(foundIdx, 1);
+                const nextClassList = classList.slice(0);
+                nextClassList.splice(foundIdx, 1);
                 console.info('Removing "' + className + '" from body classList');
-                return { classList };
+                return { "classList" : nextClassList };
             }
         }, callback);
     }
@@ -1647,45 +1646,47 @@ class BodyElement extends React.PureComponent {
             return null;
         }
 
-        var lastScrollTop = 0,
-            windowWidth = this.state.windowWidth || null,
-            handleScroll = (e) => {
+        let lastScrollTop = 0;
+        const handleScroll = (e) => {
+            const currentScrollTop = layout.getPageVerticalScrollPosition();
+            const scrollVector = currentScrollTop - lastScrollTop;
 
-                // TODO: Maybe this.setState(function(currState){ ...stuf... }), but would update maybe couple of times extra...
+            lastScrollTop = currentScrollTop;
 
-                var stateChange = {},
-                    currentScrollTop = layout.getPageVerticalScrollPosition(),
-                    scrollVector = currentScrollTop - lastScrollTop;
+            if (this.scrollHandlers.length > 0){
+                _.forEach(this.scrollHandlers, (scrollHandlerFxn) => scrollHandlerFxn(currentScrollTop, scrollVector, e) );
+            }
 
-                lastScrollTop = currentScrollTop;
+            this.setState(function({ windowWidth, scrolledPastTop, scrolledPastEighty }){
+                const rgs = layout.responsiveGridState(windowWidth);
+                let nextScrolledPastTop;
+                let nextScrolledPastEighty;
 
                 if ( // Fixed nav takes effect at medium grid breakpoint or wider.
-                    ['xs','sm'].indexOf(layout.responsiveGridState(windowWidth)) === -1 && (
+                    ['xs','sm'].indexOf(rgs) === -1 && (
                         (currentScrollTop > 20 && scrollVector >= 0) ||
                         (currentScrollTop > 80)
                     )
                 ){
-                    if (!this.state.scrolledPastTop){
-                        stateChange.scrolledPastTop = true;
-                    }
+                    nextScrolledPastTop = true;
                     if (currentScrollTop > 80){
-                        stateChange.scrolledPastEighty = true;
+                        nextScrolledPastEighty = true;
                     }
                 } else {
-                    if (this.state.scrolledPastTop){
-                        stateChange.scrolledPastTop = false;
-                        stateChange.scrolledPastEighty = false;
-                    }
+                    nextScrolledPastTop = false;
+                    nextScrolledPastEighty = false;
                 }
 
-                if (this.scrollHandlers.length > 0){
-                    _.forEach(this.scrollHandlers, (scrollHandlerFxn) => scrollHandlerFxn(currentScrollTop, scrollVector, e) );
+                if (nextScrolledPastTop === scrolledPastTop && nextScrolledPastEighty === scrolledPastEighty){
+                    return null;
                 }
 
-                if (_.keys(stateChange).length > 0){
-                    this.setState(stateChange);
-                }
-            };
+                return {
+                    "scrolledPastTop" : nextScrolledPastTop,
+                    "scrolledPastEighty" : nextScrolledPastEighty
+                };
+            });
+        };
 
         // We add as property of class instance so we can remove event listener on unmount, for example.
         this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(window, handleScroll), 10);

@@ -18,7 +18,10 @@ export class LoginNavItem extends React.Component {
     static propTypes = {
         'updateUserInfo'      : PropTypes.func.isRequired,
         'session'             : PropTypes.bool.isRequired,
-        'href'                : PropTypes.string.isRequired
+        'href'                : PropTypes.string.isRequired,
+        'id'                  : PropTypes.string,
+        'windowWidth'         : PropTypes.number,
+        'schemas'             : PropTypes.object
     };
 
     constructor(props){

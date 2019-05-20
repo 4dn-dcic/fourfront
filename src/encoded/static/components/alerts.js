@@ -7,7 +7,8 @@ import _ from 'underscore';
 import { store } from './../store';
 import { typedefs } from './util';
 
-var { AlertObj } = typedefs;
+// eslint-disable-next-line no-unused-vars
+const { AlertObj } = typedefs;
 
 const defaultNavigateDisappearThreshold = 1;
 
@@ -247,12 +248,10 @@ class AlertItem extends React.PureComponent {
     }
 
     render(){
-        const { index, alert, dismissing } = this.props;
+        const { alert, dismissing } = this.props;
         const { style : bsStyle, noCloseButton, title, message } = alert;
         return (
-            <Fade timeout={500}
-                in={ _.findIndex(dismissing, alert) === -1 }
-                onExited={this.finishDismiss} unmountOnExit={true}>
+            <Fade timeout={500} in={ _.findIndex(dismissing, alert) === -1 } onExited={this.finishDismiss} unmountOnExit={true}>
                 <div className={"alert alert-dismissable alert-" + (bsStyle || 'danger') + (noCloseButton === true ? ' no-close-button' : '')}>
                     { noCloseButton !== true ?
                         <button type="button" className="close" onClick={this.dismiss}>

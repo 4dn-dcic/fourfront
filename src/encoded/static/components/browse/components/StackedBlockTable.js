@@ -6,7 +6,7 @@ import memoize from 'memoize-one';
 import { Collapse } from 'react-bootstrap';
 import _ from 'underscore';
 import { IndeterminateCheckbox } from './../../forms/components/IndeterminateCheckbox';
-import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs } from './../../util';
+import { expFxn, object, Schemas, typedefs } from './../../util';
 
 
 // eslint-disable-next-line no-unused-vars
