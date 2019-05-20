@@ -5,21 +5,32 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, Schemas } from './../util';
 import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
-import { Publications, SOPBelowHeaderRow, WrappedCollapsibleList } from './components';
+import { Publications, SOPBelowHeaderRow, WrappedCollapsibleList, ExperimentSetTableTabView } from './components';
 import { UserContentBodyList } from './../static-pages/components';
 
 
 export default class ExperimentTypeView extends DefaultItemView {
 
     getTabViewContents(){
+        const { context, schemas, browseBaseState } = this.props;
+        const tabs = [];
+        const width = this.getTabViewWidth();
+        const expSetTableProps = _.extend({}, this.props, {
+            'requestHref' : (
+                "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
+                "experiments_in_set.experiment_type.display_title=" + context.display_title
+            ),
+            'title' : function(props, { totalCount }){
+                return (totalCount ? totalCount + ' ' : '') + context.display_title + " Experiment Sets";
+            }
+        });
 
-        var initTabs = [],
-            width = this.getTabViewWidth();
-        var context = this.props.context;
+        tabs.push(ExperimentTypeViewOverview.getTabObject(context, schemas));
 
-        initTabs.push(ExperimentTypeViewOverview.getTabObject(context, this.props.schemas));
+        tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps, width));
 
-        return initTabs.concat(this.getCommonTabs());
+        return tabs.concat(this.getCommonTabs());
     }
 
     /**
@@ -101,26 +112,24 @@ class ExperimentTypeViewOverview extends React.Component {
 }
 
 
-class OverViewBody extends React.Component {
+const OverViewBody = React.memo(function OverViewBody(props){
 
-    render(){
-        var { result, schemas } = this.props,
-            tips = object.tipsFromSchema(schemas || Schemas.get(), result),
-            commonProps = { result, tips, 'wrapInColumn' : 'col-xs-6 col-md-3' };
+    const { result, schemas } = props;
+    const tips = object.tipsFromSchema(schemas || Schemas.get(), result);
+    const commonProps = { result, tips, 'wrapInColumn' : 'col-xs-6 col-md-3' };
 
-        return (
-            <div className="row">
-                <div className="col-md-12 col-xs-12">
-                    <div className="row overview-blocks">
+    return (
+        <div className="row">
+            <div className="col-md-12 col-xs-12">
+                <div className="row overview-blocks">
 
-                        <OverViewBodyItem {...commonProps} property='experiment_category' fallbackTitle="Experiment Category" />
-                        <OverViewBodyItem {...commonProps} property='assay_classification' fallbackTitle="Assay Classification" />
-                        <OverViewBodyItem {...commonProps} property='assay_subclassification' fallbackTitle="Experimental Purpose" />
-                        <OverViewBodyItem {...commonProps} property='raw_file_types' fallbackTitle="Raw Files Available" />
+                    <OverViewBodyItem {...commonProps} property="experiment_category" fallbackTitle="Experiment Category" />
+                    <OverViewBodyItem {...commonProps} property="assay_classification" fallbackTitle="Assay Classification" />
+                    <OverViewBodyItem {...commonProps} property="assay_subclassification" fallbackTitle="Experimental Purpose" />
+                    <OverViewBodyItem {...commonProps} property="raw_file_types" fallbackTitle="Raw Files Available" />
 
-                    </div>
                 </div>
             </div>
-        );
-    }
-}
+        </div>
+    );
+});

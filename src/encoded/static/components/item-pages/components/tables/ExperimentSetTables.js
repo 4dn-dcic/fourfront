@@ -113,6 +113,11 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         };
     }
 
+    static getLimit(href){
+        // TODO return limit from href or 25 if none; memoize.
+        return 25;
+    }
+
     static defaultProps = {
         'requestHref' : function(props, state){
             return "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&publications_of_set.display_title=" + props.context.display_title;
@@ -142,7 +147,8 @@ export class ExperimentSetTableTabView extends React.PureComponent {
 
     render(){
         var { windowWidth, requestHref, title, href } = this.props;
-        var totalCount = this.state.totalCount;
+        const { totalCount } = this.state;
+        const limit = ExperimentSetTableTabView.getLimit(href);
 
         if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
         if (typeof title === 'function')        title = title(this.props, this.state);
@@ -150,11 +156,11 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         return (
             <div>
                 <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, href }} onLoad={this.getCountCallback} />
-                { totalCount && totalCount > 25 ?
+                { totalCount && totalCount > limit ?
                     <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
-                        View all Experiment Sets ({ totalCount - 25 + ' more' })
+                        View all Experiment Sets ({ totalCount - limit + ' more' })
                     </Button>
-                : null }
+                    : null }
             </div>
         );
     }

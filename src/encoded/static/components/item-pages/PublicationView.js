@@ -13,14 +13,21 @@ import { UserContentBodyList } from './../static-pages/components';
 export default class PublicationView extends DefaultItemView {
 
     getTabViewContents(){
-        const { context } = this.props;
+        const { context, browseBaseState } = this.props;
         const tabs = [];
         const width = this.getTabViewWidth();
 
         tabs.push(PublicationSummary.getTabObject(this.props, width));
 
         if ((context.exp_sets_used_in_pub || []).length > 0 || (context.exp_sets_prod_in_pub || []).length > 0){
-            tabs.push(ExperimentSetTableTabView.getTabObject(this.props, width));
+            const expSetTableProps = _.extend({}, this.props, {
+                'requestHref' : (
+                    "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
+                    (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
+                    "publications_of_set.display_title=" + context.display_title
+                )
+            });
+            tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps, width));
         }
 
         return tabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
