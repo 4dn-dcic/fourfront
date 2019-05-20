@@ -71,7 +71,7 @@ export class LoginNavItem extends React.Component {
     }
 
     loginCallback(authResult, successCallback, errorCallback){
-        const { href, updateUserInfo } = this.props;
+        const { updateUserInfo } = this.props;
 
         // First stage: we just have gotten JWT from the Auth0 widget but have not auth'd it against it our own system
         // to see if this is a valid user account or some random person who just logged into their Google account.
@@ -210,7 +210,7 @@ export class LoginNavItem extends React.Component {
 
     renderRegistrationModal(){
         const { schemas } = this.props;
-        const { showRegistrationModal, isLoading } = this.state;
+        const { showRegistrationModal } = this.state;
 
         if (!showRegistrationModal) return null;
 
