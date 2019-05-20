@@ -183,6 +183,8 @@ export class LoginNavItem extends React.Component {
                     </ul>
                 );
                 this.setState({ 'showRegistrationModal' : false });
+                // Moved out of setState callback because no guarantee that setState callback is fired
+                // if component becomes unmounted (which occurs after login).
                 Alerts.queue({
                     "title"     : "Registered & Logged In",
                     "message"   : msg,
