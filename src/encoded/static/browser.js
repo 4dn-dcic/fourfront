@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 
 import App from './components';
 var domready = require('domready');
-import { store, mapStateToProps, reducers } from './store';
+import { store, mapStateToProps } from './store';
 import { Provider, connect } from 'react-redux';
 import { console, JWT } from './components/util';
 import { BrowserFeat } from './components/util/layout';
@@ -71,15 +71,15 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         delete initialReduxStoreState.user_details; // Stored into localStorage.
         store.dispatch({ 'type' : initialReduxStoreState });
 
-        const ReduxWrappedApp = connect(mapStateToProps)(App);
+        const AppWithReduxProps = connect(mapStateToProps)(App);
         let app;
 
         try {
-            app = ReactDOM.hydrate(<Provider store={store}><ReduxWrappedApp /></Provider>, document);
+            app = ReactDOM.hydrate(<Provider store={store}><AppWithReduxProps /></Provider>, document);
         } catch (e) {
             console.error("INVARIANT ERROR", e); // To debug
             // So we can get printout and compare diff of renders.
-            app = require('react-dom/server').renderToString(<Provider store={store}><ReduxWrappedApp /></Provider>);
+            app = require('react-dom/server').renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
         }
 
         // Set <html> class depending on browser features

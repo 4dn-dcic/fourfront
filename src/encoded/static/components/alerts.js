@@ -171,7 +171,6 @@ export default class Alerts extends React.Component {
     constructor(props){
         super(props);
         this.setDismissing = this.setDismissing.bind(this);
-        this.render = this.render.bind(this);
 
         /**
          * State object for component.
@@ -189,7 +188,9 @@ export default class Alerts extends React.Component {
      * Called when 'fade out' of an alert is initialized.
      * @private
      */
-    setDismissing(dismissing){ this.setState({ dismissing }); }
+    setDismissing(dismissing){
+        this.setState({ dismissing });
+    }
 
     /**
      * Renders out Bootstrap Alerts for any queued alerts.
@@ -198,12 +199,15 @@ export default class Alerts extends React.Component {
      * @returns {JSX.Element} A `<div>` element containing AlertItems as children.
      */
     render(){
-        if (this.props.alerts.length === 0) return null;
-
+        const { alerts } = this.props;
+        const { dismissing } = this.state;
+        if (alerts.length === 0) return null;
         return (
-            <div className="alerts mt-2" {..._.omit(this.props, 'children', 'alerts')} children={_.map(this.props.alerts, (alert, index, alerts) =>
-                <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={this.state.dismissing} key={index} />
-            )} />
+            <div className="alerts mt-2" {..._.omit(this.props, 'children', 'alerts')}>
+                { _.map(alerts, (alert, index, alerts) =>
+                    <AlertItem {...{ alert, index, alerts }} setDismissing={this.setDismissing} dismissing={dismissing} key={index} />
+                )}
+            </div>
         );
     }
 }
@@ -226,14 +230,16 @@ class AlertItem extends React.PureComponent {
     dismiss(e){
         e.stopPropagation();
         e.preventDefault();
-        var { alert, dismissing, setDismissing } = this.props;
-        dismissing = dismissing.slice(0);
-        if (_.findIndex(dismissing, alert) === -1) dismissing.push(alert);
-        setDismissing(dismissing);
+        const { alert, dismissing, setDismissing } = this.props;
+        const nextDismissing = dismissing.slice(0);
+        if (_.findIndex(nextDismissing, alert) === -1){
+            nextDismissing.push(alert);
+        }
+        setDismissing(nextDismissing);
     }
 
     finishDismiss(){
-        var { alert, dismissing, setDismissing, alerts } = this.props;
+        const { alert, dismissing, setDismissing, alerts } = this.props;
         setDismissing(_.without(dismissing, alert));
         store.dispatch({
             type: { 'alerts' : _.without(alerts, alert) }
@@ -241,20 +247,21 @@ class AlertItem extends React.PureComponent {
     }
 
     render(){
-        var { index, alert, dismissing } = this.props;
+        const { index, alert, dismissing } = this.props;
+        const { style : bsStyle, noCloseButton, title, message } = alert;
         return (
             <Fade timeout={500}
                 in={ _.findIndex(dismissing, alert) === -1 }
                 onExited={this.finishDismiss} unmountOnExit={true}>
-                <div className={"alert alert-dismissable alert-" + (alert.style || 'danger') + (alert.noCloseButton === true ? ' no-close-button' : '')}>
-                    { alert.noCloseButton === true ? null :
+                <div className={"alert alert-dismissable alert-" + (bsStyle || 'danger') + (noCloseButton === true ? ' no-close-button' : '')}>
+                    { noCloseButton !== true ?
                         <button type="button" className="close" onClick={this.dismiss}>
                             <span aria-hidden="true">×</span>
                             <span className="sr-only">Close alert</span>
                         </button>
-                    }
-                    <h4>{ alert.title }</h4>
-                    <div className="mb-0" children={alert.message} />
+                        : null }
+                    <h4>{ title }</h4>
+                    <div className="mb-0">{ message }</div>
                 </div>
             </Fade>
         );

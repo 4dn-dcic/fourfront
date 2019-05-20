@@ -44,7 +44,7 @@ export class UserActionDropdownMenu extends React.Component {
      * and then refreshes current view/href via navigate fxn.
      */
     performLogout(eventKey, eventObject){
-        var { updateUserInfo } = this.props;
+        const { updateUserInfo } = this.props;
 
         // Removes both idToken (cookie) and userInfo (localStorage)
         JWT.remove();

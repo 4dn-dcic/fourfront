@@ -156,10 +156,10 @@ export default class App extends React.PureComponent {
     }
 
     /**
-     * @property {boolean} sessionMayBeSet Whether user is currently likely to be logged in.
+     * @property {boolean} initialSession - Whether user is logged in upon initial render. Only passed in on server-side render.
      */
     static defaultProps = {
-        'sessionMayBeSet' : null
+        'initialSession' : null
     };
 
     static debouncedOnNavigationTooltipRebuild = _.debounce(ReactTooltip.rebuild, 500);
@@ -177,7 +177,7 @@ export default class App extends React.PureComponent {
             'handleClick', 'handleSubmit', 'handlePopState', 'handleBeforeUnload'
         );
 
-        const { context, sessionMayBeSet } = props;
+        const { context, initialSession } = props;
 
         /**
          * Whether HistoryAPI is supported in current browser.
@@ -189,11 +189,11 @@ export default class App extends React.PureComponent {
 
         // Todo: Migrate session & user_actions to redux store?
         let session = false;
-        if (typeof sessionMayBeSet === 'boolean'){
+        if (typeof initialSession === 'boolean'){
             // Only provided from server
-            session = sessionMayBeSet;
+            session = initialSession;
         } else {
-            // Only available client-side. Same cookie sent to server-side to authenticate sessionMayBeSet, so it must match.
+            // Only available client-side. Same cookie sent to server-side to authenticate initialSession, so it must match.
             session = !!(JWT.get('cookie'));
         }
 
