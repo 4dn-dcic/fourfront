@@ -59,7 +59,9 @@ class ExperimentType(Item):
             "Fixed Sample DNA Localization": "DNA FISH",
             "Fixed Sample RNA Localization": "RNA FISH",
             "Single Particle Tracking": "SPT",
-            "Context-dependent Reporter Expression": "Reporter Expression"
+            "Context-dependent Reporter Expression": "Reporter Expression",
+            "Scanning Electron Microscopy": "SEM",
+            "Transmission Electron Microscopy": "TEM"
         }
         if assay_classification in subclass_dict:
             return subclass_dict[assay_classification]

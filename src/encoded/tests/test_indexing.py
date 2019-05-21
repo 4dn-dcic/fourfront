@@ -4,8 +4,10 @@ The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
 import pytest
+import json
+import time
 from encoded.verifier import verify_item
-
+from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from .features.conftest import app_settings, app as conf_app
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
@@ -49,7 +51,6 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
 
 @pytest.mark.slow
 def test_indexing_simple(app, testapp, indexer_testapp):
-    import time
     es = app.registry['elasticsearch']
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
     assert doc_count == 0
@@ -121,7 +122,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
 
 
 @pytest.fixture
-def item_uuid(testapp, award, experiment, lab, file_formats):
+def test_fp_uuid(testapp, award, experiment, lab, file_formats):
     # this is a processed file
     item = {
         'accession': '4DNFIO67APU2',
@@ -136,9 +137,52 @@ def item_uuid(testapp, award, experiment, lab, file_formats):
     return res.json['@graph'][0]['uuid']
 
 
-def test_item_detailed(testapp, indexer_testapp, item_uuid, registry):
+def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
+                                 award, lab, file_formats):
     # Todo, input a list of accessions / uuids:
-    verify_item(item_uuid, indexer_testapp, testapp, registry)
+    verify_item(test_fp_uuid, indexer_testapp, testapp, app.registry)
+    # While we're here, test that _update of the file properly
+    # queues the file with given relationship
+    indexer_queue = app.registry[INDEXER_QUEUE]
+    rel_file = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('pairs').get('@id')
+    }
+    rel_res = testapp.post_json('/file_processed', rel_file)
+    rel_uuid = rel_res.json['@graph'][0]['uuid']
+    # now update the original file with the relationship
+    # ensure rel_file is properly queued
+    related_files = [{'relationship_type': 'derived from', 'file': rel_uuid}]
+    testapp.patch_json('/' + test_fp_uuid, {'related_files': related_files}, status=200)
+    time.sleep(2)
+    # may need to make multiple calls to indexer_queue.receive_messages
+    received = []
+    received_batch = None
+    while received_batch is None or len(received_batch) > 0:
+        received_batch = indexer_queue.receive_messages()
+        received.extend(received_batch)
+    to_replace = []
+    to_delete = []
+    found_fp_sid = None
+    found_rel_sid = None
+    # keep track of the PATCH of the original file and the associated PATCH
+    # of the related file. Compare uuids
+    for msg in received:
+        json_body = json.loads(msg.get('Body', {}))
+        if json_body['uuid'] == test_fp_uuid and json_body['method'] == 'PATCH':
+            found_fp_sid = json_body['sid']
+            to_delete.append(msg)
+        elif json_body['uuid'] == rel_uuid and json_body['method'] == 'PATCH':
+            assert json_body['info'] == "queued from %s _update" % test_fp_uuid
+            found_rel_sid = json_body['sid']
+            to_delete.append(msg)
+        else:
+            to_replace.append(msg)
+    indexer_queue.delete_messages(to_delete)
+    indexer_queue.replace_messages(to_replace, vis_timeout=0)
+    assert found_fp_sid is not None and found_rel_sid is not None
+    assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
 # @pytest.mark.performance
@@ -159,7 +203,6 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
     from os import listdir
     from os.path import isfile, join
-    import json
     from unittest import mock
     from timeit import default_timer as timer
     from pkg_resources import resource_filename

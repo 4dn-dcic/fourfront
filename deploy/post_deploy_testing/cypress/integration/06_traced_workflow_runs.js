@@ -27,7 +27,8 @@ describe("WorkflowRun traced graphs for selected ExperimentSets", function(){
 
         testNodesTextGlobalInputs(global_input_file_accessions);
 
-        it.skip('1st column of steps is aligned to input nodes', function(){ // Wait for node.nodeData.node to exist on each DOM node before proceeding w/ further tests.
+        it.skip('1st column of steps is aligned to input nodes', function(){
+            // Wait for node.nodeData.node to exist on each DOM node before proceeding w/ further tests.
             cy.get('.graph-wrapper .nodes-layer .node[data-node-type="step"][data-node-column="1"]').should('have.length', 3).then(function($stepNodes){
                 Cypress._.forEach($stepNodes, function(stepNode){
 

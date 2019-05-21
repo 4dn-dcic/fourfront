@@ -32,7 +32,6 @@
             "description": "A plain text description of the source.",
             "type": "string",
             "lookup": 30,
-            "default": "",
             "formInput": "textarea"
         },
         "title": {

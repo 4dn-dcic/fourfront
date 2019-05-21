@@ -327,7 +327,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
             return (
                 <React.Fragment>
                     <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
-                    <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} style={{ 'padding-top':'10px' }} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
+                    <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
                 </React.Fragment>
             );
         }
