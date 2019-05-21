@@ -128,6 +128,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
+        "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.individual.organism.name",
         "experiments_in_set.biosample.modifications.modification_type",
         "experiments_in_set.biosample.modifications.display_title",
