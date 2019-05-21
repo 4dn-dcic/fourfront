@@ -91,7 +91,8 @@
                 "RNA-DNA Pairwise Interactions",
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
-                "Single Particle Tracking"
+                "Single Particle Tracking",
+                "Context-dependent Reporter Expression"
             ]
         },
         "other_tags": {
