@@ -1,7 +1,6 @@
 {
-  "name": "4DN",
+  "name": "fourfront",
   "version": "0.0.0",
-  "description": "domready held back.",
   "scripts": {
     "test": "jest",
     "build": "node --max-old-space-size=2048 ./node_modules/.bin/gulp build",
@@ -15,7 +14,9 @@
     "cypress:open-local": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://localhost:8000",
     "cypress:open-hotseat": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com",
     "cypress:test": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
-    "cypress:test-recorded": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret"
+    "cypress:test-recorded": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
+    "cypress:test-recorded-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
+    "cypress:test-recorded-hotseat": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com"
   },
   "author": "",
   "license": "MIT",
@@ -64,7 +65,7 @@
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.0.2",
     "create-react-class": "^15.6.3",
-    "cypress": "^3.2.0",
+    "cypress": "^3.3.0",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-external-nodejs-plugin": "^1.0.0",
