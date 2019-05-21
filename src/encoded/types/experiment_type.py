@@ -41,7 +41,7 @@ class ExperimentType(Item):
         "description": "A shorter and more succinct name for the assay subclassification",
         "type": "string"
     })
-    def assay_subclass_short(self, request, assay_classification=None, assay_subclassification=None):
+    def assay_subclass_short(self, request, title, assay_classification=None, assay_subclassification=None, experiment_category=None):
         subclass_dict = {
             "Replication Timing": "Repli-seq",
             "Proximity to Organelle": "Organelle-seq",
@@ -58,14 +58,17 @@ class ExperimentType(Item):
             "RNA-DNA Pairwise Interactions": "RNA-DNA HiC",
             "Fixed Sample DNA Localization": "DNA FISH",
             "Fixed Sample RNA Localization": "RNA FISH",
-            "Single Particle Tracking": "SPT"
+            "Single Particle Tracking": "SPT",
+            "Context-dependent Reporter Activity": "Reporter Activity"
         }
         if assay_classification in subclass_dict:
             return subclass_dict[assay_classification]
         elif assay_subclassification in subclass_dict:
             return subclass_dict[assay_subclassification]
+        elif experiment_category:
+            return experiment_category + ' (unclassified)'
         else:
-            return 'Unclassified'
+            return title
 
     @calculated_property(schema={
         "title": "Other Protocols",
