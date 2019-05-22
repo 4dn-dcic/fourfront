@@ -53,6 +53,7 @@ export class NavigationBar extends React.PureComponent {
         this.loadHelpMenuTree = this.loadHelpMenuTree.bind(this);
         this.setOpenDropdownID = _.throttle(this.setOpenDropdownID.bind(this), 500);
         this.resetOpenDropdownID = this.resetOpenDropdownID.bind(this);
+        this.onToggleNavBar = this.onToggleNavBar.bind(this);
 
         /**
          * Navbar state.
@@ -171,6 +172,10 @@ export class NavigationBar extends React.PureComponent {
         });
     }
 
+    onToggleNavBar(open){
+        this.setState({ 'mobileDropdownOpen' : open });
+    }
+
     setOpenDropdownID(id = null){
         this.setState({ 'openDropdown' : id });
     }
@@ -197,9 +202,8 @@ export class NavigationBar extends React.PureComponent {
                 { inclBigMenu ? <div className="big-dropdown-menu-background" onClick={this.resetOpenDropdownID} /> : null }
                 <div id="top-nav" className="navbar-fixed-top">
                     <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
-                    <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
-                        this.setState({ 'mobileDropdownOpen' : open });
-                    }} expanded={mobileDropdownOpen}>
+                    <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main"
+                        id="navbar-icon" onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
                         <Navbar.Header>
                             <FourfrontLogo onClick={this.resetOpenDropdownID} />
                             <Navbar.Toggle>
@@ -210,10 +214,11 @@ export class NavigationBar extends React.PureComponent {
                             <Nav>
                                 { browseMenuItemOpts ?
                                     <NavItem key={browseMenuItemOpts.id} id={browseMenuItemOpts.id}
-                                        href={getActionURL(browseMenuItemOpts, mounted, href)}
-                                        active={isActionActive(browseMenuItemOpts, mounted, href)}
-                                        children={browseMenuItemOpts.title || "Browse"} />
-                                : null }
+                                        href={getActionURL(browseMenuItemOpts, href)}
+                                        active={isActionActive(browseMenuItemOpts, href)}>
+                                        { browseMenuItemOpts.title || "Browse" }
+                                    </NavItem>
+                                    : null }
                                 <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
                                     setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
                             </Nav>
@@ -224,7 +229,7 @@ export class NavigationBar extends React.PureComponent {
                     { inclBigMenu ?
                         <BigDropdownMenu {...{ windowWidth, windowHeight, mobileDropdownOpen, href }}
                             setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} menuTree={helpMenuTree} />
-                    : null }
+                        : null }
                     <ChartDataController.Provider id="quick_info_bar1">
                         <QuickInfoBar href={href} schemas={schemas} context={context} browseBaseState={browseBaseState} invisible={!!(openDropdown)} />
                     </ChartDataController.Provider>

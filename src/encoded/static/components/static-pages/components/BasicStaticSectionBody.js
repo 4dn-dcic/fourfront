@@ -8,7 +8,7 @@ import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
-import * as store from './../../../store';
+import { store } from './../../../store';
 import { replaceString as replacePlaceholderString } from './../placeholders';
 
 

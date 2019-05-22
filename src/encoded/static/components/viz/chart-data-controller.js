@@ -312,7 +312,7 @@ export const ChartDataController = {
      * @returns {void} Undefined
      */
     initialize : function(browseBaseState = null, fields = null, callback = null){
-        if (!refs.store) refs.store = require('./../../store');
+        if (!refs.store) refs.store = require('./../../store').store;
 
         var initStoreState = refs.store.getState();
         refs.href = initStoreState.href;

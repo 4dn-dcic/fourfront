@@ -4,12 +4,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import * as d3 from 'd3';
-import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
 import { CursorViewBounds } from './../ChartDetailCursor';
-import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
+import { console, isServerSide, analytics } from './../../util';
 
 
 /**

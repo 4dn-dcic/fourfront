@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import * as store from './../../../store';
+import { store } from './../../../store';
 import { ajax, console, object, isServerSide, navigate } from './../../util';
 
 
