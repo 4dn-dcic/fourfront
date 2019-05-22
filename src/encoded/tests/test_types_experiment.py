@@ -142,6 +142,11 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
     assert res.json['@graph'][0]['experiment_summary'] == summary
     assert summary in res.json['@graph'][0]['display_title']
 
+
+def test_experiment_summary_repliseq(repliseq_4):
+    assert repliseq_4.get('experiment_summary') == '2-stage Repli-seq on GM12878 S-phase early'
+
+
 # test for experiment_set_replicate _update function
 def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):
     assert not replicate_experiment_set['experiments_in_set']
@@ -164,7 +169,7 @@ def test_experiment_set_default_embedded_list(registry, exp_types):
     # create experimentHiC obj; _update (and by extension, add_default_embeds)
     # are called automatically
     test_exp = ExperimentHiC.create(registry, None, exp_data)
-    #call reify embedded property (defined in snovault/resources.py)
+    # call reify embedded property (defined in snovault/resources.py)
     embedded = test_exp.embedded
     embedded_list = test_exp.embedded_list
     type_info_embedded = registry[TYPES]['experiment_hi_c'].embedded_list
@@ -566,16 +571,32 @@ def expt_w_2_targ_regions(testapp, exp_w_target_info, gene_bio_feature):
 
 
 @pytest.fixture
-def expt_w_target(testapp, lab, award, human_biosample,
-                  mboI, prot_bio_feature, exp_types):
-    item = {
+def expt_w_target_data(lab, award, human_biosample,
+                       prot_bio_feature, exp_types):
+    return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': exp_types['chia']['@id'],
         'targeted_factor': [prot_bio_feature['@id']]
     }
-    return testapp.post_json('/experiment_chiapet', item).json['@graph'][0]
+
+
+@pytest.fixture
+def expt_w_target(testapp, expt_w_target_data):
+    return testapp.post_json('/experiment_chiapet', expt_w_target_data).json['@graph'][0]
+
+
+@pytest.fixture
+def chipseq_expt(testapp, expt_w_target_data, exp_types):
+    expt_w_target_data['experiment_type'] = exp_types['chipseq']['@id']
+    return testapp.post_json('/experiment_seq', expt_w_target_data).json['@graph'][0]
+
+
+@pytest.fixture
+def tsaseq_expt(testapp, expt_w_target_data, exp_types):
+    expt_w_target_data['experiment_type'] = exp_types['tsaseq']['@id']
+    return testapp.post_json('/experiment_tsaseq', expt_w_target_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -607,6 +628,20 @@ def repliseq_3(testapp, repliseq_info):
 
 
 @pytest.fixture
+def repliseq_4(testapp, repliseq_info):
+    repliseq_info['stage_fraction'] = 'early'
+    repliseq_info['total_fractions_in_exp'] = 2
+    repliseq_info['cell_cycle_phase'] = 'S'
+    return testapp.post_json('/experiment_repliseq', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment_atacseq(testapp, repliseq_info, exp_types):
+    repliseq_info['experiment_type'] = exp_types['atacseq']['@id']
+    return testapp.post_json('/experiment_atacseq', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
 def damid_no_fusion(testapp, repliseq_info, exp_types):
     repliseq_info['experiment_type'] = exp_types['dam']['@id']
     return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
@@ -616,6 +651,13 @@ def damid_no_fusion(testapp, repliseq_info, exp_types):
 def damid_w_fusion(testapp, repliseq_info, prot_bio_feature, exp_types):
     repliseq_info['experiment_type'] = exp_types['dam']['@id']
     repliseq_info['targeted_factor'] = [prot_bio_feature['@id']]
+    return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
+
+
+@pytest.fixture
+def damid_w_multifusion(testapp, repliseq_info, prot_bio_feature, gene_bio_feature, exp_types):
+    repliseq_info['experiment_type'] = exp_types['dam']['@id']
+    repliseq_info['targeted_factor'] = [prot_bio_feature['@id'], gene_bio_feature['@id']]
     return testapp.post_json('/experiment_damid', repliseq_info).json['@graph'][0]
 
 
@@ -671,6 +713,26 @@ def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_
     img_path3 = {'path': imaging_path_3['@id'], 'channel': 'ch03'}
     repliseq_info['imaging_paths'] = [img_path1, img_path2, img_path3]
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
+def test_experiment_atacseq_display_title(experiment_atacseq):
+    assert experiment_atacseq.get('display_title') == 'ATAC-seq on GM12878 - ' + experiment_atacseq.get('accession')
+
+
+def test_experiment_damid_w_multifusion_display_title(damid_w_multifusion):
+    assert damid_w_multifusion.get('display_title') == 'DamID-seq with mulitiple DAM fusions on GM12878 - ' + damid_w_multifusion.get('accession')
+
+
+def test_experiment_chiapet_w_target_display_title(expt_w_target):
+    assert expt_w_target.get('display_title') == 'ChIA-PET against RAD21 protein on GM12878 - ' + expt_w_target.get('accession')
+
+
+def test_experiment_chipseq_w_target_display_title(chipseq_expt):
+    assert chipseq_expt.get('display_title') == 'ChIP-seq against RAD21 protein on GM12878 - ' + chipseq_expt.get('accession')
+
+
+def test_experiment_tsaseq_display_title(tsaseq_expt):
+    assert tsaseq_expt.get('display_title') == 'TSA-seq against RAD21 protein on GM12878 - ' + tsaseq_expt.get('accession')
 
 
 def test_experiment_categorizer_4_mic_no_path(testapp, microscopy_no_path):
@@ -793,3 +855,10 @@ def test_validate_exp_type_valid(testapp, experiment_data, new_exp_type):
     testapp.patch_json(exp_type1['@id'], {'valid_item_types': ['ExperimentSeq', 'ExperimentHiC']})
     expt = testapp.post_json('/experiment_hi_c', experiment_data, status=201).json['@graph'][0]
     assert expt['experiment_type'] == '/experiment-types/title/'
+
+
+def test_validate_experiment_set_duplicate_replicate_experiments(testapp, rep_set_data, experiment):
+    rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': experiment['@id']},
+                                      {'bio_rep_no': 1, 'tec_rep_no': 2, 'replicate_exp': experiment['@id']}]
+    repset = testapp.post_json('/experiment_set_replicate', rep_set_data, status=422)
+    assert 'Duplicate experiment' in repset.json.get('errors')[0].get('description')

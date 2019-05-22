@@ -179,7 +179,7 @@ class Experiment(Item):
                 status = sopmap.properties.get('status')
                 if not self.has_bad_status(status):
                     return sopmap
-            except AttributeError:
+            except AttributeError:  # pragma: no cover
                 pass
         return None
 
@@ -558,7 +558,7 @@ class ExperimentChiapet(Experiment):
             for tf in targeted_factor:
                 target_props = request.embed(tf, '@@object')
                 tstring += ', {}'.format(target_props['display_title'])
-            sum_str += ('against ' + tstring[2:])
+            sum_str += (' against ' + tstring[2:])
 
         biosamp_props = request.embed(biosample, '@@object')
         biosource = biosamp_props['biosource_summary']
@@ -790,7 +790,7 @@ def validate_exp_type_validity_for_experiment(context, request):
     data = request.json
     if 'experiment_type' in data:
         exp_type_item = get_item_if_you_can(request, data['experiment_type'], 'experiment-types')
-        if not exp_type_item:
+        if not exp_type_item:  # pragma: no cover
             # item level validation will take care of generating the error
             return
         exp_type_name = exp_type_item['title']
