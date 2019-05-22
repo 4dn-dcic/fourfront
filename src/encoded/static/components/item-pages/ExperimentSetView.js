@@ -491,6 +491,17 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 
 export class SupplementaryFilesOPFCollection extends React.PureComponent {
 
+    static collectionStatus = function(files){
+        const statuses = _.uniq(_.pluck(files, 'status'));
+        const len = statuses.length;
+        if (len === 1){
+            return statuses[0];
+        } else if (len > 1) {
+            return statuses;
+        }
+        return null;
+    }
+
     static defaultProps = {
         'defaultOpen' : false
     };
@@ -499,6 +510,8 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
+        // Usually have >1 SupplementaryFilesOPFCollection on page so we memoize at instance level not class level.
+        this.collectionStatus = memoize(SupplementaryFilesOPFCollection.collectionStatus);
 
         this.state = {
             'open' : props.defaultOpen
@@ -519,12 +532,39 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
         );
     }
 
+    renderStatusIndicator(){
+        const { collection } = this.props;
+        const { files } = collection;
+        const status = this.collectionStatus(files);
+        if (!status) return null;
+        if (typeof status === 'string'){
+            const capitalizedStatus = Schemas.Term.toName("status", status);
+            return (
+                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className="inline-block pull-right mr-12 mt-23 ml-2">
+                    <i className="item-status-indicator-dot" data-status={status} />
+                </div>
+            );
+        } else {
+            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
+            return (
+                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className="inline-block pull-right mr-12 mt-23 ml-2">
+                    {
+                        _.map(status, function(s){
+                            return <i className="item-status-indicator-dot" data-status={s} />;
+                        })
+                    }
+                </div>
+            );
+        }
+    }
+
     render(){
         const { collection, index, context, width, mounted, defaultOpen, windowWidth } = this.props;
         const { files, higlass_view_config } = collection;
         const { open } = this.state;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
+                { this.renderStatusIndicator() }
                 <h4>
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
@@ -554,15 +594,17 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
 
     static defaultProps = {
         'defaultOpen' : true,
-        /* - In case we want to extend later with more columns, enable this then pass in as prop to ProcessedFilesStackedTable
         'columnHeaders' : (function(){
             const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
-            colHeaders.splice(-1, 0, {
-                columnClass: 'file-detail', title: 'Classification', initialWidth: 135, field : "file_classification"
+            colHeaders.push({
+                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
+                render : function(file, field, detailIndex, fileEntryBlockProps){
+                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
+                    return <i className="item-status-indicator-dot ml-07" data-status={file.status} data-tip={capitalizedStatus} />;
+                }
             });
             return colHeaders;
         })()
-        */
     };
 
     constructor(props){
@@ -581,9 +623,9 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     }
 
     render(){
-        const { files, width, href } = this.props;
+        const { files, width, href, columnHeaders } = this.props;
         const filesLen = files.length;
-        const passProps = _.extend({ width, href, files }, SelectedFilesController.pick(this.props));
+        const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
                 <h4 className="mb-15">
@@ -594,7 +636,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
                 </h4>
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
-                        <ProcessedFilesStackedTable {...passProps} files={files} />
+                        <ProcessedFilesStackedTable {...passProps} files={files} columnHeaders={columnHeaders} />
                     </div>
                 </Collapse>
             </div>
@@ -744,7 +786,9 @@ export class SupplementaryFilesTabView extends React.PureComponent {
                     { titleDetailString.length > 0 ? <small> - {titleDetailString}</small> : null }
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { referenceFiles? <SupplementaryReferenceFilesSection {...commonProps} files={referenceFiles} /> : null }
+                { referenceFiles?
+                    <SupplementaryReferenceFilesSection {...commonProps} files={referenceFiles} />
+                    : null }
                 { _.map(otherProcessedFileSetsCombined, function(collection, index, all){
                     const defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 2));
                     return <SupplementaryFilesOPFCollection {..._.extend({ collection, index, defaultOpen }, commonProps)} key={index} />;
