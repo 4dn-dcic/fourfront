@@ -37,8 +37,7 @@ class BioFeature(Item):
         if preferred_label:
             return preferred_label
         ftype = get_item_if_you_can(request, feature_type)
-        if ftype is not None:
-            ftype = ftype.get('preferred_name')
+        ftype = ftype.get('preferred_name', '') if ftype is not None else ''
 
         # first pass will not assume combined fields
         if ftype == 'cellular_component':

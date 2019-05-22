@@ -93,6 +93,7 @@
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
                 "Single Particle Tracking",
+                "Context-dependent Reporter Expression",
                 "Scanning Electron Microscopy",
                 "Transmission Electron Microscopy"
             ]

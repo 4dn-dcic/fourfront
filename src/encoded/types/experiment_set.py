@@ -24,36 +24,6 @@ from .base import (
 import datetime
 
 
-def invalidate_linked_items(item, field, updates=None):
-    '''Invalidates the linkTo item(s) in the given field of an item
-        which will trigger re-indexing the linked items
-        a dictionary of field value pairs to update for the linked item(s)
-        can be provided that will be applied prior to invalidation -
-        beware that each update will be applied to every linked item in the field
-    '''
-    request = get_current_request()
-    registry = item.registry
-    try:
-        properties = item.properties
-    except KeyError:
-        # if I try to invalidate an object that isn't yet fully stored, exit
-        return
-    if field in properties:
-        links = properties[field]
-        if hasattr(links, 'lower'):
-            # if string turn into list
-            links = [links]
-        for link in links:
-            linked_item = item.collection.get(link)
-            registry.notify(BeforeModified(linked_item, request))
-            # update item info if provided
-            if updates is not None:
-                for f, val in updates.items():
-                    linked_item.properties[f] = val
-                    linked_item.update(linked_item.properties)
-            registry.notify(AfterModified(linked_item, request))
-
-
 @collection(
     name='experiment-sets',
     unique_key='accession',
@@ -340,10 +310,6 @@ def validate_experiment_set_replicate_experiments(context, request):
     any_failures = False
     for replicate_idx, replicate_exp_object in enumerate(replicate_exp_objects):
         experiment = replicate_exp_object.get('replicate_exp')
-        if experiment is None:
-            request.errors.add('body', None, 'No experiment supplied for replicate_exps[' + str(replicate_idx) + ']')
-            any_failures = True
-            continue
         if experiment in have_seen_exps:
             request.errors.add('body', None, 'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']')
             any_failures = True

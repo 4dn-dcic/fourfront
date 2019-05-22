@@ -54,10 +54,10 @@ def fetch_gene_info_from_ncbi(geneid):
         resp = requests.get(NCBI)
         if resp.status_code == 200:
             break
-        if resp.status_code == 429:
+        if resp.status_code == 429:  # pragma: no cover
             time.sleep(3)
             continue
-        if count == 4:
+        if count == 4:  # pragma: no cover
             return {}
     text = resp.text
     gene_info = get_gene_info_from_response_text(text)

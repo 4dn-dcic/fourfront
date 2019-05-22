@@ -216,7 +216,7 @@ class Protocol(Item, ItemWithAttachment):
         else:
             if protocol_type == 'Other':
                 protocol_type = 'Protocol'
-            if date_created:  # should always have this value
+            if date_created:  # pragma: no cover should always have this value
                 protocol_type = protocol_type + " from " + date_created[:10]
             return protocol_type
 
@@ -295,7 +295,7 @@ class TrackingItem(Item):
         "type": "string",
     })
     def display_title(self, tracking_type, date_created=None, google_analytics=None):
-        if date_created:  # should always be true
+        if date_created:  # pragma: no cover should always be true
             date_created = date_created[:10]
         if tracking_type == 'google_analytics':
             for_date = None

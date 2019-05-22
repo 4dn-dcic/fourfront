@@ -26,6 +26,17 @@ def biosample_1(testapp, human_biosource, lab, award):
     return testapp.post_json('/biosample', item).json['@graph'][0]
 
 
+@pytest.fixture
+def biosample_w_mod(testapp, biosample_1, mod_w_target):
+    return testapp.patch_json(biosample_1['@id'], {'modifications': [mod_w_target['@id']]}).json['@graph'][0]
+
+
+@pytest.fixture
+def biosample_w_treatment(testapp, biosample_1, rnai):
+    return testapp.patch_json(biosample_1['@id'], {'treatments': [rnai['@id']]}).json['@graph'][0]
+
+
+@pytest.fixture
 def biosample_relation(derived_from):
     return {"biosample_relation": [{"relationship_type": "derived from",
             "biosample": derived_from['@id']}]}
@@ -126,3 +137,21 @@ def test_biosample_sample_type_bs_multiple_same_type(testapp, biosample_1, human
 def test_biosample_sample_type_bs_multiple_diff_types(testapp, biosample_1, human_biosource, lung_biosource):
     res = testapp.patch_json(biosample_1['@id'], {'biosource': [human_biosource['@id'], lung_biosource['@id']]}).json['@graph'][0]
     assert res['biosample_type'] == 'mixed sample'
+
+
+def test_biosample_modifications_summaries(biosample_w_mod):
+    assert biosample_w_mod['modifications_summary'] == 'Crispr for RAD21 gene'
+    assert biosample_w_mod['modifications_summary_short'] == 'RAD21 Crispr'
+
+
+def test_biosample_modifications_summaries_no_mods(biosample_1):
+    assert biosample_1.get('modifications_summary') == 'None'
+    assert biosample_1.get('modifications_summary_short') == 'None'
+
+
+def test_biosample_treatments_summary(biosample_w_treatment):
+    assert biosample_w_treatment.get('treatments_summary') == 'shRNA treatment'
+
+
+def test_biosample_treatments_summary_no_treatment(biosample_1):
+    assert biosample_1.get('treatments_summary') == 'None'

@@ -44,6 +44,12 @@ def test_calculated_agent_treatment_display_title(testapp, heatshock_treatment):
     assert res.json['@graph'][0]['display_title'] == 'Heat Shock (3.5h at 42°C)'
 
 
+def test_calculated_agent_treatment_display_title_other_treatment(testapp, heatshock_treatment):
+    res = testapp.patch_json(
+        heatshock_treatment['@id'], {'treatment_type': 'Other'}).json['@graph'][0]
+    assert res.get('display_title') == 'Other treatment'
+
+
 def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
     assert drug_treatment['display_title'] == 'Drug treatment'
     res = testapp.patch_json(
