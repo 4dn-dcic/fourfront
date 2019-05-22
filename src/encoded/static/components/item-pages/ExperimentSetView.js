@@ -542,17 +542,15 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
             return (
                 <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className="inline-block pull-right mr-12 mt-23 ml-2">
                     <i className="item-status-indicator-dot" data-status={status} />
+                    { capitalizedStatus }
                 </div>
             );
         } else {
             const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
             return (
                 <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className="inline-block pull-right mr-12 mt-23 ml-2">
-                    {
-                        _.map(status, function(s){
-                            return <i className="item-status-indicator-dot" data-status={s} />;
-                        })
-                    }
+                    { _.map(status, function(s){ return <i className="item-status-indicator-dot" data-status={s} />; }) }
+                    Multiple
                 </div>
             );
         }
