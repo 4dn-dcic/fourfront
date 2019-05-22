@@ -268,8 +268,9 @@ function renderFileHeaderWithCheckbox(stackedBlockProps){
                 File
             </FileHeaderWithCheckbox>
         );
+    } else {
+        return "File";
     }
-    return null;
 }
 
 /**
@@ -511,13 +512,13 @@ export class RawFilesStackedTable extends React.PureComponent {
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
         const { collapseLimit, collapseShow } = this.props;
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
-        var biosample       = expsWithBiosample[0].biosample,
-            bioRepTitle     = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary,
-            biosampleAtId   = object.itemUtil.atId(biosample),
-            biosampleTitle  = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle,
-            showMoreExtraTitle = expsWithBiosample.length <= 5 ? null : (
-                    'with ' + expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + ' Files'
-                );
+        const [ { biosample } ] = expsWithBiosample; // From first exp, grab out biosample (all exps should have same 1).
+        const bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
+        const biosampleAtId = object.itemUtil.atId(biosample);
+        const biosampleTitle = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
+        const showMoreExtraTitle = expsWithBiosample.length <= 5 ? null : (
+            'with ' + expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + ' Files'
+        );
 
         return (
             <StackedBlock columnClass="biosample" hideNameOnHover={false}
@@ -526,7 +527,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6}>
                     { biosampleAtId ?
                         <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
-                    : <span className="name-title">{ biosampleTitle }</span> }
+                        : <span className="name-title">{ biosampleTitle }</span> }
                 </StackedBlockName>
                 <StackedBlockList className="experiments" title="Experiments" collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2}
                     showMoreExtTitle={showMoreExtraTitle}>
@@ -602,16 +603,18 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static filesGroupedByExperimentOrGlobal = memoize(function(files){
         // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
-        const groupedFiles = expFxn.processedFilesFromExperimentSetToGroup(files);
+        const groupedFiles = expFxn.divideFilesFromExpSetToExpSetsAndExps(files);
         const filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
 
-        // This should always be true (or false b.c of 0). It might change to not always be true (> 1). In this case, we should, figure out a different way of handling it. Like an extra stacked block at front for ExpSet.
         const expSetAccessions = _.keys(groupedFiles.experiment_sets || {});
-        if (expSetAccessions.length === 1){
-            filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]];
-        } else if (expSetAccessions.length > 1) {
+        if (expSetAccessions.length === 1){ // Should only be 1 unless files from multiple expsets present. Handle this later if becomes case.
+            // Put all files which come from experiment set itself (not an experiment) under 'global' key.
+            filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]].slice();
+        }
+        if (expSetAccessions.length > 1) {
             console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
+
         return filesGroupedByExperimentOrGlobal;
     });
 
@@ -651,14 +654,15 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
 
         const { collapseLongLists, titleForFiles } = this.props;
-
-        return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(function([ expAAccesion, filesForExpA ], [ expBAccesion, filesForExpB ]){
+        const expSortFxn = function([ expAAccesion, filesForExpA ], [ expBAccesion, filesForExpB ]){
             // Bubble 'global' exps (aka grouping of files that belong to multiple exps or expset itself)
             // to top.
             if (expAAccesion === 'global') return -1;
             if (expBAccesion === 'global') return 1;
             return 0;
-        }), ([ experimentAccession, filesForExperiment ])=>{
+        };
+
+        return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(expSortFxn), ([ experimentAccession, filesForExperiment ])=>{
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
 

@@ -140,7 +140,13 @@ class Experiment(Item):
         "processed_files.file_size",
         "processed_files.upload_key",
         "processed_files.file_format",
-        "processed_files.file_classification"
+        "processed_files.file_classification",
+
+        "reference_files.accession",
+        "reference_files.file_type_detailed",
+        "reference_files.file_size",
+        "reference_files.file_classification",
+        "reference_files.status"
     ]
 
     def generate_mapid(self, experiment_type, num):

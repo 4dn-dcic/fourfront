@@ -261,7 +261,13 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.higlass_uid",
         "experiments_in_set.other_processed_files.files.genome_assembly",
         "experiments_in_set.other_processed_files.files.status",
-        "experiments_in_set.other_processed_files.files.last_modified.date_modified"
+        "experiments_in_set.other_processed_files.files.last_modified.date_modified",
+
+        "experiments_in_set.reference_files.accession",
+        "experiments_in_set.reference_files.file_classification",
+        "experiments_in_set.reference_files.file_type_detailed",
+        "experiments_in_set.reference_files.file_size",
+        "experiments_in_set.reference_files.status"
     ]
 
     @calculated_property(schema={

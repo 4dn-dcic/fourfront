@@ -615,16 +615,10 @@ $small-label-accession-font-size : 0.75rem;
 			float: right;
 			display: block;
 
-			> .s-block.stack-depth-1:first-child {
-				border-top: 1px solid #b5b5b5;
-			}
-
 			> .s-block.stack-depth-1,
 			> .collapsible-s-block-ext > .s-block.stack-depth-1 { // .biosample
 
-				&:not(:first-child){
-					border-top: 1px solid #606060;
-				}
+				border-top: 1px solid #606060;
 
 				> .name {
 					text-align: center;
@@ -662,15 +656,21 @@ $small-label-accession-font-size : 0.75rem;
 				}
 			}
 
+			> .s-block.stack-depth-1:first-child {
+				border-top: 1px solid #b5b5b5;
+			}
+
 			.s-block-list.files,
 			.s-block-list.file-groups,
 			.s-block-list.stack-depth-2 {
 
+				.s-block.file-group:not(:first-child),
+				.collapsible-s-block-ext > .s-block.file-group:first-child {
+					border-top: 1px solid #888;
+					border-color: rgba(0,0,0,0.5);
+				}
+
 				.s-block.file-group {
-					&:not(:first-child){
-						border-top: 1px solid #888;
-						border-color: rgba(0,0,0,0.5);
-					}
 
 					> .s-block-list.files > .s-block.file:not(:first-child) {
 						border-top-style: dotted;
@@ -702,12 +702,13 @@ $small-label-accession-font-size : 0.75rem;
 					}
 				}
 
-				.s-block.file {
+				.s-block.file:not(:first-child),
+				.collapsible-s-block-ext > .s-block.file:first-child {
+					border-top: 1px solid #ccc;
+					border-color: rgba(0,0,0,0.2);
+				}
 
-					&:not(:first-child){
-						border-top: 1px solid #ccc;
-						border-color: rgba(0,0,0,0.2);
-					}
+				.s-block.file {
 
 					&:hover {
 						border-color: #888;
