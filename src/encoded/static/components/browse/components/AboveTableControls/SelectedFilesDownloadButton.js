@@ -75,8 +75,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.hideModal = this.hideModal.bind(this);
-        this.showModal = this.showModal.bind(this);
+        _.bindAll(this, 'hideModal', 'showModal');
         this.state = { 'modalOpen' : false };
     }
 
@@ -89,7 +88,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        var { selectedFiles, filenamePrefix, children, disabled, selectedFilesUniqueCount } = this.props;
+        const { selectedFiles, filenamePrefix, children, disabled, selectedFilesUniqueCount } = this.props;
+        const { modalOpen } = this.state;
         const btnProps = _.omit(this.props, 'filenamePrefix', 'selectedFiles', 'windowWidth', 'children', 'selectedFilesUniqueCount', 'disabled');
         const isDisabled = disabled || SelectedFilesDownloadButton.totalSelectedFilesCount(selectedFiles) === 0;
         return (
@@ -97,9 +97,9 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                 <Button {...btnProps} disabled={isDisabled} onClick={this.showModal}>
                     { children }
                 </Button>
-                { this.state.modalOpen ?
+                { modalOpen ?
                     <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, selectedFilesUniqueCount }} onHide={this.hideModal}/>
-                : null }
+                    : null }
             </React.Fragment>
         );
     }
@@ -164,7 +164,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                     To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
                                     <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
                                 </li>
-                            : null }
+                                : null }
                             <li className="mb-05">
                                 {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
                             </li>
@@ -174,7 +174,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                     In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
                                     Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
                                 </li>
-                            : null }
+                                : null }
                         </ul>
                     </div>
 

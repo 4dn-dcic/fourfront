@@ -40,14 +40,14 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         var otherProcessedFilesFromExpSetExist = (Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0);
 
         if (otherProcessedFilesFromExpSetExist){ // Ensure have permissions
-            otherProcessedFilesFromExpSetExist = OtherProcessedFilesStackedTableSection.checkOPFCollectionsPermissions(context.other_processed_files);
+            otherProcessedFilesFromExpSetExist = SupplementaryFilesTabView.checkOPFCollectionsPermissions(context.other_processed_files);
         }
         var expsInSetExist = (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0);
         if (!otherProcessedFilesFromExpSetExist && !expsInSetExist) return false;
 
         if (expsInSetExist){
             var expsOPFCollections = _.pluck(context.experiments_in_set, 'other_processed_files');
-            var otherProcessedFilesFromExpsExist = _.any(expsOPFCollections || [], OtherProcessedFilesStackedTableSection.checkOPFCollectionsPermissions);
+            var otherProcessedFilesFromExpsExist = _.any(expsOPFCollections || [], SupplementaryFilesTabView.checkOPFCollectionsPermissions);
             if (!otherProcessedFilesFromExpSetExist && !otherProcessedFilesFromExpsExist) return false;
         }
         return true;
@@ -156,7 +156,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
-                content : <OtherProcessedFilesStackedTableSection {...propsForTableSections} {...this.state} />
+                content : <SupplementaryFilesTabView {...propsForTableSections} {...this.state} />
             });
         }
 
@@ -489,7 +489,18 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 }
 
 
-export class OtherProcessedFilesStackedTableSectionPart extends React.PureComponent {
+export class SupplementaryFilesOPFCollection extends React.PureComponent {
+
+    static collectionStatus = function(files){
+        const statuses = _.uniq(_.pluck(files, 'status'));
+        const len = statuses.length;
+        if (len === 1){
+            return statuses[0];
+        } else if (len > 1) {
+            return statuses;
+        }
+        return null;
+    }
 
     static defaultProps = {
         'defaultOpen' : false
@@ -499,6 +510,8 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
+        // Usually have >1 SupplementaryFilesOPFCollection on page so we memoize at instance level not class level.
+        this.collectionStatus = memoize(SupplementaryFilesOPFCollection.collectionStatus);
 
         this.state = {
             'open' : props.defaultOpen
@@ -519,12 +532,39 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
         );
     }
 
+    renderStatusIndicator(){
+        const { collection } = this.props;
+        const { files } = collection;
+        const status = this.collectionStatus(files);
+        if (!status) return null;
+        if (typeof status === 'string'){
+            const capitalizedStatus = Schemas.Term.toName("status", status);
+            return (
+                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className="inline-block pull-right mr-12 mt-23 ml-2">
+                    <i className="item-status-indicator-dot mr-07" data-status={status} />
+                    { capitalizedStatus }
+                </div>
+            );
+        } else {
+            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
+            return (
+                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className="inline-block pull-right mr-12 mt-23 ml-2">
+                    <span className="indicators-collection inline-block mr-05">
+                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
+                    </span>
+                    Multiple
+                </div>
+            );
+        }
+    }
+
     render(){
-        const { collection, index, context, width, mounted, defaultOpen, windowWidth } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth } = this.props;
         const { files, higlass_view_config } = collection;
         const { open } = this.state;
         return (
             <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
+                { this.renderStatusIndicator() }
                 <h4>
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
@@ -550,87 +590,209 @@ export class OtherProcessedFilesStackedTableSectionPart extends React.PureCompon
     }
 }
 
-/** This object renders the "Supplementary Files" section. */
-export class OtherProcessedFilesStackedTableSection extends React.PureComponent {
+class SupplementaryReferenceFilesSection extends React.PureComponent {
 
-    static checkOPFCollectionPermission(opfCollection){
-        return _.any(opfCollection.files || [], function(opf){
-            return opf && object.itemUtil.atId(opf) && !opf.error;
+    static defaultProps = {
+        'defaultOpen' : true,
+        'columnHeaders' : (function(){
+            const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
+            colHeaders.push({
+                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
+                render : function(file, field, detailIndex, fileEntryBlockProps){
+                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
+                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
+                }
+            });
+            return colHeaders;
+        })()
+    };
+
+    constructor(props){
+        super(props);
+        this.toggleOpen = this.toggleOpen.bind(this);
+
+        this.state = {
+            'open' : props.defaultOpen
+        };
+    }
+
+    toggleOpen(e){
+        this.setState(function(oldState){
+            return { 'open' : !oldState.open };
         });
     }
 
-    static checkOPFCollectionsPermissions(opfCollections){
-        return _.any(opfCollections || [], OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
+    render(){
+        const { files, width, href, columnHeaders } = this.props;
+        const filesLen = files.length;
+        const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
+        return (
+            <div data-open={open} className="reference-files-section supplementary-files-section-part">
+                <h4 className="mb-15">
+                    <span className="inline-block clickable" onClick={this.toggleOpen}>
+                        <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
+                        { filesLen + " Reference File" + (filesLen > 1 ? "s" : "") }
+                    </span>
+                </h4>
+                <Collapse in={open} mountOnEnter>
+                    <div className="table-for-collection">
+                        <ProcessedFilesStackedTable {...passProps} files={files} columnHeaders={columnHeaders} />
+                    </div>
+                </Collapse>
+            </div>
+        );
+    }
+}
+
+
+/** This object renders the "Supplementary Files" section. */
+export class SupplementaryFilesTabView extends React.PureComponent {
+
+    /** @returns {boolean} true if at least one file inside the collection is viewable */
+    static checkOPFCollectionPermission({ files }){
+        return _.any(files || [], function(file){
+            return file && object.itemUtil.atId(file) && !file.error;
+        });
     }
 
-    static extendCollectionsWithExperimentFiles = memoize(function(context){
+    /** @returns {boolean} true if at least one collection has at least one file inside the collection that is viewable */
+    static checkOPFCollectionsPermissions(opfCollections){
+        return _.any(opfCollections || [], SupplementaryFilesTabView.checkOPFCollectionPermission);
+    }
+
+    /**
+     * Combines files from ExperimentSet.other_processed_files and ExperimentSet.experiments_in_set.other_processed_files.
+     *
+     * @param {ExperimentSet} context - JSON response from server for this endpoint/page depicting an ExperimentSet.
+     * @returns {{ files: File[], title: string, type: string, description: string }[]} List of uniqued-by-title viewable collections.
+     */
+    static combinedOtherProcessedFiles = memoize(function(context){
+
         // Clone -- so we don't modify props.context in place
-        var collectionsFromExpSet = _.map(
-            context.other_processed_files,
-            function(opfCollection){
-                return _.extend({}, opfCollection, {
-                    'files' : _.map(opfCollection.files || [], function(opf){
-                        return _.extend({ 'from_experiment_set' : context, 'from_experiment' : { 'from_experiment_set' : context, 'accession' : 'NONE' } }, opf);
-                    })
-                });
-            }
-        );
-        var collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
-        var collectionsByTitle = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
+        const collectionsFromExpSet = _.map(context.other_processed_files, function(collection){
+            const { files : origFiles } = collection;
+            const files = _.map(origFiles || [], function(file){
+                return _.extend({ 'from_experiment_set' : context, 'from_experiment' : { 'from_experiment_set' : context, 'accession' : 'NONE' } }, file);
+            });
+            return _.extend({}, collection, { files });
+        });
+
+        const collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
+
+        // Files from collections from Experiments will be added to the arrays of files within these collections-from-expsets, w. new keys added if necessary.
+        // We use foursight check to ensure titles are unique on back-end.
+        const collectionsByTitle = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet));
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         // Also required for SelectedFilesController
-        var collectionsFromExps = _.reduce(context.experiments_in_set || [], function(m, exp){
-            if (Array.isArray(exp.other_processed_files) && exp.other_processed_files.length > 0){
-                return m.concat(
-                    _.map(exp.other_processed_files, function(opfCollection){
-                        return _.extend({}, opfCollection, {
-                            'files' : _.map(opfCollection.files || [], function(opf){
-                                return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : context }, exp), 'from_experiment_set' : context }, opf);
-                            })
-                        });
-                    })
-                );
-            }
-            return m;
+        const allCollectionsFromExperiments = _.reduce(context.experiments_in_set || [], function(memo, exp){
+            _.forEach(exp.other_processed_files || [], function(collection){
+                const { files : origFiles } = collection;
+                const files = _.map(origFiles || [], function(file){
+                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : context }, exp), 'from_experiment_set' : context }, file);
+                });
+                memo.push(_.extend({}, collection, { files }));
+            });
+            return memo;
         }, []);
 
-        var collectionsFromExpsUnBubbled = [];
-        _.forEach(collectionsFromExps, function(collection){
-            if (collectionsByTitle[collection.title]){
-                _.forEach(collection.files, function(f){
-                    var duplicateExistingFile = _.find(collectionsByTitle[collection.title].files, function(existFile){ return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b'); });
+        _.forEach(allCollectionsFromExperiments, function(collection){
+            const { title, files } = collection;
+            if (collectionsByTitle[title]){ // Same title exists already from ExpSet.other_processed_files or another Experiment.other_processed_files.
+                // Add in files unless is already present (== duplicate).
+                _.forEach(files, function(f){
+                    const duplicateExistingFile = _.find(collectionsByTitle[title].files, function(existFile){
+                        return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b');
+                    });
                     if (duplicateExistingFile){
                         console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
+                        // TODO send to analytics?
                     } else {
-                        collectionsByTitle[collection.title].files.push(f);
+                        collectionsByTitle[title].files.push(f);
                     }
                 });
             } else {
-                collectionsByTitle[collection.title] = collection;
+                collectionsByTitle[title] = collection;
             }
         });
 
-        return _.filter(_.values(collectionsByTitle), OtherProcessedFilesStackedTableSection.checkOPFCollectionPermission);
+        // Ensure have view permissions
+        return _.filter(_.values(collectionsByTitle), SupplementaryFilesTabView.checkOPFCollectionPermission);
+    });
+
+    static allReferenceFiles = memoize(function(context){
+        // We keep track of duplicates and add a "from_experiment.accessions" property if any to help mark/ID
+        // it as being present on multiple experiments.
+        // Alternatively we might have been able to set "from_experiment.accession" (no "s") to "NONE" but this
+        // would imply that is attached to ExperimentSet and not Experiment for metadata.tsv stuff later down the road
+        // and present issues.
+        // Also changing "from_experiment" to an array is a bit more of a pain than ideal...
+
+        const referenceFilesByAtID = new Map(); // We use map to ensure we keep order of first encounter.
+
+        _.forEach(context.experiments_in_set || [], function(experiment){
+            _.forEach(experiment.reference_files || [], function(file){
+                // Add "from_experiment" and "from_experiment_set" to allow to be properly distributed in stacked block table.
+                // Also for metadata TSV downloads.
+                const fileAtID = object.itemUtil.atId(file);
+                const existingFile = referenceFilesByAtID.get(fileAtID);
+                if (existingFile){
+                    if (!Array.isArray(existingFile.from_experiment.from_multiple_accessions)){
+                        existingFile.from_experiment.from_multiple_accessions = [ existingFile.from_experiment.accession ];
+                    }
+                    // We assume there's no duplicate reference files within a single experiment
+                    existingFile.from_experiment.from_multiple_accessions.push(experiment.accession);
+                    return;
+                } else {
+                    // Add "from_experiment" and "from_experiment_set" to allow to be properly distributed in stacked block table.
+                    // Also for metadata TSV downloads.
+                    const extendedFile = _.extend({}, file, {
+                        'from_experiment' : _.extend({}, experiment, {
+                            'from_experiment_set' : context
+                        }),
+                        'from_experiment_set' : context
+                    });
+                    referenceFilesByAtID.set(fileAtID, extendedFile);
+                }
+            });
+        });
+
+        return [ ...referenceFilesByAtID.values() ];
     });
 
     render(){
         const { context, width, mounted, windowWidth } = this.props;
         const gridState = mounted && layout.responsiveGridState(windowWidth);
-        const otherProcessedFileSetsCombined = OtherProcessedFilesStackedTableSection.extendCollectionsWithExperimentFiles(context);
+        const otherProcessedFileSetsCombined = SupplementaryFilesTabView.combinedOtherProcessedFiles(context);
+        const otherProcessedFileSetsCombinedLen = otherProcessedFileSetsCombined.length;
+
+        const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context);
+        const referenceFilesLen = referenceFiles.length;
+
+        const titleDetailString = (
+            (referenceFilesLen > 0 ? (referenceFilesLen + " Reference File" + (referenceFilesLen > 1 ? "s" : "")) : "") +
+            (otherProcessedFileSetsCombinedLen > 0 && referenceFilesLen > 0 ? " and " : '') +
+            (otherProcessedFileSetsCombinedLen > 0 ? (otherProcessedFileSetsCombinedLen + " Processed Files Collection" + (otherProcessedFileSetsCombinedLen > 1 ? "s" : "")) : '')
+        );
 
         const commonProps = { context, width, mounted, windowWidth };
+
+        // TODO: Metadata.tsv stuff needs to be setup before we can select files from other_processed_files & reference_files
         //const commonProps = _.extend({ context, width, mounted, windowWidth }, SelectedFilesController.pick(this.props));
 
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
-                    <span className="text-400">{ otherProcessedFileSetsCombined.length }</span> Collections of Supplementary Files
+                    Supplementary Files
+                    { titleDetailString.length > 0 ? <small> - {titleDetailString}</small> : null }
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
+                { referenceFiles?
+                    <SupplementaryReferenceFilesSection {...commonProps} files={referenceFiles} />
+                    : null }
                 { _.map(otherProcessedFileSetsCombined, function(collection, index, all){
                     const defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 2));
-                    return <OtherProcessedFilesStackedTableSectionPart {..._.extend({ collection, index, defaultOpen }, commonProps)} key={index} />;
+                    return <SupplementaryFilesOPFCollection {..._.extend({ collection, index, defaultOpen }, commonProps)} key={index} />;
                 }) }
             </div>
         );

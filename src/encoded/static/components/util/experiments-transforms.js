@@ -3,6 +3,8 @@
 import _ from 'underscore';
 import { atIdFromObject } from './object';
 import patchedConsoleInstance from './patched-console';
+
+// eslint-disable-next-line no-unused-vars
 import { Item, File, Experiment, ExperimentSet } from './typedefs';
 
 var console = patchedConsoleInstance;
@@ -239,38 +241,53 @@ export function allProcessedFilesFromExperimentSet(experiment_set){
 
 /**
  * Groups processed files by experiment or experiment set.
+ * Files that go into "experiment_set" object (by accession) are those which either
+ * do not have a from_experiment accession and thus came from ExpSet.processed_files, for example,
+ * or those that come from multiple experiments via having a populated from_experiments.from_multiple_accessions.
+ *
+ * @returns {{ experiment_sets: Object.<string, File[]>, experiments: Object.<string, File[]> }|Object.<string, File[]>} Object of expsets and exps, each containing lists of files by relevant accession.
  */
-export function processedFilesFromExperimentSetToGroup(processed_files, combined = false){
+export function divideFilesFromExpSetToExpSetsAndExps(files, combined = false){
 
-    var byES = {};
-    var byE  = {};
+    const bySet = {};
+    const byExp  = {};
 
-    _.forEach(processed_files, function(pF){
-        if (typeof pF.from_experiment !== 'undefined' && typeof pF.from_experiment.accession === 'string' && pF.from_experiment.accession !== "NONE"){
-            if (!Array.isArray(byE[pF.from_experiment.accession])){
-                byE[pF.from_experiment.accession] = [];
-            }
-            byE[pF.from_experiment.accession].push(pF);
-            return; // Belongs to a single Exp. Don't group under ExpSet as well.
+    _.forEach(files, function(file){
+
+        if (typeof file.from_experiment === 'undefined' ||
+            typeof file.from_experiment.from_experiment_set === 'undefined' ||
+            typeof file.from_experiment.accession !== 'string' ||
+            typeof file.from_experiment.from_experiment_set.accession !== 'string' ){
+            throw new Error("Expected all files to have been extended 'from_experiment' and 'from_experiment.from_experiment_set', including accessions of each.");
         }
 
-        var expSet = pF.from_experiment_set || (pF.from_experiment && pF.from_experiment && pF.from_experiment.from_experiment_set);
+        const exp = file.from_experiment;
 
-        if (expSet && typeof expSet !== 'undefined' && typeof expSet.accession === 'string'){
-            if (!Array.isArray(byES[expSet.accession])){
-                byES[expSet.accession] = [];
+        // We group the file under ExpSet if has "NONE" as `from_experiment.accession` (means came directly from ExpSet) or
+        // if has >1 from_experiment.from_multiple_accessions (comes from multiple exps).
+        if (exp.accession === "NONE" || (Array.isArray(exp.from_multiple_accessions) && exp.from_multiple_accessions.length > 1)){
+            const expSet = file.from_experiment_set || (file.from_experiment && file.from_experiment && file.from_experiment.from_experiment_set);
+            if (!Array.isArray(bySet[expSet.accession])){
+                bySet[expSet.accession] = [];
             }
-            byES[expSet.accession].push(pF);
+            bySet[expSet.accession].push(file);
+            return; // Added to ExpSet, don't add under Exp also.
         }
+
+        if (!Array.isArray(byExp[file.from_experiment.accession])){
+            byExp[file.from_experiment.accession] = [];
+        }
+        byExp[file.from_experiment.accession].push(file);
+
     });
 
     if (!combined){
         return {
-            'experiments' : byE,
-            'experiment_sets' : byES
+            'experiments' : byExp,
+            'experiment_sets' : bySet
         };
     } else {
-        return _.extend(byE, byES);
+        return _.extend(byExp, bySet);
     }
 
 }
