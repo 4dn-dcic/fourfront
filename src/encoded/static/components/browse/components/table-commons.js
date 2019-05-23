@@ -297,13 +297,13 @@ export const defaultColumnExtensionMap = {
     },
     'status' : {
         'title' : 'Status',
-        'widthMap' : {'lg' : 120, 'md' : 120, 'sm' : 100},
+        'widthMap' : { 'lg' : 120, 'md' : 120, 'sm' : 100 },
         'order' : 501,
         'render' : function statusIndicator(result, columnDefinition, props, width){
             var statusFormatted = Schemas.Term.toName('status', result.status);
             return (
                 <React.Fragment>
-                    <i className="item-status-indicator-dot" data-status={result.status}/>
+                    <i className="item-status-indicator-dot mr-07" data-status={result.status}/>
                     { statusFormatted }
                 </React.Fragment>
             );

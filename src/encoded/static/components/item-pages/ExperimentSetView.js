@@ -541,7 +541,7 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
             const capitalizedStatus = Schemas.Term.toName("status", status);
             return (
                 <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className="inline-block pull-right mr-12 mt-23 ml-2">
-                    <i className="item-status-indicator-dot" data-status={status} />
+                    <i className="item-status-indicator-dot mr-07" data-status={status} />
                     { capitalizedStatus }
                 </div>
             );
@@ -549,7 +549,9 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
             const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
             return (
                 <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className="inline-block pull-right mr-12 mt-23 ml-2">
-                    { _.map(status, function(s){ return <i className="item-status-indicator-dot" data-status={s} />; }) }
+                    <span className="indicators-collection inline-block mr-05">
+                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
+                    </span>
                     Multiple
                 </div>
             );
@@ -557,7 +559,7 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     render(){
-        const { collection, index, context, width, mounted, defaultOpen, windowWidth } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth } = this.props;
         const { files, higlass_view_config } = collection;
         const { open } = this.state;
         return (
@@ -598,7 +600,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
                 columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
                 render : function(file, field, detailIndex, fileEntryBlockProps){
                     const capitalizedStatus = Schemas.Term.toName("status", file.status);
-                    return <i className="item-status-indicator-dot ml-07" data-status={file.status} data-tip={capitalizedStatus} />;
+                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
                 }
             });
             return colHeaders;
@@ -678,7 +680,8 @@ export class SupplementaryFilesTabView extends React.PureComponent {
         const collectionsFromExpSetTitles = _.pluck(collectionsFromExpSet, 'title');
 
         // Files from collections from Experiments will be added to the arrays of files within these collections-from-expsets, w. new keys added if necessary.
-        const collectionsByTitle = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet)); // TODO what if 2 titles are identical? Validate/prevent on back-end.
+        // We use foursight check to ensure titles are unique on back-end.
+        const collectionsByTitle = _.object(_.zip(collectionsFromExpSetTitles, collectionsFromExpSet));
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         // Also required for SelectedFilesController

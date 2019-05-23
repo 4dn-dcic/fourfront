@@ -49,7 +49,7 @@ export class FileDetailBody extends React.PureComponent {
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
             fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="inline-block">{ fileTitle }</a>;
             statusIndicator = file.status && (
-                <i className="item-status-indicator-dot" data-status={ file.status && file.status.toLowerCase() }
+                <i className="item-status-indicator-dot mr-07" data-status={ file.status && file.status.toLowerCase() }
                     data-tip={"Status - " + file.status} />
             );
         }
