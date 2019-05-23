@@ -1,22 +1,19 @@
-var { createStore, combineReducers } = require('redux');
-var _ = require('underscore');
-var { JWT, isServerSide } = require('./components/util');
+import { createStore, combineReducers } from 'redux';
+import _ from 'underscore';
+import { JWT, isServerSide } from './components/util';
 
 // Create a redux store to manage state for the whole application
+// Not sure why everything is saved to & reduced from `action.type` but w/e .. this could likely
+// be refactored further in future
 
-var reducers = {
+export const reducers = {
 
     'href' : function(state='', action) {
-        if (action.type && _.contains(_.keys(action.type), 'href')){
-            var val = action.type.href ? action.type.href : state;
-            return val;
-        } else{
-            return state;
-        }
+        return (action.type && action.type.href) || state;
     },
 
     'context' : function(state={}, action){
-        if (action.type && _.contains(_.keys(action.type), 'context')){
+        if (action.type && typeof action.type.context !== 'undefined'){
             var context = action.type.context ? action.type.context : state;
             if (!isServerSide() && context && context['@type'] && context['@type'].indexOf('User') > -1){
                 // If context type is user, and is of current user, update localStorage user_info appropriately.
@@ -35,90 +32,37 @@ var reducers = {
         }
     },
 
-    'inline' : function(state='', action) {
-        if (action.type && _.contains(_.keys(action.type), 'inline')){
-            var val = action.type.inline ? action.type.inline : state;
-            return val;
-        }else{
-            return state;
-        }
-    },
-
     'lastCSSBuildTime' : function(state='', action) {
-        if (action.type && _.contains(_.keys(action.type), 'lastCSSBuildTime')){
-            var val = action.type.lastCSSBuildTime ? action.type.lastCSSBuildTime : state;
-            return val;
-        }else{
-            return state;
-        }
-    },
-
-    'contextRequest' : function(state={}, action) {
-        if (action.type && _.contains(_.keys(action.type), 'contextRequest')){
-            var val = action.type.contextRequest ? action.type.contextRequest : state;
-            return val;
-        }else{
-            return state;
-        }
+        return (action.type && action.type.lastCSSBuildTime) || state;
     },
 
     'slow' : function(state=false, action) {
-        if (action.type && _.contains(_.keys(action.type), 'slow')){
-            var val = action.type.slow ? action.type.slow : state;
-            return val;
-        }else{
-            return state;
+        if (action.type && typeof action.type.slow === 'boolean'){
+            return action.type.slow;
         }
-    },
-
-    'expSetFilters' : function(state={}, action) {
-        if (action.type && _.contains(_.keys(action.type), 'expSetFilters')){
-            var val = action.type.expSetFilters ? action.type.expSetFilters : state;
-            return val;
-        }else{
-            return state;
-        }
-    },
-
-    'expIncompleteFacets' : function(state=null, action) {
-        if (action.type && _.contains(_.keys(action.type), 'expIncompleteFacets')){
-            var val = action.type.expIncompleteFacets ? action.type.expIncompleteFacets : state;
-            return val;
-        }else{
-            return state;
-        }
+        return state;
     },
 
     'alerts' : function(state=[], action) {
-        if (action.type && _.contains(_.keys(action.type), 'alerts')){
-            var val = action.type.alerts ? action.type.alerts : state;
-            return val;
-        }else{
-            return state;
+        if (action.type && Array.isArray(action.type.alerts)){
+            return action.type.alerts;
         }
+        return state;
     },
 
     'browseBaseState' : function(state='only_4dn', action){
-        if (action.type && _.contains(_.keys(action.type), 'browseBaseState')){
-            var val = action.type.browseBaseState ? action.type.browseBaseState : state;
-            return val;
-        }else{
-            return state;
-        }
+        return (action.type && action.type.browseBaseState) || state;
     }
 };
 
 
-var store = createStore(combineReducers(reducers));
+export const store = createStore(combineReducers(reducers));
 
 // Utility stuff (non-standard for redux)
 
-store.reducers = reducers;
-
-store.mapStateToProps = function(currStore){
+export function mapStateToProps(currStore){
     return _.object(_.map(_.keys(reducers), function(rfield){
         return [rfield, currStore[rfield]];
     }));
-};
+}
 
-module.exports = store;

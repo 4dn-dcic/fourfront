@@ -72,12 +72,11 @@ describe("Server rendering", function () {
 
     beforeEach(function () {
         App = require('..').default;
-        store = require('../../store');
+        store = require('../../store').store;
         // test dispatching some values to store
         var dispatch_vals = {
             'href':home_url,
             'context':home,
-            'inline':'',
             'contextRequest':{},
             'slow':false
         };

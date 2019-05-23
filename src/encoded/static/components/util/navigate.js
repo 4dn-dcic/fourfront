@@ -50,8 +50,8 @@ var navigate = function(href, options = {}, callback = null, fallbackCallback = 
  */
 navigate.setNavigateFunction = function(navFxn){
     if (typeof navFxn !== 'function') throw new Error("Not a function.");
-    store = require('../../store');
-    //if (typeof window !== 'undefined') window.store2 = store;
+    // eslint-disable-next-line prefer-destructuring
+    store = require('../../store').store;
     cachedNavFunction = navFxn;
 };
 
@@ -68,7 +68,8 @@ navigate.getBrowseBaseParams = function(browseBaseState = null){
     }
     if (!browseBaseState){
         if (store === null){
-            store = require('../../store');
+            // eslint-disable-next-line prefer-destructuring
+            store = require('../../store').store;
         }
         var storeState = store.getState();
         browseBaseState = storeState.browseBaseState;
