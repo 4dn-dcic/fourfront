@@ -31,22 +31,37 @@ export class JointAnalysisMatrix extends React.PureComponent {
             'Out of date'               : ['archived', 'revoked'],
             'Deleted'                   : ['deleted']
         },
+        /* Deprecated & superceded by valueChangeMap but some may still be present im StaticSection (and lack `valueChangeMap`).
         'cellTypeNameMap4DN'        : {
             "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
             "H1-hESC (Tier 1)"          : "H1-hESC",
             "HFFc6 (Tier 1)"            : "HFFc6"
+        },
+        */
+        'valueChangeMap' : {
+            '4DN' : {
+                'cell_type' : {
+                    "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
+                    "H1-hESC (Tier 1)"          : "H1-hESC",
+                    "HFFc6 (Tier 1)"            : "HFFc6"
+                }
+            },
+            'ENCODE' : {}
         },
         'groupingPropertiesSearchParamMap' : {
             '4DN'                       : {
                 'experiment_category'       : 'experiments_in_set.experiment_type.display_title',
                 'experiment_type'           : 'experiments_in_set.experiment_type.display_title',
                 'cell_type'                 : 'experiments_in_set.biosample.biosource_summary',
-                'sub_cat'                   : 'experiments_in_set.experiment_categorizer.value'
+                'sub_cat'                   : 'experiments_in_set.experiment_categorizer.value',
+                'sub_cat_title'             : 'experiments_in_set.experiment_categorizer.field',
+                'lab_name'                  : 'lab.display_title'
             },
             'ENCODE'                    : {
                 'experiment_category'       : 'assay_slims',
                 'experiment_type'           : 'assay_term_name',
-                'cell_type'                 : 'biosample_term_name'
+                'cell_type'                 : 'biosample_summary',
+                'lab_name'                  : 'lab.title'
             }
         },
         'groupingProperties4DN'     : ['experiment_type', 'sub_cat'],
@@ -70,6 +85,44 @@ export class JointAnalysisMatrix extends React.PureComponent {
         'columnSubGroupingOrder'    : ['Submitted', 'In Submission', 'Planned', 'Not Planned']
     };
 
+    static convertResult(result, dataSource, groupingPropertiesSearchParamMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField){
+
+        const convertedResult = _.clone(result);
+
+        if (groupingPropertiesSearchParamMap[dataSource]){
+            _.forEach(_.pairs(groupingPropertiesSearchParamMap[dataSource]), function([ fieldToMapTo, fieldToMapFrom ]){
+                let value = object.getNestedProperty(result, fieldToMapFrom, fieldToMapTo);
+                if (Array.isArray(value)){ // Only allow single vals.
+                    value = _.uniq(_.flatten(value));
+                    if (value.length > 1){
+                        console.warn('We have 2+ of a grouping value', fieldToMapFrom, value, result);
+                    }
+                    value = value[0] || fallbackNameForBlankField;
+                }
+                convertedResult[fieldToMapTo] = value;
+            }, {});
+        }
+
+        // Change values (e.g. shorten some):
+        if (valueChangeMap[dataSource]){
+            _.forEach(_.pairs(valueChangeMap[dataSource]), function([field, changeMap]){
+                if (typeof convertedResult[field] === 'string'){ // If present
+                    convertedResult[field] = changeMap[convertedResult[field]] || convertedResult[field];
+                }
+            });
+        }
+
+        // Standardized state from status
+        // TODO Use similar by-data-source structure as groupingPropertiesSearchParamMap, valueChangeMap
+        const [ stateTitleToSave ] = _.find(_.pairs(statusStateTitleMap), function([titleToSave, validStatuses]){ return validStatuses.indexOf(result.status) > -1; });
+        convertedResult.state = stateTitleToSave || fallbackNameForBlankField;
+
+        // Save data source
+        convertedResult.data_source = dataSource;
+
+        return convertedResult;
+    }
+
     constructor(props){
         super(props);
         this.standardizeEncodeResult = this.standardizeEncodeResult.bind(this);
@@ -84,77 +137,41 @@ export class JointAnalysisMatrix extends React.PureComponent {
     }
 
     standardizeEncodeResult(result, idx){
-        const { fallbackNameForBlankField, statusStateTitleMap } = this.props;
+        const { fallbackNameForBlankField, statusStateTitleMap, valueChangeMap, groupingPropertiesSearchParamMap } = this.props;
 
-        var cellType            = result.biosample_summary || fallbackNameForBlankField;
-        var experimentType      = result.assay_term_name || fallbackNameForBlankField;
-        var experimentCategory  = _.uniq(result.assay_slims || []);
+        const fullResult = JointAnalysisMatrix.convertResult(
+            result, 'ENCODE', groupingPropertiesSearchParamMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
+        );
 
-        if (experimentCategory.length > 1){
-            console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type) for ', result);
-        }
-        experimentCategory = experimentCategory[0] || experimentCategory;
-
-        return _.extend({}, result, {
-            'cell_type'             : cellType,
-            'experiment_category'   : experimentCategory,
-            'experiment_type'       : experimentType,
-            'data_source'           : 'ENCODE',
-            'short_description'     : result.description || null,
-            'lab_name'              : (result.lab && result.lab.title) || fallbackNameForBlankField,
-            'state'                 : (_.find(_.pairs(statusStateTitleMap), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0]
+        return _.extend(fullResult, {
+            'short_description'     : result.description || null
         });
     }
 
     standardize4DNResult(result, idx){
-        const { fallbackNameForBlankField, statusStateTitleMap, cellTypeNameMap4DN, groupingPropertiesSearchParamMap } = this.props;
+        const { fallbackNameForBlankField, statusStateTitleMap, cellTypeNameMap4DN, groupingPropertiesSearchParamMap, valueChangeMap } = this.props;
 
-        var cellType = _.uniq(_.flatten(object.getNestedProperty(result, groupingPropertiesSearchParamMap['4DN'].cell_type)));
-        if (cellType.length > 1){
-            console.warn('We have 2+ cellTypes (experiments_in_set.biosample.biosource_summary) for ', result);
+        const fullResult = JointAnalysisMatrix.convertResult(
+            result, '4DN', groupingPropertiesSearchParamMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
+        );
+
+        // (Deprecated) Harcoded rule for cellType
+        if (cellTypeNameMap4DN && typeof fullResult.cell_type !== 'undefined'){
+            fullResult.cell_type = cellTypeNameMap4DN[fullResult.cell_type] || fullResult.cell_type;
         }
-        cellType = cellType[0] || fallbackNameForBlankField;
-        cellType = cellTypeNameMap4DN[cellType] || cellType;
 
-        var experimentType =  _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_type.display_title')));
-        if (experimentType.length > 1){
-            console.warn('We have 2+ experiment_types (experiments_in_set.experiment_type.display_title) for ', result);
-        }
-        experimentType = experimentType[0] || fallbackNameForBlankField;
-
-        //var experiment_titles = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.display_title')));
+        // (Deprecated) Create short description
         var experiment_titles = _.map(result.experiments_in_set || [], function(exp){
             return exp.display_title.replace(' - ' + exp.accession, '');
         });
-
         experiment_titles = _.uniq(experiment_titles);
         if (experiment_titles.length > 1){
             console.warn('We have 2+ experiment titles (experiments_in_set.display_title, minus accession) for ', result);
         }
 
-        var experiment_categorization_value = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value')));
-        var experiment_categorization_title = _.uniq(_.flatten(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.field')));
 
-        if (experiment_categorization_value.length > 1){
-            console.warn('We have 2+ experiment_categorizer.value for ', result);
-        }
-        if (experiment_categorization_title.length > 1){
-            console.warn('We have 2+ experiment_categorizer.title for ', result);
-        }
-
-        experiment_categorization_value = experiment_categorization_value[0] || 'No value';
-        experiment_categorization_title = experiment_categorization_title[0] || 'No field';
-
-        return _.extend({}, result, {
-            'cell_type'             : cellType,
-            'experiment_type'       : experimentType,
-            'experiment_category'   : experimentType,
-            'data_source'           : '4DN',
-            'short_description'     : experiment_titles[0] || null,
-            'lab_name'              : (result.lab && result.lab.display_title) || fallbackNameForBlankField,
-            'state'                 : (_.find(_.pairs(statusStateTitleMap), function(pair){ return pair[1].indexOf(result.status) > -1; }) || ["None"])[0],
-            'sub_cat'               : experiment_categorization_value,
-            'sub_cat_title'         : experiment_categorization_title
+        return _.extend(fullResult, {
+            'short_description'     : experiment_titles[0] || null
         });
     }
 
