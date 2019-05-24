@@ -251,7 +251,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 /**
  * TODO: Move to HiGlassTabView.js ?
  */
-export class HiGlassAdjustableWidthRow extends React.PureComponent {
+class HiGlassAdjustableWidthRow extends React.PureComponent {
 
     static propTypes = {
         'width' : PropTypes.number.isRequired,
@@ -342,7 +342,7 @@ export class HiGlassAdjustableWidthRow extends React.PureComponent {
 }
 
 
-export class ProcessedFilesStackedTableSection extends React.PureComponent {
+class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
      * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig).
@@ -478,7 +478,7 @@ export class ProcessedFilesStackedTableSection extends React.PureComponent {
 }
 
 
-export class SupplementaryFilesOPFCollection extends React.PureComponent {
+class SupplementaryFilesOPFCollection extends React.PureComponent {
 
     static collectionStatus = function(files){
         const statuses = _.uniq(_.pluck(files, 'status'));
@@ -523,13 +523,15 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
 
     renderStatusIndicator(){
         const { collection } = this.props;
-        const { files } = collection;
+        const { files, description } = collection;
         const status = this.collectionStatus(files);
         if (!status) return null;
+
+        const outerClsName = "inline-block pull-right mr-12 ml-2 mt-1";
         if (typeof status === 'string'){
             const capitalizedStatus = Schemas.Term.toName("status", status);
             return (
-                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className="inline-block pull-right mr-12 mt-23 ml-2">
+                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className={outerClsName}>
                     <i className="item-status-indicator-dot mr-07" data-status={status} />
                     { capitalizedStatus }
                 </div>
@@ -537,7 +539,7 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
         } else {
             const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
             return (
-                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className="inline-block pull-right mr-12 mt-23 ml-2">
+                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
                     <span className="indicators-collection inline-block mr-05">
                         { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
                     </span>
@@ -549,22 +551,21 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
 
     render(){
         const { collection, index, width, mounted, defaultOpen, windowWidth } = this.props;
-        const { files, higlass_view_config } = collection;
+        const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         return (
-            <div data-open={open} className="supplementary-files-section-part" key={collection.title || 'collection-' + index}>
+            <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
                 { this.renderStatusIndicator() }
                 <h4>
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
-                        { collection.title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
+                        { title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
                 </h4>
-                { collection.description ?
-                    <FlexibleDescriptionBox description={collection.description} className="description"
+                { description ?
+                    <FlexibleDescriptionBox description={description} className="description"
                         fitTo="grid" expanded={open} windowWidth={windowWidth} />
-                    :
-                    <div className="mb-15"/>
+                    : <div className="mb-15"/>
                 }
                 <Collapse in={open} mountOnEnter>
                     <div className="table-for-collection">
@@ -578,6 +579,7 @@ export class SupplementaryFilesOPFCollection extends React.PureComponent {
         );
     }
 }
+
 
 class SupplementaryReferenceFilesSection extends React.PureComponent {
 
@@ -599,10 +601,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
-
-        this.state = {
-            'open' : props.defaultOpen
-        };
+        this.state = { 'open' : props.defaultOpen };
     }
 
     toggleOpen(e){
@@ -635,8 +634,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
 }
 
 
-/** This object renders the "Supplementary Files" section. */
-export class SupplementaryFilesTabView extends React.PureComponent {
+class SupplementaryFilesTabView extends React.PureComponent {
 
     /** @returns {boolean} true if at least one file inside the collection is viewable */
     static checkOPFCollectionPermission({ files }){
