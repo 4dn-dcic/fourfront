@@ -36,21 +36,10 @@ const { Item, File, ExperimentSet } = typedefs;
  */
 export default class ExperimentSetView extends WorkflowRunTracingView {
 
-    static anyOtherProcessedFilesExist = memoize(function(context){
-        var otherProcessedFilesFromExpSetExist = (Array.isArray(context.other_processed_files) && context.other_processed_files.length > 0);
-
-        if (otherProcessedFilesFromExpSetExist){ // Ensure have permissions
-            otherProcessedFilesFromExpSetExist = SupplementaryFilesTabView.checkOPFCollectionsPermissions(context.other_processed_files);
-        }
-        var expsInSetExist = (Array.isArray(context.experiments_in_set) && context.experiments_in_set.length > 0);
-        if (!otherProcessedFilesFromExpSetExist && !expsInSetExist) return false;
-
-        if (expsInSetExist){
-            var expsOPFCollections = _.pluck(context.experiments_in_set, 'other_processed_files');
-            var otherProcessedFilesFromExpsExist = _.any(expsOPFCollections || [], SupplementaryFilesTabView.checkOPFCollectionsPermissions);
-            if (!otherProcessedFilesFromExpSetExist && !otherProcessedFilesFromExpsExist) return false;
-        }
-        return true;
+    static shouldShowSupplementaryFilesTabView = memoize(function(context){
+        const opfCollections = SupplementaryFilesTabView.combinedOtherProcessedFiles(context);
+        const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context);
+        return (opfCollections.length > 0 || referenceFiles.length > 0);
     });
 
     /** Preserve selected files if href changes (due to `#tab-id`), unlike the default setting for BrowseView. */
@@ -151,8 +140,8 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             ));
         }
 
-        // Other Files Tab
-        if (ExperimentSetView.anyOtherProcessedFilesExist(context)){
+        // Supplementary Files Tab
+        if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
             tabs.push({
                 tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
@@ -617,13 +606,14 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     }
 
     toggleOpen(e){
-        this.setState(function(oldState){
-            return { 'open' : !oldState.open };
+        this.setState(function({ open  }){
+            return { 'open' : !open };
         });
     }
 
     render(){
         const { files, width, href, columnHeaders } = this.props;
+        const { open } = this.state;
         const filesLen = files.length;
         const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
         return (
@@ -784,10 +774,10 @@ export class SupplementaryFilesTabView extends React.PureComponent {
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     Supplementary Files
-                    { titleDetailString.length > 0 ? <small> - {titleDetailString}</small> : null }
+                    { titleDetailString.length > 0 ? <span className="small">&nbsp;&nbsp; &bull; {titleDetailString}</span> : null }
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { referenceFiles?
+                { referenceFilesLen > 0 ?
                     <SupplementaryReferenceFilesSection {...commonProps} files={referenceFiles} />
                     : null }
                 { _.map(otherProcessedFileSetsCombined, function(collection, index, all){
