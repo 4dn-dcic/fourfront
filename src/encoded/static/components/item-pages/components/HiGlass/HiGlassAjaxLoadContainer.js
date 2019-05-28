@@ -117,7 +117,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         this.setState({ 'loading': true }, ()=>{
             // Use the @id to get the item, then remove the loading message
             ajax.load(object.itemUtil.atId(higlassItem), (r)=>{
-                this.setState({'higlassItem' : r,'loading': false});
+                this.setState({ 'higlassItem' : r,'loading': false });
             });
         });
     }
