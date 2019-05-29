@@ -142,8 +142,8 @@ export class FileDetailBody extends React.PureComponent {
      * @todo Figure out if can use state.file always in place of props.file here.
      */
     render(){
-        var { file, node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props,
-            body, description, attachedQCBtn;
+        const { file, node, schemas, windowWidth, minHeight, keyTitleDescriptionMap } = this.props;
+        let body, description, attachedQCBtn;
 
         if (!file){
             return null;
@@ -151,7 +151,7 @@ export class FileDetailBody extends React.PureComponent {
 
         if (Array.isArray(file) && typeof file[0] === 'object' && object.atIdFromObject(file[0])) {
             // Case: Group of Files
-            var columns = _.clone(SimpleFilesTable.defaultProps.columns);
+            const columns = _.clone(SimpleFilesTable.defaultProps.columns);
             delete columns.file_type;
             columns.status = { 'title' : 'Status' };
             body = <SimpleFilesTable results={file} columns={columns} hideTypeTitle />;
@@ -171,14 +171,14 @@ export class FileDetailBody extends React.PureComponent {
             }
         } else if (WorkflowNodeElement.isNodeQCMetric(node)){
             // Case: QC Metric
-            var metrics = object.listFromTips(object.tipsFromSchema(schemas, file))
+            const metrics = object.listFromTips(object.tipsFromSchema(schemas, file))
                 .filter(function(m){
                     if (m.key === 'status') return false;
                     if (m.enum) return true;
                     if (m.type === 'number') return true;
                     return false;
                 })
-                .map((m)=>{
+                .map(function(m){
                     return _.extend(m, {
                         'result' : file[m.key]
                     });
@@ -218,14 +218,15 @@ export class FileDetailBody extends React.PureComponent {
                         { this.fileTitleBox() }
                         { this.downloadLinkBox() }
                     </div>
-                    { (description || attachedQCBtn) && <React.Fragment>
+                    { (description || attachedQCBtn) && (
+                        <React.Fragment>
                             <hr/>
                             <div className="row">
                                 { description }
                                 { attachedQCBtn }
                             </div>
                         </React.Fragment>
-                    }
+                    ) }
                 </div>
                 <hr/>
                 { body }

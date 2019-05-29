@@ -82,7 +82,7 @@ const render = function (AppComponent, body, res) {
         });
         // To debug in browser, pause on caught exceptions:
         res.statusCode = 500;
-        AppWithReduxProps = connect(mapStateToProps)(Component);
+        AppWithReduxProps = connect(mapStateToProps)(AppComponent);
         markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
     }
 

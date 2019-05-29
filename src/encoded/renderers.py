@@ -10,6 +10,7 @@ from pyramid.httpexceptions import (
     HTTPUnauthorized,
     HTTPForbidden,
     HTTPUnsupportedMediaType,
+    HTTPNotAcceptable
 )
 from pyramid.security import forget
 from pyramid.settings import asbool
@@ -34,32 +35,45 @@ log = logging.getLogger(__name__)
 
 
 def includeme(config):
-    # Under means "BEFORE" (not after)
-    config.add_tween(
-        '.renderers.fix_request_method_tween_factory',
-        under='snovault.stats.stats_tween_factory')
-    config.add_tween(
-        '.renderers.normalize_cookie_tween_factory',
-        under='.renderers.fix_request_method_tween_factory')
+    '''
+    Can get tween ordering by executing the following on command-line from root dir:
+        `bin/ptween development.ini`
 
-    renderer_tween = (
-        '.renderers.debug_page_or_json'
-        if config.registry.settings['pyramid.reload_templates']
-        else '.renderers.page_or_json'
-    )
+    We could alternatively put these in the base.ini file explicitly.
+    
+    See: https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/hooks.html#registering-tweens
 
-    config.add_tween(
-        renderer_tween,
-        under='.renderers.normalize_cookie_tween_factory')
+    --THESE ARE EXECUTED IN REVERSE ORDER--
+    Implicit Tween Chain as of 05/23/2019:
+
+        Position    Name
+        --------    ----
+        -           INGRESS
+        0           snovault.stats.stats_tween_factory
+        1           .renderers.fix_request_method_tween_factory
+        2           .renderers.normalize_cookie_tween_factory
+        3           .renderers.debug_page_or_json ---OR--- .renderers.page_or_json
+        4           .renderers.set_response_headers_tween_factory
+        5           pyramid_tm.tm_tween_factory
+        6           .renderers.security_tween_factory
+        7           pyramid.tweens.excview_tween_factory
+        -           MAIN
+
+    '''
+
+    config.add_tween('.renderers.fix_request_method_tween_factory', under='snovault.stats.stats_tween_factory')
+
+    config.add_tween('.renderers.normalize_cookie_tween_factory', under='.renderers.fix_request_method_tween_factory')
+
+    renderer_tween = '.renderers.debug_page_or_json' if config.registry.settings['pyramid.reload_templates'] else '.renderers.page_or_json'
+    config.add_tween(renderer_tween, under='.renderers.normalize_cookie_tween_factory')
 
     # This runs after the JS rendering, which is important for
     # some things such as adding response headers to an HTTP Exception.
-    config.add_tween(
-        '.renderers.set_response_headers_tween_factory',
-        under=renderer_tween,
-    )
+    config.add_tween('.renderers.set_response_headers_tween_factory', under=renderer_tween)
 
     config.add_tween('.renderers.security_tween_factory', under='pyramid_tm.tm_tween_factory')
+
     config.scan(__name__)
 
 
@@ -183,40 +197,46 @@ def security_tween_factory(handler, registry):
 
 
 def should_transform(request, response):
-    if request.method not in ('GET', 'HEAD'):
-        return False
+    '''
+    Determines whether to transform the response from JSON->HTML/JS depending on type of response
+    and what the request is looking for to be returned via e.g. request Accept, Authorization header.
+    In case of no Accept header, attempts to guess
+    '''
 
+    # We always return JSON in response to POST, PATCH, etc.
+    #if request.method not in ('GET', 'HEAD'):
+    #    return False
+
+    # Only JSON response/content can be plugged into HTML/JS template responses.
     if response.content_type != 'application/json':
         return False
 
+    # The `format` URI param allows us to override request's 'Accept' header.
     format = request.params.get('format')
-
-    if format is None:
-        original_vary = response.vary or ()
-        response.vary = original_vary + ('Accept', 'Authorization')
-        # Temporary -- remove below if clause once can assert all 3rd party scripts provide 'Accept: application/json' header.
-        if request.authorization is not None:
-            format = 'json'
-        else:
-            mime_type = request.accept.best_match(
-                [
-                    'text/html',
-                    'application/ld+json',
-                    'application/json',
-                ],
-                'text/html')
-            format = mime_type.split('/', 1)[1]
-            if format == 'ld+json':
-                format = 'json'
-    else:
+    if format is not None:
         format = format.lower()
-        if format not in ('html', 'json'):
-            format = 'html'
+        if format == 'json':
+            return False
+        if format == 'html':
+            return True
+        else:
+            raise HTTPNotAcceptable("Improper format URI parameter", comment="The format URI parameter should be set to either html or json.")
 
-    if format == 'json':
-        return False
+    # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
+    # which should contain 'text/html'
+    # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
+    mime_type = request.accept.best_match(['text/html',  'application/json', 'application/ld+json'], 'application/json')
+    format = mime_type.split('/', 1)[1] # Will be 1 of 'html', 'json', 'json-ld'
 
-    return True
+    # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?) which can parse JSON-LDs.
+    # At some point we could maybe have it to be same as making an `@@object` or `?frame=object` request (?) esp if fill
+    # out @context response w/ schema(s) (or link to schema)
+
+    if format == 'html':
+        return True
+
+    return False
+
 
 def normalize_cookie_tween_factory(handler, registry):
     from webob.cookies import Cookie
@@ -226,6 +246,9 @@ def normalize_cookie_tween_factory(handler, registry):
     }
 
     def normalize_cookie_tween(request):
+        '''Not quite sure what this does'''
+
+        print('NORMALIZECOOKIE')
         if request.path in ignore or request.path.startswith('/static/'):
             return handler(request)
 
