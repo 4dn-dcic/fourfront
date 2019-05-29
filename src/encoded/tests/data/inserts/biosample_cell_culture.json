@@ -25,5 +25,22 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com"
+    },
+    {
+        "uuid": "476aa17a-fb54-4978-a23d-d173d130d50c",
+        "description": "cell culture for differentiated ES cells used",
+        "status": "in review by lab",
+        "culture_start_date": "2017-01-31",
+        "culture_harvest_date": "2017-02-28",
+        "doubling_number": "Split 1:4 for 10 passages",
+        "doubling_time": "passaged 10 times and split 1:4",
+        "culture_duration": 33,
+        "passage_number": 16,
+        "in_vitro_differentiated": "Yes",
+        "differentiation_state": "differentiated to definitive endoderm as assayed by FOXP2 expression",
+        "differentiation_tissue": "111121bc-8535-4448-903e-854af460a233",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com"
     }
 ]

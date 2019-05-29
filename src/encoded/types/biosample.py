@@ -161,9 +161,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         # we've got a single type of biosource
         if cell_culture_details:  # this is now an array but just check the first
             cell_culture = request.embed(cell_culture_details[0], '@@object')
-            ds = cell_culture.get('differentiation_state')
-            dt = cell_culture.get('differentiation_term')
-            if ds or dt:
+            differentiated = cell_culture.get('in_vitro_differentiated')
+            if differentiated == "Yes":
                 return 'in vitro differentiated cells'
 
         biosource_type = biosource_types[0]
