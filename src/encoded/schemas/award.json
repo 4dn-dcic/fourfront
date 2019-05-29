@@ -121,6 +121,17 @@
                 "NOFIC",
                 "CvDC"
             ]
+        },
+        "previous_ids": {
+            "title": "Previous ids",
+            "description": "The previous identifiers for this award",
+            "type": "array",
+            "lookup": 110,
+            "items": {
+                "title": "id",
+                "description": "Item indicating the award identifier",
+                "type": "string"
+            }
         }
     },
     "boost_values": {
