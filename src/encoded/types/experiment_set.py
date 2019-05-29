@@ -78,6 +78,7 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_type.assay_classification",
         "experiments_in_set.experiment_type.assay_subclassification",
         "experiments_in_set.experiment_type.assay_subclass_short",
+        "experiments_in_set.experiment_type.other_tags",
         "experiments_in_set.accession",
         "experiments_in_set.status",
         "experiments_in_set.experiment_categorizer.field",
