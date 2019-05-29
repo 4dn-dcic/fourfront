@@ -61,11 +61,13 @@ def includeme(config):
 
     '''
 
+    # Tween which will pipe response into NodeJS subprocess to get HTML body
+    renderer_tween = '.renderers.page_or_json'
+    if config.registry.settings['pyramid.reload_templates']:
+        renderer_tween = '.renderers.debug_page_or_json'
+
     config.add_tween('.renderers.fix_request_method_tween_factory', under='snovault.stats.stats_tween_factory')
-
     config.add_tween('.renderers.normalize_cookie_tween_factory', under='.renderers.fix_request_method_tween_factory')
-
-    renderer_tween = '.renderers.debug_page_or_json' if config.registry.settings['pyramid.reload_templates'] else '.renderers.page_or_json'
     config.add_tween(renderer_tween, under='.renderers.normalize_cookie_tween_factory')
 
     # This runs after the JS rendering, which is important for
