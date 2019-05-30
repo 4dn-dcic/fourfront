@@ -206,42 +206,25 @@ const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
 
 /**
  * Use this button to download the tsv file metadata.
- * Also has a close modal button.
+ *
+ * Renders out a literal form which may be  (gets caught by App.js and serialized to JSON),
+ * with 'accession triples' ([ExpSetAccession, ExpAccession, FileAccession]) included in
+ * the POSTed form fields which identify the individual files to download.
  */
-export class SelectedFilesDownloadStartButton extends React.PureComponent {
+const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownloadStartButton(props){
+    const { suggestedFilename, selectedFiles } = props;
+    const accessionTripleArrays = _.map(_.keys(selectedFiles), function(accessionTripleString){
+        const accessions = accessionTripleString.split('~');
+        return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
+    });
 
-    constructor(props){
-        super(props);
-        this.getAccessionTripleArrays = this.getAccessionTripleArrays.bind(this);
-    }
-
-    getAccessionTripleArrays(){
-        return _.map(
-            _.keys(this.props.selectedFiles),
-            function(accessionTripleString){
-                var accessions = accessionTripleString.split('~');
-                return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
-            }
-        );
-    }
-
-    /**
-    * This function renders out a literal form which may be submitted, with 'accession triples'
-    * ([ExpSetAccession, ExpAccession, FileAccession]) included in the POSTed form fields which
-    * identify the individual files to download.
-    *
-    * @returns {JSX.Element} A modal instance.
-    */
-    render(){
-        const { onClose, suggestedFilename } = this.props;
-        return (
-            <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
-                <input type="hidden" name="accession_triples" value={JSON.stringify(this.getAccessionTripleArrays())} />
-                <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-                <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                    <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
-                </Button>
-            </form>
-        );
-    }
-}
+    return (
+        <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
+            <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
+            <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
+            <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
+                <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
+            </Button>
+        </form>
+    );
+});
