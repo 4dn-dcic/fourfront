@@ -8,7 +8,7 @@ import { Button, Collapse, Popover } from 'react-bootstrap';
 import { SearchResultTable } from './../SearchResultTable';
 import { CustomColumnSelector } from './../CustomColumnController';
 import { ChartDataController } from './../../../viz/chart-data-controller';
-import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
+import { AboveTablePanelWrapper } from './AboveTablePanelWrapper';
 import { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedFilesControls';
 
 
@@ -132,23 +132,22 @@ export class AboveTableControls extends React.PureComponent {
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
                 <Collapse in={!!(open)} appear>
-                    { wrapInAboveTablePanel(
-                        <CustomColumnSelector {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'columnDefinitions')} />,
-                        <span><i className="icon icon-fw icon-gear"/> Configure Visible Columns</span>,
-                        'visible-columns-selector-panel',
-                        this.handleClose
-                    ) }
+                    <AboveTablePanelWrapper className="visible-columns-selector-panel" onClose={this.handleClose}
+                        title={<span><i className="icon icon-fw icon-gear"/> Configure Visible Columns</span>}>
+                        <CustomColumnSelector {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn', 'columnDefinitions')} />
+                    </AboveTablePanelWrapper>
                 </Collapse>
             );
         } else if (open === 'filterFilesBy' || reallyOpen === 'filterFilesBy') {
             return (
                 <Collapse in={!!(open)} appear>
-                    <div>
+                    <AboveTablePanelWrapper className="file-type-selector-panel" onClose={this.handleClose}
+                        title={<span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>}>
                         <SelectedFilesFilterByContent
                             {..._.pick(this.props, 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
                             selectedFiles={selectedFiles} closeButtonClickHandler={this.handleClose}
                             currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
-                    </div>
+                    </AboveTablePanelWrapper>
                 </Collapse>
             );
         }

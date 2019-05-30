@@ -10,7 +10,6 @@ import { ButtonGroup, Checkbox, Button } from 'react-bootstrap';
 import { Schemas, ajax, typedefs } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import * as vizUtil from './../../../viz/utilities';
-import { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 
 // eslint-disable-next-line no-unused-vars
@@ -134,11 +133,6 @@ const FileTypeBucketCheckbox = React.memo(function FileTypeBucketCheckbox(props)
     const { fileType, onFileTypeClick, files, fileTypeFilters } = props;
     const selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
     const filesLength = files.length;
-    const tip = (
-        (selected ? 'Remove ' : 'Include ')
-        + filesLength + ' ' + title + ' files' +
-        (selected ? ' from ' : ' to ') + 'selection.'
-    );
     const cls = "text-ellipsis-container" + (selected ? ' is-active' : '');
     function onChange(evt){ onFileTypeClick(fileType); }
 
@@ -149,8 +143,14 @@ const FileTypeBucketCheckbox = React.memo(function FileTypeBucketCheckbox(props)
         title = Schemas.Term.toName('files.file_type_detailed', fileType);
     }
 
+    const tip = (
+        (selected ? 'Remove ' : 'Include ')
+        + filesLength + ' ' + title + ' files' +
+        (selected ? ' from ' : ' to ') + 'selection.'
+    );
+
     return (
-        <div className="col-sm-6 col-lg-3 file-type-checkbox" key={fileType} data-tip={tip}>
+        <div className="col-sm-6 col-lg-4 file-type-checkbox" key={fileType} data-tip={tip}>
             <Checkbox key={fileType} checked={selected} onChange={onChange} className={cls}>
                 { title } <sub>({ filesLength })</sub>
             </Checkbox>
@@ -188,10 +188,6 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         );
     });
 
-    /**
-     * @constant
-     * @ignore
-     */
     static propTypes = {
         'selectedFiles' : PropTypes.object.isRequired,
         'currentFileTypeFilters' : PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -199,32 +195,14 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         'closeButtonClickHandler' : PropTypes.func
     };
 
-    /**
-     * @constant
-     * @ignore
-     */
     static fileFormatButtonProps = {
         'bsStyle' : "primary",
         'bsSize' : 'small'
     };
 
-    /**
-     * @constant
-     * @ignore
-     */
     constructor(props){
         super(props);
         this.onClick = this.onClick.bind(this);
-    }
-
-    renderFileFormatButtonsSelected(){
-        const { selectedFiles, currentFileTypeFilters } = this.props;
-        if (!selectedFiles) return null;
-        return SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(
-            SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles),
-            this.onClick,
-            currentFileTypeFilters
-        );
     }
 
     /** Adds `filterString` to filters if not present, else removes it. */
@@ -241,12 +219,14 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
     }
 
     render(){
-        return wrapInAboveTablePanel(
-            <div className="row" children={this.renderFileFormatButtonsSelected()}/>,
-            <span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>,
-            'file-type-selector-panel',
-            this.props.closeButtonClickHandler
+        const { selectedFiles, currentFileTypeFilters } = this.props;
+        if (!selectedFiles) return null;
+        const fileTypeButtons = SelectedFilesFilterByContent.renderFileFormatButtonsFromBuckets(
+            SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles),
+            this.onClick,
+            currentFileTypeFilters
         );
+        return <div className="row">{ fileTypeButtons }</div>;
     }
 
 }
