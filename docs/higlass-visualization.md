@@ -81,3 +81,54 @@ If the files have mismatched genome assemblies, you'll get an error.
   "new_genome_assembly": null
 }
 ```
+
+# Fourfront display adjustment
+By default, Higlass Items are 600 pixels high. But Experiment Set pages allow 300 pixels for Higlass Items. Front end javascript will dynamically resize a copy of the viewconfig to fit.
+
+- 2D tracks adjust their height automatically, so they are not modified.
+- If there are 1D and 2D tracks in the viewconf, the 2D track is set to 2/3 of the container height.
+- If there are more than 2 views, the container halves the relative amount of height to work with.
+- 1D tracks will be scaled so they maintain the relative amount of space in the new container.
+
+# Foursight Higlass checks
+Foursight uses the Fourfront endpoint to create and update HiglassItems.
+All of the checks work on a file or experiment set.
+
+## Foursight finds reference files
+Foursight reads the genome assembly from the source files, and gets the relevant chromsizes and beddb files. 
+
+## File Higlass Items
+Foursight looks for files with Higlass uids and genome assemblies.
+There are additional queries used to further filter, based on the Foursight check.
+
+With the file and the reference files Foursight calls the Fourfront API, gets the `new_viewconf` and creates a new Higlass Item. 
+The File's static_content section is updated so it refers to the uuid of the Higlass item. 
+
+## Experiment Set (Processed Files) Higlass Items
+Foursight looks for ExpSets with:
+- A `processed_files` section with files with Higlass uids and genome assemblies.
+- At least one `experiments_in_set` object with a `processed_files` section with files with Higlass uids and genome assemblies.
+
+And then applies queries to filter further, based on the Foursight check.
+
+All of the files in the processed_files section with Higlass uids and genome assemblies are combined with the reference files to make or update a Higlass Item.
+The ExpSet's static_content is updated so the `tab:processed-files` section uses the new Higlass Item.
+
+## Experiment Set (Other Processed Files aka Supplementary Files) Higlass Items
+The opf section is a bit more complicated because each group has its own Higlass Item. 
+
+Foursight looks for ExpSets with a `other_processed_files` section. For each group it sees which groups are worth updating:
+- There are files with Higlass uids and a genome assembly
+- There is no Higlass Item for this group
+- OR The files have been updated after the Higlass Item (the Higlass Item is at least `minutes_leeway` minutes older)
+
+Each opf group in the ExpSet (not the `experiments_in_set.other_processed_files` section) is updated.
+```javascript
+{
+ "files" : [ "<list of file accessions, OR an empty array, see below>" ],
+ "title" : "<Name of the opf group>"
+ "higlass_view_config" : "<higlass item uuid>"
+}
+```
+
+If the files come from `experiments_in_set.other_processed_files`, the `files` array is empty. Otherwise it contains all of the `experiment_set.other_processed_files` used.
