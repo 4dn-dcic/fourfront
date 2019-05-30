@@ -241,7 +241,32 @@
     "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
     "uuid":"7f9eb396-5c1a-4c5e-aebf-28ea39d6a50f",
     "notes" : "A processed file output from a workflow run.",
-    "accession": "4DNFIAAAAAA1"
+    "accession": "4DNFIAAAAAA1",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "100",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "30",
+            "tooltip": "Percent of total reads (=30)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20",
+            "tooltip": "Percent of total reads (=20)",
+            "numberType": "percent"
+        },
+        {
+            "title": "SOME COOL METRIC",
+            "value": "50",
+            "tooltip": "Percent of total reads (=50)",
+            "numberType": "percent"
+        }
+    ]
 },
 {
     "lab":"/labs/4dn-dcic-lab/",
@@ -251,7 +276,32 @@
     "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
     "uuid":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f",
     "notes" : "A processed file output from a workflow run.",
-    "accession": "4DNFIAAAAAA2"
+    "accession": "4DNFIAAAAAA2",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "100",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "30",
+            "tooltip": "Percent of total reads (=30)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20",
+            "tooltip": "Percent of total reads (=20)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Trans Reads",
+            "value": "50",
+            "tooltip": "Percent of total reads (=50)",
+            "numberType": "percent"
+        }
+    ]
 },
 {
     "lab":"/labs/4dn-dcic-lab/",
