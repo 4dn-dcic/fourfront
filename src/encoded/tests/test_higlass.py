@@ -1956,6 +1956,7 @@ def test_custom_display_height(testapp, higlass_blank_viewconf, bedGraph_file_js
             "{uuid}".format(uuid=bg_file['uuid']),
             "{uuid}".format(uuid=bg_file['uuid']),
         ],
+        'height': 300,
     })
 
     assert_true(response.json["errors"] == '')
