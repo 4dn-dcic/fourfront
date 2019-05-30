@@ -1,15 +1,10 @@
 'use strict';
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import url from 'url';
-import queryString from 'query-string';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { Button, Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
-import { isServerSide, layout } from './../../../util';
-import * as vizUtil from './../../../viz/utilities';
+import { Button, Collapse, Popover } from 'react-bootstrap';
 import { SearchResultTable } from './../SearchResultTable';
 import { CustomColumnSelector } from './../CustomColumnController';
 import { ChartDataController } from './../../../viz/chart-data-controller';
@@ -23,24 +18,22 @@ import { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedF
  * This component must be fed props from CustomColumnController (for columns UI), SelectedFilesController (for selected files read-out).
  * Some may need to be transformed to exclude certain non-user-controlled columns (e.g. @type) and such.
  */
-export class AboveTableControls extends React.Component {
+export class AboveTableControls extends React.PureComponent {
 
-    static computeFileTypeFilters = memoize(function(fileTypeFilters, selectedFiles){
-        // Remove from fileTypeFilters if no newly selected files don't have filtered-in fileType.
-        var fileTypeBucketsNew  = SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles),
-            newTypes            = _.keys(fileTypeBucketsNew),
-            typesToRemove       = [],
-            nextFilters         = null;
-
+    /** Removes filters from fileTypeFilters if newly selected files don't have filtered-in fileType. */
+    static filterFileTypeFilters = memoize(function(fileTypeFilters, selectedFiles){
+        const existingFileTypeFiltersObject = _.object(_.map(fileTypeFilters, function(filtr){
+            return [filtr, true];
+        }));
+        const fileTypeBucketsNew = SelectedFilesFilterByContent.filesToFileTypeBuckets(selectedFiles);
+        let currFilter;
         for (var i = 0; i < fileTypeFilters.length ; i++){
-            if (newTypes.indexOf(fileTypeFilters[i]) === -1){
-                typesToRemove.push(fileTypeFilters[i]);
+            currFilter = fileTypeFilters[i];
+            if (typeof fileTypeBucketsNew[currFilter] === 'undefined'){
+                delete existingFileTypeFiltersObject[currFilter];
             }
         }
-        if (typesToRemove.length > 0){
-            nextFilters = _.difference(fileTypeFilters, typesToRemove);
-        }
-        return nextFilters || fileTypeFilters;
+        return _.keys(existingFileTypeFiltersObject);
     });
 
     static defaultProps = {
@@ -50,11 +43,12 @@ export class AboveTableControls extends React.Component {
     };
 
     static getDerivedStateFromProps(props, state){
-        var newState = {
-            'fileTypeFilters' : AboveTableControls.computeFileTypeFilters(state.fileTypeFilters, props.selectedFiles)
+        const { selectedFiles, selectedFilesUniqueCount } = props;
+        const newState = {
+            'fileTypeFilters' : AboveTableControls.filterFileTypeFilters(state.fileTypeFilters, selectedFiles)
         };
-
-        if (state.open === 'filterFilesBy' && _.keys(props.selectedFiles).length === 0){
+        // Close FileType filter panel if no selected files.
+        if (state.open === 'filterFilesBy' && (selectedFilesUniqueCount === 0 || _.keys(selectedFiles).length === 0)){
             newState.open = newState.reallyOpen = false;
         }
         return newState;
@@ -64,16 +58,13 @@ export class AboveTableControls extends React.Component {
         super(props);
         this.handleOpenToggle = _.throttle(this.handleOpenToggle.bind(this), 350);
         this.handleClose = this.handleOpenToggle.bind(this, false);
-        this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
+        this.handleOpenFileTypeFiltersPanel = this.handleOpenToggle.bind(this, 'filterFilesBy');
+        this.handleOpenColumnsSelectionPanel = this.handleOpenToggle.bind(this, 'customColumns');
         this.renderPanel = this.renderPanel.bind(this);
         this.renderOverlay = this.renderOverlay.bind(this);
-        this.rightButtons = this.rightButtons.bind(this);
         this.setFileTypeFilters = this.setFileTypeFilters.bind(this);
 
         /**
-         * @constant
-         * @private
-         * @type {Object}
          * @property {boolean} state.open - Whether panel is open.
          * @property {boolean} state.reallyOpen - Extra check for if open, will remain true until 'closing' transition is complete.
          * @property {string[]} state.fileTypeFilters - List of file_type_detailed strings that we filter selected files down to.
@@ -86,16 +77,18 @@ export class AboveTableControls extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState){
-        if (this.state.open || prevState.open !== this.state.open){
+        const { isFullscreen, parentForceUpdate } = this.props;
+        const { open } = this.state;
+        if (open && prevState.open !== open){
             ReactTooltip.rebuild();
         }
-        if (prevProps.isFullscreen !== this.props.isFullscreen && typeof this.props.parentForceUpdate === 'function'){
-            setTimeout(this.props.parentForceUpdate, 100);
+        if (prevProps.isFullscreen !== isFullscreen && typeof parentForceUpdate === 'function'){
+            setTimeout(parentForceUpdate, 100);
         }
     }
 
-    setFileTypeFilters(filters){
-        this.setState({ 'fileTypeFilters' : filters });
+    setFileTypeFilters(fileTypeFilters){
+        this.setState({ fileTypeFilters });
     }
 
     handleOpenToggle(value){
@@ -103,31 +96,26 @@ export class AboveTableControls extends React.Component {
             clearTimeout(this.timeout);
             delete this.timeout;
         }
-        if (typeof value === 'string' && this.state.open === value) value = false;
-        var state = { 'open' : value };
-        if (state.open){
-            state.reallyOpen = state.open;
+        this.setState(function({ open }){
+            const nextState = {};
+            if (typeof value === 'string' && open === value){
+                nextState.open = false;
+            } else {
+                nextState.open = value;
+            }
+            if (nextState.open){
+                nextState.reallyOpen = nextState.open;
+            }
+            return nextState;
+        }, ()=>{
+            const { open, reallyOpen } = this.state;
             setTimeout(ReactTooltip.rebuild, 100);
-        } else {
-            this.timeout = setTimeout(()=>{
-                this.setState({ 'reallyOpen' : false });
-            }, 400);
-        }
-        this.setState(state);
-    }
-
-    handleLayoutToggle(){
-        var { windowWidth, isFullscreen, toggleFullScreen } = this.props;
-        if (!SearchResultTable.isDesktopClientside(windowWidth)) return null;
-        if (typeof toggleFullScreen !== 'function'){
-            console.error('No toggleFullscreen function passed in.');
-            return null;
-        }
-        setTimeout(toggleFullScreen, 0, !isFullscreen);
-    }
-
-    filteredSelectedFiles(){
-        return SelectedFilesControls.filterSelectedFilesByFileTypeFilters(this.props.selectedFiles, this.state.fileTypeFilters);
+            if (!open && reallyOpen){
+                this.timeout = setTimeout(()=>{
+                    this.setState({ 'reallyOpen' : false });
+                }, 400);
+            }
+        });
     }
 
     renderOverlay(){
@@ -139,8 +127,8 @@ export class AboveTableControls extends React.Component {
     }
 
     renderPanel(){
-        const { open, reallyOpen } = this.state;
-        const filteredSelectedFiles = this.filteredSelectedFiles();
+        const { selectedFiles } = this.props;
+        const { open, reallyOpen, fileTypeFilters } = this.state;
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
                 <Collapse in={!!(open)} appear>
@@ -158,8 +146,8 @@ export class AboveTableControls extends React.Component {
                     <div>
                         <SelectedFilesFilterByContent
                             {..._.pick(this.props, 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
-                            selectedFiles={filteredSelectedFiles} closeButtonClickHandler={this.handleClose}
-                            currentFileTypeFilters={this.state.fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
+                            selectedFiles={selectedFiles} closeButtonClickHandler={this.handleClose}
+                            currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
                     </div>
                 </Collapse>
             );
@@ -167,27 +155,33 @@ export class AboveTableControls extends React.Component {
         return null;
     }
 
+    /**
+     * @todo
+     * Perhaps split up into (functional?) components similarly as RightButtonsSection.
+     * Move logic into render method (?).
+     */
     leftSection(){
-        var { showSelectedFileCount, selectedFiles, context, currentAction, showTotalResults } = this.props;
-        var filteredSelectedFiles = this.filteredSelectedFiles();
+        const { showSelectedFileCount, selectedFiles, context, currentAction, showTotalResults } = this.props;
+        const { fileTypeFilters, open } = this.state;
+        const filteredSelectedFiles = SelectedFilesControls.filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters);
 
-        // Case if on BrowseView, but not on SearchView
-        // TODO: Modularize?
+        // Case if on BrowseView, where we have selectedFiles, but not on SearchView
+        // TODO: Modularize/split?
         if (showSelectedFileCount && selectedFiles){
             return (
                 <ChartDataController.Provider id="selected_files_section">
                     <SelectedFilesControls
                         {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount', 'resetSelectedFiles',
                             'includeFileSets', 'includeProcessedFiles')}
-                        subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenToggle.bind(this, 'filterFilesBy')} currentFileTypeFilters={this.state.fileTypeFilters}
-                        setFileTypeFilters={this.setFileTypeFilters} currentOpenPanel={this.state.open} />
+                        subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenFileTypeFiltersPanel}
+                        currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} currentOpenPanel={open} />
                 </ChartDataController.Provider>
             );
         }
 
 
         // FOR NOW, we'll stick 'add' button here. -- IF NO SELECTED FILES CONTROLS
-        var addButton = null;
+        let addButton = null;
         // don't show during submission search "selecting existing"
         if (context && Array.isArray(context.actions) && !currentAction){
             var addAction = _.findWhere(context.actions, { 'name' : 'add' });
@@ -203,7 +197,7 @@ export class AboveTableControls extends React.Component {
         }
 
         // Case if on SearchView
-        var total = null;
+        let total = null;
         if (showTotalResults) {
             if (typeof showTotalResults === 'number')               total = showTotalResults;
             else if (context && typeof context.total === 'number')  total = context.total;
@@ -215,6 +209,7 @@ export class AboveTableControls extends React.Component {
         }
 
         if (!total && !addButton) return null;
+
         return (
             <div key="total-count" className="pull-left pt-11 box results-count">
                 { total }{ total && addButton ? <React.Fragment>&nbsp;&nbsp;</React.Fragment> : '' }{ addButton }
@@ -222,13 +217,43 @@ export class AboveTableControls extends React.Component {
         );
     }
 
-    rightButtons(){
-        var { open } = this.state,
-            { isFullscreen } = this.props;
+    render(){
+        const { open } = this.state;
+        return (
+            <div className="above-results-table-row">
+                <div className="clearfix">
+                    { this.leftSection() }
+                    <RightButtonsSection {..._.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen')} open={open} onColumnsBtnClick={this.handleOpenColumnsSelectionPanel} />
+                </div>
+                { this.renderPanel() }
+            </div>
+        );
+    }
+}
 
+class RightButtonsSection extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.handleLayoutToggle = _.throttle(this.handleLayoutToggle.bind(this), 350);
+    }
+
+    handleLayoutToggle(){
+        const { windowWidth, isFullscreen, toggleFullScreen } = this.props;
+        if (!SearchResultTable.isDesktopClientside(windowWidth)) return null;
+        if (typeof toggleFullScreen !== 'function'){
+            console.error('No toggleFullscreen function passed in.');
+            return null;
+        }
+        setTimeout(toggleFullScreen, 0, !isFullscreen);
+    }
+
+    render(){
+        const { open, isFullscreen, onColumnsBtnClick } = this.props;
         return (
             <div className="pull-right right-buttons">
-                <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click" active={this.state.open === 'customColumns'} onClick={this.handleOpenToggle.bind(this, 'customColumns')}>
+                <Button key="toggle-visible-columns" data-tip="Configure visible columns" data-event-off="click"
+                    active={open === 'customColumns'} onClick={onColumnsBtnClick}>
                     <i className="icon icon-fw icon-table" />
                     <i className="icon icon-fw icon-angle-down ml-03"/>
                 </Button>
@@ -236,19 +261,6 @@ export class AboveTableControls extends React.Component {
                     onClick={this.handleLayoutToggle} data-tip={(!isFullscreen ? 'Expand' : 'Collapse') + " table width"}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}></i>
                 </Button>
-            </div>
-        );
-    }
-
-
-    render(){
-        return (
-            <div className="above-results-table-row">
-                <div className="clearfix">
-                    { this.leftSection() }
-                    { this.rightButtons() }
-                </div>
-                { this.renderPanel() }
             </div>
         );
     }

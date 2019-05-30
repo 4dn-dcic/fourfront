@@ -9,46 +9,44 @@ import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 import { Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
 
-var { Item } = typedefs;
+
+// eslint-disable-next-line no-unused-vars
+const { Item } = typedefs;
 
 
 /**
  * BrowseView allows to filter down by filetype so we receive a selectedFiles and a subSelectedFiles.
  * This may likely change in future.
  */
-export class BrowseViewSelectedFilesDownloadButton extends React.PureComponent {
-    render(){
-        const { selectedFiles, subSelectedFiles, selectedFilesUniqueCount } = this.props;
+export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseViewSelectedFilesDownloadButton(props){
+    const { selectedFiles, subSelectedFiles, selectedFilesUniqueCount } = props;
+    const selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length;
+    const subSelectedFilesCount = _.keys(subSelectedFiles).length;
+    const disabled = selectedFilesUniqueCount === 0;
+    const countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount;
 
-        const selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length;
-        const subSelectedFilesCount = _.keys(subSelectedFiles).length;
-        const disabled = selectedFilesUniqueCount === 0;
-        const countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount;
+    let countToShow = selectedFilesUniqueCount;
+    let tooltip = (
+        "Download metadata TSV sheet containing download URIs for " +
+        selectedFilesUniqueCount + " files" +
+        (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
+    );
 
-        let countToShow = selectedFilesUniqueCount;
-
-        const tooltip = (
-            "Download metadata TSV sheet containing download URIs for " +
-            selectedFilesUniqueCount + " files" +
-            (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
-        );
-
-        if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
-            countToShow = subSelectedFilesCount;
-            tip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
-        }
-
-        return (
-            <SelectedFilesDownloadButton selectedFilesUniqueCount={selectedFilesUniqueCount} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
-                id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={disabled ? 'btn-secondary' : 'btn-primary'}>
-                <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
-                <span className="hidden-xs hidden-sm">Download </span>
-                <span className="count-to-download-integer">{ countToShow }</span>
-                <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
-            </SelectedFilesDownloadButton>
-        );
+    if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
+        countToShow = subSelectedFilesCount;
+        tooltip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
     }
-}
+
+    return (
+        <SelectedFilesDownloadButton countToShow={countToShow} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
+            id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={disabled ? 'btn-secondary' : 'btn-primary'}>
+            <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
+            <span className="hidden-xs hidden-sm">Download </span>
+            <span className="count-to-download-integer">{ countToShow }</span>
+            <span className="hidden-xs hidden-sm text-400"> Selected Files</span>
+        </SelectedFilesDownloadButton>
+    );
+});
 
 
 
@@ -88,9 +86,9 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        const { selectedFiles, filenamePrefix, children, disabled, selectedFilesUniqueCount } = this.props;
+        const { selectedFiles, filenamePrefix, children, disabled, countToShow } = this.props;
         const { modalOpen } = this.state;
-        const btnProps = _.omit(this.props, 'filenamePrefix', 'selectedFiles', 'windowWidth', 'children', 'selectedFilesUniqueCount', 'disabled');
+        const btnProps = _.omit(this.props, 'filenamePrefix', 'selectedFiles', 'windowWidth', 'children', 'countToShow', 'disabled');
         const isDisabled = disabled || SelectedFilesDownloadButton.totalSelectedFilesCount(selectedFiles) === 0;
         return (
             <React.Fragment>
@@ -98,7 +96,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                     { children }
                 </Button>
                 { modalOpen ?
-                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, selectedFilesUniqueCount }} onHide={this.hideModal}/>
+                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, countToShow }} onHide={this.hideModal}/>
                     : null }
             </React.Fragment>
         );
@@ -131,14 +129,14 @@ class SelectedFilesDownloadModal extends React.PureComponent {
     }
 
     render(){
-        const { onHide, filenamePrefix, selectedFiles, selectedFilesUniqueCount } = this.props;
+        const { onHide, filenamePrefix, selectedFiles, countToShow } = this.props;
         const { disclaimerAccepted } = this.state;
 
         const suggestedFilename = filenamePrefix + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
         const userInfo = JWT.getUserInfo();
         const isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
         const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-        const countSelectedFiles = selectedFilesUniqueCount || SelectedFilesDownloadButton.totalSelectedFilesCount(selectedFiles);
+        const countSelectedFiles = countToShow || SelectedFilesDownloadButton.totalSelectedFilesCount(selectedFiles);
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);
 
         return (
