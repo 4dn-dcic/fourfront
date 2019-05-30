@@ -193,7 +193,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
     }
 }
 
-function ModalCodeSnippet(props){
+const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
     const { filename, isSignedIn } = props;
     return (
         <pre className="mb-15">
@@ -201,7 +201,7 @@ function ModalCodeSnippet(props){
             { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
         </pre>
     );
-}
+});
 
 
 /**
