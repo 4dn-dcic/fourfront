@@ -139,6 +139,8 @@ const FileTypeBucketCheckbox = React.memo(function FileTypeBucketCheckbox(props)
         + filesLength + ' ' + title + ' files' +
         (selected ? ' from ' : ' to ') + 'selection.'
     );
+    const cls = "text-ellipsis-container" + (selected ? ' is-active' : '');
+    function onChange(evt){ onFileTypeClick(fileType); }
 
     let title;
     if (typeof fileType === 'undefined' || fileType === 'other' || fileType === 'undefined'){
@@ -149,9 +151,7 @@ const FileTypeBucketCheckbox = React.memo(function FileTypeBucketCheckbox(props)
 
     return (
         <div className="col-sm-6 col-lg-3 file-type-checkbox" key={fileType} data-tip={tip}>
-            <Checkbox key={fileType} checked={selected}
-                onChange={onFileTypeClick ? onFileTypeClick.bind(onFileTypeClick, fileType) : null}
-                className={"text-ellipsis-container" + (selected ? ' is-active' : '')}>
+            <Checkbox key={fileType} checked={selected} onChange={onChange} className={cls}>
                 { title } <sub>({ filesLength })</sub>
             </Checkbox>
         </div>
