@@ -155,7 +155,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const userInfo = JWT.getUserInfo();
         const isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
         const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-        const countSelectedFiles = fileCountWithDuplicates(selectedFiles);
+        const countSelectedFilesUnique = uniqueFileCount(selectedFiles);
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);
 
         return (
@@ -163,7 +163,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        <span className="text-400">Download <span className="text-600">{ countSelectedFiles }</span> Files</span>
+                        <span className="text-400">Download <span className="text-600">{ countSelectedFilesUnique }</span> Files</span>
                     </Modal.Title>
                 </Modal.Header>
 
