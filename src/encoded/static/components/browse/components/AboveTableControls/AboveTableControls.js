@@ -73,6 +73,8 @@ export class AboveTableControls extends React.PureComponent {
         this.state = {
             'open' : false,
             'reallyOpen' : false,
+            // TODO: extract this & logic related to this into a new "FileTypeFilterController" component.
+            // This would allow us to hoist this above BrowseView's entire results table and maybe hide or filter down expsets.
             'fileTypeFilters' : []
         };
     }

@@ -250,7 +250,7 @@ export class FileDownloadButton extends React.PureComponent {
         'title' : 'Download',
         'disabled' : false,
         'size' : null
-    }
+    };
 
     render(){
         var { href, className, disabled, title, filename, size } = this.props;
@@ -296,7 +296,7 @@ export class FileDownloadButtonAuto extends React.PureComponent {
             'released to project',
             'archived'
         ]
-    }
+    };
 
     canDownload(){ return FileDownloadButtonAuto.canDownload(this.props.result, this.props.canDownloadStatuses); }
 

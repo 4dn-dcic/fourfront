@@ -160,17 +160,14 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
 
     /**
      * Converts `selectedFiles` structure into groups of `file_type_detailed` property.
+     * Also uniqs the files in order to align with download button count & quick info bar.
      *
      * @param {Object.<Item>} selectedFiles - Object of files, keyed by accession triple string.
      * @returns {Object.<Item>} Object of files, keyed by `file_type_detailed` property,
      */
     static filesToFileTypeBuckets = memoize(function(selectedFiles){
-        return _.groupBy(
-            _.map(_.pairs(selectedFiles), function([accessionTripleString, file]){
-                return _.extend({ 'selection_id' : accessionTripleString }, file);
-            }),
-            'file_type_detailed'
-        );
+        const selectedFilesUniqueList = _.uniq(_.values(selectedFiles), false, 'accession');
+        return _.groupBy(selectedFilesUniqueList, 'file_type_detailed');
     });
 
     static propTypes = {
@@ -243,18 +240,21 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
 export const SelectedFilesControls = React.memo(function SelectedFilesControls(props){
 
     const { barplot_data_filtered, barplot_data_unfiltered } = props;
-    const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
-    const totalFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
     const selectedFileProps = SelectedFilesController.pick(props);
+    const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
+    // This gets unique file count from ES aggs. In future we might be able to get total including
+    // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
+    // in SelectAllFilesButton & similar.
+    const totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
 
     return (
         <div>
-            <SelectAllFilesButton {..._.extend(_.pick(props, 'href'), selectedFileProps)} totalFilesCount={totalFilesCount} />
+            <SelectAllFilesButton {..._.extend(_.pick(props, 'href'), selectedFileProps)} totalFilesCount={totalUniqueFilesCount} />
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalFilesCount} />
+                    <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalUniqueFilesCount} />
                     <SelectedFilesFilterByButton {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters',
-                        'onFilterFilesByClick', 'currentOpenPanel' ), selectedFileProps)} totalFilesCount={totalFilesCount} />
+                        'onFilterFilesByClick', 'currentOpenPanel' ), selectedFileProps)} totalFilesCount={totalUniqueFilesCount} />
                 </ButtonGroup>
             </div>
         </div>
