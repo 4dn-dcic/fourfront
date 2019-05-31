@@ -25,7 +25,8 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     const disabled = selectedFilesUniqueCount === 0;
     const countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount;
 
-    let countToShow = selectedFilesUniqueCount;
+    /** We could also have this be `selectedFilesUniqueCount` -- is relatively subjective though good to be consistent with subSelectedFilesCount. */
+    let countToShow = selectedFilesCountIncludingDuplicates;
     let tooltip = (
         "Download metadata TSV sheet containing download URIs for " +
         selectedFilesUniqueCount + " files" +
