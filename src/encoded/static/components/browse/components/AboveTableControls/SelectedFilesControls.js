@@ -11,6 +11,7 @@ import { Schemas, ajax, typedefs } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import * as vizUtil from './../../../viz/utilities';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
+import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
 
 // eslint-disable-next-line no-unused-vars
 const { Item } = typedefs;
@@ -31,24 +32,19 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         'processed_files.accession',
         'processed_files.file_type_detailed',
-        'processed_files.uuid',
 
         'experiments_in_set.accession',
 
         'experiments_in_set.files.accession',
         'experiments_in_set.files.file_type_detailed',
-        'experiments_in_set.files.paired_end',
-        'experiments_in_set.files.uuid',
-        'experiments_in_set.files.related_files.file.accession',
 
         'experiments_in_set.processed_files.accession',
         'experiments_in_set.processed_files.file_type_detailed',
-        'experiments_in_set.processed_files.uuid'
     ];
 
     constructor(props){
         super(props);
-        this.handleSelect = this.handleSelect.bind(this);
+        this.handleSelectAll = this.handleSelectAll.bind(this);
         this.state = { 'selecting' : false };
     }
 
@@ -60,16 +56,17 @@ export class SelectAllFilesButton extends React.PureComponent {
     }
 
     isAllSelected(){
-        const { totalFilesCount, selectedFilesUniqueCount } = this.props;
+        const { totalFilesCount, selectedFiles } = this.props;
         if (!totalFilesCount) return false;
-        if (totalFilesCount === selectedFilesUniqueCount){
+        // totalFilesCount as returned from bar plot aggs at moment is unique.
+        if (totalFilesCount === uniqueFileCount(selectedFiles)){
             return true;
         }
         return false;
     }
 
-    handleSelect(evt){
-        const { selectFile, resetSelectedFiles, href, includeProcessedFiles } = this.props;
+    handleSelectAll(evt){
+        const { selectFile, resetSelectedFiles, href } = this.props;
         if (typeof selectFile !== 'function' || typeof resetSelectedFiles !== 'function'){
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
@@ -84,20 +81,8 @@ export class SelectAllFilesButton extends React.PureComponent {
                 currentHrefQuery.limit = 'all';
                 var reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
                 ajax.load(reqHref, (resp)=>{
-                    var allFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, includeProcessedFiles)), []);
-                    // Some processed files may not have a 'from_experiment' property (redundant check temp), so we put in a dummy one to be able to generate a unique selector.
-                    allFiles = _.map(allFiles, function(file){
-                        if (typeof file.from_experiment === 'undefined'){
-                            return _.extend({}, file, {
-                                'from_experiment' : {
-                                    'accession' : "NONE",
-                                    'from_experiment_set' : file.from_experiment_set
-                                }
-                            });
-                        }
-                        return file;
-                    });
-                    var filesToSelect = _.zip(filesToAccessionTriples(allFiles, true), allFiles);
+                    const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                    const filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
                 });
@@ -117,7 +102,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         return (
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <Button id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)} className="btn-secondary" onClick={this.handleSelect}>
+                    <Button id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)} className="btn-secondary" onClick={this.handleSelectAll}>
                         <i className={iconClassName}/>
                         <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>
@@ -260,18 +245,16 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     const { barplot_data_filtered, barplot_data_unfiltered } = props;
     const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
     const totalFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+    const selectedFileProps = SelectedFilesController.pick(props);
 
     return (
         <div>
-            <SelectAllFilesButton {..._.pick(props, 'href', 'selectedFilesUniqueCount', 'selectedFiles', 'selectFile',
-                'unselectFile', 'resetSelectedFiles', 'includeProcessedFiles')} totalFilesCount={totalFilesCount} />
+            <SelectAllFilesButton {..._.extend(_.pick(props, 'href'), selectedFileProps)} totalFilesCount={totalFilesCount} />
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
-                    <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles', 'selectedFilesUniqueCount')}
-                        totalFilesCount={totalFilesCount} />
-                    <SelectedFilesFilterByButton {..._.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters',
-                        'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'onFilterFilesByClick',
-                        'currentOpenPanel' )} totalFilesCount={totalFilesCount} />
+                    <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalFilesCount} />
+                    <SelectedFilesFilterByButton {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters',
+                        'onFilterFilesByClick', 'currentOpenPanel' ), selectedFileProps)} totalFilesCount={totalFilesCount} />
                 </ButtonGroup>
             </div>
         </div>

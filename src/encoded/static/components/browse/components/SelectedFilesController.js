@@ -7,6 +7,26 @@ import _ from 'underscore';
 import { expFxn, object } from './../../util';
 
 
+// Memoized helper functions for getting counts of files performantly-er.
+// These are used often by other components which consume/display selected file counts.
+
+/** Used and memoized in views which have multiple sets of selectedFiles */
+export function uniqueFileCountNonMemoized(selectedFiles){
+    if (!selectedFiles || typeof selectedFiles !== 'object' || Array.isArray(selectedFiles)){
+        console.error("selectedFiles not in proper form or is non-existent", selectedFiles);
+        return 0;
+    }
+    return _.uniq(_.pluck(_.values(selectedFiles), 'accession')).length;
+}
+
+/** Pre-memoized and to be used in views that only have 1 selectedFiles collection, such as BrowseView */
+export const uniqueFileCount = memoize(uniqueFileCountNonMemoized);
+
+export const fileCountWithDuplicates = memoize(function(selectedFiles){
+    return _.keys(selectedFiles).length;
+});
+
+
 /**
  * IN PROGRESS -- TODO: Decide if we should store "selectedFiles" or "unselectedFiles" (re: 'All files in facet selection are selected by default')
  *
@@ -23,17 +43,7 @@ export class SelectedFilesController extends React.PureComponent {
      * @public
      */
     static pick(props){
-        return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount');
-    }
-
-    /**
-     * Includes related files that might be saved in memo values.
-     *
-     * @static
-     * @returns {string[]} List of file UUIDs.
-     */
-    static objectToCompleteList(selectFilesObj){
-        return _.keys(selectFilesObj);
+        return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles');
     }
 
     static listToObject(selectedFilesList){
@@ -43,8 +53,7 @@ export class SelectedFilesController extends React.PureComponent {
             // is shown (without checkbox).
             _.filter(selectedFilesList, object.itemUtil.atId),
             function(fileItem){
-                const accessionTriple = expFxn.fileToAccessionTriple(fileItem, true);
-                return [accessionTriple, fileItem];
+                return [ expFxn.fileToAccessionTriple(fileItem, true), fileItem ];
             }
         ));
     }
@@ -76,10 +85,6 @@ export class SelectedFilesController extends React.PureComponent {
         throw new Error('Received unexpected props.initiallySelectedFiles -');
     }
 
-    static uniqueFileCountByUUID = memoize(function(selectedFiles){
-        return _.uniq(_.pluck(_.values(selectedFiles), 'uuid')).length;
-    });
-
     static defaultProps = {
         'initiallySelectedFiles' : null,
         'resetSelectedFilesCheck' : function(nextProps, pastProps){
@@ -102,9 +107,8 @@ export class SelectedFilesController extends React.PureComponent {
         this.selectFile = this.selectFile.bind(this);
         this.unselectFile = this.unselectFile.bind(this);
         this.resetSelectedFiles = this.resetSelectedFiles.bind(this);
-        this.getFlatList = this.getFlatList.bind(this);
 
-        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles);
+        const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles);
 
         this.state = { selectedFiles };
     }
@@ -144,8 +148,7 @@ export class SelectedFilesController extends React.PureComponent {
                 add(accessionTriple, memo);
             } else error();
 
-            var selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(newSelectedFiles);
-            return { 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount };
+            return { 'selectedFiles' : newSelectedFiles };
         });
     }
 
@@ -177,8 +180,7 @@ export class SelectedFilesController extends React.PureComponent {
                 remove(accessionTriple);
             } else error();
 
-            var selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(newSelectedFiles);
-            return { 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount };
+            return { 'selectedFiles' : newSelectedFiles };
         });
     }
 
@@ -187,13 +189,11 @@ export class SelectedFilesController extends React.PureComponent {
         this.setState({ selectedFiles });
     }
 
-    getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
-
     render(){
-        const children = this.props.children;
+        const { children } = this.props;
+        const { selectedFiles } = this.state;
         const propsToPass = _.extend(_.omit(this.props, 'children'), {
-            'selectedFiles'             : this.state.selectedFiles,
-            'selectedFilesUniqueCount'  : SelectedFilesController.uniqueFileCountByUUID(this.state.selectedFiles),
+            'selectedFiles'             : selectedFiles,
             'selectFile'                : this.selectFile,
             'unselectFile'              : this.unselectFile,
             'resetSelectedFiles'        : this.resetSelectedFiles
@@ -207,10 +207,10 @@ export class SelectedFilesController extends React.PureComponent {
                 return React.cloneElement(child, propsToPass);
             });
         } else {
-            if (!React.isValidElement(this.props.children)){
+            if (!React.isValidElement(children)){
                 throw new Error('SelectedFilesController expects props.children to be a valid React component instance.');
             }
-            return React.cloneElement(this.props.children, propsToPass);
+            return React.cloneElement(children, propsToPass);
         }
     }
 

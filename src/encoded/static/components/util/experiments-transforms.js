@@ -424,9 +424,8 @@ export function allFilesFromExperiment(experiment, includeProcessedFiles = false
  * @todo (Possibly) Add param/feature to include other processed files.
  */
 export function allFilesFromExperimentSet(expSet, includeProcessedFiles = false){
-
-    var processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
-    var rawFiles = _.reduce(experimentsFromExperimentSet(expSet), function(m, exp){
+    const processedFiles = includeProcessedFiles ? reduceProcessedFilesWithExperimentsAndSets(allProcessedFilesFromExperimentSet(expSet)) : [];
+    const rawFiles = _.reduce(experimentsFromExperimentSet(expSet), function(m, exp){
         return m.concat(allFilesFromExperiment(exp));
     }, []);
 

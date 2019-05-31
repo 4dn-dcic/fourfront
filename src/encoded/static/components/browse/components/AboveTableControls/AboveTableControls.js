@@ -10,6 +10,7 @@ import { CustomColumnSelector } from './../CustomColumnController';
 import { ChartDataController } from './../../../viz/chart-data-controller';
 import { AboveTablePanelWrapper } from './AboveTablePanelWrapper';
 import { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedFilesControls';
+import { fileCountWithDuplicates, SelectedFilesController } from './../SelectedFilesController';
 
 
 
@@ -38,17 +39,17 @@ export class AboveTableControls extends React.PureComponent {
 
     static defaultProps = {
         'showSelectedFileCount' : false,
-        'showTotalResults'      : false,
-        'includeProcessedFiles' : true
+        'showTotalResults'      : false
     };
 
     static getDerivedStateFromProps(props, state){
-        const { selectedFiles, selectedFilesUniqueCount } = props;
+        const { selectedFiles } = props;
+        const selectedFileCount = fileCountWithDuplicates(selectedFiles);
         const newState = {
             'fileTypeFilters' : AboveTableControls.filterFileTypeFilters(state.fileTypeFilters, selectedFiles)
         };
         // Close FileType filter panel if no selected files.
-        if (state.open === 'filterFilesBy' && (selectedFilesUniqueCount === 0 || _.keys(selectedFiles).length === 0)){
+        if (state.open === 'filterFilesBy' && selectedFileCount === 0){
             newState.open = newState.reallyOpen = false;
         }
         return newState;
@@ -127,7 +128,6 @@ export class AboveTableControls extends React.PureComponent {
     }
 
     renderPanel(){
-        const { selectedFiles } = this.props;
         const { open, reallyOpen, fileTypeFilters } = this.state;
         if (open === 'customColumns' || reallyOpen === 'customColumns') {
             return (
@@ -143,10 +143,8 @@ export class AboveTableControls extends React.PureComponent {
                 <Collapse in={!!(open)} appear>
                     <AboveTablePanelWrapper className="file-type-selector-panel" onClose={this.handleClose}
                         title={<span><i className="icon icon-fw icon-filter"/> Filter Selection by File Type</span>}>
-                        <SelectedFilesFilterByContent
-                            {..._.pick(this.props, 'selectedFilesUniqueCount', 'includeFileSets', 'includeProcessedFiles')}
-                            selectedFiles={selectedFiles} closeButtonClickHandler={this.handleClose}
-                            currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
+                        <SelectedFilesFilterByContent {..._.pick(this.props, 'includeFileSets', 'selectedFiles')}
+                            closeButtonClickHandler={this.handleClose} currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
                     </AboveTablePanelWrapper>
                 </Collapse>
             );
@@ -169,9 +167,7 @@ export class AboveTableControls extends React.PureComponent {
         if (showSelectedFileCount && selectedFiles){
             return (
                 <ChartDataController.Provider id="selected_files_section">
-                    <SelectedFilesControls
-                        {..._.pick(this.props, 'href', 'selectedFiles', 'selectFile', 'unselectFile', 'selectedFilesUniqueCount', 'resetSelectedFiles',
-                            'includeFileSets', 'includeProcessedFiles')}
+                    <SelectedFilesControls {..._.extend(_.pick(this.props, 'href', 'includeFileSets'), SelectedFilesController.pick(this.props))}
                         subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenFileTypeFiltersPanel}
                         currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} currentOpenPanel={open} />
                 </ChartDataController.Provider>

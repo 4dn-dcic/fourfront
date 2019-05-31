@@ -8,6 +8,7 @@ import memoize from 'memoize-one';
 import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 import { Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
+import { uniqueFileCount, fileCountWithDuplicates, uniqueFileCountNonMemoized } from './../SelectedFilesController';
 
 
 // eslint-disable-next-line no-unused-vars
@@ -19,27 +20,33 @@ const { Item } = typedefs;
  * This may likely change in future.
  */
 export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseViewSelectedFilesDownloadButton(props){
-    const { selectedFiles, subSelectedFiles, selectedFilesUniqueCount } = props;
-    const selectedFilesCountIncludingDuplicates = _.keys(selectedFiles).length;
-    const subSelectedFilesCount = _.keys(subSelectedFiles).length;
+    const { selectedFiles, subSelectedFiles } = props;
+    const selectedFilesUniqueCount = uniqueFileCount(selectedFiles);
+    const selectedFilesCountIncludingDuplicates = fileCountWithDuplicates(selectedFiles);
+    const subSelectedFilesCountUnique = subSelectedUniqueFileCount(subSelectedFiles);
+    const subSelectedFilesCountIncludingDuplicates = subSelectedFileCountWithDuplicates(subSelectedFiles);
     const disabled = selectedFilesUniqueCount === 0;
-    const countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount;
 
-    /** We could also have this be `selectedFilesUniqueCount` -- is relatively subjective though good to be consistent with subSelectedFilesCount. */
-    let countToShow = selectedFilesCountIncludingDuplicates;
+    let countDuplicates = selectedFilesCountIncludingDuplicates - selectedFilesUniqueCount;
+    let countToShow = selectedFilesUniqueCount; // Unique count would align to quick info bar count better.
     let tooltip = (
         "Download metadata TSV sheet containing download URIs for " +
         selectedFilesUniqueCount + " files" +
-        (countDuplicates ? " ( + " + countDuplicates + " duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
+        (countDuplicates ? " ( + " + countDuplicates + " non-counted duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
     );
 
-    if (subSelectedFilesCount && subSelectedFilesCount !== selectedFilesCountIncludingDuplicates){
-        countToShow = subSelectedFilesCount;
-        tooltip = subSelectedFilesCount + " selected files filtered in out of " + selectedFilesCountIncludingDuplicates + " total" + (countDuplicates? " including " + countDuplicates + " duplicates)." : '');
+    if (subSelectedFilesCountUnique && subSelectedFilesCountUnique !== selectedFilesUniqueCount){
+        countDuplicates = subSelectedFilesCountIncludingDuplicates - subSelectedFilesCountUnique;
+        countToShow = subSelectedFilesCountUnique;
+        tooltip = (
+            subSelectedFilesCountUnique + " selected files filtered in out of " +
+            selectedFilesUniqueCount + " total" +
+            (countDuplicates? " ( + " + countDuplicates + " non-counted duplicate" + (countDuplicates > 1 ? 's' : '') + ")." : '')
+        );
     }
 
     return (
-        <SelectedFilesDownloadButton countToShow={countToShow} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
+        <SelectedFilesDownloadButton selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
             id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={disabled ? 'btn-secondary' : 'btn-primary'}>
             <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
             <span className="hidden-xs hidden-sm">Download </span>
@@ -49,14 +56,22 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     );
 });
 
+/**
+ * Exact same functionality as `fileCountWithDuplicates`, however memoized for
+ * usage with `subSelectedFiles` instead of `selectedFiles`.
+ */
+const subSelectedFileCountWithDuplicates = memoize(function(subSelectedFiles){
+    return _.keys(subSelectedFiles).length;
+});
+const subSelectedUniqueFileCount = memoize(uniqueFileCountNonMemoized);
+
+
 
 
 /**
  * Upon clicking the button, reveal a modal popup giving users more download instructions.
  */
 export class SelectedFilesDownloadButton extends React.PureComponent {
-
-    static totalSelectedFilesCount = memoize(function(selectedFiles){ return _.keys(selectedFiles || {}).length; });
 
     static propTypes = {
         'windowWidth' : PropTypes.number.isRequired,
@@ -87,17 +102,20 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     }
 
     render(){
-        const { selectedFiles, filenamePrefix, children, disabled, countToShow } = this.props;
+        const { selectedFiles, filenamePrefix, children, disabled } = this.props;
         const { modalOpen } = this.state;
-        const btnProps = _.omit(this.props, 'filenamePrefix', 'selectedFiles', 'windowWidth', 'children', 'countToShow', 'disabled');
-        const isDisabled = disabled || SelectedFilesDownloadButton.totalSelectedFilesCount(selectedFiles) === 0;
+        const btnProps = _.omit(this.props, 'filenamePrefix', 'selectedFiles', 'windowWidth', 'children', 'disabled');
+        // There might be multiple buttons in a view (e.g. ExperimentSetView)
+        // so ideally will calculate `props.disabled` rather than use the memoized
+        // fileCountWithDuplicates here
+        const isDisabled = disabled || fileCountWithDuplicates(selectedFiles) === 0;
         return (
             <React.Fragment>
                 <Button {...btnProps} disabled={isDisabled} onClick={this.showModal}>
                     { children }
                 </Button>
                 { modalOpen ?
-                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, countToShow }} onHide={this.hideModal}/>
+                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix }} onHide={this.hideModal}/>
                     : null }
             </React.Fragment>
         );
@@ -130,14 +148,14 @@ class SelectedFilesDownloadModal extends React.PureComponent {
     }
 
     render(){
-        const { onHide, filenamePrefix, selectedFiles, countToShow } = this.props;
+        const { onHide, filenamePrefix, selectedFiles } = this.props;
         const { disclaimerAccepted } = this.state;
 
         const suggestedFilename = filenamePrefix + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
         const userInfo = JWT.getUserInfo();
         const isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
         const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
-        const countSelectedFiles = countToShow || SelectedFilesDownloadButton.totalSelectedFilesCount(selectedFiles);
+        const countSelectedFiles = fileCountWithDuplicates(selectedFiles);
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);
 
         return (

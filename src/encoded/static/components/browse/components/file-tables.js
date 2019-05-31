@@ -358,20 +358,6 @@ export class RawFilesStackedTable extends React.PureComponent {
             .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || []);
     });
 
-    /**
-     * Adds `from_experiment : { from_experiment_set : { accession }, accession }`
-     * to a file.
-     */
-    static extendFile(file, experiment, experimentSet){
-        return _.extend(
-            {}, file, {
-                'from_experiment' : _.extend(
-                    {}, experiment, { 'from_experiment_set' : experimentSet }
-                )
-            }
-        );
-    }
-
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
         'selectedFiles'             : PropTypes.object,
@@ -435,7 +421,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             contents = contents.concat(_.map(fileGroups, function(group, j){
                 // Ensure can be converted to accessionTriple
                 group = _.map(group, function(f){
-                    return RawFilesStackedTable.extendFile(f, exp, experimentSet);
+                    return fileUtil.extendFile(f, exp, experimentSet);
                 });
                 // Find relation/group type(s)
                 const relationshipTypes = new Set(_.pluck(_.flatten(_.pluck(group, 'related_files'), true), 'relationship_type'));
@@ -456,7 +442,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         // Add in remaining unpaired files, if any.
         if (haveUngroupedFiles){
             contents = contents.concat(_.map(ungroupedFiles, function(file, j){
-                const extendedFile = RawFilesStackedTable.extendFile(file, exp, experimentSet);
+                const extendedFile = fileUtil.extendFile(file, exp, experimentSet);
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}

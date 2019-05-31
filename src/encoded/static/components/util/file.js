@@ -61,6 +61,22 @@ export function getLightSourceCenterMicroscopeSettingFromFile(channel, fileItem)
 
 
 
+/**
+ * Extends file (creates a copy) with properties:
+ * `{ from_experiment : { from_experiment_set : { accession }, accession }, from_experiment_set : { accession }`
+ *
+ */
+export function extendFile(file, experiment, experimentSet){
+    return _.extend(
+        {}, file, {
+            'from_experiment' : _.extend(
+                {}, experiment, { 'from_experiment_set' : experimentSet }
+            ),
+            'from_experiment_set' : experimentSet
+        }
+    );
+}
+
 
 
 /**********************************
@@ -435,19 +451,23 @@ export function getLargeMD5(file, cbProgress) {
     return new Promise((resolve, reject) => {
         // create algorithm for progressive hashing
         var md5 = CryptoJS.algo.MD5.create();
-        readChunked(file, (chunk, offs, total) => {
-            md5.update(chunk);
-            if (cbProgress) {
-                cbProgress(Math.round(offs / total * 100));
+        readChunked(
+            file,
+            function(chunk, offs, total){
+                md5.update(chunk);
+                if (cbProgress) {
+                    cbProgress(Math.round(offs / total * 100));
+                }
+            },
+            function(err){
+                if (err) {
+                    reject(err);
+                } else {
+                    var hash = md5.finalize();
+                    var hashHex = hash.toString(CryptoJS.enc.Hex);
+                    resolve(hashHex);
+                }
             }
-        }, err => {
-            if (err) {
-                reject(err);
-            } else {
-                var hash = md5.finalize();
-                var hashHex = hash.toString(CryptoJS.enc.Hex);
-                resolve(hashHex);
-            }
-        });
+        );
     });
 }

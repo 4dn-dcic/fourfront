@@ -270,8 +270,8 @@ describe('Testing RawFilesStackedTable', function() {
             expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
         }
 
-        console.log("Initially selected files:\n", SelectedFilesController.objectToCompleteList(originalSelectedFiles));
-        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testRawFilesStackedTable.ref.current.state.selectedFiles));
+        console.log("Initially selected files:\n", _.keys(originalSelectedFiles));
+        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", _.keys(testRawFilesStackedTable.ref.current.state.selectedFiles));
 
     });
 
