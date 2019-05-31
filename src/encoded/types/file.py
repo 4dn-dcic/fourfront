@@ -13,11 +13,13 @@ from snovault.validators import (
     validate_item_content_put,
     validate_item_content_patch
 )
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
+)
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     ALLOW_SUBMITTER_ADD,
     get_item_if_you_can,
     lab_award_attribution_embed_list
@@ -1395,6 +1397,7 @@ def validate_processed_file_produced_from_field(context, request):
     if context.type_info.item_type != 'file_processed':
         return
     data = request.json
+    request.errors.add('body', ['test'], "Just testing")
     if 'produced_from' not in data:
         return
     files_ok = True

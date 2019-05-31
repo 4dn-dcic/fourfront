@@ -15,10 +15,12 @@ from snovault.validators import (
     validate_item_content_patch,
     validate_item_content_put,
 )
-from .base import (
-    Item,
+from snovault.crud_views import (
     collection_add,
     item_edit,
+)
+from .base import (
+    Item,
     lab_award_attribution_embed_list
 )
 import datetime

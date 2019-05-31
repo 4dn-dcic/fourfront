@@ -23,8 +23,6 @@ from snovault import (
 from encoded.search import get_iterable_search_results
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
 )
 from .user_content import (
@@ -35,6 +33,10 @@ from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
     validate_item_content_patch
+)
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
 )
 
 

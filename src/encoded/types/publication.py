@@ -7,11 +7,13 @@ from snovault import (
     calculated_property,
     CONNECTION
 )
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
+)
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     lab_award_attribution_embed_list
 )
 from pyramid.view import (
@@ -23,6 +25,7 @@ from snovault.validators import (
     validate_item_content_put,
     validate_item_content_patch
 )
+
 
 ################################################
 # Outside methods for online data fetch

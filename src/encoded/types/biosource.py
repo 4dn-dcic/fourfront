@@ -9,12 +9,14 @@ from snovault.validators import (
     validate_item_content_patch,
     validate_item_content_put,
 )
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
+)
 from pyramid.view import view_config
 from .base import (
     Item,
-    collection_add,
     get_item_if_you_can,
-    item_edit,
     lab_award_attribution_embed_list
 )
 
