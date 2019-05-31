@@ -77,7 +77,9 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         'windowWidth' : PropTypes.number.isRequired,
         'id' : PropTypes.string,
         'selectedFiles' : PropTypes.object.isRequired,
-        'filenamePrefix' : PropTypes.string.isRequired
+        'filenamePrefix' : PropTypes.string.isRequired,
+        'children' : PropTypes.node.isRequired,
+        'disabled' : PropTypes.bool
     };
 
     static defaultProps = {
@@ -108,7 +110,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         // There might be multiple buttons in a view (e.g. ExperimentSetView)
         // so ideally will calculate `props.disabled` rather than use the memoized
         // fileCountWithDuplicates here
-        const isDisabled = disabled || fileCountWithDuplicates(selectedFiles) === 0;
+        const isDisabled = typeof disabled === 'boolean' ? disabled : fileCountWithDuplicates(selectedFiles) === 0;
         return (
             <React.Fragment>
                 <Button {...btnProps} disabled={isDisabled} onClick={this.showModal}>
