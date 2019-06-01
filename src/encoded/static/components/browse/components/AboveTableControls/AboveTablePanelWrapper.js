@@ -2,11 +2,12 @@
 
 import React from 'react';
 
-export function wrapInAboveTablePanel(inner, title, className, closeButtonClickHandler){
-    var closeButton = null;
-    if (typeof closeButtonClickHandler === 'function'){
+export const AboveTablePanelWrapper = React.memo(function AboveTablePanelWrapper(props){
+    const { children, title, className, onClose } = props;
+    let closeButton = null;
+    if (typeof onClose === 'function'){
         closeButton = (
-            <a className="close-button" onClick={closeButtonClickHandler}>
+            <a className="close-button" onClick={onClose}>
                 <i className="icon icon-fw icon-angle-up"/>
             </a>
         );
@@ -15,9 +16,8 @@ export function wrapInAboveTablePanel(inner, title, className, closeButtonClickH
         <div className={"search-result-config-panel" + (className ? ' ' + className : '')}>
             <div className="inner">
                 <h5 className="panel-title">{ title }{ closeButton }</h5>
-                { inner }
+                { children }
             </div>
         </div>
     );
-}
-
+});

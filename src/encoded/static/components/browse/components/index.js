@@ -7,7 +7,7 @@ export {
 } from './table-commons';
 export { LimitAndPageControls, ColumnSorterIcon } from './LimitAndPageControls';
 export { SortController } from './SortController';
-export { SelectedFilesController } from './SelectedFilesController';
+export { SelectedFilesController, uniqueFileCount, uniqueFileCountNonMemoized, fileCountWithDuplicates } from './SelectedFilesController';
 export { CustomColumnController, CustomColumnSelector } from './CustomColumnController';
 export { SearchResultTable } from './SearchResultTable';
 export { AboveTableControls, BrowseViewSelectedFilesDownloadButton, SelectedFilesDownloadButton } from './AboveTableControls';
