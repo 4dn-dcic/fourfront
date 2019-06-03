@@ -118,43 +118,6 @@ export class StackedBlockVisual extends React.PureComponent {
         }
     };
 
-    static minColumnWidth(props){
-        return (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
-    }
-
-    static writeTipPropertiesFromJSONObject(d, props){
-        var out = '';
-
-        _.forEach(_.keys(d), function(property){
-            var val = d[property];
-            if (!val) return;
-
-            var boldIt = (
-                (props.groupingProperties && props.groupingProperties.indexOf(property) > -1) ||
-                (props.columnGrouping && props.columnGrouping === property)
-            );
-
-            out += '<div class="row">';
-
-            out += '<div class="col-xs-6">';
-            out += '<div class="text-500 text-ellipsis-container text-right">' + ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') + '</div>';
-            out += '</div>';
-
-            if (val){
-                out += '<div class="col-xs-6">';
-                out += ' ';
-                if (boldIt) out += '<b>';
-                out += val;
-                if (boldIt) out += '</b>';
-                out += '</div>';
-            }
-
-            out += '</div>';
-        });
-
-        return out;
-    }
-
     static generatePopoverRowsFromJSON(d, props){
         const { groupingProperties, columnGrouping, titleMap } = props;
         const out = [];
@@ -222,15 +185,20 @@ export class StackedBlockVisual extends React.PureComponent {
             _.object(_.zip(keysToShow, [].fill.call({ 'length' : keysToShow.length }, null, 0, keysToShow.length)))
         );
 
+        const skipParsingKeysObj = Array.isArray(skipParsingKeys) && _.object(_.map(skipParsingKeys, function(k){ return [k, true]; }));
+
+        // Convert vals (in Set form) to rendered JSX list
         _.forEach(_.keys(moreData), function(k){
             if (typeof moreData[k] === 'number'){ // Already handled above
                 return;
             }
+
             moreData[k] = _.filter(Array.from(moreData[k]));
+
             if (moreData[k].length === 0){
                 delete moreData[k];
             } else if (moreData[k].length > 1){
-                if (skipParsingKeys && skipParsingKeys.indexOf(k) > -1){
+                if (skipParsingKeysObj && skipParsingKeysObj[k]){
                     return;
                 }
                 var showLength = 5,
@@ -323,7 +291,7 @@ export class StackedBlockVisual extends React.PureComponent {
     }
 
     renderContents(){
-        const { data : propData, titleMap, groupingProperties, columnGrouping } = this.props;
+        const { data : propData, groupingProperties, columnGrouping } = this.props;
         const { mounted } = this.state;
         if (!mounted) return null;
 
@@ -415,7 +383,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
         const commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
-            'blockTooltipContents', 'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover');
+            'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover');
         const width = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
         const containerGroupStyle = {
             'width'         : width, // Width for each column
@@ -465,7 +433,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         <div className="block-container-group" style={containerGroupStyle}
                             key={k} data-group-key={k}>
                             { _.map(blocksByColumnGroup[k], ([ key, blockData ], i) =>
-                                <StackedBlock key={key || i} {...commonProps} data={blockData} title={key} />
+                                <Block key={key || i} {...commonProps} data={blockData} title={key} />
                             ) }
                         </div>
                     );
@@ -520,7 +488,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                                 } else if (typeof props.columnSubGrouping === 'string') {
                                     title = object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <StackedBlock key={title || i} {...commonProps} {...{ title, parentGrouping, subGrouping }} data={blockData} />;
+                                return <Block key={title || i} {...commonProps} {...{ title, parentGrouping, subGrouping }} data={blockData} />;
                             }) }
                         </div>
                     );
@@ -528,7 +496,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
             }
         } else {
-            inner = _.map(allChildBlocks, ([ key, data ]) => <StackedBlock {...commonProps} {...{ key, data }} title={key} />);
+            inner = _.map(allChildBlocks, ([ key, data ]) => <Block {...commonProps} {...{ key, data }} title={key} />);
         }
 
         return <div className="blocks-container" style={{ 'minHeight' : containerGroupStyle.minHeight }}>{ inner }</div>;
@@ -579,8 +547,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
         let header = null;
         if (depth === 0 && groupedDataIndices && ((open && duplicateHeaders) || index === 0)){
-            const minColumnWidth = StackedBlockVisual.minColumnWidth(this.props);
-            const headerItemStyle = { 'width' : minColumnWidth, 'minWidth' : minColumnWidth };
+            const columnWidth = (blockHeight + (blockHorizontalSpacing * 2)) + 1;
+            const headerItemStyle = { 'width' : columnWidth, 'minWidth' : columnWidth };
             let columnKeys = _.keys(groupedDataIndices);
             if (Array.isArray(headerColumnsOrder)){
                 columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, headerColumnsOrder);
@@ -651,59 +619,46 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 }
 
 
-export class StackedBlock extends React.PureComponent {
+const Block = React.memo(function Block(props){
+    const {
+        blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, parentGrouping,
+        blockClassName, blockRenderedContents, blockPopover
+    } = props;
 
-    componentDidMount(){
-        const { blockTooltipContents } = this.props;
-        if (blockTooltipContents){
-            ReactTooltip.rebuild();
-        }
+    const style = {
+        'height' : blockHeight,
+        'width' : blockHeight,
+        'lineHeight' : blockHeight + 'px',
+        'marginBottom' : blockVerticalSpacing
+    };
+
+    const blockFxnArguments = [data, props, parentGrouping];
+
+    let className = "stacked-block";
+    if (typeof blockClassName === 'function'){
+        className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments);
+    } else if (typeof blockClassName === 'string'){
+        className += ' ' + blockClassName;
     }
 
-    render(){
-        const {
-            blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, parentGrouping,
-            blockClassName, blockRenderedContents, blockTooltipContents, blockPopover
-        } = this.props;
-
-        const style = {
-            'height' : blockHeight,
-            'width' : blockHeight,
-            'lineHeight' : blockHeight + 'px',
-            'marginBottom' : blockVerticalSpacing
-        };
-
-        const blockFxnArguments = [data, this.props, parentGrouping];
-
-        let className = "stacked-block";
-        if (typeof blockClassName === 'function'){
-            className += ' ' + blockClassName.apply(blockClassName, blockFxnArguments);
-        } else if (typeof blockClassName === 'string'){
-            className += ' ' + blockClassName;
-        }
-
-        let contents = ( <span>&nbsp;</span> );
-        if (typeof blockRenderedContents === 'function'){
-            contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments);
-        }
-
-        let popover = null;
-        if (typeof blockPopover === 'function'){
-            popover = blockPopover.apply(blockPopover, blockFxnArguments);
-        }
-
-        const blockElem = <div className={className} style={style} tabIndex={1} data-place="bottom">{ contents }</div>;
-
-        if (popover){
-            return (
-                <OverlayTrigger trigger="click" placement="bottom" overlay={popover} rootClose>{ blockElem }</OverlayTrigger>
-            );
-        }
-
-        return blockElem;
+    let contents = ( <span>&nbsp;</span> );
+    if (typeof blockRenderedContents === 'function'){
+        contents = blockRenderedContents.apply(blockRenderedContents, blockFxnArguments);
     }
 
-}
+    let popover = null;
+    if (typeof blockPopover === 'function'){
+        popover = blockPopover.apply(blockPopover, blockFxnArguments);
+    }
+
+    const blockElem = <div className={className} style={style} tabIndex={1} data-place="bottom">{ contents }</div>;
+
+    if (popover){
+        return <OverlayTrigger trigger="click" placement="bottom" overlay={popover} rootClose>{ blockElem }</OverlayTrigger>;
+    }
+
+    return blockElem;
+});
 
 
 StackedBlockVisual.Row = StackedBlockGroupedRow;

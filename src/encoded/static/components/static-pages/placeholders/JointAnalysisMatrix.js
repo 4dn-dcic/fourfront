@@ -185,6 +185,12 @@ export class JointAnalysisMatrix extends React.PureComponent {
             _.extend(fullResult, { "short_description" : experiment_titles[0] || null });
         }
 
+        // Remove sub_cat_title & sub_cat (special case) if are "Default" & "None"
+        if (fullResult.sub_cat === fallbackNameForBlankField && fullResult.sub_cat_title === "Default"){
+            delete fullResult.sub_cat;
+            delete fullResult.sub_cat_title;
+        }
+
         return fullResult;
     }
 
@@ -379,7 +385,6 @@ class VisualBody extends React.PureComponent {
     /**
      * @param {*} data An ExperimentSet or list of ExperimentSet, represented by a block/tile.
      * @param {Object} props Props passed in from the StackedBlockVisual Component instance.
-     * @param {}
      */
     blockPopover(data, blockProps, parentGrouping){
         const { self_results_url, encode_results_url, fieldChangeMap, valueChangeMap, titleMap, groupingProperties, columnGrouping } = this.props;
@@ -387,7 +392,7 @@ class VisualBody extends React.PureComponent {
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
 
-        if (!isGroup && Array.isArray(data) && data.length > 0) {
+        if (!isGroup && Array.isArray(data)){
             data = data[0];
         }
 
@@ -396,23 +401,29 @@ class VisualBody extends React.PureComponent {
             aggrData = StackedBlockVisual.aggregateObjectFromList(
                 data, keysToInclude, ['sub_cat_title'] // We use this property as an object key (string) so skip parsing to React JSX list;
             );
+
             // Custom parsing down into string -- remove 'Default' from list and ensure is saved as string.
             if (Array.isArray(aggrData.sub_cat_title)){
-                aggrData.sub_cat_title = _.without(aggrData.sub_cat_title, 'Default');
-                if (aggrData.sub_cat_title.length !== 1){
+                aggrData.sub_cat_title = _.without(_.uniq(aggrData.sub_cat_title), 'Default');
+                if (aggrData.sub_cat_title.length !== 1){ // If multiple or if none.
                     aggrData.sub_cat_title = 'Assay Details';
                 } else {
                     aggrData.sub_cat_title = aggrData.sub_cat_title[0];
                 }
             }
+        } else {
+            aggrData = data;
+            if (aggrData.sub_cat_title && aggrData.sub_cat_title === "Default"){ // Or maybe remove entirely? <- handled in standardize4DNResult()
+                aggrData.sub_cat_title = 'Assay Details';
+            }
         }
 
         const groupingPropertyCurrent = groupingProperties[depth] || null;
         const groupingPropertyCurrentTitle = (
-            groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] // <- Special case
+            groupingPropertyCurrent === 'sub_cat' ? aggrData['sub_cat_title'] // <- Special case
                 : (groupingPropertyCurrent && titleMap[groupingPropertyCurrent]) || groupingPropertyCurrent || null
         );
-        const groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
+        const groupingPropertyCurrentValue = aggrData[groupingPropertyCurrent];
 
         // Generate title area which shows current grouping vals.
         const yAxisGroupingTitle = (columnGrouping && titleMap[columnGrouping]) || columnGrouping || null;
@@ -433,14 +444,14 @@ class VisualBody extends React.PureComponent {
             </div>
         );
 
-        const data_source = (aggrData || data).data_source;
+        const data_source = aggrData.data_source;
 
         function makeSearchButton(){
             const currentFilteringProperties = groupingProperties.slice(0, depth + 1).concat([columnGrouping]);
             const currentFilteringPropertiesVals = _.object(
                 _.map(currentFilteringProperties, function(property){
                     const facetField = fieldChangeMap[data_source][property];
-                    let facetTerm = (aggrData || data)[property];
+                    let facetTerm = aggrData[property];
                     if (valueChangeMap && valueChangeMap[data_source] && valueChangeMap[data_source][property]){
                         // Convert back to in-database value for use in the search query.
                         const reversedValChangeMapForCurrSource = _.invert(valueChangeMap[data_source][property]);
@@ -474,14 +485,14 @@ class VisualBody extends React.PureComponent {
 
         // We will render only values shown in titleMap _minus_ groupingProperties & columnGrouping
         const keysToShow = _.without(_.keys(titleMap), columnGrouping, ...groupingProperties);
-        const keyValsToShow = _.pick((aggrData || data), ...keysToShow);
+        const keyValsToShow = _.pick(aggrData, ...keysToShow);
 
         // 'sub_cat' and 'sub_cat_title' are special case where we want sub_cat_title as key and sub_cat as value.
         if (
             (typeof titleMap.sub_cat !== 'undefined' || typeof titleMap.sub_cat_title !== 'undefined') &&
-            ((aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title)
+            (aggrData.sub_cat && aggrData.sub_cat !== 'No value' && aggrData.sub_cat_title)
         ){
-            keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
+            keyValsToShow[aggrData.sub_cat_title] = aggrData.sub_cat;
             delete keyValsToShow.sub_cat;
             delete keyValsToShow.sub_cat_title;
         }
