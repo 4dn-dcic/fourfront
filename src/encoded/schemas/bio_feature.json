@@ -96,7 +96,8 @@
             "description": "If the feature is a cellular structure such as a chromosome use this field and set type to 'cellular_component'",
             "type": "string",
             "lookup": 70,
-            "enum": [
+            "comment": "When possible use a term_name from the GO:cellular_component ontology",
+            "suggested_enum": [
                 "Cell membrane",
                 "Nucleolus",
                 "Nuclear pore complex",
