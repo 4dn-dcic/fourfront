@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as plansData from '../testdata/stacked-block-matrix-list';
-import * as globals from '../globals';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual, sumPropertyFromList, StackedBlockGroupedRow } from './components';
 
@@ -138,7 +137,7 @@ export default class PlannedSubmissionsPage extends React.Component {
                             filteredData = _.map(data, function(o){ return _.pick(o, ...keysToShow); });
                         }
 
-                        var tips = {}// StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
+                        var tips = {}; // StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
                         
                         if (Array.isArray(data) && data.length > 1){
 

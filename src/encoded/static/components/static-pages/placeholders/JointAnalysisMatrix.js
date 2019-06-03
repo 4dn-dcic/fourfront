@@ -334,10 +334,6 @@ export class JointAnalysisMatrix extends React.PureComponent {
 
 class VisualBody extends React.PureComponent {
 
-    static groupValue(data){
-        return StackedBlockVisual.Row.flattenChildBlocks(data).length;
-    }
-
     static blockRenderedContents(data){
         var count = 0;
         if (Array.isArray(data)) {
@@ -520,7 +516,7 @@ class VisualBody extends React.PureComponent {
     render(){
         const { results } = this.props;
         return (
-            <StackedBlockVisual data={results} groupValue={VisualBody.groupValue} checkCollapsibility
+            <StackedBlockVisual data={results} checkCollapsibility
                 {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding',
                     'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder')}
                 blockPopover={this.blockPopover}

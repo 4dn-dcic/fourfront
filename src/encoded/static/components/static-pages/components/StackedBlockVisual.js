@@ -112,9 +112,6 @@ export class StackedBlockVisual extends React.PureComponent {
             }
             return <span>{ count }</span>;
 
-        },
-        'groupValue' : function(data, blockProps){
-            return StackedBlockVisual.Row.flattenChildBlocks(data).length;
         }
     };
 
@@ -518,7 +515,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     render(){
         const {
             groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, headerColumnsOrder,
-            data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding
+            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding
         } = this.props;
         const { open } = this.state;
 
@@ -538,11 +535,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             className += ' may-collapse';
         } else {
             toggleIcon = <i className={"icon icon-fw"} />;
-        }
-
-        let totalCount = null;
-        if (depth === 0 && groupValue && typeof groupValue === 'function'){
-            totalCount = groupValue(data, group, groupingPropertyTitle);
         }
 
         let header = null;
@@ -568,7 +560,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             );
         }
 
-        const blockHeightFull = blockHeight + blockVerticalSpacing;
         const rowHeight = blockHeight + (blockVerticalSpacing * 2) + 1;
         const childBlocks = !open ? StackedBlockGroupedRow.collapsedChildBlocks(data, this.props) : (
             <div className="open-empty-placeholder" style={{ 'height' : rowHeight, 'marginLeft' : blockHorizontalSpacing }}/>
@@ -620,7 +611,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
 const Block = React.memo(function Block(props){
     const {
-        blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, parentGrouping,
+        blockHeight, blockVerticalSpacing, data, parentGrouping,
         blockClassName, blockRenderedContents, blockPopover, indexInGroup
     } = props;
 
