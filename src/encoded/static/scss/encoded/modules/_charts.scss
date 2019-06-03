@@ -2330,8 +2330,9 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-right: 0px;
                 > .open-empty-placeholder {
                     background-color: #f7f7f7;
-                    border-radius: 0% 100% 0% 100% / 100% 100% 0% 0%;
+                    border-radius: 0 10px 0 0;
                     border-top: 3px solid #eee;
+                    @include gradient-vertical($start-color: #f7f7f7, $end-color: #fff);
                 }
             }
 

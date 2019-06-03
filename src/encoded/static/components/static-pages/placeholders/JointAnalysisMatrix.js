@@ -31,6 +31,8 @@ export class JointAnalysisMatrix extends React.PureComponent {
             "Out of date"               : ["archived", "revoked"],
             "Deleted"                   : ["deleted"]
         },
+        /** Which state to set/prioritize if multiple expsets per group */
+        "statePrioritizationForGroups" : ["Submitted", "Internal Release", "In Submission", "Planned", "Out of date", "Deleted"],
         /* Deprecated & superceded by valueChangeMap but some may still be present im StaticSection (and lack `valueChangeMap`).
         "cellTypeNameMap4DN"        : {
             "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
@@ -55,32 +57,46 @@ export class JointAnalysisMatrix extends React.PureComponent {
                 "cell_type"                 : "experiments_in_set.biosample.biosource_summary",
                 "sub_cat"                   : "experiments_in_set.experiment_categorizer.value",
                 "sub_cat_title"             : "experiments_in_set.experiment_categorizer.field",
-                "lab_name"                  : "lab.display_title"
+                "lab_name"                  : "lab.display_title",
+                "short_description"         : "experiments_in_set.display_title"
             },
             "ENCODE"                    : {
                 "experiment_category"       : "assay_slims",
                 "experiment_type"           : "assay_term_name",
                 "cell_type"                 : "biosample_summary",
-                "lab_name"                  : "lab.title"
+                "lab_name"                  : "lab.title",
+                "short_description"         : "description"
             }
         },
         "groupingProperties4DN"     : ["experiment_type", "sub_cat"],
         "groupingPropertiesEncode"  : ["experiment_category", "experiment_type"],
+        "columnGrouping4DN"         : "cell_type",
+        "columnGroupingEncode"      : "cell_type",
+        "headerPadding"             : 80,
+        "headerFor4DN"              : (
+            <React.Fragment>
+                <h3 className="mt-2 mb-0 text-300">4DN</h3>
+                <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
+                    <a href="/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN">Browse all</a> 4DN data-sets
+                </h5>
+            </React.Fragment>
+        ),
+        "headerForEncode"           : <h3 className="mt-2 mb-0 text-300">ENCODE</h3>,
         "headerColumnsOrder"        : ["H1-hESC", "H1-DE", "HFFc6"],
         "titleMap"                  : {
-            "_common_name"              : " ",
+            "sub_cat"                   : "AnyStringHereBecauseSubCatTitleIsUsed",
             "experiment_type"           : "Experiment Type",
-            "data_source"               : "Available through",
+            "cell_type"                 : "Cell Type",
             "lab_name"                  : "Lab",
             "experiment_category"       : "Category",
             "state"                     : "Submission Status",
-            "cell_type"                 : "Cell Type",
             "short_description"         : "Description",
-            "award"                     : "Award",
-            "accession"                 : "Accession",
-            "number_of_experiments"     : "# Experiments in Set",
-            "submitted_by"              : "Submitter",
-            "experimentset_type"        : "Set Type",
+            //"data_source"               : "Available through",
+            //"award"                     : "Award",
+            //"accession"                 : "Accession",
+            //"number_of_experiments"     : "# Experiments in Set",
+            //"submitted_by"              : "Submitter",
+            //"experimentset_type"        : "Set Type",
         },
         "columnSubGroupingOrder"    : ["Submitted", "In Submission", "Planned", "Not Planned"]
     };
@@ -139,16 +155,17 @@ export class JointAnalysisMatrix extends React.PureComponent {
     standardizeEncodeResult(result, idx){
         const { fallbackNameForBlankField, statusStateTitleMap, fieldChangeMap, valueChangeMap, groupingPropertiesSearchParamMap } = this.props;
         const fullResult = JointAnalysisMatrix.convertResult(
-            result, "ENCODE", fieldChangeMap || groupingPropertiesSearchParamMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
+            result, "ENCODE", (fieldChangeMap || groupingPropertiesSearchParamMap), valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
         );
-        return _.extend(fullResult, { "short_description" : result.description || null });
+        return fullResult;
     }
 
     standardize4DNResult(result, idx){
-        const { fallbackNameForBlankField, statusStateTitleMap, fieldChangeMap, valueChangeMap, groupingPropertiesSearchParamMap, cellTypeNameMap4DN } = this.props;
+        const { fallbackNameForBlankField, statusStateTitleMap, fieldChangeMap : propFieldChangeMap, valueChangeMap, groupingPropertiesSearchParamMap, cellTypeNameMap4DN } = this.props;
+        const fieldChangeMap = propFieldChangeMap || groupingPropertiesSearchParamMap; // prop name `groupingPropertiesSearchParamMap` has been deprecated.
 
         const fullResult = JointAnalysisMatrix.convertResult(
-            result, "4DN", fieldChangeMap || groupingPropertiesSearchParamMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
+            result, "4DN", fieldChangeMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
         );
 
         // (Deprecated) Harcoded rule for cellType
@@ -156,16 +173,19 @@ export class JointAnalysisMatrix extends React.PureComponent {
             fullResult.cell_type = cellTypeNameMap4DN[fullResult.cell_type] || fullResult.cell_type;
         }
 
-        // (Deprecated) Create short description
-        var experiment_titles = _.map(result.experiments_in_set || [], function(exp){
-            return exp.display_title.replace(" - " + exp.accession, "");
-        });
-        experiment_titles = _.uniq(experiment_titles);
-        if (experiment_titles.length > 1){
-            console.warn("We have 2+ experiment titles (experiments_in_set.display_title, minus accession) for ", result);
+        // Remove accessions from short description(s).
+        if (fieldChangeMap["4DN"].short_description && fieldChangeMap["4DN"].short_description === "experiments_in_set.display_title"){
+            let experiment_titles = _.map(result.experiments_in_set || [], function(exp){
+                return exp.display_title.replace(" - " + exp.accession, "");
+            });
+            experiment_titles = _.uniq(experiment_titles);
+            if (experiment_titles.length > 1){
+                console.warn("We have 2+ experiment titles (experiments_in_set.display_title, minus accession) for ", result);
+            }
+            _.extend(fullResult, { "short_description" : experiment_titles[0] || null });
         }
 
-        return _.extend(fullResult, { "short_description" : experiment_titles[0] || null });
+        return fullResult;
     }
 
     componentDidMount(){
@@ -237,7 +257,8 @@ export class JointAnalysisMatrix extends React.PureComponent {
     render() {
         const {
             groupingProperties4DN, groupingPropertiesEncode, self_results_url, fieldChangeMap, groupingPropertiesSearchParamMap,
-            valueChangeMap : propValueChangeMap, cellTypeNameMap4DN
+            valueChangeMap : propValueChangeMap, cellTypeNameMap4DN, columnGrouping4DN, columnGroupingEncode,
+            headerFor4DN, headerForEncode
         } = this.props;
         const { self_planned_results, self_results, encode_results } = this.state;
         const isLoading = _.any(
@@ -264,17 +285,14 @@ export class JointAnalysisMatrix extends React.PureComponent {
             <div className="static-section joint-analysis-matrix">
                 <div className="row">
                     <div className={"col-xs-12 col-md-" + (encode_results ? '6' : '12')}>
-                        <h3 className="mt-2 mb-0 text-300">4DN</h3>
-                        <h5 className="mt-0 text-500" style={{ 'marginBottom' : -20, 'height' : 20, 'position' : 'relative', 'zIndex' : 10 }}>
-                            <a href={self_results_url.replace('&limit=all', '')}>Browse all</a> 4DN data-sets
-                        </h5>
+                        { headerFor4DN }
                         <VisualBody
-                            {..._.pick(this.props, 'cellTypeNameMap4DN', 'self_planned_results_url',
-                                'self_results_url', 'headerColumnsOrder', 'titleMap')}
+                            {..._.pick(this.props, 'self_planned_results_url', 'self_results_url', 'headerColumnsOrder',
+                                'titleMap', 'statePrioritizationForGroups', 'fallbackNameForBlankField', 'headerPadding')}
                             groupingProperties={groupingProperties4DN}
                             fieldChangeMap={fieldChangeMap || groupingPropertiesSearchParamMap}
                             valueChangeMap={valueChangeMap}
-                            columnGrouping="cell_type"
+                            columnGrouping={columnGrouping4DN}
                             duplicateHeaders={false}
                             columnSubGrouping="state"
                             results={resultList4DN}
@@ -284,13 +302,14 @@ export class JointAnalysisMatrix extends React.PureComponent {
                     </div>
                     { encode_results ?
                         <div className="col-xs-12 col-md-6">
-                            <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
+                            { headerForEncode }
                             <VisualBody
-                                {..._.pick(this.props, 'encode_results_url', 'headerColumnsOrder', 'titleMap')}
+                                {..._.pick(this.props, 'encode_results_url', 'headerColumnsOrder', 'titleMap',
+                                    'statePrioritizationForGroups', 'fallbackNameForBlankField', 'headerPadding')}
                                 groupingProperties={groupingPropertiesEncode}
                                 fieldChangeMap={fieldChangeMap || groupingPropertiesSearchParamMap}
                                 valueChangeMap={valueChangeMap}
-                                columnGrouping="cell_type"
+                                columnGrouping={columnGroupingEncode}
                                 columnSubGrouping="state"
                                 results={encode_results}
                                 duplicateHeaders={false}
@@ -313,26 +332,6 @@ class VisualBody extends React.PureComponent {
         return StackedBlockVisual.Row.flattenChildBlocks(data).length;
     }
 
-    static blockClassName(data){
-        var origClassName = StackedBlockVisual.defaultProps.blockClassName(data),
-            submissionState = null;
-
-        if (Array.isArray(data)){
-            if      (_.any(data, { 'state' : 'Submitted'        })) submissionState = 'Submitted';
-            else if (_.any(data, { 'state' : 'Internal Release' })) submissionState = 'Internal Release';
-            else if (_.any(data, { 'state' : 'In Submission'    })) submissionState = 'In Submission';
-            else if (_.any(data, { 'state' : 'Planned'          })) submissionState = 'Planned';
-            else if (_.any(data, { 'state' : 'Out of date'      })) submissionState = 'Out of date';
-            else if (_.any(data, { 'state' : 'Deleted'          })) submissionState = 'Deleted';
-            else if (_.any(data, { 'state' : 'None'             })) submissionState = 'None';
-        } else {
-            submissionState = data.state;
-        }
-
-        var submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
-        return origClassName + ' ' + submissionStateClassName + ' hoverable clickable';
-    }
-
     static blockRenderedContents(data){
         var count = 0;
         if (Array.isArray(data)) {
@@ -348,9 +347,33 @@ class VisualBody extends React.PureComponent {
 
     constructor(props){
         super(props);
-
-        // Requires non-static `this.props.encode_results_url` & `this.props.self_results_url`.
         this.blockPopover = this.blockPopover.bind(this);
+        this.blockClassName = this.blockClassName.bind(this);
+    }
+
+    blockClassName(data){
+        const { statePrioritizationForGroups, fallbackNameForBlankField } = this.props;
+        const origClassName = StackedBlockVisual.defaultProps.blockClassName(data);
+        let submissionState = null;
+
+        if (Array.isArray(data)){
+            var stateToTest, i;
+            for (i = 0; i < statePrioritizationForGroups.length; i++){
+                stateToTest = statePrioritizationForGroups[i];
+                if ( _.any(data, { 'state' : stateToTest }) ){
+                    submissionState = stateToTest;
+                    break;
+                }
+            }
+            if (submissionState === null){
+                submissionState = (data[0] && data[0].state) || fallbackNameForBlankField;
+            }
+        } else {
+            submissionState = data.state;
+        }
+
+        const submissionStateClassName = submissionState && 'cellType-' + submissionState.replace(/ /g, '-').toLowerCase();
+        return origClassName + ' ' + submissionStateClassName + ' hoverable clickable';
     }
 
     /**
@@ -359,7 +382,7 @@ class VisualBody extends React.PureComponent {
      * @param {}
      */
     blockPopover(data, blockProps, parentGrouping){
-        const { self_results_url, encode_results_url, fieldChangeMap, cellTypeNameMap4DN, titleMap, groupingProperties, columnGrouping } = this.props;
+        const { self_results_url, encode_results_url, fieldChangeMap, valueChangeMap, titleMap, groupingProperties, columnGrouping } = this.props;
         const { depth } = blockProps;
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
@@ -369,15 +392,14 @@ class VisualBody extends React.PureComponent {
         }
 
         if (isGroup){
+            const keysToInclude = _.uniq(_.keys(titleMap).concat(['sub_cat', 'sub_cat_title', 'data_source', columnGrouping]).concat(groupingProperties));
             aggrData = StackedBlockVisual.aggregateObjectFromList(
-                data,
-                _.keys(titleMap).concat(['sub_cat', 'sub_cat_title']),
-                ['sub_cat_title'] // We use this property as an object key (string) so skip parsing to React JSX list;
+                data, keysToInclude, ['sub_cat_title'] // We use this property as an object key (string) so skip parsing to React JSX list;
             );
             // Custom parsing down into string -- remove 'Default' from list and ensure is saved as string.
             if (Array.isArray(aggrData.sub_cat_title)){
                 aggrData.sub_cat_title = _.without(aggrData.sub_cat_title, 'Default');
-                if (aggrData.sub_cat_title.length > 1){
+                if (aggrData.sub_cat_title.length !== 1){
                     aggrData.sub_cat_title = 'Assay Details';
                 } else {
                     aggrData.sub_cat_title = aggrData.sub_cat_title[0];
@@ -385,53 +407,57 @@ class VisualBody extends React.PureComponent {
             }
         }
 
-        var groupingPropertyCurrent = groupingProperties[depth] || null,
-            groupingPropertyCurrentTitle = groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] : (groupingPropertyCurrent && titleMap[groupingPropertyCurrent]) || null,
-            groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
+        const groupingPropertyCurrent = groupingProperties[depth] || null;
+        const groupingPropertyCurrentTitle = (
+            groupingPropertyCurrent === 'sub_cat' ? (aggrData || data)['sub_cat_title'] // <- Special case
+                : (groupingPropertyCurrent && titleMap[groupingPropertyCurrent]) || groupingPropertyCurrent || null
+        );
+        const groupingPropertyCurrentValue = (aggrData || data)[groupingPropertyCurrent];
 
-        var yAxisGrouping = columnGrouping || null,
-            yAxisGroupingTitle = (yAxisGrouping && titleMap[yAxisGrouping]) || null,
-            yAxisGroupingValue = (isGroup ? data[0][yAxisGrouping] : data[yAxisGrouping]) || null,
-            popoverTitle = (
-                <div className="clearfix matrix-popover-title">
-                    <div className="x-axis-title pull-left">
-                        <div className="text-300">{groupingPropertyCurrentTitle}</div>
-                        <div className="text-400">{groupingPropertyCurrentValue}</div>
-                    </div>
-                    <div className="mid-icon pull-left">
-                        <i className="icon icon-times"/>
-                    </div>
-                    <div className="y-axis-title pull-left">
-                        <div className="text-300">{yAxisGroupingTitle}</div>
-                        <div className="text-400">{yAxisGroupingValue}</div>
-                    </div>
+        // Generate title area which shows current grouping vals.
+        const yAxisGroupingTitle = (columnGrouping && titleMap[columnGrouping]) || columnGrouping || null;
+        const yAxisGroupingValue = (isGroup ? data[0][columnGrouping] : data[columnGrouping]) || null;
+        const popoverTitle = (
+            <div className="clearfix matrix-popover-title">
+                <div className="x-axis-title pull-left">
+                    <div className="text-300">{groupingPropertyCurrentTitle}</div>
+                    <div className="text-400">{groupingPropertyCurrentValue}</div>
                 </div>
-            );
-
-        var currentFilteringProperties = groupingProperties.slice(0, depth + 1); // TODO use to generate search link
-
-        currentFilteringProperties.push(columnGrouping);
-
-        var data_source = (aggrData || data).data_source;
-        var initialHref = data_source === 'ENCODE' ? encode_results_url : self_results_url;
-        var reversed_cell_type_map = _.invert(cellTypeNameMap4DN);
-
-        var currentFilteringPropertiesVals = _.object(
-            _.map(currentFilteringProperties, function(property){
-                var facetField = fieldChangeMap[data_source][property], facetTerm = (aggrData || data)[property];
-                if (property === 'cell_type' && data_source === '4DN') facetTerm = reversed_cell_type_map[facetTerm] || facetTerm;
-                return [ facetField, facetTerm ];
-            })
+                <div className="mid-icon pull-left">
+                    <i className="icon icon-times"/>
+                </div>
+                <div className="y-axis-title pull-left">
+                    <div className="text-300">{yAxisGroupingTitle}</div>
+                    <div className="text-400">{yAxisGroupingValue}</div>
+                </div>
+            </div>
         );
 
+        const data_source = (aggrData || data).data_source;
+
         function makeSearchButton(){
-            var hrefParts = url.parse(initialHref, true);
-            var hrefQuery = _.clone(hrefParts.query);
+            const currentFilteringProperties = groupingProperties.slice(0, depth + 1).concat([columnGrouping]);
+            const currentFilteringPropertiesVals = _.object(
+                _.map(currentFilteringProperties, function(property){
+                    const facetField = fieldChangeMap[data_source][property];
+                    let facetTerm = (aggrData || data)[property];
+                    if (valueChangeMap && valueChangeMap[data_source] && valueChangeMap[data_source][property]){
+                        // Convert back to in-database value for use in the search query.
+                        const reversedValChangeMapForCurrSource = _.invert(valueChangeMap[data_source][property]);
+                        facetTerm = reversedValChangeMapForCurrSource[facetTerm] || facetTerm;
+                    }
+                    return [ facetField, facetTerm ];
+                })
+            );
+
+            const initialHref = data_source === 'ENCODE' ? encode_results_url : self_results_url;
+            const hrefParts = url.parse(initialHref, true);
+            const hrefQuery = _.clone(hrefParts.query);
             delete hrefQuery.limit;
             delete hrefQuery.field;
             _.extend(hrefQuery, currentFilteringPropertiesVals);
             hrefParts.search = '?' + queryString.stringify(hrefQuery);
-            var linkHref = url.format(hrefParts);
+            const linkHref = url.format(hrefParts);
 
             return (
                 <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
@@ -439,17 +465,25 @@ class VisualBody extends React.PureComponent {
         }
 
         function makeSingleItemButton(){
-            var path = object.itemUtil.atId(data);
-            if (data.data_source === 'ENCODE') path = 'https://encodeproject.org' + path;
+            let path = object.itemUtil.atId(data);
+            if (data_source === 'ENCODE') path = 'https://encodeproject.org' + path; // Else will be abs path relative to current domain.
             return (
                 <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
             );
         }
 
-        var keyValsToShow = _.pick(aggrData || data, 'lab_name', 'category');
+        // We will render only values shown in titleMap _minus_ groupingProperties & columnGrouping
+        const keysToShow = _.without(_.keys(titleMap), columnGrouping, ...groupingProperties);
+        const keyValsToShow = _.pick((aggrData || data), ...keysToShow);
 
-        if ( (aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title ) {
+        // 'sub_cat' and 'sub_cat_title' are special case where we want sub_cat_title as key and sub_cat as value.
+        if (
+            (typeof titleMap.sub_cat !== 'undefined' || typeof titleMap.sub_cat_title !== 'undefined') &&
+            ((aggrData || data).sub_cat && (aggrData || data).sub_cat !== 'No value' && (aggrData || data).sub_cat_title)
+        ){
             keyValsToShow[(aggrData || data).sub_cat_title] = (aggrData || data).sub_cat;
+            delete keyValsToShow.sub_cat;
+            delete keyValsToShow.sub_cat_title;
         }
 
         return (
@@ -476,10 +510,10 @@ class VisualBody extends React.PureComponent {
         const { results } = this.props;
         return (
             <StackedBlockVisual data={results} groupValue={VisualBody.groupValue} checkCollapsibility
-                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap',
+                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding',
                     'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder')}
                 blockPopover={this.blockPopover}
-                blockClassName={VisualBody.blockClassName}
+                blockClassName={this.blockClassName}
                 blockRenderedContents={VisualBody.blockRenderedContents}
             />
         );

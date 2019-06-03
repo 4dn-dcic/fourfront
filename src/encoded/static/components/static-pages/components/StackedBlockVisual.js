@@ -85,6 +85,7 @@ export class StackedBlockVisual extends React.PureComponent {
         // @param data may be either Array (if multiple grouped into 1) or object.
         'showGroupingPropertyTitles' : false,
         'checkCollapsibility' : false,
+        'headerPadding' : 80,
         'blockClassName' : function(data, blockProps){
 
             var isMultipleClass = 'single-set';
@@ -155,15 +156,16 @@ export class StackedBlockVisual extends React.PureComponent {
     }
 
     static generatePopoverRowsFromJSON(d, props){
-        var out = [];
+        const { groupingProperties, columnGrouping, titleMap } = props;
+        const out = [];
 
         _.forEach(_.keys(d), function(property){
-            var val = d[property];
+            let val = d[property];
             if (!val) return;
 
-            var boldIt = (
-                (props.groupingProperties && props.groupingProperties.indexOf(property) > -1) ||
-                (props.columnGrouping && props.columnGrouping === property)
+            const boldIt = (
+                (groupingProperties && groupingProperties.indexOf(property) > -1) ||
+                (columnGrouping && columnGrouping === property)
             );
 
             if (typeof val === 'object'){
@@ -176,11 +178,11 @@ export class StackedBlockVisual extends React.PureComponent {
                 }
             }
 
-            var rowElem = (
+            const rowElem = (
                 <div className="row popover-entry mb-07" key={property}>
                     <div className="col-xs-5 col-md-4">
                         <div className="text-500 text-ellipsis-continer text-right">
-                            { ((props.titleMap && props.titleMap[property]) || property) + (val ? ':' : '') }
+                            { ((titleMap && titleMap[property]) || property) + (val ? ':' : '') }
                         </div>
                     </div>
                     <div className={"col-xs-7 col-md-8" + (boldIt ? ' text-600' : '')}>{ val }</div>
@@ -390,6 +392,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         return orderedList.concat( _.keys(o)); // Incl remaining keys.
     }
 
+    /** @todo Convert to functional memoized React component */
     static collapsedChildBlocks = memoize(function(data, props){
 
         var allChildBlocksPerChildGroup = null,
@@ -538,10 +541,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         this.state = { 'open' : initOpen };
     }
 
-    childBlocksCollapsed(){
-        return StackedBlockGroupedRow.collapsedChildBlocks(this.props.data, this.props);
-    }
-
     toggleOpen(){
         this.setState(function({ open }){
             return { "open" : !open };
@@ -551,7 +550,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     render(){
         const {
             groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, headerColumnsOrder,
-            data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility
+            data, groupValue, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding
         } = this.props;
         const { open } = this.state;
 
@@ -603,16 +602,22 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
         const blockHeightFull = blockHeight + blockVerticalSpacing;
         const rowHeight = blockHeight + (blockVerticalSpacing * 2) + 1;
-        const partRowHeight = parseInt(rowHeight / 3);
-        const childBlocks = !open ? this.childBlocksCollapsed() : (
-            <div className="open-empty-placeholder" style={{ 'marginTop' : partRowHeight, 'height' : rowHeight - partRowHeight, 'marginLeft' : blockHorizontalSpacing }}/>
+        const childBlocks = !open ? StackedBlockGroupedRow.collapsedChildBlocks(data, this.props) : (
+            <div className="open-empty-placeholder" style={{ 'height' : rowHeight, 'marginLeft' : blockHorizontalSpacing }}/>
         );
         const maxBlocksInRow  = childBlocks && Math.max.apply(Math.max, _.pluck(_.pluck((childBlocks && childBlocks.props && childBlocks.props.children) || [], 'props'), 'data-block-count'));
+
+        let labelSectionStyle = null;
+        let listSectionStyle = null;
+        if (depth === 0 && index === 0){ // Add padding-top to first 1 to align w/ top padding.
+            labelSectionStyle = { 'paddingTop' : Math.max(0, headerPadding + 55 - rowHeight) };
+            listSectionStyle = { 'paddingTop' : headerPadding };
+        }
 
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
                 <div className="row grouping-row">
-                    <div className="col col-xs-4 label-section" style={depth === 0 && index === 0 ? { 'paddingTop' : Math.max(0, (open ? 95 : 135) - rowHeight) } : null}>
+                    <div className="col col-xs-4 label-section" style={labelSectionStyle}>
                         <div className="label-container" style={{ 'minHeight' : rowHeight }}>
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
@@ -625,7 +630,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         </div>
                         {/* this.childLabels() */}
                     </div>
-                    <div className={"col col-xs-8 list-section" + (header ? ' has-header' : '')}>
+                    <div className={"col col-xs-8 list-section" + (header ? ' has-header' : '')} style={listSectionStyle}>
                         { header }
                         { childBlocks }
                     </div>
@@ -657,11 +662,9 @@ export class StackedBlock extends React.PureComponent {
 
     render(){
         const {
-            blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, title : propTitle, groupingProperties, parentGrouping, depth,
-            titleMap, blockClassName, blockRenderedContents, blockTooltipContents, blockPopover
+            blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, parentGrouping,
+            blockClassName, blockRenderedContents, blockTooltipContents, blockPopover
         } = this.props;
-
-        const title = propTitle || (data && !Array.isArray(data) && data[groupingProperties[depth]]) || null;
 
         const style = {
             'height' : blockHeight,
