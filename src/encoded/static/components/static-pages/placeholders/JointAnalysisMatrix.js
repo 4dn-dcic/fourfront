@@ -23,14 +23,14 @@ export class JointAnalysisMatrix extends React.PureComponent {
         "encode_results_url_fields" : ["assay_slims", "biosample_summary", "assay_term_name", "description", "lab", "status"],
         "self_planned_results_url"  : null,
         "fallbackNameForBlankField" : "None",
-        "statusStateTitleMap"       : {
-            "Submitted"                 : ["released", "current"],
-            "Internal Release"          : ["released to project", "pre-release"],
-            "In Submission"             : ["in review by lab", "in review by project", "submission in progress", "released to lab"],
-            "Planned"                   : ["to be uploaded by workflow", "planned"],
-            "Out of date"               : ["archived", "revoked"],
-            "Deleted"                   : ["deleted"]
-        },
+        //"statusStateTitleMap"       : {
+        //    "Submitted"                 : ["released", "current"],
+        //    "Internal Release"          : ["released to project", "pre-release"],
+        //    "In Submission"             : ["in review by lab", "in review by project", "submission in progress", "released to lab"],
+        //    "Planned"                   : ["to be uploaded by workflow", "planned"],
+        //    "Out of date"               : ["archived", "revoked"],
+        //    "Deleted"                   : ["deleted"]
+        //},
         /** Which state to set/prioritize if multiple expsets per group */
         "statePrioritizationForGroups" : ["Submitted", "Internal Release", "In Submission", "Planned", "Out of date", "Deleted"],
         /* Deprecated & superceded by valueChangeMap but some may still be present im StaticSection (and lack `valueChangeMap`).
@@ -44,11 +44,33 @@ export class JointAnalysisMatrix extends React.PureComponent {
             "4DN" : {
                 "cell_type" : {
                     "H1-hESC (Tier 1) differentiated to definitive endoderm" : "H1-DE",
-                    "H1-hESC (Tier 1)"          : "H1-hESC",
-                    "HFFc6 (Tier 1)"            : "HFFc6"
+                    "H1-hESC (Tier 1)" : "H1-hESC",
+                    "HFFc6 (Tier 1)" : "HFFc6"
+                },
+                "state" : {
+                    "released" : "Submitted",
+                    "current" : "Submitted",
+                    "released to project" : "Internal Release",
+                    "pre-release" : "Internal Release",
+                    "in review by lab" : "In Submission",
+                    "in review by project" : "In Submission",
+                    "submission in progress" : "In Submission",
+                    "released to lab" : "In Submission",
+                    "to be uploaded by workflow" : "Planned",
+                    "planned" : "Planned",
+                    "archived" : "Out of date",
+                    "revoked" : "Out of date",
+                    "deleted" : "Deleted"
                 }
             },
-            "ENCODE" : {}
+            "ENCODE" : {
+                "cell_type" : {
+                    "H1" : "H1-hESC"
+                },
+                "state" : {
+                    "released" : "Submitted"
+                }
+            }
         },
         "fieldChangeMap" : {
             "4DN"                       : {
@@ -58,14 +80,16 @@ export class JointAnalysisMatrix extends React.PureComponent {
                 "sub_cat"                   : "experiments_in_set.experiment_categorizer.value",
                 "sub_cat_title"             : "experiments_in_set.experiment_categorizer.field",
                 "lab_name"                  : "lab.display_title",
-                "short_description"         : "experiments_in_set.display_title"
+                "short_description"         : "experiments_in_set.display_title",
+                "state"                     : "status"
             },
             "ENCODE"                    : {
                 "experiment_category"       : "assay_slims",
                 "experiment_type"           : "assay_term_name",
                 "cell_type"                 : "biosample_summary",
                 "lab_name"                  : "lab.title",
-                "short_description"         : "description"
+                "short_description"         : "description",
+                "state"                     : "status"
             }
         },
         "groupingProperties4DN"     : ["experiment_type", "sub_cat"],
@@ -130,9 +154,10 @@ export class JointAnalysisMatrix extends React.PureComponent {
 
         // Standardized state from status
         // TODO Use similar by-data-source structure as fieldChangeMap & valueChangeMap
-        const [ stateTitleToSave ] = _.find(_.pairs(statusStateTitleMap), function([titleToSave, validStatuses]){ return validStatuses.indexOf(result.status) > -1; });
-        convertedResult.state = stateTitleToSave || fallbackNameForBlankField;
-
+        if (statusStateTitleMap){
+            const [ stateTitleToSave ] = _.find(_.pairs(statusStateTitleMap), function([titleToSave, validStatuses]){ return validStatuses.indexOf(result.status) > -1; });
+            convertedResult.state = stateTitleToSave || fallbackNameForBlankField;
+        }
         // Save data source
         convertedResult.data_source = dataSource;
 
