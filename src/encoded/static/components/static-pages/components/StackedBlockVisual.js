@@ -363,7 +363,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     /** @todo Convert to functional memoized React component */
     static collapsedChildBlocks = memoize(function(data, props){
 
-        var allChildBlocksPerChildGroup = null,
+        var allChildBlocksPerChildGroup = null, // Forgot what this was -- seems to be null in /joint-analysis at least
             allChildBlocks = null;
 
         if (Array.isArray(data)){
@@ -399,7 +399,9 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         let columnKeys;
 
 
-        if (groupedDataIndicesPairs.length > 0){ // If columns exist, distribute these blocks by column! Otherwise (else statement @ end) we'll probably just stack em left-to-right.
+        if (groupedDataIndicesPairs.length > 0){
+            // If columns exist, distribute these blocks by column!
+            // Otherwise (else statement @ end) we'll probably just stack em left-to-right.
 
             //console.log('TEsT',allChildBlocksPerChildGroup);
 
@@ -433,7 +435,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         <div className="block-container-group" style={containerGroupStyle}
                             key={k} data-group-key={k}>
                             { _.map(blocksByColumnGroup[k], ([ key, blockData ], i) =>
-                                <Block key={key || i} {...commonProps} data={blockData} title={key} />
+                                <Block key={key || i} {...commonProps} data={blockData} indexInGroup={i} />
                             ) }
                         </div>
                     );
@@ -477,18 +479,14 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                     return (
                         <div className="block-container-group" style={containerGroupStyle}
                             key={k} data-block-count={blocksForGroup.length} data-group-key={k}>
-                            { blocksForGroup.map(function(blockData, i){
-                                var title = k;
+                            { _.map(blocksForGroup, function(blockData, i){
                                 var parentGrouping = (props.titleMap && props.titleMap[props.groupingProperties[props.depth - 1]]) || null;
                                 var subGrouping = (props.titleMap && props.titleMap[props.columnSubGrouping]) || null;
                                 if (Array.isArray(blockData)) {
                                     // We have columnSubGrouping so these are -pairs- of (0) columnSubGrouping val, (1) blocks
-                                    title = blockData[0];
                                     blockData = blockData[1];
-                                } else if (typeof props.columnSubGrouping === 'string') {
-                                    title = object.getNestedProperty(blockData, props.columnSubGrouping);
                                 }
-                                return <Block key={title || i} {...commonProps} {...{ title, parentGrouping, subGrouping }} data={blockData} />;
+                                return <Block key={i} {...commonProps} {...{ parentGrouping, subGrouping }} data={blockData} indexInGroup={i} />;
                             }) }
                         </div>
                     );
@@ -496,7 +494,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
             }
         } else {
-            inner = _.map(allChildBlocks, ([ key, data ]) => <Block {...commonProps} {...{ key, data }} title={key} />);
+            // Stack blocks left-to-right if no column grouping (?)
+            inner = _.map(allChildBlocks, ([ key, data ]) => <Block {...commonProps} {...{ key, data }} />);
         }
 
         return <div className="blocks-container" style={{ 'minHeight' : containerGroupStyle.minHeight }}>{ inner }</div>;
@@ -504,12 +503,13 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.toggleOpen = this.toggleOpen.bind(this);
+        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 250);
         var initOpen = (Array.isArray(props.defaultDepthsOpen) && props.defaultDepthsOpen[props.depth]) || false;
         this.state = { 'open' : initOpen };
     }
 
-    toggleOpen(){
+    toggleOpen(evt){
+        evt.stopPropagation();
         this.setState(function({ open }){
             return { "open" : !open };
         });
@@ -534,7 +534,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         const hasIdentifiableChildren = !checkCollapsibility ? true : (depth + 2 >= groupingProperties.length) && childRowsKeys && childRowsKeys.length > 0 && !(childRowsKeys.length === 1 && childRowsKeys[0] === 'No value');
 
         if (!Array.isArray(data) && data && hasIdentifiableChildren){
-            toggleIcon = <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus')} />;
+            toggleIcon = <i className={"clickable icon icon-fw icon-" + (open ? 'minus' : 'plus')} onClick={this.toggleOpen} />;
             className += ' may-collapse';
         } else {
             toggleIcon = <i className={"icon icon-fw"} />;
@@ -591,8 +591,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
                                 : null }
                             <h4 className="text-ellipsis-container"
-                                data-tip={group && typeof group === 'string' && group.length > 20 ? group : null}
-                                onClick={toggleIcon && hasIdentifiableChildren ? this.toggleOpen : null}>
+                                data-tip={group && typeof group === 'string' && group.length > 20 ? group : null}>
                                 { toggleIcon }{ group }
                             </h4>
                         </div>
@@ -622,14 +621,15 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 const Block = React.memo(function Block(props){
     const {
         blockHeight, blockVerticalSpacing, blockHorizontalSpacing, data, parentGrouping,
-        blockClassName, blockRenderedContents, blockPopover
+        blockClassName, blockRenderedContents, blockPopover, indexInGroup
     } = props;
 
     const style = {
         'height' : blockHeight,
         'width' : blockHeight,
         'lineHeight' : blockHeight + 'px',
-        'marginBottom' : blockVerticalSpacing
+        'marginBottom' : blockVerticalSpacing,
+        'marginTop' : indexInGroup && indexInGroup > 0 ? blockVerticalSpacing + 1 : 0
     };
 
     const blockFxnArguments = [data, props, parentGrouping];
