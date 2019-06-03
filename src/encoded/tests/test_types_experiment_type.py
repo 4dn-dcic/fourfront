@@ -16,7 +16,7 @@ def test_assay_subclass_short_w_assay_classification(testapp, exp_types):
 def test_assay_subclass_short_w_assay_subclassification(testapp, exp_types):
     hic_type = exp_types.get('hic')
     res = testapp.patch_json(hic_type['@id'], {'assay_subclassification': 'DNA-DNA Pairwise Interactions of Enriched Regions'}).json['@graph'][0]
-    assert res.get('assay_subclass_short') == 'Enrichment Hi-C'
+    assert res.get('assay_subclass_short') == 'IP-based 3C'
 
 
 def test_assay_subclass_short_w_only_expt_category(testapp, exp_types):

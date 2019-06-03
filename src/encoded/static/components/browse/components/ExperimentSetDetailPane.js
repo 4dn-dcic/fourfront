@@ -7,7 +7,7 @@ import { Collapse } from 'react-bootstrap';
 import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
 import { expFxn, layout, object } from './../../util';
-
+import { SelectedFilesController } from './SelectedFilesController';
 
 export class ExperimentSetDetailPane extends React.PureComponent {
 
@@ -76,7 +76,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                 </h4>
                 <Collapse in={this.state.rawFilesOpen}>
                     <div>
-                        <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
+                        <RawFilesStackedTable {...SelectedFilesController.pick(this.props)}
                             columnHeaders={[
                                 { columnClass: 'file-detail', title: 'File Type', render: renderFileTypeSummaryColumn },
                                 { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
@@ -105,7 +105,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                 </h4>
                 <Collapse in={this.state.processedFilesOpen}>
                     <div>
-                        <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile')}
+                        <ProcessedFilesStackedTable {...SelectedFilesController.pick(this.props)}
                             files={processedFiles} fadeIn={false} collapseLongLists href={href}
                             width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null} />
                     </div>
