@@ -59,7 +59,8 @@
                "replacement",
                "disruption",
                "point mutation",
-               "complex change"
+               "complex change",
+               "unknown"
             ]
         },
         "constructs": {
@@ -126,7 +127,8 @@
         "override_modification_name": {
             "description": "A curated modification name that will override the calculated properties - aim for short and descriptive",
             "type": "string",
-            "lookup": 100
+            "lookup": 100,
+            "permission": "import_items"
         }
     },
     "facets": {
