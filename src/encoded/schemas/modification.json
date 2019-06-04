@@ -124,8 +124,9 @@
             "linkTo": "Vendor"
         },
         "override_modification_name": {
-            "description": "A curated modification name that will override the calculated property",
-            "type": "string"
+            "description": "A curated modification name that will override the calculated properties - aim for short and descriptive",
+            "type": "string",
+            "lookup": 100
         }
     },
     "facets": {

@@ -33,15 +33,13 @@ class Modification(Item):
         "description": "Modification name including type and target.",
         "type": "string",
     })
-    def modification_name(self, request,
-                          genomic_change=None, target_of_mod=None):
-        props = self.properties
-        if 'override_modification_name' in props:
-            return props.get('override_modification_name')
+    def modification_name(self, request, modification_type,
+                          genomic_change=None, target_of_mod=None,
+                          override_modification_name=None):
+        if override_modification_name:
+            return override_modification_name
 
-        mod_name = props.get('modification_type')
-        genomic_change = props.get('genomic_change')
-        target_of_mod = props.get('target_of_mod')
+        mod_name = modification_type
         if genomic_change:
             mod_name = mod_name + " " + genomic_change
         if target_of_mod:
@@ -58,8 +56,11 @@ class Modification(Item):
         "description": "Shorter version of modification name for display on tables.",
         "type": "string",
     })
-    def modification_name_short(self, request, modification_type=None,
-                                genomic_change=None, target_of_mod=None):
+    def modification_name_short(self, request, modification_type,
+                                genomic_change=None, target_of_mod=None,
+                                override_modification_name=None):
+        if override_modification_name:
+            return override_modification_name
         mod_name = genomic_change if genomic_change else modification_type
         if target_of_mod:
             tstring = ''
@@ -75,6 +76,6 @@ class Modification(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, modification_type=None, genomic_change=None, target_of_mod=None):
+    def display_title(self, request, modification_type=None, genomic_change=None, target_of_mod=None, override_modification_name=None):
         # biosample = '/biosample/'+ self.properties['biosample']
-        return self.modification_name(request, modification_type, genomic_change, target_of_mod)
+        return self.modification_name(request, modification_type, genomic_change, target_of_mod, override_modification_name)
