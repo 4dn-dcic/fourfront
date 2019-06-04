@@ -2,7 +2,29 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import _ from 'underscore';
+import { expFxn, object } from './../../util';
+
+
+// Memoized helper functions for getting counts of files performantly-er.
+// These are used often by other components which consume/display selected file counts.
+
+/** Used and memoized in views which have multiple sets of selectedFiles */
+export function uniqueFileCountNonMemoized(selectedFiles){
+    if (!selectedFiles || typeof selectedFiles !== 'object' || Array.isArray(selectedFiles)){
+        console.error("selectedFiles not in proper form or is non-existent", selectedFiles);
+        return 0;
+    }
+    return _.uniq(_.pluck(_.values(selectedFiles), 'accession')).length;
+}
+
+/** Pre-memoized and to be used in views that only have 1 selectedFiles collection, such as BrowseView */
+export const uniqueFileCount = memoize(uniqueFileCountNonMemoized);
+
+export const fileCountWithDuplicates = memoize(function(selectedFiles){
+    return _.keys(selectedFiles).length;
+});
 
 
 /**
@@ -12,33 +34,48 @@ import _ from 'underscore';
  * @class SelectedFilesController
  * @extends {React.Component}
  */
-export class SelectedFilesController extends React.Component {
+export class SelectedFilesController extends React.PureComponent {
 
-    /**
-     * Includes related files that might be saved in memo values.
-     *
-     * @static
-     * @returns {string[]} List of file UUIDs.
-     */
-    static objectToCompleteList(selectFilesObj){
-        return _.keys(selectFilesObj);
-    }
+    /** Utility function to extract out the relevant props passed in by `SelectedFilesController` out of a props object. */
+    static pick(props){ return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles'); }
 
     static listToObject(selectedFilesList){
-        return _.object(selectedFilesList.map(function(uuid){
-            return [uuid, true];
-        }));
+        return _.object(_.map(
+            // Ensure all files have an `@id` / view permissions.
+            // Lack of view permissions is OK for when file visible in table as lack of permission
+            // is shown (without checkbox).
+            _.filter(selectedFilesList, object.itemUtil.atId),
+            function(fileItem){
+                return [ expFxn.fileToAccessionTriple(fileItem, true), fileItem ];
+            }
+        ));
     }
 
     static parseInitiallySelectedFiles(initiallySelectedFiles){
-        return (
-            Array.isArray(initiallySelectedFiles) ? SelectedFilesController.listToObject(initiallySelectedFiles) :
-                initiallySelectedFiles ? initiallySelectedFiles : {}
-        );
-    }
 
-    static uniqueFileCountByUUID(selectedFiles){
-        return _.uniq(_.pluck(_.values(selectedFiles), 'uuid')).length;
+        if (initiallySelectedFiles === null){
+            return {};
+        }
+
+        if (!Array.isArray(initiallySelectedFiles) && initiallySelectedFiles && typeof initiallySelectedFiles === 'object'){
+            // Assume we got a well-formatted selectedFiles object. This is probably only case for tests, e.g. RawFilesStackedTable-test.js.
+            // This means keys must be in form of stringified accession triples, e.g. `"EXPSETACCESSION~EXPACCESSION~FILEACCESSION"`
+            // Lets validate that --
+            _.forEach(_.keys(initiallySelectedFiles), function(key){
+                const parts = key.split('~');
+                if (parts.length !== 3){
+                    throw new Error('If supply an object as initiallySelectedFiles, it must have stringified accession triples as keys.');
+                }
+            });
+            return _.clone(initiallySelectedFiles);
+        }
+
+        if (Array.isArray(initiallySelectedFiles)){
+            return SelectedFilesController.listToObject(initiallySelectedFiles);
+        }
+
+        console.error(initiallySelectedFiles);
+        throw new Error('Received unexpected props.initiallySelectedFiles -');
     }
 
     static defaultProps = {
@@ -56,106 +93,118 @@ export class SelectedFilesController extends React.Component {
             }
             return false;
         }
-    }
+    };
 
     constructor(props){
         super(props);
         this.selectFile = this.selectFile.bind(this);
         this.unselectFile = this.unselectFile.bind(this);
         this.resetSelectedFiles = this.resetSelectedFiles.bind(this);
-        this.getFlatList = this.getFlatList.bind(this);
 
-        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles),
-            selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(selectedFiles);
+        const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles);
 
-        this.state = { selectedFiles, selectedFilesUniqueCount };
+        this.state = { selectedFiles };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.resetSelectedFilesCheck(nextProps, this.props)){
-            var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(nextProps.initiallySelectedFiles),
-                selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(selectedFiles);
-            this.setState({ selectedFiles, selectedFilesUniqueCount });
+    componentDidUpdate(pastProps){
+        if (this.props.resetSelectedFilesCheck(this.props, pastProps)){
+            this.resetSelectedFiles(this.props);
         }
     }
 
-    selectFile(uuid, memo = null){
+    selectFile(accessionTriple, memo = null){
 
-        var newSelectedFiles = _.clone(this.state.selectedFiles);
+        function error(){
+            throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
+        }
 
-        function add(id, memo = null){
-            if (typeof newSelectedFiles[id] !== 'undefined'){
-                console.error("File already selected!", id);
-            } else {
-                newSelectedFiles[id] = memo || true;
+        this.setState(({ selectedFiles })=>{
+            var newSelectedFiles = _.extend({}, selectedFiles);
+
+            function add(id, memo = null){
+                if (typeof newSelectedFiles[id] !== 'undefined'){
+                    console.error("File already selected!", id);
+                } else {
+                    newSelectedFiles[id] = memo || true;
+                }
             }
-        }
 
-        if (Array.isArray(uuid)){
-            uuid.forEach((id)=>{
-                if (typeof id === 'string'){
-                    add(id);
-                } else if (Array.isArray(id)){
-                    add(id[0], id[1]);
-                } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
-            });
-        } else if (typeof uuid === 'string') {
-            add(uuid, memo);
-        } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
+            if (Array.isArray(accessionTriple)){
+                _.forEach(accessionTriple, function(id){
+                    if (typeof id === 'string'){
+                        add(id);
+                    } else if (Array.isArray(id)){
+                        add(id[0], id[1]);
+                    } else error();
+                });
+            } else if (typeof accessionTriple === 'string') {
+                add(accessionTriple, memo);
+            } else error();
 
-        var selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(newSelectedFiles);
-        this.setState({ 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount });
+            return { 'selectedFiles' : newSelectedFiles };
+        });
     }
 
-    unselectFile(uuid){
-        var newSelectedFiles = _.clone(this.state.selectedFiles);
+    unselectFile(accessionTriple){
 
-        function remove(id) {
-            if (typeof newSelectedFiles[id] === 'undefined'){
-                console.log(id, newSelectedFiles);
-                console.error("File not in set!", id);
-            } else {
-                delete newSelectedFiles[id];
-            }
+        function error(){
+            throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
 
-        if (Array.isArray(uuid)){
-            uuid.forEach((id)=>{
-                if (typeof id === 'string'){
-                    remove(id);
-                } else throw new Error("Supplied uuid is not a string or array of strings/arrays:", uuid);
-            });
-        } else if (typeof uuid === 'string') {
-            remove(uuid);
-        } else throw new Error("Supplied uuid is not a string or array of strings:", uuid);
+        this.setState(({ selectedFiles })=>{
+            var newSelectedFiles = _.extend({}, selectedFiles);
 
-        var selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(newSelectedFiles);
-        this.setState({ 'selectedFiles' : newSelectedFiles, selectedFilesUniqueCount });
+            function remove(id) {
+                if (typeof newSelectedFiles[id] === 'undefined'){
+                    console.log(id, newSelectedFiles);
+                    console.error("File not in set!", id);
+                } else {
+                    delete newSelectedFiles[id];
+                }
+            }
+
+            if (Array.isArray(accessionTriple)){
+                _.forEach(accessionTriple, function(id){
+                    if (typeof id === 'string'){
+                        remove(id);
+                    } else error();
+                });
+            } else if (typeof accessionTriple === 'string') {
+                remove(accessionTriple);
+            } else error();
+
+            return { 'selectedFiles' : newSelectedFiles };
+        });
     }
 
     resetSelectedFiles(props = this.props){
-        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles),
-            selectedFilesUniqueCount = SelectedFilesController.uniqueFileCountByUUID(selectedFiles);
-
-        this.setState({ selectedFiles, selectedFilesUniqueCount });
+        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles);
+        this.setState({ selectedFiles });
     }
 
-    getFlatList(){ return SelectedFilesController.objectToCompleteList(this.state.selectedFiles); }
-
     render(){
-        if (typeof window !== 'undefined' && window){
-            window.lastSelectedFiles = this.state.selectedFiles;
-        }
-        //console.log('SELTEST', this.state.selectedFiles);
-        if (!React.isValidElement(this.props.children)) throw new Error('CustomColumnController expects props.children to be a valid React component instance.');
-        var propsToPass = _.extend(_.omit(this.props, 'children'), {
-            'selectedFiles'             : this.state.selectedFiles,
-            'selectedFilesUniqueCount'  : this.state.selectedFilesUniqueCount,
+        const { children } = this.props;
+        const { selectedFiles } = this.state;
+        const propsToPass = _.extend(_.omit(this.props, 'children'), {
+            'selectedFiles'             : selectedFiles,
             'selectFile'                : this.selectFile,
             'unselectFile'              : this.unselectFile,
             'resetSelectedFiles'        : this.resetSelectedFiles
         });
-        return React.cloneElement(this.props.children, propsToPass);
+
+        if (Array.isArray(children)){
+            return React.Children.map(children, function(child){
+                if (!React.isValidElement(child)){
+                    throw new Error('SelectedFilesController expects props.children[] to be valid React component instances.');
+                }
+                return React.cloneElement(child, propsToPass);
+            });
+        } else {
+            if (!React.isValidElement(children)){
+                throw new Error('SelectedFilesController expects props.children to be a valid React component instance.');
+            }
+            return React.cloneElement(children, propsToPass);
+        }
     }
 
 }

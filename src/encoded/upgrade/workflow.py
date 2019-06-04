@@ -3,6 +3,7 @@ from snovault import (
 )
 from encoded.schema_formats import is_uuid
 
+
 @upgrade_step('workflow', '1', '2')
 def workflow_1_2(value, system):
     '''Remove workflow_steps and arguments.argument_mapping, replace with steps property.'''
@@ -36,13 +37,13 @@ def workflow_1_2(value, system):
         :param stepContainer: A dictionary containing 'step' - a UUID of an AnalysisStep, and 'step_name', a name for the step used within workflow (overrides AnalysisStep.properties.name).
         '''
         uuid = stepContainer['step']
-        resultStepProperties = ['software_used', 'analysis_step_types'] # props to leave in
+        resultStepProperties = ['software_used', 'analysis_step_types']  # props to leave in
         step = system_collection.get(str(uuid))
         stepDict = {
-            'inputs' : step.properties.get('inputs', []), # Probably doesn't exist. We'll fill later.
-            'outputs' : step.properties.get('outputs', []),
-            'name' : step.properties.get('name') or step.properties.get('display_title'),
-            'meta' : {}
+            'inputs': step.properties.get('inputs', []),  # Probably doesn't exist. We'll fill later.
+            'outputs': step.properties.get('outputs', []),
+            'name': step.properties.get('name') or step.properties.get('display_title'),
+            'meta': {}
         }
         stepDict['meta'].update(step.properties)
         stepKeys = list(stepDict['meta'].keys())
@@ -54,11 +55,11 @@ def workflow_1_2(value, system):
         # Is unlikely, but possible, to differ from AnalysisStep own name.
         stepDict['name'] = stepContainer.get('step_name', stepDict.get('name'))
         if stepDict['meta'].get('software_used') is not None:
-            stepDict['meta']['software_used'] = '/software/' + stepDict['meta']['software_used'] + '/' # Convert to '@id' form so is picked up for embedding.
-        #stepDict['meta']['@id'] = step.jsonld_id(request)
+            stepDict['meta']['software_used'] = '/software/' + stepDict['meta']['software_used'] + '/'  # Convert to '@id' form so is picked up for embedding.
+        # stepDict['meta']['@id'] = step.jsonld_id(request)
         return stepDict
 
-    def mergeIOForStep(outputArgs, argType = "output"):
+    def mergeIOForStep(outputArgs, argType="output"):
         '''
         IMPORTANT:
         Each 'argument' item has up to two argument_mappings in current Workflows data structure, though there could be many more mappings than that, so in practice there are
@@ -68,7 +69,7 @@ def workflow_1_2(value, system):
         :param outputArgs: 'input' or 'output' items of a 'constructed' analysis_step item.
         :param argType: Whether we are merging/combining inputs or outputs.
         '''
-        argTargetsPropertyName = 'target' if argType == 'output' else 'source' # Inputs have a 'source', outputs have a 'target'.
+        argTargetsPropertyName = 'target' if argType == 'output' else 'source'  # Inputs have a 'source', outputs have a 'target'.
         seen_argument_names = {}
         resultArgs = []
         for arg in outputArgs:
@@ -81,7 +82,7 @@ def workflow_1_2(value, system):
                         for existingTarget in priorArgument[argTargetsPropertyName]:
                             if (
                                 existingTarget['name'] == currentTarget['name']
-                                and existingTarget.get('step','a') == currentTarget.get('step','b')
+                                and existingTarget.get('step', 'a') == currentTarget.get('step', 'b')
                             ):
                                 existingTarget.update(currentTarget)
                                 foundExisting = True
@@ -446,4 +447,40 @@ def workflow_5_6(value, system):
         value['category'] = 'processing'
         value['category'] = [value['category']]  # convert to an array
 
-    
+
+@upgrade_step('workflow', '6', '7')
+def workflow_6_7(value, system):
+    '''previous version is now an array'''
+    if 'previous_version' in value:
+        value['previous_version'] = [value['previous_version']]
+
+
+# @upgrade_step('workflow', '7', '8')
+# def workflow_7_8(value, system):
+#     '''experiment_types is now an array of linkTo'''
+#     if 'experiment_types' in value:
+#         valid_exp_types = system['registry']['collections']['ExperimentType']
+#         new_vals = []
+#         exp_types = value.get('experiment_types')
+#         for etype in exp_types:
+#             if etype == 'Repli-seq':
+#                 try:
+#                     new_vals.append(str(valid_exp_types.get('2-stage Repli-seq').uuid))
+#                     new_vals.append(str(valid_exp_types.get('Multi-stage Repli-seq').uuid))
+#                 except AttributeError:
+#                     continue
+#             elif etype == 'DAM-ID seq':
+#                 try:
+#                     new_vals.append(str(valid_exp_types.get('DamID-seq').uuid))
+#                 except AttributeError:
+#                     continue
+#             else:
+#                 try:
+#                     new_vals.append(str(valid_exp_types.get(etype).uuid))
+#                 except AttributeError:
+#                     exptypename = etype.lower().replace(' ', '-')
+#                     try:
+#                         new_vals.append(str(valid_exp_types.get(exptypename).uuid))
+#                     except AttributeError:
+#                         continue
+#         value['experiment_types'] = new_vals

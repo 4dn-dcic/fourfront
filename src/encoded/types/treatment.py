@@ -41,27 +41,6 @@ class TreatmentChemical(Treatment):
     schema = load_schema('encoded:schemas/treatment_chemical.json')
     embedded_list = Treatment.embedded_list
 
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, request, chemical=None, duration=None, duration_units=None,
-                      concentration=None, concentration_units=None, temperature=None):
-        d_t = []
-        conditions = ""
-        if concentration and concentration_units:
-            d_t.extend([str(concentration), ' ' + concentration_units])
-        if duration and duration_units:
-            d_t.extend([', ' + str(duration) + duration_units[0]])
-        if temperature:
-            d_t.append(" at " + str(temperature) + "°C")
-        if d_t:
-            conditions = " (" + "".join(d_t) + ")"
-
-        dis_tit = chemical + " treatment" + conditions
-        return dis_tit
-
 
 @collection(
     name='treatments-agent',
@@ -122,7 +101,6 @@ class TreatmentRnai(Treatment):
     embedded_list = Treatment.embedded_list + [
         'rnai_vendor.name',
         'rnai_constructs.designed_to_target',
-        'target.target_summary'
     ]
 
     @calculated_property(schema={
@@ -132,8 +110,11 @@ class TreatmentRnai(Treatment):
     })
     def display_title(self, request, rnai_type=None, target=None):
         if rnai_type and target:
-            targetObj = request.embed(target, '@@object')
-            rnai_value = rnai_type + " of " + targetObj['target_summary']
+            tstring = ''
+            for t in target:
+                target = request.embed(t, '@@object')
+                tstring += '{}, '.format(target['display_title'])
+            rnai_value = rnai_type + " of " + tstring[:-2]
         else:
             rnai_value = rnai_type + " treatment"
         return rnai_value

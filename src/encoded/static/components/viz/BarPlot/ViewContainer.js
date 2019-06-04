@@ -4,17 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import * as d3 from 'd3';
-import * as store from './../../../store';
 import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
 import { CursorViewBounds } from './../ChartDetailCursor';
-import { console, object, isServerSide, expFxn, Filters, layout, navigate, analytics } from './../../util';
+import { console, isServerSide, analytics } from './../../util';
 
 
 /**
  * Outputs a section of a bar.
- * 
+ *
  * @class BarSection
  * @type {Component}
  */
@@ -82,7 +80,7 @@ class BarSection extends React.PureComponent {
 
 /**
  * Outputs a vertical bar containing bar sections.
- * 
+ *
  * @class Bar
  * @type {Component}
  */
@@ -132,16 +130,15 @@ class Bar extends React.PureComponent {
     }
 
     barStyle(){
-        var style       = {},
-            d           = this.props.node,
-            styleOpts   = this.props.styleOptions;
+        const { node, styleOptions } = this.props;
+        const style = {};
 
         // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-        style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
-        style.left = styleOpts.offset.left;
-        style.bottom = styleOpts.offset.bottom;
-        style.width = d.attr.width;
-        style.height = d.attr.height;
+        style.transform = vizUtil.style.translate3d(node.attr.x, 0, 0);
+        style.left = styleOptions.offset.left;
+        style.bottom = styleOptions.offset.bottom;
+        style.width = node.attr.width;
+        style.height = node.attr.height;
 
         return style;
     }
@@ -149,19 +146,19 @@ class Bar extends React.PureComponent {
     renderBarSection(d, i, all){
         var { hoverTerm, hoverParentTerm, selectedTerm, selectedParentTerm, onBarPartClick,
                 onBarPartMouseEnter, onBarPartMouseOver, onBarPartMouseLeave,
-                aggregateType, transitioning, canBeHighlighted } = this.props,
+                aggregateType, canBeHighlighted } = this.props,
             key = d.term || d.name || i,
             isHoveredOver   = CursorViewBounds.isSelected(d, hoverTerm, hoverParentTerm),
             isSelected      = CursorViewBounds.isSelected(d, selectedTerm, selectedParentTerm);
 
         return (
-            <BarSection {...{ isHoveredOver, isSelected, key, aggregateType, transitioning, canBeHighlighted }} data-key={key} node={d}
+            <BarSection {...{ isHoveredOver, isSelected, key, aggregateType, canBeHighlighted }} data-key={key} node={d}
                 onClick={onBarPartClick} onMouseEnter={onBarPartMouseEnter} onMouseLeave={onBarPartMouseLeave} isRemoving={d.removing} />
         );
     }
 
     render(){
-        var { transitioning, canBeHighlighted, showBarCount } = this.props,
+        var { canBeHighlighted, showBarCount } = this.props,
             d = this.props.node;
 
         var hasSubSections = Array.isArray(d.bars),
@@ -178,10 +175,6 @@ class Bar extends React.PureComponent {
         return (
             <div
                 className={className}
-                //onMouseLeave={()=>{
-                    //if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
-                    //else unhighlightTerms(d.field);
-                //}}
                 data-term={d.term}
                 data-count={d.count}
                 data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
@@ -198,7 +191,7 @@ class Bar extends React.PureComponent {
 /**
  * React Component for wrapping the generated markup of BarPlot.Chart.
  * Also contains Components Bar and BarSection as static children, for wrapping output bar and bar parts.
- * 
+ *
  * The top-level ViewContainer component contains state for interactivity of the generated chart mark-up.
  * The child Bar and BarSection components are stateless and utilize the state passed down from ViewContainer.
  */
@@ -254,25 +247,24 @@ export class ViewContainer extends React.Component {
 
     /**
      * Passes props to and renders child 'Bar' Components.
-     * Handles caching of bars for transitioning.
      * Passes in own state, high-level props if child prop not set, and extends event handlers.
-     * 
+     *
      * @returns {Component[]} Array of 'Bar' React Components.
      */
     renderBars(){
-        var { bars, transitioning, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props,
+        var { bars, onNodeMouseEnter, onNodeMouseLeave, onNodeClick } = this.props,
             barsToRender, currentBars;
 
         return _.map(bars.sort(function(a,b){ // key will be term or name, if available
             return (a.term || a.name) < (b.term || b.name) ? -1 : 1;
         }), (d,i,a) =>
-                <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i}>
-                    <Bar key={d.term || d.name || i} node={d}
-                        showBarCount={true /*!allExpsBarDataContainer */}
-                        {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
-                            'transitioning', 'aggregateType', 'showType', 'canBeHighlighted')}
-                        onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
-                </CSSTransition>
+            <CSSTransition classNames="barplot-transition" unmountOnExit timeout={{ enter: 10, exit: 750 }} key={d.term || d.name || i}>
+                <Bar key={d.term || d.name || i} node={d}
+                    showBarCount={true /*!allExpsBarDataContainer */}
+                    {..._.pick(this.props, 'selectedParentTerm', 'selectedTerm', 'hoverParentTerm', 'hoverTerm', 'styleOptions',
+                        'aggregateType', 'showType', 'canBeHighlighted')}
+                    onBarPartMouseEnter={onNodeMouseEnter} onBarPartMouseLeave={onNodeMouseLeave} onBarPartClick={onNodeClick} />
+            </CSSTransition>
         );
     }
 
@@ -306,7 +298,7 @@ export class ViewContainer extends React.Component {
                     <div className="terms-excluded-notice text-smaller">
                         <p className="mb-0">* Only up to the top 30 terms are shown.</p>
                     </div>
-                : null }
+                    : null }
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
                 <TransitionGroup>{ this.renderBars() }</TransitionGroup>

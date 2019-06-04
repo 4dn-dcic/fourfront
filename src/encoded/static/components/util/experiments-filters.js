@@ -7,15 +7,20 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import moment from 'moment';
-import * as ajax from './ajax';
-import * as object from './object';
 import * as Schemas from './Schemas';
 import { navigate } from './navigate';
 
-
+/*
 export let getSchemas = null;
 export let getPage =  function(){ return 1;  };
 export let getLimit = function(){ return 25; };
+*/
+
+export const getters = {
+    'schemas' : null,
+    'page' : function(){ return 1; },
+    'limit' : function(){ return 25; }
+};
 
 
 
@@ -30,7 +35,7 @@ export const currentExpSetFilters = contextFiltersToExpSetFilters;
 
 /**
  * If the given term is selected, return the href for the term from context.filters.
- * 
+ *
  * @param {string} term - Term for which existence of active filter is checked.
  * @param {string} field - Field for which filter is checked.
  * @param {{ 'field' : string, 'term' : string, 'remove' : string }[]} filters - Filters as supplied by context.filters in API response.
@@ -101,7 +106,7 @@ export function getUnselectHrefIfSelectedFromResponseFilters(term, facet, filter
                     }
                 }
             });
-            
+
             retHref = '?' + queryString.stringify(commonQs);
             if (includePathName) {
                 retHref += partsFrom.pathname;
@@ -225,7 +230,8 @@ export function changeFilter(
  * @returns {void}
  */
 export function saveChangedFilters(newExpSetFilters, href=null, callback=null){
-    if (!store)   store = require('./../../store');
+    // eslint-disable-next-line prefer-destructuring
+    if (!store)  store = require('./../../store').store;
     if (!Alerts) Alerts = require('../alerts').default;
 
     var originalReduxState = store.getState();
@@ -284,7 +290,7 @@ export function determineIfTermFacetSelected(term, facet, props){
     /*
     var field = facet.field || null,
         fromFilter, fromFilterTerm, toFilter, toFilterTerm;
-    
+
     if (facet.aggregation_type === 'date_histogram'){
         // Instead of checking presense of filters here, we find earliest from and latest to and see if are within range.
 
@@ -437,14 +443,14 @@ export const NON_FILTER_URL_PARAMS = [
 /**
  * Convert back-end-supplied 'context.filters' array of filter objects into commonly-used 'expSetFilters' structure.
  * Replaces now-removed 'hrefToFilters' function and copy of expSetFilters passed down from Redux store.
- * 
+ *
  * @param {{ term : string, field : string, remove : string }[]} contextFilters     Array of filters supplied from back-end search.py.
  * @param {string} [browseBaseState] - Supply 'only_4dn' or 'all' to control which URI query params are filtered out. If 'search' is supplied, none are excluded.
  * @returns {Object} Object with fields (string, dot-separated-nested) as keys and Sets of terms (string) as values for those keys.
  */
 export function contextFiltersToExpSetFilters(contextFilters = null, browseBaseState = null){
     if (!contextFilters){ // Grab context.filters from Redux store if not supplied.
-        if (!store) store = require('./../../store');
+        if (!store) store = require('./../../store').store;
         var storeState = store.getState();
         contextFilters = (storeState && storeState.context && storeState.context.filters) || null;
     }
@@ -486,7 +492,7 @@ export function expSetFiltersToJSON(expSetFilters){
 /**
  * Compare two versions of 'expSetFilters' structure to check if they are equal.
  * Used by ChartDataController.
- * 
+ *
  * @param {Object} expSetFiltersA - 1st set of filters, object with facet/field as keys and Sets of terms as values.
  * @param {Object} expSetFiltersB - 2nd set of filters, same as param expSetFiltersA.
  * @returns {boolean} true if equal.

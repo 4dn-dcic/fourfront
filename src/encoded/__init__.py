@@ -261,8 +261,6 @@ def add_schemas_to_html_responses(config):
                                 del schema['properties']['@type']
                             if schema['properties'].get('display_title') is not None:
                                 del schema['properties']['display_title']
-                            if schema['properties'].get('link_id') is not None:
-                                del schema['properties']['link_id']
                             if schema['properties'].get('schema_version') is not None:
                                 del schema['properties']['schema_version']
                             if schema['properties'].get('uuid') is not None:
@@ -289,6 +287,11 @@ def main(global_config, **local_config):
     # set auth0 keys
     settings['auth0.secret'] = os.environ.get("Auth0Secret")
     settings['auth0.client'] = os.environ.get("Auth0Client")
+    # set google reCAPTCHA keys
+    settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
+    settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+    # set mirrored Elasticsearch location (for webprod/webprod2)
+    settings['mirror.env.es'] = os.environ.get('mirrorEnvEs')
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY

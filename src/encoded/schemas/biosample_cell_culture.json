@@ -33,7 +33,6 @@
             "description": "A short description of the cell culture procedure - eg. Details on culturing a preparation of K562 cells",
             "type": "string",
             "lookup": 20,
-            "default": "",
             "formInput": "textarea"
         },
         "culture_start_date": {
@@ -106,6 +105,14 @@
                 "linkTo": "Protocol"
             }
         },
+        "in_vitro_differentiated": {
+            "title": "Differentiated in vitro",
+            "description": "Relevant for pluripotent and stem cell lines - set to Yes if cells have undergone in vitro differentiation",
+            "type": "string",
+            "enum": ["Yes", "No"],
+            "default": "No",
+            "lookup": 98
+        },
         "differentiation_tissue": {
             "title": "Differentiation Tissue/Cell Type",
             "description": "The resulting tissue or cell type for cells that have undergone differentiation.",
@@ -116,7 +123,7 @@
         },
         "differentiation_state": {
             "title": "Differentiation State",
-            "description": "For cells that have undergone differentiation a description of the differention state and markers used to determine the state.",
+            "description": "For cells that have undergone differentiation (or serve as undifferentiated controls) a description of the differention state and markers used to determine the state.",
             "type": "string",
             "lookup": 100
         },

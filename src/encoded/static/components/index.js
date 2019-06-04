@@ -3,42 +3,99 @@
 // Require all components to ensure javascript load ordering
 
 /**
- * @file
- * @alias module:app
+ * Here we import all of our Content Views (Page Views) and register them
+ * to `globals.content_views` so that they may be picked up and routed to in
+ * the root `App` component.
  */
 
-require('./lib');
-require('./util');
-require('./viz/utilities');
-require('./app');
-require('./footer');
-require('./globals');
-require('./static-pages/StaticPage');
-require('./static-pages/DirectoryPage');
-require('./static-pages/HomePage');
-require('./static-pages/PlannedDataSubmission');
-require('./static-pages/ReleaseUpdates');
-require('./static-pages/StatisticsPage');
-require('./item-pages/DefaultItemView');
-require('./item-pages/ExperimentSetView');
-require('./item-pages/ExperimentView');
-require('./item-pages/FileSetCalibrationView');
-require('./item-pages/HealthView');
-require('./item-pages/HiGlassViewConfigView');
-require('./item-pages/UserView');
-require('./item-pages/WorkflowRunView');
-require('./item-pages/WorkflowView');
-require('./item-pages/SchemaView');
-require('./item-pages/FallbackView');
-require('./item-pages/FileView');
-require('./item-pages/FileMicroscopyView');
-require('./item-pages/BiosampleView');
-require('./item-pages/BiosourceView');
-require('./item-pages/ProtocolView');
-require('./item-pages/PublicationView');
-require('./forms/SubmissionView');
-require('./browse/BrowseView');
-require('./browse/SearchView');
-require('./browse/SubscriptionsView');
+import { content_views }        from './globals';
 
-module.exports = require('./app').default;
+import StaticPage               from './static-pages/StaticPage';
+import DirectoryPage            from './static-pages/DirectoryPage';
+
+import HomePage                 from './static-pages/HomePage';
+import PlannedSubmissionsPage   from './static-pages/PlannedSubmissionsPage';
+import ReleaseUpdates           from './static-pages/ReleaseUpdates';
+import StatisticsPageView       from './static-pages/StatisticsPageView';
+
+
+import DefaultItemView          from './item-pages/DefaultItemView';
+import ExperimentSetView        from './item-pages/ExperimentSetView';
+import ExperimentView, { ExperimentMicView } from './item-pages/ExperimentView';
+import ExperimentTypeView       from './item-pages/ExperimentTypeView';
+import FileSetCalibrationView   from './item-pages/FileSetCalibrationView';
+import HealthView               from './item-pages/HealthView';
+import HiGlassViewConfigView    from './item-pages/HiGlassViewConfigView';
+import UserView, { ImpersonateUserForm } from './item-pages/UserView';
+import WorkflowRunView          from './item-pages/WorkflowRunView';
+import WorkflowView             from './item-pages/WorkflowView';
+import SchemaView               from './item-pages/SchemaView';
+import FallbackView             from './item-pages/FallbackView';
+import FileView                 from './item-pages/FileView';
+import FileMicroscopyView       from './item-pages/FileMicroscopyView';
+import BiosampleView            from './item-pages/BiosampleView';
+import BiosourceView            from './item-pages/BiosourceView';
+import ProtocolView             from './item-pages/ProtocolView';
+import DocumentView             from './item-pages/DocumentView';
+import PublicationView          from './item-pages/PublicationView';
+import StaticSectionView        from './item-pages/StaticSectionView';
+import SubmissionView           from './forms/SubmissionView';
+import BrowseView               from './browse/BrowseView';
+import SearchView               from './browse/SearchView';
+import SubscriptionsView        from './browse/SubscriptionsView';
+
+
+content_views.register(StaticPage,    'StaticPage');
+content_views.register(DirectoryPage, 'DirectoryPage');
+
+content_views.register(HomePage,                'HomePage');
+content_views.register(PlannedSubmissionsPage,  'Planned-submissionsPage');
+content_views.register(ReleaseUpdates,          'Release-updatesPage');
+content_views.register(StatisticsPageView,      'StatisticsPage');
+
+
+content_views.register(DefaultItemView,         'Item');
+content_views.register(BiosampleView,           'Biosample');
+content_views.register(BiosourceView,           'Biosource');
+content_views.register(ExperimentSetView,       'ExperimentSet');
+content_views.register(ExperimentSetView,       'ExperimentSetReplicate');
+content_views.register(ExperimentView,          'Experiment');
+content_views.register(ExperimentTypeView,      'ExperimentType');
+content_views.register(ExperimentMicView,       'ExperimentMic');
+content_views.register(FileMicroscopyView,      'FileMicroscopy');
+content_views.register(FileSetCalibrationView,  'FileSetCalibration');
+content_views.register(FileView,                'File');
+content_views.register(HealthView,              'Health');
+content_views.register(HiGlassViewConfigView,   'HiglassViewConfig');
+content_views.register(ProtocolView,            'Protocol');
+content_views.register(DocumentView,            'Document');
+content_views.register(PublicationView,         'Publication');
+content_views.register(SchemaView,              'JSONSchema');
+content_views.register(UserView,                'User');
+content_views.register(ImpersonateUserForm,     'User', 'impersonate-user');
+content_views.register(WorkflowRunView,         'WorkflowRun');
+content_views.register(WorkflowRunView,         'WorkflowRunSbg');
+content_views.register(WorkflowRunView,         'WorkflowRunAwsem');
+content_views.register(WorkflowView,            'Workflow');
+content_views.register(StaticSectionView,       'StaticSection');
+
+content_views.register(SubmissionView,          'Item', 'edit');
+content_views.register(SubmissionView,          'Item', 'create');
+content_views.register(SubmissionView,          'Item', 'clone');
+content_views.register(SubmissionView,          'Search', 'add');
+
+content_views.register(BrowseView,              'Browse');
+content_views.register(SearchView,              'Search');
+content_views.register(SearchView,              'Search', 'selection');
+content_views.register(SearchView,              'Browse', 'selection');
+content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
+
+
+// Fallback for anything we haven't registered
+content_views.fallback = function () {
+    return FallbackView;
+};
+
+import App from './app';
+
+export default App;

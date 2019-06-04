@@ -36,10 +36,10 @@ export function allFilesForWorkflowRunsMappedByUUID(items){
 
 
 export default class WorkflowRunTracingView extends DefaultItemView {
-    
+
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
+        this.shouldGraphExist = this.shouldGraphExist.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
         var steps = _testing_data || null;
         this.state = {
@@ -51,11 +51,10 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     }
 
     componentDidMount(){
-        super.componentDidMount(...arguments);
-
+        super.componentDidMount(...arguments); // DefaultItem's this.maybeSetRedirectedAlert()
         var nextState = { 'mounted' : true };
-
         if (!this.state.steps){
+            // Will always evaluate unless are using _testing_data to override.
             nextState.loadingGraphSteps = true;
             this.loadGraphSteps();
         }
@@ -69,20 +68,17 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         }
     }
 
+    shouldGraphExist(){
+        return true;
+    }
+
     loadGraphSteps(force = false, cb = null, cache = false){
-        var context = this.props.context;
+        const context = this.props.context;
+        const steps = this.state.steps;
 
         if (typeof context.uuid !== 'string') return;
-        if (!force && Array.isArray(this.state.steps) && this.state.steps.length > 0) return;
-        if (
-            !force && (
-                Array.isArray(context['@type']) && _.contains(context['@type'], 'ExperimentSet') // If ExpSet or Exp, don't do if no processed files
-                && (!Array.isArray(context.processed_files) || context.processed_files.length === 0)
-            ) || (
-                Array.isArray(context['@type']) && _.contains(context['@type'], 'File') // If File, don't do if not output of a workflow_run.
-                && (!(Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0))
-            )
-        ) return;
+        if (!this.shouldGraphExist()) return;
+        if (!force && Array.isArray(steps) && steps.length > 0) return;
 
         var tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/',
             callback = (r) => {
@@ -110,9 +106,9 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     }
 
     handleToggleAllRuns(){
-        this.setState({ 'allRuns' : !this.state.allRuns, 'loadingGraphSteps' : true }, ()=>{
-            this.loadGraphSteps(true);
-        });
+        this.setState(function({ allRuns }){
+            return { 'allRuns' : !allRuns, 'loadingGraphSteps' : true };
+        }, () => { this.loadGraphSteps(true); });
     }
 }
 
@@ -123,18 +119,18 @@ export class FileViewGraphSection extends WorkflowGraphSection {
      * Returns tab object representation for Graph section.
      * Used by any ItemView which loads provenance graph steps into its state.steps.
      *
-     * @param {Object} parentProps - All props from parent Item view.
-     * @param {Object} parentState - All properties from parent Item view state.
-     * @param {!Object[]} parentState.steps - Steps of provenance graph, AJAXed-in by parent Item view.
-     * @param {boolean} parentState.mounted - Whether parent component/view has been mounted yet.
-     * @param {boolean} parentState.allRuns - Whether 'all runs' (vs grouped runs) are currently being loaded.
-     * @param {boolean} parentState.loadingGraphSteps - Whether steps are currently being loaded.
+     * @param {Object} props - All props from parent Item view.
+     * @param {Object} state - All properties from parent Item view state.
+     * @param {!Object[]} state.steps - Steps of provenance graph, AJAXed-in by parent Item view.
+     * @param {boolean} state.mounted - Whether parent component/view has been mounted yet.
+     * @param {boolean} state.allRuns - Whether 'all runs' (vs grouped runs) are currently being loaded.
+     * @param {boolean} state.loadingGraphSteps - Whether steps are currently being loaded.
      * @param {function} onToggleAllRuns - Callback function passed from parent Item view. Called when 'toggle all runs' checkbox is changed.
      * @returns {{ tab: JSX.Element, key: string, disabled?: boolean, isDefault?: boolean, content: JSX.Element }} Tab object
      */
-    static getTabObject(parentProps, parentState, onToggleAllRuns, width){
-        var { loadingGraphSteps, steps, mounted, allRuns } = parentState,
-            { context } = parentProps,
+    static getTabObject(props, state, onToggleAllRuns, width){
+        var { loadingGraphSteps, steps } = state,
+            { context } = props,
             iconClass   = "icon icon-fw icon-",
             tooltip     = null;
 
@@ -149,11 +145,11 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         }
 
         return {
-            'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Graph</span>,
+            'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Provenance</span>,
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
             'content'   : (
-                <FileViewGraphSection {...parentProps} {..._.pick(parentState, 'steps', 'mounted', 'allRuns')} width={width}
+                <FileViewGraphSection {...props} {..._.pick(state, 'steps', 'mounted', 'allRuns')} width={width}
                     key={"graph-for-" + context.uuid} onToggleAllRuns={onToggleAllRuns} loading={loadingGraphSteps} />
             )
         };
@@ -177,12 +173,11 @@ export class FileViewGraphSection extends WorkflowGraphSection {
 
     constructor(props){
         super(props);
-        this.commonGraphProps = this.commonGraphProps.bind(this);
+        this.commonGraphProps           = this.commonGraphProps.bind(this);
         this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
         this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
-        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
-        this.render = this.render.bind(this);
+        this.isNodeCurrentContext       = this.isNodeCurrentContext.bind(this);
         this.state = _.extend({
             'showChart' : 'detail',
             'showIndirectFiles' : false,
@@ -242,7 +237,9 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     onToggleIndirectFiles(){
-        this.setState({ 'showIndirectFiles' : !this.state.showIndirectFiles });
+        this.setState(function({ showIndirectFiles }){
+            return { "showIndirectFiles" : !showIndirectFiles };
+        });
     }
 
     onToggleAllRuns(){

@@ -3,11 +3,11 @@ import copy
 
 ORDER = [
     'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
-    'ontology', 'ontology_term', 'file_format', 'badge', 'organism',
-    'genomic_region', 'target', 'imaging_path', 'publication',
+    'ontology', 'ontology_term', 'file_format', 'badge', 'organism', 'gene',
+    'genomic_region', 'bio_feature', 'target', 'imaging_path', 'publication',
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
-    'individual_human', 'individual_mouse', 'individual_fly',
+    'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
     'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
     'treatment_agent', 'biosample', 'quality_metric_fastqc',
     'quality_metric_bamqc', 'quality_metric_pairsqc',
@@ -25,6 +25,7 @@ ORDER = [
     'sysinfo', 'tracking_item', 'quality_metric_flag',
     'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
 ]
+
 
 @pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
@@ -169,6 +170,26 @@ def lung_biosource(testapp, lab, award, lung_oterm):
 
 
 @pytest.fixture
+def de_term(testapp, lab, award):
+    item = {
+        "term_id": "UBERON:0005439",
+        "term_name": "definitive endoderm",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439"
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biosample_cc_wo_diff(testapp, de_term, lab, award):
+    item = {
+        "culture_start_date": "2018-01-01",
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
+
+
+@pytest.fixture
 def tissue_biosample(testapp, lung_biosource, lab, award):
     item = {
         'description': "Tissue Biosample",
@@ -180,13 +201,68 @@ def tissue_biosample(testapp, lung_biosource, lab, award):
 
 
 @pytest.fixture
-def protocol(testapp, lab, award):
-    item = {'description': 'A Protocol',
+def protocol_data(lab, award):
+    return {'description': 'A Protocol',
             'protocol_type': 'Experimental protocol',
             'award': award['@id'],
             'lab': lab['@id']
             }
-    return testapp.post_json('/protocol', item).json['@graph'][0]
+
+
+@pytest.fixture
+def protocol(testapp, protocol_data):
+    return testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+
+
+@pytest.fixture
+def so_ont(testapp):
+    return testapp.post_json('/ontology', {'ontology_name': 'SO'}).json['@graph'][0]
+
+
+@pytest.fixture
+def gene_term(testapp, so_ont):
+    gterm = {
+        'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000704', 'term_name': 'gene',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def region_term(testapp, so_ont):
+    gterm = {
+        'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000001', 'term_name': 'region',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def protein_term(testapp, so_ont):
+    gterm = {
+        'uuid': '8bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000104', 'term_name': 'polypeptide',
+        'preferred_name': 'protein',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def transcript_term(testapp, so_ont):
+    gterm = {
+        'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'SO:0000673', 'term_name': 'transcript',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
+
+
+@pytest.fixture
+def component_term(testapp, so_ont):
+    gterm = {
+        'uuid': '4bea5bde-d860-49f8-b178-35d0dadbd644',
+        'term_id': 'GO:0005575', 'term_name': 'cellular_component',
+        'source_ontology': so_ont['@id']}
+    return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
 @pytest.fixture
@@ -287,6 +363,7 @@ def human_data():
         'name': 'human',
         'scientific_name': 'Homo sapiens',
         'taxon_id': '9606',
+        'genome_assembly': 'GRCh38'
     }
 
 
@@ -302,6 +379,7 @@ def mouse(testapp):
         'name': 'mouse',
         'scientific_name': 'Mus musculus',
         'taxon_id': '10090',
+        'genome_assembly': 'GRCm38'
     }
     return testapp.post_json('/organism', item).json['@graph'][0]
 
@@ -330,24 +408,57 @@ def experiment(testapp, experiment_data):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample, mboI):
+def experiment_data(lab, award, human_biosample, mboI, exp_types):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': exp_types['hic']['@id'],
         'digestion_enzyme': mboI['@id'],
         'status': 'in review by lab'
     }
 
 
 @pytest.fixture
-def experiment_project_release(testapp, lab, award, human_biosample):
+def exp_types(testapp, lab, award):
+    from uuid import uuid4
+    experiment_types = {}
+    title_dict = {
+        'hic': ('in situ Hi-C', ["ExperimentHiC"]),
+        'microc': ('Micro-C', ["ExperimentHiC"]),
+        'capc': ('Capture Hi-C', ["ExperimentCaptureC"]),
+        'rnaseq': ('RNA-seq', ["ExperimentSeq"]),
+        'fish': ('DNA FISH', ["ExperimentMic"]),
+        'dnase': ('DNase Hi-C', ["ExperimentHiC"]),
+        'dam': ('DamID-seq', ["ExperimentDamid"]),
+        'chia': ('ChIA-PET', ["ExperimentChiapet"]),
+        'repliseq': ('2-stage Repli-seq', ["ExperimentRepliseq"]),
+        'multi': ('Multi-stage Repli-seq', ["ExperimentRepliseq"]),
+        'chipseq': ('ChIP-seq', ["ExperimentSeq"]),
+        'dilution': ('Dilution Hi-C', ["ExperimentHiC"]),
+        'atacseq': ('ATAC-seq', ["ExperimentAtacseq"]),
+        'tsaseq': ('TSA-seq', ["ExperimentTsaseq"])
+    }
+    for k, v in title_dict.items():
+        data = {
+            'uuid': str(uuid4()),
+            'title': v[0],
+            'lab': lab['@id'],
+            'award': award['@id'],
+            'status': 'released',
+            'valid_item_types': v[1]
+        }
+        experiment_types[k] = testapp.post_json('/experiment_type', data, status=201).json['@graph'][0]
+    return experiment_types
+
+
+@pytest.fixture
+def experiment_project_release(testapp, lab, award, human_biosample, exp_types):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
+        'experiment_type': exp_types['microc']['@id'],
         'status': 'released to project'
     }
     return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
@@ -496,14 +607,18 @@ def attachment():
 
 
 @pytest.fixture
-def image(testapp, attachment, lab, award):
-    item = {
+def image_data(attachment, lab, award):
+    return {
         'attachment': attachment,
         'caption': 'Test image',
-        'award': award['@id'],
-        'lab': lab['@id'],
+        'award': award['uuid'],
+        'lab': lab['uuid'],
     }
-    return testapp.post_json('/image', item).json['@graph'][0]
+
+
+@pytest.fixture
+def image(testapp, image_data):
+    return testapp.post_json('/image', image_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -750,6 +865,110 @@ def target_w_genes(testapp, lab, award):
 
 
 @pytest.fixture
+def targ_w_alias(testapp, target_w_genes):
+    return testapp.patch_json(target_w_genes['@id'], {'aliases': ['lab:test_targ']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def targ_gr_w_alias(testapp, target_w_region):
+    return testapp.patch_json(target_w_region['@id'], {'aliases': ['lab:test_targ_gr']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def targ_agr_w_alias(testapp, another_target_w_region):
+    return testapp.patch_json(another_target_w_region['@id'], {'aliases': ['lab:test_another_gr']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def gene_item(testapp, lab, award):
+    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
+
+
+@pytest.fixture
+def gene_bio_feature(testapp, lab, award, gene_term, gene_item):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Gene BioFeature',
+            'feature_type': gene_term['@id'],
+            'relevant_genes': [gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def prot_bio_feature(testapp, lab, award, protein_term, gene_item):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Protein BioFeature',
+            'feature_type': protein_term['@id'],
+            'relevant_genes': [gene_item['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def biofeat_w_alias(testapp, gene_bio_feature):
+    return testapp.patch_json(gene_bio_feature['@id'], {'aliases': ['lab:test_targ_bf']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def gr_biofeat_w_alias(testapp, genomic_region_bio_feature):
+    return testapp.patch_json(
+        genomic_region_bio_feature['@id'], {'aliases': ['lab:test_targ_gr_bf']}, status=200).json['@graph'][0]
+
+
+@pytest.fixture
+def some_genomic_region(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCh38',
+            'chromosome': '1',
+            'start_coordinate': 17,
+            'end_coordinate': 544}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def vague_genomic_region(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCm38',
+            'chromosome': '5',
+            'start_location': 'beginning',
+            'end_location': 'centromere'}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def vague_genomic_region_w_desc(testapp, lab, award):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'genome_assembly': 'GRCm38',
+            'chromosome': '5',
+            'start_location': 'beginning',
+            'end_location': 'centromere',
+            'location_description': 'gene X enhancer'}
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def basic_region_bio_feature(testapp, lab, award, region_term):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Region BioFeature with minimal info',
+            'feature_type': region_term['@id']}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_bio_feature(testapp, lab, award, region_term, some_genomic_region):
+    item = {'award': award['@id'],
+            'lab': lab['@id'],
+            'description': 'Test Region BioFeature',
+            'feature_type': region_term['@id'],
+            'genome_location': [some_genomic_region['@id']]}
+    return testapp.post_json('/bio_feature', item).json['@graph'][0]
+
+
+@pytest.fixture
 def target_w_region(testapp, genomic_region_w_chrloc, lab, award):
     item = {
         "targeted_genome_regions": [genomic_region_w_chrloc['@id']],
@@ -803,18 +1022,18 @@ def mod_w_genomic_change(testapp, mod_basic_info):
 
 
 @pytest.fixture
-def mod_w_target(testapp, mod_basic_info, target_w_genes):
+def mod_w_target(testapp, mod_basic_info, gene_bio_feature):
     mod = copy.deepcopy(mod_basic_info)
     mod['description'] = 'mod with target'
-    mod['target_of_mod'] = target_w_genes['@id']
+    mod['target_of_mod'] = [gene_bio_feature['@id']]
     return testapp.post_json('/modification', mod).json['@graph'][0]
 
 
 @pytest.fixture
-def mod_w_change_and_target(testapp, mod_basic_info, target_w_genes):
+def mod_w_change_and_target(testapp, mod_basic_info, gene_bio_feature):
     mod = copy.deepcopy(mod_basic_info)
     mod['description'] = 'mod with target and genomic change'
-    mod['target_of_mod'] = target_w_genes['@id']
+    mod['target_of_mod'] = [gene_bio_feature['@id']]
     mod['genomic_change'] = "deletion"
     return testapp.post_json('/modification', mod).json['@graph'][0]
 

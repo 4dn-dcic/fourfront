@@ -3,39 +3,50 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, ajax, console, fileUtil } from './../../../util';
+import { ajax, console, object } from './../../../util';
 import { requestAnimationFrame } from './../../../viz/utilities';
-import { HiGlassLocalStorage } from './HiGlassLocalStorage';
 
 
-let HiGlassComponent = null; // Loaded after componentDidMount as not supported server-side.
+/**
+ * Helper function to test if an Item is a HiglassViewConfig Item.
+ * To be used by Components such as BasicStaticSectionBody to determine
+ * what time of view to render.
+ */
+export function isHiglassViewConfigItem(context){
+    if (!context) return false;
+    if (Array.isArray(context['@type'])){
+        // Ideal case is that @type is present. However it may not be embedded in all cases.
+        return context['@type'].indexOf('HiglassViewConfig') > -1;
+    }
+    // Fallback test in case @type is not present;
+    const itemAtId = object.itemUtil.atId(context);
+    if (!itemAtId || itemAtId[0] !== '/') return false;
+    const pathPartForType = itemAtId.slice(1).split('/', 1)[0];
+    return pathPartForType === 'higlass-view-configs';
+}
 
+
+/**
+ * Functional component to display loading indicator.
+ *
+ * @param {{ icon: string, title: JSX.Element|string }} props Props passed into this Component.
+ */
+export function HiGlassLoadingIndicator(props) {
+    const { icon, title } = props;
+    return (
+        <React.Fragment>
+            <h3>
+                <i className={"icon icon-lg icon-" + (icon || "television")}/>
+            </h3>
+            { title || "Initializing" }
+        </React.Fragment>
+    );
+}
+
+/** Loaded upon componentDidMount; HiGlassComponent is not supported server-side. */
+let HiGlassComponent = null;
 
 export class HiGlassPlainContainer extends React.PureComponent {
-
-    static does2DTrackExist(viewConfig){
-
-        var found = false;
-
-        _.forEach(viewConfig.views || [], function(view){
-            if (found) return;
-            _.forEach((view.tracks && view.tracks.center) || [], function(centerTrack){
-                if (found) return;
-                if (centerTrack.position === 'center') {
-                    found = true;
-                }
-            });
-        });
-
-        return found;
-    }
-
-    static getPrimaryViewID(viewConfig){
-        if (!viewConfig || !Array.isArray(viewConfig.views) || viewConfig.views.length === 0){
-            return null;
-        }
-        return _.uniq(_.pluck(viewConfig.views, 'uid'))[0];
-    }
 
     static correctTrackDimensions(hiGlassComponent){
         requestAnimationFrame(()=>{
@@ -57,14 +68,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'height' : 500,
         'viewConfig' : null,
         'mountDelay' : 500,
-        'placeholder' : (
-            <React.Fragment>
-                <h3>
-                    <i className="icon icon-lg icon-television"/>
-                </h3>
-                Initializing
-            </React.Fragment>
-        )
+        'placeholder' : <HiGlassLoadingIndicator/>,
     };
 
     constructor(props){
@@ -83,19 +87,43 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
-            if (!HiGlassComponent) {
-                window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility
-                // Would ideally load non-compiled app, but requires CSS webpack loaders (see HiGlass webpack.config.js).
-                //HiGlassComponent = require('higlass/app/scripts/hglib').HiGlassComponent;
-                HiGlassComponent = require('higlass/dist/hglib').HiGlassComponent;
-            }
+        const { mountDelay } = this.props;
+        const finish = () => {
             this.setState(function(currState){
                 return { 'mounted' : true, 'mountCount' : currState.mountCount + 1 };
-            }, ()=>{
+            }, () => {
                 setTimeout(this.correctTrackDimensions, 500);
             });
-        }, this.props.mountDelay);
+        };
+
+        setTimeout(()=>{ // Allow tab CSS transition to finish (the render afterwards lags browser a little bit).
+            if (!HiGlassComponent) {
+                window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
+                // Load in HiGlass libraries as separate JS file due to large size.
+                // @see https://webpack.js.org/api/module-methods/#requireensure
+                require.ensure(['higlass/dist/hglib'], (require) => {
+                    const hglib = require('higlass/dist/hglib');
+                    HiGlassComponent = hglib.HiGlassComponent;
+                    finish();
+                }, "higlass-utils-bundle");
+
+                // Alternative, newer version of above -- currently the 'magic comments' are
+                // not being picked up (?) though so the above is used to set name of JS file.
+                //import(
+                //    /* webpackChunkName: "higlass-bundle" */
+                //    'higlass/dist/hglib'
+                //).then((hglib) =>{
+                //    HiGlassComponent = hglib.HiGlassComponent;
+                //    finish();
+                //});
+
+            } else {
+                finish();
+            }
+
+        }, mountDelay || 500);
+
     }
 
     correctTrackDimensions(){
@@ -148,12 +176,10 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     render(){
-        var { disabled, isValidating, tilesetUid, height, width, options, style,
-            className, viewConfig, placeholder
-            } = this.props,
-            hiGlassInstance = null,
-            mounted         = (this.state && this.state.mounted) || false,
-            outerKey        = "mount-number-" + this.state.mountCount;
+        const { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig, placeholder } = this.props;
+        const { mounted, mountCount, hasRuntimeError } = this.state;
+        let hiGlassInstance = null;
+        const outerKey = "mount-number-" + mountCount;
 
         if (isValidating || !mounted){
             var placeholderStyle = {};
@@ -168,7 +194,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
                     <h4 className="text-400">Not Available</h4>
                 </div>
             );
-        } else if (this.state.hasRuntimeError) {
+        } else if (hasRuntimeError) {
             hiGlassInstance = (
                 <div className="text-center" key={outerKey} style={placeholderStyle}>
                     <h4 className="text-400">Runtime Error</h4>
@@ -176,7 +202,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             );
         } else {
             hiGlassInstance = (
-                <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
+                <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', height, 'width' : width || null }} ref={this.instanceContainerRefFunction}>
                     <HiGlassComponent {...{ options, viewConfig, width, height }} ref={this.hgcRef} />
                 </div>
             );
@@ -188,12 +214,11 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.2.8/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.5.7/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
-                <div className="higlass-wrapper row" children={hiGlassInstance} />
+                <div className="higlass-wrapper row">{ hiGlassInstance }</div>
             </div>
         );
     }
-
 
 }

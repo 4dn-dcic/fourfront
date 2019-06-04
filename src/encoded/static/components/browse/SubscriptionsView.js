@@ -3,8 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
-import * as globals from './../globals';
-import { ajax, console, object, isServerSide, DateUtility } from './../util';
+import { ajax, DateUtility } from './../util';
 
 /**
  * @typedef {Object} Subscription
@@ -19,7 +18,7 @@ var Subscription;
  * Container component for the submissions page. Fetches the user info and
  * coordinates individual subscriptions.
  */
-export class SubscriptionView extends React.Component {
+export default class SubscriptionsView extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -50,7 +49,7 @@ export class SubscriptionView extends React.Component {
      */
     getUserInfo = () => {
         ajax.promise('/me?frame=embedded').then(response => {
-            if (!response.link_id || !response.subscriptions){
+            if (!response.uuid || !response.subscriptions){
                 this.setState({
                     'subscriptions': null,
                     'initialized': true
@@ -65,37 +64,26 @@ export class SubscriptionView extends React.Component {
     }
 
     /**
-     * Generates a subscription list item.
-     *
-     * @private
-     * @param {Subscription} scrip      Current subscription.
-     * @param {number} index            Index of current subscription/
-     * @param {Subscription[]} all      All subscriptions.
-     * @returns {JSX.Element} A `SubscriptionEntry` component instance.
-     */
-    generateSubscription = (scrip, index, all) => {
-        return(
-            <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />
-        );
-    }
-
-    /**
      * @private
      * @returns {JSX.Element} Div containing list of subscription views.
      */
     render(){
-        var subscrip_list, main_message;
-        if(this.state.subscriptions){
-            subscrip_list = _.map(this.state.subscriptions, this.generateSubscription);
+        var { subscriptions, initialized } = this.state,
+            subscrip_list, main_message;
+
+        if (Array.isArray(subscriptions) && subscriptions.length > 0){
+            subscrip_list = _.map(subscriptions, function(scrip){
+                return <SubscriptionEntry key={scrip.url} url={scrip.url} title={scrip.title} />;
+            });
             main_message = "View your 4DN submissions and track those you're associated with.";
-        }else if(this.state.initialized){
+        } else if (initialized){
             main_message = "No submissions to track; you are not a submitter nor associated with any labs.";
-        }else{
-            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}></i>;
+        } else {
+            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}/>;
         }
-        return(
-            <div>
-                <div className="flexible-description-box item-page-heading" style={{'marginBottom':'25px'}}>
+        return (
+            <div id="content" className="container">
+                <div className="flexible-description-box item-page-heading mb-25 mt-1">
                     <p className="text-larger">{main_message}</p>
                 </div>
                 {subscrip_list}
@@ -116,7 +104,7 @@ class SubscriptionEntry extends React.Component{
         this.changePage = _.throttle(this.changePage, 250);
         var is_open = false;
         // user submissions default to open
-        if(this.props.title == 'My submissions'){
+        if (this.props.title == 'My submissions'){
             is_open = true;
         }
         this.state = {
@@ -144,7 +132,9 @@ class SubscriptionEntry extends React.Component{
         if(!this.state.data){
             this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
         }
-        this.setState({'open':!this.state.open});
+        this.setState(function({ open }){
+            return {'open': !open };
+        });
     }
 
     loadSubscriptionData = (url, page, type) => {
@@ -220,10 +210,10 @@ class SubscriptionEntry extends React.Component{
     }
 
     generateEntry = (entry) => {
-        if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry.link_id){
+        if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry['@id']){
             return;
         }
-        var format_id = entry.link_id.replace(/~/g, "/");
+        var format_id = entry['@id'];
         return(
             <tr key={entry.date_created}>
                 <td>
@@ -314,7 +304,7 @@ class SubscriptionEntry extends React.Component{
             submissions = this.state.data.map((entry) => this.generateEntry(entry));
         }
         return(
-            <div>
+            <div className="mb-1">
                 <div className='submission-page-heading'>
                     <h3 className='submission-subtitle'>{this.props.title}</h3>
                     <h3 className='submission-subtitle'>{this.displayToggle()}</h3>
@@ -342,5 +332,3 @@ class SubscriptionEntry extends React.Component{
         );
     }
 }
-
-globals.content_views.register(SubscriptionView, 'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)

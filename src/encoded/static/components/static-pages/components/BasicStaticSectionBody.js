@@ -7,9 +7,11 @@ import { Button } from 'react-bootstrap';
 import { object, analytics, isServerSide } from './../../util';
 import { compiler } from 'markdown-to-jsx';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
-import { HiGlassPlainContainer } from './../../item-pages/components/HiGlass/HiGlassPlainContainer';
-import * as store from './../../../store';
+import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
+import { store } from './../../../store';
 import { replaceString as replacePlaceholderString } from './../placeholders';
+
+
 
 export class BasicUserContentBody extends React.PureComponent {
 
@@ -29,15 +31,17 @@ export class BasicUserContentBody extends React.PureComponent {
         });
     }
 
+    /** Determines the item type from the context. */
     itemType(){
         var { context, itemType } = this.props;
         if (itemType && typeof itemType === 'string') return itemType;
         if (!Array.isArray(context['@type'])) throw new Error('Expected an @type on context.');
         if (context['@type'].indexOf('StaticSection') > -1){
             return 'StaticSection';
-        } else if (context['@type'].indexOf('HiglassViewConfig') > -1){
+        } else if (isHiglassViewConfigItem(context)){ // Func internally checks context['@type'].indexOf('HiglassViewConfig') > -1 also
             return 'HiglassViewConfig';
         } else {
+            // TODO: Case for JupyterNotebook (?) and/or yet-to-be-created ones.
             throw new Error('Unsupported Item type.');
         }
     }
@@ -60,10 +64,11 @@ export class BasicUserContentBody extends React.PureComponent {
             return (
                 <React.Fragment>
                     <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    <HiGlassPlainContainer viewConfig={context.viewconfig} />
+                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} />
                 </React.Fragment>
             );
         } else {
+            // TODO handle @type=JupyterHub?
             return (
                 <div className="error">
                     <h4>Error determining Item type.</h4>
@@ -84,7 +89,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     static defaultProps = _.extend({}, OverviewHeadingContainer.defaultProps, {
         'className' : 'with-background mb-1 mt-1',
         'title'     : "Information",
-        'prependTitleIconFxn' : function(open, props){
+        'prependTitleIconFxn' : function prependedIcon(open, props){
             if (!props.titleIcon) return null;
             return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
         },
@@ -94,7 +99,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     renderInnerBody(){
         var { context, href } = this.props,
             open        = this.state.open,
-            isHiGlass   = isHiGlassDisplay(context);
+            isHiGlass   = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
@@ -108,25 +113,28 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 export class EmbeddedHiglassActions extends React.PureComponent {
 
     static defaultProps = {
-        'parentComponentType' : BasicUserContentBody
+        'parentComponentType' : BasicUserContentBody,
+        'showDescription' : true,
+        'constrainDescription' : false
     };
 
     render(){
-        var { context, parentComponentType } = this.props,
-            btnProps = {
-                'href'      : object.itemUtil.atId(context),
-                'data-tip'  : "Open HiGlass display to add other data",
-                'className' : 'pull-right extra-info-higlass-btn'
-            };
+        const { context, parentComponentType, showDescription, constrainDescription } = this.props;
+        const btnProps = {
+            'href'      : object.itemUtil.atId(context),
+            'data-tip'  : "Open HiGlass display to add other data",
+            'className' : 'pull-right extra-info-higlass-btn'
+        };
 
         if (parentComponentType === BasicUserContentBody) {
             btnProps.bsSize = 'sm';
         }
 
         return (
-            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'parentComponentType')}>
-                <div className="description">
-                    { context.description }
+            // Styled as flexrow, which will keep btn-container aligned to right as long as the ".description" container is present.
+            <div className="extra-info extra-info-for-higlass-display" {..._.omit(this.props, 'context', 'showDescription', 'parentComponentType', 'constrainDescription')}>
+                <div className={"description" + (constrainDescription ? ' text-ellipsis-container' : '')} >
+                    { showDescription ? context.description : null }
                 </div>
                 <div className="btn-container">
                     <Button {...btnProps}>
@@ -175,7 +183,7 @@ export class UserContentBodyList extends React.PureComponent {
     }
 
     render(){
-        return <div className="static-content-list" children={this.contentList()} />;
+        return <div className="static-content-list">{ this.contentList() }</div>;
     }
 
 }
@@ -199,20 +207,18 @@ export class BasicStaticSectionBody extends React.PureComponent {
         var { content, filetype, element, markdownCompilerOptions } = this.props,
             passedProps = _.omit(this.props, 'content', 'filetype', 'children', 'element', 'markdownCompilerOptions');
 
-        if (filetype === 'md'){
+        if (filetype === 'md' && typeof content === 'string'){
             return React.createElement(element, passedProps, compiler(content, markdownCompilerOptions || undefined) );
         } else if (filetype === 'html' && typeof content === 'string'){
             return React.createElement(element, passedProps, object.htmlToJSX(content));
+        } else if (filetype === 'jsx' && typeof content === 'string'){
+            return replacePlaceholderString(content.trim());
         } else if (filetype === 'txt' && typeof content === 'string' && content.slice(0,12) === 'placeholder:'){
-            return replacePlaceholderString(content.slice(12).trim().replace(/\s/g,''));
+            // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
+            return replacePlaceholderString(content.slice(12).trim());
         } else {
-            return React.createElement(element, passedProps, content );
+            return React.createElement(element, passedProps, content);
         }
     }
 
-}
-
-
-export function isHiGlassDisplay(context){
-    return Array.isArray(context['@type']) && context['@type'].indexOf('HiglassViewConfig') > -1;
 }

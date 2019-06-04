@@ -4,7 +4,7 @@
         "description": "GM12878 prepared for Hi-C, batch 1",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
-        "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
+        "cell_culture_details": ["131106bc-8535-4448-903e-854af460b212"],
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
         "award": "Test-4DN",
@@ -18,7 +18,7 @@
         "description": "GM12878 prepared for Hi-C, batch 1",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
-        "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
+        "cell_culture_details": ["131106bc-8535-4448-903e-854af460b212"],
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
         "award": "Test-4DN",
@@ -33,13 +33,17 @@
         "description": "GM12878 prepared for Hi-C, batch 1",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
-        "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
+        "cell_culture_details": ["131106bc-8535-4448-903e-854af460b212"],
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
         "award": "Test-4DN",
         "badges": [{
             "badge": "e39777c6-8fe4-4424-bac1-40406342e026",
-            "message": "Biosample is missing a morphology image"
+            "messages": [
+                "Biosample is missing a morphology image",
+                "Biosample is missing culture duration",
+                "Biosample is missing passage number"
+            ]
         }],
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
@@ -51,7 +55,7 @@
         "description": "GM12878 prepared for Hi-C, batch 2",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
-        "cell_culture_details": "131112bc-8535-4448-903e-854af460b212",
+        "cell_culture_details": ["131112bc-8535-4448-903e-854af460b212"],
         "modifications": ["431106bc-8535-4448-903e-854af460b265", "431106bc-8535-4448-903e-854af460b276"],
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b", "686b362f-4eb6-4a9c-8173-3ab267307a8d"],
         "award": "Test-4DN",
@@ -109,11 +113,11 @@
         "status": "in review by lab",
         "accession": "4DNBS1234444",
         "badges": [
-                    {
-                      "badge": "dee03a23-49e5-4c33-afab-9ec90d65faf3",
-                      "message": "test badge message"
-                    }
-                  ]
+            {
+                "badge": "dee03a23-49e5-4c33-afab-9ec90d65faf3",
+                "messages": ["test badge message 1", "test badge message 2"]
+            }
+        ]
     },
     {
         "uuid": "234511bc-8535-4448-903e-854af460b255",
@@ -148,6 +152,7 @@
         "uuid": "111112bc-1111-4448-903e-854af460b123",
         "description": "H1 test prep",
         "biosource": ["331111bc-8535-4448-903e-854ab460b254"],
+        "cell_culture_details": ["476aa17a-fb54-4978-a23d-d173d130d50c"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",

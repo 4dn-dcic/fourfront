@@ -33,7 +33,7 @@ describe('Testing browse.js for experiment set browser', function() {
         var { Provider, connect } = require('react-redux');
         Browse = require('../browse/BrowseView').default;
         context = require('../testdata/browse/context');
-        store = require('../../store');
+        store = require('../../store').store;
 
         var dispatch_vals = {
             'href' : "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN",

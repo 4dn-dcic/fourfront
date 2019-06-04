@@ -5,10 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { isServerSide } from './misc';
-import * as d3 from 'd3';
-import * as vizUtil from './../viz/utilities';
+import * as d3 from 'd3'; // TODO change to only import d3.select and d3.interpolateNumber
 
-/** 
+/**
  * Most of these functions should not be run from a component until it has mounted as they do not work
  * on serverside (depend on window, document, DOM, etc.)
  */
@@ -47,10 +46,10 @@ export function getElementOffsetFine(el) {
     return { left: x, top: y };
 }
 
-/** 
+/**
  * Shorten a string to a maximum character length, splitting on word break (or other supplied character).
  * Optionally append an ellipsis.
- * 
+ *
  * @param {string}  originalText
  * @param {number}  maxChars
  * @param {boolean} [addEllipsis=true]
@@ -67,7 +66,7 @@ export const shortenString = memoize(function(originalText, maxChars = 28, addEl
         if (returnStrLen + nextLength <= maxChars){
             returnArr.push(textArr.shift());
             returnStrLen += nextLength;
-            
+
         } else break;
     }
     if (textArr.length === 0) return originalText;
@@ -183,7 +182,7 @@ export const textHeight = memoize(function(
     if (containerElement && containerElement.parentElement){
         containerElement.parentElement.appendChild(contElem);
         height = contElem.clientHeight;
-        containerElement.parentElement.removeChild(contElem);    
+        containerElement.parentElement.removeChild(contElem);
     } else {
         document.body.appendChild(contElem);
         height = contElem.clientHeight;
@@ -231,20 +230,11 @@ export const textContentWidth = memoize(function(
     return textLineWidth;
 });
 
-
-export function verticalCenterOffset(innerElem, extraHeight = 0, outerElem = null){
-    if (!outerElem) {
-        outerElem = innerElem.offsetParent || innerElem.parentElement;
-    }
-    if (!outerElem || !innerElem.offsetHeight || !outerElem.offsetHeight) return 0;
-    return ((outerElem.offsetHeight + extraHeight) - innerElem.offsetHeight) / 2;
-}
-
 /**
  * Grabs the outer-most scrolling container for the page, either <body> or <html>.
  * Needed because the outer-most scrolling container differs between Google Chrome (which use `document.body`, aka <body>)
  * and Mozilla Firefox & MS Edge (which use `document.documentElement`, aka <html>).
- * 
+ *
  * @returns {HTMLElement}
  */
 export function getScrollingOuterElement(){
@@ -325,12 +315,12 @@ export function animateScrollTo(to, duration = 750, offsetBeforeTarget = 112, ca
 export function toggleBodyClass(className, toggleTo = null, bodyElement = null){
 
     bodyElement = bodyElement || (window && document && document.body) || null;
-    
+
     var allClasses = (Array.isArray(className) ? className : (typeof className === 'string' ? allClasses = className.split(' ') : null ));
     if (!className) {
         throw new Error('Invalid className supplied. Must be a string or array.');
     }
-    
+
     if (bodyElement){
         var bodyClasses = bodyElement.className.split(' ');
 
@@ -353,56 +343,10 @@ export function toggleBodyClass(className, toggleTo = null, bodyElement = null){
                 }
             }
         });
-        
+
         bodyElement.className = bodyClasses.length > 0 ? (bodyClasses.length === 1 ? bodyClasses[0] : bodyClasses.join(' ')) : null;
     }
 
-}
-
-
-
-
-/**
- * Pass 'windowWidth' through props down from BodyElement for this element to update.
- *
- * @deprecated
- * We should know what our width is; try to set/determine it off of `windowWidth` and `responsiveGridState(windowWidth)`
- * where/when possible to avoid needing to query the DOM for width.
- */
-export class WidthProvider extends React.Component {
-
-    static propTypes = {
-        'windowWidth' : PropTypes.number.isRequired
-    };
-
-    constructor(props){
-        super(props);
-        this.state = {
-            'mounted' : false
-        };
-    }
-
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
-    }
-
-    render(){
-        var domWrapperBlock = (this.state.mounted && this.refs && this.refs.wrapper) || null,
-            width = null,
-            passProps = {};
-
-        if (domWrapperBlock){
-            width = domWrapperBlock.offsetWidth;
-        }
-
-        if (width) {
-            passProps.width = width;
-        } else if (this.props.fallbackWidth){
-            passProps.width = this.props.fallbackWidth;
-        }
-
-        return <div ref="wrapper" children={React.cloneElement(this.props.children, passProps)} />;
-    }
 }
 
 

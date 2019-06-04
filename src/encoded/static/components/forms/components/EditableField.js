@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import * as store from './../../../store';
+import { store } from './../../../store';
 import { ajax, console, object, isServerSide, navigate } from './../../util';
 
 
@@ -165,7 +165,6 @@ export class EditableField extends React.PureComponent {
         this.fieldSchema = this.fieldSchema.bind(this);
         this.validationPattern = this.validationPattern.bind(this);
         this.validationFeedbackMessage = this.validationFeedbackMessage.bind(this);
-        this.fetch = this.fetch.bind(this);
         this.save = this.save.bind(this);
         this.enterEditState = this.enterEditState.bind(this);
         this.cancelEditState = this.cancelEditState.bind(this);
@@ -246,15 +245,15 @@ export class EditableField extends React.PureComponent {
             newProps.pattern !== this.props.pattern ||
             newProps.required !== this.props.required
         ){
-            newState.validationPattern = newProps.pattern || this.validationPattern(newProps.schemas || newContext.schemas);
-            newState.required = newProps.required || this.isRequired(newProps.schemas || newContext.schemas);
+            newState.validationPattern = newProps.pattern || this.validationPattern(newProps.schemas);
+            newState.required = newProps.required || this.isRequired(newProps.schemas);
             // Also, update state.valid if in editing mode
             if (this.props.parent.state && this.props.parent.state.currentlyEditing && this.inputElementRef.current){
                 stateChangeCallback = this.handleChange;
             }
         }
         // Apply state edits, if any
-        if (Object.keys(newState).length > 0) this.setState(newState, stateChangeCallback);
+        if (_.keys(newState).length > 0) this.setState(newState, stateChangeCallback);
     }
 
     componentDidUpdate(oldProps, oldState){
@@ -348,9 +347,9 @@ export class EditableField extends React.PureComponent {
      * @return {RegExp|null} Pattern to input validate against.
      */
     validationPattern(schemas = this.props.schemas){
-        var { labelID, fieldType, debug } = this.props;
+        const { labelID, fieldType, debug } = this.props;
 
-        function getPatternFromSchema(){ // TODO: Maybe move to util/Schemas.js
+        const getPatternFromSchema = () => { // TODO: Maybe move to util/Schemas.js
             // We do not handle nested, linked or embedded properties for now.
             if (!schemas || !labelID || labelID.indexOf('.') > -1) return null;
 
@@ -359,13 +358,13 @@ export class EditableField extends React.PureComponent {
             if (!fieldSchema || typeof fieldSchema.pattern === 'undefined') return null; // No pattern set.
             if (debug) console.info('Obtained EditableField validationPattern from schema (' + [this.objectType(), 'properties', labelID].join('.') + ')');
             return fieldSchema.pattern;
-        }
+        };
 
-        var schemaDerivedPattern = getPatternFromSchema.call(this);
+        var schemaDerivedPattern = getPatternFromSchema();
         if (schemaDerivedPattern) return schemaDerivedPattern;
 
         // Fallback to generic pattern, if applicable for props.fieldType.
-        if (fieldType === 'phone') return object.itemUtil.User.localRegexValidation.phone;
+        if      (fieldType === 'phone') return object.itemUtil.User.localRegexValidation.phone;
         else if (fieldType === 'email') return object.itemUtil.User.localRegexValidation.email;
         else return null;
     }
@@ -411,18 +410,10 @@ export class EditableField extends React.PureComponent {
         }
     }
 
-    fetch(){
-        var { endpoint, labelID, context } = this.props;
-        ajax.load(endpoint || context['@id'], (res)=>{
-            var value = object.getNestedProperty(res, labelID);
-            this.setState({ value, 'savedValue' : value });
-        }, 'GET');
-    }
-
     save(successCallback = null, errorCallback = null){
-        var { labelID, endpoint, context, parent } = this.props;
+        const { labelID, endpoint, context, parent } = this.props;
 
-        var errorFallback = (res) => {
+        const errorFallback = (res) => {
             // ToDo display (bigger?) errors
             console.error("Error: ", res);
             this.setState({ 'serverErrors' : res.errors, 'serverErrorsMessage' : res.description, 'loading' : false }, errorCallback);
@@ -430,17 +421,28 @@ export class EditableField extends React.PureComponent {
         };
 
         this.setState({ 'loading' : true }, ()=>{
-            var value       = this.state.value,
-                patchData   = object.generateSparseNestedProperty(labelID, value),
-                timestamp   = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
+            const value = this.state.value;
+            const timestamp   = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
 
-            ajax.load( (endpoint || object.itemUtil.atId(context) ) + '?ts=' + timestamp, (r) => {
+            let ajaxEndpoint = (endpoint || object.itemUtil.atId(context) ) + '?ts=' + timestamp;
+            let patchData = null;
+
+            if (value === ''){ // Send delete fields request instd of normal patch
+                ajaxEndpoint += '&delete_fields=' + labelID;
+                patchData = object.generateSparseNestedProperty(labelID, undefined);
+            } else {
+                patchData = object.generateSparseNestedProperty(labelID, value);
+            }
+
+            ajax.load(ajaxEndpoint, (r) => {
                 console.info('EditableField Save Result:', r);
+
                 if (r.status !== 'success') return errorFallback(r);
 
                 var nextContext     = _.clone(context),
-                    insertSuccess   = object.deepExtend(nextContext, patchData);
-                if (insertSuccess){
+                    extendSuccess   = object.deepExtend(nextContext, patchData);
+
+                if (extendSuccess){
                     this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
                         var unsubscribe = store.subscribe(()=>{
                             unsubscribe();
@@ -460,7 +462,6 @@ export class EditableField extends React.PureComponent {
                     // Couldn't insert into current context, refetch from server :s.
                     console.warn("Couldn't update current context, fetching from server.");
                     navigate('', {'inPlace':true});
-                    // ToDo : ...navigate(inPlace)...
                 }
 
             }, 'PATCH', errorFallback, JSON.stringify(patchData));
@@ -474,12 +475,15 @@ export class EditableField extends React.PureComponent {
     }
 
     cancelEditState(e){
+        var parent = this.props.parent;
         e.preventDefault();
-        if (!this.props.parent.state || !this.props.parent.state.currentlyEditing) {
+        if (!parent.state || !parent.state.currentlyEditing) {
             throw new Error('No state was set on parent.');
         }
-        this.setState({ value : this.state.savedValue, valid : null, validationMessage : null });
-        this.props.parent.setState({ currentlyEditing : null });
+        this.setState(function({ savedValue }){
+            return { 'value' : savedValue, 'valid' : null, 'validationMessage' : null };
+        });
+        parent.setState({ 'currentlyEditing' : null });
     }
 
     saveEditState(e){

@@ -33,7 +33,6 @@
         "description": {
             "title": "Description",
             "type": "string",
-            "default": "",
             "formInput": "textarea"
         },
         "access_key_id": {

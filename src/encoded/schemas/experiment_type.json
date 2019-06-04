@@ -37,6 +37,7 @@
             "lookup": 20
         },
         "experiment_name": {
+            "title": "Experiment Name",
             "description": "DON'T SUBMIT, auto-generated",
             "type": "string",
             "pattern": "^[a-z0-9\\-]+$",
@@ -64,14 +65,15 @@
             "suggested_enum": [
                 "Linear DNA Enrichment",
                 "3C via Ligation",
-                "Ligation-free Multi-fragment 3C",
+                "Ligation-free 3C",
                 "RNA Quantification",
                 "RNA-DNA Proximity Capture",
-                "Fluorescence Localization"
+                "Fluorescence Localization",
+                "Electron Microscopy"
             ]
         },
         "assay_subclassification": {
-            "title": "Assay Sub-classification",
+            "title": "Assay Purpose",
             "description": "Sub-classification of assay based on what is measured",
             "type": "string",
             "lookup": 120,
@@ -87,9 +89,13 @@
                 "DNA-DNA Pairwise Interactions of Enriched Regions",
                 "DNA-DNA Pairwise Interactions of Selected Loci",
                 "RNA-DNA Multi-way Interactions",
+                "RNA-DNA Pairwise Interactions",
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
-                "Single Particle Tracking"
+                "Single Particle Tracking",
+                "Context-dependent Reporter Expression",
+                "Scanning Electron Microscopy",
+                "Transmission Electron Microscopy"
             ]
         },
         "other_tags": {
@@ -106,7 +112,10 @@
                     "RNA-DNA",
                     "DNA-Protein",
                     "Single Cell",
-                    "Multi-contact"
+                    "Multi-contact",
+                    "Pairwise",
+                    "1D",
+                    "3D"
                 ]
             }
         },
@@ -134,6 +143,17 @@
                 "description": "Publication metadata",
                 "type": "string",
                 "linkTo": "Publication"
+            }
+        },
+        "valid_item_types": {
+            "title": "Valid Item Types",
+            "description": "Types of items that can utilize this experiment type",
+            "type": "array",
+            "permission": "import_items",
+            "items": {
+                "title": "Item Type",
+                "description": "Item class name (e.g. ExperimentHiC)",
+                "type": "string"
             }
         }
     },

@@ -4,10 +4,10 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as vizUtil from './../utilities';
 import { Legend } from './../components';
-import { console, object, isServerSide, expFxn, Filters, Schemas, layout, analytics } from './../../util';
+import { console, Filters, Schemas, layout, analytics } from './../../util';
 import { Toggle } from './../../forms/components';
 import { boundActions } from './ViewContainer';
 
@@ -40,7 +40,7 @@ export class UIControlsWrapper extends React.PureComponent {
             'both'              : 'All & Selected'
         },
         'availableFields_XAxis' : [
-            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type.display_title' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
@@ -51,7 +51,7 @@ export class UIControlsWrapper extends React.PureComponent {
         ],
         'availableFields_Subdivision' : [
             { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
-            { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+            { title : "Experiment Type", field : 'experiments_in_set.experiment_type.display_title' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
@@ -66,7 +66,6 @@ export class UIControlsWrapper extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected.bind(this);
         this.titleMap = this.titleMap.bind(this);
         this.adjustedChildChart = this.adjustedChildChart.bind(this);
@@ -78,7 +77,6 @@ export class UIControlsWrapper extends React.PureComponent {
         this.renderDropDownMenuItems = this.renderDropDownMenuItems.bind(this);
         this.handleDropDownToggle = this.handleDropDownToggle.bind(this);
         this.renderShowTypeDropdown = this.renderShowTypeDropdown.bind(this);
-        this.render = this.render.bind(this);
 
         this.state = {
             'aggregateType' : 'experiment_sets',
@@ -87,7 +85,8 @@ export class UIControlsWrapper extends React.PureComponent {
         };
     }
 
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
+        // TODO: Refactor into getDerivedStateFromProps
         if (
             // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
             (
@@ -364,7 +363,7 @@ export class UIControlsWrapper extends React.PureComponent {
         return (
             <div className="bar-plot-chart-controls-wrapper">
                 <div className="overlay" style={{
-                    width  : (windowGridSize !== 'xs' ? (layout.gridContainerWidth() * (9/12) - 15) : null)
+                    width  : (windowGridSize !== 'xs' ? (layout.gridContainerWidth(windowWidth) * (9/12) - 15) : null)
                 }}>
 
                     <div className="y-axis-top-label" style={{
@@ -408,7 +407,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                 <div className="col-xs-3" style={{ width : 51 }}>
                                     <h6 className="dropdown-heading">X Axis</h6>
                                 </div>
-                                <div className="col-xs-9 pull-right" style={{ width : (layout.gridContainerWidth() * (windowGridSize !== 'xs' ? 3/12 : 1)) + 5 - 52 }}>
+                                <div className="col-xs-9 pull-right" style={{ "width" : (layout.gridContainerWidth(windowWidth) * (windowGridSize !== 'xs' ? 0.25 : 1)) + 5 - 52 }}>
                                     <DropdownButton
                                         id="select-barplot-field-0"
                                         onSelect={this.handleFieldSelect.bind(this, 0)}
@@ -440,7 +439,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                     />
                                 </div>
                             </div>
-                            
+
                         </div>
 
                     </div>

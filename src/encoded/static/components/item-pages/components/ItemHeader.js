@@ -4,9 +4,8 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'querystring';
-import { console, DateUtility, Filters, Schemas, object } from './../../util';
+import { console, DateUtility, Schemas, object } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
-import { itemUtil } from '../../util/object';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -17,7 +16,7 @@ import { itemUtil } from '../../util/object';
  * @module
  * @type {Object}
  * @example
- * <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
+ * <ItemHeader.Wrapper className="something-or-other" context={this.props.context} href={this.props.href}>
  *     <ItemHeader.TopRow>
  *         <span data-tip="Experiment Type" className="inline-block">
  *             { this.props.context.experimentset_type }
@@ -46,9 +45,16 @@ import { itemUtil } from '../../util/object';
  */
 export class TopRow extends React.Component {
 
+    static defaultProps = {
+        'itemActionsDescriptions': {
+            'edit'      : 'Edit the properties of this Item.',
+            'create'    : 'Create a blank new Item of the same type.',
+            'clone'     : 'Create and edit a copy of this Item.'
+        },
+    };
+
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.parsedStatus = this.parsedStatus.bind(this);
         this.viewJSONButton = this.viewJSONButton.bind(this);
         this.itemActions = this.itemActions.bind(this);
@@ -58,27 +64,22 @@ export class TopRow extends React.Component {
 
     /**
      * Renders Item status and color indicator.
-     *
-     * @memberof module:item-pages/components.ItemHeader.TopRow
-     * @private
-     * @instance
+     * Status colors are set via CSS (layout.scss) dependent on the `data-status` attribute.
      */
     parsedStatus(){
-        if (!('status' in this.props.context)) return <div></div>;
+        const { context } = this.props;
+        if (!context || !context.status) return <div/>;
 
-        // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
-            <div className="indicator-item item-status"
-                data-status={ this.props.context.status.toLowerCase() }
-                data-tip="Current Status" children={this.props.context.status} />
+            <div className="indicator-item item-status" data-status={ context.status.toLowerCase() } data-tip="Current Status">
+                { context.status }
+            </div>
         );
     }
+
     /**
      * Renders view JSON button.
      *
-     * @memberof module:item-pages/components.ItemHeader.TopRow
-     * @private
-     * @instance
      * @returns {Element|null} <span> element, or null if no props.href.
      */
     viewJSONButton(){
@@ -89,12 +90,9 @@ export class TopRow extends React.Component {
         var viewUrl = url.format(urlParts);
         return (
             <div className="indicator-item view-ajax-button">
-                <i className="icon icon-fw icon-file-code-o"/> <a 
-                    href={viewUrl}
-                    className="inline-block"
-                    target="_blank"
-                    data-tip="Open raw JSON in new window"
-                    onClick={(e)=>{
+                <i className="icon icon-fw icon-file-code-o"/> <a href={viewUrl}
+                    className="inline-block" target="_blank" rel="noreferrer noopener"
+                    data-tip="Open raw JSON in new window" onClick={(e)=>{
                         if (window && window.open){
                             e.preventDefault();
                             window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
@@ -105,64 +103,83 @@ export class TopRow extends React.Component {
             </div>
         );
     }
-    /**
-     * Renders Item actions for admins and submitter.
-     *
-     * @memberof module:item-pages/components.ItemHeader.TopRow
-     * @private
-     * @instance
-     */
-    itemActions(){
-        var actions = this.props.context && this.props.context.actions;
-        if (!Array.isArray(actions) || actions.length === 0) return null;
-        var descriptions = {
-            'edit'      : 'Edit the properties of this Item.',
-            'create'    : 'Create a blank new Item of the same type.',
-            'clone'     : 'Create and edit a copy of this Item.'
-        };
 
-        return _.map(actions, function(action, i){
-            return (
-                <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i} data-tip={descriptions[action.name]}>
-                    <a href={action.href}>{ action.title }</a>
-                </div>
-            );
-        });
+    /** Renders Item actions for admins and submitter. */
+    itemActions(){
+        const { itemActionsDescriptions, context } = this.props;
+        const actions = context && context.actions;
+
+        if (!Array.isArray(actions) || actions.length === 0) return null;
+
+        return _.map(
+            _.filter(
+                actions, // Only keep actions that are defined in the descriptions
+                function(action){
+                    return typeof itemActionsDescriptions[action.name] !== 'undefined';
+                }
+            ),
+            function(action, i){ // For each action, generate a clickable element.
+                return (
+                    <div className="indicator-item action-button" data-action={action.name || null} key={action.name || i}>
+                        <a href={action.href} data-tip={itemActionsDescriptions[action.name]}>{ action.title }</a>
+                    </div>
+                );
+            }
+        );
     }
 
+    /**
+     * Renders `props.typeInfo` if any passed in, otherwise attempts to render
+     * out the abstract or parent type of what this Item is, if one exists that isn't
+     * simply 'Item'.
+     */
     typeInfoLabel(){
-        if (this.props.typeInfo){
-            return <span className="type-info inline-block" data-tip={(this.props.typeInfo && this.props.typeInfo.description) || null}>{ this.props.typeInfo && this.props.typeInfo.title }</span>;
+        const { typeInfo, context, schemas } = this.props;
+        if (typeInfo && typeInfo.title){
+            return (
+                <span className="type-info inline-block" data-tip={(typeInfo && typeInfo.description) || null}>
+                    { typeInfo && typeInfo.title }
+                </span>
+            );
         }
-        var baseItemType = Schemas.getBaseItemType(this.props.context);
-        var itemType = Schemas.getItemType(this.props.context);
+
+        var baseItemType = Schemas.getBaseItemType(context);
+        var itemType = Schemas.getItemType(context);
+
         if (itemType === baseItemType) return null;
 
-        var baseTypeInfo = Schemas.getSchemaForItemType(baseItemType, this.props.schemas || null);
-        var title = (baseTypeInfo && baseTypeInfo.title) || baseItemType;
-        var detailTypeInfo = Schemas.getSchemaForItemType(itemType, this.props.schemas || null);
-        var detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
+        const baseTypeInfo = Schemas.getSchemaForItemType(baseItemType, schemas || null);
+        const title = (baseTypeInfo && baseTypeInfo.title) || baseItemType;
+        const detailTypeInfo = Schemas.getSchemaForItemType(itemType, schemas || null);
+        const detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
 
-        return <span className="type-info inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>{ title }</span>;
+        return (
+            <span className="type-info inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>
+                { title }
+            </span>
+        );
     }
 
     /**
      * Wraps props.children in a <div> element.
-     *
-     * @memberof module:item-pages/components.ItemHeader.TopRow
-     * @private
-     * @instance
      */
     wrapChildren(){
-        if (!this.props.children) return null;
-        return React.Children.map(this.props.children, (child,i) =>
-            <div
-                className="indicator-item expset-type"
-                title={this.props.title || null}
-                key={i}
-                children={child}
-            />
-        );
+        const { children, title } = this.props;
+        if (!children) return null;
+
+        function wrap(child, idx = 0){
+            return (
+                <div className="indicator-item" title={title || null} key={child.key || idx}>
+                    { child }
+                </div>
+            );
+        }
+
+        if (Array.isArray(children)){
+            return React.Children.map(children, wrap);
+        } else {
+            return wrap(children);
+        }
     }
 
     /**
@@ -174,22 +191,25 @@ export class TopRow extends React.Component {
      * @returns {*} Div element with .row Bootstrap class and items in top-right section.
      */
     render(){
-        var typeInfo = Schemas.getSchemaForItemType(Schemas.getItemType(this.props.context), this.props.schemas || null);
-        var accessionTooltip = "Accession";
-        if (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description){
-            accessionTooltip += ': ' + typeInfo.properties.accession.description;
+        const { context, schemas } = this.props;
+
+        const typeSchema = Schemas.getSchemaForItemType(Schemas.getItemType(context), schemas || null);
+
+        let accessionTooltip = "Accession";
+        if (typeSchema && typeSchema.properties.accession && typeSchema.properties.accession.description){
+            accessionTooltip += ': ' + typeSchema.properties.accession.description;
         }
 
-        //if (accessionTooltip){
-        //    accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} />;
-        //}
         return (
             <div className="row clearfix top-row">
                 <h5 className="col-sm-5 item-label-title">
                     <div className="inner">
-                        { this.typeInfoLabel(this.props.typeInfo || null) }
-                        { this.props.context.accession ?
-                            <object.CopyWrapper value={this.props.context.accession} className="accession inline-block" data-tip={accessionTooltip} children={this.props.context.accession} wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -5 } }} />
+                        { this.typeInfoLabel() }
+                        { context.accession ?
+                            <object.CopyWrapper value={context.accession} className="accession inline-block" data-tip={accessionTooltip}
+                                wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -3 } }}>
+                                { context.accession }
+                            </object.CopyWrapper>
                         : null }
                     </div>
                 </h5>
@@ -278,7 +298,7 @@ export class BottomRow extends React.PureComponent {
     render(){
         var { context, children } = this.props,
             dateToUse = null;
-    
+
         if (typeof context.date_modified === 'string'){
             dateToUse = 'date_modified';
         } else if (typeof context.date_created === 'string'){
@@ -298,9 +318,6 @@ export class BottomRow extends React.PureComponent {
  * Use this to wrap ItemHeader.TopRow, .MiddleRow, and .BottomRow to create a complete ItemHeader.
  * Passes own props.context and props.href down to children.
  *
- * @memberof module:item-pages/components.ItemHeader
- * @namespace
- * @type {Component}
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  * @prop {string} href - Location from Redux store or '@id' of current Item. Used for View JSON button.
  * @prop {Object} schemas - Pass from app.state. Used for tooltips and such.
@@ -312,20 +329,23 @@ export class Wrapper extends React.PureComponent {
         this.adjustChildren = this.adjustChildren.bind(this);
     }
 
+    /** Passes down own props to all children */
     adjustChildren(){
         var { context, href, schemas, children, windowWidth } = this.props;
         if (!context) return children;
+        // We shouldn't ever receive a single Child.
         return React.Children.map(children, (child)=>
-            React.cloneElement(child, {
-                context, href, windowWidth,
-                'schemas': schemas || (Schemas.get && Schemas.get()) || null
-            })
+            React.cloneElement(child, { context, href, windowWidth, schemas })
         );
     }
 
     render(){
-        return <div className={"item-view-header " + (this.props.className || '') + (!this.props.context.description ? ' no-description' : '')}>{ this.adjustChildren() }</div>;
+        const { context, className } = this.props;
+        return (
+            <div className={"item-view-header " + (className || '') + (!context.description ? ' no-description' : '')}>
+                { this.adjustChildren() }
+            </div>
+        );
     }
 
 }
-

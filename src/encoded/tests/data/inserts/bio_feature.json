@@ -1,0 +1,40 @@
+[
+    {
+        "description": "A gene feature",
+        "preferred_label": "MFG",
+        "feature_type": "0231da78-1adc-4b8a-89b9-4f91908412a3",
+        "uuid": "a8ab8bca-4840-41b7-88d7-04cc19a54657",
+        "genome_location": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "relevant_genes": ["3f3496f7-31bf-429f-8da7-7f1fdf840dcc"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "aliases": ["dcic:test_bio1"],
+        "status": "in review by lab",
+        "organism_name": "human"
+    },
+    {
+        "description": "A protein feature",
+        "feature_type": "91f427e6-5246-4992-8123-b4f8fa9eef01",
+        "uuid": "5a5b6f55-0b54-441c-86bf-292d41e443a0",
+        "relevant_genes": ["d5ee3bf3-63b0-4032-b133-314173b3cc4d"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "aliases": ["dcic:test_bio2"],
+        "status": "in review by lab",
+        "organism_name": "human"
+    },
+    {
+        "description": "A TAD feature",
+        "feature_type": "41b7a2c5-f2d9-46b4-a49d-51502fe61bb3",
+        "genome_location": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "uuid": "67c54a0d-f27c-43c7-b36c-d51dd52f7073",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "aliases": ["dcic:test_bio3"],
+        "status": "in review by lab",
+        "organism_name": "mouse"
+    }
+]

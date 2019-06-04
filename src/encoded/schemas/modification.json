@@ -26,7 +26,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "description": {
             "title": "Description",
@@ -101,9 +101,13 @@
         "target_of_mod": {
             "title": "Target of Modification",
             "description": "The gene or genomic region that is targeted by the modification.",
-            "type": "string",
+            "type": "array",
             "lookup": 70,
-            "linkTo": "Target"
+            "items": {
+                "title": "Feature",
+                "type": "string",
+                "linkTo": "BioFeature"
+            }
         },
         "url": {
             "title": "URL",

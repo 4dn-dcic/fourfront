@@ -1,14 +1,13 @@
 'use strict';
 
 import React from 'react';
-import { content_views } from './../globals';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
 import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, WorkflowDetailPane } from './components';
 import DefaultItemView from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { commonGraphPropsFromProps, parseAnalysisStepsMixin, doValidAnalysisStepsExist, WorkflowGraphSection } from './WorkflowView';
+import Graph from './../viz/Workflow';
+import { commonGraphPropsFromProps, doValidAnalysisStepsExist, WorkflowGraphSection } from './WorkflowView';
 
 // Test/Debug Data
 //import { WFR_JSON } from './../testdata/traced_workflow_runs/WorkflowRunSBG-4DNWF06BPEF2';
@@ -30,7 +29,7 @@ export function mapEmbeddedFilesToStepRunDataIDs(nodes, uuidFileMap){
     return _.map(nodes, function(n){
         if (!n.meta || !n.meta.run_data || !n.meta.run_data.file) return n;
         if (typeof n.meta.run_data.file !== 'string') return n;
-        
+
         var fileUUID;
         try {
             fileUUID = object.assertUUID(n.meta.run_data.file);
@@ -82,7 +81,7 @@ export function allFilesForWorkflowRunMappedByUUID(item){
                 return [
                     file.uuid,                                  // Key
                     _.extend({}, file, {                        // Value
-                        '@id' : object.itemUtil.atId(file)      // We add in '@id' since at one point this wasn't returned by back-end in lieu of link_id ('/' replaced by '~'). We keep for now just for heck of it.
+                        '@id' : object.itemUtil.atId(file)      // Outdated way to get @id. Keep for now just for heck of it.
                     })
                 ];
             }
@@ -190,7 +189,3 @@ class GraphSection extends WorkflowGraphSection {
     }
 
 }
-
-content_views.register(WorkflowRunView, 'WorkflowRun');
-content_views.register(WorkflowRunView, 'WorkflowRunSbg');
-content_views.register(WorkflowRunView, 'WorkflowRunAwsem');

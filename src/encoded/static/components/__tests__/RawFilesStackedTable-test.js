@@ -49,13 +49,7 @@ describe('Testing RawFilesStackedTable', function() {
                 return (
                     <div>
                         <SelectedFilesController initiallySelectedFiles={initiallySelectedFiles} ref={this.ref}>
-                            <RawFilesStackedTable
-                                experimentArray={context.experiments_in_set}
-                                experimentSetAccession={context.accession}
-                                replicateExpsArray={context.replicate_exps}
-                                experimentSetType={context.experimentset_type}
-                                width={960}
-                            />
+                            <RawFilesStackedTable experimentSet={context} width={960} collapseLongLists={false} />
                         </SelectedFilesController>
                     </div>
                 );
@@ -81,7 +75,7 @@ describe('Testing RawFilesStackedTable', function() {
         ).toEqual(checkIfHaveHeaders);
 
         // Then ensure they're rendered.
-        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testRawFilesStackedTable, 'expset-headers');
+        var headersContainer = TestUtils.findRenderedDOMComponentWithClass(testRawFilesStackedTable, 'stacked-block-table-headers');
         var headers = headersContainer.children; // == TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
         expect(
             _.intersection(
@@ -146,7 +140,7 @@ describe('Testing RawFilesStackedTable', function() {
         var found = {
             'experiment' : false,
             'file' : false,
-            'file-pair' : false
+            'file-group' : false
         };
         var foundAll = false;
 
@@ -197,15 +191,17 @@ describe('Testing RawFilesStackedTable', function() {
 
         function getFilePairCheckboxElement(sBlock){
             if (
-                sBlock.className.split(' ').indexOf('file-pair') > -1 &&
+                sBlock.className.split(' ').indexOf('file-group') > -1 &&
                 sBlock.children[0].className.indexOf('name') !== -1 &&
                 sBlock.children[0].children[1].className.indexOf('name-title') !== -1 &&
-                sBlock.children[0].children[1].children[0].className.indexOf('checkbox') !== -1 &&
-                sBlock.children[0].children[1].children[0].children[0].children[0].getAttribute('type') === 'checkbox'
-            ) return sBlock.children[0].children[1].children[0].children[0].children[0];
+                sBlock.children[0].children[1].children[0].className.indexOf('multiple-files-checkbox-wrapper') !== -1 &&
+                sBlock.children[0].children[1].children[0].children[0].getAttribute('type') === 'checkbox'
+            ){
+                return sBlock.children[0].children[1].children[0].children[0];
+            }
             // .s-block.file-pair (sBlock) > div.name.col-file-pair > span.name-title > .exp-table-checkbox.checkbox > label > input
             // ToDo change .children[1] to _.find or something (as well as other stuff which might differ by layout/style)
-            else return null;
+            return null;
         }
 
         var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
@@ -274,8 +270,8 @@ describe('Testing RawFilesStackedTable', function() {
             expect(selectedFilesMatchSelectedCheckboxes()).toBe(true);
         }
 
-        console.log("Initially selected files:\n", SelectedFilesController.objectToCompleteList(originalSelectedFiles));
-        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", SelectedFilesController.objectToCompleteList(testRawFilesStackedTable.ref.current.state.selectedFiles));
+        console.log("Initially selected files:\n", _.keys(originalSelectedFiles));
+        console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", _.keys(testRawFilesStackedTable.ref.current.state.selectedFiles));
 
     });
 

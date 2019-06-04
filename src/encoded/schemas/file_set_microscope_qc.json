@@ -36,8 +36,7 @@
             "title": "Description",
             "description": "A description of what files are part of the set.",
             "type": "string",
-            "lookup": 20,
-            "default": ""
+            "lookup": 20
         },
         "objective_na": {
             "title": "NA of objective",

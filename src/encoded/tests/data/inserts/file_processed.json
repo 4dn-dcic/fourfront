@@ -241,7 +241,32 @@
     "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
     "uuid":"7f9eb396-5c1a-4c5e-aebf-28ea39d6a50f",
     "notes" : "A processed file output from a workflow run.",
-    "accession": "4DNFIAAAAAA1"
+    "accession": "4DNFIAAAAAA1",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "100",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "30",
+            "tooltip": "Percent of total reads (=30)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20",
+            "tooltip": "Percent of total reads (=20)",
+            "numberType": "percent"
+        },
+        {
+            "title": "SOME COOL METRIC",
+            "value": "50",
+            "tooltip": "Percent of total reads (=50)",
+            "numberType": "percent"
+        }
+    ]
 },
 {
     "lab":"/labs/4dn-dcic-lab/",
@@ -251,7 +276,32 @@
     "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
     "uuid":"7f9eb396-5c1a-1111-aebf-28ea39d6a50f",
     "notes" : "A processed file output from a workflow run.",
-    "accession": "4DNFIAAAAAA2"
+    "accession": "4DNFIAAAAAA2",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "100",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "30",
+            "tooltip": "Percent of total reads (=30)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20",
+            "tooltip": "Percent of total reads (=20)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Trans Reads",
+            "value": "50",
+            "tooltip": "Percent of total reads (=50)",
+            "numberType": "percent"
+        }
+    ]
 },
 {
     "lab":"/labs/4dn-dcic-lab/",
@@ -263,6 +313,31 @@
     "notes" : "A processed file output from a workflow run.",
     "accession": "4DNFIAAAAAA3",
     "quality_metric": "131106bc-8535-4448-903e-854abbbbbbbb",
+    "quality_metric_summary": [
+        {
+            "title": "Filtered Reads",
+            "value": "109380000",
+            "numberType": "integer"
+        },
+        {
+            "title": "Cis reads (>20kb)",
+            "value": "55.645",
+            "tooltip": "Percent of total reads (=60.86m)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Short cis reads",
+            "value": "20.673",
+            "tooltip": "Percent of total reads (=22.61m)",
+            "numberType": "percent"
+        },
+        {
+            "title": "Trans Reads",
+            "value": "23.682",
+            "tooltip": "Percent of total reads (=25.9m)",
+            "numberType": "percent"
+        }
+    ],
     "extra_files" : [
         {
             "file_format" : "pairs_px2",
@@ -390,7 +465,7 @@
     "file_format": "d1312212-218e-4f61-aaf0-91f226248b2c",
     "uuid": "5bca8842-0f3c-4224-9763-016caa0eec84",
     "accession": "4DNFIU37KWB1",
-    "higlass_uid": "Tjm04dCjSBCuFR0pGYEaGw",
+    "higlass_uid": "43d7eec9-70ed-4b51-8f3e-dc382a6f3af5",
     "genome_assembly": "GRCm38",
     "override_experiment_type": "Dataset",
     "file_type": "File",
@@ -541,4 +616,21 @@
     "genome_assembly": "GRCm38",
     "override_biosource_name" : "Biosource"
 }
+,{
+    "lab": "/labs/4dn-dcic-lab/",
+    "status": "uploaded",
+    "award":"/awards/1U01CA200059-01/",
+    "higlass_uid": "Mk9TiuoCRpi93LNA73GjSg",
+    "file_format": "bbafb7f8-98d5-48d7-8e75-dc40a5186e19",
+    "uuid": "9072874a-2b47-453f-9b14-4be28e609152",
+    "date_created": "2019-02-25T21:48:18.755856+00:00",
+    "accession": "4DNFIWQJFZHS",
+    "genome_assembly": "GRCh38",
+    "file_type": "conservative peaks",
+    "file_classification": "processed file",
+    "override_experiment_type": "Dataset",
+    "override_assay_info": "Assay",
+    "override_biosource_name" : "Biosource"
+}
+
 ]

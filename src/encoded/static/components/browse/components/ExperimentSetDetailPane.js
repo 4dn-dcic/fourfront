@@ -1,18 +1,15 @@
 'use strict';
 
 import React from 'react';
-import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import ReactTooltip from 'react-tooltip';
 import { Collapse } from 'react-bootstrap';
-import { RawFilesStackedTable, ProcessedFilesStackedTable } from './file-tables';
+import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
 import { FlexibleDescriptionBox } from './../../item-pages/components';
-import { expFxn, layout } from './../../util';
-import { defaultColumnBlockRenderFxn, sanitizeOutputValue } from './table-commons';
+import { expFxn, layout, object } from './../../util';
+import { SelectedFilesController } from './SelectedFilesController';
 
-
-export class ExperimentSetDetailPane extends React.Component {
+export class ExperimentSetDetailPane extends React.PureComponent {
 
     /**
      * Gets all file UUIDs from an ExperimentSet.
@@ -25,30 +22,28 @@ export class ExperimentSetDetailPane extends React.Component {
         'selectAllFilesInitially' : PropTypes.bool,
         'result' : PropTypes.object.isRequired,
         'containerWidth' : PropTypes.number,
-        'additionalDetailFields' : PropTypes.object,
         'paddingWidth' : PropTypes.number,
-        'windowWidth' : PropTypes.number.isRequired
-    }
+        'windowWidth' : PropTypes.number.isRequired,
+        'href' : PropTypes.string.isRequired,
+        'minimumWidth' : PropTypes.number
+    };
 
     static defaultProps = {
         'selectAllFilesInitially' : false,
         'paddingWidth' : 0,
-        'additionalDetailFields' : {
-            'Lab': 'lab',
-            'Publication': 'produced_in_pub',
-        }
-    }
+        'minimumWidth' : 725
+    };
 
     constructor(props){
         super(props);
-        this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), { 'trailing' : false });
-        this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), { 'trailing' : false });
+        this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), 500, { 'trailing' : false });
+        this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), 500, { 'trailing' : false });
         this.state = {
             'rawFilesOpen' : false,
             'processedFilesOpen' : false
         };
     }
-    
+
     /*
     componentDidUpdate(pastProps, pastState){
         if ((pastState.rawFilesOpen !== this.state.rawFilesOpen) || (pastState.processedFilesOpen !== this.state.processedFilesOpen)){
@@ -60,15 +55,16 @@ export class ExperimentSetDetailPane extends React.Component {
     */
 
     toggleStateProperty(property){
-        var state = {};
-        state[property] = !this.state[property];
-        this.setState(state);
+        this.setState(function(currState){
+            var nextState = {};
+            nextState[property] = !currState[property];
+            return nextState;
+        });
     }
 
     renderRawFilesSection(paddingWidth){
-        var { containerWidth } = this.props;
-        var expSet = this.props.result,
-            rawFilesCount = expFxn.fileCountFromExperimentSet(expSet, false, false);
+        const { containerWidth, result, href, minimumWidth } = this.props;
+        const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
 
         if (rawFilesCount === 0) return null;
 
@@ -76,18 +72,17 @@ export class ExperimentSetDetailPane extends React.Component {
             <div className="raw-files-table-section">
                 <h4 className="pane-section-title" onClick={this.toggleRawFilesOpen}>
                     <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw files
+                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
                 </h4>
                 <Collapse in={this.state.rawFilesOpen}>
                     <div>
-                        <RawFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile', 'selectedFilesUniqueCount')}
+                        <RawFilesStackedTable {...SelectedFilesController.pick(this.props)}
                             columnHeaders={[
-                                { columnClass: 'file-detail', title: 'File Type'},
+                                { columnClass: 'file-detail', title: 'File Type', render: renderFileTypeSummaryColumn },
                                 { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
                             ]}
-                            experimentSetAccession={expSet.accession || null} experimentArray={expSet.experiments_in_set}
-                            replicateExpsArray={expSet.replicate_exps} experimentSetType={expSet.experimentset_type}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
+                            experimentSet={result} href={href}
+                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null}
                             fadeIn={false} collapseLongLists />
                     </div>
                 </Collapse>
@@ -96,9 +91,8 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     renderProcessedFilesSection(paddingWidth){
-        var { containerWidth } = this.props;
-        var expSet = this.props.result,
-            processedFiles = expFxn.allProcessedFilesFromExperimentSet(expSet);
+        const { containerWidth, result, href, minimumWidth } = this.props;
+        const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
 
         if (!Array.isArray(processedFiles) || processedFiles.length === 0){
             return null;
@@ -111,10 +105,9 @@ export class ExperimentSetDetailPane extends React.Component {
                 </h4>
                 <Collapse in={this.state.processedFilesOpen}>
                     <div>
-                        <ProcessedFilesStackedTable {..._.pick(this.props, 'selectedFiles', 'unselectFile', 'selectFile', 'selectedFilesUniqueCount')}
-                            experimentSetAccession={expSet.accession || null} files={processedFiles}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, 665) /* account for padding of pane */) : null}
-                            fadeIn={false} collapseLongLists />
+                        <ProcessedFilesStackedTable {...SelectedFilesController.pick(this.props)}
+                            files={processedFiles} fadeIn={false} collapseLongLists href={href}
+                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null} />
                     </div>
                 </Collapse>
             </div>
@@ -122,14 +115,12 @@ export class ExperimentSetDetailPane extends React.Component {
     }
 
     render(){
-        var { additionalDetailFields, paddingWidthMap, containerWidth, windowWidth } = this.props,
-            expSet = this.props.result,
-            addInfoKeys = _.keys(additionalDetailFields),
-            paddingWidth = this.props.paddingWidth || 0;
-    
+        const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result } = this.props;
+        let usePadWidth = paddingWidth || 0;
+
         if (paddingWidthMap){
             var rgs = layout.responsiveGridState(windowWidth);
-            paddingWidth = paddingWidthMap[rgs] || paddingWidth;
+            usePadWidth = paddingWidthMap[rgs] || paddingWidth;
         }
 
         return (
@@ -140,33 +131,36 @@ export class ExperimentSetDetailPane extends React.Component {
                             {/* <label className="text-500 description-label">Description</label> */}
                             <FlexibleDescriptionBox
                                 windowWidth={windowWidth}
-                                description={ expSet.description }
+                                description={ result.description }
                                 fitTo="self"
                                 textClassName="text-normal"
                                 dimensions={null}
-                                linesOfText={Math.max(1, addInfoKeys.length)}
+                                linesOfText={2}
                             />
                         </div>
                         <div className="col-md-6 addinfo-properties-section">
-                        { _.map(addInfoKeys, function(title){
-                            var value = sanitizeOutputValue(defaultColumnBlockRenderFxn(expSet, { 'field' : additionalDetailFields[title] }, null, 0)); // Uses object.getNestedProperty, pretty prints JSX. Replaces value probe stuff.
-                            return (
-                                <div className="row expset-addinfo-row clearfix" key={title}>
-                                    <div className="col-xs-4 col-sm-3 expset-addinfo-key">
-                                        { title }:
-                                    </div>
-                                    <div className="col-xs-8 col-sm-9 expset-addinfo-val">
-                                        { value || <small><em>None</em></small> }
-                                    </div>
+                            <div className="row mb-05 clearfix">
+                                <div className="col-xs-4 col-sm-3 text-500">
+                                    Lab:
                                 </div>
-                            );
-                        })}
+                                <div className="col-xs-8 col-sm-9 expset-addinfo-val">
+                                    { object.itemUtil.generateLink(result.lab) || <small><em>None</em></small> }
+                                </div>
+                            </div>
+                            <div className="row mb-05 clearfix">
+                                <div className="col-xs-4 col-sm-3 text-500">
+                                    Publication:
+                                </div>
+                                <div className="col-xs-8 col-sm-9 expset-addinfo-val">
+                                    { object.itemUtil.generateLink(result.produced_in_pub) || <small><em>None</em></small> }
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - paddingWidth) : null }} className="files-tables-container">
-                    { this.renderRawFilesSection(paddingWidth) }
-                    { this.renderProcessedFilesSection(paddingWidth) }
+                <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - usePadWidth) : null }} className="files-tables-container">
+                    { this.renderRawFilesSection(usePadWidth) }
+                    { this.renderProcessedFilesSection(usePadWidth) }
                 </div>
             </div>
         );

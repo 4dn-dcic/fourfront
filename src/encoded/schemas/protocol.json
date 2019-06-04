@@ -33,7 +33,6 @@
             "title": "Description",
             "description": "A short description of the protocol or document",
             "type": "string",
-            "default": "",
             "lookup": 40,
             "formInput": "textarea"
         },
@@ -69,6 +68,7 @@
                "Karyotyping Authentication",
                "Differentiation Authentication",
                "Cell cycle Authentication",
+               "Ploidy Authentication",
                "Instrument Authentication",
                "Antibody Authentication",
                "Tissue Preparation Methods"

@@ -3,32 +3,47 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
-import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { FormattedInfoBlock, TabbedView, ExperimentSetTables, ExperimentSetTablesLoaded, WorkflowNodeElement,
-    SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
-import { OverViewBodyItem } from './DefaultItemView';
-import { ExperimentSetDetailPane, ResultRowColumnBlockValue } from './../browse/components';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
-import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import WorkflowRunTracingView, { filterOutParametersFromGraphData, filterOutReferenceFilesFromGraphData, FileViewGraphSection } from './WorkflowRunTracingView';
+import { console, object, Schemas, expFxn } from './../util';
+import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
+import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
+import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
 
 export default class ExperimentView extends WorkflowRunTracingView {
 
+    static procesedFilesWithViewPermissions = memoize(function(context){
+        return Array.isArray(context.processed_files) && _.filter(context.processed_files, function(rf){
+            if (rf.error && !object.itemUtil.atId(rf)) return false;
+            return true;
+        });
+    });
+
+    constructor(props){
+        super(props);
+        this.shouldGraphExist = this.shouldGraphExist.bind(this);
+        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
+
+        /**
+         * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
+         * `loadingGraphSteps`, `allRuns`, `steps`, & `mounted`
+         */
+        this.state = this.state;
+    }
+
+    shouldGraphExist(){
+        const context = this.props.context;
+        const procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
+        return !!(procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0);
+    }
+
     getFilesTabs(width){
-        var context = this.props.context;
-
-        /* In addition to built-in headers for experimentSetType defined by RawFilesStackedTable */
-        var expTableColumnHeaders = [
-        ];
-
+        const context = this.props.context;
 
         var tabs = [];
 
-        var rawFilesWithViewPermissions = Array.isArray(context.files) && context.files.length > 0 && _.filter(context.files, function(rf){
+        var rawFilesWithViewPermissions = Array.isArray(context.files) && _.filter(context.files, function(rf){
             if (rf.error && !object.itemUtil.atId(rf)) return false;
             return true;
         });
@@ -45,16 +60,17 @@ export default class ExperimentView extends WorkflowRunTracingView {
                     {...this.state}
                 />
             });
-
         }
 
-        if (Array.isArray(context.processed_files) && context.processed_files.length > 0) {
-            
+        var procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
+
+        if (procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0) {
+
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
                 content : <ProcessedFilesTableSection
-                    files={context.processed_files}
+                    files={procesedFilesWithViewPermissions}
                     width={width}
                     {..._.pick(this.props, 'context', 'schemas')}
                     {...this.state}
@@ -64,6 +80,17 @@ export default class ExperimentView extends WorkflowRunTracingView {
         }
 
         return tabs;
+    }
+
+    isNodeCurrentContext(node){
+        const context = this.props.context;
+        if (!context) return false;
+        if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
+        if (Array.isArray(node.meta.run_data.file)) return false;
+        if (typeof node.meta.run_data.file.accession !== 'string') return false;
+        if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files === 0) return false;
+        if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
+        return false;
     }
 
     /**
@@ -77,7 +104,6 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {{ tab : JSX.Element, key: string, disabled: boolean, content: JSX.Element }[]} List of JSON objects representing Tabs and their content.
      */
     getTabViewContents(){
-
         var initTabs = [],
             context = this.props.context,
             width = this.getTabViewWidth();
@@ -86,21 +112,12 @@ export default class ExperimentView extends WorkflowRunTracingView {
             initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
         }
 
-        if (Array.isArray(context.processed_files) && context.processed_files.length > 0){
+        if (this.shouldGraphExist()){
             initTabs.push(FileViewGraphSection.getTabObject(
-                _.extend({}, this.props, {
-                    'isNodeCurrentContext' : function(node){
-                        if (!context) return false;
-                        if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
-                        if (Array.isArray(node.meta.run_data.file)) return false;
-                        if (typeof node.meta.run_data.file.accession !== 'string') return false;
-                        if (!context.processed_files || !Array.isArray(context.processed_files) || context.processed_files === 0) return false;
-                        if (_.contains(_.pluck(context.processed_files, 'accession'), node.meta.run_data.file.accession)) return true;
-                        return false;
-                    }.bind(this)
-                }),
+                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isNodeCurrentContext }),
                 this.state,
-                this.handleToggleAllRuns
+                this.handleToggleAllRuns,
+                width
             ));
         }
 
@@ -113,7 +130,14 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {{ title: string|JSX.Element, description: string }} JS Object ascribing what to display.
      */
     typeInfo(){
-        return { 'title' : this.props.context.experiment_type || null, 'description' : "Type of Experiment" };
+        const experimentType = expFxn.getExperimentTypeStr(this.props.context);
+        if (experimentType){
+            return {
+                'title' : experimentType,
+                'description' : "Type of Experiment"
+            };
+        }
+        return null;
     }
 
     /**
@@ -122,27 +146,31 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
-            <OverviewHeading context={this.props.context} />
-        ];
+        return (
+            <React.Fragment>
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} />
+                <OverviewHeading context={this.props.context} />
+            </React.Fragment>
+        );
     }
 
 }
 
-globals.content_views.register(ExperimentView, 'Experiment'); // This function registers the "ExperimentView" class as the "view" for the "Experiment" @type (and sub-types, unless overriden).
 
 
 export class ExperimentMicView extends ExperimentView {
+    /** Uses OverviewHeadingMic instead of OverviewHeading as in ExperimentView. */
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow produced_in_pub={this.props.context.produced_in_pub} />,
-            <OverviewHeadingMic context={this.props.context} />
-        ];
+        return (
+            <React.Fragment>
+                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
+                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
+                <OverviewHeadingMic context={this.props.context} />
+            </React.Fragment>
+        );
     }
 }
-
-globals.content_views.register(ExperimentMicView, 'ExperimentMic'); // This function registers the "ExperimentMicView" class as the "view" for the "ExperimentMic" @type.
 
 
 
@@ -174,17 +202,17 @@ class ExperimentSetsViewOverview extends React.Component {
     static propTypes = {
         'context' : PropTypes.shape({
             'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                'link_id' : PropTypes.string.isRequired
+                '@id' : PropTypes.string.isRequired
             })).isRequired
         }).isRequired
     }
 
     render(){
-        var { context, width, windowWidth } = this.props,
+        var { context, width, windowWidth, href } = this.props,
             experimentSetUrls = _.map(context.experiment_sets || [], object.atIdFromObject);
 
         if (experimentSetUrls.length > 0){
-            return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} />;
+            return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth, href }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
         }
 
         return null;
@@ -246,7 +274,7 @@ class OverviewHeadingMic extends React.Component {
                 <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
                 <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
                 <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
-                
+
                 <OverViewBodyItem {...commonProps} property='imaging_paths' fallbackTitle="Imaging Paths"
                     wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement='div' listWrapperElement='div' singleItemClassName="block"
                     titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
@@ -260,7 +288,7 @@ class OverviewHeadingMic extends React.Component {
 
 export class RawFilesTableSection extends React.Component {
     render(){
-        var files       = this.props.files,
+        var { files, context } = this.props,
             fileUrls    = _.map(files, object.itemUtil.atId),
             columns     = _.clone(SimpleFilesTable.defaultProps.columns);
 
@@ -285,13 +313,13 @@ export class RawFilesTableSection extends React.Component {
                 'minColumnWidth' : 30
             };
         }
-        
+
         return (
             <div className="raw-files-table-section">
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
                 </h3>
-                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} columns={columns} fileUrls={fileUrls} />
+                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} columns={columns} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
             </div>
         );
     }
@@ -299,14 +327,14 @@ export class RawFilesTableSection extends React.Component {
 
 export class ProcessedFilesTableSection extends React.Component {
     render(){
-        var files       = this.props.files,
+        var { files, context } = this.props,
             fileUrls    = _.map(files, object.itemUtil.atId);
         return (
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
                 </h3>
-                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} fileUrls={fileUrls} />
+                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
             </div>
         );
     }

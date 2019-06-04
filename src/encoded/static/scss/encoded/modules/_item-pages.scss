@@ -32,6 +32,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	padding: 27px 0 16px; // 67px height
 }
 
+h3.tab-section-title {
+	line-height: 24px;
+}
+
 h4.tab-section-title {
   padding-top: 36px;
   padding-bottom: 12px;
@@ -44,10 +48,11 @@ h4.tab-section-title {
 	border-top-color: #ccc;
 }
 
+body .rc-tabs-top {
 
-.rc-tabs-top {
 	box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
-  
+	border-bottom: none;
+
 	.rc-tabs-bar.extra-style-2 {
 		border-top: none;
 		border-bottom: none;
@@ -58,7 +63,7 @@ h4.tab-section-title {
 		}
 	}
 }
-  
+
 .rc-tabs-bar {
 
 	.rc-tabs-tab {
@@ -129,10 +134,6 @@ h4.tab-section-title {
 			i.icon {
 				margin-right: 3px;
 
-				&.icon-warning, &.icon-check {
-					opacity: 0.25;
-				}
-
 				&.icon-th,
 				&.icon-list,
 				&.icon-warning,
@@ -141,11 +142,6 @@ h4.tab-section-title {
 					position: relative;
 					top: 1px;
 				}
-
-			}
-
-			span.active > i.icon {
-				opacity : 1;
 
 				&.icon-warning {
 					color: $audit-color-warning;
@@ -170,7 +166,7 @@ h4.tab-section-title {
 			display: block;
 			color: #fff;
 
-			> span.rc-tabs-tab-prev-icon, 
+			> span.rc-tabs-tab-prev-icon,
 			> span.rc-tabs-tab-next-icon {
 				top: 3px;
 			}
@@ -178,7 +174,7 @@ h4.tab-section-title {
 			&.rc-tabs-tab-btn-disabled {
 				opacity: 0.25;
 			}
-	
+
 			> .rc-tabs-tab-next-icon:before {
 				font-family: FontAwesome;
 				content: "\f105";
@@ -448,7 +444,6 @@ i.item-status-indicator-dot {
 		height : 9px;
 		display: inline-block;
 		position: relative;
-		margin-right: 7px;
 		border-radius: 50%;
 	}
 	@include statusColorStyles;
@@ -551,21 +546,16 @@ i.item-status-indicator-dot {
 		padding-bottom: 7px;
     }
 
-	.rc-tabs-tabpane {
-		overflow-x: hidden;
-		.info-area {
-			overflow: hidden;
-			border-bottom: none;
-		}
-	}
-
-	.tab-view-container {
-		.rc-tabs {
-			@media screen and (min-width: $screen-sm-min){
-				//margin-top: -17px;
+	.rc-tabs-content {
+		.rc-tabs-tabpane {
+			overflow-x: hidden;
+			.info-area {
+				overflow: hidden;
+				border-bottom: none;
 			}
 		}
 	}
+
 
     .item-info-area {
         margin-bottom: 20px;
@@ -573,6 +563,12 @@ i.item-status-indicator-dot {
     }
 
 }
+
+
+
+/**********************************************************
+		     		Detail Tab
+**********************************************************/
 
 .item-page-detail {
 
@@ -1032,8 +1028,6 @@ $download-button-width : 100px;
 }
 
 
-
-
 /**********************************************************
 				Formatted Info Panel/Block
 **********************************************************/
@@ -1145,7 +1139,7 @@ $download-button-width : 100px;
 				opacity: 0.5;
 			}
 
-			div.correspondence { 
+			div.correspondence {
 				> ol, > ul {
 					padding-left: 25px;
 					> li.contact-person {
@@ -1212,6 +1206,49 @@ $download-button-width : 100px;
 }
 
 
+/**********************************************************
+		     		Badges Tab View
+**********************************************************/
+
+$badge-item-min-height: 90px;
+
+.rc-tabs {
+
+	.badge-classification-group {
+		padding-top: 5px;
+		margin-bottom: 30px;
+
+		.badge-item {
+			padding-top: 15px;
+			padding-bottom: 15px;
+			min-height: $badge-item-min-height;
+
+			&:not(:last-child){
+				border-bottom: 1px solid #ddd;
+			}
+
+			.icon-col {
+				.icon-container > img {
+					max-width: 100%;
+					max-height: $badge-item-min-height;
+				}
+			}
+
+			.title-col {
+				display: flex;
+				align-items: center;
+
+				.messages-list {
+					padding-left: 32px;
+				}
+
+			}
+
+		}
+
+	}
+
+}
 
 
 /**********************************************************
@@ -1224,6 +1261,14 @@ $download-button-width : 100px;
 
 	display: flex;
 	flex-direction: row;
+
+	/** Keep section above padding/margins of HiGlassComponent **/
+	position: relative;
+	z-index: 5;
+  
+	&.right-align {
+		flex-direction: row-reverse;
+	}
 
 	> .description {
 		flex: 1;
@@ -1250,6 +1295,7 @@ $download-button-width : 100px;
 
 	.overview-blocks-header {
 		&.with-background {
+
 			background: #fbfbfb;
 			padding-left: 16px;
 			padding-right: 16px;
@@ -1260,6 +1306,14 @@ $download-button-width : 100px;
 			> .inner > .overview-blocks {
 				padding-bottom: 10px;
 			}
+
+			/** Cases when markdown parses out a single <span> instead of a <p> (when 1 markdown line) **/
+			> .inner > .static-section-header > div > span:only-child {
+				/* Imitate a <p> */
+				display: block;
+				margin-bottom: 10px;
+			}
+
 			&.is-closed {
 				background-color: #f4f4f4;
 				border-color: #eee;
@@ -1361,7 +1415,7 @@ $download-button-width : 100px;
 		}
 
 	}
-	
+
 	.supplementary-files-section-part {
 		//margin-top: 10px;
 		padding-top: 5px;
@@ -1369,7 +1423,7 @@ $download-button-width : 100px;
 		border-bottom: 1px solid #ccc;
 		> h4 {
 			padding-top: 10px;
-			padding-bottom: 2px;
+			padding-bottom: 0;
 			margin-top: 0;
 			margin-bottom: 0;
 			font-weight: 500;
@@ -1620,7 +1674,6 @@ $download-button-width : 100px;
 
 		// Adjustments for when HiGlass inside ExpSet view as mini preview thingy
 		.higlass-instance {
-			margin-top: -15px;
 			.ViewHeader-module_multitrack-header-nav-list-2nvcu {
 				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(1),
 				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(1),
@@ -1923,11 +1976,15 @@ $download-button-width : 100px;
 
 	.higlass-instance {
 
+		height: 600px;
+		transition: opacity 1s;
+		opacity: 0;
 		.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
-			.TrackControl-module_track-control-button-2fdIb { // Hide "add track" & "move" buttons.
+			.TrackControl-module_track-control-button-2fdIb { // Hide "add track" button.
 				display: none;
 				&:nth-child(2),
-				&:last-child {
+				&:last-child,
+				&:first-child {
 					display: block;
 				}
 			}
@@ -1946,7 +2003,7 @@ $download-button-width : 100px;
 
 		.ViewHeader-module_multitrack-header-3XnZx .ViewHeader-module_multitrack-header-nav-list-2nvcu {
 			.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(3), // Hide 'plus' button in header.
-			.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3),{
+			.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3) {
 				display: none;
 			}
 		}
@@ -1957,10 +2014,6 @@ $download-button-width : 100px;
 				font-family: "FontAwesome";
 			}
 		}
-
-		height: 600px;
-		transition: opacity 1s;
-		opacity: 0;
 
 		.react-grid-layout {
 			.form-group {
@@ -1973,6 +2026,26 @@ $download-button-width : 100px;
 					font-family: $font-family-monospace;
 					font-size: 0.825rem;
 				}
+			}
+		}
+	}
+}
+
+/** For when HiGlass track is being dragged **/
+/**
+    All of this 'hide/override via CSS' is kinda hacky anyway, esp. with the PostCSS classNames;
+    ideally would be nice if can pass in props to HiGlassComponent
+    re: what menu options to include/exclude.
+**/
+
+.TiledPlot-module_stylizedItem-2bQBK {
+	.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
+		.TrackControl-module_track-control-button-2fdIb { // Hide "add track" button.
+			display: none;
+			&:nth-child(2),
+			&:last-child,
+			&:first-child {
+				display: block;
 			}
 		}
 	}
@@ -2004,228 +2077,245 @@ $download-button-width : 100px;
 		User Profile Page
 ***********************************************************/
 
-.page-container > .row.first-row {
-	margin-top: 29px;
-}
+div.user-profile-page {
 
-.panel.user-info,
-.panel.user-work-info {
+	/* Panels */
 
-	margin-bottom: 0;
+	.panel.shadow-border {
+		background-color: inherit;
+		margin-top: 15px;
+		margin-bottom: 15px;
+		padding: 15px 20px;
+		overflow: visible;
+		border: 1px solid transparent; /* So bordered and border-less panels have same padding */
+		@include box-shadow(0px 0px 0px rgba(0,0,0,0));
 
-	#email {
-		font-weight: 500;
+		border: 1px solid #ddd;
+		border-bottom-color: #c8c8c8;
+		box-shadow: 0px 1px 9px -3px rgba(0,0,0,0.5);
+		background-color: #fff;
 	}
 
-	.formatted-info-panel {
+	.panel.user-info,
+	.panel.user-work-info {
 
-		&:not(.no-details){
-			/* min-height: 41px; */
+		margin-bottom: 0;
+
+		#email {
+			font-weight: 500;
 		}
 
-		/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
-		&.no-details.no-icon.no-label {
-			display: inline-block;
-			padding: 0;
-			vertical-align: text-top;
-			max-width: 85%;
-			word-break: break-word;
-		}
+		.formatted-info-panel {
 
-		.block-title,
-		.block-title a {
-			font-weight: 600;
-		}
-	}
+			&:not(.no-details){
+				/* min-height: 41px; */
+			}
 
-}
-
-.panel.user-info {
-	/* for fun - comment out bottom transform in Inspect Element */
-	transform: rotateZ(0deg) scale3d(1, 1, 1) translateX(0);
-    opacity: 1;
-	left: 0px;
-	transition: transform 1.2s ease-out, opacity 1.5s ease-out, left 1.2s ease-out;
-	position: relative;
-	z-index: 2;
-	background-color: #fff;
-
-	&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
-
-	.user-title-row-container {
-		margin-bottom: 20px;
-		border-bottom: 1px solid #eee;
-	}
-
-	.user-title-col {
-		padding-bottom: 17px;
-	}
-
-	.user-title {
-		margin-top: 0px;
-		margin-bottom: 0px;
-		font-weight: 300;
-		font-size: 2.6rem;
-
-		.editable-field-entry {
-			//max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
-			text-overflow: ellipsis;
-			.value {
+			/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
+			&.no-details.no-icon.no-label {
+				display: inline-block;
+				padding: 0;
+				vertical-align: text-top;
+				max-width: 85%;
 				word-break: break-word;
-				.edit-button {
-					font-size: 1rem;
+			}
+
+			.block-title,
+			.block-title a {
+				font-weight: 600;
+			}
+		}
+
+	}
+
+	.panel.user-info {
+		/* for fun - comment out bottom transform in Inspect Element */
+		transform: rotateZ(0deg) scale3d(1, 1, 1) translateX(0);
+		opacity: 1;
+		left: 0px;
+		transition: transform 1.2s ease-out, opacity 1.5s ease-out, left 1.2s ease-out;
+		position: relative;
+		z-index: 2;
+		background-color: #fff;
+
+		&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
+
+		.user-title-row-container {
+			margin-bottom: 20px;
+			border-bottom: 1px solid #eee;
+		}
+
+		.user-title-col {
+			padding-bottom: 17px;
+		}
+
+		.user-title {
+			margin-top: 0px;
+			margin-bottom: 0px;
+			font-weight: 300;
+			font-size: 2.6rem;
+
+			.editable-field-entry {
+				//max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
+				text-overflow: ellipsis;
+				.value {
+					word-break: break-word;
+					.edit-button {
+						font-size: 1rem;
+					}
+				}
+				&.editing{
+					//max-width: 70%;
 				}
 			}
-			&.editing{
-				//max-width: 70%;
+
+		}
+
+		@media screen and (min-width: $screen-sm-min){
+
+			.user-title-col {
+				padding-top: 15px;
+				min-height: 85px;
+				padding-bottom: 30px;
+			}
+
+			.user-title {
+				/* white-space: nowrap; */
+				/* overflow: hidden; */
+				text-overflow: ellipsis;
+			}
+		}
+
+		@media screen and (max-width: $screen-xs-max){
+
+			.user-title-col {
+				padding-top: 2px;
+			}
+
+			.user-title {
+				font-size: 2rem;
+				font-weight: 400;
+				margin-right: 70px;
+			}
+		}
+
+		div.gravatar-container {
+			position: relative;
+
+			img.gravatar {
+				width: 70px;
+				height: 70px;
+				float: right;
+				border-radius: $border-radius-base;
+			}
+
+			a.edit-button-remote {
+				opacity: 0;
+				position: absolute;
+				background: #fff;
+				color: #000;
+				top: 0;
+				right: 10px;
+				line-height: 21px;
+				width: 21px;
+				padding-left: 2px;
+				border-radius: 5px;
+				&:after {
+					display: none;
+					content: none;
+				}
+			}
+
+			&:hover {
+				a.edit-button-remote {
+					opacity: 0.5;
+					&:hover {
+						opacity: 1;
+					}
+				}
+			}
+
+			@media screen and (max-width: $screen-xs-max){
+				img.gravatar {
+					width: 94px; /* Account for border */
+					height: 70px;
+					position: relative;
+					z-index: 2;
+					margin-bottom: -30px;
+					margin-top: 5px;
+					border-left: 24px solid #FFF;
+				}
 			}
 		}
 
 	}
 
 	@media screen and (min-width: $screen-sm-min){
-
-		.user-title-col {
-			padding-top: 15px;
-			min-height: 85px;
-			padding-bottom: 30px;
-		}
-
-		.user-title {
-			/* white-space: nowrap; */
-			/* overflow: hidden; */
-			text-overflow: ellipsis;
+		.editing .user-title .editable-field-entry.inline:not(.editing) {
+			display: inline-block;
+			//max-width: 30%;
 		}
 	}
 
-	@media screen and (max-width: $screen-xs-max){
+	.panel.user-work-info {
 
-		.user-title-col {
-			padding-top: 2px;
-		}
+		> .block-title {
+			margin-bottom: 20px;
+			padding-bottom: 15px;
+			border-bottom: 1px solid #eee;
+			padding-top: 0;
 
-		.user-title {
-			font-size: 2rem;
-			font-weight: 400;
-			margin-right: 70px;
-		}
-	}
-
-	div.gravatar-container {
-		position: relative;
-
-		img.gravatar {
-			width: 70px;
-			height: 70px;
-			float: right;
-			border-radius: $border-radius-base;
-		}
-
-		a.edit-button-remote {
-			opacity: 0;
-			position: absolute;
-			background: #fff;
-			color: #000;
-			top: 0;
-			right: 10px;
-			line-height: 21px;
-			width: 21px;
-			padding-left: 2px;
-			border-radius: 5px;
-			&:after {
-				display: none;
-				content: none;
+			> i.icon.icon-fw {
+				margin-right: 5px;
+				font-size: 1.5rem;
 			}
 		}
 
-		&:hover {
-			a.edit-button-remote {
-				opacity: 0.5;
-				&:hover {
-					opacity: 1;
-				}
-			}
-		}
-
-		@media screen and (max-width: $screen-xs-max){
-			img.gravatar {
-				width: 94px; /* Account for border */
-				height: 70px;
-				position: relative;
-				z-index: 2;
-				margin-bottom: -30px;
-				margin-top: 5px;
-				border-left: 24px solid #FFF;
-			}
-		}
 	}
 
-}
+	.access-keys-container {
+		padding-top: 15px;
 
-@media screen and (min-width: $screen-sm-min){
-	.editing .user-title .editable-field-entry.inline:not(.editing) {
-		display: inline-block;
-		//max-width: 30%;
-	}
-}
+		> h3 {
 
-.panel.user-work-info {
-
-	> .block-title {
-		margin-bottom: 20px;
-		padding-bottom: 15px;
-		border-bottom: 1px solid #eee;
-		padding-top: 0;
-
-		> i.icon.icon-fw {
-			margin-right: 5px;
-			font-size: 1.5rem;
-		}
-	}
-
-}
-
-.access-keys-container {
-	padding-top: 15px;
-
-	> h3 {
-
-		margin-bottom: 17px;
-		/*
-	    padding-bottom: 17px;
-    	border-bottom: 1px solid #eee;
-		*/
-	}
-
-	table.access-keys-table {
-		margin-bottom: 20px;
-
-		tr {
+			margin-bottom: 17px;
 			/*
-			&:nth-child(2n-1) {
-				background-color: #f8f8f8;
-			}
+			padding-bottom: 17px;
+			border-bottom: 1px solid #eee;
 			*/
-			td {
-				border-bottom: 1px solid #eee;
-				&.access-key-buttons {
-					width: 140px;
-					.btn.btn-xs {
-						margin: 0 4px;
+		}
+
+		table.access-keys-table {
+			margin-bottom: 20px;
+
+			tr {
+				/*
+				&:nth-child(2n-1) {
+					background-color: #f8f8f8;
+				}
+				*/
+				td {
+					border-bottom: 1px solid #eee;
+					&.access-key-buttons {
+						width: 140px;
+						.btn.btn-xs {
+							margin: 0 4px;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	#add-access-key.btn{
-		float: right;
-		min-width: 180px;
-	}
+		#add-access-key.btn{
+			float: right;
+			min-width: 180px;
+		}
 
-	.no-access-keys > hr:first-child {
-		margin-top: 0;
-		margin-bottom: 17px;
+		.no-access-keys > hr:first-child {
+			margin-top: 0;
+			margin-bottom: 17px;
+		}
+
 	}
 
 }

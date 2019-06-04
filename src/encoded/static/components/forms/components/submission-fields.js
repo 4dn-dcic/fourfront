@@ -3,15 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
-import * as globals from './../../globals';
 import { ajax, console, object, Schemas } from './../../util';
 import Alerts from './../../alerts';
 import { BasicStaticSectionBody } from './../../static-pages/components/BasicStaticSectionBody';
 import { Line as ProgressBar } from 'rc-progress';
-import { LinkToSelector } from './LinkToSelector'; 
+import { LinkToSelector } from './LinkToSelector';
 
 
 /**
@@ -34,7 +32,7 @@ export class BuildField extends React.PureComponent {
      * @returns {string} Type of field that will be created, according to schema.
      */
     static fieldTypeFromFieldSchema(fieldSchema){
-        var fieldType = fieldSchema.type ? fieldSchema.type : "text";
+        let fieldType = fieldSchema.type ? fieldSchema.type : "text";
         // transform some types...
         if (fieldType === 'string'){
             fieldType = 'text';
@@ -43,11 +41,11 @@ export class BuildField extends React.PureComponent {
             }
         }
         // check if this is an enum
-        if(fieldSchema.enum || fieldSchema.suggested_enum){
+        if (fieldSchema.enum || fieldSchema.suggested_enum){
             fieldType = 'enum';
         }
         // handle a linkTo object on the the top level
-        if(fieldSchema.linkTo){
+        if (fieldSchema.linkTo){
             fieldType = 'linked object';
         } else if (fieldSchema.attachment && fieldSchema.attachment === true){
             fieldType = 'attachment';
@@ -57,24 +55,27 @@ export class BuildField extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.wrapWithLabel = this.wrapWithLabel.bind(this);
-        this.wrapWithNoLabel = this.wrapWithNoLabel.bind(this);
-        this.displayField = this.displayField.bind(this);
+        _.bindAll(this,
+            'displayField', 'handleDropdownButtonToggle', 'handleAliasChange',
+            'buildEnumEntry', 'submitEnumVal', 'handleChange', 'handleAliasChange', 'deleteField', 'pushArrayValue',
+            'commonRowProps', 'labelTypeDescriptor', 'wrapWithLabel', 'wrapWithNoLabel'
+        );
         this.state = {
             'dropdownOpen' : false
         };
+
+        this.inputElementRef = React.createRef();
     }
 
     componentDidMount(){
         ReactTooltip.rebuild();
     }
 
-    handleDropdownButtonToggle = (isOpen, evt) => {
-        if (isOpen) {
-            this.setState({ 'dropdownOpen' : true });
-        } else {
-            this.setState({ 'dropdownOpen' : false });
-        }
+    handleDropdownButtonToggle(isOpen, evt){
+        this.setState(function({ dropdownOpen }){
+            if (isOpen === dropdownOpen) return null;
+            return { 'dropdownOpen' : isOpen };
+        });
     }
 
     /**
@@ -83,13 +84,14 @@ export class BuildField extends React.PureComponent {
      * @param {string} [fieldType=this.props.fieldType] Type of input field to render, if different from `props.fieldType`.
      * @returns {JSX.Element} A JSX `<input>` element, a Bootstrap input element component, or custom React component which will render input fields.
      */
-    displayField(fieldType = this.props.fieldType){
-        var { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, currType, getCurrContext } = this.props;
-        var inputProps = {
+    displayField(fieldType){
+        const { field, value, disabled, enumValues, currentSubmittingUser, roundTwo, currType, currContext, fieldType : propFieldType } = this.props;
+        fieldType = fieldType || propFieldType;
+        const inputProps = {
             'key'       :        field,
             'id'                : 'field_for_' + field,
             'disabled'          : disabled || false,
-            'ref'               : "inputElement",
+            'ref'               : this.inputElementRef,
             'value'             : (typeof value === 'number' ? value || 0 : value || ''),
             'onChange'          : this.handleChange,
             'name'              : field,
@@ -101,8 +103,7 @@ export class BuildField extends React.PureComponent {
 
         if (currType === 'StaticSection' && field === 'body'){
             // Static section preview
-            var currContext = getCurrContext(), // Make sure we have a filetype.
-                filetype = currContext && currContext.options && currContext.options.filetype;
+            const filetype = currContext && currContext.options && currContext.options.filetype;
             if (filetype === 'md' || filetype === 'html'){
                 return <PreviewField {...this.props} filetype={filetype} onChange={this.handleChange} />;
             }
@@ -112,7 +113,11 @@ export class BuildField extends React.PureComponent {
         switch(fieldType){
             case 'text' :
                 if (field === 'aliases'){
-                    return <div className="input-wrapper"><AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={currentSubmittingUser} /></div>;
+                    return (
+                        <div className="input-wrapper">
+                            <AliasInputField {...inputProps} onAliasChange={this.handleAliasChange} currentSubmittingUser={currentSubmittingUser} />
+                        </div>
+                    );
                 }
                 return <FormControl type="text" inputMode="latin" {...inputProps} />;
             case 'textarea':
@@ -130,7 +135,7 @@ export class BuildField extends React.PureComponent {
                 </Checkbox>
             );
             case 'enum'             : return (
-                <span className="input-wrapper" style={{'display':'inline'}}>
+                <span className="input-wrapper" style={{ 'display':'inline' }}>
                     <DropdownButton title={value || <span className="text-300">No value</span>} onToggle={this.handleDropdownButtonToggle}>
                         {_.map(enumValues, (val) => this.buildEnumEntry(val))}
                     </DropdownButton>
@@ -138,8 +143,8 @@ export class BuildField extends React.PureComponent {
             );
             case 'linked object'    : return <LinkedObj key="linked-item" {...this.props}/>;
             case 'array'            : return <ArrayField {...this.props} pushArrayValue={this.pushArrayValue} value={value || null} roundTwo={roundTwo} />;
-            case 'object'           : return <div style={{'display':'inline'}}><ObjectField {...this.props}/></div>;
-            case 'attachment'       : return <div style={{'display':'inline'}}><AttachmentInput {...this.props}/></div>;
+            case 'object'           : return <div style={{ 'display':'inline' }}><ObjectField {...this.props}/></div>;
+            case 'attachment'       : return <div style={{ 'display':'inline' }}><AttachmentInput {...this.props}/></div>;
             case 'file upload'      : return <S3FileInput {...this.props} />;
         }
         // Fallback
@@ -147,62 +152,67 @@ export class BuildField extends React.PureComponent {
     }
 
     // create a dropdown item corresponding to one enum value
-    buildEnumEntry = (val) => {
-        return(
+    buildEnumEntry(val){
+        return (
             <MenuItem key={val} title={val || ''} eventKey={val} onSelect={this.submitEnumVal}>
                 {val || ''}
             </MenuItem>
         );
     }
 
-    submitEnumVal = (eventKey) => {
-        this.props.modifyNewContext(this.props.nestedField, eventKey, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    submitEnumVal(eventKey){
+        const { modifyNewContext, nestedField, fieldType, linkType, arrayIdx } = this.props;
+        modifyNewContext(nestedField, eventKey, fieldType, linkType, arrayIdx);
     }
 
-    handleChange = (e) => {
-        var inputElement = e && e.target ? e.target : this.refs.inputElement;
-        var currValue = inputElement.value;
-        if (this.props.fieldType === 'boolean'){
+    handleChange(e){
+        const { fieldType, modifyNewContext, nestedField, linkType, arrayIdx } = this.props;
+        const inputElement = e && e.target ? e.target : this.inputElementRef.current;
+        let currValue = inputElement.value;
+        if (fieldType === 'boolean'){
             currValue = inputElement.checked;
-        } else if (this.props.fieldType === 'integer'){
+        } else if (fieldType === 'integer'){
             currValue = parseInt(currValue);
             if (isNaN(currValue)){
                 currValue = null;
             }
-        } else if (this.props.fieldType === 'number'){
+        } else if (fieldType === 'number'){
             currValue = parseFloat(currValue);
             if (isNaN(currValue)){
                 currValue = null;
             }
         }
         //console.log('VAL', this.props.nestedField, currValue, this.props.fieldType, this.props.value, this.props.arrayIdx);
-        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+        modifyNewContext(nestedField, currValue, fieldType, linkType, arrayIdx);
     }
 
-    handleAliasChange = (currValue) =>{
-        this.props.modifyNewContext(this.props.nestedField, currValue, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+    handleAliasChange(currValue){
+        const { fieldType, modifyNewContext, nestedField, linkType, arrayIdx } = this.props;
+        modifyNewContext(nestedField, currValue, fieldType, linkType, arrayIdx);
     }
 
     // call modifyNewContext from parent to delete the value in the field
-    deleteField = (e) => {
+    deleteField(e){
+        const { fieldType, modifyNewContext, nestedField, linkType, arrayIdx } = this.props;
         e.preventDefault();
-        this.props.modifyNewContext(this.props.nestedField, null, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+        modifyNewContext(nestedField, null, fieldType, linkType, arrayIdx);
     }
 
     // this needs to live in BuildField for styling purposes
-    pushArrayValue = (e) => {
+    pushArrayValue(e){
+        const { fieldType, value, schema, modifyNewContext, nestedField, linkType, arrayIdx } = this.props;
         e && e.preventDefault();
-        if(this.props.fieldType !== 'array'){
+        if (fieldType !== 'array') {
             return;
         }
-        var valueCopy = this.props.value ? this.props.value.slice() : [];
-        if(this.props.schema.items && this.props.schema.items.type === 'object'){
+        const valueCopy = value ? value.slice() : [];
+        if (schema.items && schema.items.type === 'object'){
             // initialize with empty obj in only this case
             valueCopy.push({});
         }else{
             valueCopy.push(null);
         }
-        this.props.modifyNewContext(this.props.nestedField, valueCopy, this.props.fieldType, this.props.linkType, this.props.arrayIdx);
+        modifyNewContext(nestedField, valueCopy, fieldType, linkType, arrayIdx);
     }
 
     /**
@@ -212,14 +222,16 @@ export class BuildField extends React.PureComponent {
      * @returns {{ 'className': string, 'data-field-type': string, 'data-field-name': string, 'style': Object.<string|number> }} Object of props and values.
      */
     commonRowProps(){
+        const { isArray, fieldType, field } = this.props;
+        const { dropdownOpen } = this.state;
         return {
             'className' : (
                 "field-row" +
-                (this.state.dropdownOpen ? ' active-submission-row' : '') +
-                (this.props.isArray ? ' in-array-field clearfix row'  : '')
+                (dropdownOpen ? ' active-submission-row' : '') +
+                (isArray ? ' in-array-field clearfix row'  : '')
             ),
-            'data-field-type' : this.props.fieldType,
-            'data-field-name' : this.props.field,
+            'data-field-type' : fieldType,
+            'data-field-name' : field,
             'style' : { 'overflow' : 'visible' }
         };
     }
@@ -228,7 +240,8 @@ export class BuildField extends React.PureComponent {
      * Returns a `<div>` JSX element with 'Required' label/text, if `props.required` is true or truthy.
      */
     labelTypeDescriptor(){
-        return <div className="field-descriptor">{ this.props.required ? <span style={{'color':'#a94442'}}> Required</span> : null }</div>;
+        const { required } = this.props;
+        return <div className="field-descriptor">{ required ? <span style={{ 'color':'#a94442' }}> Required</span> : null }</div>;
     }
 
     /** @ignore */
@@ -240,7 +253,9 @@ export class BuildField extends React.PureComponent {
                     <div className="col-sm-12 col-md-4">
                         <h5 className="submission-field-title text-ellipsis-container">
                             { this.labelTypeDescriptor() }
-                            { fieldTip ? [<InfoIcon children={fieldTip} title={title} fieldType={fieldType} schema={schema} />, <span>&nbsp;&nbsp; </span>] : null}
+                            { fieldTip ?
+                                <InfoIcon className="mr-07" title={title} fieldType={fieldType} schema={schema}>{ fieldTip }</InfoIcon>
+                                : null}
                             <span>{ title }</span>
                         </h5>
                     </div>
@@ -267,12 +282,12 @@ export class BuildField extends React.PureComponent {
      * @private
      * @returns {JSX.Element} Appropriate element/markup for this field.
      */
-    render = () => {
-        var { value, isArray, field, fieldType, arrayIdx, isLastItemInArray, schema } = this.props;
-        var cannot_delete       = ['filename'], // hardcoded fields you can't delete
-            showDelete          = false,
-            disableDelete       = false,
-            extClass            = '';
+    render(){
+        const { value, isArray, field, fieldType, arrayIdx, isLastItemInArray } = this.props;
+        const cannot_delete       = ['filename']; // hardcoded fields you can't delete
+        let showDelete          = false;
+        let disableDelete       = false;
+        let extClass            = '';
 
         // Don't show delete button unless:
         // not in hardcoded cannot delete list AND is not an object or
@@ -286,9 +301,9 @@ export class BuildField extends React.PureComponent {
             showDelete = false;
         }
 
-        var wrapFunc = this.wrapWithLabel,
-            excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'), // In case we render our own w/ dif functionality lower down.
-            fieldToDisplay = this.displayField(fieldType);  // The rendered field.
+        let wrapFunc = this.wrapWithLabel;
+        const excludeRemoveButton = (fieldType === 'array' || fieldType === 'file upload'); // In case we render our own w/ dif functionality lower down.
+        const fieldToDisplay = this.displayField(fieldType);  // The rendered field.
 
         if (isArray) {
             // array items don't need fieldnames/tooltips
@@ -318,35 +333,33 @@ export class BuildField extends React.PureComponent {
         }
 
         return wrapFunc(
-            <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + extClass} children={fieldToDisplay}/>,
-            excludeRemoveButton ? null : <SquareButton show={showDelete} disabled={disableDelete} tip={isArray ? 'Remove Item' : 'Clear Value'} onClick={this.deleteField} />
+            <React.Fragment>
+                <div className={'field-column col-xs-' + (excludeRemoveButton ? "12": "10") + extClass}>{ fieldToDisplay }</div>
+                { excludeRemoveButton ? null : <SquareButton show={showDelete} disabled={disableDelete} tip={isArray ? 'Remove Item' : 'Clear Value'} onClick={this.deleteField} /> }
+            </React.Fragment>
         );
     }
 }
 
 
 
-class SquareButton extends React.Component {
-
-    static defaultProps = {
-        'bsStyle' : 'danger',
-        'icon' : 'times',
-        'style' : null
-    }
-
-    render(){
-        var { show, disabled, onClick, tip, bsStyle, buttonContainerClassName, icon, style } = this.props;
-        return (
-            <div className="col-xs-2 remove-button-column" style={style}>
-                <Fade in={show}>
-                    <div className={"pull-right remove-button-container" + (!show ? ' hidden' : '') + (buttonContainerClassName ? ' ' + buttonContainerClassName : '')}>
-                        <Button tabIndex={2} bsStyle={bsStyle} disabled={disabled} onClick={onClick} data-tip={tip}><i className={"icon icon-fw icon-" + icon}/></Button>
-                    </div>
-                </Fade>
-            </div>
-        );
-    }
-}
+const SquareButton = React.memo(function SquareButton(props){
+    const { show, disabled, onClick, tip, bsStyle, buttonContainerClassName, icon, style } = props;
+    return (
+        <div className="col-xs-2 remove-button-column" style={style}>
+            <Fade in={show}>
+                <div className={"pull-right remove-button-container" + (!show ? ' hidden' : '') + (buttonContainerClassName ? ' ' + buttonContainerClassName : '')}>
+                    <Button tabIndex={2} bsStyle={bsStyle} disabled={disabled} onClick={onClick} data-tip={tip}><i className={"icon icon-fw icon-" + icon}/></Button>
+                </div>
+            </Fade>
+        </div>
+    );
+});
+SquareButton.defaultProps = {
+    'bsStyle' : 'danger',
+    'icon' : 'times',
+    'style' : null
+};
 
 
 
@@ -420,13 +433,12 @@ class LinkedObj extends React.PureComponent {
 
     handleStartSelectItem(e){
         e.preventDefault();
-
         if (!window) return;
 
-        var { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props,
-            itemType = schema.linkTo;
+        const { schema, nestedField, currType, linkType, arrayIdx, selectObj, selectCancel } = this.props;
+        const itemType = schema.linkTo;
 
-        selectObj(itemType, nestedField, linkType, arrayIdx);
+        selectObj(itemType, nestedField, arrayIdx);
     }
 
     /**
@@ -435,8 +447,9 @@ class LinkedObj extends React.PureComponent {
      * @see Notes and inline comments for handleChildFourFrontSelectionClick re isValidAtId.
      */
     handleFinishSelectItem(atId, itemContext){
-        var isValidAtId     = object.isValidAtIDFormat(atId),
-            invalidTitle    = "Invalid Item Selected";
+        const { selectComplete } = this.props;
+        const isValidAtId     = object.isValidAtIDFormat(atId);
+        const invalidTitle    = "Invalid Item Selected";
 
         if (!atId || !isValidAtId) {
             Alerts.queue({
@@ -449,12 +462,12 @@ class LinkedObj extends React.PureComponent {
             Alerts.deQueue({ 'title' : invalidTitle });
         }
 
-        this.props.selectComplete(atId);
+        selectComplete(atId);
     }
 
     handleCreateNewItemClick(e){
         e.preventDefault();
-        var { fieldBeingSelected, selectCancel, modifyNewContext, nestedField, linkType, arrayIdx, schema } = this.props;
+        const { fieldBeingSelected, selectCancel, modifyNewContext, nestedField, linkType, arrayIdx, schema } = this.props;
         if (fieldBeingSelected !== null) selectCancel();
         modifyNewContext(nestedField, null, 'new linked object', linkType, arrayIdx, schema.linkTo);
     }
@@ -487,10 +500,10 @@ class LinkedObj extends React.PureComponent {
                     'title' : 'Selecting ' + itemType + ' for field ' + (prettyTitle ? prettyTitle + ' ("' + nestedField + '")' : '"' + nestedField + '"'),
                     'message' : (
                         <div>
-                            <p class="mb-0">
+                            <p className="mb-0">
                                 Please either <b>drag and drop</b> an Item (row) from this window into the submissions window or click its corresponding select (checkbox) button.
                             </p>
-                            <p class="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
+                            <p className="mb-0">You may also browse around and drag & drop a link into the submissions window as well.</p>
                         </div>
                     ),
                     'style' : 'info'
@@ -514,7 +527,7 @@ class LinkedObj extends React.PureComponent {
                     { canShowAcceptTypedInput ?
                         <SquareButton show onClick={this.handleAcceptTypedID} icon="check"
                             bsStyle="success" tip="Accept typed identifier and look it up in database." />
-                    : null }
+                        : null }
                     <SquareButton show onClick={selectCancel} tip="Cancel selection" style={{ 'marginRight' : 9 }} />
                 </div>
                 <LinkToSelector isSelecting onSelect={this.handleFinishSelectItem} onCloseChildWindow={selectCancel}
@@ -524,7 +537,6 @@ class LinkedObj extends React.PureComponent {
     }
 
     renderEmptyField(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState } = this.props;
         return (
             <div className="linked-object-buttons-container">
                 <Button className="select-create-linked-item-button" onClick={this.handleStartSelectItem}>
@@ -538,8 +550,8 @@ class LinkedObj extends React.PureComponent {
     }
 
     render(){
-        var { schema, value, keyDisplay, keyComplete, setSubmissionState, nestedField, selectCancel, currType } = this.props,
-            isSelecting = this.isInSelectionField();
+        const { value, keyDisplay, keyComplete } = this.props;
+        const isSelecting = this.isInSelectionField();
 
         if (isSelecting){
             return this.renderSelectInputField();
@@ -552,8 +564,8 @@ class LinkedObj extends React.PureComponent {
                 return(
                     <div className="submitted-linked-object-display-container text-ellipsis-container">
                         <i className="icon icon-fw icon-database" />&nbsp;&nbsp;
-                        <a href={value} target="_blank" data-tip={"This Item, '" + thisDisplay + "' is already in the database"} children={thisDisplay} />
-                        &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-external-link"/>
+                        <a href={value} target="_blank" data-tip={"This Item, '" + thisDisplay + "' is already in the database"}>{ thisDisplay }</a>
+                        &nbsp;<i style={{ 'fontSize' : '0.85rem' }} className="icon icon-fw icon-external-link ml-05"/>
                     </div>
                 );
             } else {
@@ -565,16 +577,16 @@ class LinkedObj extends React.PureComponent {
                 if (keyComplete[intKey]){
                     return(
                         <div>
-                            <a href={keyComplete[intKey]} target="_blank" children={thisDisplay}/>
-                            <i style={{'marginLeft': 5}} className="icon icon-fw icon-external-link"/>
+                            <a href={keyComplete[intKey]} target="_blank" children>{ thisDisplay }</a>
+                            <i className="icon icon-fw icon-external-link ml-05"/>
                         </div>
                     );
                 } else {
                     return(
                         <div className="incomplete-linked-object-display-container text-ellipsis-container">
                             <i className="icon icon-fw icon-sticky-note-o" />&nbsp;&nbsp;
-                            <a href="#" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting" children={thisDisplay} />
-                            &nbsp;<i style={{'marginLeft': 5, 'fontSize' : '0.85rem'}} className="icon icon-fw icon-pencil"/>
+                            <a href="#" onClick={this.setSubmissionStateToLinkedToItem} data-tip="Continue editing/submitting">{ thisDisplay }</a>
+                            &nbsp;<i style={{ 'fontSize' : '0.85rem' }} className="icon icon-fw icon-pencil ml-05"/>
                         </div>
                     );
                 }
@@ -587,28 +599,23 @@ class LinkedObj extends React.PureComponent {
 }
 
 
-
-class PreviewField extends React.Component {
-
-    render(){
-        var { value, filetype, field, onChange } = this.props,
-            preview = value && (
-                <React.Fragment>
-                    <h6 className="mt-1 text-600">Preview:</h6>
-                    <hr className="mb-1 mt-05" />
-                    <BasicStaticSectionBody content={value || ''} filetype={filetype} />
-                </React.Fragment>
-            );
-        return (
-            <div className="preview-field-container">
-                <FormControl onChange={onChange} id={"field_for_" + field} name={field} value={value} type="text" inputMode="latin" componentClass="textarea" rows={8}
-                    wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />
-                { preview }
-            </div>
-        );
-    }
-
-}
+const PreviewField = React.memo(function PreviewField(props){
+    const { value, filetype, field, onChange } = props;
+    const preview = value && (
+        <React.Fragment>
+            <h6 className="mt-1 text-600">Preview:</h6>
+            <hr className="mb-1 mt-05" />
+            <BasicStaticSectionBody content={value || ''} filetype={filetype} />
+        </React.Fragment>
+    );
+    return (
+        <div className="preview-field-container">
+            <FormControl onChange={onChange} id={"field_for_" + field} name={field} value={value} type="text" inputMode="latin" componentClass="textarea" rows={8}
+                wrap="off" style={{ 'fontFamily' : "Source Code Pro, monospace", 'fontSize' : 'small' }} />
+            { preview }
+        </div>
+    );
+});
 
 
 /**
@@ -643,57 +650,61 @@ class ArrayField extends React.Component{
                 )
             )
         ){
-            if (field !== 'aliases') {
-                return true;
-            } else {
-                if (currentArr && currentArr.length >= 1) return true;
-            }
+            return true;
         }
         return false;
+    }
+
+    constructor(props){
+        super(props);
+        _.bindAll(this, 'initiateArrayField', 'generateAddButton');
     }
 
     /**
      * If empty array, add initial 'null' element. On Mount & Update.
      */
     componentDidMount(){
-        if (ArrayField.shouldPushArrayValue(this.props.value, this.props.field)){
-            this.props.pushArrayValue();
+        const { value, field, pushArrayValue } = this.props;
+        if (ArrayField.shouldPushArrayValue(value, field)){
+            pushArrayValue();
         }
     }
 
     componentDidUpdate(prevProps, prevState){ // We can't do a comparison of props.value here because parent property mutates yet stays part of same obj.
-        if (ArrayField.shouldPushArrayValue(this.props.value, this.props.field)){
-            this.props.pushArrayValue();
+        const { value, field, pushArrayValue, modifyNewContext, nestedField, schema, linkType } = this.props;
+        if (ArrayField.shouldPushArrayValue(value, field)){
+            pushArrayValue();
         } else {
-            if (Array.isArray(this.props.value) && this.props.value.length >= 2){
-                if (isValueNull(this.props.value[this.props.value.length - 1]) && isValueNull(this.props.value[this.props.value.length - 2])){
-                    this.props.modifyNewContext(this.props.nestedField, null, ArrayField.typeOfItems(this.props.schema.items || {}), this.props.linkType, [this.props.value.length - 2]);
+            if (Array.isArray(value) && value.length >= 2){
+                if (isValueNull(value[value.length - 1]) && isValueNull(value[value.length - 2])){
+                    modifyNewContext(nestedField, null, ArrayField.typeOfItems(schema.items || {}), linkType, [value.length - 2]);
                 }
             }
         }
     }
 
-    initiateArrayField = (arrayInfo, index, allItems) => {
-        var value = arrayInfo[0] || null;
-        var fieldSchema = arrayInfo[1];
+    initiateArrayField(arrayInfo, index, allItems){
+        const { arrayIdx : propArrayIdx, schema } = this.props;
         // use arrayIdx as stand-in value for field
-        var arrayIdx = arrayInfo[2];
-        var fieldTip = fieldSchema.description || null;
-        if(fieldSchema.comment){
+        const [ inArrValue, fieldSchema, arrayIdx ] = arrayInfo;
+        const value = inArrValue || null;
+
+        let fieldTip = fieldSchema.description || null;
+        if (fieldSchema.comment){
             fieldTip = fieldTip ? fieldTip + ' ' + fieldSchema.comment : fieldSchema.comment;
         }
-        var title = fieldSchema.title || 'Item';
-        var fieldType = ArrayField.typeOfItems(fieldSchema);
-        var enumValues = fieldSchema.enum ? (fieldSchema.enum || []) : []; // check if this is an enum
+        const title = fieldSchema.title || 'Item';
+        const fieldType = ArrayField.typeOfItems(fieldSchema);
+        const enumValues = fieldSchema.enum ? (fieldSchema.enum || []) : []; // check if this is an enum
 
-        var arrayIdxList;
-        if(this.props.arrayIdx){
-            arrayIdxList = this.props.arrayIdx.slice();
+        let arrayIdxList;
+        if (propArrayIdx){
+            arrayIdxList = propArrayIdx.slice();
         }else{
             arrayIdxList = [];
         }
         arrayIdxList.push(arrayIdx);
-        fieldSchema = _.extend({}, fieldSchema, { 'parentSchema' : this.props.schema });
+        const childFieldSchema = _.extend({}, fieldSchema, { 'parentSchema' : schema });
         return(
             <div key={arrayIdx} className={"array-field-container " + (arrayIdx % 2 === 0 ? 'even' : 'odd')} data-field-type={fieldType}>
                 <BuildField
@@ -702,7 +713,7 @@ class ArrayField extends React.Component{
                         'nestedField', 'keyDisplay', 'keyComplete', 'setSubmissionState', 'fieldBeingSelected', 'fieldBeingSelectedArrayIdx',
                         'updateUpload', 'upload', 'uploadStatus', 'md5Progress', 'currentSubmittingUser', 'roundTwo', 'currType' ) }
                     isArray={true} isLastItemInArray={allItems.length - 1 === index} arrayIdx={arrayIdxList}
-                    schema={fieldSchema} disabled={false} required={false} key={arrayIdx} />
+                    schema={childFieldSchema} disabled={false} required={false} key={arrayIdx} />
             </div>
         );
     }
@@ -717,10 +728,11 @@ class ArrayField extends React.Component{
     }
 
     render(){
-        var schema = this.props.schema.items || {};
-        var values = this.props.value || [];
-        var valuesToRender = _.map( values.length === 0 ? [null] : values , function(v,i){ return [v, schema, i]; });
-        var showAddButton = !isValueNull(values[valuesToRender.length - 1]);
+        const { schema : propSchema, value : propValue } = this.props;
+        const schema = propSchema.items || {};
+        const values = propValue || [];
+        const valuesToRender = _.map( values.length === 0 ? [null] : values , function(v,i){ return [v, schema, i]; });
+        const showAddButton = !isValueNull(values[valuesToRender.length - 1]);
 
         return(
             <div className="list-of-array-items">
@@ -738,10 +750,6 @@ class ArrayField extends React.Component{
  * and coordinate BuildFields that correspond to the fields within the subfield.
  */
 class ObjectField extends React.Component {
-
-    constructor(props){
-        super(props);
-    }
 
     componentDidMount(){
         // initialize with empty dictionary
@@ -950,7 +958,7 @@ class S3FileInput extends React.Component{
     the filename context using modifyNewContext
     */
     handleChange = (e) => {
-        var { modifyNewContext, nestedField, linkType, arrayIdx } = this.props,
+        var { modifyNewContext, nestedField, linkType, arrayIdx, currContext } = this.props,
             file = e.target.files[0];
 
         if (!file) return; // No file was chosen.
@@ -958,7 +966,7 @@ class S3FileInput extends React.Component{
         var filename = file.name ? file.name : "unknown";
 
         // check Extensions
-        var fileFormat = this.props.getCurrContext().file_format;
+        var fileFormat = currContext.file_format;
         if(!fileFormat.startsWith('/')){
             fileFormat = '/' + fileFormat;
         }
@@ -1114,15 +1122,24 @@ class S3FileInput extends React.Component{
  */
 export class AliasInputField extends React.Component {
 
-    static getInitialSubmitsForLabName(submitter){
-        var submits_for_list = (submitter && Array.isArray(submitter.submits_for) && submitter.submits_for.length > 0 && submitter.submits_for) || null;
-        var primaryLab = submitter && submitter.lab;
-        if (_.pluck(submits_for_list, 'uuid').indexOf(primaryLab.uuid) > -1) {
+    static emailToString(email){
+        return email.replace('@', "_at_");
+    }
+
+    static getInitialSubmitsForFirstPart(submitter){
+        const submits_for_list = (submitter && Array.isArray(submitter.submits_for) && submitter.submits_for.length > 0 && submitter.submits_for) || null;
+        const primaryLab = (submitter && submitter.lab) || null;
+        const primaryLabID = primaryLab && object.itemUtil.atId(primaryLab);
+
+        if (!submits_for_list){ // Fallback to using submitter ID.
+            return AliasInputField.emailToString(submitter.email);
+        }
+
+        if (primaryLabID && primaryLab.name && _.map(submits_for_list, object.itemUtil.atId).indexOf(primaryLabID) > -1) {
             return primaryLab.name;
-        } else if (submits_for_list && submits_for_list.length >= 1){
+        } else {
             return submits_for_list[0].name;
         }
-        return null;
     }
 
     static propTypes = {
@@ -1135,11 +1152,11 @@ export class AliasInputField extends React.Component {
             }))
         }).isRequired,
         'errorMessage' : PropTypes.string // String or null
-    }
+    };
 
     static defaultProps = {
         'value' : ':'
-    }
+    };
 
     static splitInTwo(str){
         var parts = (str || ':').split(':');
@@ -1150,17 +1167,19 @@ export class AliasInputField extends React.Component {
     }
 
     constructor(props){
-        super(props); // Inherits this.onHide() function.
-        this.onAliasSecondPartChange = this.onAliasSecondPartChange.bind(this);
-        this.onAliasFirstPartChange = this.onAliasFirstPartChange.bind(this);
-        this.onAliasFirstPartChangeTyped = this.onAliasFirstPartChangeTyped.bind(this);
+        super(props);
+        _.bindAll(this, 'onAliasSecondPartChange', 'onAliasFirstPartChange', 'onAliasFirstPartChangeTyped',
+            'getInitialSubmitsForPart', 'finalizeAliasPartsChange'
+        );
     }
 
     getInitialSubmitsForPart(){
-        return AliasInputField.getInitialSubmitsForLabName(this.props.currentSubmittingUser);
+        const { currentSubmittingUser } = this.props;
+        return AliasInputField.getInitialSubmitsForFirstPart(currentSubmittingUser);
     }
 
     finalizeAliasPartsChange(aliasParts){
+        const { onAliasChange } = this.props;
         // Also check to see if need to add first or second part, e.g. if original value passed in was '' or null.
         if (!aliasParts[0] || aliasParts[0] === '') {
             aliasParts[0] = this.getInitialSubmitsForPart();
@@ -1168,7 +1187,7 @@ export class AliasInputField extends React.Component {
         if (aliasParts.length === 1){
             aliasParts[1] = '';
         }
-        this.props.onAliasChange(aliasParts.join(':'));
+        onAliasChange(aliasParts.join(':'));
     }
 
     onAliasFirstPartChangeTyped(evt){
@@ -1177,50 +1196,61 @@ export class AliasInputField extends React.Component {
     }
 
     onAliasFirstPartChange(evtKey, e){
+        const { value } = this.props;
         e.preventDefault();
-        var firstPartOfAlias = evtKey;
-        var aliasParts = AliasInputField.splitInTwo(this.props.value);
+        const firstPartOfAlias = evtKey;
+        const aliasParts = AliasInputField.splitInTwo(value);
         aliasParts[0] = firstPartOfAlias;
         this.finalizeAliasPartsChange(aliasParts);
     }
 
     onAliasSecondPartChange(e){
+        const { value } = this.props;
         e.preventDefault();
-        var secondPartOfAlias = e.target.value;
-        var aliasParts = AliasInputField.splitInTwo(this.props.value);
+        const secondPartOfAlias = e.target.value;
+        const aliasParts = AliasInputField.splitInTwo(value);
         aliasParts[1] = secondPartOfAlias;
         this.finalizeAliasPartsChange(aliasParts);
     }
 
     render(){
-        var { currentSubmittingUser, errorMessage, withinModal, value } = this.props;
-        var parts = AliasInputField.splitInTwo(value),
-            submits_for_list = (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0 && currentSubmittingUser.submits_for) || null,
-            initialDefaultFirstPartValue = this.getInitialSubmitsForPart(),
-            firstPartSelect;
+        const { currentSubmittingUser, errorMessage, withinModal, value } = this.props;
+        const parts = AliasInputField.splitInTwo(value);
+        const submits_for_list = (currentSubmittingUser && Array.isArray(currentSubmittingUser.submits_for) && currentSubmittingUser.submits_for.length > 0 && currentSubmittingUser.submits_for) || null;
+        const initialDefaultFirstPartValue = this.getInitialSubmitsForPart();
+        const currFirstPartValue = (parts.length > 1 && parts[0]) || initialDefaultFirstPartValue;
+        // const userEmailAsPrefix = AliasInputField.emailToString(currentSubmittingUser.email); // TODO - maybe have as dropdown option
+        let firstPartSelect;
 
         if (currentSubmittingUser && Array.isArray(currentSubmittingUser.groups) && currentSubmittingUser.groups.indexOf('admin') > -1){
             // Render an ordinary input box for admins (can specify any lab).
             firstPartSelect = (
-                <FormControl id="aliasFirstPartInput" type="text" inputMode="latin"
-                    value={(parts.length > 1 && parts[0]) || ''} placeholder={"Lab (default: " + initialDefaultFirstPartValue + ")"}
+                <FormControl type="text" inputMode="latin" id="firstPartSelect" // Todo append index to id if in array
+                    value={currFirstPartValue || ''} placeholder={"Lab (default: " + initialDefaultFirstPartValue + ")"}
                     onChange={this.onAliasFirstPartChangeTyped} style={{ 'paddingRight' : 8, 'borderRight' : 'none' }} />
             );
-        } else if (submits_for_list && submits_for_list.length === 1){
-            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ initialDefaultFirstPartValue }</InputGroup.Addon>;
         } else if (submits_for_list && submits_for_list.length > 1){
             firstPartSelect = (
-                <DropdownButton className="alias-lab-select form-control alias-first-part-input"
+                <DropdownButton className="alias-lab-select form-control alias-first-part-input" id="firstPartSelect"
                     onSelect={this.onAliasFirstPartChange} componentClass={InputGroup.Button}
-                    id="aliasFirstPartInput" title={(parts.length > 1 && (
-                        <span className="text-400"><small className="pull-left">Lab: </small><span className="pull-right text-ellipsis-container" style={{ maxWidth : '80%' }}>{ ((parts[0] !== '' && parts[0]) || this.getInitialSubmitsForPart()) }</span></span>
-                    )) || 'Select a Lab'} children={_.map(submits_for_list, (lab) =>
+                    title={(parts.length > 1 && (
+                        <span className="text-400">
+                            <small className="pull-left">Lab: </small>
+                            <span className="pull-right text-ellipsis-container" style={{ maxWidth : '80%' }}>
+                                { ((parts[0] !== '' && parts[0]) || this.getInitialSubmitsForPart()) }
+                            </span>
+                        </span>
+                    )) || 'Select a Lab'}>
+                    {_.map(submits_for_list, (lab) =>
                         <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>
-                    )} />
+                    )}
+                </DropdownButton>
             );
+        } else { // Only 1 submits_for lab or 0 submits_for -- fallback to staticy thingy
+            firstPartSelect = <InputGroup.Addon className="alias-lab-single-option">{ currFirstPartValue }</InputGroup.Addon>;
         }
         return (
-            <FormGroup className="mb-0" validationState={this.props.errorMessage ? 'error' : null}>
+            <FormGroup className="mb-0" validationState={errorMessage ? 'error' : null}>
                 <InputGroup>
                     { firstPartSelect }
                     { firstPartSelect ? <InputGroup.Addon className="colon-separator">:</InputGroup.Addon> : null}
@@ -1229,7 +1259,7 @@ export class AliasInputField extends React.Component {
                         type="text"
                         inputMode="latin"
                         value={parts[1] || ''}
-                        autoFocus={this.props.withinModal && !parts[1] ? true : false}
+                        autoFocus={withinModal && !parts[1] ? true : false}
                         placeholder="Type in a new identifier"
                         onChange={this.onAliasSecondPartChange}
                     />
@@ -1243,13 +1273,14 @@ export class AliasInputField extends React.Component {
 
 
 
-class InfoIcon extends React.Component{
+class InfoIcon extends React.PureComponent {
 
     fieldTypeDescriptor(){
-        if (typeof this.props.fieldType !== 'string' || this.props.fieldType.length === 0) return null;
+        const { fieldType, schema } = this.props;
+        if (typeof fieldType !== 'string' || fieldType.length === 0) return null;
 
-        var type = Schemas.Term.capitalizeSentence(this.props.fieldType === 'array' ? ArrayField.typeOfItems(this.props.schema.items) : this.props.fieldType);
-        if (this.props.fieldType === 'array'){
+        let type = Schemas.Term.capitalizeSentence(fieldType === 'array' ? ArrayField.typeOfItems(schema.items) : fieldType);
+        if (fieldType === 'array'){
             type = type + ' <span class="array-indicator">[]</span>';
         }
         return type;
@@ -1257,16 +1288,17 @@ class InfoIcon extends React.Component{
     }
 
     render() {
-        if (!this.props.children || typeof this.props.children !== 'string') return null;
-        var tip = this.props.children;
-        if (typeof this.props.title === 'string' && this.props.title.length){
-            tip = '<h5 class="mt-03 mb-05 text-600">' + this.props.title + '</h5>' + tip;
+        const { children, title, fieldType, className } = this.props;
+        if (!children || typeof children !== 'string') return null;
+        let tip = children;
+        if (typeof title === 'string' && title.length > 0){
+            tip = '<h5 class="mt-03 mb-05 text-600">' + title + '</h5>' + tip;
         }
-        if (typeof this.props.fieldType === 'string' && this.props.fieldType.length){
+        if (typeof fieldType === 'string' && fieldType.length > 0){
             tip += '<h6 class="mt-07 text-300">Field Type: <span class="text-400">' + this.fieldTypeDescriptor() + '</span></h6>';
         }
         return (
-            <i className="icon icon-info-circle" data-tip={tip} data-html/>
+            <i className={"icon icon-info-circle" + (className? ' ' + className : '')} data-tip={tip} data-html/>
         );
     }
 }

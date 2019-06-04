@@ -6,11 +6,11 @@ import _ from 'underscore';
 import url from 'url';
 import Alerts from './alerts';
 import { content_views } from './globals';
-import { console, object, Schemas, JWT, layout, DateUtility, typedefs } from './util';
-import { windowHref } from './globals';
+import { console, object, Schemas, JWT, layout, DateUtility, typedefs, itemTypeHierarchy } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
 
+// eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
 
 /**
@@ -36,7 +36,7 @@ const TITLE_PATHNAME_MAP = {
             if (currentAction === 'selection') return 'Selecting';
             return 'Search';
         },
-        'calloutTitle' : function(pathName, context, href, currentAction){
+        'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction){
             var thisTypeTitle = Schemas.getSchemaTypeFromSearchContext(context);
             return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
@@ -133,7 +133,7 @@ export default class PageTitle extends React.PureComponent {
         var currentPathName = null,
             currentPathRoot, title,
             atId = object.atIdFromObject(context),
-            currentHref = isMounted ? windowHref(href) : href,
+            currentHref = isMounted ? (window && window.location && window.location.href) || href : href,
             currentHrefParts = url.parse(currentHref);
 
         if (typeof atId === 'string'){
@@ -178,7 +178,7 @@ export default class PageTitle extends React.PureComponent {
         title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
 
         if (!title) {
-            
+
             var pathRoot = currentPathName.split('/')[1] || null;
             if (typeof pathRoot === 'string' && pathRoot.length > 0){
                 currentPathName = '/' + pathRoot + '/*';
@@ -206,14 +206,14 @@ export default class PageTitle extends React.PureComponent {
 
         /**** Post-mapping overrides ****/
         if (object.isAnItem(context)){ // If Item
-            
+
             title = object.itemUtil.getTitleStringFromContext(context);
             var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
 
             // Handle long title strings by Item type
             if (itemTypeTitle === 'Publication'){
                 if (context.title && context.short_attribution){
-                    return {'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
+                    return { 'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
                 }
                 return { 'title' : itemTypeTitle, 'subtitle' : title, 'subtitleEllipsis' : true };
             }
@@ -245,7 +245,7 @@ export default class PageTitle extends React.PureComponent {
                     viewReturnsTypeInfo = true; // Assume it failed because trying to access "this", which means typeInfo() most likely does & returns something.
                     console.warn(e);
                 }
-                if (!context.accession && !Schemas.itemTypeHierarchy[context['@type'][0]] && !viewReturnsTypeInfo && typeof title === 'string' && title.length > 20) {
+                if (!context.accession && !itemTypeHierarchy[context['@type'][0]] && !viewReturnsTypeInfo && typeof title === 'string' && title.length > 20) {
                     return { 'title' : itemTypeTitle, 'subtitle' : title };
                 }
                 return { 'title' : itemTypeTitle, 'calloutTitle' : title };
@@ -293,7 +293,6 @@ export default class PageTitle extends React.PureComponent {
     /** @ignore */
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
 
         /**
          * @private

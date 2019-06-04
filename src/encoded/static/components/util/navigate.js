@@ -50,8 +50,8 @@ var navigate = function(href, options = {}, callback = null, fallbackCallback = 
  */
 navigate.setNavigateFunction = function(navFxn){
     if (typeof navFxn !== 'function') throw new Error("Not a function.");
-    store = require('../../store');
-    //if (typeof window !== 'undefined') window.store2 = store;
+    // eslint-disable-next-line prefer-destructuring
+    store = require('../../store').store;
     cachedNavFunction = navFxn;
 };
 
@@ -68,7 +68,8 @@ navigate.getBrowseBaseParams = function(browseBaseState = null){
     }
     if (!browseBaseState){
         if (store === null){
-            store = require('../../store');
+            // eslint-disable-next-line prefer-destructuring
+            store = require('../../store').store;
         }
         var storeState = store.getState();
         browseBaseState = storeState.browseBaseState;
@@ -152,12 +153,22 @@ navigate.isBaseBrowseQuery = function(hrefQuery, browseBaseState = null){
 };
 
 
-navigate.setBrowseBaseStateAndRefresh = function(newBrowseBaseState = 'all', currentHref = null, context = null, navOptions = { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true }){
+navigate.setBrowseBaseStateAndRefresh = function(
+    newBrowseBaseState = 'all',
+    currentHref = null,
+    context = null,
+    navOptions = null,
+    callback = null
+){
 
     if (!currentHref || !context){
         var storeState = store.getState();
         currentHref = storeState.href;
         context = storeState.context;
+    }
+
+    if (navOptions === null || navOptions === undefined){
+        navOptions = { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true };
     }
 
     if (navigate.isBrowseHref(currentHref)){
@@ -171,7 +182,7 @@ navigate.setBrowseBaseStateAndRefresh = function(newBrowseBaseState = 'all', cur
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
         }
         // Refresh page THEN change update browse state b/c ChartDataController grabs 'expSetFilters' (to grab filtered aggregations) from context.filters so we want that in place before updating charts.
-        navigate(nextBrowseHref, navOptions, null, null, {
+        navigate(nextBrowseHref, navOptions, callback, null, {
             'browseBaseState' : newBrowseBaseState
         });
     } else {
@@ -181,6 +192,7 @@ navigate.setBrowseBaseStateAndRefresh = function(newBrowseBaseState = 'all', cur
                 'browseBaseState' : newBrowseBaseState
             }
         });
+        if (typeof callback === 'function') callback();
     }
 };
 

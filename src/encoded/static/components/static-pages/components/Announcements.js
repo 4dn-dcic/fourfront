@@ -60,12 +60,10 @@ class AnnouncementsLoaded extends React.Component {
 
     static defaultProps = {
         'searchURL' : '/search/?type=StaticSection&section_type=Announcement&sort=-date_created'
-    }
+    };
 
     constructor(props){
         super(props);
-        this.componentDidMount = this.componentDidMount.bind(this);
-        this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
         this.fetchAnnouncements = this.fetchAnnouncements.bind(this);
         this.handleAnnouncementsSearchResponse = this.handleAnnouncementsSearchResponse.bind(this);
         this.state = {
@@ -81,8 +79,8 @@ class AnnouncementsLoaded extends React.Component {
         else this.setState({ 'mounted' : true });
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.session !== this.props.session) this.fetchAnnouncements();
+    componentDidUpdate(pastProps){
+        if (pastProps.session !== this.props.session) this.fetchAnnouncements();
     }
 
     fetchAnnouncements(){
@@ -114,7 +112,7 @@ class AnnouncementsLoaded extends React.Component {
 
 /**
  * Component which shows currents announcements.
- * 
+ *
  * @prop {string} className - Outer <div> element's className
  * @prop {string} id - Outer <div> element's id attribute.
  */
@@ -135,13 +133,17 @@ export class Announcements extends React.Component {
     }
 
     toggleOpen(){
-        this.setState({ 'open' : !this.state.open });
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
     }
 
     render(){
         var { loaded, announcements, initiallyVisible, className, id, total } = this.props;
         if (loaded) return <AnnouncementsLoaded {...this.props} />;
-        if (!total) total = announcements.length;
+
+        var announcementsLength = (Array.isArray(announcements) && announcements.length) || 0;
+        if (!total) total = announcementsLength;
 
         var persistent, collapsible = null;
 
@@ -149,15 +151,15 @@ export class Announcements extends React.Component {
             return <Announcement key={announce.title} index={idx} section={announce} icon={collapsible ? true : false} />;
         }
 
-        if (announcements.length > initiallyVisible) {
+        if (announcementsLength === 0){
+            return <div className={'text-center ' + (className || '')} id={id}><em>No announcements</em></div>;
+        }
+
+        if (announcementsLength > initiallyVisible) {
             persistent = announcements.slice(0,initiallyVisible);
             collapsible = announcements.slice(initiallyVisible);
         } else {
             persistent = announcements;
-        }
-
-        if (!announcements || announcements.length === 0){
-            return <div className={'text-center ' + (className || '')} id={id}><em>No announcements</em></div>;
         }
 
         var onSeeMoreButtonClick = this.props.onSeeMoreClick || this.toggleOpen;

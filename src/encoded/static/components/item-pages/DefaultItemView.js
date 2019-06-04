@@ -2,15 +2,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
-import ReactTooltip from 'react-tooltip';
-import { content_views } from './../globals';
 import Alerts from './../alerts';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, ExternalReferenceLink,
-    FilesInSetTable, FormattedInfoBlock, ItemFooterRow, Publications, AttributionTabView } from './components';
-import { console, object, DateUtility, Filters, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
+import { ItemHeader, ItemDetailList, TabbedView, AuditTabView, Publications, AttributionTabView, BadgesTabView } from './components';
+import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
 import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
 
 var { TabObject, Item } = typedefs;
@@ -30,6 +28,24 @@ var { TabObject, Item } = typedefs;
  * Look at the render method to see how the functions are brought in together -- there shouldn't be a need to create own 'render' function from some Item view.
  */
 export default class DefaultItemView extends React.PureComponent {
+
+    static className = memoize(function(context){
+        const classes = [
+            'view-detail',
+            'item-page-container',
+            'container'
+        ];
+
+        _.forEach((context['@type'] || []), function (type) {
+            classes.push('type-' + type);
+        });
+
+        if (typeof context.status === 'string'){
+            classes.push('status-' + context.status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,''));
+        }
+
+        return classes.join(' ');
+    });
 
     /**
      * Bind instance methods to `this` and creates an empty state object which may be extended by subclasses.
@@ -65,11 +81,17 @@ export default class DefaultItemView extends React.PureComponent {
         var { href, context } = this.props;
         if (!href) return;
 
-        var hrefParts = url.parse(href, true),
-            redirected_from = hrefParts.query && hrefParts.query.redirected_from,
-            redirected_from_accession = redirected_from && _.filter(redirected_from.split('/'))[1];
+        var hrefParts = url.parse(href, true);
+        var redirected_from = hrefParts.query && hrefParts.query.redirected_from;
+
+        if (Array.isArray(redirected_from)){
+            redirected_from = redirected_from[0];
+        }
+
+        var redirected_from_accession = redirected_from && _.filter(redirected_from.split('/'))[1];
 
         if (typeof redirected_from_accession !== 'string' || redirected_from_accession.slice(0,3) !== '4DN') redirected_from_accession = null; // Unset if not in form of accession.
+
         if (redirected_from_accession && context.accession && Array.isArray(context.alternate_accessions) && context.alternate_accessions.indexOf(redirected_from_accession) > -1){
             // Find @id of our redirected_from item.
             ajax.load('/search/?type=Item&field=@id&field=uuid&field=accession&status=replaced&accession=' + redirected_from_accession, (r)=>{
@@ -111,16 +133,28 @@ export default class DefaultItemView extends React.PureComponent {
      * @param {Object} props Current props sent down to view. Should be about same as in App render function.
      * @returns {TabObject[]}
      */
-    getCommonTabs(props = this.props){
+    getCommonTabs(){
         var returnArr = [],
             { context, schemas, windowWidth } = this.props;
-    
+
+        // Attribution Tab
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
 
         returnArr.push(ItemDetailList.getTabObject(this.props));
-        returnArr.push(AuditTabView.getTabObject(this.props));
+
+        // Badges, if any
+        const badges = BadgesTabView.getBadgesList(context);
+        if (badges){
+            returnArr.push(BadgesTabView.getTabObject(this.props));
+        }
+
+        // Audits, if any -- THESE WILL BE DEPRECATED SOME DAY
+        if (AuditTabView.doAnyAuditsExist(context)){
+            returnArr.push(AuditTabView.getTabObject(this.props));
+        }
+
         return returnArr;
     }
 
@@ -146,12 +180,10 @@ export default class DefaultItemView extends React.PureComponent {
      * Calculated width of tabview pane.
      * Alias of `layout.gridContainerWidth(this.props.windowWidth)`.
      *
-     * @returns {void}
+     * @returns {number} Width of tabview.
      */
     getTabViewWidth(){
-        var windowWidth = this.props.windowWidth,
-            width = layout.gridContainerWidth(windowWidth);
-        return width;
+        return layout.gridContainerWidth(this.props.windowWidth);
     }
 
     /**
@@ -184,7 +216,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {string} A className
      */
     itemClassName(){
-        return itemClass(this.props.context, 'view-detail item-page-container');
+        return DefaultItemView.className(this.props.context);
     }
 
     /**
@@ -217,7 +249,7 @@ export default class DefaultItemView extends React.PureComponent {
      */
     itemHeader(){
         return (
-            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')} className="exp-set-header-area">
+            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <ItemHeader.TopRow typeInfo={this.typeInfo()} />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
@@ -229,13 +261,18 @@ export default class DefaultItemView extends React.PureComponent {
      * Returns list of elements to be rendered between Item header and the list of properties (or Tabs).
      * May be extended/customized.
      *
-     * @returns {JSX.Element[]} By default, `Publications.ProducedInPublicationBelowHeaderRow` and `StaticHeaderArea` component instances.
+     * **NOTE: If adding something here and intend it to apply to _ALL_ Item views:**,
+     * Ensure any Item views which extend/override this method also receive this edit.
+     *
+     * @returns {JSX.Element[]} By default, `Publications.PublicationBelowHeaderRow` and `StaticHeaderArea` component instances.
      */
     itemMidSection(){
-        return [
-            <Publications.ProducedInPublicationBelowHeaderRow {...this.props} produced_in_pub={this.props.context.produced_in_pub} key="publication-info" />,
-            <StaticHeadersArea context={this.props.context} key="static-headers-area" />
-        ];
+        return (
+            <React.Fragment>
+                <Publications.PublicationBelowHeaderRow {...this.props} publication={this.props.context.produced_in_pub} key="publication-info" />
+                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
+            </React.Fragment>
+        );
     }
 
     /**
@@ -244,7 +281,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @protected
      * @returns {JSX.Element}
      */
-    tabbedView(){
+    renderTabbedView(){
         return (
             <TabbedView {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
                 contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView" />
@@ -261,7 +298,9 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * The render method which puts the above method outputs together. Do not extend; instead, extend other methods which are called in this render method.
+     * The render method which puts the above method outputs together.
+     * Should not override except for rare cases; instead, override other
+     * methods which are called in this render method.
      *
      * @private
      * @protected
@@ -269,14 +308,10 @@ export default class DefaultItemView extends React.PureComponent {
      */
     render() {
         return (
-            <div className={this.itemClassName()}>
-
+            <div className={this.itemClassName()} id="content">
                 { this.itemHeader() }
                 { this.itemMidSection() }
-
-                <div className="row">
-                    <div className="col-xs-12 col-md-12 tab-view-container" children={this.tabbedView()} />
-                </div>
+                { this.renderTabbedView() }
                 <br/>
                 { this.itemFooter() }
             </div>
@@ -285,11 +320,6 @@ export default class DefaultItemView extends React.PureComponent {
 
 }
 
-content_views.register(DefaultItemView, 'Item');
-
-
-
-
 
 
 
@@ -297,28 +327,6 @@ content_views.register(DefaultItemView, 'Item');
 /*******************************************
  ****** Helper Components & Functions ******
  *******************************************/
-
-/**
- * @deprecated
- */
-export function itemClass(context, htmlClass) {
-    htmlClass = htmlClass || '';
-    (context['@type'] || []).forEach(function (type) {
-        htmlClass += ' type-' + type;
-    });
-    return statusClass(context.status, htmlClass);
-}
-
-/**
- * @deprecated
- */
-export function statusClass(status, htmlClass) {
-    htmlClass = htmlClass || '';
-    if (typeof status == 'string') {
-        htmlClass += ' status-' + status.toLowerCase().replace(/ /g, '-').replace(/\(|\)/g,'');
-    }
-    return htmlClass;
-}
 
 
 /**
@@ -372,15 +380,13 @@ export class EmbeddedItemWithAttachment extends React.Component {
     filename(){
         return (this.props.item && this.props.item.attachment && this.props.item.attachment.download) || object.itemUtil.getTitleStringFromContext(this.props.item) || null;
     }
-    
+
     render(){
         var { item, index } = this.props,
             linkToItem = object.itemUtil.atId(item),
             isInArray = typeof index === 'number';
 
         if (!item || !linkToItem) return null;
-
-        var itemTitle = object.itemUtil.getTitleStringFromContext(item);
 
         var viewAttachmentButton = null;
         var haveAttachment = (item.attachment && item.attachment.href && typeof item.attachment.href === 'string');
@@ -389,7 +395,7 @@ export class EmbeddedItemWithAttachment extends React.Component {
                 <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={this.filename()} href={linkToItem + item.attachment.href} disabled={!haveAttachment} className='text-ellipsis-container btn-block' />
             );
         }
-        
+
         return (
             <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToItem}>
                 <div className="row">
@@ -435,7 +441,7 @@ export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment 
 
         var imageElem = <a href={linkToItem} className="image-wrapper"><img className="embedded-item-image" src={linkToItem + item.attachment.href} /></a>;
         var captionText = (item.attachment && item.attachment.caption) || this.filename();
-        
+
         return (
             <div className={"embedded-item-with-attachment is-image" + (isInArray ? ' in-array' : '')} key={linkToItem}>
                 <div className="inner">{ imageElem }{ this.caption() }</div>
@@ -445,7 +451,7 @@ export class EmbeddedItemWithImageAttachment extends EmbeddedItemWithAttachment 
 }
 
 
-export class OverViewBodyItem extends React.Component {
+export class OverViewBodyItem extends React.PureComponent {
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
@@ -550,24 +556,28 @@ export class OverViewBodyItem extends React.Component {
         'listWrapperElementProps'       : null,
         'listItemElement'               : 'li',
         'listItemElementProps'          : null,
-        'columnExtraClassName'          : null,
         'singleItemClassName'           : null,
         'fallbackTitle'                 : null,
         'propertyForLabel'              : null,
         'property'                      : null
+    };
+
+    constructor(props){
+        super(props);
+        this.createList = memoize(this.createList);
     }
 
     /** Feeds params + props into static function */
-    createList(valueForProperty, listItemElement, listItemElementProps){
-        return OverViewBodyItem.createList(valueForProperty, this.props.property, this.props.titleRenderFxn, this.props.addDescriptionTipForLinkTos, listItemElement, listItemElementProps, this.props.result);
+    createList(valueForProperty, property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps, result){
+        return OverViewBodyItem.createList(valueForProperty, property, titleRenderFxn, addDescriptionTipForLinkTos, listItemElement, listItemElementProps, result);
     }
 
     render(){
-        var { 
+        var {
             result, property, fallbackValue, fallbackTitle, titleRenderFxn, addDescriptionTipForLinkTos, propertyForLabel,
-            listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, columnExtraClassName, singleItemClassName
+            listWrapperElement, listWrapperElementProps, listItemElement, listItemElementProps, wrapInColumn, singleItemClassName
         } = this.props;
-        
+
         function fallbackify(val){
             if (!property) return titleRenderFxn(property, result, true, addDescriptionTipForLinkTos, null, 'div', result);
             return val || fallbackValue || 'None';
@@ -582,7 +592,15 @@ export class OverViewBodyItem extends React.Component {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
-        var resultPropertyValue = property && this.createList( object.getNestedProperty(result, property), listItemElement, listItemElementProps );
+        var resultPropertyValue = property && this.createList(
+            object.getNestedProperty(result, property),
+            property,
+            titleRenderFxn,
+            addDescriptionTipForLinkTos,
+            listItemElement,
+            listItemElementProps,
+            result
+        );
 
         if (property && this.props.hideIfNoValue && (!resultPropertyValue || (Array.isArray(resultPropertyValue) && resultPropertyValue.length === 0))){
             return null;
@@ -618,19 +636,21 @@ export class OverViewBodyItem extends React.Component {
             );
         }
 
-        if (wrapInColumn){
-            var outerClassName = (columnExtraClassName ? columnExtraClassName : '');
-            if (typeof wrapInColumn === 'string'){
-                // MAYBE TODO-REMOVE / ANTI-PATTERN
-                if (wrapInColumn === 'auto' && this._reactInternalInstance && this._reactInternalInstance._hostParent && this._reactInternalInstance._hostParent._currentElement && this._reactInternalInstance._hostParent._currentElement.props && Array.isArray(this._reactInternalInstance._hostParent._currentElement.props.children)){
-                    var rowCountItems = React.Children.count(this._reactInternalInstance._hostParent._currentElement.props.children);
-                    outerClassName += ' col-md-' + (12 / rowCountItems) + ' col-xs-6';
-                } else outerClassName += ' ' + wrapInColumn;
-            } else {
-                outerClassName += " col-xs-6 col-md-4"; // Default column sizing
-            }
-            return <div className={outerClassName} key="outer" children={innerBlockReturned} />;
-        } else return innerBlockReturned;
-
+        return <WrapInColumn wrap={wrapInColumn}>{ innerBlockReturned }</WrapInColumn>;
     }
 }
+
+export function WrapInColumn(props){
+    const { children, wrap, className, defaultWrapClassName } = props;
+    if (!wrap) return children;
+
+    let wrapClassName;
+    if (wrap === true)                  wrapClassName = defaultWrapClassName;
+    else if (typeof wrap === 'string')  wrapClassName = wrap;
+    return <div className={wrapClassName + (className ? ' ' + className : '')}>{ children }</div>;
+}
+WrapInColumn.defaultProps = {
+    'wrap' : false,
+    'defaultWrapClassName' : "col-xs-6 col-md-4"
+};
+

@@ -6,10 +6,10 @@ pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_parse_args_defaults():
-    args = ['development.ini', '--app-name', 'app']
+    args = []
     args = go.parse_args(args)
     assert args.ontologies == 'all'
-    assert args.key is None
+    assert args.key == 's3'
     assert args.env == 'data'
 
 
@@ -893,10 +893,11 @@ def test_write_outfile_pretty(simple_terms):
 
 
 def test_write_outfile_notpretty(simple_terms):
+    # import pdb; pdb.set_trace()
     print(simple_terms)
     import json
     filename = 'tmp_test_file'
-    go.write_outfile(simple_terms.values(), filename)
+    go.write_outfile(list(simple_terms.values()), filename)
     with open(filename, 'r') as infile:
         for l in infile:
             result = json.loads(l)
@@ -918,8 +919,8 @@ def test_terms_match_w_parents(matches):
     t1 = matches[0]
     t2 = matches[1]
     p1 = ['OBI:01', 'EFO:01']
-    p2 = [{'link_id': '~ontology-terms~OBI:01~', 'display_title': 'blah'},
-          {'link_id': '~ontology-terms~EFO:01~', 'display_title': 'hah'}]
+    p2 = [{'@id': '/ontology-terms/OBI:01/', 'display_title': 'blah'},
+          {'@id': '/ontology-terms/EFO:01/', 'display_title': 'hah'}]
     t1['parents'] = p1
     t2['parents'] = p2
     assert go._terms_match(t1, t2)
@@ -929,7 +930,7 @@ def test_terms_match_unmatched_parents_1(matches):
     t1 = matches[0]
     t2 = matches[1]
     p1 = ['OBI:01', 'EFO:01']
-    p2 = [{'link_id': '~ontology-terms~OBI:01~', 'display_title': 'blah'}]
+    p2 = [{'@id': '/ontology-terms/OBI:01/', 'display_title': 'blah'}]
     t1['parents'] = p1
     t2['parents'] = p2
     assert not go._terms_match(t1, t2)
@@ -939,8 +940,8 @@ def test_terms_match_unmatched_parents_2(matches):
     t1 = matches[0]
     t2 = matches[1]
     p1 = ['OBI:01', 'EFO:01']
-    p2 = [{'link_id': '~ontology-terms~OBI:01~', 'display_title': 'blah'},
-          {'link_id': '~ontology-terms~EFO:02~', 'display_title': 'hah'}]
+    p2 = [{'@id': '/ontology-terms/OBI:01/', 'display_title': 'blah'},
+          {'@id': '/ontology-terms/EFO:02/', 'display_title': 'hah'}]
     t1['parents'] = p1
     t2['parents'] = p2
     assert not go._terms_match(t1, t2)
@@ -950,7 +951,7 @@ def test_terms_match_w_ontology(matches):
     t1 = matches[0]
     t2 = matches[1]
     o1 = '530016bc-8535-4448-903e-854af460b254'
-    o2 = {'link_id': '~ontologys~530016bc-8535-4448-903e-854af460b254~', 'display_title': 'blah'}
+    o2 = {'@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/', 'display_title': 'blah'}
     t1['source_ontology'] = o1
     t2['source_ontology'] = o2
     assert go._terms_match(t1, t2)
@@ -960,7 +961,7 @@ def test_terms_match_unmatched_ontology(matches):
     t1 = matches[0]
     t2 = matches[1]
     o1 = '530016bc-8535-4448-903e-854af460b254'
-    o2 = {'link_id': '~ontologys~530016bc-8535-4448-903e-854af460b000~', 'display_title': 'blah'}
+    o2 = {'@id': '/ontologys/530016bc-8535-4448-903e-854af460b000/', 'display_title': 'blah'}
     t1['source_ontology'] = o1
     t2['source_ontology'] = o2
     assert not go._terms_match(t1, t2)
@@ -1070,11 +1071,10 @@ def valid_uuid(uid):
     return True
 
 
-def test_add_uuids(partitioned_terms):
-    result = go.add_uuids(partitioned_terms)
-    assert len(result) == 2
-    news = result[0]
-    for t in news:
+def test_add_uuids_and_combine(partitioned_terms):
+    result = go.add_uuids_and_combine(partitioned_terms)
+    assert len(result) == 4
+    for t in result:
         assert 'uuid' in t
         assert valid_uuid(t['uuid'])
         if t['term_id'] == 't1':
@@ -1085,20 +1085,9 @@ def test_add_uuids(partitioned_terms):
             for p in t['parents']:
                 assert valid_uuid(p)
     assert t1uuid == t3puuid
-    patch = result[1][0]
-    assert valid_uuid(patch['uuid'])
-    assert valid_uuid(patch['parents'][0])
 
 
-def test_add_uuids_no_post(partitioned_terms):
-    del partitioned_terms['post']
-    result = go.add_uuids(partitioned_terms)
-    assert len(result) == 2
-    assert result[0] is None
-
-
-def test_add_uuids_no_patch(partitioned_terms):
-    del partitioned_terms['patch']
-    result = go.add_uuids(partitioned_terms)
-    assert len(result) == 2
-    assert result[1] is None
+def test_add_uuids_and_combine_no_terms():
+    partitioned_terms = {'post': [], 'patch': [], 'idmap': {}}
+    result = go.add_uuids_and_combine(partitioned_terms)
+    assert not result

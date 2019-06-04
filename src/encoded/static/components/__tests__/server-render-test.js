@@ -71,14 +71,12 @@ describe("Server rendering", function () {
     });
 
     beforeEach(function () {
-        require('../../libs/react-patches');
-        App = require('..');
-        store = require('../../store');
+        App = require('..').default;
+        store = require('../../store').store;
         // test dispatching some values to store
         var dispatch_vals = {
             'href':home_url,
             'context':home,
-            'inline':'',
             'contextRequest':{},
             'slow':false
         };

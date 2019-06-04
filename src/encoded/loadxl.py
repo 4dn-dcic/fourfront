@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Load collections and determine the order."""
 import mimetypes
 import structlog
@@ -10,6 +11,7 @@ from dcicutils.beanstalk_utils import get_beanstalk_real_url
 from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
+from pyramid.response import Response
 from datetime import datetime
 from base64 import b64encode
 from PIL import Image
@@ -43,20 +45,48 @@ IS_ATTACHMENT = [
 ]
 
 
+class LoadGenWrapper(object):
+    """
+    Simple class that accepts a generator function and handles errors by
+    setting self.caught to the error message.
+    """
+    def __init__(self, gen):
+        self.gen = gen
+        self.caught = None
+
+    def __iter__(self):
+        """
+        Iterate through self.gen and see if 'ERROR: ' bytes are in any yielded
+        value. If so, store the error message as self.caught and raise
+        StopIteration to halt the generator.
+        """
+        # self.caught = yield from self.gen
+        for iter_val in self.gen:
+            if b'ERROR:' in iter_val:
+                self.caught = iter_val.decode()
+            yield iter_val
+
+    def close(self):
+        if self.caught:
+            logger.error('load_data: failed to load with iter_response', error=self.caught)
+
+
 @view_config(route_name='load_data', request_method='POST', permission='add')
 def load_data_view(context, request):
     '''
     expected input data
 
-    {'local_dir': inserts folder on your computer
+    {'local_path': path to a directory or file in file system
      'fdn_dir': inserts folder under encoded
-     'store': if not local_dir or fdn_dir, use the dictionary
+     'store': if not local_path or fdn_dir, look for a dictionary of items here
      'overwrite' (Bool): overwrite if existing data
-     'itype': (list or str): only pick some types from the source
+     'itype': (list or str): only pick some types from the source or specify type in in_file
+     'iter_response': invoke the Response as an app_iter, directly calling load_all_gen
      'config_uri': user supplied configuration file}
 
     post can contain 2 different styles of data
-    1) reference to a folder
+    1) reference to a folder or file (local_path or fd_dir). If this is done
+       itype can be optionally used to specify type of items loaded from files
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     '''
@@ -74,23 +104,38 @@ def load_data_view(context, request):
     }
     from pkg_resources import resource_filename
     store = request.json.get('store', {})
+    local_path = request.json.get('local_path')
     fdn_dir = request.json.get('fdn_dir')
-    local_dir = request.json.get('local_dir')
     overwrite = request.json.get('overwrite', False)
-    itype = request.json.get('itype', None)
-
+    itype = request.json.get('itype')
+    iter_resp = request.json.get('iter_response', False)
+    inserts = None
+    from_json = False
     if fdn_dir:
-        fdn_inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
-        res = load_all(testapp, fdn_inserts, None, overwrite=overwrite, itype=itype)
-    elif local_dir:
-        res = load_all(testapp, local_dir, None, overwrite=overwrite, itype=itype)
+        inserts = resource_filename('encoded', 'tests/data/' + fdn_dir + '/')
+    elif local_path:
+        inserts = local_path
     elif store:
-        res = load_all(testapp, store, None, overwrite=overwrite, itype=itype, from_json=True)
+        inserts = store
+        from_json = True
+    # if we want to iterate over the response to keep the connection alive
+    # this directly calls load_all_gen, instead of load_all
+    if iter_resp:
+        return Response(
+            content_type = 'text/plain',
+            app_iter = LoadGenWrapper(
+                load_all_gen(testapp, inserts, None, overwrite=overwrite,
+                             itype=itype, from_json=from_json)
+            )
+        )
+    # otherwise, it is a regular view and we can call load_all as usual
+    if inserts:
+        res = load_all(testapp, inserts, None, overwrite=overwrite, itype=itype, from_json=from_json)
     else:
         res = 'No uploadable content found!'
 
-    # Expect res to be empty if load_all is success?
-    if res:
+    if res:  # None if load_all is successful
+        print(LOAD_ERROR_MESSAGE)
         request.response.status = 422
         result['status'] = 'error'
         result['@graph'] = str(res)
@@ -180,38 +225,117 @@ def format_for_attachment(json_data, docsdir):
     return json_data
 
 
+LOAD_ERROR_MESSAGE = """#   ██▓     ▒█████   ▄▄▄      ▓█████▄  ██▓ ███▄    █   ▄████
+#  ▓██▒    ▒██▒  ██▒▒████▄    ▒██▀ ██▌▓██▒ ██ ▀█   █  ██▒ ▀█▒
+#  ▒██░    ▒██░  ██▒▒██  ▀█▄  ░██   █▌▒██▒▓██  ▀█ ██▒▒██░▄▄▄░
+#  ▒██░    ▒██   ██░░██▄▄▄▄██ ░▓█▄   ▌░██░▓██▒  ▐▌██▒░▓█  ██▓
+#  ░██████▒░ ████▓▒░ ▓█   ▓██▒░▒████▓ ░██░▒██░   ▓██░░▒▓███▀▒
+#  ░ ▒░▓  ░░ ▒░▒░▒░  ▒▒   ▓▒█░ ▒▒▓  ▒ ░▓  ░ ▒░   ▒ ▒  ░▒   ▒
+#  ░ ░ ▒  ░  ░ ▒ ▒░   ▒   ▒▒ ░ ░ ▒  ▒  ▒ ░░ ░░   ░ ▒░  ░   ░
+#    ░ ░   ░ ░ ░ ▒    ░   ▒    ░ ░  ░  ▒ ░   ░   ░ ░ ░ ░   ░
+#      ░  ░    ░ ░        ░  ░   ░     ░           ░       ░
+#                              ░
+#   ██▓ ███▄    █   ██████ ▓█████  ██▀███  ▄▄▄█████▓  ██████
+#  ▓██▒ ██ ▀█   █ ▒██    ▒ ▓█   ▀ ▓██ ▒ ██▒▓  ██▒ ▓▒▒██    ▒
+#  ▒██▒▓██  ▀█ ██▒░ ▓██▄   ▒███   ▓██ ░▄█ ▒▒ ▓██░ ▒░░ ▓██▄
+#  ░██░▓██▒  ▐▌██▒  ▒   ██▒▒▓█  ▄ ▒██▀▀█▄  ░ ▓██▓ ░   ▒   ██▒
+#  ░██░▒██░   ▓██░▒██████▒▒░▒████▒░██▓ ▒██▒  ▒██▒ ░ ▒██████▒▒
+#  ░▓  ░ ▒░   ▒ ▒ ▒ ▒▓▒ ▒ ░░░ ▒░ ░░ ▒▓ ░▒▓░  ▒ ░░   ▒ ▒▓▒ ▒ ░
+#   ▒ ░░ ░░   ░ ▒░░ ░▒  ░ ░ ░ ░  ░  ░▒ ░ ▒░    ░    ░ ░▒  ░ ░
+#   ▒ ░   ░   ░ ░ ░  ░  ░     ░     ░░   ░   ░      ░  ░  ░
+#   ░           ░       ░     ░  ░   ░                    ░
+#
+#    █████▒▄▄▄       ██▓ ██▓    ▓█████ ▓█████▄
+#  ▓██   ▒▒████▄    ▓██▒▓██▒    ▓█   ▀ ▒██▀ ██▌
+#  ▒████ ░▒██  ▀█▄  ▒██▒▒██░    ▒███   ░██   █▌
+#  ░▓█▒  ░░██▄▄▄▄██ ░██░▒██░    ▒▓█  ▄ ░▓█▄   ▌
+#  ░▒█░    ▓█   ▓██▒░██░░██████▒░▒████▒░▒████▓
+#   ▒ ░    ▒▒   ▓▒█░░▓  ░ ▒░▓  ░░░ ▒░ ░ ▒▒▓  ▒
+#   ░       ▒   ▒▒ ░ ▒ ░░ ░ ▒  ░ ░ ░  ░ ░ ▒  ▒
+#   ░ ░     ░   ▒    ▒ ░  ░ ░      ░    ░ ░  ░
+#               ░  ░ ░      ░  ░   ░  ░   ░
+#                                       ░                    """
+
+
 def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
-    """convert data to store format dictionary (same format expected from from_json=True),
+    """
+    Wrapper function for load_all_gen, which invokes the generator returned
+    from that function. Takes all of the same args as load_all_gen, so
+    please reference that docstring.
+
+    This function uses LoadGenWrapper, which will catch a returned value from
+    the execution of the generator, which is an Exception in the case of
+    load_all_gen. Return that Exception if encountered, which is consistent
+    with the functionality of load_all_gen.
+    """
+    gen = LoadGenWrapper(
+        load_all_gen(testapp, inserts, docsdir, overwrite, itype, from_json)
+    )
+    # run the generator; don't worry about the output
+    for _ in gen:
+        pass
+    # gen.caught will str error message on error, otherwise None on success
+    if gen.caught is not None:
+        return Exception(gen.caught)
+    return gen.caught
+
+
+def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=False):
+    """
+    Generator function that yields bytes information about each item POSTed/PATCHed.
+    Is the base functionality of load_all function.
+
+    convert data to store format dictionary (same format expected from from_json=True),
     assume main function is to load reasonable number of inserts from a folder
 
-    args:
+    Args:
         testapp
-        inserts : either a folder, or a dictionary in the store format
+        inserts : either a folder, file, or a dictionary in the store format
         docsdir : attachment folder
         overwrite (bool)   : if the database contains the item already, skip or patch
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
 
-    returns:
-        None if successful, otherwise an Exception
+    Yields:
+        Bytes with information on POSTed/PATCHed items
+
+    Returns:
+        None if successful, otherwise a bytes error message
     """
+    # TODO: deal with option of file to load (not directory struture)
     if docsdir is None:
         docsdir = []
     # Collect Items
     store = {}
-    if from_json:
+    if from_json:  # we are directly loading json
         store = inserts
-    if not from_json:
-        # grab json files
-        if not inserts.endswith('/'):
-            inserts += '/'
-        files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+    if not from_json:  # we are loading a file
+        use_itype = False
+        if os.path.isdir(inserts):  # we've specified a directory
+            if not inserts.endswith('/'):
+                inserts += '/'
+            files = [i for i in os.listdir(inserts) if i.endswith('.json')]
+        elif os.path.isfile(inserts):  # we've specified a single file
+            files = [inserts]
+            # use the item type if provided AND not a list
+            # otherwise guess from the filename
+            use_itype = True if (itype and isinstance(itype, basestring)) else False
+        else:  # cannot get the file
+            err_msg = 'Failure loading inserts from %s. Could not find matching file or directory.' % inserts
+            print(err_msg)
+            yield str.encode('ERROR: %s\n' % err_msg)
+            raise StopIteration
+        # load from the directory/file
         for a_file in files:
-            item_type = a_file.split('/')[-1].replace(".json", "")
-            with open(inserts + a_file) as f:
+            if use_itype:
+                item_type = itype
+            else:
+                item_type = a_file.split('/')[-1].replace(".json", "")
+                a_file = inserts + a_file
+            with open(a_file) as f:
                 store[item_type] = json.loads(f.read())
     # if there is a defined set of items, subtract the rest
-    if itype is not None:
+    if itype:
         if isinstance(itype, list):
             store = {i: store[i] for i in itype if i in store}
         else:
@@ -219,10 +343,16 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
     # clear empty values
     store = {k: v for k, v in store.items() if v is not None}
     if not store:
-        logger.error('No items found in %s %s', inserts, item_type)
-        return
+        if from_json:
+            err_msg = 'No items found in input "store" json'
+        else:
+            err_msg = 'No items found in %s' % inserts
+        if itype:
+            err_msg += ' for item type(s) %s' % itype
+        print(err_msg)
+        yield str.encode('ERROR: %s' % err_msg)
+        raise StopIteration
     # order Items
-
     all_types = list(store.keys())
     for ref_item in reversed(ORDER):
         if ref_item in all_types:
@@ -243,7 +373,7 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
         if 'aliases' not in ids:
             ids.append('aliases')
         # file format is required for files, but its usability depends this field
-        if a_type == 'file_format':
+        if a_type in ['file_format', 'experiment_type']:
             req_fields.append('valid_item_types')
         first_fields = list(set(req_fields+ids))
         skip_existing_items = set()
@@ -257,22 +387,29 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 exists = True
             except:
                 exists = False
-            # skip the items that exists, if overwrite is not allowed, they them out from patch list
+            # skip the items that exists
+            # if overwrite=True, still include them in PATCH round
             if exists:
                 skip_exist += 1
                 if not overwrite:
                     skip_existing_items.add(an_item['uuid'])
-                continue
-            post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
-            post_first = format_for_attachment(post_first, docsdir)
-            try:
-                res = testapp.post_json('/'+a_type, post_first)
-                assert res.status_code == 201
-                posted += 1
-            except Exception as e:
-                logger.error('load_all: could not POST item', error=trim(str(e)),
-                              uuid=post_first.get('uuid'), item_type=obj_type)
-                return e
+                yield str.encode('SKIP: %s\n' % an_item['uuid'])
+            else:
+                post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+                post_first = format_for_attachment(post_first, docsdir)
+                try:
+                    res = testapp.post_json('/'+a_type, post_first)
+                    assert res.status_code == 201
+                    posted += 1
+                    # yield bytes to work with Response.app_iter
+                    yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
+                except Exception as e:
+                    print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
+                          a_type, str(first_fields), str(e)))
+                    # remove newlines from error, since they mess with generator output
+                    e_str = str(e).replace('\n', '')
+                    yield str.encode('ERROR: %s\n' % e_str)
+                    raise StopIteration
         second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
         logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
         logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
@@ -289,15 +426,21 @@ def load_all(testapp, inserts, docsdir, overwrite=True, itype=None, from_json=Fa
                 res = testapp.patch_json('/'+an_item['uuid'], an_item)
                 assert res.status_code == 200
                 patched += 1
+                # yield bytes to work with Response.app_iter
+                yield str.encode('PATCH: %s\n' % an_item['uuid'])
             except Exception as e:
-                logger.error('load_all: could not PATCH item', error=trim(str(e)),
-                              uuid=an_item.get('uuid'), item_type=obj_type)
-                return e
+                print('Patching {} failed. Patch body:\n{}\n\nError Message:\n{}'.format(
+                      a_type, str(an_item), str(e)))
+                e_str = str(e).replace('\n', '')
+                yield str.encode('ERROR: %s\n' % e_str)
+                raise StopIteration
         logger.info('{} 2nd: {} items patched .'.format(a_type, patched))
+
+    # explicit return upon finish
+    return None
 
 
 def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
-
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
@@ -361,7 +504,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
 
 
 def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
-              clear_tables=False, overwrite=False):
+              clear_tables=False, overwrite=False, use_master_inserts=True):
     '''
     This function will take the inserts folder as input, and place them to the given environment.
     args:
@@ -382,9 +525,10 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
             Base.metadata.drop_all(session.connection().engine)
             Base.metadata.create_all(session.connection().engine)
         except Exception as e:
-            logger.error("error droping tables: %s" % str(e))
+            logger.error("load_data: error dropping tables: %s" % str(e))
             transaction.abort()
         else:
+            logger.warning("load_data: successfully dropped tables")
             transaction.commit()
         transaction.begin()
 
@@ -395,11 +539,14 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
     }
     testapp = TestApp(app, environ)
     from pkg_resources import resource_filename
-    if indir != 'master-inserts':  # Always load up master_inserts
+    # load master-inserts by default
+    if indir != 'master-inserts' and use_master_inserts:
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
         master_res = load_all(testapp, master_inserts, [])
         if master_res:  # None if successful
-            logger.error('load_data: failed to load from%s' % master_inserts, error=master_res)
+            print(LOAD_ERROR_MESSAGE)
+            logger.error('load_data: failed to load from %s' % master_inserts, error=master_res)
+            return master_res
 
     if not indir.endswith('/'):
         indir += '/'
@@ -412,22 +559,31 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
         docsdir = [resource_filename('encoded', 'tests/data/' + docsdir)]
     res = load_all(testapp, inserts, docsdir, overwrite=overwrite)
     if res:  # None if successful
+        print(LOAD_ERROR_MESSAGE)
         logger.error('load_data: failed to load from %s' % docsdir, error=res)
+        return res
     keys = generate_access_key(testapp, access_key_loc)
     store_keys(app, access_key_loc, keys)
+    return None  # unnecessary, but makes it more clear that no error was encountered
 
 
 def load_test_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load inserts and master-inserts
+
+    Returns:
+        None if successful, otherwise Exception encountered
     """
-    load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-              clear_tables=clear_tables, overwrite=overwrite)
+    return load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                     clear_tables=clear_tables, overwrite=overwrite)
 
 
 def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load temp-local-inserts. If not present, load inserts and master-inserts
+
+    Returns:
+        None if successful, otherwise Exception encountered
     """
     from pkg_resources import resource_filename
     # if we have any json files in temp-local-inserts, use those
@@ -437,49 +593,19 @@ def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=Fals
         use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
 
     if use_temp_local:
-        load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
-                  clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
+        return load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
+                         clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
     else:
-        load_data(app, access_key_loc, docsdir='documents', indir='inserts',
-                  clear_tables=clear_tables, overwrite=overwrite)
+        return load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+                         clear_tables=clear_tables, overwrite=overwrite)
 
 
 def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
     """
     Load master-inserts
+
+    Returns:
+        None if successful, otherwise Exception encountered
     """
-    load_data(app, access_key_loc, indir='master-inserts',
-              clear_tables=clear_tables, overwrite=overwrite)
-
-
-def load_ontology_terms(app, post_json=None, patch_json=None):
-    from webtest import TestApp
-    from webtest.app import AppError
-    # change the data format from list to store
-    if post_json:
-        post_json = {'ontology_term': post_json}
-    if patch_json:
-        patch_json = {'ontology_term': patch_json}
-
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-
-    if post_json:
-        post_res = load_all(testapp, post_json, None, itype='ontology_term')
-        if post_res:  # None if successful
-            logger.error('load_ontology_terms: failed to POST', error=post_res)
-
-    if patch_json:
-        patch_res = load_all(testapp, patch_json, None, itype='ontology_term', overwrite=True)
-        if patch_res:  # None if successful
-            logger.error('load_ontology_terms: failed to PATCH', error=patch_res)
-
-    # now keep track of the last time we loaded these suckers
-    data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
-    try:
-        testapp.post_json("/sysinfo", data)
-    except AppError:
-        testapp.patch_json("/sysinfo/%s" % data['name'], data)
+    return load_data(app, access_key_loc, indir='master-inserts',
+                     clear_tables=clear_tables, overwrite=overwrite)

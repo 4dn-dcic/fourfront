@@ -21,7 +21,7 @@ class DataReleaseUpdate(Item):
         "update_items.primary_id.status",
         "update_items.primary_id.tags",
         "update_items.primary_id.experiments_in_set.status",
-        "update_items.primary_id.experiments_in_set.experiment_type",
+        "update_items.primary_id.experiments_in_set.experiment_type.display_title",
         "update_items.primary_id.experiments_in_set.experiment_categorizer",
         "update_items.primary_id.experiments_in_set.biosample.biosource_summary",
         "update_items.primary_id.experiments_in_set.files.status",

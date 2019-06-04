@@ -4,6 +4,7 @@ import pytest
 from encoded.commands.run_upgrader_on_inserts import get_inserts
 import json
 import time
+from snovault import TYPES
 pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing]
 
 
@@ -82,9 +83,9 @@ def test_search_with_embedding(workbook, testapp):
     res_json = [bios for bios in res['@graph'] if bios['accession'] == '4DNBS1234567']
     assert len(res_json) == 1
     test_json = res_json[0]
-    # check defualt embedding: link_id and display_title for submitted_by
+    # check default embedding: @id and display_title for submitted_by
     assert test_json['submitted_by']['display_title'] == 'Wrangler Wrangler'
-    assert test_json['submitted_by']['link_id'] == '~users~986b362f-4eb6-4a9c-8173-3ab267307e3b~'
+    assert test_json['submitted_by']['@id'] == '/users/986b362f-4eb6-4a9c-8173-3ab267307e3b/'
     # this specific field should be embedded ('biosource.biosource_type')
     assert test_json['biosource'][0]['biosource_type'] == 'immortalized cell line'
     # this specific linked should be embedded ('biosource.biosource_vendor')
@@ -130,7 +131,6 @@ def test_search_with_simple_query(workbook, testapp):
 
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     # TODO: Adjust ordering of mixed-in facets, perhaps sort by lookup or something, in order to un-xfail.
-    from snovault import TYPES
     test_type = 'experiment_set_replicate'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
@@ -346,7 +346,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
-    from snovault.fourfront_utils import add_default_embeds
+    from snovault.util import add_default_embeds
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
@@ -377,6 +377,36 @@ def test_search_query_string_no_longer_functional(workbook, testapp):
     assert len(res_search.json['@graph']) == 0
 
 
+def test_search_with_added_display_title(workbook, testapp, registry):
+    # 4DNBS1234567 is display_title for biosample
+    search = '/search/?type=ExperimentHiC&biosample=4DNBS1234567'
+    # 301 because search query is changed
+    res_json = testapp.get(search, status=301).follow(status=200).json
+    assert res_json['@id'] == '/search/?type=ExperimentHiC&biosample.display_title=4DNBS1234567'
+    added_facet = [fct for fct in res_json['facets'] if fct['field'] == 'biosample.display_title']
+    # use the title from biosample in experiment schema
+    bios_title = registry[TYPES]['ExperimentHiC'].schema['properties']['biosample']['title']
+    assert added_facet[0]['title'] == bios_title
+    exps = [exp['uuid'] for exp in res_json['@graph']]
+
+    # make sure the search result is the same for the explicit query
+    res_json2 = testapp.get(res_json['@id']).json
+    exps2 = [exp['uuid'] for exp in res_json2['@graph']]
+    assert set(exps) == set(exps2)
+
+    # check to see that added facet doesn't conflict with existing facet title
+    # query below will change to file_format.display_title=fastq
+    search = '/search/?type=File&file_format=fastq'
+    res_json = testapp.get(search, status=301).follow(status=200).json
+    assert res_json['@id'] == '/search/?type=File&file_format.display_title=fastq'
+    # find title from schema
+    ff_title = registry[TYPES]['File'].schema['properties']['file_format']['title']
+    existing_ff_facet = [fct for fct in res_json['facets'] if fct['field'] == 'file_format.file_format']
+    assert existing_ff_facet[0]['title'] == ff_title
+    added_ff_facet = [fct for fct in res_json['facets'] if fct['field'] == 'file_format.display_title']
+    assert added_ff_facet[0]['title'] == ff_title + ' (Title)'
+
+
 def test_search_with_no_value(workbook, testapp):
     search = '/search/?description=No+value&description=GM12878+prepared+for+HiC&type=Biosample'
     res_json = testapp.get(search).json
@@ -392,8 +422,6 @@ def test_search_with_no_value(workbook, testapp):
     assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
-
-
 
 
 #########################################
@@ -484,14 +512,14 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
     # We should get back same count as from search results here.
     res = testapp.post_json('/bar_plot_aggregations', {
         "search_query_params" : { "type" : ['ExperimentSetReplicate'] },
-        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type", "award.project"]
+        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type.display_title", "award.project"]
     }).json
 
     # Our total count for experiment_sets should match # of exp_set_replicate inserts.abs
 
     assert (res['total']['experiment_sets'] == count_exp_set_test_inserts) or (res['total']['experiment_sets'] == search_result_count)
 
-    assert res['field'] == 'experiments_in_set.experiment_type' # top level field
+    assert res['field'] == 'experiments_in_set.experiment_type.display_title' # top level field
 
     assert isinstance(res['terms'], dict) is True
 

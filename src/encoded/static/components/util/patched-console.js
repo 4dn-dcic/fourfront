@@ -22,13 +22,17 @@ const patchedConsoleInstance = (function(){
     var PatchedConsole = function(){
 
         /**
-         * Check if process.env.NODE_ENV is not on 'production'.
+         * Check if `BUILDTYPE` constant is not on 'production'.
          *
-         * @return {boolean} - True if NODE_ENV != 'production'.
+         * @return {boolean} - True if `BUILDTYPE` != 'production'.
          */
         this.isDebugging = function(){
-            // process.env.NODE_ENV is set in webpack.config.js if running 'npm run build'
-            if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') {
+            // `BUILDTYPE` && `process.env.NODE_ENV` is set in webpack.config.js if running 'npm run build'
+            if (typeof BUILDTYPE === 'undefined'){
+                console.warn("BUILDTYPE var is not set - likely running uncompiled ES6 JS -or- compile-time issue.");
+                return true;
+            }
+            if (BUILDTYPE === "production") {
                 return false;
             }
             return true;

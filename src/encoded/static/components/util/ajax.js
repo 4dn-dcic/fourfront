@@ -69,8 +69,15 @@ export function load(url, callback, method = 'GET', fallback = null, data = null
     } else {
         xhr.send();
     }
+    return xhr;
 }
 
+/**
+ * Own implementation of an AJAX Promise.
+ * Similar to the modern `window.fetch` that most modern browsers support (excl. IE),
+ * but adds support for `abort` and all other nice features of the XMLHttpRequest
+ * interface.
+ */
 export function promise(url, method = 'GET', headers = {}, data = null, cache = true, debugResponse = false){
     var xhr;
     var promiseInstance = new Promise(function(resolve, reject) {
@@ -96,9 +103,9 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
         xhr.open(method, url, true);
         xhr = setHeaders(xhr, headers);
 
-        if(data){
+        if (data) {
             xhr.send(data);
-        }else{
+        } else {
             xhr.send();
         }
         return xhr;
@@ -112,25 +119,27 @@ export function promise(url, method = 'GET', headers = {}, data = null, cache = 
 
 /**
  * Wrapper around function promise() which is slightly more relevant for navigation.
- * Strips hash from URL, sets same origin police.
+ * Strips hash from URL, sets same origin policy.
  *
  * @export
  * @param {any} url
  * @param {any} options
  */
-export function fetch(url, options){
-    options = _.extend({credentials: 'same-origin'}, options);
-    var http_method = options.method || 'GET';
-    var headers = options.headers = _.extend({}, options.headers || {});
+export function fetch(targetURL, options){
+    options = _.extend({ 'credentials' : 'same-origin' }, options);
+    const http_method = options.method || 'GET';
+    const headers = options.headers = _.extend({}, options.headers || {});
+
     // Strip url fragment.
-    var url_hash = url.indexOf('#');
-    if (url_hash > -1) {
-        url = url.slice(0, url_hash);
+    const hashIndex = targetURL.indexOf('#');
+    if (hashIndex > -1) {
+        targetURL = targetURL.slice(0, hashIndex);
     }
-    var data = options.body ? options.body : null;
-    var request = promise(url, http_method, headers, data, options.cache === false ? false : true);
+    const data = options.body ? options.body : null;
+    const request = promise(targetURL, http_method, headers, data, options.cache === false ? false : true);
+    request.targetURL = targetURL;
     request.xhr_begin = 1 * new Date();
-    request.then(response => {
+    request.then((response) => {
         request.xhr_end = 1 * new Date();
     });
     return request;

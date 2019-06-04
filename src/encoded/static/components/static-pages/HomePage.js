@@ -3,11 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, layout, navigate } from'./../util';
+import { console, navigate } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { Collapse, Button } from 'react-bootstrap';
-import * as store from '../../store';
-import * as globals from './../globals';
 import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
 
 
@@ -21,27 +19,11 @@ export default class HomePage extends React.PureComponent {
 
     static propTypes = {
         "context" : PropTypes.shape({
-            "content" : PropTypes.array
-        }).isRequired
-    }
-
-    midHeader(){
-        return null;// <div className="mt-2" />; // Temporary -- remove and uncomment lines below when we have better "Getting Started" page or static section or w/e.
-        /*
-        return (
-            <div className="homepage-mid-header row mb-4 mt-2">
-                <div className="col-md-6">
-                    <BigBrowseButton />
-                </div>
-                <div className="col-md-6">
-                    <Button className="btn-block btn-lg text-300" href="/help/user-guide/data-organization">
-                        Guide to Getting Started
-                    </Button>
-                </div>
-            </div>
-        );
-        */
-    }
+            "content" : PropTypes.array.isRequired,
+            "announcements" : PropTypes.arrayOf(PropTypes.object)
+        }).isRequired,
+        "session": PropTypes.bool.isRequired
+    };
 
     introText(){
         var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
@@ -53,36 +35,32 @@ export default class HomePage extends React.PureComponent {
         return <p className="text-center">Introduction content not yet indexed.</p>;
     }
 
-    announcements(){
-        return (
-            <React.Fragment>
-                <h2 className="homepage-section-title">Announcements</h2>
-                <Announcements loaded session={this.props.session} announcements={this.props.context.announcements || null} />
-            </React.Fragment>
-        );
-    }
-
     /**
      * The render function. Renders homepage contents.
      * @returns {Element} A React <div> element.
      */
     render() {
         return (
-            <div className="home-content-area">
-                { this.midHeader() }
-                <HomePageCarousel {..._.pick(this.props, 'windowWidth')} />
-                <div className="row">
-                    <div className="col-xs-12 col-md-8">
-                        <h2 className="homepage-section-title">Introduction</h2>
-                        { this.introText() }
+            <div className="homepage-wrapper">
+
+                <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
+
+                <div className="container home-content-area" id="content">
+                    <div className="row">
+                        <div className="col-xs-12 col-md-8">
+                            <h2 className="homepage-section-title">Introduction</h2>
+                            { this.introText() }
+                        </div>
+                        <div className="col-xs-12 col-md-4 pull-right">
+                            <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
+                        </div>
                     </div>
-                    <div className="col-xs-12 col-md-4 pull-right">
-                        <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
+                    <div className="mt-4">
+                        <h2 className="homepage-section-title">Announcements</h2>
+                        <Announcements session={this.props.session} announcements={this.props.context.announcements || null} />
                     </div>
                 </div>
-                <div className="mt-4">
-                    { this.announcements() }
-                </div>
+
             </div>
         );
     }
@@ -224,22 +202,22 @@ class LinksColumn extends React.PureComponent {
                 <h4 className="text-400 mb-15 mt-25">External Links</h4>
                 <div className="links-wrapper clearfix">
                     <div className="link-block">
-                        <a href="http://www.4dnucleome.org/" target="_blank" className="external-link">
+                        <a href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>Main Portal</span>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank" className="external-link">
+                        <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>4DN DCIC</span>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" className="external-link">
+                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>NIH Common Fund</span>
                         </a>
                     </div>
                     <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" className="external-link">
+                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer" className="external-link">
                             <span>Centers and Labs</span>
                         </a>
                     </div>
@@ -255,5 +233,3 @@ class LinksColumn extends React.PureComponent {
 
 }
 
-
-globals.content_views.register(HomePage, 'HomePage');

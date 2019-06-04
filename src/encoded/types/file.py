@@ -41,15 +41,15 @@ import json
 import pytz
 import os
 from pyramid.traversal import resource_path
-
 from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
+from copy import deepcopy
 from . import TrackingItem
 from ..authentication import session_properties
-
+import structlog
 import logging
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
-log = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
@@ -232,9 +232,9 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'experiments.display_title',
+        # 'experiments.display_title',
         'experiments.accession',
-        'experiments.experiment_type',
+        'experiments.experiment_type.display_title',
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
@@ -245,10 +245,12 @@ class File(Item):
         'experiments.biosample.treatments_summary',
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.digestion_enzyme.name',
+        'experiments.last_modified.date_modified',
         'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession',
-        'quality_metric.display_title'
+        'quality_metric.display_title',
+        'quality_metric.@type'
     ]
     name_key = 'accession'
     rev = {
@@ -297,8 +299,7 @@ class File(Item):
             pass
         return outString
 
-    def generate_track_title(self, track_info):
-        props = self.properties
+    def generate_track_title(self, track_info, props):
         if not props.get('higlass_uid'):
             return None
         exp_type = track_info.get('experiment_type', None)
@@ -327,6 +328,9 @@ class File(Item):
             if [of for of in ofiles if of == fatid]:
                 return obucket.get('title')
         return None
+
+    def _get_ds_cond_from_repset(self, repset):
+        return (repset.get('dataset_label', None), repset.get('condition', None))
 
     def _get_file_experiment_info(self, request, currinfo):
         """
@@ -361,7 +365,10 @@ class File(Item):
             rep_set_info = get_item_if_you_can(request, repsetid)
             if not rep_set_info:
                 return info
-            # 2 pieces of info to get from the repset if there is one
+            # pieces of info to get from the repset if there is one
+            ds, c = self._get_ds_cond_from_repset(rep_set_info)
+            info['dataset'] = ds
+            info['condition'] = c
             expts_in_set = rep_set_info.get('experiments_in_set', [])
             if not expts_in_set:
                 return info
@@ -378,7 +385,9 @@ class File(Item):
             exp_info = get_item_if_you_can(request, expid)
             if not exp_info:  # sonmethings fishy - abort
                 return info
-            info['experiment_type'] = exp_info.get('experiment_type')
+            exp_type = get_item_if_you_can(request, exp_info.get('experiment_type'))
+            if exp_type is not None:
+                info['experiment_type'] = exp_type.get('title')
             if 'experiment_bucket' not in info:  # did not get it from rep_set
                 info['experiment_bucket'] = self._get_file_expt_bucket(request, exp_info)
             assay_info = exp_info.get('experiment_categorizer')
@@ -393,6 +402,9 @@ class File(Item):
                     repset = repset[0]
                     rep_set_info = get_item_if_you_can(request, repset)
                     if rep_set_info is not None:
+                        ds, c = self._get_ds_cond_from_repset(rep_set_info)
+                        info['dataset'] = ds
+                        info['condition'] = c
                         rep_exps = rep_set_info.get('replicate_exps', [])
                         for rep in rep_exps:
                             if rep.get('replicate_exp') == expid:
@@ -429,14 +441,20 @@ class File(Item):
             "experiment_bucket": {
                 "type": "string"
             },
+            "dataset": {
+                "type": "string"
+            },
+            "condition": {
+                "type": "string"
+            },
             "track_title": {
                 "type": "string"
             }
         }
     })
     def track_and_facet_info(self, request, biosource_name=None):
-        props = self.properties
-        fields = ['experiment_type', 'assay_info', 'lab_name',
+        props = self.upgrade_properties()
+        fields = ['experiment_type', 'assay_info', 'lab_name', 'dataset', 'condition',
                   'biosource_name', 'replicate_info', 'experiment_bucket']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
@@ -444,25 +462,25 @@ class File(Item):
 
         # vistrack only pass in biosource_name because _biosource_name is
         # a calc prop of vistrack - from linked Biosource
-        if biosource_name is not None and 'biosource_name' not in track_info:
+        if biosource_name and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
-        if len(track_info) != 6:  # if length==6 we have everything we need
-            if not (len(track_info) == 5 and 'lab_name' not in track_info):
+        if len(track_info) != 8:  # if length==6 we have everything we need
+            if not (len(track_info) == 7 and 'lab_name' not in track_info):
                 # only if everything but lab exists can we avoid getting expt
                 einfo = self._get_file_experiment_info(request, track_info)
                 track_info.update({k: v for k, v in einfo.items() if k not in track_info})
-            if 'experiment_type' not in track_info:
+            # if 'experiment_type' not in track_info:
                 # avoid more unnecessary work if we don't have key piece
-                return
+                # return
 
-            if track_info.get('lab_name') is None:
+            if 'lab_name' not in track_info:
                 labid = props.get('lab')
                 lab = get_item_if_you_can(request, labid)
                 if lab is not None:
                     track_info['lab_name'] = lab.get('display_title')
 
-        track_title = self.generate_track_title(track_info)
+        track_title = self.generate_track_title(track_info, props)
         if track_title is not None:
             track_info['track_title'] = track_title
         return track_info
@@ -543,6 +561,10 @@ class File(Item):
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
+
+        # handle related_files. This is quite janky; must manually invalidate
+        # the relation made on `related_fl` item because we are calling its
+        # update() method directly, which circumvents snovault.crud_view.item_edit
         DicRefRelation = {
             "derived from": "parent of",
             "parent of": "derived from",
@@ -550,34 +572,52 @@ class File(Item):
             "is superceded by": "supercedes",
             "paired with": "paired with"
         }
-        acc = str(self.uuid)
 
-        if 'related_files' in properties.keys():
+        if 'related_files' in properties:
+            my_uuid = str(self.uuid)
+            # save these values
+            curr_txn = None
+            curr_request = None
             for relation in properties["related_files"]:
                 try:
                     switch = relation["relationship_type"]
                     rev_switch = DicRefRelation[switch]
                     related_fl = relation["file"]
-                    relationship_entry = {"relationship_type": rev_switch, "file": acc}
-                    rel_dic = {'related_files': [relationship_entry, ]}
+                    relationship_entry = {"relationship_type": rev_switch, "file": my_uuid}
                 except:
-                    print("invalid data, can't update correctly")
-                    return
+                    log.error('Error updating related_files on %s _update. %s'
+                              % (my_uuid, relation))
+                    continue
 
                 target_fl = self.collection.get(related_fl)
-                # case one we don't have relations
-                if 'related_files' not in target_fl.properties.keys():
-                    target_fl.properties.update(rel_dic)
-                    target_fl.update(target_fl.properties)
+                target_fl_props = deepcopy(target_fl.properties)
+                # This is a cool python feature. If break is not hit in the loop,
+                # go to the `else` statement. Works for empty lists as well
+                for target_relation in target_fl_props.get('related_files', []):
+                    if (target_relation.get('file') == my_uuid and
+                        target_relation.get('relationship_type') == rev_switch):
+                        break
                 else:
-                    # case two we have relations but not the one we need
-                    for target_relation in target_fl.properties['related_files']:
-                        if target_relation.get('file') == acc:
-                            break
-                    else:
-                        # make data for new related_files
-                        target_fl.properties['related_files'].append(relationship_entry)
-                        target_fl.update(target_fl.properties)
+                    import transaction
+                    from pyramid.threadlocal import get_current_request
+                    from snovault.invalidation import add_to_indexing_queue
+                    # Get the current request in order to queue the forced
+                    # update for indexing. This is bad form.
+                    # Don't do this anywhere else, please!
+                    if curr_txn is None:
+                        curr_txn = transaction.get()
+                    if curr_request is None:
+                        curr_request = get_current_request()
+                    # handle related_files whether or not any currently exist
+                    target_related_files = target_fl_props.get('related_files', [])
+                    target_related_files.append(relationship_entry)
+                    target_fl_props.update({'related_files': target_related_files})
+                    target_fl._update(target_fl_props)
+                    to_queue = {'uuid': str(target_fl.uuid), 'sid': target_fl.sid,
+                                'info': 'queued from %s _update' % my_uuid}
+                    curr_txn.addAfterCommitHook(add_to_indexing_queue,
+                                                args=(curr_request, to_queue, 'edit'))
+
 
     @property
     def __name__(self):
@@ -599,22 +639,21 @@ class File(Item):
         "type": "string",
         "description": "Accession of this file"
     })
-    def title(self):
-        return self.properties.get('accession', self.properties.get('external_accession'))
+    def title(self, accession=None, external_accession=None):
+        return accession or external_accession
 
     @calculated_property(schema={
         "title": "Download URL",
         "type": "string",
         "description": "Use this link to download this file."
     })
-    def href(self, request):
-        file_format = self.properties.get('file_format')
+    def href(self, request, file_format, accession=None, external_accession=None):
         fformat = get_item_if_you_can(request, file_format, 'file-formats')
         try:
             file_extension = '.' + fformat.get('standard_file_extension')
         except AttributeError:
             file_extension = ''
-        accession = self.properties.get('accession', self.properties.get('external_accession'))
+        accession = accession or external_accession
         filename = '{}{}'.format(accession, file_extension)
         return request.resource_path(self) + '@@download/' + filename
 
@@ -630,7 +669,7 @@ class File(Item):
                 external = self.build_external_creds(self.registry, self.uuid, properties)
             except ClientError:
                 log.error(os.environ)
-                log.error(self.properties)
+                log.error(properties)
                 return 'UPLOAD KEY FAILED'
         return external['key']
 
@@ -722,10 +761,19 @@ class FileFastq(File):
         "badges.badge.warning",
         "badges.badge.badge_classification",
         "badges.badge.description",
-        "badges.message"
+        "badges.badge.badge_icon",
+        "badges.messages"
     ]
     aggregated_items = {
-        "badges": ["message", "badge.commendation", "badge.warning", "badge.uuid"]
+        "badges": [
+            "messages",
+            "badge.commendation",
+            "badge.warning",
+            "badge.uuid",
+            "badge.@id",
+            "badge.badge_icon",
+            "badge.description"
+        ]
     }
     name_key = 'accession'
     rev = dict(File.rev, **{
@@ -772,6 +820,7 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        'experiment_sets.last_modified.date_modified',
         "quality_metric.Total reads",
         "quality_metric.Trans reads",
         "quality_metric.Cis reads (>20kb)",
@@ -787,6 +836,11 @@ class FileProcessed(File):
         'other_experiments': ('Experiment', 'other_processed_files.files'),
         'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
+    aggregated_items = {
+        "last_modified": [
+            "date_modified"
+        ],
+    }
 
     @classmethod
     def get_bucket(cls, registry):
@@ -802,9 +856,9 @@ class FileProcessed(File):
             "linkTo": "WorkflowRun"
         }
     })
-    def workflow_run_inputs(self, request):
+    def workflow_run_inputs(self, request, disable_wfr_inputs=False):
         # switch this calc prop off for some processed files, i.e. control exp files
-        if not self.properties.get('disable_wfr_inputs'):
+        if not disable_wfr_inputs:
             return self.rev_link_atids(request, "workflow_run_inputs")
         else:
             return []
@@ -860,7 +914,7 @@ class FileProcessed(File):
     name='files-reference',
     unique_key='accession',
     properties={
-        'title': 'Refenrence Files',
+        'title': 'Reference Files',
         'description': 'Listing of Reference Files',
     })
 class FileReference(File):
@@ -917,25 +971,23 @@ class FileVistrack(File):
             }
         }
     })
-    def track_and_facet_info(self, request, biosource_name=None):
-        return super().track_and_facet_info(request, biosource_name=self.override_biosource_name(request))
+    def track_and_facet_info(self, request, biosource_name=None, biosource=None):
+        return super().track_and_facet_info(request, biosource_name=self.override_biosource_name(request, biosource))
 
     @calculated_property(schema={
         "title": "Biosource Name",
         "type": "string"
     })
-    def override_biosource_name(self, request):
-        bios = self.properties.get('biosource')
-        if bios is not None:
-            return request.embed(bios, '@@object').get('biosource_name')
+    def override_biosource_name(self, request, biosource=None):
+        if biosource:
+            return request.embed(biosource, '@@object').get('biosource_name')
 
     @calculated_property(schema={
         "title": "Display Title",
         "description": "Name of this File",
         "type": "string"
     })
-    def display_title(self, request, file_format, accession=None, external_accession=None):
-        dbxrefs = self.properties.get('dbxrefs')
+    def display_title(self, request, file_format, accession=None, external_accession=None, dbxrefs=None):
         if dbxrefs:
             acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
             if acclist:
@@ -1159,12 +1211,13 @@ def download(context, request):
         raise ValueError(external.get('service'))
 
     tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    tracking_values['is_visualization'] = False
     # create a tracking_item to track this download
-    tracking_item = {'date_created': datetime.datetime.now(datetime.timezone.utc),
-                     'status': 'in review by lab', 'tracking_type': 'download_tracking',
+    tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
                      'download_tracking': tracking_values}
-    TrackingItem.create_and_commit(request, tracking_item)
+    try:
+        TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
+    except Exception as e:
+        log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
@@ -1227,8 +1280,13 @@ def get_file_experiment_type(request, context, properties):
         if found_experiment_type == 'None' or found_experiment_type == exp_type:
             found_experiment_type = exp_type
         else:  # multiple experiment types
-            found_experiment_type = 'Integrative analysis'
-            break
+            return 'Integrative analysis'
+    if found_experiment_type != 'None':
+        found_item = get_item_if_you_can(request, found_experiment_type)
+        if found_item is None:
+            found_experiment_type = 'None'
+        else:
+            found_experiment_type = found_item.get('title')
     return found_experiment_type
 
 

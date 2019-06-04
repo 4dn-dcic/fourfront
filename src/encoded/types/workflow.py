@@ -133,7 +133,10 @@ def item_model_to_object(model, request):
 
     # For files -- include download link/href (if available)
     if hasattr(item_instance, 'href'):
-        dict_repr['href'] = item_instance.href(request)
+        href_parameters_requested = signature(item_instance.href).parameters
+        href_parameters_requested_names = list(href_parameters_requested.keys())
+        href_parameters = { arg : dict_repr.get(arg, href_parameters_requested[arg].default) for arg in href_parameters_requested_names if arg != 'request' }
+        dict_repr['href'] = item_instance.href(request, **href_parameters)
 
     return dict_repr
 
@@ -720,6 +723,7 @@ class WorkflowRun(Item):
         'input_files.workflow_argument_name',
         'input_files.value.filename',
         'input_files.value.display_title',
+        'input_files.value.href',
         'input_files.value.file_format',
         'input_files.value.accession',
         'input_files.value.@type',
@@ -731,6 +735,7 @@ class WorkflowRun(Item):
         'output_files.workflow_argument_name',
         'output_files.value.filename',
         'output_files.value.display_title',
+        'output_files.value.href',
         'output_files.value.file_format',
         'output_files.value.accession',
         'output_files.value.@type',
