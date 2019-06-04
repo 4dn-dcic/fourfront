@@ -202,5 +202,8 @@ def biosource_add(context, request, render=None):
              validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
+@view_config(context=Biosource, permission='index', request_method='GET',
+             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line],
+             request_param=['check_only=true'])
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)

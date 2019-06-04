@@ -321,5 +321,8 @@ def publication_add(context, request, render=None):
              validators=[validate_item_content_put, validate_unique_pub_id])
 @view_config(context=Publication, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_unique_pub_id])
+@view_config(context=Publication, permission='index', request_method='GET',
+             validators=[validate_item_content_patch, validate_unique_pub_id],
+             request_param=['check_only=true'])
 def publication_edit(context, request, render=None):
     return item_edit(context, request, render)

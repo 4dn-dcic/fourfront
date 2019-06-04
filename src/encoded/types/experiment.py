@@ -815,5 +815,8 @@ def experiment_add(context, request, render=None):
              validators=[validate_item_content_put, validate_exp_type_validity_for_experiment])
 @view_config(context=Experiment, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_exp_type_validity_for_experiment])
+@view_config(context=Experiment, permission='index', request_method='GET',
+             validators=[validate_item_content_patch, validate_exp_type_validity_for_experiment],
+             request_param=['check_only=true'])
 def experiment_edit(context, request, render=None):
     return item_edit(context, request, render)

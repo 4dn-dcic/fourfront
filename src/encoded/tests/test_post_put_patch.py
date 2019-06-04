@@ -216,7 +216,7 @@ def test_post_check_only(testapp, human_data, human):
 
     # so this one won't post, but schema validation is ok,
     # note it doesn't detect primary key
-    rest = testapp.post_json('/organism/?check_only=True', human_data).json
+    rest = testapp.post_json('/organism/?check_only=true', human_data).json
     assert rest['status'] == 'success'
 
 
@@ -230,7 +230,7 @@ def test_put_check_only(testapp, human_data, human):
 
     # so this one won't post, but schema validation is ok,
     # note it doesn't detect primary key
-    rest = testapp.post_json('/organism/?check_only=True', human_data).json
+    rest = testapp.post_json('/organism/?check_only=true', human_data).json
     assert rest['status'] == 'success'
 
 def test_post_check_only_invalid_data(testapp, human_data):
@@ -238,7 +238,7 @@ def test_post_check_only_invalid_data(testapp, human_data):
     note theese test should work on any object
     '''
     human_data['taxon_id'] = 24;
-    testapp.post_json('/organism/?check_only=True', human_data, status=422)
+    testapp.post_json('/organism/?check_only=true', human_data, status=422)
 
 
 def test_put_check_only(testapp, human_data, human):
@@ -247,12 +247,12 @@ def test_put_check_only(testapp, human_data, human):
     '''
     # human_data has already been posted, now put with invalid status
     human_data['status'] = 'no a valid status'
-    testapp.put_json('/organisms/human/?check_only=True', human_data, status=422)
+    testapp.put_json('/organisms/human/?check_only=true', human_data, status=422)
 
     # so this one won't post, but schema validation is ok,
     # note it doesn't detect primary key
     human_data['status'] = human['status']
-    rest = testapp.put_json('/organisms/human/?check_only=True', human_data).json
+    rest = testapp.put_json('/organisms/human/?check_only=true', human_data).json
     assert rest['status'] == 'success'
 
 
@@ -262,12 +262,12 @@ def test_patch_check_only(testapp, human_data, human):
     '''
     # human_data has already been posted, now put with invalid status
     human_data['status'] = 'no a valid status'
-    testapp.patch_json('/organisms/human/?check_only=True', human_data, status=422)
+    testapp.patch_json('/organisms/human/?check_only=true', human_data, status=422)
 
     # so this one won't post, but schema validation is ok,
     # note it doesn't detect primary key
     human_data['status'] = human['status']
-    rest = testapp.patch_json('/organisms/human/?check_only=True', human_data).json
+    rest = testapp.patch_json('/organisms/human/?check_only=true', human_data).json
     assert rest['status'] == 'success'
 
 

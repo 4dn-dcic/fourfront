@@ -37,7 +37,7 @@ class Award(Item):
     ONLY_ADMIN_VIEW = [
         (Allow, 'group.admin', ['view', 'edit']),
         (Allow, 'group.read-only-admin', ['view']),
-        (Allow, 'remoteuser.INDEXER', ['view', 'edit']),
+        (Allow, 'remoteuser.INDEXER', ['view']),
         (Allow, 'remoteuser.EMBED', ['view']),
         (Deny, Everyone, ['view', 'edit'])
     ]

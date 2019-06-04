@@ -317,7 +317,6 @@ def validate_experiment_set_replicate_experiments(context, request):
     '''
     data = request.json
     replicate_exp_objects = data.get('replicate_exps', [])
-
     have_seen_exps = set()
     any_failures = False
     for replicate_idx, replicate_exp_object in enumerate(replicate_exp_objects):
@@ -342,5 +341,8 @@ def experiment_set_replicate_add(context, request, render=None):
              validators=[validate_item_content_put, validate_experiment_set_replicate_experiments])
 @view_config(context=ExperimentSetReplicate, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments])
+@view_config(context=ExperimentSetReplicate, permission='index', request_method='GET',
+             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments],
+             request_param=['check_only=true'])
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)
