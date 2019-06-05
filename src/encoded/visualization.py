@@ -468,7 +468,7 @@ def add_files_to_higlass_viewconf(request):
     first_view_location_and_zoom = request.json_body.get('firstViewLocationAndZoom', [None, None, None])
     remove_unneeded_tracks = request.json_body.get('remove_unneeded_tracks', None)
     genome_assembly = request.json_body.get('genome_assembly', None)
-    maximum_height = request.json_body.get('height', 300)
+    maximum_height = request.json_body.get('height', 600)
 
     # Check the height of the display.
     if maximum_height < 100:

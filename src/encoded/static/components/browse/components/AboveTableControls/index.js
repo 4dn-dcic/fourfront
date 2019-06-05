@@ -1,6 +1,6 @@
 'use strict';
 
 export { AboveTableControls } from './AboveTableControls';
-export { wrapInAboveTablePanel } from './wrapInAboveTablePanel';
+export { AboveTablePanelWrapper } from './AboveTablePanelWrapper';
 export { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedFilesControls';
 export { BrowseViewSelectedFilesDownloadButton, SelectedFilesDownloadButton } from './SelectedFilesDownloadButton';

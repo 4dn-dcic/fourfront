@@ -51,15 +51,15 @@
             "description": "Term used for the method for crosslinking chromatin",
             "type": "string",
             "lookup": 100,
-            "internal_comment": "We might need to change the structure to accomodate user additions",
-            "enum": [
+            "suggested_enum": [
                 "none",
                 "1% Formaldehyde",
                 "1.3% Formaldehyde",
                 "2% Formaldehyde",
                 "2.5% Formaldehyde",
                 "3.5% Formaldehyde",
-                "1% Formaldehyde and 3nM DSG"
+                "1% Formaldehyde and 3nM DSG",
+                "1% Formaldehyde and 3mM DSG"
             ]
         },
         "crosslinking_time": {
