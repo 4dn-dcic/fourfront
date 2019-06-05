@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as plansData from '../testdata/stacked-block-matrix-list';
-import * as globals from '../globals';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual, sumPropertyFromList, StackedBlockGroupedRow } from './components';
 
@@ -125,6 +124,8 @@ export default class PlannedSubmissionsPage extends React.Component {
 
                         return origClassName + (statusClass ? ' ' + statusClass : '');
                     }}
+                    // The below is no longer used / deprecated. If we need to use this view again, we should migrate this to `blockPopover`.
+                    // We could also add prop for how blockPopover is activated and allow onHover/onMouseOut
                     blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
 
                         var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];
@@ -136,7 +137,7 @@ export default class PlannedSubmissionsPage extends React.Component {
                             filteredData = _.map(data, function(o){ return _.pick(o, ...keysToShow); });
                         }
 
-                        var tips = StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
+                        var tips = {}; // StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
                         
                         if (Array.isArray(data) && data.length > 1){
 
@@ -164,8 +165,6 @@ export default class PlannedSubmissionsPage extends React.Component {
                                     moreData[k] = moreData[k][0];
                                 }
                             });
-
-                            tips += StackedBlockVisual.writeTipPropertiesFromJSONObject(moreData, props);
 
                         }
                         
