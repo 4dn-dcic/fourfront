@@ -16,7 +16,6 @@ from .base import (
     ONLY_ADMIN_VIEW,
     ALLOW_OWNER_EDIT,
     ALLOW_ANY_USER_ADD,
-    get_item_if_you_can,
     lab_award_attribution_embed_list
 )
 import os

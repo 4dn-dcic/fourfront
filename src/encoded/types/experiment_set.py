@@ -342,14 +342,12 @@ class ExperimentSetReplicate(ExperimentSet):
             # We only need to check Microscopy Experiments
             return None
 
-        # The below throws a stack overflow if using request.embed(...) isself
-        first_experiment_obj = get_item_if_you_can(request, first_experiment_id)
+        first_experiment_obj = get_item_if_you_can(request, first_experiment_id, frame='raw')
         if not first_experiment_obj: # Not yet in DB?
             return None
 
-        imaging_paths = first_experiment_obj.get('imaging_paths')
+        return first_experiment_obj.get('imaging_paths')
 
-        return imaging_paths
 
     class Collection(Item.Collection):
         pass

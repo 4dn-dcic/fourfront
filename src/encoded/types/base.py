@@ -107,13 +107,19 @@ ALLOW_ANY_USER_ADD = [
 ] + ALLOW_EVERYONE_VIEW
 
 
-def get_item_if_you_can(request, value, itype=None):
+def get_item_if_you_can(request, value, itype=None, frame='object'):
     """
-    Return the @@object view of an item from a number of different sources
+    Return the view of an item with given frame. Can specify different types
+    of `value` for item lookup
 
-        :param value: String item identifier or a dict containing @id/uuid
-        :param itype: Optional string collection name for the item (e.g. /file-formats/)
-        :returns: the dictionary @@object view of the item
+    Args:
+        request: the current Request
+        value (str): String item identifier or a dict containing @id/uuid
+        itype (str): Optional string collection name for the item (e.g. /file-formats/)
+        frame (str): Optional frame to return. Defaults to 'object'
+
+    Returns:
+        dict: given view of the item or None on failure
     """
     item = None
 
@@ -131,16 +137,13 @@ def get_item_if_you_can(request, value, itype=None):
         if itype is not None:
             svalue = '/' + itype + svalue
 
-    try:        # Try to obtain normal way, e.g. thru ES.
-        item = request.embed(svalue, '@@object')
+    # Request.embed will attempt to get from ES for frame=object/embedded
+    # If that fails, get from DB. Use '@@' syntax instead of 'frame=' because
+    # these paths are cached in indexing
+    try:
+        item = request.embed(svalue, '@@' + frame)
     except:
         pass
-
-    if not item or not item.get('uuid'):
-        try:    # Fallback to datastore=database
-            item = request.embed(svalue, '?datastore=database&frame=object')
-        except:
-            pass
 
     # could lead to unexpected errors if == None
     return item
