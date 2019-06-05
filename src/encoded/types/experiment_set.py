@@ -282,7 +282,7 @@ class ExperimentSet(Item):
     def number_of_experiments(self, request, experiments_in_set=None):
         if experiments_in_set:
             return len(experiments_in_set)
-    
+
 
 
 @collection(
@@ -342,11 +342,8 @@ class ExperimentSetReplicate(ExperimentSet):
             # We only need to check Microscopy Experiments
             return None
 
-        try:    # Need to get @id of imaging_path(s) to make linkTo so we grab @@object.
-            first_experiment_obj = request.embed(first_experiment_id, '@@object')
-        except: # Not yet in DB?
-            return None
-
+        # The below throws a stack overflow if using request.embed(...) isself
+        first_experiment_obj = get_item_if_you_can(request, first_experiment_id)
         if not first_experiment_obj: # Not yet in DB?
             return None
 
