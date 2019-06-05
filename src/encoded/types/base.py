@@ -124,7 +124,7 @@ def get_item_if_you_can(request, value, itype=None):
             value = value['@id']
 
     svalue = str(value)
-    
+
     # Below case is for UUIDs & unique_keys such as accessions, but not @ids
     if not svalue.startswith('/') and not svalue.endswith('/'):
         svalue = '/' + svalue + '/'
