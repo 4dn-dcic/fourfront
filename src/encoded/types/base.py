@@ -115,28 +115,35 @@ def get_item_if_you_can(request, value, itype=None):
         :param itype: Optional string collection name for the item (e.g. /file-formats/)
         :returns: the dictionary @@object view of the item
     """
+    item = None
+
     if isinstance(value, dict):
         if 'uuid' in value:
             value = value['uuid']
         elif '@id' in value:
             value = value['@id']
+
     svalue = str(value)
-    if not svalue.startswith('/'):
-        svalue = '/' + svalue
-    try:
+
+    # Below case is for UUIDs & unique_keys such as accessions, but not @ids
+    if not svalue.startswith('/') and not svalue.endswith('/'):
+        svalue = '/' + svalue + '/'
+        if itype is not None:
+            svalue = '/' + itype + svalue
+
+    try:        # Try to obtain normal way, e.g. thru ES.
         item = request.embed(svalue, '@@object')
     except:
         pass
-    else:
-        if item.get('uuid'):
-            return item
-    if itype is not None:
-        svalue = '/' + itype + svalue + '/?datastore=database'
-        try:
-            return request.embed(svalue, '@@object')
+
+    if not item or not item.get('uuid'):
+        try:    # Fallback to datastore=database
+            item = request.embed(svalue, '?datastore=database&frame=object')
         except:
-            # this could lead to unexpected errors
-            return None
+            pass
+
+    # could lead to unexpected errors if == None
+    return item
 
 
 def set_namekey_from_title(properties):
