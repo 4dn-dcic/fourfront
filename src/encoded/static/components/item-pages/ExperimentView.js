@@ -33,23 +33,22 @@ export default class ExperimentView extends WorkflowRunTracingView {
     }
 
     shouldGraphExist(){
-        const context = this.props.context;
+        const { context } = this.props;
         const procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
         return !!(procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0);
     }
 
-    getFilesTabs(width){
-        const context = this.props.context;
+    getFilesTabs(){
+        const { context } = this.props;
+        const width = this.getTabViewWidth();
+        const tabs = [];
 
-        var tabs = [];
-
-        var rawFilesWithViewPermissions = Array.isArray(context.files) && _.filter(context.files, function(rf){
+        const rawFilesWithViewPermissions = Array.isArray(context.files) && _.filter(context.files, function(rf){
             if (rf.error && !object.itemUtil.atId(rf)) return false;
             return true;
         });
 
         if (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length > 0) {
-
             tabs.push({
                 tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
                 key : 'raw-files',
@@ -62,10 +61,9 @@ export default class ExperimentView extends WorkflowRunTracingView {
             });
         }
 
-        var procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
+        const procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
 
         if (procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0) {
-
             tabs.push({
                 tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
@@ -76,14 +74,13 @@ export default class ExperimentView extends WorkflowRunTracingView {
                     {...this.state}
                 />
             });
-
         }
 
         return tabs;
     }
 
     isNodeCurrentContext(node){
-        const context = this.props.context;
+        const { context } = this.props;
         if (!context) return false;
         if (!node || !node.meta || !node.meta.run_data || !node.meta.run_data.file) return false;
         if (Array.isArray(node.meta.run_data.file)) return false;
@@ -104,9 +101,9 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {{ tab : JSX.Element, key: string, disabled: boolean, content: JSX.Element }[]} List of JSON objects representing Tabs and their content.
      */
     getTabViewContents(){
-        var initTabs = [],
-            context = this.props.context,
-            width = this.getTabViewWidth();
+        const { context } = this.props;
+        const width = this.getTabViewWidth();
+        const initTabs = [];
 
         if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
@@ -121,7 +118,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
             ));
         }
 
-        return initTabs.concat(this.getFilesTabs(width)).concat(this.getCommonTabs());
+        return initTabs.concat(this.getFilesTabs()).concat(this.getCommonTabs());
     }
 
     /**
@@ -146,11 +143,12 @@ export default class ExperimentView extends WorkflowRunTracingView {
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
+        const { context } = this.props;
         return (
             <React.Fragment>
-                <Publications.PublicationBelowHeaderRow publication={this.props.context.produced_in_pub} />
-                <StaticHeadersArea context={this.props.context} />
-                <OverviewHeading context={this.props.context} />
+                <Publications.PublicationBelowHeaderRow publication={context.produced_in_pub} />
+                <StaticHeadersArea context={context} />
+                <OverviewHeading context={context} />
             </React.Fragment>
         );
     }
@@ -173,169 +171,162 @@ export class ExperimentMicView extends ExperimentView {
 }
 
 
-
-
-
 /**
  * This is the first Tab of the Experiment Item view and shows what ExperimentSets the Experiment is part of.
+ *
  * @see ExperimentView.getTabViewContents()
+ * @todo Change to have ExpSets loaded from single search URL instead of spinning off multiple AJAX requests.
  */
-class ExperimentSetsViewOverview extends React.Component {
+const ExperimentSetsViewOverview = React.memo(function ExperimentSetsViewOverview(props){
+    const { context, width, windowWidth, href } = props;
+    const experimentSetUrls = _.filter(_.map(context.experiment_sets || [], object.atIdFromObject));
 
-    static parentExpSetsExistForExp(exp){
-        return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
+    if (experimentSetUrls.length > 0){
+        return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth, href }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
     }
 
-    static getTabObject({ schemas, context, windowWidth }, width){
-        return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
-            'key' : 'experiments-info',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <ExperimentSetsViewOverview {...{ context, schemas, windowWidth, width }} />
-                </div>
-            )
-        };
-    }
+    return null;
+});
 
-    static propTypes = {
-        'context' : PropTypes.shape({
-            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                '@id' : PropTypes.string.isRequired
-            })).isRequired
-        }).isRequired
-    }
+ExperimentSetsViewOverview.propTypes = {
+    'context' : PropTypes.shape({
+        'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+            '@id' : PropTypes.string.isRequired
+        })).isRequired
+    }).isRequired,
+    'width' : PropTypes.number.isRequired,
+    'windowWidth' : PropTypes.number,
+    'href' : PropTypes.string
+};
 
-    render(){
-        var { context, width, windowWidth, href } = this.props,
-            experimentSetUrls = _.map(context.experiment_sets || [], object.atIdFromObject);
+ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWidth }, width){
+    return {
+        'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
+        'key' : 'experiments-info',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : (
+            <div className="overflow-hidden">
+                <ExperimentSetsViewOverview {...{ context, schemas, windowWidth, width }} />
+            </div>
+        )
+    };
+};
 
-        if (experimentSetUrls.length > 0){
-            return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth, href }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
-        }
+ExperimentSetsViewOverview.parentExpSetsExistForExp = memoize(function(exp){
+    return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
+});
 
-        return null;
-    }
-
-}
 
 /**
  * This is rendered in middle of ExperimentView, between Item header and TabbedView.
  * @see ExperimentView.itemMidSection()
  */
-class OverviewHeading extends React.Component {
-    render(){
-        var { context, schemas } = this.props,
-            tips = object.tipsFromSchema(schemas || Schemas.get(), context), // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-            tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, context.biosample)),
-            commonProps = {
-                'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
-                'result'        : context,              // The Item from which are getting value for 'property'.
-                'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
-            },
-            commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : context.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
+const OverviewHeading = React.memo(function OverviewHeading(props){
+    const { context, schemas } = props;
+    const { biosample } = context;
+    const tips = object.tipsFromSchema(schemas || Schemas.get(), context); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({ '@type' : ['Biosample', 'Item'] }, biosample));
+    const commonProps = {
+        'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
+        'result'        : context,              // The Item from which are getting value for 'property'.
+        'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+    };
+    const commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
-        return (
-            <OverviewHeadingContainer>
-                <OverViewBodyItem {...commonProps} property='experiment_type' fallbackTitle="Experiment Type" />
-                <OverViewBodyItem {...commonProps} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
-                <OverViewBodyItem {...commonProps} property='biosample' fallbackTitle="Biosample" />
-                <OverViewBodyItem {...commonProps} property='digestion_enzyme' fallbackTitle="Digestion Enzyme" />
-                <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
-                <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
-                <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
-            </OverviewHeadingContainer>
-        );
-    }
-}
+    return (
+        <OverviewHeadingContainer>
+            <OverViewBodyItem {...commonProps} property="experiment_type" fallbackTitle="Experiment Type" />
+            <OverViewBodyItem {...commonProps} property="follows_sop" fallbackTitle="Follows SOP" fallbackValue="No" />
+            <OverViewBodyItem {...commonProps} property="biosample" fallbackTitle="Biosample" />
+            <OverViewBodyItem {...commonProps} property="digestion_enzyme" fallbackTitle="Digestion Enzyme" />
+            <OverViewBodyItem {...commonBioProps} property="modifications_summary" fallbackTitle="Biosample Modifications" />
+            <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
+            <OverViewBodyItem {...commonBioProps} property="biosource" fallbackTitle="Biosample Biosource" />
+        </OverviewHeadingContainer>
+    );
+});
 
 /**
  * This is rendered in middle of ExperimentView, between Item header and TabbedView.
  * @see ExperimentView.itemMidSection()
  */
-class OverviewHeadingMic extends React.Component {
-    render(){
-        var exp = this.props.context;
-        var tips = object.tipsFromSchema(this.props.schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-        var tipsForBiosample = object.tipsFromSchema(this.props.schemas || Schemas.get(), _.extend({'@type' : ['Biosample', 'Item']}, exp.biosample));
-        var commonProps = {
-            'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
-            'result'        : exp,                  // The Item from which are getting value for 'property'.
-            'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
-        };
-        var commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
+const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
+    const { context: exp, schemas } = props;
+    const tips = object.tipsFromSchema(schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({ '@type' : ['Biosample', 'Item'] }, exp.biosample));
+    const commonProps = {
+        'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
+        'result'        : exp,                  // The Item from which are getting value for 'property'.
+        'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+    };
+    const commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
-        return (
-            <OverviewHeadingContainer>
-                <OverViewBodyItem {...commonProps} property='experiment_type' fallbackTitle="Experiment Type" />
-                <OverViewBodyItem {...commonProps} property='follows_sop' fallbackTitle="Follows SOP" fallbackValue="No" />
-                <OverViewBodyItem {...commonProps} property='biosample' fallbackTitle="Biosample" />
-                <OverViewBodyItem {...commonBioProps} property='biosource' fallbackTitle="Biosample Biosource" />
-                <OverViewBodyItem {...commonBioProps} property='modifications_summary' fallbackTitle="Biosample Modifications" />
-                <OverViewBodyItem {...commonBioProps} property='treatments_summary' fallbackTitle="Biosample Treatments" />
+    return (
+        <OverviewHeadingContainer>
+            <OverViewBodyItem {...commonProps} property="experiment_type" fallbackTitle="Experiment Type" />
+            <OverViewBodyItem {...commonProps} property="follows_sop" fallbackTitle="Follows SOP" fallbackValue="No" />
+            <OverViewBodyItem {...commonProps} property="biosample" fallbackTitle="Biosample" />
+            <OverViewBodyItem {...commonBioProps} property="biosource" fallbackTitle="Biosample Biosource" />
+            <OverViewBodyItem {...commonBioProps} property="modifications_summary" fallbackTitle="Biosample Modifications" />
+            <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
 
-                <OverViewBodyItem {...commonProps} property='imaging_paths' fallbackTitle="Imaging Paths"
-                    wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement='div' listWrapperElement='div' singleItemClassName="block"
-                    titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+            <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
+                wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
 
-                <OverViewBodyItem {...commonProps} property='microscopy_technique' fallbackTitle="Microscopy Technique" />
-                <OverViewBodyItem {...commonProps} property='microscope_qc' fallbackTitle="Microscope Quality Control" />
-            </OverviewHeadingContainer>
-        );
-    }
-}
+            <OverViewBodyItem {...commonProps} property="microscopy_technique" fallbackTitle="Microscopy Technique" />
+            <OverViewBodyItem {...commonProps} property="microscope_qc" fallbackTitle="Microscope Quality Control" />
+        </OverviewHeadingContainer>
+    );
+});
 
-export class RawFilesTableSection extends React.Component {
-    render(){
-        var { files, context } = this.props,
-            fileUrls    = _.map(files, object.itemUtil.atId),
-            columns     = _.clone(SimpleFilesTable.defaultProps.columns);
 
-        columns['related_files'] = {
-            'title' : 'Relations',
-            'minColumnWidth' : 120,
-            'render' : function(result, columnDefinition, props, width){
-                var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
-                    var link = object.atIdFromObject(fContainer.file);
-                    var title = typeof fContainer.file.accession === 'string' ? <span className="mono-text">{fContainer.file.accession}</span> : fContainer.file.display_title;
-                    return <span key={link || i}>{ fContainer.relationship_type } { link ? <a href={link}>{ title }</a> : title }</span>;
-                });
-                return related_files;
-            }
-        };
+const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
+    const { files, context } = props;
+    const fileUrls    = _.map(files, object.itemUtil.atId);
+    const columns     = _.clone(SimpleFilesTable.defaultProps.columns);
 
-        // Add column for paired end if any files have one.
-        if (_.any(files, function(f) { return typeof f.paired_end !== 'undefined'; })){
-            columns['paired_end'] = {
-                "title" : 'End',
-                'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 },
-                'minColumnWidth' : 30
-            };
+    columns['related_files'] = {
+        'title' : 'Relations',
+        'minColumnWidth' : 120,
+        'render' : function(result, columnDefinition, props, width){
+            var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
+                var link = object.atIdFromObject(fContainer.file);
+                var title = typeof fContainer.file.accession === 'string' ? <span className="mono-text">{fContainer.file.accession}</span> : fContainer.file.display_title;
+                return <span key={link || i}>{ fContainer.relationship_type } { link ? <a href={link}>{ title }</a> : title }</span>;
+            });
+            return related_files;
         }
+    };
 
-        return (
-            <div className="raw-files-table-section">
-                <h3 className="tab-section-title">
-                    <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
-                </h3>
-                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} columns={columns} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
-            </div>
-        );
+    // Add column for paired end if any files have one.
+    if (_.any(files, function(f) { return typeof f.paired_end !== 'undefined'; })){
+        columns['paired_end'] = {
+            "title" : 'End',
+            'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 },
+            'minColumnWidth' : 30
+        };
     }
-}
 
-export class ProcessedFilesTableSection extends React.Component {
-    render(){
-        var { files, context } = this.props,
-            fileUrls    = _.map(files, object.itemUtil.atId);
-        return (
-            <div className="processed-files-table-section">
-                <h3 className="tab-section-title">
-                    <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
-                </h3>
-                <SimpleFilesTableLoaded {..._.pick(this.props, 'schemas', 'width')} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
-            </div>
-        );
-    }
-}
+    return (
+        <div className="raw-files-table-section">
+            <h3 className="tab-section-title">
+                <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
+            </h3>
+            <SimpleFilesTableLoaded {..._.pick(props, 'schemas', 'width')} columns={columns} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
+        </div>
+    );
+});
+
+const ProcessedFilesTableSection = React.memo(function ProcessedFilesTableSection(props){
+    const { files, context } = props;
+    const fileUrls = _.map(files, object.itemUtil.atId);
+    return (
+        <div className="processed-files-table-section">
+            <h3 className="tab-section-title">
+                <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
+            </h3>
+            <SimpleFilesTableLoaded {..._.pick(props, 'schemas', 'width')} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
+        </div>
+    );
+});
