@@ -329,7 +329,6 @@ class ExperimentSetReplicate(ExperimentSet):
         }
     })
     def imaging_paths(self, request, experiments_in_set=None):
-        '''NEEDS WORK - THROWING STACK OVERFLOW EXCEPTION'''
         if not experiments_in_set:
             return None
 
