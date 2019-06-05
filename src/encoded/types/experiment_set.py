@@ -19,7 +19,8 @@ from .base import (
     Item,
     collection_add,
     item_edit,
-    lab_award_attribution_embed_list
+    lab_award_attribution_embed_list,
+    get_item_if_you_can
 )
 import datetime
 
@@ -283,6 +284,7 @@ class ExperimentSet(Item):
             return len(experiments_in_set)
 
 
+
 @collection(
     name='experiment-set-replicates',
     unique_key='accession',
@@ -304,6 +306,47 @@ class ExperimentSetReplicate(ExperimentSet):
         all_experiments = [exp['replicate_exp'] for exp in properties.get('replicate_exps', [])]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+    @calculated_property(schema={
+        "title": "Imaging Paths",
+        "type": "array",
+        "items": {
+            "title": "Imaging path",
+            "type": "object",
+            "properties":{
+                "path":{
+                    "title": "Imaging Path",
+                    "type": "string",
+                    "linkTo": "ImagingPath"
+                },
+                "channel":{
+                    "title": "Imaging channnel",
+                    "description" : "channel info, ie. ch01, ch02...",
+                    "type": "string",
+                    "pattern": "^(ch\\d\\d)$"
+                }
+            }
+        }
+    })
+    def imaging_paths(self, request, experiments_in_set=None):
+        if not experiments_in_set:
+            return None
+
+        # We presume all experiments in set have the exact same imaging paths.
+        # Thus we grab from 1st experiment. If not the case, this is a data issue.
+        # We should have a foursight check to assert this perhaps?
+        first_experiment_id = experiments_in_set[0] #replicate_exps[0]['replicate_exp']
+
+        if '/experiments-mic/' not in first_experiment_id:
+            # We only need to check Microscopy Experiments
+            return None
+
+        first_experiment_obj = get_item_if_you_can(request, first_experiment_id, frame='raw')
+        if not first_experiment_obj: # Not yet in DB?
+            return None
+
+        return first_experiment_obj.get('imaging_paths')
+
 
     class Collection(Item.Collection):
         pass
