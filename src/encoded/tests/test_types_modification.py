@@ -28,3 +28,11 @@ def test_calculated_modification_name(testapp, modifications):
         elif name == 'mod_w_both':
             assert modname == 'Crispr deletion for RAD21 gene'
             assert short == 'RAD21 deletion'
+
+
+def test_calculated_modification_name_w_override(testapp, mod_w_change_and_target):
+    assert mod_w_change_and_target.get('modification_name') == 'Crispr deletion for RAD21 gene'
+    assert mod_w_change_and_target.get('modification_name_short') == 'RAD21 deletion'
+    res = testapp.patch_json(mod_w_change_and_target['@id'], {'override_modification_name': 'RAD21 is gone!'}, status=200).json['@graph'][0]
+    assert res.get('modification_name') == 'RAD21 is gone!'
+    assert res.get('modification_name_short') == 'RAD21 is gone!'
