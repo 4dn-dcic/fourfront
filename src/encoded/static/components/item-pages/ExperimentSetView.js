@@ -171,42 +171,45 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 }
 
 
-class OverviewHeading extends React.PureComponent {
+const OverviewHeading = React.memo(function OverviewHeading(props){
+    const { context, schemas } = props;
+    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const commonProps = { 'result' : context, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
+    return (
+        <OverviewHeadingContainer {...props}>
+            {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
+            <OverViewBodyItem {...commonProps} property="experimentset_type" fallbackTitle="Set Type" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.individual.organism" fallbackTitle="Organism" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.biosource_type" fallbackTitle="Biosource Type" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource_summary" fallbackTitle="Biosource" />
 
-    static prependTitleIcon(open, props){
-        return <i className="expand-icon icon icon-th-list" />;
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_type" fallbackTitle="Experiment Type(s)" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.modifications.modification_type" fallbackTitle="Modification Type" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.treatments.treatment_type" fallbackTitle="Treatment Type" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_categorizer.combined" fallbackTitle="Assay Details"
+                titleRenderFxn={OverviewHeading.expCategorizerTitle} />
+
+            <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
+                wrapInColumn="col-xs-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} hideIfNoValue />
+
+        </OverviewHeadingContainer>
+    );
+});
+
+// eslint-disable-next-line react/display-name
+OverviewHeading.prependTitleIcon = function(open, props){
+    return <i className="expand-icon icon icon-th-list" />;
+};
+
+OverviewHeading.expCategorizerTitle = memoize(function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+    let expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
+    expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
+    if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
+        return <span><span className="text-500">{ expCatObj.field }:</span> { expCatObj.value }</span>;
     }
-
-    static expCategorizerTitle(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
-        var expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
-        expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
-        if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
-            return <span><span className="text-500">{ expCatObj.field }:</span> { expCatObj.value }</span>;
-        }
-        return OverViewBodyItem.titleRenderPresets.default(...arguments);
-    }
-
-    render(){
-        const { context, schemas } = this.props;
-        const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
-        const commonProps = { 'result' : context, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
-        return (
-            <OverviewHeadingContainer {...this.props}>
-                {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
-                <OverViewBodyItem {...commonProps} property="experimentset_type" fallbackTitle="Set Type" />
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.individual.organism" fallbackTitle="Organism" />
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.biosource_type" fallbackTitle="Biosource Type" />
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource_summary" fallbackTitle="Biosource" />
-
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_type" fallbackTitle="Experiment Type(s)" />
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_categorizer.combined" fallbackTitle="Assay Details"
-                    titleRenderFxn={OverviewHeading.expCategorizerTitle} />
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.modifications.modification_type" fallbackTitle="Modification Type" />
-                <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.treatments.treatment_type" fallbackTitle="Treatment Type" />
-            </OverviewHeadingContainer>
-        );
-    }
-}
+    return OverViewBodyItem.titleRenderPresets.default(...arguments);
+});
 
 
 export class RawFilesStackedTableSection extends React.PureComponent {
