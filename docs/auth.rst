@@ -61,7 +61,6 @@ Permissions
 
 * add
 * add_unvalidated (admin)
-* audit - view audits on an individual content item
 * edit
 * edit_unvalidated (admin)
 * expand (system)
@@ -71,7 +70,6 @@ Permissions
 * index (system)
 * list
 * search
-* search_audit - global permission to see audits in search results
 * submit_for_any (admin)
 * view
 * view_details - protection of user contact information

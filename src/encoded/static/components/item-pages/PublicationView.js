@@ -30,7 +30,7 @@ export default class PublicationView extends DefaultItemView {
             tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps, width));
         }
 
-        return tabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
+        return tabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }

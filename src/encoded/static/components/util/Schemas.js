@@ -208,7 +208,6 @@ export const Field = {
         if (!schemas && !skipExpFilters) schemas = get && get();
         var baseSchemaProperties = (schemas && schemas[startAt] && schemas[startAt].properties) || null;
         if (!baseSchemaProperties) return null;
-        if (field.slice(0,5) === 'audit') return null;
         var fieldParts = field.split('.');
 
 

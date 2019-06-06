@@ -19,7 +19,7 @@ export default class DocumentView extends DefaultItemView {
 
         initTabs.push(DocumentViewOverview.getTabObject(context, this.props.schemas));
 
-        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
+        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }

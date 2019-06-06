@@ -332,11 +332,6 @@ export default class BrowseView extends React.Component {
             if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
         }
 
-        if (facet.field.substring(0, 6) === 'audit.'){
-            if (session && JWT.isLoggedInAsAdmin()) return true;
-            return false; // Exclude audit facets temporarily, if not logged in as admin.
-        }
-
         return true;
     }
 

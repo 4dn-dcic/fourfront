@@ -144,11 +144,11 @@ body .rc-tabs-top {
 				}
 
 				&.icon-warning {
-					color: $audit-color-warning;
+					color: $badge-color-warning;
 				}
 
 				&.icon-ban, &.icon-exclamation-circle {
-					color : $audit-color-warning;
+					color : $badge-color-warning;
 					//color: #ff5757;
 				}
 
@@ -1265,7 +1265,7 @@ $badge-item-min-height: 90px;
 	/** Keep section above padding/margins of HiGlassComponent **/
 	position: relative;
 	z-index: 5;
-  
+
 	&.right-align {
 		flex-direction: row-reverse;
 	}
@@ -1924,10 +1924,10 @@ $badge-item-min-height: 90px;
 			border-bottom: 1px solid #f4f4f4;
 
 			.icon-exclamation-circle {
-				color : $audit-color-error;
+				color : $badge-color-error;
 			}
 			.icon-warning {
-				color : $audit-color-warning;
+				color : $badge-color-warning;
 			}
 			.icon-check {
 				color : green;
