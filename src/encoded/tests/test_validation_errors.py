@@ -6,7 +6,7 @@ def test_validation_err_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
     val_err_facets = [facet for facet in res['facets'] if facet['title'] == 'Validation Errors']
     assert len(val_err_facets) == 1
-    assert val_err_facets['aggregation_type'] == 'terms'
+    assert val_err_facets[0]['aggregation_type'] == 'terms'
 
 
 def test_validation_err_itemview(workbook, testapp):
