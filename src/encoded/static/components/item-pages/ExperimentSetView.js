@@ -187,7 +187,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
             <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.modifications.modification_type" fallbackTitle="Modification Type" />
             <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.treatments.treatment_type" fallbackTitle="Treatment Type" />
             <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_categorizer.combined" fallbackTitle="Assay Details"
-                titleRenderFxn={OverviewHeading.expCategorizerTitle} />
+                titleRenderFxn={OverviewHeading.expCategorizerTitle} wrapInColumn="col-sm-6 col-md-3 pull-right" />
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-xs-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
