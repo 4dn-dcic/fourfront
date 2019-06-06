@@ -82,7 +82,7 @@ describe('Browse Views - Files Selection', function () {
         it('"Select All Files" button works & becomes "Deselect All" after.', function(){
 
             cy.getSelectAllFilesButton().click().should('contain', "Deselect All").end()
-                .getDownloadButton().should('not.have.attr', 'disabled').end().window().screenshot();
+                .getDownloadButton().should('not.have.attr', 'disabled').end();
 
         });
 
@@ -105,29 +105,35 @@ describe('Browse Views - Files Selection', function () {
                 let origSelectedCount = downloadButtonTextContent.match(/\d/g);
                 origSelectedCount = parseInt(origSelectedCount.join(''));
                 return cy.get('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]').each(($checkBox, idx)=>{
-                    if (idx > 15) return;
+                    if (idx >= 15) return; // Only run for first 15 expsets
                     return checkUncheckFileCheckbox(origSelectedCount, $checkBox);
                 });
             });
         });
 
         it('ExpSets > FilePairs+Files checkboxes are checked & can be toggled.', function(){
+
             cy.getDownloadButton().invoke('text').then((downloadButtonTextContent)=>{
                 let origSelectedCount = downloadButtonTextContent.match(/\d/g);
                 origSelectedCount = parseInt(origSelectedCount.join(''));
-                return cy.get('.search-results-container .search-result-row .search-result-column-block button.toggle-detail-button').should('have.length.greaterThan', 24).each(($toggleDetailButton, idx)=>{
-                    if (idx > 7) return;
-                    return cy.wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end()
-                        .get('.search-results-container .search-result-row.detail-open').then(function($resultRow){
-                            return cy.get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container h4 i.toggle-open-icon')
-                                .each(($toggleFilesOpenButton, idx)=>{ // Raw Files (0), Processed Files (1)
-                                    cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end() // Open
-                                        .get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container .stacked-block-table input[type="checkbox"]')
-                                        .each(checkUncheckFileCheckbox.bind(null, origSelectedCount)).end()
-                                        .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end(); // Close
-                                });
-                        }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end();
-                });
+                return cy.get('.search-results-container .search-result-row .search-result-column-block button.toggle-detail-button')
+                    .should('have.length.greaterThan', 24)
+                    .each(($toggleDetailButton, idx)=>{
+                        if (idx >= 5) return; // Only run for first 5 expsets
+                        return cy.wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end()
+                            .get('.search-results-container .search-result-row.detail-open').then(function($resultRow){
+                                return cy.get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container h4 i.toggle-open-icon')
+                                    .each(($toggleFilesOpenButton, idx)=>{ // Raw Files (0), Processed Files (1)
+                                        cy.wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end() // Open
+                                            .get('.search-results-container .search-result-row.detail-open .result-table-detail-container.detail-open .files-tables-container .stacked-block-table input[type="checkbox"]')
+                                            .each(function($checkBox, checkBoxIdx){
+                                                if (checkBoxIdx >= 3) return; // Only do for first few files
+                                                checkUncheckFileCheckbox(origSelectedCount, $checkBox);
+                                            }).end()
+                                            .wrap($toggleFilesOpenButton).scrollToCenterElement().click({ 'force' : true }).wait(300).end(); // Close
+                                    });
+                            }).end().wrap($toggleDetailButton).scrollToCenterElement().click({ 'force' : true }).end();
+                    });
             });
         });
 
