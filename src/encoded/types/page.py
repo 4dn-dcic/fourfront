@@ -189,7 +189,9 @@ class Page(Item):
         pass
 
 for field in ['display_title', 'name', 'description', 'content.name']:
-    Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
+    Page.embedded_list = Page.embedded_list + [
+        'children.' + field, 'children.children.' + field, 'children.children.children.' + field
+    ]
 
 
 #### Must add validators for add/edit since 'name' path is now lookup_key, not unique_key
@@ -211,7 +213,7 @@ def validate_unique_page_name(context, request):
                 return
             error_msg = ("page %s already exists with name '%s'. This field must be unique"
                          % (lookup_res.uuid, data['name']))
-            request.errors.add('body', ['name'],  error_msg)
+            request.errors.add('body', ['Page: non-unique name'],  error_msg)
             return
 
 
