@@ -136,6 +136,10 @@
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Sample"
         },
+        "aggregated_items.tissue.item.preferred_name": {
+            "title": "Tissue Source",
+            "order": 997
+        },
         "publications_of_set.display_title": {
             "title": "Publication"
         },

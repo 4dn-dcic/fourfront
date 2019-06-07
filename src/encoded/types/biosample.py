@@ -63,7 +63,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'cell_culture_details.morphology_image.attachment.download',
         'cell_culture_details.morphology_image.attachment.width',
         'cell_culture_details.morphology_image.attachment.height',
-        'cell_culture_details.differentiation_tissue.term_name',
+        'cell_culture_details.tissue.term_name',
+        'cell_culture_details.tissue.preferred_name',
         'modifications.modification_type',
         'modifications.description',
         'treatments.treatment_type',
@@ -132,8 +133,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             ret_str = ret_str[:-5]
             if cell_culture_details and len(cell_culture_details) == 1:
                 cc_props = request.embed(cell_culture_details[0], '@@embedded')
-                if 'differentiation_tissue' in cc_props:
-                    ret_str = ret_str + ' differentiated to ' + cc_props['differentiation_tissue'].get('display_title')
+                if 'tissue' in cc_props:
+                    ret_str = ret_str + ' differentiated to ' + cc_props['tissue'].get('display_title')
             return ret_str
         return 'None'  # pragma: no cover
 
