@@ -23,7 +23,10 @@ from html.parser import HTMLParser
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
-    validate_item_content_patch
+    validate_item_content_patch,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
 )
 
 
@@ -313,6 +316,9 @@ def validate_unique_pub_id(context, request):
 
 @view_config(context=Publication.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_unique_pub_id])
+@view_config(context=Publication.Collection, permission='add_unvalidated', request_method='POST',
+             validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def publication_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -321,6 +327,12 @@ def publication_add(context, request, render=None):
              validators=[validate_item_content_put, validate_unique_pub_id])
 @view_config(context=Publication, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_unique_pub_id])
+@view_config(context=Publication, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=Publication, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
 @view_config(context=Publication, permission='index', request_method='GET',
              validators=[validate_item_content_patch, validate_unique_pub_id],
              request_param=['check_only=true'])

@@ -11,7 +11,10 @@ from snovault.schema_utils import schema_validator
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
-    validate_item_content_patch
+    validate_item_content_patch,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
 )
 from snovault.crud_views import (
     collection_add,
@@ -1486,6 +1489,9 @@ def validate_extra_file_format(context, request):
                          validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field])
+@view_config(context=File.Collection, permission='add_unvalidated', request_method='POST',
+             validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -1504,6 +1510,12 @@ def file_add(context, request, render=None):
                          validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field])
+@view_config(context=File, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=File, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
 @view_config(context=File, permission='index', request_method='GET',
              validators=[validate_item_content_patch,
                          validate_file_filename,

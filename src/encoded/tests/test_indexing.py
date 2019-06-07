@@ -185,6 +185,41 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
+def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
+    """
+    Create an item (file-processed) with a validation error and index,
+    to ensure that validation errors work
+    """
+    import uuid
+    from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
+    es = app.registry[ELASTIC_SEARCH]
+    fp_body = {
+        'schema_version': '3',
+        'uuid': str(uuid.uuid4()),
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['uuid'],
+        'award': award['uuid'],
+        'higlass_uid': 1  # validation error -- higlass_uid should be string
+    }
+    res = testapp.post_json('/files-processed/?validate=false&upgrade=False',
+                                  fp_body, status=201).json
+    fp_id = res['@graph'][0]['@id']
+    val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
+    assert val_err_view['@id'] == fp_id
+    assert val_err_view['validation_errors'] == []
+
+    # call to /index will throw MissingIndexItemException multiple times, since
+    # associated file_format, lab, and award are not indexed. That's okay
+    indexer_testapp.post_json('/index', {'record': True})
+    time.sleep(2)
+    es_res = es.get(index='file_processed', doc_type='file_processed', id=res['@graph'][0]['uuid'])
+    assert len(es_res['_source'].get('validation_errors', [])) == 1
+    # check that validation-errors view works
+    val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
+    assert val_err_view['@id'] == fp_id
+    assert val_err_view['validation_errors'] == es_res['_source']['validation_errors']
+
+
 # @pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
 def test_load_and_index_perf_data(testapp, indexer_testapp):
