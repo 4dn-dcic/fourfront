@@ -183,8 +183,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
     def get_token_info(self, token, request):
         '''
-        given a jwt get token info from auth0, handle
-        retrying and what not
+        Given a jwt get token info from auth0, handle retrying and whatnot.
+        This is only called if we receive a Bearer token in Authorization header.
         '''
         try:
             # lets see if we have an auth0 token or our own

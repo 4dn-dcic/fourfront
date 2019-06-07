@@ -61,8 +61,8 @@ def includeme(config):
         --------    ----
         -           INGRESS
         0           snovault.stats.stats_tween_factory
-        1           .renderers.fix_request_method_tween_factory
-        2           .renderers.remove_expired_session_cookies_tween_factory
+        1           .renderers.validate_request_tween_factory
+        DISABLED 2           .renderers.remove_expired_session_cookies_tween_factory
         3           .renderers.render_page_html_tween_factory
         5           .renderers.set_response_headers_tween_factory
         6           pyramid_tm.tm_tween_factory
@@ -76,9 +76,9 @@ def includeme(config):
 
     '''
 
-    config.add_tween('.renderers.fix_request_method_tween_factory', under='snovault.stats.stats_tween_factory')
-    #.add_tween('.renderers.remove_expired_session_cookies_tween_factory', under='.renderers.fix_request_method_tween_factory')
-    config.add_tween('.renderers.render_page_html_tween_factory', under='.renderers.fix_request_method_tween_factory')
+    config.add_tween('.renderers.validate_request_tween_factory', under='snovault.stats.stats_tween_factory')
+    #.add_tween('.renderers.remove_expired_session_cookies_tween_factory', under='.renderers.validate_request_tween_factory')
+    config.add_tween('.renderers.render_page_html_tween_factory', under='.renderers.validate_request_tween_factory')
 
     # The above tweens, when using response (= `handler(request)`) act on the _transformed_ response (containing HTML body).
     # The below tweens run _before_ the JS rendering. Responses in these tweens have not been transformed to HTML yet.
@@ -91,23 +91,35 @@ def includeme(config):
     config.scan(__name__)
 
 
-def fix_request_method_tween_factory(handler, registry):
-    """ Fix Request method changed by mod_wsgi.
-
-    See: https://github.com/GrahamDumpleton/mod_wsgi/issues/2
-
+def validate_request_tween_factory(handler, registry):
+    """ 
     Apache config:
         SetEnvIf Request_Method HEAD X_REQUEST_METHOD=HEAD
     """
 
-    def fix_request_method_tween(request):
+    def validate_request_tween(request):
+
+        # Fix Request method changed by mod_wsgi.
+        # See: https://github.com/GrahamDumpleton/mod_wsgi/issues/2
         environ = request.environ
         if 'X_REQUEST_METHOD' in environ:
             environ['REQUEST_METHOD'] = environ['X_REQUEST_METHOD']
+
+        if request.method in ('GET', 'HEAD'):
+            # If GET request, don't need to check `request.content_type`
+            # Includes page text/html requests.
+            return handler(request)
+
+        elif request.content_type != 'application/json':
+            if request.content_type == 'application/x-www-form-urlencoded' and request.path[0:10] == '/metadata/':
+                # Special case to allow us to POST to metadata TSV requests via form submission
+                return handler(request)
+            detail = "Request content type %s is not 'application/json'" % request.content_type
+            raise HTTPUnsupportedMediaType(detail)
+
         return handler(request)
 
-    return fix_request_method_tween
-
+    return validate_request_tween
 
 
 def security_tween_factory(handler, registry):
@@ -118,27 +130,32 @@ def security_tween_factory(handler, registry):
 
         expected_user = request.headers.get('X-If-Match-User')
         if expected_user is not None: # Not sure when this is the case
-            login = request.authenticated_userid
-            if login != 'mailto.' + expected_user:
+            if request.authenticated_userid != 'mailto.' + expected_user:
                 detail = 'X-If-Match-User does not match'
                 raise HTTPPreconditionFailed(detail)
 
-        # Older stuff (pre-Auth0)
-        elif request.authorization is not None or asbool(request.headers.get('X-Auth-Challenge', False)):
-            login = request.authenticated_userid
-            if not login:
-                # wget may only send credentials following a challenge response.
-                raise HTTPForbidden(title="No Access")
+        if request.authorization is not None or asbool(request.headers.get('X-Auth-Challenge', False)):
+            # wget may only send credentials following a challenge response.
+            if not request.authenticated_userid:
+                if not hasattr(request, 'auth0_expired'):
+                    # Not a "Bearer" JWT token in Auth header. Or other error.
+                    raise HTTPUnauthorized(title="No Access", comment="Invalid Authorization header or Auth Challenge response.")
 
-        if request.method in ('GET', 'HEAD'): # Includes page text/html requests.
-            return handler(request)
+        if getattr(request, 'auth0_expired', False):
+            # If have the attribute and it is true, then our session has expired.
+            # This is true for both AJAX requests (which have request.authorization) & browser page
+            # requests (which have cookie); both cases handled in authentication.py
+            # Informs client or libs/react-middleware.js serverside render of expired token
+            # to set logged-out state in front-end in either doc request or xhr request & set appropriate alerts
+            response = handler(request)
+            response.headers['X-Request-JWT'] = "expired"
 
-        if request.content_type != 'application/json':
-            if request.content_type == 'application/x-www-form-urlencoded' and request.path[0:10] == '/metadata/':
-                # Special case to allow us to POST to metadata TSV requests via form submission
-                return handler(request)
-            detail = "Request content type %s is not 'application/json'" % request.content_type
-            raise HTTPUnsupportedMediaType(detail)
+            # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
+            # React render has App(instance).state.session = false to be synced w/ server-side
+            response.set_cookie(name='jwtToken', value=None, max_age=0,path='/') # = Same as response.delete_cookie(..)
+            response.status_code = 401
+            response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
+            return response
 
         return handler(request)
 
@@ -160,6 +177,14 @@ def security_tween_factory(handler, registry):
 
 
 def remove_expired_session_cookies_tween_factory(handler, registry):
+    '''
+    Original purpose of this was to remove expired (session?) cookies.
+    See: https://github.com/ENCODE-DCC/encoded/commit/75854803c99e5044a6a33aedb3a79d750481b6cd#diff-bc19a9793a1b3b4870cff50e7c7c9bd1R135
+
+    We disable it for now via removing from tween chain as are using JWT tokens and handling elsewhere.
+    If needed for some reason due to newly-encountered error,
+    can re-enable.
+    '''
     from webob.cookies import Cookie
 
     ignore = {
@@ -167,15 +192,6 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
     }
 
     def remove_expired_session_cookies_tween(request):
-        '''
-        Original purpose of this was to remove expired (session?) cookies.
-        See: https://github.com/ENCODE-DCC/encoded/commit/75854803c99e5044a6a33aedb3a79d750481b6cd#diff-bc19a9793a1b3b4870cff50e7c7c9bd1R135
-
-        We disable it for now via removing from tween chain.
-        If needed for some reason due to newly-encountered error,
-        can re-enable.
-        '''
-
         if request.path in ignore or request.path.startswith('/static/'):
             return handler(request)
 
@@ -311,30 +327,21 @@ def render_page_html_tween_factory(handler, registry):
             response - Response for req as obtained from handler(request).
         """
 
-        if not hasattr(request, 'auth0_expired'):
-            # No session acquired in authentication.py, assume anonymous user & skip
+        if getattr(request, 'auth0_expired', True):
+            print('\n\n\nTTTT', response.headers)
+            # No current Auth0 session acquired in authentication.py,
+            # or an expired session. Handle as anonymous user and continue.
             return response
 
-        if not request.auth0_expired:
-            login = request.authenticated_userid
-            if login:
-                authtype, email = login.split('.', 1)
-                if authtype == 'auth0':
-                    response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
-                    response.headers['X-User-Info'] = json.dumps(request.user_info) # Re-ified property set in authentication.py
-                else:
-                    response.headers['X-Request-JWT'] = "null"
-
-        else:
-            # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
-            # either doc request or xhr request & set appropriate alerts
-            response.headers['X-Request-JWT'] = "expired"
-
-            # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
-            # React render has App(instance).state.session = false to be synced w/ server-side
-            response.set_cookie(name='jwtToken', value=None, max_age=0,path='/')
-            response.status_code = 401
-            response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
+        # `request.auth0_expired == False` == have current authenticated JWT
+        login = request.authenticated_userid
+        if login:
+            authtype, email = login.split('.', 1)
+            if authtype == 'auth0':
+                response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
+                response.headers['X-User-Info'] = json.dumps(request.user_info) # Re-ified property set in authentication.py
+            else:
+                response.headers['X-Request-JWT'] = "null"
 
         return response
 
@@ -381,7 +388,7 @@ def render_page_html_tween_factory(handler, registry):
         # Add `X-User-Info` header. This is parsed in renderer.js, or, more accurately,
         # by libs/react-middleware.js which is imported by server.js and compiled into
         # renderer.js. Is used to get access to User Info on initial web page render.
-        add_x_user_info_header(response, request)
+        response = add_x_user_info_header(response, request)
 
         # These stats are converted into "X-Stats" header in snovault.
         # Maybe we could conditionally disable this at some point in .ini config
