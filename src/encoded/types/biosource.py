@@ -150,7 +150,7 @@ def validate_biosource_tissue(context, request):
             tissuename = tissue.get('term_name')
         except AttributeError:
             tissuename = str(tissue)
-        request.errors.add('body', None, 'Term: ' + tissuename + ' is not found in UBERON')
+        request.errors.add('body', ['Biosource: invalid tissue term'], 'Term: ' + tissuename + ' is not found in UBERON')
     else:
         request.validated.update({})
 
@@ -187,7 +187,7 @@ def validate_biosource_cell_line(context, request):
             cellname = cell_line.get('term_name')
         except AttributeError:
             cellname = str(cell_line)
-        request.errors.add('body', None, 'Term: ' + cellname + ' is not a known valid cell line')
+        request.errors.add('body', ['Biosource: invalid cell_line term'], 'Term: ' + cellname + ' is not a known valid cell line')
     else:
         request.validated.update({})
 
