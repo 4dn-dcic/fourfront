@@ -1424,7 +1424,7 @@ def validate_extra_file_format(context, request):
     '''
     files_ok = True
     data = request.json
-    if 'extra_files' not in data:
+    if not data.get('extra_files'):
         return
     extras = data['extra_files']
     # post should always have file_format as it is required patch may or may not
