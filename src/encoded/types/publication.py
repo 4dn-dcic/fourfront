@@ -307,7 +307,7 @@ def validate_unique_pub_id(context, request):
                 return
             error_msg = ("publication %s already exists with ID '%s'. This field must be unique"
                          % (lookup_res.uuid, data['ID']))
-            request.errors.add('body', ['ID'],  error_msg)
+            request.errors.add('body', ['Publication: non-unique ID'],  error_msg)
             return
 
 
