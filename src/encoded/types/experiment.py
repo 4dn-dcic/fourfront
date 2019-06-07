@@ -803,7 +803,7 @@ def validate_exp_type_validity_for_experiment(context, request):
         exp = context.type_info.name
         if exp not in allowed_types:
             msg = 'Experiment Type {} is not allowed for {}'.format(exp_type_name, exp)
-            request.errors.add('body', None, msg)
+            request.errors.add('body', ['Experiment: invalid experiment type'], msg)
         else:
             request.validated.update({})
 

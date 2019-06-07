@@ -359,7 +359,8 @@ class ExperimentSetReplicate(ExperimentSet):
 
 def validate_experiment_set_replicate_experiments(context, request):
     '''
-    Validates that each replicate_exps.replicate_exp in context (ExperimentSetReplicate Item) is unique within the ExperimentSetReplicate.
+    Validates that each replicate_exps.replicate_exp in context (ExperimentSetReplicate Item)
+    is unique within the ExperimentSetReplicate.
     '''
     data = request.json
     replicate_exp_objects = data.get('replicate_exps', [])
@@ -368,7 +369,10 @@ def validate_experiment_set_replicate_experiments(context, request):
     for replicate_idx, replicate_exp_object in enumerate(replicate_exp_objects):
         experiment = replicate_exp_object.get('replicate_exp')
         if experiment in have_seen_exps:
-            request.errors.add('body', None, 'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']')
+            request.errors.add(
+                'body', ['ExperimentSet: non-unique exps'],
+                'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']'
+            )
             any_failures = True
             continue
         have_seen_exps.add(experiment)

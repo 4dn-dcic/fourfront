@@ -909,7 +909,7 @@ def validate_input_json(context, request):
     # if not context.get(wkfl_uuid):
     #    request.errors.add('body', None, 'workflow_uuid %s not found in the system' % wkfl_uuid)
     if not input_json.get('metadata_only'):
-        request.errors.add('body', None, 'metadata_only must be set to true in input_json')
+        request.errors.add('body', ['Workflow: metadata_only False'], 'metadata_only must be set to true in input_json')
 
 
 @view_config(name='pseudo-run', context=WorkflowRun.Collection, request_method='POST',
