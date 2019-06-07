@@ -6,8 +6,8 @@ import { transformResponse } from 'subprocess-middleware';
 import fs from 'fs';
 import { store, mapStateToProps } from './../store';
 import { Provider, connect } from 'react-redux';
-import { JWT } from './../components/util';
-//import Alerts from './../components/alerts';
+import { JWT, object } from './../components/util';
+import Alerts from './../components/alerts';
 
 
 const cssFileStats = fs.statSync(__dirname + '/../css/style.css');
@@ -20,7 +20,7 @@ const render = function (AppComponent, body, res) {
     const context = JSON.parse(body);
     const disp_dict = {
         'context'           : context,
-        'href'              : res.getHeader('X-Request-URL') || context['@id'],
+        'href'              : res.getHeader('X-Request-URL') || object.itemUtil.atId(context),
         'lastCSSBuildTime'  : lastCSSBuildTime
     };
 
@@ -36,23 +36,19 @@ const render = function (AppComponent, body, res) {
     let userInfo = null;
 
     if (JWT.maybeValid(jwtToken)){
+        // Receiving 'X-User-Info' header allows us to have user info such as name
+        // in server-side render instead of relying only on JWT (stored in cookie)
+        // post-mount + AJAX request for user info.
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
-        // This allows us to have user info such as name in server-side render
-        // instead of relying only on JWT (stored in cookie)
         if (userInfo){
             JWT.saveUserInfoLocalStorage(userInfo);
+            JWT.save(jwtToken); // Just in case we want to access this later in server-side for some reason.
             initialSession = true;
         }
+    } else if (jwtToken === 'expired'){
+        // TODO: Ensure is working as expected on load balancer.
+        disp_dict.alerts = [Alerts.LoggedOut];
     }
-    //else if (
-    //    /* (disp_dict.context.code === 403 || res.statusCode === 403) && */
-    //    // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)
-    //    jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token."
-    //){
-    //    initialSession = false;
-    //    // TEMPORARY DISABLED (maybe not temporary eventually)
-    //    //disp_dict.alerts = [Alerts.LoggedOut];
-    //}
     // End JWT token grabbing
 
     store.dispatch({

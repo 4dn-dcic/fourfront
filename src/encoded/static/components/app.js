@@ -244,24 +244,21 @@ export default class App extends React.PureComponent {
     componentDidMount() {
         const { href, context } = this.props;
 
+        // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
+        // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
+        const windowHref = (window && window.location && window.location.href) || href;
+        if (href !== windowHref){
+            store.dispatch({ 'type' : { 'href' : windowHref } });
+        }
+
         // Load up analytics
-        analytics.initializeGoogleAnalytics(
-            analytics.getTrackingId(href),
-            context
-        );
+        analytics.initializeGoogleAnalytics(analytics.getTrackingId(href), context);
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
 
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
-
-        // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
-        // Here we grab full-length href from window and update props.href (via Redux), if it is different.
-        const queryHref = (window && window.location && window.location.href) || href;
-        if (href !== queryHref){
-            store.dispatch({ 'type' : { 'href' : queryHref } });
-        }
 
         if (this.historyEnabled) {
             try {
@@ -329,7 +326,7 @@ export default class App extends React.PureComponent {
 
             // If we have UTM URL parameters in the URI, attempt to set history state (& browser) URL to exclude them after a few seconds
             // after Google Analytics may have stored proper 'source', 'medium', etc. (async)
-            const urlParts = url.parse(queryHref, true);
+            const urlParts = url.parse(windowHref, true);
             const paramsToClear = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 
             if (urlParts.query && _.any(paramsToClear, function(prm){ return typeof urlParts.query[prm] !== 'undefined'; })){
@@ -340,14 +337,14 @@ export default class App extends React.PureComponent {
                         urlParts.protocol + '//' + urlParts.host +
                         urlParts.pathname + (_.keys(queryToSet).length > 0 ? '?' + queryString.stringify(queryToSet) : '')
                     );
-                    if (nextUrl !== queryHref && this.historyEnabled){
+                    if (nextUrl !== windowHref && this.historyEnabled){
                         try {
                             window.history.replaceState(context, '', nextUrl);
                         } catch (exc) {
                             // Might fail due to too large data
                             window.history.replaceState(null, '', nextUrl);
                         }
-                        console.info('Replaced UTM params in URI:', queryHref, nextUrl);
+                        console.info('Replaced UTM params in URI:', windowHref, nextUrl);
                     }
                 }, 3000);
             }

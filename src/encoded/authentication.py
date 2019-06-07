@@ -227,7 +227,12 @@ def get_jwt(request):
     except (ValueError, TypeError, KeyError):
         pass
 
-    if not token:
+    if not token and request.method in ('GET', 'HEAD'):
+        # Only grab this if is a GET request, not a transactional request to help mitigate CSRF attacks.
+        # See: https://en.wikipedia.org/wiki/Cross-site_request_forgery#Cookie-to-header_token
+        # The way our JS grabs and sticks JWT into Authorization header is somewhat analogous to above approach.
+        # TODO: Ensure our `Access-Control-Allow-Origin` response headers are appropriate (more for CGAP).
+        # TODO: Get a security audit done.
         token = request.cookies.get('jwtToken')
 
     return token
@@ -236,15 +241,19 @@ def get_jwt(request):
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
-    '''check the auth0 assertion and remember the user'''
+    '''
+    Check the auth0 assertion and return User Information to be stored client-side
+    user_info comes from /session-properties and other places and would contain ultimately:
+        { id_token: string, user_actions : string[], details : { uuid, email, first_name, last_name, groups, timezone, status } }
+    '''
+    user_info = None
     if hasattr(request, 'user_info'):
         user_info = request.user_info
-        if not user_info:
-            raise LoginDenied()
-    else:
-        raise LoginDenied()
 
-    return user_info
+    if user_info and user_info.get('id_token'): # Authenticated
+        return user_info
+
+    raise LoginDenied()
 
 
 @view_config(route_name='logout',
