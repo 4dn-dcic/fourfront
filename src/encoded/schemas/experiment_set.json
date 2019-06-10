@@ -137,8 +137,7 @@
             "title": "Sample"
         },
         "aggregated_items.tissue.item.preferred_name": {
-            "title": "Tissue Source",
-            "order": 997
+            "title": "Tissue Source"
         },
         "publications_of_set.display_title": {
             "title": "Publication"
