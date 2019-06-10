@@ -332,7 +332,6 @@ def render_page_html_tween_factory(handler, registry):
         """
 
         if getattr(request, 'auth0_expired', True):
-            print('\n\n\nTTTT', response.headers)
             # No current Auth0 session acquired in authentication.py,
             # or an expired session. Handle as anonymous user and continue.
             return response
