@@ -2,27 +2,27 @@ import pytest
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
-def test_assay_subclass_short_wo_assay_classification(exp_types):
-    hic_type = exp_types.get('hic')
-    assert hic_type.get('assay_subclass_short') == hic_type.get('title')
-
-
-def test_assay_subclass_short_w_assay_classification(testapp, exp_types):
-    hic_type = exp_types.get('hic')
-    res = testapp.patch_json(hic_type['@id'], {'assay_classification': 'DNA-DNA Pairwise Interactions'}).json['@graph'][0]
-    assert res.get('assay_subclass_short') == 'Hi-C'
-
-
-def test_assay_subclass_short_w_assay_subclassification(testapp, exp_types):
-    hic_type = exp_types.get('hic')
-    res = testapp.patch_json(hic_type['@id'], {'assay_subclassification': 'DNA-DNA Pairwise Interactions of Enriched Regions'}).json['@graph'][0]
-    assert res.get('assay_subclass_short') == 'IP-based 3C'
-
-
-def test_assay_subclass_short_w_only_expt_category(testapp, exp_types):
-    hic_type = exp_types.get('hic')
-    res = testapp.patch_json(hic_type['@id'], {'experiment_category': 'Sequencing'}).json['@graph'][0]
-    assert res.get('assay_subclass_short') == 'Sequencing (unclassified)'
+# def test_assay_subclass_short_wo_assay_classification(exp_types):
+#     hic_type = exp_types.get('hic')
+#     assert hic_type.get('assay_subclass_short') == hic_type.get('title')
+#
+#
+# def test_assay_subclass_short_w_assay_classification(testapp, exp_types):
+#     hic_type = exp_types.get('hic')
+#     res = testapp.patch_json(hic_type['@id'], {'assay_classification': 'DNA-DNA Pairwise Interactions'}).json['@graph'][0]
+#     assert res.get('assay_subclass_short') == 'Hi-C'
+#
+#
+# def test_assay_subclass_short_w_assay_subclassification(testapp, exp_types):
+#     hic_type = exp_types.get('hic')
+#     res = testapp.patch_json(hic_type['@id'], {'assay_subclassification': 'DNA-DNA Pairwise Interactions of Enriched Regions'}).json['@graph'][0]
+#     assert res.get('assay_subclass_short') == 'IP-based 3C'
+#
+#
+# def test_assay_subclass_short_w_only_expt_category(testapp, exp_types):
+#     hic_type = exp_types.get('hic')
+#     res = testapp.patch_json(hic_type['@id'], {'experiment_category': 'Sequencing'}).json['@graph'][0]
+#     assert res.get('assay_subclass_short') == 'Sequencing (unclassified)'
 
 
 def test_other_protocols_no_protocol(exp_types):
