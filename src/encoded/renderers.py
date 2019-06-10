@@ -62,12 +62,11 @@ def includeme(config):
         -           INGRESS
         0           snovault.stats.stats_tween_factory
         1           .renderers.validate_request_tween_factory
-        DISABLED 2           .renderers.remove_expired_session_cookies_tween_factory
-        3           .renderers.render_page_html_tween_factory
-        5           .renderers.set_response_headers_tween_factory
-        6           pyramid_tm.tm_tween_factory
-        7           .renderers.security_tween_factory
-        8           pyramid.tweens.excview_tween_factory
+        2           .renderers.render_page_html_tween_factory
+        3           .renderers.set_response_headers_tween_factory
+        4           pyramid_tm.tm_tween_factory
+        5           .renderers.security_tween_factory
+        6           pyramid.tweens.excview_tween_factory
         -           MAIN
 
     The `handler` kwarg of tween factories refers to the subsequent tween to be called.
@@ -77,7 +76,7 @@ def includeme(config):
     '''
 
     config.add_tween('.renderers.validate_request_tween_factory', under='snovault.stats.stats_tween_factory')
-    #.add_tween('.renderers.remove_expired_session_cookies_tween_factory', under='.renderers.validate_request_tween_factory')
+    # DISABLED - .add_tween('.renderers.remove_expired_session_cookies_tween_factory', under='.renderers.validate_request_tween_factory')
     config.add_tween('.renderers.render_page_html_tween_factory', under='.renderers.validate_request_tween_factory')
 
     # The above tweens, when using response (= `handler(request)`) act on the _transformed_ response (containing HTML body).
@@ -92,7 +91,11 @@ def includeme(config):
 
 
 def validate_request_tween_factory(handler, registry):
-    """ 
+    """
+    Updates request.environ's REQUEST_METHOD to be X_REQUEST_METHOD if present.
+    Asserts that if a POST (or similar) request is in application/json format,
+    with exception for /metadata/* endpoints.
+
     Apache config:
         SetEnvIf Request_Method HEAD X_REQUEST_METHOD=HEAD
     """
@@ -178,12 +181,13 @@ def security_tween_factory(handler, registry):
 
 def remove_expired_session_cookies_tween_factory(handler, registry):
     '''
+    CURRENTLY DISABLED
     Original purpose of this was to remove expired (session?) cookies.
     See: https://github.com/ENCODE-DCC/encoded/commit/75854803c99e5044a6a33aedb3a79d750481b6cd#diff-bc19a9793a1b3b4870cff50e7c7c9bd1R135
 
-    We disable it for now via removing from tween chain as are using JWT tokens and handling elsewhere.
-    If needed for some reason due to newly-encountered error,
-    can re-enable.
+    We disable it for now via removing from tween chain as are using JWT tokens and handling
+    their removal in security_tween_factory & authentication.py as well as client-side
+    (upon "Logout" action). If needed for some reason, can re-enable.
     '''
     from webob.cookies import Cookie
 
