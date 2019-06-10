@@ -17,7 +17,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
         "self_results_url_fields"   : [
             "experiments_in_set.experiment_type.display_title", "lab", "experiments_in_set.biosample.biosource_summary", "status", "lab.display_title",
             "experiments_in_set.experiment_categorizer.value", "experiments_in_set.experiment_categorizer.field", "experiments_in_set.display_title",
-            "experiments_in_set.accession"
+            "experiments_in_set.accession", "experiments_in_set.experiment_type.assay_subclass_short"
         ],
         "encode_results_url"        : "https://www.encodeproject.org/search/?type=Experiment&biosample_summary=H1-hESC&biosample_summary=HFFc6&status!=archived&status!=revoked&limit=all",
         "encode_results_url_fields" : ["assay_slims", "biosample_summary", "assay_term_name", "description", "lab", "status"],
@@ -74,11 +74,11 @@ export class JointAnalysisMatrix extends React.PureComponent {
         },
         "fieldChangeMap" : {
             "4DN"                       : {
-                "experiment_category"       : "experiments_in_set.experiment_type.display_title",
+                "experiment_category"       : "experiments_in_set.experiment_type.assay_subclass_short",
                 "experiment_type"           : "experiments_in_set.experiment_type.display_title",
                 "cell_type"                 : "experiments_in_set.biosample.biosource_summary",
-                "sub_cat"                   : "experiments_in_set.experiment_categorizer.value",
-                "sub_cat_title"             : "experiments_in_set.experiment_categorizer.field",
+                "sub_cat"                   : "experiments_in_set.experiment_type.display_title",
+                "sub_cat_title"             : "experiments_in_set.experiment_type.display_title",
                 "lab_name"                  : "lab.display_title",
                 "short_description"         : "experiments_in_set.display_title",
                 "state"                     : "status"
@@ -92,7 +92,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
                 "state"                     : "status"
             }
         },
-        "groupingProperties4DN"     : ["experiment_type", "sub_cat"],
+        "groupingProperties4DN"     : ["experiment_category", "experiment_type"],
         "groupingPropertiesEncode"  : ["experiment_category", "experiment_type"],
         "columnGrouping4DN"         : "cell_type",
         "columnGroupingEncode"      : "cell_type",
@@ -551,4 +551,3 @@ class VisualBody extends React.PureComponent {
         );
     }
 }
-
