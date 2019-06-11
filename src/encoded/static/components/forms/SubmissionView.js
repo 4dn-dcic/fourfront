@@ -1135,8 +1135,8 @@ export default class SubmissionView extends React.PureComponent{
                         stateToSet.errorCount = errorList.length;
                         for(i = 0; i<errorList.length; i++){
                             var detail = errorList[i].description || errorList[i] || "Unidentified error";
-                            if (errorList[i].name && errorList[i].name.length > 0){
-                                detail += ('. See ' + errorList[i].name[0] + ' in ' + keyDisplay[inKey]);
+                            if (errorList[i].name){
+                                detail += ('. ' + errorList[i].name + ' in ' + keyDisplay[inKey]);
                             } else {
                                 detail += ('. See ' + keyDisplay[inKey]);
                             }
