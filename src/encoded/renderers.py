@@ -393,7 +393,8 @@ def render_page_html_tween_factory(handler, registry):
         # renderer.js. Is used to get access to User Info on initial web page render.
         response = add_x_user_info_header(response, request)
 
-        # These stats are converted into "X-Stats" header in snovault.
+
+        # The stats below are converted into "X-Stats" header in snovault.
         # Maybe we could conditionally disable this at some point in .ini config
         # for minute performance enhancement(s).
 
@@ -409,7 +410,9 @@ def render_page_html_tween_factory(handler, registry):
             stats = request._stats
             stats['render_count'] = stats.get('render_count', 0) + 1
             stats['render_time'] = stats.get('render_time', 0) + transform_duration
-            request._add_stats_cookie = True
+            # We don't care about getting this back in form of a cookie. Will be available
+            # as header.
+            request._add_stats_cookie = False
 
         return response
 

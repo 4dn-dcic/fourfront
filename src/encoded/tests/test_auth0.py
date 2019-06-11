@@ -72,12 +72,12 @@ def headers(auth0_access_token):
 @pytest.fixture(scope='session')
 def fake_request(headers):
 
-
     class FakeRequest(object):
-
+        '''TODO: See if could/should use or subclass from DummyRequest'''
         def __init__(self):
             self.headers = headers
             self.cookies = {}
+            self.method = "GET"
 
     return FakeRequest()
 
