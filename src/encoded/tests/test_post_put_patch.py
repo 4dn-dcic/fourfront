@@ -78,7 +78,7 @@ def test_submitter_post(submitter_testapp):
     testapp = submitter_testapp
     testapp.post_json(COLLECTION_URL, item, status=201)
     res = testapp.post_json(COLLECTION_URL, item_with_uuid[0], status=422)
-    assert any(error.get('name') == ['uuid'] for error in res.json['errors'])
+    assert any(error.get('name') == 'Schema: uuid' for error in res.json['errors'])
 
 
 def test_admin_put_uuid(content, testapp):
@@ -308,6 +308,7 @@ def test_patch_delete_fields_fails_with_no_validation(content, testapp):
     # using delete_fields with validate=False will now raise a validation err
     res = testapp.patch_json(url + "?delete_fields=simple1,field_no_default&validate=false", {}, status=422)
     assert res.json['description'] == "Failed validation"
+    assert res.json['errors'][0]['name'] == 'delete_fields'
     assert 'Cannot delete fields' in res.json['errors'][0]['description']
 
 
@@ -352,15 +353,19 @@ def test_patch_delete_fields_import_items_submitter(content, testapp, submitter_
     assert res.json['@graph'][0]['protected'] == 'protected new'
 
     res2 = submitter_testapp.patch_json(url + "?delete_fields=protected", {}, status=422)
-    perm_errs = [err['description'] for err in res2.json['errors'] if err['name'] == ['protected']]
-    assert len(perm_errs) == 1
-    assert perm_errs[0] == "permission 'import_items' required"
+    res_errors = res2.json['errors']
+    assert len(res_errors) == 2
+    assert res_errors[0]['name'] == "Schema: protected"
+    assert res_errors[0]['description'] == "permission 'import_items' required"
+    assert res_errors[1]['name'] == 'delete_fields'
+    assert res_errors[1]['description'] == 'Error deleting fields'
 
 
 def test_patch_delete_fields_required(content, testapp):
     url = content['@id']
     res = testapp.patch_json(url + "?delete_fields=required", {}, status=422)
     assert res.json['description'] == "Failed validation"
+    assert res.json['errors'][0]['name'] == 'Schema: '
     assert res.json['errors'][0]['description'] == "'required' is a required property"
 
 
@@ -370,6 +375,7 @@ def test_name_key_validation(link_targets, testapp):
     res = testapp.post_json('/testing-link-targets/', target_data, status=422)
     assert res.json['description'] == 'Failed validation'
     res_error = res.json['errors'][0]
+    assert res_error['name'] == 'Item: path characters'
     assert "Forbidden character(s) {'#'}" in res_error['description']
 
     # unique_key
@@ -377,4 +383,5 @@ def test_name_key_validation(link_targets, testapp):
     res = testapp.post_json('/testing-link-sources/', source_data, status=422)
     assert res.json['description'] == 'Failed validation'
     res_error = res.json['errors'][0]
+    assert res_error['name'] == 'Item: path characters'
     assert "Forbidden character(s) {'*'}" in res_error['description']

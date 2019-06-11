@@ -267,7 +267,7 @@ def test_vendor_alias_wrong_format(testapp, vendor_data_alias):
     assert response['code'] == 422
     problematic_aliases = 0
     for an_error in response['errors']:
-        if an_error['name'][0] == 'aliases':
+        if an_error['name'].startswith('Schema: aliases'):
             problematic_aliases += 1
     assert problematic_aliases == 2
 

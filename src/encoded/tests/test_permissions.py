@@ -305,6 +305,7 @@ def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_b
 def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award, exp_types):
     experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': exp_types['microc']['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=422)
+    assert res.json['errors'][0]['name'] == 'Schema: lab'
     assert "not in user submits_for" in res.json['errors'][0]['description']
 
 
