@@ -8,6 +8,7 @@ from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
     validate_item_content_patch,
+    validate_item_content_in_place,
     no_validate_item_content_post,
     no_validate_item_content_put,
     no_validate_item_content_patch
@@ -153,7 +154,7 @@ def validate_biosource_tissue(context, request):
             tissuename = tissue.get('term_name')
         except AttributeError:
             tissuename = str(tissue)
-        request.errors.add('body', ['Biosource: invalid tissue term'], 'Term: ' + tissuename + ' is not found in UBERON')
+        request.errors.add('body', 'Biosource: invalid tissue term', 'Term: ' + tissuename + ' is not found in UBERON')
     else:
         request.validated.update({})
 
@@ -190,7 +191,7 @@ def validate_biosource_cell_line(context, request):
             cellname = cell_line.get('term_name')
         except AttributeError:
             cellname = str(cell_line)
-        request.errors.add('body', ['Biosource: invalid cell_line term'], 'Term: ' + cellname + ' is not a known valid cell line')
+        request.errors.add('body', 'Biosource: invalid cell_line term', 'Term: ' + cellname + ' is not a known valid cell line')
     else:
         request.validated.update({})
 
@@ -215,7 +216,7 @@ def biosource_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=Biosource, permission='index', request_method='GET',
-             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line],
+             validators=[validate_item_content_in_place, validate_biosource_tissue, validate_biosource_cell_line],
              request_param=['check_only=true'])
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)

@@ -24,6 +24,7 @@ from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
     validate_item_content_patch,
+    validate_item_content_in_place,
     no_validate_item_content_post,
     no_validate_item_content_put,
     no_validate_item_content_patch
@@ -310,7 +311,7 @@ def validate_unique_pub_id(context, request):
                 return
             error_msg = ("publication %s already exists with ID '%s'. This field must be unique"
                          % (lookup_res.uuid, data['ID']))
-            request.errors.add('body', ['Publication: non-unique ID'],  error_msg)
+            request.errors.add('body', 'Publication: non-unique ID',  error_msg)
             return
 
 
@@ -334,7 +335,7 @@ def publication_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=Publication, permission='index', request_method='GET',
-             validators=[validate_item_content_patch, validate_unique_pub_id],
+             validators=[validate_item_content_in_place, validate_unique_pub_id],
              request_param=['check_only=true'])
 def publication_edit(context, request, render=None):
     return item_edit(context, request, render)

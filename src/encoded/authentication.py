@@ -453,7 +453,7 @@ def create_unauthorized_user(request):
     # validate the User json
     validate_request(user_coll.type_info.schema, request, user_props)
     if request.errors:
-        raise ValidationFailure('body')  # use errors from validate_request
+        raise ValidationFailure('body', 'create_unauthorized_user', 'Cannot validate request')
 
     # validate recaptcha_resp
     # https://developers.google.com/recaptcha/docs/verify

@@ -10,6 +10,7 @@ from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
     validate_item_content_patch,
+    validate_item_content_in_place,
     no_validate_item_content_post,
     no_validate_item_content_put,
     no_validate_item_content_patch
@@ -803,7 +804,7 @@ def validate_exp_type_validity_for_experiment(context, request):
         exp = context.type_info.name
         if exp not in allowed_types:
             msg = 'Experiment Type {} is not allowed for {}'.format(exp_type_name, exp)
-            request.errors.add('body', ['Experiment: invalid experiment type'], msg)
+            request.errors.add('body', 'Experiment: invalid experiment type', msg)
         else:
             request.validated.update({})
 
@@ -828,7 +829,7 @@ def experiment_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=Experiment, permission='index', request_method='GET',
-             validators=[validate_item_content_patch, validate_exp_type_validity_for_experiment],
+             validators=[validate_item_content_in_place, validate_exp_type_validity_for_experiment],
              request_param=['check_only=true'])
 def experiment_edit(context, request, render=None):
     return item_edit(context, request, render)

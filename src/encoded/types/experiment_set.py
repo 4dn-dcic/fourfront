@@ -14,6 +14,7 @@ from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
     validate_item_content_patch,
+    validate_item_content_in_place,
     no_validate_item_content_post,
     no_validate_item_content_put,
     no_validate_item_content_patch
@@ -370,7 +371,7 @@ def validate_experiment_set_replicate_experiments(context, request):
         experiment = replicate_exp_object.get('replicate_exp')
         if experiment in have_seen_exps:
             request.errors.add(
-                'body', ['ExperimentSet: non-unique exps'],
+                'body', 'ExperimentSet: non-unique exps',
                 'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']'
             )
             any_failures = True
@@ -401,7 +402,7 @@ def experiment_set_replicate_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=ExperimentSetReplicate, permission='index', request_method='GET',
-             validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments],
+             validators=[validate_item_content_in_place, validate_experiment_set_replicate_experiments],
              request_param=['check_only=true'])
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)

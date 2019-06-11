@@ -33,6 +33,7 @@ from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
     validate_item_content_patch,
+    validate_item_content_in_place,
     no_validate_item_content_post,
     no_validate_item_content_put,
     no_validate_item_content_patch
@@ -216,7 +217,7 @@ def validate_unique_page_name(context, request):
                 return
             error_msg = ("page %s already exists with name '%s'. This field must be unique"
                          % (lookup_res.uuid, data['name']))
-            request.errors.add('body', ['Page: non-unique name'],  error_msg)
+            request.errors.add('body', 'Page: non-unique name',  error_msg)
             return
 
 
@@ -240,7 +241,7 @@ def page_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=Page, permission='index', request_method='GET',
-             validators=[validate_item_content_patch, validate_unique_page_name],
+             validators=[validate_item_content_in_place, validate_unique_page_name],
              request_param=['check_only=true'])
 def page_edit(context, request, render=None):
     return item_edit(context, request, render)

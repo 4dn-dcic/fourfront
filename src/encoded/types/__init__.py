@@ -277,12 +277,14 @@ class TrackingItem(Item):
         prior_remote = request.remote_user
         request.remote_user = 'EMBED'
         # remove any missing attributes from DownloadTracking
-        properties['download_tracking'] = {k: v for k, v in properties.get('download_tracking', {}).items()
-                                           if v is not None}
+        properties['download_tracking'] = {
+            k: v for k, v in properties.get('download_tracking', {}).items() if v is not None
+        }
         validate_request(collection.type_info.schema, request, properties)
-        if request.errors:  # from validate_request
+        if request.errors:  # added from validate_request
             request.remote_user = prior_remote
-            raise ValidationFailure('body')  # use errors from validate_request
+            raise ValidationFailure('body', 'TrackingItem: create_and_commit',
+                                    'Cannot validate request')
         ti_res = sno_collection_add(collection, request, False)  # render=False
         transaction.get().commit()
         if clean_headers and 'Location' in request.response.headers:
