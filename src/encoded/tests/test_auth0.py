@@ -101,21 +101,21 @@ def test_get_jwt_falls_back_to_cookie(fake_request):
 
 
 def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
-    anontestapp.post_json('/login', auth0_4dn_user_token, status=403)
+    anontestapp.post_json('/login', auth0_4dn_user_token, status=401)
 
 
 def test_login_token_no_email(anontestapp, auth0_access_token_no_email, headers):
     headers1 = headers.copy()
     headers1['Authorization'] = 'Bearer ' + auth0_access_token_no_email
     # Log in without headers
-    anontestapp.post_json('/login', headers=headers1, status=403)
+    anontestapp.post_json('/login', headers=headers1, status=401)
 
 
 def test_invalid_login(anontestapp, headers):
     headers1=headers.copy()
     headers1['Authorization'] = 'Bearer invalid token'
     # Log in without headers
-    res = anontestapp.post_json('/login', headers=headers1, status=403)
+    res = anontestapp.post_json('/login', headers=headers1, status=401)
 
 
 def test_login_logout(testapp, anontestapp, headers,

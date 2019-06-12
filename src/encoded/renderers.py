@@ -142,6 +142,8 @@ def security_tween_factory(handler, registry):
             if not request.authenticated_userid:
                 if not hasattr(request, 'auth0_expired'):
                     # Not a "Bearer" JWT token in Auth header. Or other error.
+                    # We send a 401 "Unauthorized" exception if authentication issue or expiration.
+                    # We send a 403 "Forbidden" (TODO: assert) if authorized correctly but no view permission
                     raise HTTPUnauthorized(title="No Access", comment="Invalid Authorization header or Auth Challenge response.")
 
 

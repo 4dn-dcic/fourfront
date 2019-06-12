@@ -24,6 +24,7 @@ from pyramid.security import (
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
+    HTTPUnauthorized,
     HTTPFound
 )
 from pyramid.view import (
@@ -132,8 +133,8 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
         super(BasicAuthAuthenticationPolicy, self).__init__(check, *args, **kw)
 
 
-class LoginDenied(HTTPForbidden):
-    title = 'Login failure'
+class LoginDenied(HTTPUnauthorized):
+    title = 'Login Failure'
 
 
 _fake_user = object()
@@ -168,13 +169,13 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         email = request._auth0_authenticated = jwt_info['email'].lower()
 
         # At this point, email has been authenticated with their Auth0 provider, but we don't know yet if this email is in our database.
-        # If not authenticated (not in our DB), request.user_info will throw an HTTPForbidden error.
+        # If not authenticated (not in our DB), request.user_info will throw an HTTPUnauthorized error.
 
         # Allow access basic user credentials from request obj after authenticating & saving request
         def get_user_info(request):
             user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
             if not user_props.get('details'):
-                raise HTTPForbidden(title="Not logged in.")
+                raise HTTPUnauthorized(title="Not logged in.")
             user_props['id_token'] = id_token
             return user_props
 
@@ -389,7 +390,7 @@ def impersonate_user(request):
     auth0_client = registry.settings.get('auth0.client')
     auth0_secret = registry.settings.get('auth0.secret')
     if not(auth0_client and auth0_secret):
-        raise HTTPForbidden(title="no keys to impersonate user")
+        raise HTTPForbidden(title="No keys to impersonate user")
 
     jwt_contents = {
         'email': userid,
@@ -451,7 +452,7 @@ def create_unauthorized_user(request):
     email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
     user_props = request.json
     if user_props.get('email') != email:
-        raise HTTPForbidden(title="Provided email %s not validated with Auth0. Try logging in again."
+        raise HTTPUnauthorized(title="Provided email %s not validated with Auth0. Try logging in again."
                             % user_props.get('email'))
 
     del user_props['g-recaptcha-response']
@@ -483,4 +484,4 @@ def create_unauthorized_user(request):
             raise HTTPForbidden(title="Could not create user. Try logging in again.")
     else:
         # error with re-captcha
-        raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")
+        raise HTTPUnauthorized(title="Invalid reCAPTCHA. Try logging in again.")
