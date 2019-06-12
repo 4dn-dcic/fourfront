@@ -182,7 +182,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
             if not user_props.get('details'):
                 raise HTTPUnauthorized(
-                    title="Not logged in.",
+                    title="Could not find user info for {}".format(email),
                     headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
                 )
             user_props['id_token'] = id_token
