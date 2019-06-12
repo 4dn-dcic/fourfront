@@ -21,7 +21,8 @@ const render = function (AppComponent, body, res) {
     const disp_dict = {
         'context'           : context,
         'href'              : res.getHeader('X-Request-URL') || object.itemUtil.atId(context),
-        'lastCSSBuildTime'  : lastCSSBuildTime
+        'lastCSSBuildTime'  : lastCSSBuildTime,
+        'alerts'            : [] // Always have fresh alerts per request, else subprocess will re-use leftover global vars/vals.
     };
 
     // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request.
@@ -46,8 +47,7 @@ const render = function (AppComponent, body, res) {
             initialSession = true;
         }
     } else if (jwtToken === 'expired'){
-        // TODO: Ensure is working as expected on load balancer.
-        disp_dict.alerts = [Alerts.LoggedOut];
+        disp_dict.alerts.push(Alerts.LoggedOut);
     }
     // End JWT token grabbing
 
