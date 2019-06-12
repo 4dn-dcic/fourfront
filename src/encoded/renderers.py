@@ -158,11 +158,11 @@ def security_tween_factory(handler, registry):
                     )
 
 
-
         if hasattr(request, 'auth0_expired'):
             # Add some security-related headers on the up-swing
             response = handler(request)
             if request.auth0_expired:
+                #return response
                 # If have the attribute and it is true, then our session has expired.
                 # This is true for both AJAX requests (which have request.authorization) & browser page
                 # requests (which have cookie); both cases handled in authentication.py
@@ -263,6 +263,9 @@ def set_response_headers_tween_factory(handler, registry):
     def set_response_headers_tween(request):
         response = handler(request)
         response.headers['X-Request-URL'] = request.url
+        # Setter automatically converts set back to tuple.
+        # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary
+        response.vary = set((response.vary or ()) + ('Accept', 'Authorization'))
         return response
 
     return set_response_headers_tween
@@ -339,10 +342,6 @@ def should_transform(request, response):
             return True
         else:
             raise HTTPNotAcceptable("Improper format URI parameter", comment="The format URI parameter should be set to either html or json.")
-
-    # Setter automatically converts set back to tuple.
-    # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary
-    response.vary = set((response.vary or ()) + ('Accept', 'Authorization'))
 
     # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
     # which should contain 'text/html'

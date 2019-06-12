@@ -12,6 +12,7 @@ import { ItemStore } from './../lib/store';
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
 import { EditableField, FieldSet } from './../forms/components';
+import { content_views } from './../globals';
 
 import { Item } from './../util/typedefs';
 
@@ -35,7 +36,7 @@ class AccessKeyStore extends ItemStore {
     resetSecret(id) {
         this.fetch(id + 'reset-secret', {
             method: 'POST',
-        }, response => this.dispatch('onResetSecret', response));
+        }, (response) => this.dispatch('onResetSecret', response));
     }
 }
 
@@ -160,7 +161,7 @@ class AccessKeyTable extends React.Component {
     }
 
     showNewSecret(response, reset = false) {
-        this.setState({ 'modal' :
+        this.setState({ 'modal' : (
             <Modal show onHide={this.hideModal}>
                 <Modal.Header>{ reset ? <Modal.Title>Your secret key has been created.</Modal.Title> : <Modal.Title>Your secret key has been reset.</Modal.Title> }</Modal.Header>
                 <Modal.Body>
@@ -186,7 +187,7 @@ class AccessKeyTable extends React.Component {
                     </div>
                 </Modal.Body>
             </Modal>
-        });
+        ) });
     }
 
     /**** Methods which are CALLED BY ITEMSTORE VIA DISPATCH(); TODO: Refactor, more Reactful ****/
