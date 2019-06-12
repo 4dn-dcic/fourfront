@@ -180,7 +180,7 @@ def de_term(testapp, lab, award):
 
 
 @pytest.fixture
-def biosample_cc_wo_diff(testapp, de_term, lab, award):
+def biosample_cc_wo_diff(testapp, lab, award):
     item = {
         "culture_start_date": "2018-01-01",
         'award': award['@id'],
