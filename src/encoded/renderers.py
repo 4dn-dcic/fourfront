@@ -1,5 +1,6 @@
 from pkg_resources import resource_filename
 from urllib.parse import urlencode
+from functools import lru_cache
 from pyramid.events import (
     BeforeRender,
     subscriber,
@@ -129,7 +130,6 @@ def security_tween_factory(handler, registry):
 
     def security_tween(request):
         """Executed prior to any page transforms"""
-        login = None
 
         expected_user = request.headers.get('X-If-Match-User')
         if expected_user is not None: # Not sure when this is the case
@@ -144,21 +144,41 @@ def security_tween_factory(handler, registry):
                     # Not a "Bearer" JWT token in Auth header. Or other error.
                     raise HTTPUnauthorized(title="No Access", comment="Invalid Authorization header or Auth Challenge response.")
 
-        if getattr(request, 'auth0_expired', False):
-            # If have the attribute and it is true, then our session has expired.
-            # This is true for both AJAX requests (which have request.authorization) & browser page
-            # requests (which have cookie); both cases handled in authentication.py
-            # Informs client or libs/react-middleware.js serverside render of expired token
-            # to set logged-out state in front-end in either doc request or xhr request & set appropriate alerts
-            response = handler(request)
-            response.headers['X-Request-JWT'] = "expired"
 
-            # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
-            # React render has App(instance).state.session = false to be synced w/ server-side
-            response.set_cookie(name='jwtToken', value=None, max_age=0,path='/') # = Same as response.delete_cookie(..)
-            response.status_code = 401
-            response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
-            return response
+
+        if hasattr(request, 'auth0_expired'):
+            # Add some security-related headers on the up-swing
+            response = handler(request)
+            if request.auth0_expired:
+                # If have the attribute and it is true, then our session has expired.
+                # This is true for both AJAX requests (which have request.authorization) & browser page
+                # requests (which have cookie); both cases handled in authentication.py
+                # Informs client or libs/react-middleware.js serverside render of expired token
+                # to set logged-out state in front-end in either doc request or xhr request & set appropriate alerts
+                response.headers['X-Request-JWT'] = "expired"
+
+                # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
+                # React render has App(instance).state.session = false to be synced w/ server-side
+                response.set_cookie(name='jwtToken', value=None, max_age=0,path='/') # = Same as response.delete_cookie(..)
+                response.status_code = 401
+                response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
+                return response
+
+            else:
+                # We have JWT and it's not expired. Add 'X-Request-JWT' & 'X-User-Info' header.
+                # For performance, only do it if should transform to HTML as is not needed on every request.
+                if should_transform(request, response):
+                    login = request.authenticated_userid
+                    if login:
+                        authtype, email = login.split('.', 1)
+                        if authtype == 'auth0':
+                            # This header is parsed in renderer.js, or, more accurately,
+                            # by libs/react-middleware.js which is imported by server.js and compiled into
+                            # renderer.js. Is used to get access to User Info on initial web page render.
+                            response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
+                            response.headers['X-User-Info'] = json.dumps(request.user_info) # Re-ified property set in authentication.py
+                        else:
+                            response.headers['X-Request-JWT'] = "null"
 
         return handler(request)
 
@@ -278,80 +298,58 @@ def canonical_redirect(event):
     raise HTTPMovedPermanently(location=location, detail="Redirected from " + str(request.path_info))
 
 
-def render_page_html_tween_factory(handler, registry):
+@lru_cache(maxsize=16)
+def should_transform(request, response):
+    '''
+    Determines whether to transform the response from JSON->HTML/JS depending on type of response
+    and what the request is looking for to be returned via e.g. request Accept, Authorization header.
+    In case of no Accept header, attempts to guess.
 
-    def should_transform(request, response):
-        '''
-        Determines whether to transform the response from JSON->HTML/JS depending on type of response
-        and what the request is looking for to be returned via e.g. request Accept, Authorization header.
-        In case of no Accept header, attempts to guess
-        '''
-
-        # We always return JSON in response to POST, PATCH, etc.
-        #if request.method not in ('GET', 'HEAD'):
-        #    return False
-
-        # Only JSON response/content can be plugged into HTML/JS template responses.
-        if response.content_type != 'application/json':
-            return False
-
-        # The `format` URI param allows us to override request's 'Accept' header.
-        format = request.params.get('format')
-        if format is not None:
-            format = format.lower()
-            if format == 'json':
-                return False
-            if format == 'html':
-                return True
-            else:
-                raise HTTPNotAcceptable("Improper format URI parameter", comment="The format URI parameter should be set to either html or json.")
-
-        # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
-        # which should contain 'text/html'
-        # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
-        mime_type = request.accept.best_match(['text/html',  'application/json', 'application/ld+json'], 'application/json')
-        format = mime_type.split('/', 1)[1] # Will be 1 of 'html', 'json', 'json-ld'
-
-        # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?) which can parse JSON-LDs.
-        # At some point we could maybe have it to be same as making an `@@object` or `?frame=object` request (?) esp if fill
-        # out @context response w/ schema(s) (or link to schema)
-
-        if format == 'html':
-            return True
+    Memoized via `lru_cache`. Cache size is set to be > 1 in case other requests fired off in route handler.
+    '''
+    # We always return JSON in response to POST, PATCH, etc.
+    if request.method not in ('GET', 'HEAD'):
         return False
 
-    def add_x_user_info_header(response, request):
-        """
-        This 'X-User-Info' header is added only for server-side HTML responses; not on JSON responses.
+    # Only JSON response/content can be plugged into HTML/JS template responses.
+    if response.content_type != 'application/json':
+        return False
 
-        Checks if user is logged in via Auth0 and sets 'X-Request-JWT' & 'X-User-Info' headers
-        accordingly to inform React render.
+    # The `format` URI param allows us to override request's 'Accept' header.
+    format = request.params.get('format')
+    if format is not None:
+        format = format.lower()
+        if format == 'json':
+            return False
+        if format == 'html':
+            return True
+        else:
+            raise HTTPNotAcceptable("Improper format URI parameter", comment="The format URI parameter should be set to either html or json.")
 
-        Arguments:
-            response - Response for req as obtained from handler(request).
-        """
+    # Setter automatically converts set back to tuple.
+    # See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary
+    response.vary = set((response.vary or ()) + ('Accept', 'Authorization'))
 
-        if getattr(request, 'auth0_expired', True):
-            # No current Auth0 session acquired in authentication.py,
-            # or an expired session. Handle as anonymous user and continue.
-            return response
+    # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
+    # which should contain 'text/html'
+    # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
+    mime_type = request.accept.best_match(['text/html',  'application/json', 'application/ld+json'], 'application/json')
+    format = mime_type.split('/', 1)[1] # Will be 1 of 'html', 'json', 'json-ld'
 
-        # `request.auth0_expired == False` == have current authenticated JWT
-        login = request.authenticated_userid
-        if login:
-            authtype, email = login.split('.', 1)
-            if authtype == 'auth0':
-                response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
-                response.headers['X-User-Info'] = json.dumps(request.user_info) # Re-ified property set in authentication.py
-            else:
-                response.headers['X-Request-JWT'] = "null"
+    # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?) which can parse JSON-LDs.
+    # At some point we could maybe have it to be same as making an `@@object` or `?frame=object` request (?) esp if fill
+    # out @context response w/ schema(s) (or link to schema)
 
-        return response
+    if format == 'html':
+        return True
+    return False
+
+
+def render_page_html_tween_factory(handler, registry):
 
     class TransformErrorResponse(HTTPServerError):
         """Extends 500 server error"""
         explanation = 'Transformation of JSON response to HTML webpage failed.'
-
 
     node_env = os.environ.copy()
     node_env['NODE_PATH'] = ''
@@ -382,17 +380,10 @@ def render_page_html_tween_factory(handler, registry):
     def render_page_html_tween(request):
         # Result of downstream tweens. Body not yet transformed into HTML.
         response = handler(request)
-        should_transform_this_response = should_transform(request, response)
 
-        if not should_transform_this_response:
+        if not should_transform(request, response):
             # Continue back up the tween chain with JSON response body.
             return response
-
-        # Add `X-User-Info` header. This is parsed in renderer.js, or, more accurately,
-        # by libs/react-middleware.js which is imported by server.js and compiled into
-        # renderer.js. Is used to get access to User Info on initial web page render.
-        response = add_x_user_info_header(response, request)
-
 
         # The stats below are converted into "X-Stats" header in snovault.
         # Maybe we could conditionally disable this at some point in .ini config
