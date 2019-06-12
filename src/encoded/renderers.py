@@ -176,8 +176,6 @@ def security_tween_factory(handler, registry):
                 response.set_cookie(name='jwtToken', value=None, max_age=0,path='/') # = Same as response.delete_cookie(..)
                 response.status_code = 401
                 response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
-                return response
-
             else:
                 # We have JWT and it's not expired. Add 'X-Request-JWT' & 'X-User-Info' header.
                 # For performance, only do it if should transform to HTML as is not needed on every request.
@@ -193,6 +191,7 @@ def security_tween_factory(handler, registry):
                             response.headers['X-User-Info'] = json.dumps(request.user_info) # Re-ified property set in authentication.py
                         else:
                             response.headers['X-Request-JWT'] = "null"
+            return response
 
         return handler(request)
 
