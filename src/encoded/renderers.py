@@ -129,7 +129,14 @@ def validate_request_tween_factory(handler, registry):
 def security_tween_factory(handler, registry):
 
     def security_tween(request):
-        """Executed prior to any page transforms"""
+        """
+        Executed inside/prior-to any page transforms and inside/prior-to 
+        `pyramid_tm.tm_tween_factory` (transaction management tween).
+        This is because request.authenticated_userid as well as `request.user_info`
+        property getters _may_ access Postgres DB to get user properties (if not yet
+        indexed in ES) and all DB transactions must complete before transaction
+        management tween is completed.
+        """
 
         expected_user = request.headers.get('X-If-Match-User')
         if expected_user is not None: # Not sure when this is the case
@@ -144,7 +151,11 @@ def security_tween_factory(handler, registry):
                     # Not a "Bearer" JWT token in Auth header. Or other error.
                     # We send a 401 "Unauthorized" exception if authentication issue or expiration.
                     # We send a 403 "Forbidden" (TODO: assert) if authorized correctly but no view permission
-                    raise HTTPUnauthorized(title="No Access", comment="Invalid Authorization header or Auth Challenge response.")
+                    raise HTTPUnauthorized(
+                        title="No Access",
+                        comment="Invalid Authorization header or Auth Challenge response.",
+                        headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+                    )
 
 
 
@@ -159,8 +170,9 @@ def security_tween_factory(handler, registry):
                 # to set logged-out state in front-end in either doc request or xhr request & set appropriate alerts
                 response.headers['X-Request-JWT'] = "expired"
 
-                # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
-                # React render has App(instance).state.session = false to be synced w/ server-side
+                # Especially for initial document requests by browser, but also desired for AJAX and other requests,
+                # unset jwtToken cookie so initial client-side React render has App(instance).state.session = false
+                # to be synced w/ server-side
                 response.set_cookie(name='jwtToken', value=None, max_age=0,path='/') # = Same as response.delete_cookie(..)
                 response.status_code = 401
                 response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
@@ -307,7 +319,7 @@ def should_transform(request, response):
     and what the request is looking for to be returned via e.g. request Accept, Authorization header.
     In case of no Accept header, attempts to guess.
 
-    Memoized via `lru_cache`. Cache size is set to be > 1 in case other requests fired off in route handler.
+    Memoized via `lru_cache`. Cache size is set to be 16 (> 1) in case sub-requests fired off during handling.
     '''
     # We always return JSON in response to POST, PATCH, etc.
     if request.method not in ('GET', 'HEAD'):

@@ -136,6 +136,12 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
 class LoginDenied(HTTPUnauthorized):
     title = 'Login Failure'
 
+    def __init__(self, domain=None, *args, **kwargs):
+        super(HTTPUnauthorized, self).__init__(*args, **kwargs)
+        if not self.headers.get('WWW-Authenticate') and domain:
+            # headers['WWW-Authenticate'] might be set in constructor thru headers
+            self.headers = { 'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(domain, domain) }
+
 
 _fake_user = object()
 
@@ -175,7 +181,10 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         def get_user_info(request):
             user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
             if not user_props.get('details'):
-                raise HTTPUnauthorized(title="Not logged in.")
+                raise HTTPUnauthorized(
+                    title="Not logged in.",
+                    headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+                )
             user_props['id_token'] = id_token
             return user_props
 
@@ -254,7 +263,7 @@ def login(request):
     if user_info and user_info.get('id_token'): # Authenticated
         return user_info
 
-    raise LoginDenied()
+    raise LoginDenied(domain=request.domain)
 
 
 @view_config(route_name='logout',
@@ -452,8 +461,10 @@ def create_unauthorized_user(request):
     email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
     user_props = request.json
     if user_props.get('email') != email:
-        raise HTTPUnauthorized(title="Provided email %s not validated with Auth0. Try logging in again."
-                            % user_props.get('email'))
+        raise HTTPUnauthorized(
+            title="Provided email {} not validated with Auth0. Try logging in again.".format(user_props.get('email')),
+            headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+        )
 
     del user_props['g-recaptcha-response']
     user_props['was_unauthorized'] = True
@@ -484,4 +495,7 @@ def create_unauthorized_user(request):
             raise HTTPForbidden(title="Could not create user. Try logging in again.")
     else:
         # error with re-captcha
-        raise HTTPUnauthorized(title="Invalid reCAPTCHA. Try logging in again.")
+        raise HTTPUnauthorized(
+            title="Invalid reCAPTCHA. Try logging in again.",
+            headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+        )
