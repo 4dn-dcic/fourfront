@@ -130,7 +130,7 @@ def security_tween_factory(handler, registry):
 
     def security_tween(request):
         """
-        Executed inside/prior-to any page transforms and inside/prior-to 
+        Executed inside/prior-to any page transforms and inside/prior-to
         `pyramid_tm.tm_tween_factory` (transaction management tween).
         This is because request.authenticated_userid as well as `request.user_info`
         property getters _may_ access Postgres DB to get user properties (if not yet

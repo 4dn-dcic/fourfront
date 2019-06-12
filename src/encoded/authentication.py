@@ -137,10 +137,10 @@ class LoginDenied(HTTPUnauthorized):
     title = 'Login Failure'
 
     def __init__(self, domain=None, *args, **kwargs):
-        super(HTTPUnauthorized, self).__init__(*args, **kwargs)
+        super(LoginDenied, self).__init__(*args, **kwargs)
         if not self.headers.get('WWW-Authenticate') and domain:
             # headers['WWW-Authenticate'] might be set in constructor thru headers
-            self.headers = { 'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(domain, domain) }
+            self.headers['WWW-Authenticate'] = "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(domain, domain)
 
 
 _fake_user = object()
