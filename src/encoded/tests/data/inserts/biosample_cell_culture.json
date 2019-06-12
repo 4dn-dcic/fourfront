@@ -38,7 +38,7 @@
         "passage_number": 16,
         "in_vitro_differentiated": "Yes",
         "differentiation_state": "differentiated to definitive endoderm as assayed by FOXP2 expression",
-        "differentiation_tissue": "111121bc-8535-4448-903e-854af460a233",
+        "tissue": "111121bc-8535-4448-903e-854af460a233",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com"

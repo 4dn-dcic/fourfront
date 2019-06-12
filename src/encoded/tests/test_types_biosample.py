@@ -8,7 +8,7 @@ def biosample_cc_w_diff(testapp, de_term, lab, award):
     item = {
         "culture_start_date": "2018-01-01",
         "differentiation_state": "Differentiated to definitive endoderm demonstrated by decreased Oct4 expression and increased Sox17 expression",
-        "differentiation_tissue": de_term['@id'],
+        "tissue": de_term['@id'],
         "in_vitro_differentiated": "Yes",
         'award': award['@id'],
         'lab': lab['@id']
