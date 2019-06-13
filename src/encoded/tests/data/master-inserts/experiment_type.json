@@ -200,7 +200,7 @@
     {
         "title": "DNA SPRITE",
         "experiment_category": "Sequencing",
-        "assay_classification": "Ligation-free Multi-fragment 3C",
+        "assay_classification": "Ligation-free 3C",
         "assay_subclassification": "DNA-DNA Multi-way Interactions",
         "assay_subclass_short": "Ligation-free 3C",
         "raw_file_types": "Reads (fastq) provided by lab",
@@ -213,7 +213,7 @@
     {
         "title": "RNA-DNA SPRITE",
         "experiment_category": "Sequencing",
-        "assay_classification": "Ligation-free Multi-fragment 3C",
+        "assay_classification": "Ligation-free 3C",
         "assay_subclassification": "RNA-DNA Multi-way Interactions",
         "assay_subclass_short": "Ligation-free 3C",
         "raw_file_types": "Reads (fastq) provided by lab",
@@ -264,7 +264,7 @@
     {
         "title": "GAM",
         "experiment_category": "Sequencing",
-        "assay_classification": "Ligation-free Multi-fragment 3C",
+        "assay_classification": "Ligation-free 3C",
         "assay_subclassification": "DNA-DNA Multi-way Interactions",
         "assay_subclass_short": "Ligation-free 3C",
         "raw_file_types": "Reads (fastq) provided by lab",
@@ -277,9 +277,9 @@
     {
         "title": "MARGI",
         "experiment_category": "Sequencing",
-        "assay_classification": "Ligation-free Multi-fragment 3C",
-        "assay_subclassification": "DNA-DNA Multi-way Interactions",
-        "assay_subclass_short": "RNA-DNA Hi-C",
+        "assay_classification": "RNA-DNA Proximity Capture",
+        "assay_subclassification": "RNA-DNA Pairwise Interactions",
+        "assay_subclass_short": "RNA-DNA HiC",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "a17e17cd-187d-3a3b-fcc7-17a666544b3c",
         "lab": "4dn-dcic-lab",
