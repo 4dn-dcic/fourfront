@@ -903,6 +903,10 @@ export default class App extends React.PureComponent {
                 console.warn('Canceling previous navigation request', this.currentNavigationRequest);
                 this.currentNavigationRequest.abort();
                 this.currentNavigationRequest = null;
+                this.setState(function({ slowLoad }){
+                    if (!slowLoad) return null;
+                    return { 'slowLoad' : false };
+                });
             }
 
             if (options.skipRequest) {
@@ -936,9 +940,12 @@ export default class App extends React.PureComponent {
             const timeout = new Timeout(App.SLOW_REQUEST_TIME);
 
             Promise.race([currentRequestInThisScope, timeout.promise]).then((v) => {
-                if (v instanceof Timeout) {
+                if (v instanceof Timeout && currentRequestInThisScope === this.currentNavigationRequest) {
                     console.log('TIMEOUT!!!');
-                    this.setState({ 'slowLoad' : true });
+                    this.setState(function({ slowLoad }){
+                        if (slowLoad) return null;
+                        return { 'slowLoad' : true };
+                    });
                 }
             });
 
@@ -1024,6 +1031,7 @@ export default class App extends React.PureComponent {
              * via its `target` property.
              */
             currentRequestInThisScope.catch((err)=>{
+                console.log('ERRR', err);
                 this.setState(function({ slowLoad }){
                     if (!slowLoad) return null;
                     return { 'slowLoad' : false };

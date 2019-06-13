@@ -324,7 +324,7 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, doAction
  * @memberof module:item-pages/user
  */
 
-export default class UserView extends React.PureComponent {
+export default class UserView extends React.Component {
 
     static propTypes = {
         'context' : PropTypes.shape({
@@ -437,7 +437,7 @@ export default class UserView extends React.PureComponent {
  * @private
  * @type {Component}
  */
-const ProfileContactFields = React.memo(function ProfileContactFields(props){
+function ProfileContactFields(props){
     const { user, windowWidth, parent, mayEdit, href, schemas } = props;
     const { email, phone1, fax, skype } = user;
     return (
@@ -464,7 +464,7 @@ const ProfileContactFields = React.memo(function ProfileContactFields(props){
 
         </FieldSet>
     );
-});
+}
 
 function ProfileContactFieldsIcon({ icon }){
     return <i className={"visible-lg-inline icon icon-fw icon-" + icon }/>;
@@ -716,7 +716,12 @@ export class ImpersonateUserForm extends React.PureComponent {
             //}
             JWT.saveUserInfo(resp);
             updateUserInfo();
-            navigate('/', { 'inPlace' : true });
+            let navTarget = "/";
+            const profileAction = resp.user_actions && _.find(resp.user_actions, { 'id' : 'profile' });
+            if (profileAction && profileAction.href){
+                navTarget = profileAction.href;
+            }
+            navigate(navTarget, { 'inPlace' : true });
             alert('Success! ' + data + ' is being impersonated.');
         };
         const fallbackFxn = function() {
