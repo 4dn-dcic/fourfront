@@ -380,7 +380,7 @@ export function getTrackingId(href = null){
     if (href === null && !isServerSide()){
         href = window.location.href;
     }
-    var host = url.parse(href).host;
+    const host = url.parse(href).host;
     if (host.indexOf('testportal.4dnucleome') > -1){
         return 'UA-86655305-2';
     }

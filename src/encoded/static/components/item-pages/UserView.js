@@ -6,13 +6,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, Alert, FormControl, Button } from 'react-bootstrap';
+import { Modal, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ItemStore } from './../lib/store';
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
 import { EditableField, FieldSet } from './../forms/components';
+import { content_views } from './../globals';
 
+// eslint-disable-next-line no-unused-vars
 import { Item } from './../util/typedefs';
 
 
@@ -35,7 +37,7 @@ class AccessKeyStore extends ItemStore {
     resetSecret(id) {
         this.fetch(id + 'reset-secret', {
             method: 'POST',
-        }, response => this.dispatch('onResetSecret', response));
+        }, (response) => this.dispatch('onResetSecret', response));
     }
 }
 
@@ -48,9 +50,7 @@ class AccessKeyStore extends ItemStore {
  * @type {Component}
  * @private
  */
-
-
-class AccessKeyTable extends React.Component {
+class SyncedAccessKeyTable extends React.PureComponent {
 
     static propTypes = {
         'access_keys' : PropTypes.array,
@@ -67,27 +67,16 @@ class AccessKeyTable extends React.Component {
             'job_title' : PropTypes.string,
             'submits_for' : PropTypes.array
         })
-    }
+    };
 
     constructor(props){
         super(props);
-        this.syncAccessKeysFromSearch = this.syncAccessKeysFromSearch.bind(this);
-        this.create = this.create.bind(this);
-        this.doAction = this.doAction.bind(this);
-        this.onCreate = this.onCreate.bind(this);
-        this.onResetSecret = this.onResetSecret.bind(this);
-        this.showNewSecret = this.showNewSecret.bind(this);
-        this.onDelete = this.onDelete.bind(this);
-        this.onError = this.onError.bind(this);
-        this.hideModal = this.hideModal.bind(this);
+        _.bindAll(this, 'syncAccessKeysFromSearch', 'create', 'doAction', 'onCreate', 'onResetSecret',
+            'showNewSecret', 'onDelete', 'onError', 'hideModal');
 
-        this.renderTableRow = this.renderTableRow.bind(this);
-        this.renderTable = this.renderTable.bind(this);
-        this.render = this.render.bind(this);
-
-        var accessKeys = props.access_keys || null;
+        const accessKeys = props.access_keys || null;
         if (accessKeys){
-            this.store = new AccessKeyStore(props.access_keys, this, 'access_keys');
+            this.store = new AccessKeyStore(accessKeys, this, 'access_keys');
         } else {
             this.store = null;
         }
@@ -99,33 +88,37 @@ class AccessKeyTable extends React.Component {
     }
 
     componentDidMount(){
-        if (!this.state.access_keys || !this.store){
+        const { access_keys } = this.state;
+        if (!access_keys || !this.store){
             this.syncAccessKeysFromSearch();
         }
     }
 
     syncAccessKeysFromSearch(){
-        var { user } = this.props;
+        const { user } = this.props;
+        const { loadingStatus } = this.state;
         if (!user || !user.uuid || !object.isUUID(user.uuid)){
             throw new Error("No user, or invalid user.uuid supplied.");
         }
-        var requestFailed = () => {
-                this.setState({ 'loadingStatus' : 'failed', 'access_keys' : null });
-            },
-            requestSucceeded = (resp) => { // Use for both load success+fail ajax callback in case of 404 (no results)
-                if (!resp || !Array.isArray(resp['@graph'])) return requestFailed();
-                this.store = new AccessKeyStore(resp['@graph'], this, 'access_keys');
-                this.setState({
-                    'loadingStatus' :' loaded',
-                    'access_keys' : resp['@graph']
-                });
-            },
-            loadFxn = () => {
-                var hrefToRequest = '/search/?type=AccessKey&limit=500&user.uuid=' + user.uuid;
-                ajax.load(hrefToRequest, requestSucceeded, 'GET', requestSucceeded);
-            };
 
-        if (this.state.loadingStatus !== 'loading'){
+        const requestSucceeded = (resp) => {
+            // Use for both load success+fail ajax callback in case of 404 (no results)
+            if (!resp || !Array.isArray(resp['@graph'])){
+                this.setState({ 'loadingStatus' : 'failed', 'access_keys' : null });
+            }
+            this.store = new AccessKeyStore(resp['@graph'], this, 'access_keys');
+            this.setState({
+                'loadingStatus' :' loaded',
+                'access_keys' : resp['@graph']
+            });
+        };
+
+        const loadFxn = () => {
+            const hrefToRequest = '/search/?type=AccessKey&limit=500&user.uuid=' + user.uuid;
+            ajax.load(hrefToRequest, requestSucceeded, 'GET', requestSucceeded);
+        };
+
+        if (loadingStatus !== 'loading'){
             this.setState({ 'loadingStatus' : 'loading' }, loadFxn);
         } else {
             loadFxn();
@@ -139,12 +132,12 @@ class AccessKeyTable extends React.Component {
      * @param {MouseEvent} e - Click event.
      */
     create(e) {
-        e.preventDefault();
-        var item = {};
-        if(this.props.session){
-            var idToken = JWT.get();
+        const { session } = this.props;
+        const item = {};
+        if (session){
+            const idToken = JWT.get();
             if (idToken){
-                var decoded = jwt.decode(idToken);
+                const decoded = jwt.decode(idToken);
                 item['user'] = decoded.email_verified ? decoded.email : "";
             } else {
                 console.warn("Access key aborted");
@@ -154,15 +147,20 @@ class AccessKeyTable extends React.Component {
         this.store.create('/access-keys/', item);
     }
 
-    doAction(action, arg, e) {
-        e.preventDefault();
+    doAction(action, arg) {
         this.store[action](arg);
     }
 
     showNewSecret(response, reset = false) {
-        this.setState({ 'modal' :
+        const { secret_access_key, access_key_id } = response;
+        this.setState({ 'modal' : (
             <Modal show onHide={this.hideModal}>
-                <Modal.Header>{ reset ? <Modal.Title>Your secret key has been created.</Modal.Title> : <Modal.Title>Your secret key has been reset.</Modal.Title> }</Modal.Header>
+                <Modal.Header closeButton>
+                    { reset ?
+                        <Modal.Title>Your secret key has been created.</Modal.Title>
+                        : <Modal.Title>Your secret key has been reset.</Modal.Title>
+                    }
+                </Modal.Header>
                 <Modal.Body>
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
@@ -173,7 +171,7 @@ class AccessKeyTable extends React.Component {
                             Access Key ID
                         </div>
                         <div className="col-xs-8">
-                            <code>{response.access_key_id}</code>
+                            <code>{ access_key_id }</code>
                         </div>
                     </div>
                     <div className="row mt-05">
@@ -181,12 +179,12 @@ class AccessKeyTable extends React.Component {
                             Secret Access Key
                         </div>
                         <div className="col-xs-8">
-                            <code>{response.secret_access_key}</code>
+                            <code>{ secret_access_key }</code>
                         </div>
                     </div>
                 </Modal.Body>
             </Modal>
-        });
+        ) });
     }
 
     /**** Methods which are CALLED BY ITEMSTORE VIA DISPATCH(); TODO: Refactor, more Reactful ****/
@@ -196,119 +194,123 @@ class AccessKeyTable extends React.Component {
     onResetSecret(response) { this.showNewSecret(response, true); }
 
     onDelete(item) {
-        this.setState({ 'modal' :
+        this.setState({ 'modal' : (
             <Modal show onHide={this.hideModal}>
-                <Modal.Header>
+                <Modal.Header closeButton>
                     <Modal.Title className="text-400">Access key <span className="mono-text">{ item['access_key_id'] }</span> has been deleted.</Modal.Title>
                 </Modal.Header>
             </Modal>
-        });
+        ) });
     }
 
     onError(error) {
         var errorViewComponent = content_views.lookup(error);
-        this.setState({ 'modal' :
+        this.setState({ 'modal' : (
             <Modal onHide={this.hideModal}>
-                <Modal.Header><Modal.Title>Error</Modal.Title></Modal.Header>
+                <Modal.Header closeButton><Modal.Title>Error</Modal.Title></Modal.Header>
                 <Modal.Body><errorViewComponent context={error} loadingComplete /></Modal.Body>
             </Modal>
-        });
+        ) });
     }
 
     hideModal() {
-        this.setState({modal: null});
+        this.setState({ 'modal' : null });
     }
-
-
-    renderTableRow(key){
-        return (
-            <tr key={key.access_key_id}>
-                <td className="access-key-id">{ key.access_key_id }</td>
-                <td>{ key.date_created ? <DateUtility.LocalizedTime timestamp={key.date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
-                <td>{ key.description }</td>
-                <td className="access-key-buttons">
-                    <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
-                    <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', {'@id':key['@id'],'uuid':key.uuid})}>Delete</a>
-                </td>
-            </tr>
-        );
-    }
-
-
-    renderTable(){
-        var { access_keys } = this.state;
-
-        if (!access_keys.length){
-            return (
-                <div className="no-access-keys">
-                    <hr/><span>No access keys set.</span>
-                </div>
-            );
-        }
-
-        return (
-            <table className="table access-keys-table">
-                <thead>
-                    <tr>
-                        <th>Access Key ID</th>
-                        <th>Created</th>
-                        <th>Description</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody children={_.map(access_keys, this.renderTableRow)} />
-            </table>
-        );
-
-    }
-
-    wrapInContainer(children){
-        return (
-            <div className="access-keys-container">
-                <h3 className="text-300">Access Keys</h3>
-                <div className="access-keys-table-container clearfix" children={children}/>
-            </div>
-        );
-    }
-
 
     render() {
-        var { access_keys, loadingStatus, modal } = this.state;
+        const { access_keys, loadingStatus, modal } = this.state;
 
         if (!Array.isArray(access_keys) || !this.store){
             if (loadingStatus === 'loading'){
-                return this.wrapInContainer(
-                    <div className="text-center pt-3 pb-3">
-                        <i className="icon icon-2x icon-fw icon-circle-o-notch icon-spin" style={{ 'color' : '#999' }}/>
-                    </div>
+                return (
+                    <AccessKeyTableContainer>
+                        <div className="text-center pt-3 pb-3">
+                            <i className="icon icon-2x icon-fw icon-circle-o-notch icon-spin" style={{ 'color' : '#999' }}/>
+                        </div>
+                    </AccessKeyTableContainer>
                 );
             } else if (loadingStatus === 'failed'){
-                return this.wrapInContainer(
-                    <div className="text-center pt-3 pb-3">
-                        <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
-                        <h4 className="text-400">Failed to load Access Keys</h4>
-                    </div>
+                return (
+                    <AccessKeyTableContainer>
+                        <div className="text-center pt-3 pb-3">
+                            <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                            <h4 className="text-400">Failed to load Access Keys</h4>
+                        </div>
+                    </AccessKeyTableContainer>
                 );
             } else if (loadingStatus === 'loaded'){
-                return this.wrapInContainer(
-                    <div className="text-center pt-3 pb-3">
-                        <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
-                        <h4 className="text-400">Unknown Error</h4>
-                    </div>
+                return (
+                    <AccessKeyTableContainer>
+                        <div className="text-center pt-3 pb-3">
+                            <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                            <h4 className="text-400">Unknown Error</h4>
+                        </div>
+                    </AccessKeyTableContainer>
                 );
             }
         }
 
-        return this.wrapInContainer(
-            <React.Fragment>
-                { this.renderTable() }
-                <a href="#add-access-key" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</a>
+        return (
+            <AccessKeyTableContainer>
+                <AccessKeyTable accessKeys={access_keys} doAction={this.doAction} />
+                <button type="button" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</button>
                 { modal }
-            </React.Fragment>
+            </AccessKeyTableContainer>
+        );
+    }
+}
+
+function AccessKeyTableContainer({ children }){
+    return (
+        <div className="access-keys-container">
+            <h3 className="text-300">Access Keys</h3>
+            <div className="access-keys-table-container clearfix">{ children }</div>
+        </div>
+    );
+}
+
+const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, doAction }){
+
+    if (!accessKeys.length){
+        return (
+            <div className="no-access-keys">
+                <hr/><span>No access keys set.</span>
+            </div>
         );
     }
 
-}
+    return (
+        <table className="table access-keys-table">
+            <thead>
+                <tr>
+                    <th>Access Key ID</th>
+                    <th>Created</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                { _.map(accessKeys, function(accessKey, idx){
+                    const { access_key_id : id, date_created, description, uuid } = accessKey;
+                    const atId = accessKey['@id'];
+                    function resetKey(e){ doAction('resetSecret', atId); }
+                    function deleteKey(e){ doAction('delete', { '@id' : atId, uuid }); }
+                    return (
+                        <tr key={id || idx}>
+                            <td className="access-key-id">{ id }</td>
+                            <td>{ date_created ? <DateUtility.LocalizedTime timestamp={date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
+                            <td>{ description }</td>
+                            <td className="access-key-buttons">
+                                <button type="button" className="btn btn-xs btn-success" onClick={resetKey}>Reset</button>
+                                <button type="button" className="btn btn-xs btn-danger" onClick={deleteKey}>Delete</button>
+                            </td>
+                        </tr>
+                    );
+                }) }
+            </tbody>
+        </table>
+    );
+});
 
 
 
@@ -322,7 +324,7 @@ class AccessKeyTable extends React.Component {
  * @memberof module:item-pages/user
  */
 
-export default class UserView extends React.PureComponent {
+export default class UserView extends React.Component {
 
     static propTypes = {
         'context' : PropTypes.shape({
@@ -354,24 +356,21 @@ export default class UserView extends React.PureComponent {
                 })
             })
         })
-    }
+    };
 
     mayEdit(){
-        return this.props.listActionsFor('context').filter(function(action){
+        const { listActionsFor } = this.props;
+        return _.any(listActionsFor('context'), function(action){
             return action.name && action.name === 'edit';
-        }).length > 0 ? true : false;
+        });
     }
 
     render() {
-
-        var user = this.props.context;
-
-        var crumbs = [
-            {id: 'Users'}
-        ];
-
-        var mayEdit = this.mayEdit();
-        var ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
+        const { context : user, schemas, href, windowWidth } = this.props;
+        const { email, lab, submits_for, access_keys } = user;
+        const mayEdit = this.mayEdit();
+        // Todo: remove
+        const ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
 
         return (
             <div className="user-profile-page container" id="content">
@@ -391,51 +390,37 @@ export default class UserView extends React.PureComponent {
                                 <div className="user-title-row-container">
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
-                                            { object.itemUtil.User.gravatar(user.email, 70) }
+                                            { object.itemUtil.User.gravatar(email, 70) }
                                             <a className="edit-button-remote text-center" target="_blank" rel="noopener noreferrer" href="https://gravatar.com">
                                                 <i className="icon icon-pencil"/>
                                             </a>
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
-                                                <FieldSet
-                                                    context={user}
-                                                    parent={this}
-                                                    style="inline"
-                                                    inputSize="lg"
-                                                    absoluteBox={true}
-                                                    objectType="User"
-                                                    schemas={this.props.schemas}
-                                                    disabled={!mayEdit}
-                                                    href={this.props.href}
-                                                    windowWidth={this.props.windowWidth}>
-                                                    <EditableField
-                                                        labelID="first_name"
-                                                        fallbackText="No first name set"
-                                                        placeholder="First name"
-                                                    />
+                                                <FieldSet context={user} parent={this} style="inline"
+                                                    inputSize="lg" absoluteBox objectType="User"
+                                                    schemas={schemas} disabled={!mayEdit} href={href} windowWidth={windowWidth}>
+                                                    <EditableField labelID="first_name" fallbackText="No first name set"
+                                                        placeholder="First name" />
                                                     {' '}
-                                                    <EditableField
-                                                        labelID="last_name"
-                                                        fallbackText="No last name set"
-                                                        placeholder="Last name"
-                                                    />
+                                                    <EditableField labelID="last_name" fallbackText="No last name set"
+                                                        placeholder="Last name" />
                                                 </FieldSet>
                                             </h1>
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} href={this.props.href} />
+                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} href={href} />
                             </div>
 
                         </div>
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
-                            <ProfileWorkFields user={user} parent={this} href={this.props.href} />
+                            <ProfileWorkFields user={user} parent={this} href={href} />
                         </div>
 
                     </div>
 
-                    { user.lab || user.submits_for ? <AccessKeyTable user={user} access_keys={user.access_keys} /> : null }
+                    { lab || submits_for ? <SyncedAccessKeyTable user={user} access_keys={access_keys} /> : null }
 
                 </div>
             </div>
@@ -452,41 +437,37 @@ export default class UserView extends React.PureComponent {
  * @private
  * @type {Component}
  */
-class ProfileContactFields extends React.Component {
+function ProfileContactFields(props){
+    const { user, windowWidth, parent, mayEdit, href, schemas } = props;
+    const { email, phone1, fax, skype } = user;
+    return (
+        <FieldSet context={user}
+            parent={parent} className="profile-contact-fields"
+            disabled={!mayEdit} objectType="User" windowWidth={windowWidth}
+            schemas={schemas} href={href}>
 
-    static icon(iconName){
-        return <i className={"visible-lg-inline icon icon-fw icon-" + iconName }></i>;
-    }
+            <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
+                <ProfileContactFieldsIcon icon="envelope" />&nbsp; <a href={'mailto:' + email}>{ email }</a>
+            </EditableField>
 
-    render(){
-        var user = this.props.user;
+            <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
+                <ProfileContactFieldsIcon icon="phone" />&nbsp; { phone1 }
+            </EditableField>
 
-        return (
-            <FieldSet context={user}
-                parent={this.props.parent} className="profile-contact-fields"
-                disabled={!this.props.mayEdit} objectType="User" windowWidth={this.props.windowWidth}
-                schemas={this.props.schemas} href={this.props.href}>
+            <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
+                <ProfileContactFieldsIcon icon="fax" />&nbsp; { fax }
+            </EditableField>
 
-                <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
-                    { ProfileContactFields.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
-                </EditableField>
+            <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
+                <ProfileContactFieldsIcon icon="skype" />&nbsp; { skype }
+            </EditableField>
 
-                <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
-                    { ProfileContactFields.icon('phone') }&nbsp; { user.phone1 }
-                </EditableField>
+        </FieldSet>
+    );
+}
 
-                <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
-                    { ProfileContactFields.icon('fax') }&nbsp; { user.fax }
-                </EditableField>
-
-                <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
-                    { ProfileContactFields.icon('skype') }&nbsp; { user.skype }
-                </EditableField>
-
-            </FieldSet>
-        );
-    }
-
+function ProfileContactFieldsIcon({ icon }){
+    return <i className={"visible-lg-inline icon icon-fw icon-" + icon }/>;
 }
 
 
@@ -498,7 +479,7 @@ class ProfileContactFields extends React.Component {
  * @type {Component}
  */
 
-class ProfileWorkFields extends React.Component {
+class ProfileWorkFields extends React.PureComponent {
 
     /**
     * Get list of all awards (unique) from list of labs.
@@ -559,21 +540,21 @@ class ProfileWorkFields extends React.Component {
             return;
         }
 
-        this.setState(function(currState){
+        this.setState(function({ awards_list = [] }){
             // As of React 16 we can return null in setState func to cancel out of state update.
-            var currAwardsList      = (currState.awards_list && currState.awards_list.slice(0)) || [],
-                currAwardsListIDs   = new Set(currAwardsList.map(object.atIdFromObject)),
-                newAwards           = ProfileWorkFields.getAwardsList(labDetails);
+            const nextAwardsList      = awards_list.slice(0);
+            const nextAwardsListIDs   = new Set(_.map(nextAwardsList, object.atIdFromObject));
+            const newAwards           = ProfileWorkFields.getAwardsList(labDetails);
 
             for (var i = 0; i < newAwards.length; i++){
-                var award   = newAwards[i],
-                    awardID = award && object.atIdFromObject(award);
+                const award   = newAwards[i];
+                const awardID = award && object.atIdFromObject(award);
                 if (!awardID) continue; // Error ?
-                if (!currAwardsListIDs.has(awardID)) currAwardsList.push(award);
+                if (!nextAwardsListIDs.has(awardID)) nextAwardsList.push(award);
             }
 
-            if (currAwardsList.length > (currState.awards_list || []).length){
-                return { 'awards_list' : currAwardsList };
+            if (nextAwardsList.length > (awards_list || []).length){
+                return { 'awards_list' : nextAwardsList };
             } else {
                 return null;
             }
@@ -583,29 +564,26 @@ class ProfileWorkFields extends React.Component {
 
 
     render(){
-        var user        = this.props.user,
-            awards      = this.state.awards_list,
-            submits_for = null,
-            labTitle    = <span className="not-set">No Labs</span>,
-            pendingLabText = "Will be verified in the next few business days"; // Default
+        const { user, containerClassName } = this.props;
+        const { submits_for = [], lab, pending_lab, job_title } = user;
+        const { awards_list: awards } = this.state;
 
-        if (user.lab){
-            labTitle = object.itemUtil.generateLink(user.lab);
-        } else if (user.pending_lab && object.itemUtil.isAnItem(user.pending_lab)){
+        let labTitle = <span className="not-set">No Labs</span>;
+        const pendingLabText = "Will be verified in the next few business days"; // Default
+
+        if (lab){
+            labTitle = object.itemUtil.generateLink(lab);
+        } else if (pending_lab && object.itemUtil.isAnItem(pending_lab)){
             // Might occur later... currently not embedded.
-            labTitle = <span>{ object.itemUtil.generateLink(user.lab) } <em data-tip={pendingLabText}>(pending)</em></span>;
-        } else if (user.pending_lab && typeof user.pending_lab === 'string'){
+            labTitle = <span>{ object.itemUtil.generateLink(pending_lab) } <em data-tip={pendingLabText}>(pending)</em></span>;
+        } else if (pending_lab && typeof pending_lab === 'string'){
             labTitle = <span className="text-400">{ pendingLabText }</span>;
-        }
-
-        if (user.submits_for && user.submits_for.length > 0){
-            submits_for = user.submits_for;
         }
 
         // THESE FIELDS ARE NOT EDITABLE.
         // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (
-            <div className={this.props.containerClassName}>
+            <div className={containerClassName}>
                 <h3 className="text-300 block-title">
                     <i className="icon icon-users icon-fw"></i> Organizations
                 </h3>
@@ -622,7 +600,7 @@ class ProfileWorkFields extends React.Component {
                         <label htmlFor="job_title">Role</label>
                     </div>
                     <div id="job_title" className="col-sm-9 value">
-                        { user.job_title || <span className="not-set">No Job Title</span> }
+                        { job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
                 <div className="row field-entry submits_for">
@@ -632,7 +610,7 @@ class ProfileWorkFields extends React.Component {
                     <div className="col-sm-9 value text-500">
                         <FormattedInfoBlock.List
                             renderItem={object.itemUtil.generateLink}
-                            endpoints={(submits_for && _.filter(_.map(submits_for, object.itemUtil.atId))) || []}
+                            endpoints={_.filter(_.map(submits_for, object.itemUtil.atId))}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
                             ajaxCallback={this.updateAwardsList}
@@ -664,7 +642,7 @@ class ProfileWorkFields extends React.Component {
  * @private
  * @type {Component}
  */
-class BasicForm extends React.Component {
+class BasicForm extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -681,18 +659,20 @@ class BasicForm extends React.Component {
 
     handleSubmit(e){
         e.preventDefault();
-        if(this.state.value.length == 0){
+        const { onSubmit } = this.props, { value } = this.state;
+        if (value.length === 0){
             return;
         }
-        this.props.onSubmit(this.state.value);
+        onSubmit(value);
         this.setState({ 'value': '' });
     }
 
     render() {
+        const { value } = this.state;
         return(
             <form onSubmit={this.handleSubmit}>
-                <FormControl className="mt-08" type='text' placeholder='Enter an email to impersonate...'
-                    onChange={this.handleChange} value={this.state.value}/>
+                <FormControl className="mt-08" type="text" placeholder="Enter an email to impersonate..."
+                    onChange={this.handleChange} value={value}/>
                 <Button className="mt-15 pull-right" type="submit" bsStyle="primary" bsSize="md">
                     <i className="icon icon-fw icon-user"/>&nbsp; Impersonate
                 </Button>
@@ -707,11 +687,11 @@ class BasicForm extends React.Component {
  * @private
  * @type {Component}
  */
-export class ImpersonateUserForm extends React.Component {
+export class ImpersonateUserForm extends React.PureComponent {
 
     static propTypes = {
         'updateUserInfo': PropTypes.func.isRequired
-    }
+    };
 
     constructor(props){
         super(props);
@@ -727,20 +707,26 @@ export class ImpersonateUserForm extends React.Component {
      * @param {Object} data - User ID or email address.
      */
     handleSubmit(data) {
-        var url = "/impersonate-user",
-            postData = { 'userid' : data },
-            callbackFxn = (resp) => {
-                //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                //    localStorage.setItem("user_info", JSON.stringify(payload));
-                //}
-                JWT.saveUserInfo(resp);
-                this.props.updateUserInfo();
-                navigate('/', { 'inPlace' : true });
-                alert('Success! ' + data + ' is being impersonated.');
-            },
-            fallbackFxn = function() {
-                alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-            };
+        const { updateUserInfo } = this.props;
+        const url = "/impersonate-user";
+        const postData = { 'userid' : data };
+        const callbackFxn = (resp) => {
+            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            //    localStorage.setItem("user_info", JSON.stringify(payload));
+            //}
+            JWT.saveUserInfo(resp);
+            updateUserInfo();
+            let navTarget = "/";
+            const profileAction = resp.user_actions && _.find(resp.user_actions, { 'id' : 'profile' });
+            if (profileAction && profileAction.href){
+                navTarget = profileAction.href;
+            }
+            navigate(navTarget, { 'inPlace' : true });
+            alert('Success! ' + data + ' is being impersonated.');
+        };
+        const fallbackFxn = function() {
+            alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+        };
 
         //var userInfo = localStorage.getItem('user_info') || null;
         //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;

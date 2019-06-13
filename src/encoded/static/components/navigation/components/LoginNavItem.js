@@ -156,7 +156,7 @@ export class LoginNavItem extends React.Component {
         if (!error.code && error.type === 'timed-out'){
             // Server or network error of some sort most likely.
             Alerts.queue(Alerts.LoginFailed);
-        } else if (error.code === 403) {
+        } else if (error.code === 401) {
             // Present a registration form
             //navigate('/error/login-failed');
             this.setState({ 'showRegistrationModal' : true });

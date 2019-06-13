@@ -53,14 +53,14 @@ describe("HiGlass Display pages", function(){
 
         beforeEach(function() {
             // Log in.
-            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
         });
 
         afterEach(function(){
             if (testItemsToDelete.length === 0) return;
 
             // Log in _as admin_.
-            cy.visit('/higlass-view-configs/').login4DN({'email': '4dndcic@gmail.com', 'useEnvToken' : true}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken' : true }).wait(500);
 
             // Delete all newly created higlass views.
             cy.wrap(testItemsToDelete).each(function(testItem){ // Synchronously process async stuff.
@@ -86,6 +86,7 @@ describe("HiGlass Display pages", function(){
             // Empty the array now that we're done.
             testItemsToDelete = [];
         });
+
 
         it('Can clone new draft views', function() {
             // Verify logged in users can save higlass displays.
@@ -131,13 +132,16 @@ describe("HiGlass Display pages", function(){
 
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
+
                 // Click the 'Clone' button.
                 .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
-                .get(".tab-section-title .inner-panel.collapse.in").within(($panel)=>{
+                .get(".tab-section-title .inner-panel.collapse.in").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
+
                 // Confirm there is a success message.
                 .get('.alert div').should('have.text', 'Saved new display.').end()
+
                 // Inspect the AJAX response so we can capture the new uuid.
                 .get('@newHiglassDisplay').then(function (xhr) {
 

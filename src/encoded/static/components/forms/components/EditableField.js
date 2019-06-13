@@ -116,9 +116,11 @@ export class FieldSet extends React.PureComponent {
  * Currently can only be used on pages/views which have a context, i.e. JSON graph/output
  * from server, and only edit fields in that context.
  *
+ * @todo: Refactor, a lot. Pass in editing boolean prop instead of reading from parent state.
+ *
  * @see EditableField.propTypes for more info of props to provide.
  */
-export class EditableField extends React.PureComponent {
+export class EditableField extends React.Component {
 
     static displayName = 'EditableField';
 
