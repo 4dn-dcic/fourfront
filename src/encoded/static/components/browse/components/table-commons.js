@@ -10,7 +10,6 @@ import memoize from 'memoize-one';
 import queryString from 'querystring';
 import Draggable from 'react-draggable';
 import { isServerSide, navigate, object, layout, Schemas, DateUtility, analytics, typedefs, expFxn } from './../../util';
-import { ColumnSorterIcon } from './LimitAndPageControls';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, ColumnDefinition } = typedefs;
@@ -507,6 +506,50 @@ export class ResultRowColumnBlockValue extends React.Component {
     }
 }
 
+
+export class ColumnSorterIcon extends React.PureComponent {
+
+    static icon(style="descend"){
+        if (style === 'descend')        return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}/>;
+        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(4px)' }}/>;
+    }
+
+    static propTypes = {
+        'currentSortColumn' : PropTypes.string,
+        'descend' : PropTypes.bool,
+        'value' : PropTypes.string.isRequired,
+        'sortByFxn' : PropTypes.func.isRequired
+    };
+
+    static defaultProps = {
+        'descend' : false
+    };
+
+    constructor(props){
+        super(props);
+        this.sortClickFxn = this.sortClickFxn.bind(this);
+    }
+
+    sortClickFxn(e){
+        const { value, descend, currentSortColumn, sortByFxn } = this.props;
+        e.preventDefault();
+        const reverse = (currentSortColumn === value) && !descend;
+        sortByFxn(value, reverse);
+    }
+
+    render(){
+        const { value, descend, currentSortColumn } = this.props;
+        if (typeof value !== 'string' || value.length === 0) {
+            return null;
+        }
+        const style = !descend && currentSortColumn === value ? 'ascend' : 'descend';
+        const linkClass = (
+            (currentSortColumn === value ? 'active ' : '') +
+            'column-sort-icon'
+        );
+        return <span className={linkClass} onClick={this.sortClickFxn}>{ ColumnSorterIcon.icon(style) }</span>;
+    }
+}
 
 
 class HeadersRowColumn extends React.PureComponent {

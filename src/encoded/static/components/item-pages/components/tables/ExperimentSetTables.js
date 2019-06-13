@@ -3,6 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
+import url from 'url';
+import queryString from 'query-string';
 import { Button } from 'react-bootstrap';
 import { ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, } from './ItemPageTable';
 import { ExperimentSetDetailPane, defaultColumnExtensionMap } from './../../../browse/components';
@@ -21,9 +24,23 @@ export class ExperimentSetTables extends React.PureComponent {
         'title' : <span>In Experiment Sets</span>
     };
 
+    constructor(props){
+        super(props);
+        this.renderDetailPane = this.renderDetailPane.bind(this);
+    }
+
+    renderDetailPane(es, rowNum, width){
+        const { windowWidth, href } = this.props;
+        return (
+            <ExperimentSetDetailPane result={es} href={href} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
+                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
+            }} />
+        );
+    }
+
     render(){
-        var { loading, title, windowWidth, href } = this.props,
-            expSets = this.props.experiment_sets || this.props.results;
+        const { loading, title, windowWidth, href, experiment_sets, results } = this.props;
+        const expSets = experiment_sets || results;
 
         if (loading || !Array.isArray(expSets)){
             return (
@@ -44,11 +61,7 @@ export class ExperimentSetTables extends React.PureComponent {
                 <h3 className="tab-section-title">{ title }</h3>
                 <ItemPageTable
                     results={expSets}
-                    renderDetailPane={(es, rowNum, width)=>
-                        <ExperimentSetDetailPane result={es} href={href} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
-                            'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
-                        }} />
-                    }
+                    renderDetailPane={this.renderDetailPane}
                     columns={{
                         "display_title" : { "title" : "Title" },
                         "number_of_experiments" : { "title" : "Exps" },
@@ -64,33 +77,26 @@ export class ExperimentSetTables extends React.PureComponent {
     }
 }
 
-export class ExperimentSetTablesLoaded extends React.PureComponent {
 
-    static propTypes = {
-        'experimentSetUrls' : PropTypes.arrayOf(PropTypes.string).isRequired
-    };
+export const ExperimentSetTablesLoaded = React.memo(function ExperimentSetTablesLoaded({ experimentSetUrls, id, ...props }){
+    return (
+        <ItemPageTableLoader itemUrls={experimentSetUrls} key={id}>
+            <ExperimentSetTables {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
+        </ItemPageTableLoader>
+    );
+});
+ExperimentSetTablesLoaded.propTypes = {
+    'experimentSetUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
+    'id' : PropTypes.string
+};
 
-    render(){
-        var { experimentSetUrls, id } = this.props;
-        return (
-            <ItemPageTableLoader itemUrls={experimentSetUrls} key={id}>
-                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
-            </ItemPageTableLoader>
-        );
-    }
-}
-
-
-export class ExperimentSetTablesLoadedFromSearch extends React.PureComponent {
-    render(){
-        return (
-            <ItemPageTableSearchLoaderPageController {..._.pick(this.props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
-                <ExperimentSetTables {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
-            </ItemPageTableSearchLoaderPageController>
-        );
-    }
-}
-
+export const ExperimentSetTablesLoadedFromSearch = React.memo(function ExperimentSetTablesLoadedFromSearch(props){
+    return (
+        <ItemPageTableSearchLoaderPageController {..._.pick(props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
+            <ExperimentSetTables {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
+        </ItemPageTableSearchLoaderPageController>
+    );
+});
 
 export class ExperimentSetTableTabView extends React.PureComponent {
 
@@ -113,10 +119,21 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         };
     }
 
-    static getLimit(href){
-        // TODO return limit from href or 25 if none; memoize.
-        return 25;
-    }
+    /** We set the default number of results to get here to be 7, unless is overriden in href */
+    static getLimit = memoize(function(href){
+        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
+        const { query : { limit = 0 } = { limit : 0 } } = url.parse(href, true);
+        return (limit && parseInt(limit)) || 7;
+    });
+
+    static hrefWithoutLimit = memoize(function(href){
+        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
+        const hrefParts = url.parse(href, true);
+        const { query } = hrefParts;
+        delete query.limit;
+        hrefParts.search = '?' + queryString.stringify(query);
+        return url.format(hrefParts);
+    });
 
     static defaultProps = {
         'requestHref' : function(props, state){
@@ -134,9 +151,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     constructor(props){
         super(props);
         this.getCountCallback = this.getCountCallback.bind(this);
-        this.state = {
-            'totalCount' : null
-        };
+        this.state = { 'totalCount' : null };
     }
 
     getCountCallback(resp){
@@ -148,10 +163,11 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     render(){
         var { windowWidth, requestHref, title, href } = this.props;
         const { totalCount } = this.state;
-        const limit = ExperimentSetTableTabView.getLimit(href);
 
         if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
         if (typeof title === 'function')        title = title(this.props, this.state);
+
+        const limit = ExperimentSetTableTabView.getLimit(requestHref);
 
         return (
             <div>

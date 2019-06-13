@@ -28,6 +28,7 @@
         "prefer-spread" : "error",
         "react/button-has-type" : "error",
         "react/destructuring-assignment" : ["warn", "always"],
+        "react/display-name" : 0,
         "react/jsx-closing-tag-location" : "error",
         "react/jsx-indent" : "error",
         "react/jsx-indent-props" : "error",

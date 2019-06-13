@@ -16,12 +16,6 @@ export let getPage =  function(){ return 1;  };
 export let getLimit = function(){ return 25; };
 */
 
-export const getters = {
-    'schemas' : null,
-    'page' : function(){ return 1; },
-    'limit' : function(){ return 25; }
-};
-
 
 
 /**
@@ -560,12 +554,14 @@ export function filtersToNodes(expSetFilters = {}, orderedFieldNames = null, fla
 export function convertExpSetFiltersTerms(expSetFilters, to = 'array'){
     return _(expSetFilters).chain()
         .pairs()
-        .map(function(pair){
+        .map(function([ field, terms ]){
+            let nextTermsVal;
             if (to === 'array'){
-                return [pair[0], [...pair[1]]];
+                nextTermsVal = [...terms];
             } else if (to === 'set'){
-                return [pair[0], new Set(pair[1])];
+                nextTermsVal = new Set(terms);
             }
+            return [field, nextTermsVal];
         })
         .object()
         .value();
@@ -607,6 +603,7 @@ export function searchQueryStringFromHref(href){
     if (!href) return null;
     if (typeof href !== 'string') return null;
     var searchQueryString = null;
+    // eslint-disable-next-line no-useless-escape
     var searchQueryMatch = href.match(/(\?|&)(q)(=)[\w\s\+\-\%\.\*\!\(\)]+/);
     if (searchQueryMatch){
         searchQueryString = searchQueryMatch[0].replace(searchQueryMatch.slice(1).join(''), '').replace(/\+/g, ' ');
@@ -619,7 +616,7 @@ export function searchQueryStringFromHref(href){
 
 
 /** Check whether expSetFiles exists and is empty. */
-export function filterObjExistsAndNoFiltersSelected(expSetFilters = this.props.expSetFilters){
+export function filterObjExistsAndNoFiltersSelected(expSetFilters){
     return (
         typeof expSetFilters === 'object'
         && expSetFilters !== null
