@@ -256,7 +256,7 @@ def login(request):
     user_info comes from /session-properties and other places and would contain ultimately:
         { id_token: string, user_actions : string[], details : { uuid, email, first_name, last_name, groups, timezone, status } }
     '''
-    user_info = getsattr(request, 'user_info', None)
+    user_info = getattr(request, 'user_info', None)
     if user_info and user_info.get('id_token'): # Authenticated
         return user_info
 
