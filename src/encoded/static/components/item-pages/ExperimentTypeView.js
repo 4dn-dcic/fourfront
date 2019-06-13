@@ -12,7 +12,7 @@ import { UserContentBodyList } from './../static-pages/components';
 export default class ExperimentTypeView extends DefaultItemView {
 
     getTabViewContents(){
-        const { context, schemas, browseBaseState } = this.props;
+        const { context, browseBaseState } = this.props;
         const tabs = [];
         const width = this.getTabViewWidth();
         const expSetTableProps = _.extend({}, this.props, {
@@ -26,7 +26,7 @@ export default class ExperimentTypeView extends DefaultItemView {
             }
         });
 
-        tabs.push(ExperimentTypeViewOverview.getTabObject(context, schemas));
+        tabs.push(ExperimentTypeViewOverview.getTabObject(this.props));
 
         tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps, width));
 
@@ -66,50 +66,39 @@ export default class ExperimentTypeView extends DefaultItemView {
 }
 
 
-class ExperimentTypeViewOverview extends React.Component {
+const ExperimentTypeViewOverview = React.memo(function ExperimentTypeViewOverview({ context, schemas }){
+    const staticContent = _.pluck(_.filter(context.static_content || [], function(s){
+        return s.content && !s.content.error && s.location === 'tab:overview';
+    }), 'content');
 
-    /**
-     * Get overview tab object for tabpane.
-     *
-     * @param {Object} context - Current ExperimentType Item being shown.
-     * @param {Object} schemas - Schemas passed down from app.state.schemas (or Schemas.get()).
-     */
-    static getTabObject(context, schemas){
-        return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
-            'key' : 'overview',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>Overview</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <ExperimentTypeViewOverview context={context} schemas={schemas} />
+    return (
+        <div>
+            <OverViewBody result={context} schemas={schemas} />
+            { staticContent.length > 0 ? (
+                <div className="mt-2">
+                    <hr/>
+                    <UserContentBodyList contents={staticContent} />
                 </div>
-            )
-        };
-    }
-
-    render(){
-        var { context, schemas } = this.props,
-            staticContent = _.pluck(_.filter(context.static_content || [], function(s){
-                return s.content && !s.content.error && s.location === 'tab:overview';
-            }), 'content');
-
-        return (
-            <div>
-                <OverViewBody result={context} schemas={schemas} />
-                { staticContent.length > 0 ? (
-                    <div className="mt-2">
-                        <hr/>
-                        <UserContentBodyList contents={staticContent} />
-                    </div>
-                ) : null }
+            ) : null }
+        </div>
+    );
+});
+ExperimentTypeViewOverview.getTabObject = function({ context, schemas }){
+    return {
+        'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+        'key' : 'overview',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title">
+                    <span>Overview</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                <ExperimentTypeViewOverview context={context} schemas={schemas} />
             </div>
-        );
-    }
-}
+        )
+    };
+};
 
 
 const OverViewBody = React.memo(function OverViewBody(props){
