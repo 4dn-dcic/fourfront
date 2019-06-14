@@ -31,3 +31,29 @@ export class SOPBelowHeaderRow extends React.PureComponent {
     }
 }
 
+
+export class LinkBelowHeaderRow extends React.PureComponent {
+
+    static defaultProps = {
+        'outerClassName' : "mb-2"
+    };
+
+    /**
+     * @todo
+     * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
+     * component to create own <div> with whatever className is desired, among other element attributes.
+     */
+    render(){
+        var { url, outerClassName } = this.props;
+        if (!url) return null;
+        return (
+            <div className={outerClassName}>
+                <FormattedInfoWrapper singularTitle="Reference Protocol" isSingleItem iconClass="file">
+                    <h5 className={"block-title" + ( ' mt-08' )}>
+                        <a href={url.link} target="_blank" rel="noopener noreferrer">{ url.title }</a>
+                    </h5>
+                </FormattedInfoWrapper>
+            </div>
+        );
+    }
+}
