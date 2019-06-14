@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { 
-    ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, AttributionTabView,
+import {
+    ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AttributionTabView,
     ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
     WorkflowNodeElement, CollapsibleItemViewButtonToolbar, WorkflowGraphSectionControls
 } from './components';
@@ -115,7 +115,6 @@ export default class WorkflowView extends DefaultItemView {
 
         tabs.push(AttributionTabView.getTabObject(this.props));
         tabs.push(ItemDetailList.getTabObject(this.props));
-        tabs.push(AuditTabView.getTabObject(this.props));
 
         return _.map(tabs, (tabObj) =>{ // Common properties
             return _.extend(tabObj, {
@@ -178,7 +177,7 @@ export class WorkflowGraphSection extends React.PureComponent {
     commonGraphProps(){
         var { showParameters, showReferenceFiles, rowSpacingType } = this.state,
             graphData = this.parseAnalysisSteps();
-        
+
         // Filter out legend items which aren't relevant for this context.
         var keepItems = ['Input File', 'Output File', 'Input Reference File'];
         if (showParameters){
@@ -272,4 +271,3 @@ export class WorkflowGraphSection extends React.PureComponent {
     }
 
 }
-

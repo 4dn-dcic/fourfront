@@ -5,7 +5,7 @@
     "type": "object",
     "required": [ "email", "first_name", "last_name", "role"],
     "identifyingProperties": ["uuid", "email", "aliases"],
-    "additionalProperties": false,
+    "additionalProperties": true,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
@@ -69,6 +69,16 @@
                 "patient"
             ],
             "lookup": 41
+        },
+        "authorized_cases":{
+            "title": "Authorized Cases",
+            "description": "Cases this user is authorized to view or edit, depending on role",
+            "type": "array",
+            "items": {
+                "title": "Case",
+                "type": "string",
+                "linkTo": "Case"
+            }
         },
         "groups": {
             "title": "Groups",

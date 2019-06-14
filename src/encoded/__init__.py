@@ -341,7 +341,6 @@ def main(global_config, **local_config):
     # Load upgrades last so that all views (including testing views) are
     # registered.
     config.include('.upgrade')
-    config.include('.audit')
 
     app = config.make_wsgi_app()
 

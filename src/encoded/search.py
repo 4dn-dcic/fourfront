@@ -36,7 +36,6 @@ log = structlog.getLogger(__name__)
 
 def includeme(config):
     config.add_route('search', '/search{slash:/?}')
-    config.add_route('available_facets', '/facets{slash:/?}')
     config.scan(__name__)
 
 sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?]')
@@ -73,7 +72,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     }
     principals = request.effective_principals
     es = request.registry[ELASTIC_SEARCH]
-    search_audit = request.has_permission('search_audit')
 
     from_, size = get_pagination(request)
 
@@ -194,31 +192,6 @@ def collection_view(context, request):
     This is a redirect directly to the search page
     """
     return search(context, request, context.type_info.name, False, forced_type='Search')
-
-
-@view_config(route_name='available_facets', request_method='GET', permission='search', renderer='json')
-def get_available_facets(context, request, search_type=None):
-    """
-    Method to get available facets for a content/data type; built off of search() without querying Elasticsearch.
-    Unlike in search(), due to lack of ES query, does not return possible terms nor counts of experiments matching the terms.
-    """
-
-    types = request.registry[TYPES]
-    doc_types = set_doc_types(request, types, search_type)
-    schemas = (types[item_type].schema for item_type in doc_types)
-    principals = request.effective_principals
-    prepared_terms = prepare_search_term(request)
-    facets = initialize_facets(request, doc_types, request.has_permission('search_audit'), principals, prepared_terms, schemas)
-
-    ### Mini version of format_facets
-    result = []
-    for field, facet in facets:
-        result.append({
-            'field': field,
-            'title': facet.get('title', field)
-        })
-
-    return result
 
 
 def get_collection_actions(request, type_info):
@@ -403,7 +376,7 @@ def prepare_search_term(request):
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.normalized_params.iteritems():
-        if field.startswith('audit') or field.startswith('aggregated_items'):
+        if field.startswith('validation_errors') or field.startswith('aggregated_items'):
             continue
         elif field == 'q': # searched string has field 'q'
             # people shouldn't provide multiple queries, but if they do,
@@ -479,7 +452,6 @@ def list_source_fields(request, doc_types, frame):
     Note that you must provide the full fieldname with embeds, such as:
     'field=biosample.biosource.individual.organism.name' and not just
     'field=name'
-    Add audit to this so we can look at that as well
     """
     fields_requested = request.normalized_params.getall('field')
     if fields_requested:
@@ -712,7 +684,7 @@ def set_filters(request, search, result, principals, doc_types):
         # Add filter to query
         if range_type and f_field and range_type in ('date', 'numerical'):
             query_field = 'embedded.' + f_field
-        elif field.startswith('audit') or field.startswith('aggregated_items'):
+        elif field.startswith('validation_errors') or field.startswith('aggregated_items'):
             query_field = field + '.raw'
         elif field == 'type':
             query_field = 'embedded.@type.raw'
@@ -825,11 +797,8 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
         # TODO: Re-enable below line if/when 'range' URI param queries for date & numerical fields are implemented.
         # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
-    audit_facets = [
-        ('audit.ERROR.category', {'title': 'Audit category: ERROR', 'order': 999}),
-        ('audit.NOT_COMPLIANT.category', {'title': 'Audit category: NOT COMPLIANT', 'order': 999}),
-        ('audit.WARNING.category', {'title': 'Audit category: WARNING', 'order': 999}),
-        ('audit.INTERNAL_ACTION.category', {'title': 'Audit category: DCC ACTION', 'order': 999})
+    validation_error_facets = [
+        ('validation_errors.name', {'title': 'Validation Errors', 'order': 999})
     ]
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
@@ -902,9 +871,10 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             facets.append(facet_tuple)
 
-    ## Append additional facets (status, audit, ...) at the end of list unless were already added via schemas, etc.
+    # Append additional facets (status, validation_errors, ...) at the end of
+    # list unless were already added via schemas, etc.
     used_facets = [ facet[0] for facet in facets ] # Reset this var
-    for ap_facet in append_facets + audit_facets:
+    for ap_facet in append_facets + validation_error_facets:
         if ap_facet[0] not in used_facets:
             facets.append(ap_facet)
         else: # Update with better title if not already defined from e.g. requested filters.
@@ -942,8 +912,10 @@ def schema_for_field(field, request, doc_types, should_log=False):
 
     field_schema = None
 
-    # for 'audit.*' and 'aggregated_items.*', schema will never be found and logging isn't helpful
-    if schemas and not field.startswith('audit.') and not field.startswith('aggregated_items.'):
+    # for 'validation_errors.*' and 'aggregated_items.*',
+    # schema will never be found and logging isn't helpful
+    if (schemas and not field.startswith('validation_errors.') and
+        not field.startswith('aggregated_items.')):
         # 'type' field is really '@type' in the schema
         use_field = '@type' if field == 'type' else field
         # eliminate '!' from not fields
@@ -1067,7 +1039,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
         if field == 'type':
             query_field = 'embedded.@type.raw'
-        elif field.startswith('audit') or field.startswith('aggregated_items'):
+        elif field.startswith('validation_errors') or field.startswith('aggregated_items'):
             query_field = field + '.raw'
         elif facet.get('aggregation_type') in ('stats', 'date_histogram', 'histogram', 'range'):
             query_field = 'embedded.' + field
@@ -1266,7 +1238,7 @@ def format_results(request, hits, search_frame):
     """
     Loads results to pass onto UI
     Will retrieve the desired frame from the search hits and automatically
-    add 'audit' and 'aggregated_items' frames if they are present
+    add 'validation_errors' and 'aggregated_items' frames if they are present
     """
     fields_requested = request.normalized_params.getall('field')
     if fields_requested:
@@ -1282,8 +1254,8 @@ def format_results(request, hits, search_frame):
             frame = 'properties'
         for hit in hits:
             frame_result = hit['_source'][frame]
-            if 'audit' in hit['_source'] and 'audit' not in frame_result:
-                frame_result['audit'] = hit['_source']['audit']
+            if 'validation_errors' in hit['_source'] and 'validation_errors' not in frame_result:
+                frame_result['validation_errors'] = hit['_source']['validation_errors']
             if 'aggregated_items' in hit['_source'] and 'aggregated_items' not in frame_result:
                 frame_result['aggregated_items'] = hit['_source']['aggregated_items']
             yield frame_result

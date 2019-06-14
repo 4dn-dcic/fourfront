@@ -21,6 +21,67 @@ def includeme(config):
 
 
 @collection(
+    name='individuals',
+    properties={
+        'title': 'Individuals',
+        'description': 'Listing of Individuals',
+    })
+class Individual(Item):
+    item_type = 'individual'
+    schema = load_schema('encoded:schemas/individual.json')
+    embedded_list = []
+
+    @calculated_property(schema={
+        "title": "Title",
+        "type": "string",
+    })
+    def title(self, first_name, last_name):
+        """return first and last name."""
+        title = u'{} {}'.format(first_name, last_name)
+        return title
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, first_name, last_name):
+        return self.title(first_name, last_name)
+
+
+@collection(
+    name='cases',
+    properties={
+        'title': 'Cases',
+        'description': 'Listing of Cases',
+    })
+class Case(Item):
+    item_type = 'case'
+    schema = load_schema('encoded:schemas/case.json')
+    embedded_list = []
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, title):
+        return title
+
+
+@collection(
+    name='samples',
+    properties={
+        'title': 'Samples',
+        'description': 'Listing of Samples',
+    })
+class Sample(Item):
+    item_type = 'sample'
+    schema = load_schema('encoded:schemas/sample.json')
+    embedded_list = []
+
+
+@collection(
     name='documents',
     properties={
         'title': 'Documents',
@@ -99,12 +160,14 @@ class TrackingItem(Item):
         prior_remote = request.remote_user
         request.remote_user = 'EMBED'
         # remove any missing attributes from DownloadTracking
-        properties['download_tracking'] = {k: v for k, v in properties.get('download_tracking', {}).items()
-                                           if v is not None}
+        properties['download_tracking'] = {
+            k: v for k, v in properties.get('download_tracking', {}).items() if v is not None
+        }
         validate_request(collection.type_info.schema, request, properties)
-        if request.errors:  # from validate_request
+        if request.errors:  # added from validate_request
             request.remote_user = prior_remote
-            raise ValidationFailure('body')  # use errors from validate_request
+            raise ValidationFailure('body', 'TrackingItem: create_and_commit',
+                                    'Cannot validate request')
         ti_res = sno_collection_add(collection, request, False)  # render=False
         transaction.get().commit()
         if clean_headers and 'Location' in request.response.headers:

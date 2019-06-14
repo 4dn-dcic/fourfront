@@ -3,7 +3,7 @@
     "id": "/profiles/page.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "required": ["name"],
-    "additionalProperties": false,
+    "additionalProperties": true,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },

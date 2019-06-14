@@ -29,7 +29,7 @@ export default class BiosourceView extends DefaultItemView {
             }
         })));
 
-        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
+        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }

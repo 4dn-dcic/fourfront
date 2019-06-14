@@ -1008,7 +1008,7 @@ export default class SubmissionView extends React.PureComponent{
      * Master object submission function. Takes a key index and uses ajax to
      * POST/PATCH the json to the object collection (a new object) or to the
      * specific object path (a pre-existing/roundTwo object). If test=true,
-     * the POST is made to the check_only=True endpoint for validation without
+     * the POST is made to the check_only=true endpoint for validation without
      * actual submission.
      *
      * Upon successful submission, reponse data for the newly instantiated object
@@ -1109,8 +1109,8 @@ export default class SubmissionView extends React.PureComponent{
             }
 
             if (test){
-                // if testing validation, use check_only=True (see /types/base.py)'
-                destination += '?check_only=True';
+                // if testing validation, use check_only=true (see /types/base.py)'
+                destination += '?check_only=true';
             } else {
                 console.log('FINALIZED PAYLOAD:', finalizedContext);
                 console.log('DELETE FIELDS:', deleteFields);
@@ -1135,8 +1135,8 @@ export default class SubmissionView extends React.PureComponent{
                         stateToSet.errorCount = errorList.length;
                         for(i = 0; i<errorList.length; i++){
                             var detail = errorList[i].description || errorList[i] || "Unidentified error";
-                            if (errorList[i].name && errorList[i].name.length > 0){
-                                detail += ('. See ' + errorList[i].name[0] + ' in ' + keyDisplay[inKey]);
+                            if (errorList[i].name){
+                                detail += ('. ' + errorList[i].name + ' in ' + keyDisplay[inKey]);
                             } else {
                                 detail += ('. See ' + keyDisplay[inKey]);
                             }

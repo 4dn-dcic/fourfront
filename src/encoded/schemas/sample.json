@@ -1,0 +1,24 @@
+{
+    "title": "Sample",
+    "id": "/profiles/sample.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": true,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/attribution" }
+    ],
+    "properties": {
+        "individual": {
+            "title": "Individual",
+            "description": "Individual this sample is derived from",
+            "type": "string",
+            "linkTo": "Individual"
+        }
+    }
+}
