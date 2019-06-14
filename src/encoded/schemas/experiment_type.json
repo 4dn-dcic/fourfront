@@ -162,6 +162,48 @@
             "lookup": 170,
             "linkTo": "Protocol"
         },
+        "url": {
+            "title": "Protocol URL",
+            "lookup": 1000,
+            "description": "If no SOP, an external link to a protocol.",
+            "type": "object",
+            "properties": {
+                "title": {
+                    "title": "Protocol Title",
+                    "type": "string"
+                },
+                "link": {
+                    "title": "Link",
+                    "type": "string",
+                    "format": "uri"
+                }
+            }
+        },
+        "imaging_paths": {
+            "title": "Imaging Paths",
+            "description": "Target to label connections in each channel.",
+            "type":  "array",
+            "lookup": 63,
+            "items": {
+                "title": "Imaging path",
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["path", "channel"],
+                "properties":{
+                    "path":{
+                        "title": "Imaging Path",
+                        "type": "string",
+                        "linkTo": "ImagingPath"
+                    },
+                    "channel":{
+                        "title": "Imaging channnel",
+                        "description" : "channel info, ie. ch01, ch02...",
+                        "type": "string",
+                        "pattern": "^(ch\\d\\d)$"
+                    }
+                }
+            }
+        },
         "reference_pubs": {
             "title": "Reference Publications",
             "description": "Reference publication(s) for the experiment type",
