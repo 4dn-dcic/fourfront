@@ -30,15 +30,16 @@ import { Buffer } from 'buffer';
 
 
 /** Expected to throw error of some sort if not on search page, or no results. */
-Cypress.Commands.add('searchPageTotalResultCount', (options) => {
-    return cy.get('div.above-results-table-row .box.results-count > div.inline-block > span.text-500').invoke('text').then((resultText)=>{
-        return parseInt(resultText);
-    });
+Cypress.Commands.add('searchPageTotalResultCount', function(options){
+    return cy.get('div.above-results-table-row .box.results-count > div.inline-block > span.text-500')
+        .invoke('text').then(function(resultText){
+            return parseInt(resultText);
+        });
 });
 
 
 
-Cypress.Commands.add('scrollToBottom', (options) => {
+Cypress.Commands.add('scrollToBottom', function(options){
     return cy.get('body').then(($body)=>{
         cy.scrollTo(0, $body[0].scrollHeight);
     });
@@ -68,15 +69,15 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
             cy.request({
                 'url' : '/login',
                 'method' : 'POST',
-                'body' : JSON.stringify({'id_token' : token}),
-                'headers' : { 'Authorization': 'Bearer ' + token },
+                'body' : JSON.stringify({ 'id_token' : token }),
+                'headers' : { 'Authorization': 'Bearer ' + token, 'Content-Type' : "application/json; charset=UTF-8" },
                 'followRedirect' : true
             }).then(function(resp){
                 w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
                 // Triggers app.state.session change (req'd to update UI)
                 w.fourfront.app.updateUserInfo();
                 // Refresh curr page/context
-                w.fourfront.navigate('', {'inPlace':true});
+                w.fourfront.navigate('', { 'inPlace' : true });
             }).end();
         }).end();
     }
@@ -137,17 +138,17 @@ Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
 
 Cypress.Commands.add('getQuickInfoBarCounts', function(options = { shouldNotEqual : '' }){
 
-    return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).should('not.equal', '' + options.shouldNotEqual).then((expsetCountElemText)=>{
-        return cy.get('#stats-stat-experiments').then((expCountElem)=>{
-            return cy.get('#stats-stat-files').then((fileCountElem)=>{
-                var experiment_sets = parseInt(expsetCountElemText),
-                    experiments     = parseInt(expCountElem.text()),
-                    files           = parseInt(fileCountElem.text());
-
-                return { experiment_sets, experiments, files };
+    return cy.get('#stats-stat-expsets').invoke('text').should('have.length.above', 0).should('not.equal', '' + options.shouldNotEqual)
+        .then(function(expsetCountElemText){
+            return cy.get('#stats-stat-experiments').then(function(expCountElem){
+                return cy.get('#stats-stat-files').then((fileCountElem)=>{
+                    const experiment_sets = parseInt(expsetCountElemText);
+                    const experiments = parseInt(expCountElem.text());
+                    const files = parseInt(fileCountElem.text());
+                    return { experiment_sets, experiments, files };
+                });
             });
         });
-    });
 
 });
 

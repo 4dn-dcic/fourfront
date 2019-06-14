@@ -19,7 +19,12 @@ describe("HiGlass Display pages", function(){
                 .get(".facets-header .facets-title").should('have.text', 'Properties');
 
             // All of the higlass displays you can view should have the "released" status.
-            cy.request("/higlass-view-configs/?format=json").then((response)=>{
+            cy.request({
+                'url' : "/higlass-view-configs/?format=json",
+                'method' : "GET",
+                'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
+                'followRedirect' : true
+            }).then((response)=>{
                 const nonReleasedFound = Cypress._.some(response.body["@graph"], (higlassViewConf)=>{
                     if (higlassViewConf.status && higlassViewConf.status === "released") {
                         return false;
@@ -36,7 +41,7 @@ describe("HiGlass Display pages", function(){
             // You should be able to visit the higlass view that is still in "draft" status.
 
             // Log in, visit the page and look for the create button to assert ability to create.
-            cy.login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500).end()
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end()
                 .get(".above-results-table-row a.btn.btn-xs span").should('have.text', 'Create');
 
             cy.visit(draftUrl).end().logout4DN();
@@ -71,16 +76,15 @@ describe("HiGlass Display pages", function(){
                         "Content-Type" : "application/json",
                         "Accept" : "application/json"
                     }
-                }).end()
-                    .request({
-                        method: "PATCH",
-                        url: testItem['@id'],
-                        headers: {
-                            "Content-Type" : "application/json",
-                            "Accept" : "application/json"
-                        },
-                        body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
-                    });
+                }).end().request({
+                    method: "PATCH",
+                    url: testItem['@id'],
+                    headers: {
+                        "Content-Type" : "application/json",
+                        "Accept" : "application/json"
+                    },
+                    body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+                });
             });
 
             // Empty the array now that we're done.
@@ -102,7 +106,7 @@ describe("HiGlass Display pages", function(){
             cy.get('.higlass-instance .react-grid-layout').end()
                 // Click the 'Clone' button.
                 .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
-                .get(".tab-section-title .inner-panel.collapse.in").within(($panel)=>{
+                .get(".tab-section-title .inner-panel.collapse.in").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
                 .get('.alert div').should('have.text', 'Saved new display.').end()
@@ -172,7 +176,12 @@ describe("HiGlass Display pages", function(){
                             cy.get(".action-buttons-container button.btn-info").click().then(() => {
                                 cy.get(".action-buttons-container button.btn-success").click().wait(1000).then(() => {
                                     // Once the page reloads, look for the updated title/description
-                                    cy.request(newID + "?format=json&datastore=database").then((resp)=>{
+                                    cy.request({
+                                        'url' : newID + "?format=json&datastore=database",
+                                        'method' : "GET",
+                                        'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
+                                        'followRedirect' : true
+                                    }).then((resp)=>{
                                         expect(resp.body.title).to.equal(newTitle);
                                         expect(resp.body.description).to.equal(newDescription);
                                     });
@@ -189,7 +198,7 @@ describe("HiGlass Display pages", function(){
 
         after(function(){
             // Edit the higlass display back to draft status.
-            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500).end().request(
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end().request(
                 'PATCH',
                 draftUrl,
                 {
@@ -204,7 +213,7 @@ describe("HiGlass Display pages", function(){
             // N.B. Cypress had/has some gotchas/issues in terms of preserving cookies between test, so had previously
             // been attempting to login and out in same test.
             // They might have updated/improved their mechanisms and maybe could refactor code later.
-            cy.visit('/higlass-view-configs/').login4DN({'email': 'ud4dntest@gmail.com', 'useEnvToken' : true}).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
 
             // Go to the draft higlass display.
             // Click on the Share button.
@@ -214,7 +223,7 @@ describe("HiGlass Display pages", function(){
             cy.visit(draftUrl).get('.item-view-header .indicator-item.item-status').should('have.text', 'draft').end()
                 .get(".tab-section-title button.toggle-open-button").click().wait(500).end()
                 .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle").click().wait(300).end()
-                .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle + ul").within(($ul) => {
+                .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle + ul").within(function($ul){
                     return cy.contains("Visible by Everyone").click().wait(1000).end();
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()

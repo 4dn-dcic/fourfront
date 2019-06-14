@@ -132,7 +132,12 @@ describe('Static Page & Content Tests', function () {
                         cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"]):not([href*=".gov"])').each(($linkElem)=>{
                             const linkHref = $linkElem.attr('href');
                             console.log($linkElem.attr('href'));
-                            return cy.request(linkHref);
+                            return cy.request({
+                                'url' : linkHref,
+                                'method' : 'GET',
+                                'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
+                                'followRedirect' : true
+                            });
                         }).then(()=>{
                             finish(titleText);
                         });
