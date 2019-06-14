@@ -172,6 +172,7 @@ def test_validate_biosource_cell_line_invalid_ont(testapp, award, lab, gm12878_o
                  'cell_line': gm12878_oterm['@id']}
     res = testapp.post_json('/biosource', biosource, status=422)
     errors = res.json['errors']
+    assert errors[0]['name'] == 'Biosource: invalid cell_line term'
     assert 'not a known valid cell line' in errors[0]['description']
 
 
@@ -224,4 +225,5 @@ def test_validate_biosource_cell_line_on_invalid_patch(testapp, award, lab, gm12
     pid = '/' + res.json['@graph'][0].get('uuid')
     res2 = testapp.patch_json(pid, {'cell_line': ot.json['@graph'][0]['uuid']}, status=422)
     errors = res2.json['errors']
+    assert errors[0]['name'] == 'Biosource: invalid cell_line term'
     assert 'not a known valid cell line' in errors[0]['description']

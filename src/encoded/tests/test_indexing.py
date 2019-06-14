@@ -76,14 +76,20 @@ def test_indexing_simple(app, testapp, indexer_testapp):
         count += 1
     assert res.json['total'] >= 2
     assert uuid in uuids
-    # test the meta index
+
     indexing_doc = es.get(index='indexing', doc_type='indexing', id='latest_indexing')
     indexing_source = indexing_doc['_source']
     assert 'indexing_count' in indexing_source
-    testing_ppp_meta = es.get(index='meta', doc_type='meta', id='testing_post_put_patch')
-    testing_ppp_source = testing_ppp_meta['_source']
-    assert 'mappings' in testing_ppp_source
-    assert 'settings' in testing_ppp_source
+    assert 'indexing_finished' in indexing_source
+    assert 'indexing_content' in indexing_source
+    assert indexing_source['indexing_status'] == 'finished'
+    assert indexing_source['indexing_count'] > 0
+    testing_ppp_mappings = es.indices.get_mapping(index='testing_post_put_patch')['testing_post_put_patch']
+    assert 'mappings' in testing_ppp_mappings
+    testing_ppp_settings = es.indices.get_settings(index='testing_post_put_patch')['testing_post_put_patch']
+    assert 'settings' in testing_ppp_settings
+    # ensure we only have 1 shard for tests
+    assert testing_ppp_settings['settings']['index']['number_of_shards'] == '1'
 
 
 def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
@@ -92,33 +98,32 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     Do this by checking es directly before and after running mapping.
     Delete an index directly, run again to see if it recovers.
     """
-    from snovault.elasticsearch.create_mapping import type_mapping, create_mapping_by_type, build_index_record
+    from snovault.elasticsearch.create_mapping import (
+        type_mapping,
+        create_mapping_by_type,
+        build_index_record,
+        compare_against_existing_mapping
+    )
     from snovault.elasticsearch import ELASTIC_SEARCH
     from snovault import TYPES
     es = registry[ELASTIC_SEARCH]
     item_types = TEST_COLLECTIONS
     # check that mappings and settings are in index
     for item_type in item_types:
-        print('Testing mapping for %s' % item_type)
         item_mapping = type_mapping(registry[TYPES], item_type)
         try:
             item_index = es.indices.get(index=item_type)
         except:
             assert False
-        found_index_mapping = item_index.get(item_type, {}).get('mappings').get(item_type, {}).get('properties', {}).get('embedded')
-        found_index_settings = item_index.get(item_type, {}).get('settings')
-        assert found_index_mapping
+        found_index_mapping_emb = item_index[item_type]['mappings'][item_type]['properties']['embedded']
+        found_index_settings = item_index[item_type]['settings']
+        assert found_index_mapping_emb
         assert found_index_settings
-        # get the item record from meta and compare that
+        # compare the manually created mapping to the one in ES
         full_mapping = create_mapping_by_type(item_type, registry)
         item_record = build_index_record(full_mapping, item_type)
-        try:
-            item_meta = es.get(index='meta', doc_type='meta', id=item_type)
-        except:
-            assert False
-        meta_record = item_meta.get('_source', None)
-        assert meta_record
-        assert item_record == meta_record
+        # below is True if the found mapping matches manual one
+        assert compare_against_existing_mapping(es, item_type, item_record, True)
 
 
 @pytest.fixture
@@ -183,6 +188,41 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
     indexer_queue.replace_messages(to_replace, vis_timeout=0)
     assert found_fp_sid is not None and found_rel_sid is not None
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
+
+
+def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
+    """
+    Create an item (file-processed) with a validation error and index,
+    to ensure that validation errors work
+    """
+    import uuid
+    from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
+    es = app.registry[ELASTIC_SEARCH]
+    fp_body = {
+        'schema_version': '3',
+        'uuid': str(uuid.uuid4()),
+        'file_format': file_formats.get('mcool').get('uuid'),
+        'lab': lab['uuid'],
+        'award': award['uuid'],
+        'higlass_uid': 1  # validation error -- higlass_uid should be string
+    }
+    res = testapp.post_json('/files-processed/?validate=false&upgrade=False',
+                                  fp_body, status=201).json
+    fp_id = res['@graph'][0]['@id']
+    val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
+    assert val_err_view['@id'] == fp_id
+    assert val_err_view['validation_errors'] == []
+
+    # call to /index will throw MissingIndexItemException multiple times, since
+    # associated file_format, lab, and award are not indexed. That's okay
+    indexer_testapp.post_json('/index', {'record': True})
+    time.sleep(2)
+    es_res = es.get(index='file_processed', doc_type='file_processed', id=res['@graph'][0]['uuid'])
+    assert len(es_res['_source'].get('validation_errors', [])) == 1
+    # check that validation-errors view works
+    val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
+    assert val_err_view['@id'] == fp_id
+    assert val_err_view['validation_errors'] == es_res['_source']['validation_errors']
 
 
 # @pytest.mark.performance

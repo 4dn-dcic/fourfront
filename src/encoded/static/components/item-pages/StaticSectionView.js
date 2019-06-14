@@ -17,7 +17,7 @@ export default class StaticSectionView extends DefaultItemView {
 
         initTabs.push(StaticSectionViewPreview.getTabObject(this.props));
 
-        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
+        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }

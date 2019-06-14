@@ -861,4 +861,5 @@ def test_validate_experiment_set_duplicate_replicate_experiments(testapp, rep_se
     rep_set_data['replicate_exps'] = [{'bio_rep_no': 1, 'tec_rep_no': 1, 'replicate_exp': experiment['@id']},
                                       {'bio_rep_no': 1, 'tec_rep_no': 2, 'replicate_exp': experiment['@id']}]
     repset = testapp.post_json('/experiment_set_replicate', rep_set_data, status=422)
-    assert 'Duplicate experiment' in repset.json.get('errors')[0].get('description')
+    assert repset.json['errors'][0]['name'] == 'ExperimentSet: non-unique exps'
+    assert 'Duplicate experiment' in repset.json['errors'][0]['description']
