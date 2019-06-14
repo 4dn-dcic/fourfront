@@ -1,23 +1,12 @@
 [
     {
-        "aliases": ["admin-admin:photo"],
-        "attachment": "photo.jpg",
-        "award": "1U01CA200059-01",
-        "description": "",
-        "lab": "4dn-dcic-lab",
-        "submitted_by": "4dndcic@gmail.com",
-        "urls": ["https://commonfund.nih.gov/4dnucleome/index"],
-        "status": "in review by lab",
-        "uuid": "dcf15d5e-40aa-43bc-b81c-32c70c9afb01"
-    },
-    {
         "aliases": ["admin-admin:doc"],
         "attachment": "photo.zip",
-        "award": "1U01CA200059-01",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "description": "zipped files",
-        "lab": "4dn-dcic-lab",
-        "submitted_by": "4dndcic@gmail.com",
-        "status": "in review by lab",
+        "institution": "hms-dbmi",
+        "submitted_by": "carl_vitzthum@hms.harvard.edu",
+        "status": "released",
         "uuid": "dcf15d5e-40aa-43bc-b81c-32c70c9afb48"
     }
 ]

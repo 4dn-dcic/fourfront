@@ -27,16 +27,8 @@ def includeme(config):
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
     'user',
-    'award',
-    'lab',
-    'file_format',
-    'ontology_term',  # validate_biosource_cell_line requires term_name
-    'experiment_type',
-    'biosource',
-    'biosample',
-    'organism',  # allow the 'default' linkTo in individuals work
-    'workflow',
-    'vendor'
+    'institution',
+    'project'
 ]
 
 IS_ATTACHMENT = [
@@ -404,6 +396,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     # yield bytes to work with Response.app_iter
                     yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
                 except Exception as e:
+                    import pdb; pdb.set_trace()
                     print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
                           a_type, str(first_fields), str(e)))
                     # remove newlines from error, since they mess with generator output

@@ -9,7 +9,8 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/modified" }
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
         "schema_version": {
@@ -80,34 +81,7 @@
                     "lookup" : 7
                 }
             }
-        },
-        "lab": {
-            "title": "Lab",
-            "description": "Lab associated with the submission.",
-            "exclude_from": ["submit4dn"],
-            "type": "string",
-            "linkTo": "Lab"
-        },
-        "contributing_labs": {
-            "title": "Contributing Labs",
-            "description": "Other labs associated with the submitted data.",
-            "type": "array",
-            "lookup": 950,
-            "exclude_from" : ["submit4dn"],
-            "items": {
-                "title": "Contributing Lab",
-                "description": "A lab that has contributed to the associated data.",
-                "type": "string",
-                "linkTo": "Lab"
-            }
-        },
-        "award": {
-            "title": "Grant",
-            "description": "Grant associated with the submission.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "type": "string",
-            "linkTo": "Award"
         }
     },
-    "excludedColumns" : ["lab.display_title"]
+    "excludedColumns" : ["institution.display_title"]
 }

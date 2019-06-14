@@ -4,7 +4,7 @@
     "id": "/profiles/document.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["lab", "award"],
+    "required": ["institution", "project"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -15,10 +15,8 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
-        { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/attachment" },
-        { "$ref": "mixins.json#/release_dates" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/static_embeds" }
     ],

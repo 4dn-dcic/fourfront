@@ -13,110 +13,14 @@ EPILOG = __doc__
 # This order determines order that items will be mapped + added to the queue
 # Can use item type (e.g. file_fastq) or class name (e.g. FileFastq)
 ITEM_INDEX_ORDER = [
-    'Award',
-    'Lab',
+    'Project',
+    'Institution',
     'AccessKey',
     'User',
     'Sysinfo',
-
-    'Ontology',
-    'OntologyTerm',
-
     'StaticSection',
     'Document',
-    'Protocol',
-
-    'FileFormat',
-    'ExperimentType',
-
-    'Vendor',
-    'Organism',
-
-    'Gene',
-    'GenomicRegion',
-    'BioFeature',
-    'Target',
-
-    'Construct',
-    'Enzyme',
-    'Antibody',
-
-    'FileReference',
-
-    'IndividualChicken',
-    'IndividualFly',
-    'IndividualHuman',
-    'IndividualMouse',
-    'IndividualPrimate',
-
-    'Image',
-    'Modification',
-
-    'Biosource',
-    'BiosampleCellCulture',
-    'Biosample',
-
-    'Workflow',
-    'WorkflowMapping',
-
-    'PublicationTracking',
-    'Software',
-    'AnalysisStep',
-    'Badge',
-    'SopMap',
-    'SummaryStatistic',
-    'SummaryStatisticHiC',
-    'TrackingItem',
-
-    'TreatmentAgent',
-    'TreatmentChemical',
-    'TreatmentRnai',
-
-    'ImagingPath',
-    'MicroscopeSettingA1',
-    'MicroscopeSettingA2',
-    'MicroscopeSettingD1',
-    'MicroscopeSettingD2',
-
-    'HiglassViewConfig',
-    'QualityMetricAtacseq',
-    'QualityMetricBamqc',
-    'QualityMetricChipseq',
-    'QualityMetricDedupqcRepliseq',
-    'QualityMetricFastqc',
-    'QualityMetricFlag',
-    'QualityMetricPairsqc',
-
-    'ExperimentAtacseq',
-    'ExperimentCaptureC',
-    'ExperimentChiapet',
-    'ExperimentDamid',
-    'ExperimentHiC',
-    'ExperimentMic',
-    'ExperimentRepliseq',
-    'ExperimentSeq',
-    'ExperimentTsaseq',
-    'ExperimentSet',
-    'ExperimentSetReplicate',
-
-    'Publication',
-
-    'FileCalibration',
-    'FileFastq',
-    'FileMicroscopy',
-    'FileProcessed',
-    'FileSet',
-    'FileSetCalibration',
-    'FileSetMicroscopeQc',
-    'FileVistrack',
-
-    'DataReleaseUpdate',
-
-    'WorkflowRun',
-    'WorkflowRunAwsem',
-    'WorkflowRunSbg',
-
-    'Page',
+    'Page'
 ]
 
 

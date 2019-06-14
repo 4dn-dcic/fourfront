@@ -9,7 +9,6 @@ CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
     'snovault',
-    'Submit4DN',
     'dcicutils',
     'Pillow',
     'PyBrowserID',
@@ -96,8 +95,6 @@ setup(
         deploy = encoded.commands.deploy:main
         extract-test-data = encoded.commands.extract_test_data:main
         es-index-data = encoded.commands.es_index_data:main
-        generate-ontology = encoded.commands.generate_ontology:main
-        load-ontology = encoded.commands.load_ontology_terms:main
         import-data = encoded.commands.import_data:main
         export-data = encoded.commands.export_data:main
         jsonld-rdf = encoded.commands.jsonld_rdf:main

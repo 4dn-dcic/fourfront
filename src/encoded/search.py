@@ -36,7 +36,6 @@ log = structlog.getLogger(__name__)
 
 def includeme(config):
     config.add_route('search', '/search{slash:/?}')
-    config.add_route('browse', '/browse{slash:/?}')
     config.add_route('available_facets', '/facets{slash:/?}')
     config.scan(__name__)
 
@@ -186,14 +185,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     if search_session_id: # Is 'None' if e.g. limit=all
         request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
     return result
-
-
-@view_config(route_name='browse', request_method='GET', permission='search')
-def browse(context, request, search_type='ExperimentSetReplicate', return_generator=False):
-    """
-    Simply use search results for browse view
-    """
-    return search(context, request, search_type, return_generator, forced_type='Browse')
 
 
 @view_config(context=AbstractCollection, permission='list', request_method='GET')
@@ -1333,11 +1324,6 @@ def make_search_subreq(request, path):
     subreq.headers['Accept'] = 'application/json'
     return subreq
 
-DEFAULT_BROWSE_PARAM_LISTS = {
-    'type'                  : ["ExperimentSetReplicate"],
-    'experimentset_type'    : ['replicate'],
-    'award.project'         : ['4DN']
-}
 
 def get_iterable_search_results(request, search_path='/search/', param_lists=None, **kwargs):
     '''
@@ -1345,14 +1331,11 @@ def get_iterable_search_results(request, search_path='/search/', param_lists=Non
     TODO: Maybe make 'limit=all', and instead of calling invoke_subrequest(subrequest), instead call iter_search_results!
 
     :param request: Only needed to pass to do_subreq to make a subrequest with.
-    :param search_path: Root path to call, defaults to /search/ (can also use /browse/).
+    :param search_path: Root path to call, defaults to /search/.
     :param param_lists: Dictionary of param:lists_of_vals which is converted to URL query.
     :param search_results_chunk_row_size: Amount of results to get per chunk. Default should be fine.
     '''
-    if param_lists is None:
-        param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
-    else:
-        param_lists = deepcopy(param_lists)
+    param_lists = deepcopy(param_lists)
     param_lists['limit'] = ['all']
     param_lists['from'] = [0]
     param_lists['sort'] = param_lists.get('sort','uuid')

@@ -281,8 +281,8 @@ def main(global_config, **local_config):
     set_logging(in_prod=settings.get('production'))
     # set_logging(settings.get('elasticsearch.server'), settings.get('production'))
 
-    settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
-    settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
+    # settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
+    # settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
     # set auth0 keys
     settings['auth0.secret'] = os.environ.get("Auth0Secret")
@@ -318,9 +318,7 @@ def main(global_config, **local_config):
     config.include('.server_defaults')
     config.include('.root')
     config.include('.types')
-    config.include('.batch_download')
     config.include('.loadxl')
-    config.include('.visualization')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')

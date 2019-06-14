@@ -116,13 +116,6 @@ def health_check(config):
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
 
-        # when ontologies were imported
-        try:
-            si = request.embed('/sysinfos/ffsysinfo')
-            ont_date = si.json['ontology_updated']
-        except:  # pylint:disable
-            ont_date = "Never Generated"
-
         app_url = request.application_url
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
@@ -136,7 +129,6 @@ def health_check(config):
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('snovault.load_test_data'),
             "beanstalk_env": settings.get('env.name'),
-            'ontology_updated': ont_date,
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
@@ -211,10 +203,10 @@ def acl_from_settings(settings):
 
 
 @root
-class FourfrontRoot(Root):
+class CGAPRoot(Root):
     properties = {
         'title': 'Home',
-        'portal_title': '4DN Data Portal',
+        'portal_title': 'CGAP Portal',
     }
 
     @reify
@@ -228,7 +220,7 @@ class FourfrontRoot(Root):
         return acl
 
     def get(self, name, default=None):
-        resource = super(FourfrontRoot, self).get(name, None)
+        resource = super(CGAPRoot, self).get(name, None)
         if resource is not None:
             return resource
         resource = self.connection.get_by_unique_key('page:location', name)
@@ -253,7 +245,7 @@ class FourfrontRoot(Root):
 
     def jsonld_type(self):
         '''Inherits from '@type' calculated property of Root in snovault/resources.py'''
-        return ['HomePage', 'StaticPage'] + super(FourfrontRoot, self).jsonld_type()
+        return ['HomePage', 'StaticPage'] + super(CGAPRoot, self).jsonld_type()
 
     @calculated_property(schema={
         "title": "Static Page Content",

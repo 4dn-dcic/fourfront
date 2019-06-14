@@ -27,16 +27,6 @@
 			"description": "some name",
             "type": "string",
             "uniqueKey": true
-		},
-        "ontolgy_updated": {
-            "title": "Last time Ontology was updated",
-            "type": "string",
-            "anyOf": [
-                {"format": "date-time"},
-                {"format": "date"}
-            ],
-            "serverDefault": "now",
-            "permission": "import_items"
 		}
     }
 }

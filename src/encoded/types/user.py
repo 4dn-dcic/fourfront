@@ -69,9 +69,8 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     embedded_list = [
-        'lab.awards.project',
-        'lab.name',
-        'lab.display_title',
+        'institution.name',
+        'project.name',
         'submits_for.name',
         'submits_for.display_title'
     ]
@@ -79,8 +78,7 @@ class User(Item):
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
         'deleted': USER_DELETED,
-        'replaced': USER_DELETED,
-        'revoked': ONLY_ADMIN_VIEW_DETAILS,
+        'replaced': USER_DELETED
     }
 
     @calculated_property(schema={
@@ -118,62 +116,6 @@ class User(Item):
         owner = 'userid.%s' % self.uuid
         return {owner: 'role.owner'}
 
-    def _update(self, properties, sheets=None):
-        # update user subscriptions to ensure that they include the labs
-        # that the user is associated with, as well as their own submissions
-        # if they are a sumbitter
-        curr_subs = properties.get('subscriptions', [])
-        # subscriptions is a list but change to dict here for processing
-        curr_subs_dict = {sub['title']: sub for sub in curr_subs}
-        labs = {}  # cache lab info. keyed by @id
-        # remove old subscriptions
-        if 'My submissions' in curr_subs_dict: del curr_subs_dict['My submissions']
-        if 'My lab' in curr_subs_dict: del curr_subs_dict['My lab']
-        # if user has a lab, include all submissions to that lab
-        if properties.get('lab'):
-            my_lab = self.collection.get(properties['lab'])
-            my_lab_title = my_lab.properties.get('title', 'NO TITLE FOUND')
-            curr_subs_dict['All submissions for ' + my_lab_title] = {
-                'title': 'All submissions for ' + my_lab_title,
-                'url': '?lab.uuid=' + str(my_lab.uuid) + '&sort=-date_created'
-            }
-            labs[properties['lab']] = my_lab
-        # if submitter, add subscriptions to this user submissions for each lab
-        for submits_lab in properties.get('submits_for', []):
-            submit_lab = labs.get(submits_lab, self.collection.get(submits_lab))
-            lab_title = submit_lab.properties.get('title', 'NO TITLE FOUND')
-            curr_subs_dict['My submissions for ' + lab_title] = {
-                'title': 'My submissions for ' + lab_title,
-                'url': '?submitted_by.uuid=' + str(self.uuid) + '&lab.uuid=' +
-                       str(submit_lab.uuid) + '&sort=-date_created'
-            }
-        # sort alphabetically by title
-        properties['subscriptions'] = sorted(list(curr_subs_dict.values()), key= lambda v:v['title'])
-
-        # if we are on webprod/webprod2, make sure there is an account for the
-        # user that reflects any email changes
-        ff_env = self.registry.settings.get('env.name')
-        # compare previous and updated emails, respectively
-        try:
-            prev_email = self.properties.get('email')
-        except KeyError:  # if new user, previous properties do not exist
-            prev_email = None
-        new_email = properties.get('email')
-        update_email = new_email if prev_email != new_email else None
-        if ff_env is not None and update_email is not None and 'webprod' in ff_env:
-            s3Obj = s3Utils(env='data')
-            jh_key = s3Obj.get_jupyterhub_key()
-            jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', update_email])
-            jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
-            try:
-                res = requests.post(jh_endpoint, headers=jh_headers)
-            except Exception as jh_exc:
-                log.warning('Error posting user %s to JupyterHub' % update_email,
-                            error=str(jh_exc))
-            else:
-                log.info('Updating user %s on JupyterHub. Result: %s' % (update_email, res.text))
-        super(User, self)._update(properties, sheets)
-
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
 def user_page_view(context, request):
@@ -181,7 +123,7 @@ def user_page_view(context, request):
     properties = item_view_page(context, request)
     if not request.has_permission('view_details'):
         filtered = {}
-        for key in ['@id', '@type', 'uuid', 'lab', 'title', 'display_title']:
+        for key in ['@id', '@type', 'uuid', 'institution', 'project', 'title', 'display_title']:
             try:
                 filtered[key] = properties[key]
             except KeyError:

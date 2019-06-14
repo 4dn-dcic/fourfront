@@ -12,56 +12,12 @@ from snovault import (
     COLLECTIONS
 )
 # from pyramid.traversal import find_root
-from .base import (
-    Item,
-    set_namekey_from_title
-)
+from .base import Item
 
 
 def includeme(config):
     """include me method."""
     config.scan()
-
-
-@collection(
-    name='analysis-steps',
-    unique_key='analysis_step:name',
-    properties={
-        'title': 'AnalysisSteps',
-        'description': 'Listing of analysis steps for 4DN analyses',
-    })
-class AnalysisStep(Item):
-    """The AnalysisStep class that descrbes a step in a workflow."""
-
-    item_type = 'analysis_step'
-    schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded_list = Item.embedded_list + ['software_used.*', 'qa_stats_generated.*']
-
-
-@collection(
-    name='biosample-cell-cultures',
-    properties={
-        'title': 'Biosample Cell Culture Information',
-        'description': 'Listing Biosample Cell Culture Information',
-    })
-class BiosampleCellCulture(Item):
-    """Cell culture details for Biosample."""
-
-    item_type = 'biosample_cell_culture'
-    schema = load_schema('encoded:schemas/biosample_cell_culture.json')
-
-
-@collection(
-    name='constructs',
-    properties={
-        'title': 'Constructs',
-        'description': 'Listing of Constructs',
-    })
-class Construct(Item):
-    """Construct class."""
-
-    item_type = 'construct'
-    schema = load_schema('encoded:schemas/construct.json')
 
 
 @collection(
@@ -85,140 +41,6 @@ class Document(ItemWithAttachment, Item):
         if attachment:
             return attachment.get('download')
         return Item.display_title(self)
-
-
-@collection(
-    name='enzymes',
-    unique_key='enzyme:name',
-    properties={
-        'title': 'Enzymes',
-        'description': 'Listing of enzymes',
-    })
-class Enzyme(Item):
-    """Enzyme class."""
-
-    item_type = 'enzyme'
-    schema = load_schema('encoded:schemas/enzyme.json')
-    name_key = 'name'
-    embedded_list = Item.embedded_list + ['enzyme_source.title']
-
-
-@collection(
-    name='file-formats',
-    unique_key='file_format:file_format',
-    lookup_key='file_format',
-    properties={
-        'title': 'File Formats',
-        'description': 'Listing of file formats used by 4DN'
-    }
-)
-class FileFormat(Item, ItemWithAttachment):
-    """The class to store information about 4DN file formats"""
-    item_type = 'file_format'
-    schema = load_schema('encoded:schemas/file_format.json')
-    name_key = 'file_format'
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title",
-        "type": "string"
-    })
-    def display_title(self, file_format):
-        return file_format
-
-
-@collection(
-    name='genomic-regions',
-    properties={
-        'title': 'Genomic Regions',
-        'description': 'Listing of genomic regions',
-    })
-class GenomicRegion(Item):
-    """The GenomicRegion class that describes a region of a genome."""
-
-    item_type = 'genomic_region'
-    schema = load_schema('encoded:schemas/genomic_region.json')
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title",
-        "type": "string"
-    })
-    def display_title(self, genome_assembly, location_description=None,
-                      start_coordinate=None, end_coordinate=None, chromosome=None):
-        ''' If you have full genome coordinates use those, otherwise use a
-            location description (which should be provided if not coordinates)
-            with default just being genome assembly (required)
-        '''
-        value = None
-        if location_description and not (start_coordinate or end_coordinate):
-            value = location_description
-        else:
-            value = genome_assembly
-            if chromosome is not None:
-                value += (':' + chromosome)
-            if start_coordinate and end_coordinate:
-                value += ':' + str(start_coordinate) + '-' + str(end_coordinate)
-        return value
-
-
-@collection(
-    name='organisms',
-    unique_key='organism:taxon_id',
-    lookup_key='name',
-    properties={
-        'title': 'Organisms',
-        'description': 'Listing of all registered organisms',
-    })
-class Organism(Item):
-    """Organism class."""
-
-    item_type = 'organism'
-    schema = load_schema('encoded:schemas/organism.json')
-    name_key = 'taxon_id'
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title",
-        "type": "string"
-    })
-    def display_title(self, name, scientific_name=None):
-        if scientific_name:
-            scientific_name_parts = scientific_name.split(' ')
-            if len(scientific_name_parts) > 1:
-                return ' '.join([scientific_name_parts[0][0].upper() + '.'] + scientific_name_parts[1:])
-            else:
-                return scientific_name
-        return name
-
-
-@collection(
-    name='protocols',
-    properties={
-        'title': 'Protocols',
-        'description': 'Listing of protocols',
-    })
-class Protocol(Item, ItemWithAttachment):
-    """Protocol class."""
-
-    item_type = 'protocol'
-    schema = load_schema('encoded:schemas/protocol.json')
-    embedded_list = Item.embedded_list + ["award.project", "lab.title"]
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title",
-        "type": "string"
-    })
-    def display_title(self, protocol_type, attachment=None, date_created=None):
-        if attachment:
-            return attachment.get('download')
-        else:
-            if protocol_type == 'Other':
-                protocol_type = 'Protocol'
-            if date_created:  # pragma: no cover should always have this value
-                protocol_type = protocol_type + " from " + date_created[:10]
-            return protocol_type
 
 
 @collection(
@@ -314,25 +136,3 @@ class TrackingItem(Item):
             if date_created:
                 title = title + ' from ' + date_created
             return title
-
-
-@collection(
-    name='vendors',
-    unique_key='vendor:name',
-    properties={
-        'title': 'Vendors',
-        'description': 'Listing of sources and vendors for 4DN material',
-    })
-class Vendor(Item):
-    """The Vendor class that contains the company/lab sources for reagents/cells... used."""
-
-    item_type = 'vendor'
-    schema = load_schema('encoded:schemas/vendor.json')
-    name_key = 'name'
-    embedded_list = Item.embedded_list + ['award.project']
-
-    def _update(self, properties, sheets=None):
-        # set name based on what is entered into title
-        properties['name'] = set_namekey_from_title(properties)
-
-        super(Vendor, self)._update(properties, sheets)

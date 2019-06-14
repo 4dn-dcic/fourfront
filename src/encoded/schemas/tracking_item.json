@@ -16,10 +16,10 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "2"
+            "default": "1"
         },
         "status": {
-            "default": "in review by lab"
+            "default": "processing"
         },
         "tracking_type": {
             "title": "Tracking Type",
@@ -29,8 +29,7 @@
             "enum" : [
                 "other",
                 "download_tracking",
-                "google_analytics",
-                "jupyterhub_session"
+                "google_analytics"
             ]
 		},
         "download_tracking": {
@@ -428,5 +427,5 @@
             "default_hidden" : true
         }
     },
-    "excludedColumns" : ["lab.display_title"]
+    "excludedColumns" : ["institution.display_title"]
 }

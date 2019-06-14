@@ -32,9 +32,9 @@ import re
 
 
 @lru_cache()
-def _award_viewing_group(award_uuid, root):
-    award = root.get_by_uuid(award_uuid)
-    return award.upgrade_properties().get('viewing_group')
+def _project_viewing_group(proj_uuid, root):
+    proj = root.get_by_uuid(proj_uuid)
+    return proj.upgrade_properties().get('viewing_group')
 
 
 # Item acls
@@ -183,27 +183,26 @@ static_content_embed_list = [
     "static_content.content.status",
     "static_content.content.description",
     "static_content.content.options",
-    "static_content.content.lab",
-    "static_content.content.contributing_labs",
-    "static_content.content.award",
+    "static_content.content.institution",
+    "static_content.content.project",
     "static_content.content.filetype"
 ]
 
-lab_award_attribution_embed_list = [
-    "award.project",
-    "award.center_title",
-    "lab.city",
-    "lab.state",
-    "lab.country",
-    "lab.postal_code",
-    "lab.city",
-    "lab.display_title",
-    "lab.url",
-    "lab.correspondence",                                # Not a real linkTo - temp workaround
-    "contributing_labs.correspondence",                  # Not a real linkTo - temp workaround
-    "submitted_by.timezone",
-    "submitted_by.job_title"
-]
+# lab_award_attribution_embed_list = [
+#     "award.project",
+#     "award.center_title",
+#     "lab.city",
+#     "lab.state",
+#     "lab.country",
+#     "lab.postal_code",
+#     "lab.city",
+#     "lab.display_title",
+#     "lab.url",
+#     "lab.correspondence",                                # Not a real linkTo - temp workaround
+#     "contributing_labs.correspondence",                  # Not a real linkTo - temp workaround
+#     "submitted_by.timezone",
+#     "submitted_by.job_title"
+# ]
 
 
 class AbstractCollection(snovault.AbstractCollection):
@@ -258,7 +257,7 @@ class Collection(snovault.Collection, AbstractCollection):
             return
         # XXX collections should be setup after all types are registered.
         # Don't access type_info.schema here as that precaches calculated schema too early.
-        if 'lab' in self.type_info.factory.schema['properties']:
+        if 'institution' in self.type_info.factory.schema['properties']:
             self.__acl__ = ALLOW_SUBMITTER_ADD
 
 
@@ -295,28 +294,12 @@ class Item(snovault.Item):
     Collection = Collection
     STATUS_ACL = {
         # standard_status
-        'released': ALLOW_CURRENT,
         'current': ALLOW_CURRENT,
-        'revoked': ALLOW_CURRENT,
-        'archived': ALLOW_CURRENT,
-        'deleted': DELETED,
+        'released': ALLOW_CURRENT,
         'replaced': ALLOW_CURRENT,
-        'planned': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
-        'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
-        'submission in progress': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
-        'released to project': ALLOW_VIEWING_GROUP_VIEW,
-        'archived to project': ALLOW_VIEWING_GROUP_VIEW,
-        # for file
+        'processing': ALLOW_VIEWING_GROUP_VIEW,
         'obsolete': DELETED,
-        'uploading': ALLOW_LAB_SUBMITTER_EDIT,
-        'to be uploaded by workflow': ALLOW_LAB_SUBMITTER_EDIT,
-        'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
-        'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
-        'restricted': ALLOW_CURRENT,
-        # publication
-        'published': ALLOW_CURRENT,
-        # experiment sets
-        'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
+        'deleted': DELETED
     }
 
     # Items of these statuses are filtered out from rev links
@@ -347,52 +330,23 @@ class Item(snovault.Item):
         return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
 
     def __ac_local_roles__(self):
-        """this creates roles based on properties of the object being acccessed"""
-
-        def _is_joint_analysis(props):
-            for t in props.get('tags', []):
-                if 'joint analysis' in t.lower():
-                    return True
-            return False
-
+        """this creates roles based on properties of the object being accessed"""
         roles = {}
         properties = self.upgrade_properties()
-        if 'lab' in properties:
-            lab_submitters = 'submits_for.%s' % properties['lab']
-            roles[lab_submitters] = 'role.lab_submitter'
+        if 'institution' in properties:
+            inst_submitters = 'submits_for.%s' % properties['institution']
+            roles[inst_submitters] = 'role.lab_submitter'
             # add lab_member as well
-            lab_member = 'lab.%s' % properties['lab']
-            roles[lab_member] = 'role.lab_member'
-        if 'contributing_labs' in properties:
-            for clab in properties['contributing_labs']:
-                clab_member = 'lab.%s' % clab
-                roles[clab_member] = 'role.lab_member'
-        if 'award' in properties:
-            viewing_group = _award_viewing_group(properties['award'], find_root(self))
+            inst_member = 'lab.%s' % properties['institution']
+            roles[inst_member] = 'role.lab_member'
+        if 'project' in properties:
+            viewing_group = _project_viewing_group(properties['project'], find_root(self))
             if viewing_group is not None:
                 viewing_group_members = 'viewing_group.%s' % viewing_group
                 roles[viewing_group_members] = 'role.viewing_group_member'
-                award_group_members = 'award.%s' % properties['award']
-                roles[award_group_members] = 'role.award_member'
+                proj_group_members = 'award.%s' % properties['project']
+                roles[proj_group_members] = 'role.award_member'
 
-                status = properties.get('status')
-                # need to add 4DN viewing_group to NOFIC items that are rel2proj
-                # or are JA and planned or in progress
-                if viewing_group == 'NOFIC':
-                    if status == 'released to project':
-                        roles['viewing_group.4DN'] = 'role.viewing_group_member'
-                    elif status in ['planned', 'submission in progress']:
-                        if _is_joint_analysis(properties):
-                            roles['viewing_group.4DN'] = 'role.viewing_group_member'
-                    # else leave the NOFIC viewing group role in place
-                elif status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties):
-                    # view should be restricted to lab members only so remove viewing_group roles
-                    grps = []
-                    for group, role in roles.items():
-                        if role == 'role.viewing_group_member':
-                            grps.append(group)
-                    for g in grps:
-                        del roles[g]
         # This emulates __ac_local_roles__ of User.py (role.owner)
         if 'submitted_by' in properties:
             submitter = 'userid.%s' % properties['submitted_by']
@@ -430,11 +384,6 @@ class Item(snovault.Item):
             props = self.properties
         except KeyError:
             pass
-        if 'status' in props and props['status'] == 'planned':
-            # if an item is status 'planned' and an update is submitted
-            # by a non-admin user then status should be changed to 'submission in progress'
-            if not self.is_update_by_admin_user():
-                properties['status'] = 'submission in progress'
 
         try:  # update last_modified. this depends on an available request
             last_modified = {
@@ -448,60 +397,8 @@ class Item(snovault.Item):
             if last_modified['modified_by'] != NO_DEFAULT:
                 properties['last_modified'] = last_modified
 
-        date2status = [{'public_release': ['released', 'current']}, {'project_release': ['released to project']}]
-        # if an item is directly released without first being released to project
-        # then project_release date is added for same date as public_release
-        for dateinfo in date2status:
-            datefield, statuses = next(iter(dateinfo.items()))
-            if datefield not in props:
-                if datefield in self.schema['properties'] and datefield not in properties:
-                    if 'status' in properties and properties['status'] in statuses:
-                        # check the status and add the date if it's not provided and item has right status
-                        properties[datefield] = date.today().isoformat()
-                    elif datefield == 'project_release':
-                        # case where public_release is added and want to set project_release = public_release
-                        public_rel = properties.get('public_release')
-                        if public_rel:
-                            properties[datefield] = public_rel
-
         super(Item, self)._update(properties, sheets)
 
-    @snovault.calculated_property(schema={
-        "title": "External Reference URIs",
-        "description": "External references to this item.",
-        "type": "array",
-        "items": {
-            "type": "object", "title": "External Reference", "properties": {
-                "uri": {"type": "string"},
-                "ref": {"type": "string"}
-            }
-        }
-    })
-    def external_references(self, request, dbxrefs=None):
-        namespaces = request.registry.settings.get('snovault.jsonld.namespaces')
-        if dbxrefs and namespaces:
-            refs = []
-            for r in dbxrefs:
-                refObject = {"ref": r, "uri": None}
-                refParts = r.split(':')
-                if len(refParts) < 2:
-                    refs.append(refObject)
-                    continue
-                refPrefix = refParts[0]
-                refID = refParts[1]
-                baseUri = namespaces.get(refPrefix)
-                if not baseUri:
-                    refs.append(refObject)
-                    continue
-
-                if '{reference_id}' in baseUri:
-                    refObject['uri'] = baseUri.replace('{reference_id}', refID, 1)
-                else:
-                    refObject['uri'] = baseUri + refID
-                refs.append(refObject)
-
-            return refs
-        return []
 
     @snovault.calculated_property(schema={
         "title": "Display Title",
@@ -554,9 +451,9 @@ class SharedItem(Item):
         """smth."""
         roles = {}
         properties = self.upgrade_properties().copy()
-        if 'lab' in properties:
-            lab_submitters = 'submits_for.%s' % properties['lab']
-            roles[lab_submitters] = 'role.lab_submitter'
+        if 'institution' in properties:
+            inst_submitters = 'submits_for.%s' % properties['institution']
+            roles[inst_submitters] = 'role.lab_submitter'
         roles[Authenticated] = 'role.viewing_group_member'
         return roles
 
@@ -588,7 +485,7 @@ def edit(context, request):
 
 @snovault.calculated_property(context=Item, category='action')
 def create(context, request):
-    """If the user submits for any lab, allow them to create"""
+    """If the user submits for any institution, allow them to create"""
     if request.has_permission('create'):
         return {
             'name': 'create',

@@ -130,5 +130,5 @@
             "title" : "Path Name"
         }
     },
-    "excludedColumns" : ["lab.display_title"]
+    "excludedColumns" : ["institution.display_title"]
 }

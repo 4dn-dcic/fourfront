@@ -76,17 +76,10 @@
             "enum": [
                 "released",
                 "current",
-                "planned",
                 "revoked",
-                "archived",
                 "deleted",
                 "obsolete",
-                "replaced",
-                "in review by lab",
-                "submission in progress",
-                "pre-release",
-                "released to project",
-                "archived to project"
+                "replaced"
             ]
         }
     },
@@ -112,34 +105,6 @@
             "linkTo": "User",
             "lookup": 1000,
             "serverDefault": "userid",
-            "permission": "import_items"
-        }
-    },
-    "release_dates": {
-        "public_release": {
-            "title": "Public Release Date",
-            "description": "The date which the item was released to the public",
-            "comment": "Do not submit, value is assigned when released.",
-            "type": "string",
-            "lookup": 1000,
-            "anyOf": [
-                {"format": "date-time"},
-                {"format": "date"}
-            ],
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "permission": "import_items"
-        },
-        "project_release": {
-            "title": "Project Release Date",
-            "description": "The date which the item was released to the project",
-            "comment": "Do not submit, value is assigned when released to project.",
-            "type": "string",
-            "lookup": 1000,
-            "anyOf": [
-                {"format": "date-time"},
-                {"format": "date"}
-            ],
-            "exclude_from": ["submit4dn"],
             "permission": "import_items"
         }
     },
@@ -171,50 +136,21 @@
             }
         }
     },
-    "references": {
-        "references": {
-            "title": "Reference publications",
-            "description": "The publications that provide more information about the object.",
-            "type": "array",
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "lookup": 1000,
-            "uniqueItems": true,
-            "items": {
-                "title": "Reference",
-                "description": "A publication that provide smore information about the object.",
-                "type": "string",
-                "linkTo": "Publication"
-            }
-        }
-    },
     "attribution": {
-        "lab": {
-            "title": "Lab",
-             "description": "Lab associated with the submission.",
+        "institution": {
+            "title": "Institution",
+             "description": "Institution associated with the submission.",
              "exclude_from": ["submit4dn", "FFedit-create"],
              "type": "string",
-             "linkTo": "Lab",
+             "linkTo": "Institution",
              "linkSubmitsFor": true
         },
-        "contributing_labs": {
-            "title": "Contributing Labs",
-            "description": "Other labs associated with the submitted data.",
-            "type": "array",
-            "lookup": 1000,
-            "exclude_from" : ["submit4dn"],
-            "items": {
-                "title": "Contributing Lab",
-                "description": "A lab that has contributed to the associated data.",
-                "type": "string",
-                "linkTo": "Lab"
-            }
-        },
-        "award": {
-            "title": "Grant",
-            "description": "Grant associated with the submission.",
+        "project": {
+            "title": "Project",
+            "description": "Project associated with the submission.",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
-            "linkTo": "Award"
+            "linkTo": "Project"
         }
     },
     "notes": {
@@ -322,201 +258,6 @@
             }
         }
     },
-    "dbxrefs": {
-        "dbxrefs": {
-            "@type": "@id",
-            "rdfs:subPropertyOf": "rdfs:seeAlso",
-            "title": "External identifiers",
-            "comment": "Enter as a database name:identifier eg. HGNC:PARK2",
-            "description": "Unique identifiers from external resources.",
-            "type": "array",
-            "ff_flag": "clear clone",
-            "uniqueItems": true,
-            "items": {
-                "title": "External identifier",
-                "description": "A unique identifier from external resource.",
-                "type":  "string"
-            }
-        }
-    },
-    "library": {
-        "average_fragment_size": {
-            "title": "Average Fragment Size (bp)",
-            "description": "Size of average fragment in base pairs after fragmentation step",
-            "type": "integer",
-            "lookup": 202
-        },
-        "fragment_size_range": {
-            "title": "Fragment size range",
-            "description": "The measured size range of the purified nucleic acid, in bp.",
-            "type": "string",
-            "lookup": 203,
-            "pattern": "(^[0-9]+-[0-9]+$|^[<>][0-9]+$)"
-        },
-        "fragmentation_method": {
-            "title": "Fragmentation method",
-            "description": "A short description or reference of the nucleic acid fragmentation protocol used in library preparation, if applicable.",
-            "type": "string",
-            "lookup": 200,
-            "enum": [
-              "chemical",
-              "shearing",
-              "sonication",
-              "tagmentation",
-              "see protocol document",
-              "none",
-              "n/a"
-            ]
-        },
-        "fragment_size_selection_method": {
-            "title": "Size selection method",
-            "description": "A short description or reference of the size selection protocol used in library preparation, if applicable.",
-            "type": "string",
-            "lookup": 201,
-            "enum": [
-              "gel",
-              "see document",
-              "SPRI beads",
-              "none",
-              "BluePippin"
-          ]
-        },
-        "library_preparation_date":{
-            "title": "Library Preparation Date",
-            "description": "The date that the library was prepared for sequencing - submitted as YYYY-MM-DD.",
-            "type": "string",
-            "lookup": 220,
-            "format": "date"
-        },
-        "pcr_cycles": {
-            "title": "Library amplification PCR cycles",
-            "description": "The number of PCR cycles used for final library amplification prior to sequencing",
-            "type": "integer",
-            "lookup": 210
-        }
-    },
-    "antibody_info": {
-        "antibody": {
-            "title": "Antibody",
-            "description": "Reference to a 4DN antibody object",
-            "type": "string",
-            "lookup": 90,
-            "linkTo": "Antibody"
-        },
-        "antibody_lot_id": {
-            "title": "Antibody Lot Number",
-            "description": "A lot number or other unique identifier for a particular antibody lot",
-            "type": "string",
-            "lookup": 91
-        },
-        "antibody_dilution": {
-            "title": "Antibody Dilution/Concentration",
-            "description": "The working dilution or concentration of the antibody eg. 1:100 or 200 ug/ml",
-            "type": "string",
-            "lookup": 92
-        }
-    },
-    "spikein_info": {
-        "spikin_description": {
-            "title": "Spike in Description",
-            "description": "A description of the type/purpose of the spike-in",
-            "type": "string",
-            "lookup": 197,
-            "comment": "In some cases a spike in with heterologous non-specific DNA is used and this field can be used to indicate the source organism and concentration"
-        },
-        "spikein_sequences": {
-            "title": "Spike In Sequences",
-            "description": "Reference to a Reference File Item with multi fasta of the spike in sequences - spikein concentration info can be added as a 'conc' extra_file",
-            "type": "string",
-            "lookup": 196,
-            "linkTo": "FileReference"
-        },
-        "spikein_source": {
-            "title": "Spike in source",
-            "description": "The vendor or lab that provided the spikein",
-            "type": "string",
-            "linkTo": "Vendor",
-            "lookup": 198
-        }
-    },
-    "supplementary_files": {
-        "other_processed_files": {
-            "title": "Supplementary Processed Files",
-            "description": "Additional, archived or preliminary processed filesets that are derived from files in this experiment set.",
-            "type": "array",
-            "lookup": 410,
-            "exclude_from": ["submit4dn", "FFedit-create"],
-            "items": {
-                "title": "Supplementary Processed Filesets",
-                "description": "Fileset metadata",
-                "type": "object",
-                "required": ["title", "files"],
-                "properties": {
-                    "title": {
-                        "title": "Fileset Title",
-                        "type": "string",
-                        "lookup": 411
-                    },
-                    "type": {
-                        "title": "Fileset Type",
-                        "type": "string",
-                        "lookup": 412,
-                        "enum": [
-                            "supplementary",
-                            "archived",
-                            "preliminary",
-                            "visualization"
-                        ]
-                    },
-                    "description": {
-                        "title": "Description",
-                        "type": "string",
-                        "lookup": 413
-                    },
-                    "files": {
-                        "title": "Files",
-                        "type": "array",
-                        "lookup": 414,
-                        "items": {
-                            "title": "File",
-                            "type": "string",
-                            "linkTo": "FileProcessed"
-                        }
-                    },
-                    "higlass_view_config": {
-                        "title": "Higlass View Config",
-                        "type": "string",
-                        "linkTo": "HiglassViewConfig",
-                        "exclude_from": ["submit4dn"]
-                    }
-                }
-            }
-        }
-    },
-    "sop_mapping": {
-        "sop_mapping": {
-            "title": "SOP Mappping",
-            "permission": "import_items",
-            "exclude_from" : ["submit4dn", "FFedit-create"],
-            "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "has_sop": {
-                    "title": "Has SOP",
-                    "description": "Does this item have an sop when it was submitted",
-                    "type": "string",
-                    "enum": ["Yes", "No"]
-                },
-                "sop_map": {
-                    "title": "SOP MAP",
-                    "description": "The SOP map that the item maps to",
-                    "type": "string",
-                    "linkTo": "SopMap"
-                }
-            }
-        }
-    },
     "tags": {
         "tags": {
             "title": "Tags",
@@ -530,45 +271,6 @@
                 "title": "Tag",
                 "description": "A tag for the item.",
                 "type":  "string"
-            }
-        }
-    },
-    "badges": {
-        "badges": {
-            "title": "Badges",
-            "description": "Badges that can be added to an item.",
-            "type": "array",
-            "ff_flag": "clear clone",
-            "exclude_from" : ["submit4dn", "FFedit-create"],
-            "permission": "import_items",
-            "items": {
-                "description": "A badge (and possibly message) for the item.",
-                "type":  "object",
-                "required": ["badge"],
-                "additionalProperties": false,
-                "exclude_from" : ["submit4dn", "FFedit-create"],
-                "permission": "import_items",
-                "properties": {
-                    "badge": {
-                        "title": "Badge",
-                        "type": "string",
-                        "linkTo": "Badge"
-                    },
-                    "message": {
-                        "title": "Info",
-                        "description": "Information about why the badge was added",
-                        "type": "string"
-                    },
-                    "messages": {
-                        "title": "Info",
-                        "description": "Information about why the badge was added",
-                        "type": "array",
-                        "items": {
-                            "title": "Info",
-                            "type": "string"
-                        }
-                    }
-                }
             }
         }
     },
@@ -622,22 +324,11 @@
         }
     },
     "facets_common" : {
-        "award.project": {
+        "project.display_title": {
             "title": "Project"
         },
-        "lab.display_title": {
-            "title": "Lab"
-        }
-    },
-    "facets_aggregated_badges" : {
-        "aggregated_items.badges.item.badge.commendation": {
-            "title": "Commendations",
-            "order": 997
-        },
-        "aggregated_items.badges.item.badge.warning": {
-            "title": "Warnings",
-            "order": 998
+        "institution.display_title": {
+            "title": "Institution"
         }
     }
-
 }

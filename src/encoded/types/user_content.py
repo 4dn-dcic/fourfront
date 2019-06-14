@@ -11,12 +11,9 @@ from .base import (
     Item,
     ALLOW_CURRENT,
     DELETED,
-    ALLOW_LAB_SUBMITTER_EDIT,
     ALLOW_VIEWING_GROUP_VIEW,
     ONLY_ADMIN_VIEW,
-    ALLOW_OWNER_EDIT,
-    ALLOW_ANY_USER_ADD,
-    lab_award_attribution_embed_list
+    ALLOW_OWNER_EDIT
 )
 import os
 import requests
@@ -32,16 +29,14 @@ class UserContent(Item):
 
     base_types = ['UserContent'] + Item.base_types
     schema = load_schema('encoded:schemas/user_content.json')
-    embedded_list = lab_award_attribution_embed_list
+    embedded_list = []
+    # embedded_list = lab_award_attribution_embed_list
 
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
         'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
         'deleted'               : ALLOW_OWNER_EDIT + DELETED,
         'draft'                 : ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
-        'released to lab'       : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
-        'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW,
-        # 'archived'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
-        # 'archived to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
+        'processing'            : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
     }
 
     @calculated_property(schema={
@@ -67,13 +62,13 @@ class UserContent(Item):
 
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
-        submitted_by_uuid   = properties.get('submitted_by')
-        lab_schema          = cls.schema and cls.schema.get('properties', {}).get('lab')
-        award_schema        = cls.schema and cls.schema.get('properties', {}).get('award')
+        submitted_by_uuid = properties.get('submitted_by')
+        institution_schema = cls.schema and cls.schema.get('properties', {}).get('institution')
+        project_schema = cls.schema and cls.schema.get('properties', {}).get('project')
         if (
             not submitted_by_uuid                               # Shouldn't happen
-            or (not lab_schema and not award_schema)            # If not applicable for Item type (shouldn't happen as props defined on UserContent schema)
-            or ('lab' in properties or 'award' in properties)   # If values exist already - ideal case - occurs for general submission process(es)
+            or (not institution_schema and not project_schema)            # If not applicable for Item type (shouldn't happen as props defined on UserContent schema)
+            or ('institution' in properties or 'project' in properties)   # If values exist already - ideal case - occurs for general submission process(es)
         ):
             # Default for all other Items
             return super(UserContent, cls).create(registry, uuid, properties, sheets)
@@ -82,18 +77,15 @@ class UserContent(Item):
 
         if submitted_by_item:
             # All linkTo property values, if present, are UUIDs
-            if 'lab' not in properties and 'lab' in submitted_by_item.properties:
-                # Use lab of submitter - N.B. this differs from other Items where lab comes from 'submits_for' list.
-                properties['lab'] = submitted_by_item.properties['lab']
+            if 'institution' not in properties and 'institution' in submitted_by_item.properties:
+                # Use institution of submitter
+                properties['institution'] = submitted_by_item.properties['institution']
 
-            if 'award' not in properties and 'lab' in submitted_by_item.properties:
-                lab_item = registry[STORAGE].get_by_uuid(submitted_by_item.properties['lab'])
-                if lab_item and len(lab_item.properties.get('awards', [])) > 0:
-                    # Using first award as default/fallback when award not explicitly selected/sent.
-                    properties['award'] = lab_item.properties['awards'][0]
+            if 'project' not in properties and 'project' in submitted_by_item.properties:
+                # Use project of submitter
+                properties['project'] = submitted_by_item.properties['project']
 
         return super(UserContent, cls).create(registry, uuid, properties, sheets)
-
 
 
 @collection(
@@ -147,73 +139,6 @@ class StaticSection(UserContent):
             else:
                 return 'txt' # Default if no file extension.
         return None
-
-
-
-
-@collection(
-    name='higlass-view-configs',
-    unique_key='user_content:name',
-    properties={
-        'title': 'HiGlass Displays',
-        'description': 'Displays and view configurations for HiGlass',
-    })
-class HiglassViewConfig(UserContent):
-    """
-    Item type which contains a `view_config` property and other metadata.
-    """
-
-    item_type = 'higlass_view_config'
-    schema = load_schema('encoded:schemas/higlass_view_config.json')
-
-    #@calculated_property(schema={
-    #    "title": "ViewConfig Files",
-    #    "description": "List of files which are defined in ViewConfig",
-    #    "type": "array",
-    #    "linkTo" : "File"
-    #})
-    #def viewconfig_files(self, request):
-    #    '''
-    #    TODO: Calculate which files are defined in viewconfig, if any.
-    #    '''
-    #    return None
-
-
-    #@calculated_property(schema={
-    #    "title": "ViewConfig Tileset UIDs",
-    #    "description": "List of UIDs which are defined in ViewConfig",
-    #    "type": "array",
-    #    "items" : {
-    #        "type" : "string"
-    #    }
-    #})
-    #def viewconfig_tileset_uids(self, request):
-    #    '''
-    #    TODO: Calculate which tilesetUids are defined in viewconfig, if any.
-    #    '''
-    #    return None
-
-    @calculated_property(schema={
-        "title": "File Type",
-        "description": "Type of this Item (unused)",
-        "type": "string"
-    })
-    def filetype(self, request):
-        return "HiglassViewConfig"
-
-    class Collection(Item.Collection):
-        '''
-        This extension of the default Item collection allows any User to create a new version of these.
-        Emulates base.py Item collection setting of self.__acl__
-
-        TODO:
-            Eventually we can move this up to UserContent or replicate it on JupyterNotebook if want any
-            User to be able to create new one.
-        '''
-        def __init__(self, *args, **kw):
-            super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
-            self.__acl__ = ALLOW_ANY_USER_ADD
-
 
 
 def get_local_file_contents(filename, contentFilesLocation=None):

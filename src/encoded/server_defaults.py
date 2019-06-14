@@ -65,7 +65,7 @@ FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
 
 def enc_accession(accession_type):
     random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
-    return '4DN' + accession_type + random_part
+    return 'GAP' + accession_type + random_part
 
 
 TEST_ACCESSION_FORMAT = (digits, ) * 7
