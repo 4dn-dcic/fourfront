@@ -24,6 +24,7 @@ from pyramid.security import (
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
+    HTTPUnauthorized,
     HTTPFound
 )
 from pyramid.view import (
@@ -132,8 +133,14 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
         super(BasicAuthAuthenticationPolicy, self).__init__(check, *args, **kw)
 
 
-class LoginDenied(HTTPForbidden):
-    title = 'Login failure'
+class LoginDenied(HTTPUnauthorized):
+    title = 'Login Failure'
+
+    def __init__(self, domain=None, *args, **kwargs):
+        super(LoginDenied, self).__init__(*args, **kwargs)
+        if not self.headers.get('WWW-Authenticate') and domain:
+            # headers['WWW-Authenticate'] might be set in constructor thru headers
+            self.headers['WWW-Authenticate'] = "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(domain, domain)
 
 
 _fake_user = object()
@@ -168,13 +175,16 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         email = request._auth0_authenticated = jwt_info['email'].lower()
 
         # At this point, email has been authenticated with their Auth0 provider, but we don't know yet if this email is in our database.
-        # If not authenticated (not in our DB), request.user_info will throw an HTTPForbidden error.
+        # If not authenticated (not in our DB), request.user_info will throw an HTTPUnauthorized error.
 
         # Allow access basic user credentials from request obj after authenticating & saving request
         def get_user_info(request):
             user_props = request.embed('/session-properties', as_user=email) # Performs an authentication against DB for user.
             if not user_props.get('details'):
-                raise HTTPForbidden(title="Not logged in.")
+                raise HTTPUnauthorized(
+                    title="Could not find user info for {}".format(email),
+                    headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+                )
             user_props['id_token'] = id_token
             return user_props
 
@@ -183,8 +193,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
     def get_token_info(self, token, request):
         '''
-        given a jwt get token info from auth0, handle
-        retrying and what not
+        Given a jwt get token info from auth0, handle retrying and whatnot.
+        This is only called if we receive a Bearer token in Authorization header.
         '''
         try:
             # lets see if we have an auth0 token or our own
@@ -227,7 +237,12 @@ def get_jwt(request):
     except (ValueError, TypeError, KeyError):
         pass
 
-    if not token:
+    if not token and request.method in ('GET', 'HEAD'):
+        # Only grab this if is a GET request, not a transactional request to help mitigate CSRF attacks.
+        # See: https://en.wikipedia.org/wiki/Cross-site_request_forgery#Cookie-to-header_token
+        # The way our JS grabs and sticks JWT into Authorization header is somewhat analogous to above approach.
+        # TODO: Ensure our `Access-Control-Allow-Origin` response headers are appropriate (more for CGAP).
+        # TODO: Get a security audit done.
         token = request.cookies.get('jwtToken')
 
     return token
@@ -236,15 +251,16 @@ def get_jwt(request):
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
-    '''check the auth0 assertion and remember the user'''
-    if hasattr(request, 'user_info'):
-        user_info = request.user_info
-        if not user_info:
-            raise LoginDenied()
-    else:
-        raise LoginDenied()
+    '''
+    Check the auth0 assertion and return User Information to be stored client-side
+    user_info comes from /session-properties and other places and would contain ultimately:
+        { id_token: string, user_actions : string[], details : { uuid, email, first_name, last_name, groups, timezone, status } }
+    '''
+    user_info = getattr(request, 'user_info', None)
+    if user_info and user_info.get('id_token'): # Authenticated
+        return user_info
 
-    return user_info
+    raise LoginDenied(domain=request.domain)
 
 
 @view_config(route_name='logout',
@@ -380,7 +396,7 @@ def impersonate_user(request):
     auth0_client = registry.settings.get('auth0.client')
     auth0_secret = registry.settings.get('auth0.secret')
     if not(auth0_client and auth0_secret):
-        raise HTTPForbidden(title="no keys to impersonate user")
+        raise HTTPForbidden(title="No keys to impersonate user")
 
     jwt_contents = {
         'email': userid,
@@ -442,8 +458,10 @@ def create_unauthorized_user(request):
     email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
     user_props = request.json
     if user_props.get('email') != email:
-        raise HTTPForbidden(title="Provided email %s not validated with Auth0. Try logging in again."
-                            % user_props.get('email'))
+        raise HTTPUnauthorized(
+            title="Provided email {} not validated with Auth0. Try logging in again.".format(user_props.get('email')),
+            headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+        )
 
     del user_props['g-recaptcha-response']
     user_props['was_unauthorized'] = True
@@ -474,4 +492,7 @@ def create_unauthorized_user(request):
             raise HTTPForbidden(title="Could not create user. Try logging in again.")
     else:
         # error with re-captcha
-        raise HTTPForbidden(title="Invalid reCAPTCHA. Try logging in again.")
+        raise HTTPUnauthorized(
+            title="Invalid reCAPTCHA. Try logging in again.",
+            headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+        )

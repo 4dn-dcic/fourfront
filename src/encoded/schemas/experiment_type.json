@@ -79,7 +79,7 @@
             "lookup": 120,
             "suggested_enum": [
                 "Replication Timing",
-                "Proximity to Organelle",
+                "Proximity to Cellular Component",
                 "DNA Binding",
                 "Open Chromatin",
                 "DNA-DNA Pairwise Interactions",
@@ -97,6 +97,35 @@
                 "Scanning Electron Microscopy",
                 "Transmission Electron Microscopy"
             ]
+        },
+        "assay_subclass_short": {
+            "title": "Experiment Type Grouping",
+            "description": "A short name for the assay sub-classification",
+            "type": "string",
+            "lookup": 125,
+            "suggested_enum": [
+                "Replication timing",
+                "Proximity-seq",
+                "DNA binding",
+                "Open Chromatin",
+                "Hi-C",
+                "Hi-C (single cell)",
+                "Hi-C (multi-contact)",
+                "3/4/5-C (multi-contact)",
+                "IP-based 3C",
+                "3/4/5-C",
+                "Ligation-free 3C",
+                "Transcription",
+                "RNA-DNA HiC",
+                "DNA FISH",
+                "RNA FISH",
+                "SPT",
+                "Reporter Expression",
+                "SEM",
+                "TEM"
+            ],
+            "default": "Unclassified",
+            "exclude_from": ["submit4dn"]
         },
         "other_tags": {
             "title": "Tags",

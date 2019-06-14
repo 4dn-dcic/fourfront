@@ -46,12 +46,12 @@ def test_access_key_get(anontestapp, access_key):
 
 def test_access_key_get_bad_username(anontestapp, access_key):
     headers = {'Authorization': basic_auth('not_an_access_key', 'bad_password')}
-    anontestapp.get('/', headers=headers, status=403)
+    anontestapp.get('/', headers=headers, status=401)
 
 
 def test_access_key_get_bad_password(anontestapp, access_key):
     headers = {'Authorization': basic_auth(access_key['access_key_id'], 'bad_password')}
-    anontestapp.get('/', headers=headers, status=403)
+    anontestapp.get('/', headers=headers, status=401)
 
 
 def test_access_key_principals(anontestapp, execute_counter, access_key, submitter, lab):
@@ -129,7 +129,7 @@ def test_access_key_reset(anontestapp, access_key, submitter):
     new_headers = {
         'Authorization': basic_auth(access_key['access_key_id'], res.json['secret_access_key']),
     }
-    anontestapp.get('/@@testing-user', headers=headers, status=403)
+    anontestapp.get('/@@testing-user', headers=headers, status=401)
     res = anontestapp.get('/@@testing-user', headers=new_headers)
     assert res.json['authenticated_userid'] == 'accesskey.' + access_key['access_key_id']
 
@@ -137,13 +137,13 @@ def test_access_key_reset(anontestapp, access_key, submitter):
 def test_access_key_delete_disable_login(anontestapp, testapp, access_key):
     testapp.patch_json(access_key['@id'], {'status': 'deleted'})
     headers = {'Authorization': auth_header(access_key)}
-    anontestapp.get('/@@testing-user', headers=headers, status=403)
+    anontestapp.get('/@@testing-user', headers=headers, status=401)
 
 
 def test_access_key_user_disable_login(anontestapp, no_login_access_key):
     access_key = no_login_access_key
     headers = {'Authorization': auth_header(access_key)}
-    anontestapp.get('/@@testing-user', headers=headers, status=403)
+    anontestapp.get('/@@testing-user', headers=headers, status=401)
 
 
 def test_access_key_edit(anontestapp, access_key):

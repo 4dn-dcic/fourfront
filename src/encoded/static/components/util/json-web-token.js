@@ -1,17 +1,20 @@
 'use strict';
 
 import _ from 'underscore';
-var cookie = require('react-cookie');
+//var cookie = require('react-cookie');
+import Cookies from 'universal-cookie';
 import { isServerSide } from './misc';
 import patchedConsoleInstance from './patched-console';
 import { getNestedProperty } from './object';
 
-var console = patchedConsoleInstance;
-
-
+const console = patchedConsoleInstance;
 const COOKIE_ID = 'jwtToken';
 
-let dummyStorage = {};
+/** Interface to grab cookies. We can move to own util file later for re-use if necessary. */
+export const cookieStore = new Cookies();
+
+
+const dummyStorage = {};
 
 /**
  * Get the current JWT token string from cookie or localStorage.
@@ -20,24 +23,13 @@ let dummyStorage = {};
  * @param {string} [source='cookie'] Specify whether to get from cookie or localStorage.
  * @returns {string} The token.
  */
-export function get(source = 'cookie'){
-    if (source === 'all' || source === '*') source = 'any';
-
-    var idToken = null;
-
-    if (source === 'cookie' || source === 'any'){
-        if (isServerSide()){
-            idToken = null;
-        } else {
-            idToken = cookie.load(COOKIE_ID) || null;
-        }
+export function get(){
+    let idToken = null;
+    if (isServerSide()){
+        idToken = null;
+    } else {
+        idToken = cookieStore.get(COOKIE_ID) || null;
     }
-
-    if (idToken === null && (source === 'localStorage' || source === 'any' || isServerSide())){
-        var userInfo = getUserInfo();
-        if (userInfo && userInfo.id_token) idToken = userInfo.id_token;
-    }
-
     return idToken;
 }
 
@@ -76,11 +68,11 @@ export function maybeValid(jwtToken){
  * @returns {string[]} List of group names.
  */
 export function getUserGroups(){
-    var userInfo = getUserInfo();
-    var userGroups = [];
+    const userInfo = getUserInfo();
+    let userGroups = [];
     if (userInfo){
-        var currGroups = getNestedProperty(userInfo, ['details', 'groups'], true);
-        if(currGroups && Array.isArray(currGroups)){
+        const currGroups = getNestedProperty(userInfo, ['details', 'groups'], true);
+        if (currGroups && Array.isArray(currGroups)){
             userGroups = currGroups;
         }
     }
@@ -114,13 +106,10 @@ export function getUserInfo(){
  * @returns {Object|null} Object containing user details, or null.
  */
 export function getUserDetails(){
-    var userInfo = getUserInfo();
-    if (userInfo && userInfo.details) {
-        var userDetails = userInfo.details;
-        if (userDetails === 'null') userDetails = null;
-        return userDetails;
-    }
-    return null;
+    const userInfo = getUserInfo();
+    let userDetails = (userInfo && userInfo.details) || null;
+    if (userDetails === 'null') userDetails = null;
+    return userDetails;
 }
 
 /**
@@ -134,16 +123,15 @@ export function getUserDetails(){
  *
  * @public
  * @param {Object} details - Object containing user details. Should be clone/extension of existing user details.
+ * @returns {boolean} True if success. False if no user info.
  */
 export function saveUserDetails(details){
-    var userInfo = getUserInfo();
+    const userInfo = getUserInfo();
     if (typeof userInfo !== 'undefined' && userInfo) {
         userInfo.details = details;
         saveUserInfoLocalStorage(userInfo);
         return true;
     } else {
-        //userInfo = { 'details' : details };
-        //saveUserInfoLocalStorage(userInfo);
         return false;
     }
 }
@@ -152,20 +140,17 @@ export function saveUserDetails(details){
  * Saves JWT token to cookie or localStorage.
  * Called upon user login.
  *
- * @todo Maybe support localStorage. Or remove token from localStorage completely.
+ * This function (and cookieStore) works server-side
+ * as well however the data does not get transferred down with request
+ * in a cookie.
  *
  * @public
  * @param {string} idToken - The JWT token.
- * @param {string} [destination='cookie']
  * @returns {boolean} True if success.
  */
-export function save(idToken, destination = 'cookie'){
-    if (destination === 'cookie'){
-        cookie.save(COOKIE_ID, idToken, {
-            path : '/'
-        });
-        return true;
-    }
+export function save(idToken){
+    cookieStore.set(COOKIE_ID, idToken, { path : '/' });
+    return true;
 }
 
 /**
@@ -209,36 +194,24 @@ export function saveUserInfo(user_info){
  * May be called as part of logout.
  *
  * @public
- * @param {string} [source='all'] Specify what to delete, if desired. Default is all.
- * @returns {{ removedCookie: boolean, removedLocalStorage: boolean }} - Removal results
  */
-export function remove(source = 'all'){
+export function remove(){
 
     console.warn("REMOVING JWT!!");
 
-    if (source === 'any' || source === '*') source = 'all';
-
-    var removedCookie = false,
-        removedLocalStorage = false;
-
-    if (source === 'cookie' || source === 'all'){
-        var savedIdToken = cookie.load(COOKIE_ID) || null;
-        if (savedIdToken) {
-            cookie.remove(COOKIE_ID, { path : '/' });
-            removedCookie = true;
-        }
+    const savedIdToken = cookieStore.get(COOKIE_ID) || null;
+    if (savedIdToken) {
+        cookieStore.remove(COOKIE_ID, { path : '/' });
     }
-    if (source.toLowerCase() === 'localstorage' || source === 'all'){
-        if(!storeExists()) {
-            delete dummyStorage.user_info;
-            removedLocalStorage = true;
-        } else if (localStorage.user_info){
-            localStorage.removeItem("user_info");
-            removedLocalStorage = true;
-        }
+
+    if (!storeExists()) {
+        delete dummyStorage.user_info;
+    } else if (localStorage.user_info){
+        localStorage.removeItem("user_info");
     }
-    console.info('Removed JWT: ' + removedCookie + ' (cookie) ' + removedLocalStorage + ' (localStorage)');
-    return { 'removedCookie' : removedCookie, 'removedLocalStorage' : removedLocalStorage };
+
+    console.info('Removed JWT: ' + savedIdToken);
+    return true;
 }
 
 /**

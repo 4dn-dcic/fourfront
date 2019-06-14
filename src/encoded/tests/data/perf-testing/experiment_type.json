@@ -4,6 +4,7 @@
         "experiment_category": "Sequencing",
         "assay_classification": "3C via Ligation",
         "assay_subclassification": "DNA-DNA Pairwise Interactions",
+        "assay_subclass_short": "Hi-C",
         "raw_file_types": "Reads (fastq) provided by lab",
         "uuid": "a17b17cd-544a-3a3b-abc3-17a544544b3c",
         "lab": "4dn-dcic-lab",

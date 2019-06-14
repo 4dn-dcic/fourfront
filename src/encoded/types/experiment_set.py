@@ -57,7 +57,8 @@ class ExperimentSet(Item):
             "badge.@id",
             "badge.badge_icon",
             "badge.description"
-        ]
+        ],
+        "tissue": ["preferred_name"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -105,12 +106,15 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource_summary",
         "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosource.biosource_type",
+        "experiments_in_set.biosample.biosource.cell_line.preferred_name",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
+        "experiments_in_set.biosample.biosource.tissue.preferred_name",
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.individual.organism.name",
+        "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
         "experiments_in_set.biosample.modifications.modification_type",
         "experiments_in_set.biosample.modifications.display_title",
         "experiments_in_set.biosample.treatments.treatment_type",
@@ -290,7 +294,6 @@ class ExperimentSet(Item):
             return len(experiments_in_set)
 
 
-
 @collection(
     name='experiment-set-replicates',
     unique_key='accession',
@@ -319,15 +322,15 @@ class ExperimentSetReplicate(ExperimentSet):
         "items": {
             "title": "Imaging path",
             "type": "object",
-            "properties":{
-                "path":{
+            "properties": {
+                "path": {
                     "title": "Imaging Path",
                     "type": "string",
                     "linkTo": "ImagingPath"
                 },
-                "channel":{
+                "channel": {
                     "title": "Imaging channnel",
-                    "description" : "channel info, ie. ch01, ch02...",
+                    "description": "channel info, ie. ch01, ch02...",
                     "type": "string",
                     "pattern": "^(ch\\d\\d)$"
                 }
@@ -341,18 +344,17 @@ class ExperimentSetReplicate(ExperimentSet):
         # We presume all experiments in set have the exact same imaging paths.
         # Thus we grab from 1st experiment. If not the case, this is a data issue.
         # We should have a foursight check to assert this perhaps?
-        first_experiment_id = experiments_in_set[0] #replicate_exps[0]['replicate_exp']
+        first_experiment_id = experiments_in_set[0]  # replicate_exps[0]['replicate_exp']
 
         if '/experiments-mic/' not in first_experiment_id:
             # We only need to check Microscopy Experiments
             return None
 
         first_experiment_obj = get_item_if_you_can(request, first_experiment_id, frame='raw')
-        if not first_experiment_obj: # Not yet in DB?
+        if not first_experiment_obj:  # Not yet in DB?
             return None
 
         return first_experiment_obj.get('imaging_paths')
-
 
     class Collection(Item.Collection):
         pass

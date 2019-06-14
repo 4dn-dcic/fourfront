@@ -761,26 +761,8 @@ class FileFastq(File):
         "quality_metric.overall_quality_status",
         "quality_metric.Total Sequences",
         "quality_metric.Sequence length",
-        "quality_metric.url",
-        "badges.badge.title",
-        "badges.badge.commendation",
-        "badges.badge.warning",
-        "badges.badge.badge_classification",
-        "badges.badge.description",
-        "badges.badge.badge_icon",
-        "badges.messages"
+        "quality_metric.url"
     ]
-    aggregated_items = {
-        "badges": [
-            "messages",
-            "badge.commendation",
-            "badge.warning",
-            "badge.uuid",
-            "badge.@id",
-            "badge.badge_icon",
-            "badge.description"
-        ]
-    }
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),

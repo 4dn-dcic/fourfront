@@ -20,7 +20,8 @@ import {
 //import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 //import { BROWSE } from './../testdata/browse/checkboxes';
 
-var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
+// eslint-disable-next-line no-unused-vars
+const { SearchResponse, Item, ColumnDefinition, URLParts, File } = typedefs;
 
 
 /**
@@ -43,6 +44,9 @@ class ExperimentSetCheckBox extends React.PureComponent {
         this.onChange = this.onChange.bind(this);
     }
 
+    // These per-instance memoized functions appear to be working as expected.
+    // It might be worth to slightly refactor for readability in future.
+
     expSetFilesToObjectKeyedByAccessionTriples = memoize(function(expSet){
         var allFiles                = allFilesFromExperimentSet(expSet, true),
             allFileAccessionTriples = filesToAccessionTriples(allFiles, true, true),
@@ -56,6 +60,7 @@ class ExperimentSetCheckBox extends React.PureComponent {
     });
 
     isAllFilesChecked = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        // eslint-disable-next-line no-invalid-this
         var selectedFilesForSetLen = this.selectedFilesFromSet(allFilesKeyedByTriplesForSet, selectedFiles).length,
             allFileAccessionTriplesLen = _.keys(allFilesKeyedByTriplesForSet).length;
 
@@ -63,6 +68,7 @@ class ExperimentSetCheckBox extends React.PureComponent {
     });
 
     isIndeterminate = memoize(function(allFilesKeyedByTriplesForSet, selectedFiles){
+        // eslint-disable-next-line no-invalid-this
         var selectedFilesForSet = this.selectedFilesFromSet(allFilesKeyedByTriplesForSet, selectedFiles);
         return (
             Array.isArray(selectedFilesForSet) && selectedFilesForSet.length > 0 && selectedFilesForSet.length < _.keys(allFilesKeyedByTriplesForSet).length
@@ -113,7 +119,17 @@ class ExperimentSetCheckBox extends React.PureComponent {
  */
 class ResultTableContainer extends React.PureComponent {
 
-    static colDefOverridesFull(selectedFiles, columnExtensionMap, selectFile, unselectFile){
+    /**
+     * Extends or creates `columnExtensionMap.display_title` with a larger width as well as
+     * a render method which will render out a checkbox for selecting files of an ExperimentSet,
+     * if `selectedFiles` are passed in as well.
+     * If no selected files data structure is being fed through props, this function returns `columnExtensionMap`.
+     *
+     * @param {Object.<string, File>?} selectedFiles - Object of selectedFiles keyed by accession-triple strings.
+     * @param {ColumnDefinition} columnExtensionMap - Colummn overrides or extensions from props.
+     * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
+     */
+    static colDefOverrides = memoize(function(selectedFiles, columnExtensionMap, selectFile, unselectFile){
         if (typeof selectedFiles === 'undefined'){
             // We don't need to add checkbox(es) for file selection.
             return columnExtensionMap || null;
@@ -134,7 +150,7 @@ class ResultTableContainer extends React.PureComponent {
                 }
             })
         });
-    }
+    });
 
     static propTypes = {
         // Props' type validation based on contents of this.props during render.
@@ -157,7 +173,6 @@ class ResultTableContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.colDefOverrides = this.colDefOverrides.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
         this.onFilter = onFilterHandlerMixin.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
@@ -183,26 +198,16 @@ class ResultTableContainer extends React.PureComponent {
      * @param {Object} [props=this.props] Current or next props.
      * @returns {ColumnDefinition[]} Final column definitions.
      */
-    getColumnDefinitions(props = this.props){
-        return columnsToColumnDefinitions(props.context.columns, this.colDefOverrides());
+    getColumnDefinitions(){
+        const { context, selectedFiles, selectFile, unselectFile, columnExtensionMap } = this.props;
+        return columnsToColumnDefinitions(
+            context.columns,
+            ResultTableContainer.colDefOverrides(selectedFiles, columnExtensionMap, selectFile, unselectFile)
+        );
     }
 
     isTermSelected(term, facet){
         return Filters.determineIfTermFacetSelected(term, facet, this.props);
-    }
-
-    /**
-     * Extends or creates `props.columnExtensionMap.display_title` with a larger width as well as
-     * a render method which will render out a checkbox for selecting files of an ExperimentSet,
-     * if `props.selectedFiles` are passed in as well.
-     * If no selected files data structure is being fed through props, this function returns `props.columnExtensionMap`.
-     *
-     * @param {{ selectedFiles?: Object, columnExtensionMap : ColumnDefinition }} props - Current component props.
-     * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
-     */
-    colDefOverrides(props = this.props){
-        var { selectedFiles, selectFile, unselectFile, columnExtensionMap } = props;
-        return ResultTableContainer.colDefOverridesFull(selectedFiles, columnExtensionMap, selectFile, unselectFile);
     }
 
     handleClearFilters(evt){
@@ -220,10 +225,12 @@ class ResultTableContainer extends React.PureComponent {
     }
 
     render() {
-        var { context, href, countExternalSets, session, browseBaseState, schemas, windowHeight,
-            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets } = this.props,
-            showClearFiltersButton = _.keys(Filters.currentExpSetFilters() || {}).length > 0,
-            columnDefinitions = this.getColumnDefinitions();
+        const {
+            context, href, countExternalSets, session, browseBaseState, schemas, windowHeight,
+            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets
+        } = this.props;
+        const showClearFiltersButton = _.keys(Filters.currentExpSetFilters() || {}).length > 0;
+        const columnDefinitions = this.getColumnDefinitions();
 
         return (
             <div className="row">
@@ -240,13 +247,12 @@ class ResultTableContainer extends React.PureComponent {
                     null
                 }
                 <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9')}>
-                    <AboveTableControls {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
+                    <AboveTableControls parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
+                        {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles',
                             'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen', 'isFullscreen'
-                        )}
-                        parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
-                        showSelectedFileCount />
+                        )} showSelectedFileCount />
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
                         ref={this.searchResultTableRef}
@@ -269,13 +275,14 @@ class ExternaDataExpSetsCount extends React.PureComponent {
     }
 
     onBrowseStateToggle(e){
+        const { browseBaseState, href, context } = this.props;
         e.preventDefault();
         e.stopPropagation();
-        navigate.setBrowseBaseStateAndRefresh(this.props.browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', this.props.href, this.props.context);
+        navigate.setBrowseBaseStateAndRefresh(browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', href, context);
     }
 
     render(){
-        var { countExternalSets, browseBaseState } = this.props;
+        const { countExternalSets, browseBaseState } = this.props;
         if (countExternalSets < 1) return <div className="above-results-table-row" />;
         return (
             <div className="above-results-table-row text-right text-ellipsis-container">
@@ -344,6 +351,32 @@ export default class BrowseView extends React.Component {
         );
     });
 
+
+    /**
+     * If different count in Browse result total, refetch chart data.
+     *
+     * @private
+     * @param {URLParts} hrefParts - Components of current URI.
+     * @param {SearchResponse} context - Current search response.
+     * @returns {void}
+     */
+    static checkResyncChartData(hrefParts, context){
+        setTimeout(function(){
+            if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
+                const cdcState = ChartDataController.getState();
+                const cdcExpSetCount = (cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets);
+
+                if (cdcExpSetCount && cdcExpSetCount !== context.total){
+                    if (cdcState.isLoadingChartData){
+                        console.info('Already loading chart data, canceling.');
+                    } else {
+                        ChartDataController.sync();
+                    }
+                }
+            }
+        }, 10);
+    }
+
     /**
      * PropTypes for component.
      *
@@ -356,32 +389,12 @@ export default class BrowseView extends React.Component {
         'context' : PropTypes.object.isRequired,
         'session' : PropTypes.bool,
         'schemas' : PropTypes.object,
-        'href' : PropTypes.string.isRequired
+        'href' : PropTypes.string.isRequired,
+        'windowWidth' : PropTypes.number,
+        'isFullscreen' : PropTypes.bool,
+        'browseBaseState' : PropTypes.string,
+        'navigate' : PropTypes.func
     };
-
-    /**
-     * Creates an instance of BrowseView.
-     *
-     * @public
-     * @constructor
-     * @param {Object} props - Initial props.
-     */
-    constructor(props){
-        super(props);
-
-        /**
-         * Internal state for root-level BrowseView component.
-         * Contains list of default hidden columns, as calculated by merging `props.defaultHiddenColumns` with contents
-         * of SearchResponse.columns which have `"default_hidden" : true`.
-         *
-         * @private
-         * @type {Object}
-         * @property {string[]} state.defaultHiddenColumns - List of column fields which are hidden by default, until user interaction.
-         */
-        this.state = {
-            'defaultHiddenColumns' : defaultHiddenColumnMapFromColumns(props.context.columns)
-        };
-    }
 
     /**
      * Rules for when to update/re-render this view, according to change in state or props.
@@ -394,12 +407,13 @@ export default class BrowseView extends React.Component {
      * @param {Object} nextState - Next state, to be compared against this.state.
      */
     shouldComponentUpdate(nextProps, nextState){
-        if (this.props.context !== nextProps.context) return true;
-        if (this.props.session !== nextProps.session) return true;
-        if (this.props.href !== nextProps.href) return true;
-        if (this.props.schemas !== nextProps.schemas) return true;
-        if (this.props.windowWidth !== nextProps.windowWidth) return true;
-        if (this.props.isFullscreen !== nextProps.isFullscreen) return true;
+        const { context, session, href, schemas, windowWidth, isFullscreen } = this.props;
+        if (context !== nextProps.context) return true;
+        if (session !== nextProps.session) return true;
+        if (href !== nextProps.href) return true;
+        if (schemas !== nextProps.schemas) return true;
+        if (windowWidth !== nextProps.windowWidth) return true;
+        if (isFullscreen !== nextProps.isFullscreen) return true;
         return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     }
 
@@ -418,7 +432,7 @@ export default class BrowseView extends React.Component {
             return;
         }
 
-        this.checkResyncChartData(hrefParts, context);
+        BrowseView.checkResyncChartData(hrefParts, context);
     }
 
     // /**
@@ -455,48 +469,23 @@ export default class BrowseView extends React.Component {
             }
         }
 
-        this.checkResyncChartData(hrefParts, context);
+        BrowseView.checkResyncChartData(hrefParts, context);
     }
-
-    /**
-     * If we get different count in Browse result total, then refetch chart data.
-     *
-     * @private
-     * @param {URLParts} hrefParts - Components of current URI.
-     * @param {SearchResponse} context - Current search response.
-     * @returns {void}
-     */
-    checkResyncChartData(hrefParts, context = this.props.context){
-        setTimeout(function(){
-            if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
-                var cdcState = ChartDataController.getState(),
-                    cdcExpSetCount = (cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets);
-
-                if (cdcExpSetCount && cdcExpSetCount !== context.total){
-                    if (cdcState.isLoadingChartData){
-                        console.info('Already loading chart data, canceling.');
-                    } else {
-                        ChartDataController.sync();
-                    }
-                }
-            }
-        }, 10);
-    }
-
 
     /**
      * Called by `componentDidMount` and/or `componentDidUpdate` to redirect to correct Browse page URI params, if needed.
      *
-     * @private
+     * @todo Move to back-end. If award.project=4DN not in initial /browse/ href, then set browseBaseState to all in App root.
+     *
      * @param {URLParts} [hrefParts=null] If not passed, is obtained by parsing `this.props.href`.
      * @returns {void}
      */
     redirectToCorrectBrowseView(hrefParts = null){
-        if (!hrefParts) hrefParts = url.parse(this.props.href, true);
+        const { href, context } = this.props;
+        if (!hrefParts) hrefParts = url.parse(href, true);
 
-        var context = this.props.context,
-            nextBrowseHref = navigate.getBrowseBaseHref(),
-            expSetFilters = Filters.contextFiltersToExpSetFilters((context && context.filters) || null);
+        let nextBrowseHref = navigate.getBrowseBaseHref();
+        const expSetFilters = Filters.contextFiltersToExpSetFilters((context && context.filters) || null);
 
         // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
         //var availableProjectsInResults = Array.isArray(context.facets) ? _.uniq(_.pluck(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key')) : [];
@@ -557,7 +546,7 @@ export default class BrowseView extends React.Component {
                                     Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
                                 </Button>
                             </div>
-                        : null }
+                            : null }
                         <hr/>
                     </div>
                 </div>
@@ -573,11 +562,11 @@ export default class BrowseView extends React.Component {
      * @returns {JSX.Element} View for Browse page.
      */
     render() {
-        var { context, href, session, browseBaseState, schemas } = this.props,
-            results             = context['@graph'],
-            hrefParts           = url.parse(href, true),
-            countExternalSets   = BrowseView.externalDataSetsCount(context),
-            facets              = BrowseView.transformedFacets(context, browseBaseState, session);
+        const { context, href, session, browseBaseState, schemas, navigate : propNavigate } = this.props;
+        const hrefParts = url.parse(href, true);
+        const countExternalSets = BrowseView.externalDataSetsCount(context);
+        const facets = BrowseView.transformedFacets(context, browseBaseState, session);
+        const defaultHiddenColumns = defaultHiddenColumnMapFromColumns(context.columns);
 
         //context = _.extend({}, context, { '@graph' : BROWSE['@graph'] });
 
@@ -603,8 +592,8 @@ export default class BrowseView extends React.Component {
         return (
             <div className="browse-page-container search-page-container container" id="content">
                 <SelectedFilesController href={href}>
-                    <CustomColumnController defaultHiddenColumns={this.state.defaultHiddenColumns}>
-                        <SortController href={href} context={context} navigate={this.props.navigate || navigate}>
+                    <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
+                        <SortController href={href} context={context} navigate={propNavigate || navigate}>
                             <ResultTableContainer {...{ browseBaseState, session, schemas, countExternalSets, facets }}
                                 {..._.pick(this.props, 'windowHeight', 'windowWidth', 'registerWindowOnScrollHandler', 'toggleFullScreen', 'isFullscreen')}
                                 totalExpected={context && context.total} />
