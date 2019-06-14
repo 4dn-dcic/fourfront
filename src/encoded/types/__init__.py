@@ -21,6 +21,67 @@ def includeme(config):
 
 
 @collection(
+    name='individuals',
+    properties={
+        'title': 'Individuals',
+        'description': 'Listing of Individuals',
+    })
+class Individual(Item):
+    item_type = 'individual'
+    schema = load_schema('encoded:schemas/individual.json')
+    embedded_list = []
+
+    @calculated_property(schema={
+        "title": "Title",
+        "type": "string",
+    })
+    def title(self, first_name, last_name):
+        """return first and last name."""
+        title = u'{} {}'.format(first_name, last_name)
+        return title
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, first_name, last_name):
+        return self.title(first_name, last_name)
+
+
+@collection(
+    name='cases',
+    properties={
+        'title': 'Cases',
+        'description': 'Listing of Cases',
+    })
+class Case(Item):
+    item_type = 'case'
+    schema = load_schema('encoded:schemas/case.json')
+    embedded_list = []
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, title):
+        return title
+
+
+@collection(
+    name='samples',
+    properties={
+        'title': 'Samples',
+        'description': 'Listing of Samples',
+    })
+class Sample(Item):
+    item_type = 'sample'
+    schema = load_schema('encoded:schemas/sample.json')
+    embedded_list = []
+
+
+@collection(
     name='documents',
     properties={
         'title': 'Documents',

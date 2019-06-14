@@ -1,0 +1,14 @@
+[
+    {
+        "title": "Person Family WGS",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "cc7d83a2-6886-4ca0-9402-7c49734cf3c4",
+        "individuals": [
+            "5ec91041-78a0-4758-abef-21c7f5fd9ffc",
+            "5c302401-88f6-44b8-9cf9-f062dfaa98c4",
+            "96974f2e-de0a-4f3a-9be5-543359da74a1"
+        ]
+    }
+]

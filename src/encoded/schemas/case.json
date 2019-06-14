@@ -3,7 +3,7 @@
     "id": "/profiles/case.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": ["title", "project", "institution"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -13,5 +13,21 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" }
     ],
-    "properties": {}
+    "properties": {
+        "title": {
+            "title": "Title",
+            "description": "Identifying for this case",
+            "type": "string"
+        },
+        "individuals": {
+            "title": "Individuals in Case",
+            "description": "All individuals within scope of case",
+            "type": "array",
+            "items": {
+                "title": "Individual",
+                "type": "string",
+                "linkTo": "Individual"
+            }
+        }
+    }
 }
