@@ -16,8 +16,6 @@ from snovault.validators import (
 from pyramid.view import view_config
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     lab_award_attribution_embed_list
 )
 

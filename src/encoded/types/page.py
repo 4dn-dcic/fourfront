@@ -23,8 +23,6 @@ from snovault import (
 from encoded.search import get_iterable_search_results
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
 )
 from .user_content import (
@@ -34,7 +32,15 @@ from snovault.resource_views import item_view_page
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
-    validate_item_content_patch
+    validate_item_content_patch,
+    validate_item_content_in_place,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
+)
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
 )
 
 
@@ -187,7 +193,9 @@ class Page(Item):
         pass
 
 for field in ['display_title', 'name', 'description', 'content.name']:
-    Page.embedded_list = Page.embedded_list + [ 'children.' + field, 'children.children.' + field, 'children.children.children.' + field ]
+    Page.embedded_list = Page.embedded_list + [
+        'children.' + field, 'children.children.' + field, 'children.children.children.' + field
+    ]
 
 
 #### Must add validators for add/edit since 'name' path is now lookup_key, not unique_key
@@ -209,12 +217,15 @@ def validate_unique_page_name(context, request):
                 return
             error_msg = ("page %s already exists with name '%s'. This field must be unique"
                          % (lookup_res.uuid, data['name']))
-            request.errors.add('body', ['name'],  error_msg)
+            request.errors.add('body', 'Page: non-unique name',  error_msg)
             return
 
 
 @view_config(context=Page.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_unique_page_name])
+@view_config(context=Page.Collection, permission='add_unvalidated', request_method='POST',
+             validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def page_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -223,6 +234,15 @@ def page_add(context, request, render=None):
              validators=[validate_item_content_put, validate_unique_page_name])
 @view_config(context=Page, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_unique_page_name])
+@view_config(context=Page, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=Page, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
+@view_config(context=Page, permission='index', request_method='GET',
+             validators=[validate_item_content_in_place, validate_unique_page_name],
+             request_param=['check_only=true'])
 def page_edit(context, request, render=None):
     return item_edit(context, request, render)
 

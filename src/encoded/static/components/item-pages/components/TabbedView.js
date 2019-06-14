@@ -179,7 +179,7 @@ export class TabbedView extends React.PureComponent {
         if (additionalTabs.length === 0){
             allTabs = contents;
         } else {
-            var addBeforeTabs   = ['details', 'audits', 'attribution'],
+            var addBeforeTabs   = ['details', 'attribution'],
                 addIdx          = _.findIndex(contents, function(t){ return addBeforeTabs.indexOf(t.key) > -1; });
 
             if (typeof addIdx !== 'number'){
