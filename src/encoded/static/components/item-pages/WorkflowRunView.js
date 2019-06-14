@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { DropdownButton, MenuItem } from 'react-bootstrap';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AuditTabView, WorkflowDetailPane } from './components';
+import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, WorkflowDetailPane } from './components';
 import DefaultItemView from './DefaultItemView';
 import { console, object, DateUtility, Filters, isServerSide } from './../util';
 import Graph from './../viz/Workflow';
@@ -118,7 +118,6 @@ export default class WorkflowRunView extends DefaultItemView {
             ];
 
         tabs.push(ItemDetailList.getTabObject(this.props));
-        tabs.push(AuditTabView.getTabObject(this.props));
 
         return _.map(tabs, (tabObj) =>{ // Common properties
             return _.extend(tabObj, {

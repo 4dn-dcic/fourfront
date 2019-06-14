@@ -44,7 +44,6 @@
       "/jest/",
       "/src/encoded/static/store.js",
       "/src/encoded/static/components/util/layout.js",
-      "/src/encoded/static/components/audit.js",
       "/src/encoded/static/components/action.js",
       "/src/encoded/static/components/inputs/"
     ],

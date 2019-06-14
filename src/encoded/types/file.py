@@ -11,13 +11,19 @@ from snovault.schema_utils import schema_validator
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
-    validate_item_content_patch
+    validate_item_content_patch,
+    validate_item_content_in_place,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
+)
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
 )
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     ALLOW_SUBMITTER_ADD,
     get_item_if_you_can,
     lab_award_attribution_embed_list
@@ -1286,7 +1292,7 @@ def validate_file_format_validity_for_file_type(context, request):
         file_type = context.type_info.name
         if file_type not in allowed_types:
             msg = 'File format {} is not allowed for {}'.format(file_format_name, file_type)
-            request.errors.add('body', None, msg)
+            request.errors.add('body', 'File: invalid format', msg)
         else:
             request.validated.update({})
 
@@ -1308,7 +1314,7 @@ def validate_file_filename(context, request):
     file_format_item = get_item_if_you_can(request, ff, 'file-formats')
     if not file_format_item:
         msg = 'Problem getting file_format for %s' % filename
-        request.errors.add('body', None, msg)
+        request.errors.add('body', 'File: no format', msg)
         return
     msg = None
     try:
@@ -1333,8 +1339,9 @@ def validate_file_filename(context, request):
         if not msg:
             msg = ["'." + ext + "'" for ext in file_extensions]
             msg = ', '.join(msg)
-            msg = 'Filename %s extension does not agree with specified file format. Valid extension(s): %s' % (filename, msg)
-        request.errors.add('body', None, msg)
+            msg = ('Filename %s extension does not agree with specified file format. '
+                   'Valid extension(s): %s' % (filename, msg))
+        request.errors.add('body', 'File: invalid extension', msg)
 
 
 def validate_processed_file_unique_md5_with_bypass(context, request):
@@ -1358,7 +1365,7 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
         if search_resp.status_int < 400:
             # already got this md5
             found = search_resp.json['@graph'][0]['accession']
-            request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
+            request.errors.add('body', 'File: non-unique md5sum', 'md5sum %s already exists for accession %s' %
                                (data['md5sum'], found))
     else:  # find it in the database
         conn = request.registry['connection']
@@ -1366,7 +1373,7 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
         if res is not None:
             # md5 already exists
             found = res.properties['accession']
-            request.errors.add('body', None, 'md5sum %s already exists for accession %s' %
+            request.errors.add('body', 'File: non-unique md5sum', 'md5sum %s already exists for accession %s' %
                                (data['md5sum'], found))
 
 
@@ -1386,12 +1393,12 @@ def validate_processed_file_produced_from_field(context, request):
             fid = get_item_if_you_can(request, f, 'files').get('uuid')
         except AttributeError:
             files_ok = False
-            request.errors.add('body', ['produced_from', i], "'%s' not found" % f)
+            request.errors.add('body', 'File: invalid produced_from id', "'%s' not found" % f)
             # bad_files.append(f)
         else:
             if not fid:
                 files_ok = False
-                request.errors.add('body', ['produced_from', i], "'%s' not found" % f)
+                request.errors.add('body', 'File: invalid produced_from id', "'%s' not found" % f)
 
     if files_ok:
         request.validated.update({})
@@ -1403,7 +1410,7 @@ def validate_extra_file_format(context, request):
     '''
     files_ok = True
     data = request.json
-    if 'extra_files' not in data:
+    if not data.get('extra_files'):
         return
     extras = data['extra_files']
     # post should always have file_format as it is required patch may or may not
@@ -1412,12 +1419,15 @@ def validate_extra_file_format(context, request):
         ff = context.properties.get('file_format')
     file_format_item = get_item_if_you_can(request, ff, 'file-formats')
     if not file_format_item or 'standard_file_extension' not in file_format_item:
-        request.errors.add('body', None, "Can't find parent file format for extra_files")
+        request.errors.add('body', 'File: no extra_file format', "Can't find parent file format for extra_files")
         return
     parent_format = file_format_item['uuid']
     schema_eformats = file_format_item.get('extrafile_formats')
     if not schema_eformats:  # means this parent file shouldn't have any extra files
-        request.errors.add('body', None, "File with format %s should not have extra_files" % file_format_item.get('file_format'))
+        request.errors.add(
+            'body', 'File: invalid extra files',
+            "File with format %s should not have extra_files" % file_format_item.get('file_format')
+        )
         return
     else:
         valid_ext_formats = []
@@ -1426,7 +1436,8 @@ def validate_extra_file_format(context, request):
             try:
                 off_uuid = ok_format_item.get('uuid')
             except AttributeError:
-                raise  Exception("FileFormat Item %s contains unknown FileFormats in the extrafile_formats property" % file_format_item.get('uuid'))
+                raise  Exception("FileFormat Item %s contains unknown FileFormats"
+                                 " in the extrafile_formats property" % file_format_item.get('uuid'))
             valid_ext_formats.append(off_uuid)
     seen_ext_formats = []
     # formats = request.registry['collections']['FileFormat']
@@ -1438,22 +1449,33 @@ def validate_extra_file_format(context, request):
         try:
             ef_uuid = eformat_item.get('uuid')
         except AttributeError:
-            request.errors.add('body', ['extra_files', i], "'%s' not a valid or known file format" % eformat)
+            request.errors.add(
+                'body', 'File: invalid extra_file format', "'%s' not a valid or known file format" % eformat
+            )
             files_ok = False
             break
         if ef_uuid in seen_ext_formats:
-            request.errors.add('body', ['extra_files', i], "Multple extra files with '%s' format cannot be submitted at the same time" % eformat)
+            request.errors.add(
+                'body', 'File: invalid extra_file formats',
+                "Multple extra files with '%s' format cannot be submitted at the same time" % eformat
+            )
             files_ok = False
             break
         else:
             seen_ext_formats.append(ef_uuid)
         if ef_uuid == parent_format:
-            request.errors.add('body', ['extra_files', i], "'%s' format cannot be the same for file and extra_file" % file_format_item.get('file_format'))
+            request.errors.add(
+                'body', 'File: invalid extra_file formats',
+                "'%s' format cannot be the same for file and extra_file" % file_format_item.get('file_format')
+            )
             files_ok = False
             break
 
         if ef_uuid not in valid_ext_formats:
-            request.errors.add('body', ['extra_files', i], "'%s' not a valid extrafile_format for '%s'" % (eformat, file_format_item.get('file_format')))
+            request.errors.add(
+                'body', 'File: invalid extra_file formats',
+                "'%s' not a valid extrafile_format for '%s'" % (eformat, file_format_item.get('file_format'))
+            )
             files_ok = False
     if files_ok:
         request.validated.update({})
@@ -1466,6 +1488,9 @@ def validate_extra_file_format(context, request):
                          validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field])
+@view_config(context=File.Collection, permission='add_unvalidated', request_method='POST',
+             validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -1484,5 +1509,19 @@ def file_add(context, request, render=None):
                          validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field])
+@view_config(context=File, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=File, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
+@view_config(context=File, permission='index', request_method='GET',
+             validators=[validate_item_content_in_place,
+                         validate_file_filename,
+                         validate_extra_file_format,
+                         validate_file_format_validity_for_file_type,
+                         validate_processed_file_unique_md5_with_bypass,
+                         validate_processed_file_produced_from_field],
+            request_param=['check_only=true'])
 def file_edit(context, request, render=None):
     return item_edit(context, request, render)

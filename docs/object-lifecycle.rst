@@ -15,7 +15,7 @@ Objects are stored in the DB "raw" - with only the properties that are submitted
 
 * frame=object
 
-This is the raw object with additional "@properties" (@id, @type) and calculated properties (defined in python code "types" package). 
+This is the raw object with additional "@properties" (@id, @type) and calculated properties (defined in python code "types" package).
 
 * frame=edit
 
@@ -27,7 +27,7 @@ This is the frame=object object with all the embedded properties (also specified
 
 * frame=page
 
-This is the default object returned if frame is not specified.  It is the frame=embedded object with several UI and form properties added including @context, audit, and actions.
+This is the default object returned if frame is not specified.  It is the frame=embedded object with several UI and form properties added including @context, aggregated items, validation errors, and user actions.
 
 
 Submission (POST)
@@ -309,7 +309,7 @@ Page expansion
 --------------
 
 The final step in the rendering pipeline is applied only to single items, not to search results.
-It provides the opportunity to add properties that are restricted or tailored to certain users, such as the actions and audit results::
+It provides the opportunity to add properties that are restricted or tailored to certain users, such as user actions::
 
     {
         "actions": [
@@ -325,17 +325,5 @@ It provides the opportunity to add properties that are restricted or tailored to
                 "name": "edit-json",
                 "title": "Edit JSON"
             }
-        ],
-        "audit": {
-            "ERROR": [
-                {
-                    "category": "missing donor",
-                    "name": "audit_biosample_donor",
-                    "level": 60,
-                    "detail": "Biosample ENCBS000TST requires a donor",
-                    "path": "/biosamples/ENCBS000TST/",
-                    "level_name": "ERROR"
-                }
-            ]
-        }
+        ]
     }

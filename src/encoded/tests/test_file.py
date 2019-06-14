@@ -26,9 +26,11 @@ def test_processed_file_unique_md5(testapp, mcool_file_json):
 
     res = testapp.patch_json('/file_processed/%s' % res_2['accession'], mcool_file_json, status=422)
     assert 'ValidationFailure' in res.json['@type']
+    assert res.json['errors'][0]['name'] == 'File: non-unique md5sum'
     assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
 
     res = testapp.put_json('/file_processed/%s' % res_2['accession'], mcool_file_json, status=422)
+    assert res.json['errors'][0]['name'] == 'File: non-unique md5sum'
     assert 'ValidationFailure' in res.json['@type']
     assert mcool_file_json['md5sum'] in res.json['errors'][0]['description']
 
@@ -846,7 +848,8 @@ def test_validate_extra_files_extra_files_bad_post_extra_same_as_primary(testapp
     extf = {'file_format': 'pairs'}
     processed_file_data['extra_files'] = [extf]
     res = testapp.post_json('/files-processed', processed_file_data, status=422)
-    assert "'pairs' format cannot be the same for file and extra_file" == res.json.get('errors')[0].get('description')
+    assert res.json['errors'][0]['name'] == 'File: invalid extra_file formats'
+    assert "'pairs' format cannot be the same for file and extra_file" == res.json['errors'][0]['description']
 
 
 def test_validate_extra_files_extra_files_bad_patch_extra_same_as_primary(testapp, processed_file_data):
@@ -854,14 +857,16 @@ def test_validate_extra_files_extra_files_bad_patch_extra_same_as_primary(testap
     res1 = testapp.post_json('/files-processed', processed_file_data, status=201)
     pfid = res1.json['@graph'][0]['@id']
     res2 = testapp.patch_json(pfid, {'extra_files': [extf]}, status=422)
-    assert "'pairs' format cannot be the same for file and extra_file" == res2.json.get('errors')[0].get('description')
+    assert res2.json['errors'][0]['name'] == 'File: invalid extra_file formats'
+    assert "'pairs' format cannot be the same for file and extra_file" == res2.json['errors'][0]['description']
 
 
 def test_validate_extra_files_extra_files_bad_post_existing_extra_format(testapp, processed_file_data):
     extfs = [{'file_format': 'pairs_px2'}, {'file_format': 'pairs_px2'}]
     processed_file_data['extra_files'] = extfs
     res = testapp.post_json('/files-processed', processed_file_data, status=422)
-    assert "Multple extra files with 'pairs_px2' format cannot be submitted at the same time" == res.json.get('errors')[0].get('description')
+    assert res.json['errors'][0]['name'] == 'File: invalid extra_file formats'
+    assert "Multple extra files with 'pairs_px2' format cannot be submitted at the same time" == res.json['errors'][0]['description']
 
 
 def test_validate_extra_files_extra_files_ok_patch_existing_extra_format(testapp, processed_file_data):

@@ -103,7 +103,7 @@ class SubItemListView extends React.Component {
             'alwaysCollapsibleKeys' : [],
             'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
-                    'audit', 'lab', 'award', 'description'
+                    'lab', 'award', 'description'
                 ).concat([
                 // Add
                     'schema_version', 'uuid'
@@ -835,7 +835,7 @@ export class Detail extends React.PureComponent {
 
     static defaultProps = {
         'excludedKeys' : [
-            '@context', 'actions', 'audit', 'principals_allowed',
+            '@context', 'actions', 'principals_allowed',
             // Visible elsewhere on page
             'lab', 'award', 'description',
             '@id', 'display_title'

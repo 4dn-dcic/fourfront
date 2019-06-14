@@ -144,8 +144,10 @@ def test_publication_unique_ID(testapp, publication_doi_pubmed, publication_doi_
     new_pub = {fld: publication_doi_pubmed[fld] for fld in ['ID', 'lab', 'award']}
     res = testapp.post_json('/publication', new_pub, status=422)
     expected_val_err = "%s already exists with ID '%s'" % (publication_doi_pubmed['uuid'], new_pub['ID'])
+    assert res.json['errors'][0]['name'] == 'Publication: non-unique ID'
     assert expected_val_err in res.json['errors'][0]['description']
 
     # also test PATCH of an existing publication with another pub's ID
     res = testapp.patch_json(publication_doi_biorxiv['@id'], {'ID': new_pub['ID']}, status=422)
+    assert res.json['errors'][0]['name'] == 'Publication: non-unique ID'
     assert expected_val_err in res.json['errors'][0]['description']

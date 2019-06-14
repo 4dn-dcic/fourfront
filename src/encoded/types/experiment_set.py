@@ -12,13 +12,19 @@ from snovault import (
 from snovault.calculated import calculate_properties
 from snovault.validators import (
     validate_item_content_post,
-    validate_item_content_patch,
     validate_item_content_put,
+    validate_item_content_patch,
+    validate_item_content_in_place,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
+)
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
 )
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     lab_award_attribution_embed_list,
     get_item_if_you_can
 )
@@ -356,17 +362,20 @@ class ExperimentSetReplicate(ExperimentSet):
 
 def validate_experiment_set_replicate_experiments(context, request):
     '''
-    Validates that each replicate_exps.replicate_exp in context (ExperimentSetReplicate Item) is unique within the ExperimentSetReplicate.
+    Validates that each replicate_exps.replicate_exp in context (ExperimentSetReplicate Item)
+    is unique within the ExperimentSetReplicate.
     '''
     data = request.json
     replicate_exp_objects = data.get('replicate_exps', [])
-
     have_seen_exps = set()
     any_failures = False
     for replicate_idx, replicate_exp_object in enumerate(replicate_exp_objects):
         experiment = replicate_exp_object.get('replicate_exp')
         if experiment in have_seen_exps:
-            request.errors.add('body', None, 'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']')
+            request.errors.add(
+                'body', 'ExperimentSet: non-unique exps',
+                'Duplicate experiment "' + experiment + '" defined in replicate_exps[' + str(replicate_idx) + ']'
+            )
             any_failures = True
             continue
         have_seen_exps.add(experiment)
@@ -377,6 +386,9 @@ def validate_experiment_set_replicate_experiments(context, request):
 
 @view_config(context=ExperimentSetReplicate.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_experiment_set_replicate_experiments])
+@view_config(context=ExperimentSetReplicate.Collection, permission='add_unvalidated',
+             request_method='POST', validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def experiment_set_replicate_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -385,5 +397,14 @@ def experiment_set_replicate_add(context, request, render=None):
              validators=[validate_item_content_put, validate_experiment_set_replicate_experiments])
 @view_config(context=ExperimentSetReplicate, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_experiment_set_replicate_experiments])
+@view_config(context=ExperimentSetReplicate, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=ExperimentSetReplicate, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
+@view_config(context=ExperimentSetReplicate, permission='index', request_method='GET',
+             validators=[validate_item_content_in_place, validate_experiment_set_replicate_experiments],
+             request_param=['check_only=true'])
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)

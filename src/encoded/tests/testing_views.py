@@ -13,7 +13,6 @@ from snovault.interfaces import CONNECTION
 
 def includeme(config):
     config.scan(__name__)
-    config.include('.testing_auditor')
 
 
 @view_config(name='testing-user', request_method='GET')
