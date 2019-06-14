@@ -36,36 +36,35 @@ export const genChartBarDims = memoize(function(
     fullHeightCount         = null
 ){
 
-    var numberOfTerms = _.keys(rootField.terms).length,
-        largestExpCountForATerm = typeof fullHeightCount === 'number' ? fullHeightCount : _.reduce(rootField.terms, function(m,t){
-            return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
-        }, 0),
-        insetDims           = {
-            width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
-            height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
-        },
-        availWidthPerBar    = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap),
-        barXCoords          = d3.range(0, insetDims.width, availWidthPerBar),
-        barWidth            = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth),
-        sortByAggrCount = function(b){
-            if (typeof b[aggregateType] === 'number'){
-                return b[aggregateType];
-            }
-            return b.term;
-        };
+    const numberOfTerms = _.keys(rootField.terms).length;
+    const largestExpCountForATerm = typeof fullHeightCount === 'number' ? fullHeightCount : _.reduce(rootField.terms, function(m,t){
+        return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
+    }, 0);
+    const insetDims = {
+        width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
+        height : Math.max(availHeight - styleOpts.offset.bottom - styleOpts.offset.top,   0)
+    };
+    const availWidthPerBar = Math.min(Math.floor(insetDims.width / numberOfTerms), styleOpts.maxBarWidth + styleOpts.gap);
+    const barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
+    const barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
+    const sortByAggrCount = function(b){
+        if (typeof b[aggregateType] === 'number'){
+            return b[aggregateType];
+        }
+        return b.term;
+    };
 
     function genBarData(fieldObj, outerDims = insetDims, parent = null){
         return _(fieldObj.terms).chain()
             .pairs()
             .map(function([termKey, termObj], i){
-                var termCount = termObj[aggregateType];
-                var childBars = null;
+                let termCount = termObj[aggregateType];
                 if (typeof termObj.field === 'string'){
                     termCount = termObj.total[aggregateType];
                 }
-                var maxYForBar = parent ? parent.count : largestExpCountForATerm;
-                var barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
-                var barNode = {
+                const maxYForBar = parent ? parent.count : largestExpCountForATerm;
+                const barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
+                const barNode = {
                     'name'      : Schemas.Term.toName(fieldObj.field, termKey),
                     'term'      : termKey,
                     'count'     : termCount,
@@ -97,15 +96,14 @@ export const genChartBarDims = memoize(function(
             .value();
     }
 
-    var barData = {
-        'bars'            : genBarData(rootField, insetDims),
-        'field'           : rootField,
+    const barData = {
+        'bars' : genBarData(rootField, insetDims),
+        'field' : rootField,
         'fullHeightCount' : largestExpCountForATerm
     };
 
-
     // Assign colors based on sub-field total decr. counts
-    var fauxOrderedSubFieldNodesForColorAssignment = _.sortBy(_.sortBy(_.values(_.reduce(barData.bars, function(m,bar){
+    const fauxOrderedSubFieldNodesForColorAssignment = _.sortBy(_.sortBy(_.values(_.reduce(barData.bars, function(m,bar){
         if (!Array.isArray(bar.bars)) return m;
         _.forEach(bar.bars, function(b){
             if (typeof m[b.term] === 'undefined'){
@@ -130,7 +128,6 @@ export const genChartBarDims = memoize(function(
             return _.extend(b, { 'color' : barplot_color_cycler.colorForNode(b) });
         });
     });
-
 
     return barData;
 });
@@ -221,8 +218,6 @@ export class Chart extends React.PureComponent {
     constructor(props){
         super(props);
         this.styleOptions = this.styleOptions.bind(this);
-        this.getLegendData = this.getLegendData.bind(this);
-        this.getTopLevelField = this.getTopLevelField.bind(this);
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
         this.renderParts.leftAxis = this.renderParts.leftAxis.bind(this);
         this.state = { 'mounted' : false };
@@ -241,93 +236,64 @@ export class Chart extends React.PureComponent {
      * Gets style options for BarPlotChart instance. Internally, extends BarPlotChart.getDefaultStyleOpts() with props.styleOptions.
      * @returns {Object} Style options object.
      */
-    styleOptions(){ return vizUtil.extendStyleOptions(this.props.styleOptions, Chart.getDefaultStyleOpts()); }
-
-    /**
-     * Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
-     * Internally, runs BarPlotChart.barDataToLegendData().
-     *
-     * @deprecated
-     * @returns {Array|null} List of fields containing terms. For use by legend component.
-     */
-    getLegendData(){
-        if (!this.barData) return null;
-        return Chart.barDataToLegendData(this.barData, this.props.schemas || null);
-    }
-
-    /**
-     * Get the for-bar-filled field object used for the X axis.
-     * @returns {Object} Top-level field containing terms.
-     */
-    getTopLevelField(){
-        if (!this.barData) return null;
-        return this.barData.fields[this.barData.fieldIndex].field;
+    styleOptions(){
+        const { styleOptions } = this.props;
+        return vizUtil.extendStyleOptions(styleOptions, Chart.getDefaultStyleOpts());
     }
 
     /* TODO: Own components */
     renderParts = {
 
         bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
-            var _this = this;
-
-            var labelWidth = styleOpts.labelWidth;
-            if (typeof styleOpts.labelRotation === 'number'){
-
-                var maxWidthGivenBottomOffset = (
-                    1 / Math.abs(Math.sin((styleOpts.labelRotation / 180) * Math.PI)
-                )) * styleOpts.offset.bottom;
-
-                labelWidth = Math.min(
-                    maxWidthGivenBottomOffset,
-                    (styleOpts.labelWidth || 100000)
-                );
-
-            }
-
-            var barLabelsSortedByTerm = _.map(currentBars, function(b){
+            const { windowWidth } = this.props, { mounted } = this.state;
+            const { offset, labelRotation, maxLabelWidth, maxBarWidth } = styleOpts;
+            const barLabelsSortedByTerm = _.map(currentBars, function(b){
                 return {
-                    'name'      : b.name || b.term,
-                    'term'      : b.term,
-                    'x'         : b.attr.x,
-                    'opacity'   : 1
+                    'name' : b.name || b.term,
+                    'term' : b.term,
+                    'x' : b.attr.x,
+                    'opacity' : 1
                 };
             }).sort(function(a,b){
                 return a.term < b.term ? -1 : 1;
             });
 
+            const placementWidth = (currentBars[0] && currentBars[0].attr.width) || maxBarWidth || Chart.getDefaultStyleOpts().maxBarWidth;
+
             return (
                 <div className="y-axis-bottom" style={{
-                    left : styleOpts.offset.left,
-                    right : styleOpts.offset.right,
-                    height : Math.max(styleOpts.offset.bottom - 5, 0),
-                    bottom : Math.min(styleOpts.offset.bottom - 5, 0)
+                    left : offset.left,
+                    right : offset.right,
+                    height : Math.max(offset.bottom - 5, 0),
+                    bottom : Math.min(offset.bottom - 5, 0)
                 }}>
                     <RotatedLabel.Axis
                         labels={barLabelsSortedByTerm}
                         labelClassName="y-axis-label no-highlight-color"
                         y={5}
                         extraHeight={5}
-                        placementWidth={(currentBars[0] && currentBars[0].attr.width) || styleOpts.maxBarWidth || Chart.getDefaultStyleOpts().maxBarWidth}
-                        placementHeight={styleOpts.offset.bottom}
-                        angle={styleOpts.labelRotation}
-                        maxLabelWidth={styleOpts.maxLabelWidth || 1000}
-                        isMounted={_this.state.mounted}
-                        windowWidth={this.props.windowWidth}
+                        placementWidth={placementWidth}
+                        placementHeight={offset.bottom}
+                        angle={labelRotation}
+                        maxLabelWidth={maxLabelWidth || 1000}
+                        isMounted={mounted}
+                        windowWidth={windowWidth}
                     />
                 </div>
             );
         },
 
         leftAxis : function(availWidth, availHeight, barData, styleOpts){
-            var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
-            var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
-            var ticks = d3.ticks(0, barData.fullHeightCount * ((chartHeight - 10)/chartHeight), Math.min(8, barData.fullHeightCount)).concat([barData.fullHeightCount]);
-            var steps = ticks.map(function(v,i){
+            const { offset, gap, maxBarWidth } = styleOpts;
+            const chartHeight = availHeight - offset.top - offset.bottom;
+            const chartWidth = availWidth - offset.left - offset.right;
+            const ticks = d3.ticks(0, barData.fullHeightCount * ((chartHeight - 10)/chartHeight), Math.min(8, barData.fullHeightCount)).concat([barData.fullHeightCount]);
+            const steps = ticks.map(function(v,i){
                 var w = i === 0 ? chartWidth : (
                     Math.min(
                         (barData.bars.filter(function(b){
                             return b.count >= v - ((ticks[1] - ticks[0]) * 2);
-                        }).length) * Math.min(styleOpts.maxBarWidth + styleOpts.gap, chartWidth / barData.bars.length) + (styleOpts.maxBarWidth * .66),
+                        }).length) * Math.min(maxBarWidth + gap, chartWidth / barData.bars.length) + (maxBarWidth * .66),
                         chartWidth
                     )
                 );
@@ -348,8 +314,8 @@ export class Chart extends React.PureComponent {
             return (
                 <div className="bar-plot-left-axis" style={{
                     height : chartHeight,
-                    width: Math.max(styleOpts.offset.left - 5, 0),
-                    top:  styleOpts.offset.top + 'px'
+                    width: Math.max(offset.left - 5, 0),
+                    top: offset.top + 'px'
                 }}>
                     { steps }
                 </div>
@@ -365,18 +331,19 @@ export class Chart extends React.PureComponent {
      * @returns {JSX.Element} - Chart markup wrapped in a div.
      */
     render(){
-        if (this.state.mounted === false) return <div/>;
+        const { mounted } = this.state;
+        if (!mounted) return <div/>;
 
         // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
         barplot_color_cycler.resetCache();
 
-        var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props,
-            styleOptions = this.styleOptions();
-
-        var topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
+        const { width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
+            aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props;
+        const styleOptions = this.styleOptions();
+        const topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
 
         // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-        var barData = genChartBarDims(
+        const barData = genChartBarDims(
             topLevelField,
             width,
             height,
@@ -388,8 +355,8 @@ export class Chart extends React.PureComponent {
         return (
             <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href }}
                 actions={cursorDetailActions}
-                leftAxis={this.renderParts.leftAxis.call(this, width, height, barData, styleOptions)}
-                bottomAxis={this.renderParts.bottomXAxis.call(this, width, height, barData.bars, styleOptions)}
+                leftAxis={this.renderParts.leftAxis(width, height, barData, styleOptions)}
+                bottomAxis={this.renderParts.bottomXAxis(width, height, barData.bars, styleOptions)}
                 topLevelField={barData.field} bars={barData.bars} />
         );
 
