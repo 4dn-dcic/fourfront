@@ -182,8 +182,6 @@ export class RotatedLabel extends React.PureComponent {
             expanded = false;
         }
 
-        console.log('TTTT', textHeight, shortLabel, expanded);
-
         return { textHeight, shortLabel, expanded };
     }
 
