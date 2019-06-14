@@ -6,15 +6,21 @@ from snovault import (
 )
 from snovault.validators import (
     validate_item_content_post,
-    validate_item_content_patch,
     validate_item_content_put,
+    validate_item_content_patch,
+    validate_item_content_in_place,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
+)
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
 )
 from pyramid.view import view_config
 from .base import (
     Item,
-    collection_add,
     get_item_if_you_can,
-    item_edit,
     lab_award_attribution_embed_list
 )
 
@@ -150,7 +156,7 @@ def validate_biosource_tissue(context, request):
             tissuename = tissue.get('term_name')
         except AttributeError:
             tissuename = str(tissue)
-        request.errors.add('body', None, 'Term: ' + tissuename + ' is not found in UBERON')
+        request.errors.add('body', 'Biosource: invalid tissue term', 'Term: ' + tissuename + ' is not found in UBERON')
     else:
         request.validated.update({})
 
@@ -187,13 +193,16 @@ def validate_biosource_cell_line(context, request):
             cellname = cell_line.get('term_name')
         except AttributeError:
             cellname = str(cell_line)
-        request.errors.add('body', None, 'Term: ' + cellname + ' is not a known valid cell line')
+        request.errors.add('body', 'Biosource: invalid cell_line term', 'Term: ' + cellname + ' is not a known valid cell line')
     else:
         request.validated.update({})
 
 
 @view_config(context=Biosource.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_biosource_tissue, validate_biosource_cell_line])
+@view_config(context=Biosource.Collection, permission='add_unvalidated', request_method='POST',
+             validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def biosource_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -202,5 +211,14 @@ def biosource_add(context, request, render=None):
              validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
+@view_config(context=Biosource, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=Biosource, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
+@view_config(context=Biosource, permission='index', request_method='GET',
+             validators=[validate_item_content_in_place, validate_biosource_tissue, validate_biosource_cell_line],
+             request_param=['check_only=true'])
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)

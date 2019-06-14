@@ -305,6 +305,7 @@ def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_b
 def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award, exp_types):
     experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': exp_types['microc']['@id']}
     res = submitter_testapp.post_json('/experiments-hi-c', experiment, status=422)
+    assert res.json['errors'][0]['name'] == 'Schema: lab'
     assert "not in user submits_for" in res.json['errors'][0]['description']
 
 
@@ -1143,3 +1144,30 @@ def test_static_section_with_lab_view_by_lab_member(
     static_section_item['status'] = 'released to lab'
     res = wrangler_testapp.post_json('/static_section', static_section_item).json['@graph'][0]
     lab_viewer_testapp.get(res['@id'], status=200)
+
+
+def test_permissions_validate_false(award, lab, file_formats, submitter_testapp, wrangler_testapp):
+    """
+    Only admin can use validate=false with POST/PUT/PATCH
+    """
+    file_item_body = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'paired_end': '1'
+    }
+    res = submitter_testapp.post_json('/file_fastq', file_item_body, status=201)
+
+    # no permissions
+    submitter_testapp.post_json('/file_fastq/?validate=false', file_item_body, status=403)
+    submitter_testapp.patch_json(res.json['@graph'][0]['@id'] + '?validate=false',
+                                 {'paired_end': '1'}, status=403)
+    submitter_testapp.put_json(res.json['@graph'][0]['@id'] + '?validate=false',
+                               file_item_body, status=403)
+    # okay permissions
+    wrangler_testapp.post_json('/file_fastq/?validate=false&upgrade=False', file_item_body, status=201)
+
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'] + '?validate=false',
+                                {'paired_end': '1'}, status=200)
+    wrangler_testapp.put_json(res.json['@graph'][0]['@id'] + '?validate=false',
+                              file_item_body, status=200)

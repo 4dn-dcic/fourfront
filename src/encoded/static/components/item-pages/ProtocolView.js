@@ -17,7 +17,7 @@ export default class ProtocolView extends DefaultItemView {
 
         initTabs.push(ProtocolViewOverview.getTabObject(this.props));
 
-        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution, Audits)
+        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }

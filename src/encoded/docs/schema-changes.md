@@ -7,7 +7,6 @@ Guide to where to edit Source Code
 ----------------
 
 * **src** directory - contains all the python and javascript code for front and backends
-    * **audit** - python instructions for checking metadata stored in the schema
     * **schemas** - JSON schemas ([JSONSchema], [JSON-LD]) describing allowed types and values for all metadata objects
     * **tests** - Unit and integration tests
     * **types** -  business logic for dispatching URLs and producing the correct JSON
@@ -145,8 +144,6 @@ This new object is an array of example objects that can successfully POST agains
                     "uuid": "0137a084-57af-4f69-b756-d6a920393fde"
                 }
 
-8. If applicable you may want to add audits on the metadata. Please refer to [making_audits]
-
 -----
 
 Updating an existing schema
@@ -218,9 +215,7 @@ NOTE: first argument to upgrade is 'schema_name', second is the fixture
             assert value['schema_version'] == '3'
             assert value['property_1'] == 'value 1'
 
-5. If applicable you may need to update audits on the metadata. Please refer to [making_audits]
-
-6. To document all the schema changes that occurred between increments of the ```schema_version``` update the object changelogs the **schemas/changelogs** directory. Below is an example of the changelog for above upgrade:
+5. To document all the schema changes that occurred between increments of the ```schema_version``` update the object changelogs the **schemas/changelogs** directory. Below is an example of the changelog for above upgrade:
 
     Schema version 2
     ----------------
@@ -232,4 +227,3 @@ NOTE: first argument to upgrade is 'schema_name', second is the fixture
 [JSON-LD]:  http://json-ld.org/
 [overview.rst]: ../../../docs/overview.rst
 [object-lifecycle.rst]: ../../../docs/object-lifecycle.rst
-[making_audits]: making_audits.md

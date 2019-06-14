@@ -7,11 +7,13 @@ from snovault import (
     calculated_property,
     CONNECTION
 )
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
+)
 from snovault.attachment import ItemWithAttachment
 from .base import (
     Item,
-    collection_add,
-    item_edit,
     lab_award_attribution_embed_list
 )
 from pyramid.view import (
@@ -21,8 +23,13 @@ from html.parser import HTMLParser
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
-    validate_item_content_patch
+    validate_item_content_patch,
+    validate_item_content_in_place,
+    no_validate_item_content_post,
+    no_validate_item_content_put,
+    no_validate_item_content_patch
 )
+
 
 ################################################
 # Outside methods for online data fetch
@@ -304,12 +311,15 @@ def validate_unique_pub_id(context, request):
                 return
             error_msg = ("publication %s already exists with ID '%s'. This field must be unique"
                          % (lookup_res.uuid, data['ID']))
-            request.errors.add('body', ['ID'],  error_msg)
+            request.errors.add('body', 'Publication: non-unique ID',  error_msg)
             return
 
 
 @view_config(context=Publication.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post, validate_unique_pub_id])
+@view_config(context=Publication.Collection, permission='add_unvalidated', request_method='POST',
+             validators=[no_validate_item_content_post],
+             request_param=['validate=false'])
 def publication_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -318,5 +328,14 @@ def publication_add(context, request, render=None):
              validators=[validate_item_content_put, validate_unique_pub_id])
 @view_config(context=Publication, permission='edit', request_method='PATCH',
              validators=[validate_item_content_patch, validate_unique_pub_id])
+@view_config(context=Publication, permission='edit_unvalidated', request_method='PUT',
+             validators=[no_validate_item_content_put],
+             request_param=['validate=false'])
+@view_config(context=Publication, permission='edit_unvalidated', request_method='PATCH',
+             validators=[no_validate_item_content_patch],
+             request_param=['validate=false'])
+@view_config(context=Publication, permission='index', request_method='GET',
+             validators=[validate_item_content_in_place, validate_unique_pub_id],
+             request_param=['check_only=true'])
 def publication_edit(context, request, render=None):
     return item_edit(context, request, render)

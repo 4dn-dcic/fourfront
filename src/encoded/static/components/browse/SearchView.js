@@ -272,12 +272,6 @@ export default class SearchView extends React.PureComponent {
         // Set in backend or schema for facets which are under development or similar.
         if (facet.hide_from_view) return false;
 
-        // Hide audit facets unless are admin.
-        if (facet.field.substring(0, 6) === 'audit.'){
-            if (session && JWT.isLoggedInAsAdmin()) return true;
-            return false;
-        }
-
         // Remove the @type facet while in selection mode.
         if (facet.field === 'type' && currentAction === 'selection') return false;
 

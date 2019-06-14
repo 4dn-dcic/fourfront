@@ -131,7 +131,7 @@ def main():
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
     # Loading app will have configured from config file. Reconfigure here:
-    set_logging(in_prod=app.registry.settings.get('production'), level=logging.DEBUG)
+    set_logging(in_prod=app.registry.settings.get('production'), log_name=__name__, level=logging.DEBUG)
     # set_logging(app.registry.settings.get('elasticsearch.server'), app.registry.settings.get('production'), level=logging.DEBUG)
 
     # check if staging

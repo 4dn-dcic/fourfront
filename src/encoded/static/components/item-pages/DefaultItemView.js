@@ -7,7 +7,7 @@ import url from 'url';
 import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
 import Alerts from './../alerts';
-import { ItemHeader, ItemDetailList, TabbedView, AuditTabView, Publications, AttributionTabView, BadgesTabView } from './components';
+import { ItemHeader, ItemDetailList, TabbedView, Publications, AttributionTabView, BadgesTabView } from './components';
 import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
 import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
 
@@ -126,7 +126,7 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * Returns a list of _common_ tab definitions - `AttributionTabView`, `ItemDetailList`, & `AuditTabView`.
+     * Returns a list of _common_ tab definitions - `AttributionTabView`, `ItemDetailList`
      * DO NOT EXTEND.
      *
      * @protected
@@ -150,16 +150,11 @@ export default class DefaultItemView extends React.PureComponent {
             returnArr.push(BadgesTabView.getTabObject(this.props));
         }
 
-        // Audits, if any -- THESE WILL BE DEPRECATED SOME DAY
-        if (AuditTabView.doAnyAuditsExist(context)){
-            returnArr.push(AuditTabView.getTabObject(this.props));
-        }
-
         return returnArr;
     }
 
     /**
-     * Returns a list of _default_ tab definitions - `ItemDetailList`, `AttributionTabView`, & `AuditTabView`.
+     * Returns a list of _default_ tab definitions - `ItemDetailList`, `AttributionTabView`
      * Order of tabs differs from `getCommonTabs`.
      * DO NOT EXTEND.
      *
@@ -172,7 +167,6 @@ export default class DefaultItemView extends React.PureComponent {
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
-        returnArr.push(AuditTabView.getTabObject(this.props));
         return returnArr;
     }
 
@@ -653,4 +647,3 @@ WrapInColumn.defaultProps = {
     'wrap' : false,
     'defaultWrapClassName' : "col-xs-6 col-md-4"
 };
-
