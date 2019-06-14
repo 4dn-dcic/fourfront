@@ -177,7 +177,11 @@ export class RotatedLabel extends React.PureComponent {
         );
 
         if (textHeight > maxHeight){
-            const maxChars = maxHeight; // Just conveniently aligns.
+            const maxChars = maxHeight;
+            // maxHeight just aligns conveniently;
+            // TODO: In the future maybe some smarter logic could be used, such as
+            // length of hypotenuse divided by avg character width (+~1px) in
+            // context of maxTextHeight and maxLabelWidth.
             shortLabel = layout.shortenString(label, maxChars, true, ' ');
             expanded = false;
         }
