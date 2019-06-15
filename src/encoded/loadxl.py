@@ -396,7 +396,6 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     # yield bytes to work with Response.app_iter
                     yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
                 except Exception as e:
-                    import pdb; pdb.set_trace()
                     print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
                           a_type, str(first_fields), str(e)))
                     # remove newlines from error, since they mess with generator output
