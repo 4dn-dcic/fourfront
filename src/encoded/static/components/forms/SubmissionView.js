@@ -361,14 +361,14 @@ export default class SubmissionView extends React.PureComponent{
         }
         if (schema && schema.properties.aliases){
             this.setState(_.extend({
-                'creatingAlias' : autoSuggestedAlias,
-                'creatingIdx': newIdx,
-                'creatingType': type,
-                'creatingLink': newLink,
-                'creatingLinkForField' : parentField
+                'creatingAlias'         : autoSuggestedAlias,
+                'creatingIdx'           : newIdx,
+                'creatingType'          : type,
+                'creatingLink'          : newLink,
+                'creatingLinkForField'  : parentField
             }, extraState));
         } else { // schema doesn't support aliases
-            var fallbackAlias = 'My ' + type + ' ' + newIdx;
+            const fallbackAlias = 'My ' + type + ' ' + newIdx;
             this.createObj(type, newIdx, newLink, fallbackAlias, extraState);
         }
     }
@@ -450,9 +450,10 @@ export default class SubmissionView extends React.PureComponent{
         if (type === null || newIdx === null || newLink === null){
             return false;
         }
+
         // check if created object supports aliases
         const hasAlias = schema && schema.properties && schema.properties.aliases;
-        if(alias.length > 0 && hasAlias){
+        if (alias.length > 0 && hasAlias){
             var patt = new RegExp('\\S+:\\S+');
             var regexRes = patt.test(alias);
             if(!regexRes){
@@ -560,11 +561,11 @@ export default class SubmissionView extends React.PureComponent{
             }
 
             typesCopy[keyIdx] = type;
-            var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
-            if (contextWithAlias.aliases) {
-                contextWithAlias.aliases.push(alias);
+            const contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
+            if (Array.isArray(contextWithAlias.aliases)) {
+                contextWithAlias.aliases = _.uniq(_.filter(contextWithAlias.aliases.slice(0)).concat([ alias ]));
             } else {
-                contextWithAlias.aliases = [alias];
+                contextWithAlias.aliases = [ alias ];
             }
 
             contextCopy[keyIdx] = buildContext(contextWithAlias, schemas[type], bookmarksList, true, false);
