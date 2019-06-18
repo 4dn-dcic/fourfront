@@ -58,7 +58,7 @@ export default class ExperimentTypeView extends DefaultItemView {
             <div className="mb-2">
                 { publicationArea }
                 <SOPBelowHeaderRow sop={context.sop} outerClassName={null} />
-                <LinkBelowHeaderRow url={context.url} outerClassName={null} />
+                <LinkBelowHeaderRow url={context.reference_protocol} outerClassName={null} />
                 <StaticHeadersArea context={this.props.context} key="static-headers-area" />
             </div>
         );

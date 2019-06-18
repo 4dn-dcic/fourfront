@@ -179,7 +179,7 @@
         "assay_subclassification": "DNA binding",
         "assay_subclass_short": "DNA binding",
         "raw_file_types": "Reads (fastq) provided by lab",
-        "url": {
+        "reference_protocol": {
             "title": "CUT&RUN protocol v3",
             "link": "https://www.protocols.io/view/cut-amp-run-targeted-in-situ-genome-wide-profiling-zcpf2vn"
         },

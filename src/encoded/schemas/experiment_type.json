@@ -162,11 +162,12 @@
             "lookup": 170,
             "linkTo": "Protocol"
         },
-        "url": {
-            "title": "Protocol URL",
+        "reference_protocol": {
+            "title": "External Protocol URL",
             "lookup": 1000,
-            "description": "If no SOP, an external link to a protocol.",
+            "description": "If no SOP, an external link to a reference protocol.",
             "type": "object",
+            "required": ["link"],
             "properties": {
                 "title": {
                     "title": "Protocol Title",
