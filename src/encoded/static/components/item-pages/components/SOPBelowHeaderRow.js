@@ -45,12 +45,12 @@ export class LinkBelowHeaderRow extends React.PureComponent {
      */
     render(){
         var { url, outerClassName } = this.props;
-        if (!url) return null;
+        if (!url.link) return null;
         return (
             <div className={outerClassName}>
                 <FormattedInfoWrapper singularTitle="Reference Protocol" isSingleItem iconClass="file">
-                    <h5 className={"block-title" + ( ' mt-08' )}>
-                        <a href={url.link} target="_blank" rel="noopener noreferrer">{ url.title }</a>
+                    <h5 className={"block-title mt-08"}>
+                        <a href={url.link} target="_blank" rel="noopener noreferrer">{ url.title ? url.title : url.link }</a>
                     </h5>
                 </FormattedInfoWrapper>
             </div>
