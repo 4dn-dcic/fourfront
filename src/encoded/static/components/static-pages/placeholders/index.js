@@ -6,16 +6,15 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 
 import { SlideCarousel } from './SlideCarousel';
-import { JointAnalysisMatrix } from './JointAnalysisMatrix';
 
-export { SlideCarousel, JointAnalysisMatrix };
+export { SlideCarousel };
 
 
 /**
  * Any placeholder(s) used in a StaticSection _must_ get imported here
  * and be available here.
  */
-const placeholders = { SlideCarousel, JointAnalysisMatrix };
+const placeholders = { SlideCarousel };
 
 export const replaceString = memoize(function(placeholderString, props){
 

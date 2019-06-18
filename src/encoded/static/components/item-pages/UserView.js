@@ -8,11 +8,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Modal, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
-import { ItemStore } from './../lib/store';
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
 import { FormattedInfoBlock } from './components';
 import { EditableField, FieldSet } from './../forms/components';
-import { content_views } from './../globals';
+import Alerts from './../alerts';
 
 // eslint-disable-next-line no-unused-vars
 import { Item } from './../util/typedefs';
@@ -27,21 +26,6 @@ import { Item } from './../util/typedefs';
 
 
 /**
- * Extends ItemStore to help manage collection of Access Keys from back-end.
- *
- * @todo Remove/refactor this and the ItemStore dependency in favor of using a React Component to wrap and provide state to some child view in UserView.
- * @extends module:lib/store.ItemStore
- * @private
- */
-class AccessKeyStore extends ItemStore {
-    resetSecret(id) {
-        this.fetch(id + 'reset-secret', {
-            method: 'POST',
-        }, (response) => this.dispatch('onResetSecret', response));
-    }
-}
-
-/**
  * Component which fetches, saves, and show access keys that user may use to submit
  * experiments and other data.
  *
@@ -54,7 +38,6 @@ class SyncedAccessKeyTable extends React.PureComponent {
 
     static propTypes = {
         'access_keys' : PropTypes.array,
-        'session' : PropTypes.bool,
         'user' : PropTypes.shape({
             '@id' : PropTypes.string.isRequired,
             'uuid' : PropTypes.string.isRequired,
@@ -71,27 +54,18 @@ class SyncedAccessKeyTable extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'syncAccessKeysFromSearch', 'create', 'doAction', 'onCreate', 'onResetSecret',
-            'showNewSecret', 'onDelete', 'onError', 'hideModal');
+        _.bindAll(this, 'syncAccessKeysFromSearch', 'handleCreate', 'handleResetSecret',
+            'showNewSecret', 'handleDelete', 'hideModal');
 
-        const accessKeys = props.access_keys || null;
-        if (accessKeys){
-            this.store = new AccessKeyStore(accessKeys, this, 'access_keys');
-        } else {
-            this.store = null;
-        }
         this.state = {
-            'access_keys'   : accessKeys,
-            'loadingStatus' : accessKeys ? 'loaded' : 'loading',
+            'access_keys'   : null,
+            'loadingStatus' : 'loading',
             'modal'         : null
         };
     }
 
     componentDidMount(){
-        const { access_keys } = this.state;
-        if (!access_keys || !this.store){
-            this.syncAccessKeysFromSearch();
-        }
+        this.syncAccessKeysFromSearch();
     }
 
     syncAccessKeysFromSearch(){
@@ -131,24 +105,33 @@ class SyncedAccessKeyTable extends React.PureComponent {
      *
      * @param {MouseEvent} e - Click event.
      */
-    create(e) {
-        const { session } = this.props;
+    handleCreate(e) {
         const item = {};
-        if (session){
-            const idToken = JWT.get();
-            if (idToken){
-                const decoded = jwt.decode(idToken);
-                item['user'] = decoded.email_verified ? decoded.email : "";
-            } else {
-                console.warn("Access key aborted");
-                return;
-            }
+        const idToken = JWT.get();
+        if (idToken){
+            const decoded = jwt.decode(idToken);
+            item.user = decoded.email_verified ? decoded.email : "";
+        } else {
+            console.warn("Access key aborted");
+            return;
         }
-        this.store.create('/access-keys/', item);
-    }
 
-    doAction(action, arg) {
-        this.store[action](arg);
+        ajax.load('/access-keys/', (resp)=>{
+            const [ newKey ] = resp['@graph'];
+            this.setState(function({ access_keys : prevKeys }){
+                const nextKeys = prevKeys.slice(0);
+                nextKeys.unshift(newKey); // Add to start of list.
+                return { 'access_keys' : nextKeys };
+            }, () => {
+                this.showNewSecret(resp);
+            });
+        }, 'POST', (err)=>{
+            Alerts.queue({
+                'title'     : "Adding access key failed",
+                "message"   : "Check your internet connection or if you have been logged out due to expired session.",
+                "style"     : 'danger'
+            });
+        }, JSON.stringify(item));
     }
 
     showNewSecret(response, reset = false) {
@@ -189,28 +172,55 @@ class SyncedAccessKeyTable extends React.PureComponent {
 
     /**** Methods which are CALLED BY ITEMSTORE VIA DISPATCH(); TODO: Refactor, more Reactful ****/
 
-    onCreate(response) { this.showNewSecret(response); }
-
-    onResetSecret(response) { this.showNewSecret(response, true); }
-
-    onDelete(item) {
-        this.setState({ 'modal' : (
-            <Modal show onHide={this.hideModal}>
-                <Modal.Header closeButton>
-                    <Modal.Title className="text-400">Access key <span className="mono-text">{ item['access_key_id'] }</span> has been deleted.</Modal.Title>
-                </Modal.Header>
-            </Modal>
-        ) });
+    handleResetSecret(id) {
+        ajax.load(id + 'reset-secret', (resp)=>{
+            this.showNewSecret(resp, true);
+        }, 'POST', (err)=>{
+            Alerts.queue({
+                'title'     : "Resetting access key failed",
+                "message"   : "Check your internet connection or if you have been logged out due to expired session.",
+                "style"     : 'danger'
+            });
+        });
     }
 
-    onError(error) {
-        var errorViewComponent = content_views.lookup(error);
-        this.setState({ 'modal' : (
-            <Modal onHide={this.hideModal}>
-                <Modal.Header closeButton><Modal.Title>Error</Modal.Title></Modal.Header>
-                <Modal.Body><errorViewComponent context={error} loadingComplete /></Modal.Body>
-            </Modal>
-        ) });
+    handleDelete(item) {
+        const dispatch_body = { 'status': 'deleted' };
+        if (item.accession){
+            dispatch_body.accession = item.accession;
+        }
+        if (item.uuid){
+            dispatch_body.uuid = item.uuid;
+        }
+        ajax.load(item['@id'] + '?render=false', (resp)=>{
+            this.setState(({ access_keys : prevKeys }) => {
+                const foundItemIdx = _.findIndex(prevKeys, function(sItem){
+                    return sItem['@id'] === item['@id'];
+                });
+                if (typeof foundItemIdx !== 'number' || foundItemIdx === -1){
+                    throw new Error('Couldn\'t find deleted key - ' + sItem['@id']);
+                }
+                const foundItem = prevKeys[foundItemIdx];
+                const nextKeys = prevKeys.slice(0);
+                nextKeys.splice(foundItemIdx, 1);
+                return {
+                    'access_keys' : nextKeys,
+                    'modal' : (
+                        <Modal show onHide={this.hideModal}>
+                            <Modal.Header closeButton>
+                                <Modal.Title className="text-400">Access key <span className="mono-text">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
+                            </Modal.Header>
+                        </Modal>
+                    )
+                };
+            });
+        }, "PATCH", ()=>{
+            Alerts.queue({
+                'title'     : "Deleting access key failed",
+                "message"   : "Check your internet connection or if you have been logged out due to expired session.",
+                "style"     : 'danger'
+            });
+        }, JSON.stringify(dispatch_body));
     }
 
     hideModal() {
@@ -252,8 +262,8 @@ class SyncedAccessKeyTable extends React.PureComponent {
 
         return (
             <AccessKeyTableContainer>
-                <AccessKeyTable accessKeys={access_keys} doAction={this.doAction} />
-                <button type="button" id="add-access-key" className="btn btn-success mb-2" onClick={this.create}>Add Access Key</button>
+                <AccessKeyTable accessKeys={access_keys} onResetSecret={this.handleResetSecret} onDelete={this.handleDelete} />
+                <button type="button" id="add-access-key" className="btn btn-success mb-2" onClick={this.handleCreate}>Add Access Key</button>
                 { modal }
             </AccessKeyTableContainer>
         );
@@ -269,7 +279,7 @@ function AccessKeyTableContainer({ children }){
     );
 }
 
-const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, doAction }){
+const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete, onResetSecret }){
 
     if (!accessKeys.length){
         return (
@@ -293,8 +303,8 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, doAction
                 { _.map(accessKeys, function(accessKey, idx){
                     const { access_key_id : id, date_created, description, uuid } = accessKey;
                     const atId = accessKey['@id'];
-                    function resetKey(e){ doAction('resetSecret', atId); }
-                    function deleteKey(e){ doAction('delete', { '@id' : atId, uuid }); }
+                    function resetKey(e){ onResetSecret(atId); }
+                    function deleteKey(e){ onDelete({ '@id' : atId, uuid }); }
                     return (
                         <tr key={id || idx}>
                             <td className="access-key-id">{ id }</td>
