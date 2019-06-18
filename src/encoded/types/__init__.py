@@ -67,10 +67,27 @@ class Case(Item):
     item_type = 'case'
     schema = load_schema('encoded:schemas/case.json')
     embedded_list = []
-    '''
-    @calculated_property(schema=display_title_schema)
+
+    @calculated_property(schema={
+        "title" : "Family Trio",
+        "type" : "array",
+        "items" : {
+            "type" : "object",
+            "title" : "Trio Relationship",
+            "properties" : {
+                "individual": {
+                    "title": "Individual",
+                    "type": "string",
+                    "linkTo": "Individual"
+                },
+                "relationship_type": {
+                    "title": "Relationship Type",
+                    "type": "string"
+                }
+            }
+        }
+    })
     def trio(self, request, proband=None):
-        print('\n\n\nTTT', proband)
         if not proband:
             return []
         individual_list = [{ "individual" : proband, "relationship_type" : "self" }]
@@ -90,7 +107,6 @@ class Case(Item):
                     "relationship_type" : relationship_type
                 })
         return individual_list
-    '''
 
     @calculated_property(schema={
         "title": "Display Title",

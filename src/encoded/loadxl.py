@@ -29,10 +29,10 @@ ORDER = [
     'user',
     'institution',
     'project',
-    #'disease',
-    #'individual',
-    #'case',
-    #'sample'
+    'disease',
+    'individual',
+    'case',
+    'sample'
 ]
 
 IS_ATTACHMENT = [
