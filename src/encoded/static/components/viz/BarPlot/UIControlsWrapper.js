@@ -86,6 +86,14 @@ export class UIControlsWrapper extends React.PureComponent {
         super(props);
         _.bindAll(this, 'filterObjExistsAndNoFiltersSelected', 'titleMap', 'adjustedChildChart',
             'getFieldAtIndex', 'renderDropDownMenuItems', 'handleDropDownToggle', 'renderShowTypeDropdown');
+
+        this.handleDropDownShowTypeToggle = this.handleDropDownToggle.bind(this, 'showType');
+        this.handleDropDownSubdivisionFieldToggle = this.handleDropDownToggle.bind(this, 'subdivisionField');
+        this.handleDropDownYAxisFieldToggle = this.handleDropDownToggle.bind(this, 'yAxis');
+        this.handleDropDownXAxisFieldToggle = this.handleDropDownToggle.bind(this, 'xAxisField');
+        this.handleFirstFieldSelect = this.handleFieldSelect.bind(this, 0);
+        this.handleSecondFieldSelect = this.handleFieldSelect.bind(this, 1);
+
         this.handleAggregateTypeSelect = _.throttle(this.handleAggregateTypeSelect.bind(this), 750);
         this.handleExperimentsShowType = _.throttle(this.handleExperimentsShowType.bind(this), 750, { trailing : false });
         this.handleFieldSelect = _.throttle(this.handleFieldSelect.bind(this), 300);
@@ -235,7 +243,9 @@ export class UIControlsWrapper extends React.PureComponent {
 
     handleDropDownToggle(id, isOpen, evt, source){
         if (isOpen){
-            setTimeout(this.setState.bind(this), 10, { 'openDropdown' : id });
+            setTimeout(()=>{
+                this.setState({ 'openDropdown' : id });
+            }, 10);
         } else {
             this.setState({ 'openDropdown' : null });
         }
@@ -267,7 +277,7 @@ export class UIControlsWrapper extends React.PureComponent {
                             <span className="text-600">{ showStateTitle }</span> { aggrTypeTitle }
                         </React.Fragment>
                     }
-                    onToggle={this.handleDropDownToggle.bind(this, 'showType')}>
+                    onToggle={this.handleDropDownShowTypeToggle}>
                     {
                         this.renderDropDownMenuItems([
                             [
@@ -304,16 +314,16 @@ export class UIControlsWrapper extends React.PureComponent {
         return (
             <div className="field-1-change-section">
                 <h6 className="dropdown-heading">Group By</h6>
-                <DropdownButton id="select-barplot-field-1" onSelect={this.handleFieldSelect.bind(this, 1)}
+                <DropdownButton id="select-barplot-field-1" onSelect={this.handleSecondFieldSelect}
                     disabled={isLoadingChartData} title={title}
-                    onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}>
+                    onToggle={this.handleDropDownSubdivisionFieldToggle}>
                     {
                         this.renderDropDownMenuItems(
                             _.map(availableFields_Subdivision.slice(0).concat([{
                                 title : <em>None</em>,
                                 field : "none"
                             }]), function(field){
-                                const isDisabled = barplot_data_fields[0] === field.field;
+                                //const isDisabled = barplot_data_fields[0] === field.field;
                                 return [
                                     field.field,                                        // Field
                                     field.title || Schemas.Field.toName(field.field),   // Title
@@ -331,8 +341,10 @@ export class UIControlsWrapper extends React.PureComponent {
     }
 
     render(){
-        const { barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, href,
-            availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth, cursorDetailActions } = this.props;
+        const {
+            barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, href,
+            availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth, cursorDetailActions
+        } = this.props;
         const { aggregateType, showState } = this.state;
 
         if (!UIControlsWrapper.canShowChart(barplot_data_unfiltered)) return null;
@@ -344,6 +356,14 @@ export class UIControlsWrapper extends React.PureComponent {
             : chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50;
 
         vizUtil.unhighlightTerms();
+
+        let xAxisDropdownTitle;
+        if (isLoadingChartData){
+            xAxisDropdownTitle = <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
+        } else {
+            const field = this.getFieldAtIndex(0);
+            xAxisDropdownTitle = <span>{(field.title || Schemas.Field.toName(field.field))}</span>;
+        }
 
         return (
             <div className="bar-plot-chart-controls-wrapper">
@@ -365,7 +385,7 @@ export class UIControlsWrapper extends React.PureComponent {
                                     bsSize="xsmall"
                                     onSelect={this.handleAggregateTypeSelect}
                                     title={this.titleMap(aggregateType)}
-                                    onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}>
+                                    onToggle={this.handleDropDownYAxisFieldToggle}>
                                     { this.renderDropDownMenuItems(['experiment_sets','experiments','files'], aggregateType) }
                                 </DropdownButton>
                             </div>
@@ -393,19 +413,10 @@ export class UIControlsWrapper extends React.PureComponent {
                                 <div className="col-xs-9 pull-right" style={{ "width" : (layout.gridContainerWidth(windowWidth) * (windowGridSize !== 'xs' ? 0.25 : 1)) + 5 - 52 }}>
                                     <DropdownButton
                                         id="select-barplot-field-0"
-                                        onSelect={this.handleFieldSelect.bind(this, 0)}
+                                        onSelect={this.handleFirstFieldSelect}
                                         disabled={isLoadingChartData}
-                                        title={(()=>{
-                                            //if (this.state.openDropdown === 'xAxisField'){
-                                            //    return <em className="dropdown-open-title">X-Axis Field</em>;
-                                            //}
-                                            if (isLoadingChartData){
-                                                return <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
-                                            }
-                                            var field = this.getFieldAtIndex(0);
-                                            return <span>{(field.title || Schemas.Field.toName(field.field))}</span>;
-                                        })()}
-                                        onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}>
+                                        title={xAxisDropdownTitle}
+                                        onToggle={this.handleDropDownXAxisFieldToggle}>
                                         {
                                             this.renderDropDownMenuItems(
                                                 _.map(availableFields_XAxis, function(field){

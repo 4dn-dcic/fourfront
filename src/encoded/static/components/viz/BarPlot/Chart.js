@@ -204,6 +204,9 @@ export class Chart extends React.PureComponent {
         'useOnlyPopulatedFields' : PropTypes.bool,
         'showType'      : PropTypes.oneOf(['all', 'filtered', 'both']),
         'aggregateType' : PropTypes.oneOf(['experiment_sets', 'experiments', 'files']),
+        'windowWidth'   : PropTypes.number,
+        'href'          : PropTypes.string,
+        'cursorDetailActions' : PopoverViewContainer.propTypes.cursorDetailActions
     };
 
     static defaultProps = {

@@ -17,7 +17,10 @@ export class ExperimentSetTables extends React.PureComponent {
     static propTypes = {
         'loading' : PropTypes.bool,
         'windowWidth' : PropTypes.number.isRequired,
-        'title' : PropTypes.string
+        'title' : PropTypes.string,
+        'href' : PropTypes.string,
+        'results' : PropTypes.arrayOf(PropTypes.object),
+        'experiment_sets' : PropTypes.arrayOf(PropTypes.object)
     };
 
     static defaultProps = {
@@ -39,7 +42,7 @@ export class ExperimentSetTables extends React.PureComponent {
     }
 
     render(){
-        const { loading, title, windowWidth, href, experiment_sets, results } = this.props;
+        const { loading, title, experiment_sets, results } = this.props;
         const expSets = experiment_sets || results;
 
         if (loading || !Array.isArray(expSets)){

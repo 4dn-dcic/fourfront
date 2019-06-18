@@ -6,15 +6,16 @@ import url from 'url';
 import queryString from 'querystring';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { isServerSide, Filters, navigate, object } from './../../util';
+import { isServerSide, navigate, object } from './../../util';
 
 
 export class SortController extends React.PureComponent {
 
     static propTypes = {
-        'href'            : PropTypes.string.isRequired,
-        'context'         : PropTypes.object.isRequired,
-        'navigate'        : PropTypes.func
+        'href'          : PropTypes.string.isRequired,
+        'context'       : PropTypes.object.isRequired,
+        'navigate'      : PropTypes.func,
+        'children'      : PropTypes.node.isRequired
     };
 
     static defaultProps = {
