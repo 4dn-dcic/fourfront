@@ -44,7 +44,11 @@ class Individual(Item):
     #    return title
 
 
-    @calculated_property(schema=display_title_schema)
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
     def display_title(self, first_name, last_name):
         """return first and last name."""
         title = u'{} {}'.format(first_name, last_name)
@@ -88,10 +92,12 @@ class Case(Item):
         return individual_list
     '''
 
-    @calculated_property(schema=display_title_schema)
-    def display_title(self, title, aliases=None):
-        if aliases:
-            return aliases[0]
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, title):
         return title
 
 
@@ -125,7 +131,11 @@ class Disease(Item):
     item_type = 'disease'
     schema = load_schema('encoded:schemas/disease.json')
 
-    @calculated_property(schema=display_title_schema)
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
     def display_title(self, term_name):
         return term_name
 
@@ -146,7 +156,11 @@ class Document(ItemWithAttachment, Item):
 
     embedded_list = []
 
-    @calculated_property(schema=display_title_schema)
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
     def display_title(self, attachment=None):
         if attachment:
             return attachment.get('download')
@@ -228,7 +242,11 @@ class TrackingItem(Item):
         request.remote_user = prior_remote
         return ti_res
 
-    @calculated_property(schema=display_title_schema)
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
     def display_title(self, tracking_type, date_created=None, google_analytics=None):
         if date_created:  # pragma: no cover should always be true
             date_created = date_created[:10]

@@ -371,7 +371,11 @@ class Item(snovault.Item):
         super(Item, self)._update(properties, sheets)
 
 
-    @snovault.calculated_property(schema=snovault.display_title_schema)
+    @snovault.calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
     def display_title(self, request=None):
         """create a display_title field."""
         display_title = ""
