@@ -29,6 +29,12 @@
         "schema_version": {
             "default": "1"
         },
+        "title": {
+            "title": "Title",
+            "description": "A name for the protocol/authentication document",
+            "type": "string",
+            "lookup": 11
+        },
         "description": {
             "title": "Description",
             "description": "A short description of the protocol or document",
