@@ -138,6 +138,17 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         return url.format(hrefParts);
     });
 
+    static hrefWithLimit = memoize(function(href, limit=null){
+        // TODO: Implement. Pass to ItemPageTableSearchLoaderPageController
+        // If limit in URL excists, keep it. (_or_ override it?)
+        // If not, set it to val of limit param.
+        // ALSO: get rid of ItemPageTableSearchLoaderPageController since we no longer plan to paginate results at all ever in future
+        // instead direvtly use ItemPageTableSearchLoader
+        // ALSO: Refactor ItemPageTableSearchLoader to latest standards & for performance (React.PureComponent instd of React.COmponent)
+        // ALSO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
+        // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
+    });
+
     static defaultProps = {
         'requestHref' : function(props, state){
             return "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&publications_of_set.display_title=" + props.context.display_title;

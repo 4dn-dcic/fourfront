@@ -36,7 +36,7 @@ const RotatedLabelAxis = React.memo(function RotatedLabelAxis(props){
     const {
         placementWidth, placementHeight, angle, lineHeight, extraHeight, maxLabelWidth, append, debug,
         labels, labelClassName, className, x, y, isMounted, deRotateAppend, term : propTerm, field : propField,
-        appendOffset, opacity
+        appendOffset
     } = props;
     const maxTextHeight = RotatedLabel.maxTextHeight(placementWidth, lineHeight, extraHeight || 0);
     const labelWidth = Math.min(RotatedLabel.maxHypotenuse(placementHeight, angle), maxLabelWidth || 1000);
@@ -63,8 +63,6 @@ const RotatedLabelAxis = React.memo(function RotatedLabelAxis(props){
                 if (lineHeight)   childProps.lineHeight = lineHeight;
                 if (appendOffset) childProps.appendOffset = appendOffset;
                 if (!appendOffset && deRotateAppend) childProps.appendOffset = 3;
-                if (typeof label.opacity !== 'undefined')   childProps.opacity = label.opacity;
-                else if (typeof opacity !== 'undefined')    childProps.opacity = opacity;
                 if (label.color)        childProps.color = label.color;
                 return React.createElement(RotatedLabel, childProps);
             }) }
@@ -129,7 +127,6 @@ export class RotatedLabel extends React.PureComponent {
         'term'      : null,
         'field'     : null,
         'x'         : 0,
-        'opacity'   : 1,
         'style'     : {
             fontSize    : '0.85rem',
             fontFamily  : 'Work Sans',
@@ -263,7 +260,7 @@ export class RotatedLabel extends React.PureComponent {
     }
 
     render(){
-        const { lineHeight, angle, className, x, y, placementWidth, opacity, label, color, term: propTerm } = this.props;
+        const { lineHeight, angle, className, x, y, placementWidth, label, color, term: propTerm } = this.props;
         const { expanded, shortLabel, hover, textHeight } = this.state;
         const term = this.props['data-term'] || propTerm || null;
         const labelWidth = this.labelWidth();
@@ -279,7 +276,6 @@ export class RotatedLabel extends React.PureComponent {
                 style={{
                     transform : vizUtil.style.translate3d(x, y, 0),
                     width : placementWidth,
-                    opacity : opacity,
                 }}
                 onMouseEnter={this.onMouseEnter}
                 onMouseLeave={this.onMouseLeave}

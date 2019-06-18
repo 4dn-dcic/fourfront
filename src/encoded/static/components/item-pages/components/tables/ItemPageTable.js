@@ -203,7 +203,7 @@ class ItemPageTableRow extends React.PureComponent {
                 { this.renderRowOfColumns() }
                 { this.state.open && typeof renderDetailPane === 'function' ?
                     <div className="inner-wrapper">{ renderDetailPane(result, rowNumber, width, this.props) }</div>
-                : null }
+                    : null }
             </div>
         );
     }
