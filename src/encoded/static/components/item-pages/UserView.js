@@ -80,7 +80,6 @@ class SyncedAccessKeyTable extends React.PureComponent {
             if (!resp || !Array.isArray(resp['@graph'])){
                 this.setState({ 'loadingStatus' : 'failed', 'access_keys' : null });
             }
-            this.store = new AccessKeyStore(resp['@graph'], this, 'access_keys');
             this.setState({
                 'loadingStatus' :' loaded',
                 'access_keys' : resp['@graph']

@@ -204,12 +204,7 @@ h1.page-title {
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
 
-	// Deprecated Margins
-	margin-top: 32px;
-	margin-bottom: 32px;
-
 	&.top-of-page {
-		margin-top: 36px;
 		margin-bottom: 0px;
 		margin-left: -2px;
 		

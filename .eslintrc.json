@@ -20,7 +20,6 @@
         "no-unused-vars": ["warn", { "args" : "none" }],
         "no-useless-concat": "error",
         "no-useless-constructor": "error",
-        "no-useless-escape" : "error",
         "no-whitespace-before-property" : "error",
         "object-curly-spacing" : ["error", "always"],
         "prefer-const" : "error",

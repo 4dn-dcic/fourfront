@@ -53,7 +53,7 @@ const TITLE_PATHNAME_MAP = {
     '/indexing_status' : {
         'title' : "Indexing Status"
     },
-    '/users/\*' : {
+    '/users/*' : {
         'title' : function(pathName, context){
             var myDetails = JWT.getUserDetails(),
                 myEmail = myDetails && myDetails.email;
@@ -314,23 +314,24 @@ export default class PageTitle extends React.PureComponent {
      * @returns {JSX.Element} Div with ID set to "page-title-container" and any child elements for representing title, subtitle, etc.
      */
     render(){
-        var { context, href, session, currentAction, windowWidth } = this.props;
+        const { context, href, session, currentAction, windowWidth, alerts, schemas } = this.props;
+        const { mounted } = this.state;
 
-        var elementStyle;
+        let elementStyle;
 
         if (PageTitle.isHomePage(href)){
-            elementStyle = PageTitle.getStyles(context, href, this.state.mounted, false, windowWidth);
+            elementStyle = PageTitle.getStyles(context, href, mounted, false, windowWidth);
             return (
                 <div id="page-title-container" className="container">
                     <div className="breadcrumb-placeholder" key="breadcrumbs" />
-                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href', 'windowWidth')} mounted={this.state.mounted} style={elementStyle} />
-                    <Alerts alerts={this.props.alerts} />
+                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href', 'windowWidth', 'session')} mounted={mounted} style={elementStyle} />
+                    <Alerts alerts={alerts} />
                 </div>
             );
         }
 
         var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(
-            context, href, (this.props.shemas || Schemas.get()), this.state.mounted, currentAction
+            context, href, (schemas || Schemas.get()), mounted, currentAction
         );
 
         if (title) {
@@ -352,13 +353,13 @@ export default class PageTitle extends React.PureComponent {
             && context['table-of-contents'].enabled
         );
 
-        elementStyle = PageTitle.getStyles(context, href, this.state.mounted, hasToc, windowWidth);
+        elementStyle = PageTitle.getStyles(context, href, mounted, hasToc, windowWidth);
 
         return (
             <div id="page-title-container" className="container">
                 <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
-                <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={this.state.mounted} style={elementStyle} />
-                <Alerts alerts={this.props.alerts} style={{ 'width' : elementStyle.width || null }} />
+                <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={mounted} style={elementStyle} />
+                <Alerts alerts={alerts} style={{ 'width' : elementStyle.width || null }} />
             </div>
         );
     }
@@ -374,35 +375,40 @@ export default class PageTitle extends React.PureComponent {
  * @prop {JSX.Element|string} subtitle - Shown at bottom title in small size, 400 font weight.
  * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
  */
-class PageTitleElement extends React.PureComponent {
-
-    render(){
-        var { title, calloutTitle, subtitle, context, href, mounted, hasToc, style } = this.props;
-
-        return ((title || subtitle) && (
-            <h1 className="page-title top-of-page" style={style} >
-                { title }{ calloutTitle }{ subtitle }
-            </h1>
-        )) || <br/>;
-    }
-}
+const PageTitleElement = React.memo(function PageTitleElement(props) {
+    const { title, calloutTitle, subtitle, style } = props;
+    return ((title || subtitle) && (
+        <h1 className="page-title top-of-page" style={style} >
+            { title }{ calloutTitle }{ subtitle }
+        </h1>
+    )) || <br/>;
+});
 
 
-class HomePageTitleElement extends React.PureComponent {
-    render(){
-        var { title, calloutTitle, subtitle, context, href, mounted, hasToc, style } = this.props;
+const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
+    const { session } = props;
+    let { style } = props;
 
-        style = _.clone(style);
-        style.marginTop ? style.marginTop -= 3 : null;
-
+    if (session){
         return (
-            <h1 className="home-page-title page-title top-of-page" style={style} >
-                <span className="title">4D Nucleome Data Portal</span>
-                <div className="subtitle">A platform to search, visualize, and download nucleomics data.</div>
+            <h1 className="home-page-title page-title top-of-page" >
+                <span className="title">My Dashboard</span>
             </h1>
         );
     }
-}
+
+    console.log('SESS', session);
+
+    style = _.clone(style);
+    style.marginTop ? style.marginTop -= 3 : null;
+
+    return (
+        <h1 className="home-page-title page-title top-of-page" style={style} >
+            <span className="title"><em>TODO:</em> Portal Title Here</span>
+            <div className="subtitle">Genomics Analysis Platform</div>
+        </h1>
+    );
+});
 
 
 /**

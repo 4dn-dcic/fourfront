@@ -16,7 +16,6 @@ import { store } from './../store';
 import * as origin from '../libs/origin';
 import { ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
 import Alerts from './alerts';
-import { FacetCharts } from './browse/components/FacetCharts';
 import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import PageTitle from './PageTitle';
@@ -33,7 +32,7 @@ var { NavigateOpts } = typedefs;
  * @type {Object}
  */
 const portal = {
-    "portal_title": '4DN Data Portal',
+    "portal_title": 'Clinical Genomic Analysis Platform',
     "global_sections": [ // DEPRECATED ?
         {
             'id': 'browse-menu-item', 'sid':'sBrowse', 'title': 'Browse',
@@ -1769,11 +1768,6 @@ class BodyElement extends React.PureComponent {
                             <div id="pre-content-placeholder"/>
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
-
-                            <div id="facet-charts-container" className="container">
-                                <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
-                                    {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
-                            </div>
 
                             <ContentErrorBoundary canonical={canonical}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
