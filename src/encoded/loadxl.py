@@ -28,7 +28,11 @@ def includeme(config):
 ORDER = [
     'user',
     'institution',
-    'project'
+    'project',
+    #'disease',
+    #'individual',
+    #'case',
+    #'sample'
 ]
 
 IS_ATTACHMENT = [

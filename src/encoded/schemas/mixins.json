@@ -51,7 +51,7 @@
     "aliases": {
         "aliases": {
             "title": "Aliases",
-            "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
+            "description": "Institution-specific ID (e.g. bgm:case-1234-a).",
             "type": "array",
             "comment": "Colon separated lab name and lab identifier, no slash. (e.g. dcic-lab:42).",
             "lookup": 1,
@@ -59,8 +59,8 @@
             "ff_flag": "clear clone",
             "items": {
                 "uniqueKey": "alias",
-                "title": "Lab alias",
-                "description": "Lab specific ID (e.g. dcic_lab:my_biosample1).",
+                "title": "ID Alias",
+                "description": "Institution-specific ID (e.g. bgm:case-1234-a).",
                 "type":  "string",
                 "pattern": "^[^\\s\\\\\\/]+:[^\\s\\\\\\/]+$"
             }

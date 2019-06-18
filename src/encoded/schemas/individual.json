@@ -7,13 +7,43 @@
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/modified" },
-        { "$ref": "mixins.json#/attribution" }
+        { "$ref": "mixins.json#/modified" }
     ],
     "properties": {
+        "first_name": {
+            "title": "First name",
+            "description": "The user's first (given) name.",
+            "type": "string"
+        },
+        "last_name": {
+            "title": "Last name",
+            "description": "The user's last (family) name.",
+            "type": "string"
+        },
+        "gender": {
+            "title": "Gender",
+            "type": "string"
+        },
+        "diseases" : {
+            "title" : "Diseases",
+            "type" : "array",
+            "uniqueItems": true,
+            "items" : {
+                "title" : "Disease",
+                "type" : "string",
+                "linkTo" : "Disease"
+            }
+        },
+        "birth_date" : {
+            "title" : "Date of Birth",
+            "type" : "string",
+            "format" : "date"
+        },
         "related_individuals": {
             "title": "Related Individuals",
             "type": "array",
@@ -29,28 +59,24 @@
                     },
                     "relationship_type": {
                         "title": "Relationship Type",
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "mother",
+                            "father",
+                            "parent",
+                            "sister",
+                            "brother",
+                            "sibling",
+                            "daughter",
+                            "son",
+                            "child",
+                            "wife",
+                            "husband",
+                            "partner"
+                        ]
                     }
                 }
             }
-        },
-        "is_proband": {
-            "title": "Is Proband",
-            "type": "boolean"
-        },
-        "gender": {
-            "title": "Gender",
-            "type": "string"
-        },
-        "first_name": {
-            "title": "First name",
-            "description": "The user's first (given) name.",
-            "type": "string"
-        },
-        "last_name": {
-            "title": "Last name",
-            "description": "The user's last (family) name.",
-            "type": "string"
         }
     }
 }

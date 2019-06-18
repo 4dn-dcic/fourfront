@@ -6,7 +6,6 @@
         "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9ffc",
         "first_name": "Joe",
         "last_name": "Person",
-        "is_proband": true,
         "gender": "male",
         "related_individuals": [
             {
@@ -26,7 +25,6 @@
         "uuid": "5c302401-88f6-44b8-9cf9-f062dfaa98c4",
         "first_name": "Sally",
         "last_name": "Person",
-        "is_proband": false,
         "gender": "female",
         "related_individuals": [
             {
@@ -46,7 +44,6 @@
         "uuid": "96974f2e-de0a-4f3a-9be5-543359da74a1",
         "first_name": "Douglas",
         "last_name": "Person",
-        "is_proband": false,
         "gender": "male",
         "related_individuals": [
             {

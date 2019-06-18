@@ -16,6 +16,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    display_title_schema
 )
 
 from snovault.storage import User as AuthUser
@@ -90,11 +91,7 @@ class User(Item):
         title = u'{} {}'.format(first_name, last_name)
         return title
 
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
+    @calculated_property(schema=display_title_schema)
     def display_title(self, first_name, last_name):
         return self.title(first_name, last_name)
 

@@ -9,15 +9,21 @@ from snovault import (
     collection,
     load_schema,
     CONNECTION,
-    COLLECTIONS
+    COLLECTIONS,
+    display_title_schema
 )
 # from pyramid.traversal import find_root
-from .base import Item
+from .base import (
+    Item,
+    get_item_if_you_can
+)
 
 
 def includeme(config):
     """include me method."""
     config.scan()
+
+
 
 
 @collection(
@@ -31,22 +37,20 @@ class Individual(Item):
     schema = load_schema('encoded:schemas/individual.json')
     embedded_list = []
 
-    @calculated_property(schema={
-        "title": "Title",
-        "type": "string",
-    })
-    def title(self, first_name, last_name):
+    #@calculated_property(schema=display_title_schema)
+    #def display_title(self, first_name, last_name):
+    #    """return first and last name."""
+    #    title = u'{} {}'.format(first_name, last_name)
+    #    return title
+
+
+    @calculated_property(schema=display_title_schema)
+    def display_title(self, first_name, last_name):
         """return first and last name."""
         title = u'{} {}'.format(first_name, last_name)
         return title
 
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, first_name, last_name):
-        return self.title(first_name, last_name)
+
 
 
 @collection(
@@ -59,14 +63,38 @@ class Case(Item):
     item_type = 'case'
     schema = load_schema('encoded:schemas/case.json')
     embedded_list = []
+    '''
+    @calculated_property(schema=display_title_schema)
+    def trio(self, request, proband=None):
+        print('\n\n\nTTT', proband)
+        if not proband:
+            return []
+        individual_list = [{ "individual" : proband, "relationship_type" : "self" }]
+        proband_object = get_item_if_you_can(request, proband, "Individual")
+        for relation in proband_object.get("related_individuals", []):
+            if relation["relationship_type"] in ["mother", "father", "parent"]:
+                relationship_type = relation["relationship_type"]
+                if relationship_type == "parent": # no gender defined
+                    related_individual_object = get_item_if_you_can(request, relation['related_individual'], "Individual")
+                    related_individual_gender = related_individual_object.get("gender")
+                    if related_individual_gender == "male":
+                        relationship_type = "father"
+                    elif related_individual_gender == "female":
+                        relationship_type = "mother"
+                individual_list.append({
+                    "individual" : relation['related_individual'],
+                    "relationship_type" : relationship_type
+                })
+        return individual_list
+    '''
 
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, title):
+    @calculated_property(schema=display_title_schema)
+    def display_title(self, title, aliases=None):
+        if aliases:
+            return aliases[0]
         return title
+
+
 
 
 @collection(
@@ -78,7 +106,30 @@ class Case(Item):
 class Sample(Item):
     item_type = 'sample'
     schema = load_schema('encoded:schemas/sample.json')
-    embedded_list = []
+
+    embedded_list = [
+        "individual.display_title",
+        "individual.gender"
+    ]
+
+
+
+
+@collection(
+    name='diseases',
+    properties={
+        'title': 'Diseases',
+        'description': 'Listing of Diseases',
+    })
+class Disease(Item):
+    item_type = 'disease'
+    schema = load_schema('encoded:schemas/disease.json')
+
+    @calculated_property(schema=display_title_schema)
+    def display_title(self, term_name):
+        return term_name
+
+
 
 
 @collection(
@@ -93,15 +144,15 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
 
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title",
-        "type": "string"
-    })
+    embedded_list = []
+
+    @calculated_property(schema=display_title_schema)
     def display_title(self, attachment=None):
         if attachment:
             return attachment.get('download')
         return Item.display_title(self)
+
+
 
 
 @collection(
@@ -118,6 +169,8 @@ class Sysinfo(Item):
     schema = load_schema('encoded:schemas/sysinfo.json')
     name_key = 'name'
     embedded_list = []
+
+
 
 
 @collection(
@@ -175,10 +228,7 @@ class TrackingItem(Item):
         request.remote_user = prior_remote
         return ti_res
 
-    @calculated_property(schema={
-        "title": "Title",
-        "type": "string",
-    })
+    @calculated_property(schema=display_title_schema)
     def display_title(self, tracking_type, date_created=None, google_analytics=None):
         if date_created:  # pragma: no cover should always be true
             date_created = date_created[:10]
