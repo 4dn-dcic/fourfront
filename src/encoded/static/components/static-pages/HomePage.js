@@ -66,7 +66,7 @@ const MyDashboard = function MyDashboard(props){
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Curation</a>
                     </div>
                     <div className="col-xs-12 col-md-4">
-                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Crowdsourcing Statistics</a>
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Crowdsourcing</a>
                     </div>
                     <div className="col-xs-12 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Item">Clinical Reports</a>
