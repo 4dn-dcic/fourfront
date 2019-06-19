@@ -3,7 +3,7 @@
     "id": "/profiles/case.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "project", "institution"],
+    "required": ["title", "project", "institution", "proband"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -29,6 +29,13 @@
             "description": "Individual who is proband scope of case",
             "type" : "string",
             "linkTo" : "Individual"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A description of this case",
+            "type": "string",
+            "lookup": 20,
+            "formInput": "textarea"
         }
     }
 }

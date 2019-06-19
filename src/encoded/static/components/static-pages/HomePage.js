@@ -47,7 +47,7 @@ export default class HomePage extends React.PureComponent {
 
 
 
-const MyDashboard = function MyDashboard(props){
+const MyDashboard = React.memo(function MyDashboard(props){
     return (
         <React.Fragment>
             <div className="mt-4 homepage-dashboard">
@@ -77,11 +77,11 @@ const MyDashboard = function MyDashboard(props){
             <RecentCasesSection/>
         </React.Fragment>
     );
-};
+});
 
 
 
-const GuestHomeView = function GuestHomeView(props){
+const GuestHomeView = React.memo(function GuestHomeView(props){
     return (
         <React.Fragment>
             <div className="row mt-5">
@@ -98,7 +98,7 @@ const GuestHomeView = function GuestHomeView(props){
             </div>
         </React.Fragment>
     );
-};
+});
 
 
 
@@ -141,23 +141,28 @@ const ExternalLinksColumn = React.memo(function ExternalLinksColumn(props){
             ( layout & location not final / TBD )
             <div className="links-wrapper clearfix">
                 <div className="link-block">
-                    <a href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                        <span>Main Portal</span>
+                    <a href="https://dbmi.hms.harvard.edu/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>HMS DBMI</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="https://www.brighamandwomens.org/medicine/genetics/genetics-genomic-medicine-service" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>Brigham Genomic Medicine</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="https://undiagnosed.hms.harvard.edu/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>Undiagnosed Diseased Network (UDN)</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="https://forome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>Forome</span>
                     </a>
                 </div>
                 <div className="link-block">
                     <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
                         <span>4DN DCIC</span>
-                    </a>
-                </div>
-                <div className="link-block">
-                    <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer" className="external-link">
-                        <span>NIH Common Fund</span>
-                    </a>
-                </div>
-                <div className="link-block">
-                    <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer" className="external-link">
-                        <span>Centers and Labs</span>
                     </a>
                 </div>
             </div>

@@ -35,13 +35,45 @@ def includeme(config):
 class Individual(Item):
     item_type = 'individual'
     schema = load_schema('encoded:schemas/individual.json')
+
     embedded_list = []
+
+    rev = {
+        'cases_proband': ('Case', 'proband'),
+        'cases_affiliate' : ('Case', 'trio.individual')
+    }
 
     #@calculated_property(schema=display_title_schema)
     #def display_title(self, first_name, last_name):
     #    """return first and last name."""
     #    title = u'{} {}'.format(first_name, last_name)
     #    return title
+
+    @calculated_property(schema={
+        "title": "Cases (proband)",
+        "description": "Cases that this individual is a proband of",
+        "type": "array",
+        "items": {
+            "title": "Case",
+            "type": "string",
+            "linkTo": "Case"
+        }
+    })
+    def cases_proband(self, request):
+        return self.rev_link_atids(request, "cases_proband")
+
+    @calculated_property(schema={
+        "title": "Cases (affiliated)",
+        "description": "Cases that this individual is affiliated with",
+        "type": "array",
+        "items": {
+            "title": "Case",
+            "type": "string",
+            "linkTo": "Case"
+        }
+    })
+    def cases_affiliate(self, request):
+        return self.rev_link_atids(request, "cases_affiliate")
 
 
     @calculated_property(schema={
