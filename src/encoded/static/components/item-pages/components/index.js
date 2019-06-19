@@ -18,7 +18,7 @@ export { ExternalReferenceLink } from './ExternalReferenceLink';
 export { FilesInSetTable, FileItemRow } from './FilesInSetTable';
 export { ItemFooterRow } from './ItemFooterRow';
 export { Publications } from './Publications';
-export { SOPBelowHeaderRow, LinkBelowHeaderRow } from './SOPBelowHeaderRow';
+export { SOPBelowHeaderRow, LinkBelowHeaderRow } from './LinkBelowHeaderRow';
 export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { BadgesTabView } from './BadgesTabView';
