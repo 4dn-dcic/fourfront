@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object, Schemas, fileUtil } from './../util';
+import { console, object, Schemas, fileUtil } from './../../util';
 
 
 export class ItemFileAttachment extends React.PureComponent {

@@ -7,7 +7,7 @@ import memoize from 'memoize-one';
 import url from 'url';
 import queryString from 'query-string';
 import { Button } from 'react-bootstrap';
-import { ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoaderPageController, } from './ItemPageTable';
+import { ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
 import { ExperimentSetDetailPane, defaultColumnExtensionMap } from './../../../browse/components';
 import { console } from './../../../util';
 
@@ -95,9 +95,9 @@ ExperimentSetTablesLoaded.propTypes = {
 
 export const ExperimentSetTablesLoadedFromSearch = React.memo(function ExperimentSetTablesLoadedFromSearch(props){
     return (
-        <ItemPageTableSearchLoaderPageController {..._.pick(props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
+        <ItemPageTableSearchLoader {..._.pick(props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
             <ExperimentSetTables {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
-        </ItemPageTableSearchLoaderPageController>
+        </ItemPageTableSearchLoader>
     );
 });
 
@@ -132,21 +132,24 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     static hrefWithoutLimit = memoize(function(href){
         // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
         const hrefParts = url.parse(href, true);
-        const { query } = hrefParts;
+        const { query = {} } = hrefParts;
         delete query.limit;
         hrefParts.search = '?' + queryString.stringify(query);
         return url.format(hrefParts);
     });
 
     static hrefWithLimit = memoize(function(href, limit=null){
-        // TODO: Implement. Pass to ItemPageTableSearchLoaderPageController
-        // If limit in URL excists, keep it. (_or_ override it?)
-        // If not, set it to val of limit param.
-        // ALSO: get rid of ItemPageTableSearchLoaderPageController since we no longer plan to paginate results at all ever in future
+        // TODO: get rid of ItemPageTableSearchLoaderPageController since we no longer plan to paginate results at all ever in future
         // instead direvtly use ItemPageTableSearchLoader
         // ALSO: Refactor ItemPageTableSearchLoader to latest standards & for performance (React.PureComponent instd of React.COmponent)
         // ALSO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
         // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
+
+        const hrefParts = url.parse(href, true);
+        const { query = {} } = hrefParts;
+        query.limit = query.limit || limit || ExperimentSetTableTabView.getLimit(href);
+        hrefParts.search = '?' + queryString.stringify(query);
+        return url.format(hrefParts);
     });
 
     static defaultProps = {
@@ -175,19 +178,22 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     }
 
     render(){
-        var { windowWidth, requestHref, title, href } = this.props;
+        var { windowWidth, href : currentPageHref } = this.props;
+        let { requestHref, title } = this.props;
         const { totalCount } = this.state;
 
         if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
         if (typeof title === 'function')        title = title(this.props, this.state);
 
         const limit = ExperimentSetTableTabView.getLimit(requestHref);
+        const hrefWithLimit = ExperimentSetTableTabView.hrefWithLimit(requestHref, limit);
+        const hrefWithoutLimit = ExperimentSetTableTabView.hrefWithoutLimit(requestHref, limit);
 
         return (
             <div>
-                <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, href }} onLoad={this.getCountCallback} />
+                <ExperimentSetTablesLoadedFromSearch {...{ 'requestHref' : hrefWithLimit, windowWidth, title, 'href' : currentPageHref }} onLoad={this.getCountCallback} />
                 { totalCount && totalCount > limit ?
-                    <Button className="mt-2" href={requestHref} bsStyle="primary" bsSize="lg">
+                    <Button className="mt-2" href={hrefWithoutLimit} bsStyle="primary" bsSize="lg">
                         View all Experiment Sets ({ totalCount - limit + ' more' })
                     </Button>
                     : null }
