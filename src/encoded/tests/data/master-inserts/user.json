@@ -1,5 +1,16 @@
 [
     {
+        "email" : "cgap.platform@gmail.com",
+        "first_name" : "Genomics Platform",
+        "last_name" : "Administration",
+        "groups": ["admin"],
+        "job_title": "Admin",
+        "submits_for": ["hms-dbmi"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "uuid": "b5f738b6-455a-42e5-bc1c-77fbfd9b15d2",
+        "date_created": "2019-06-20T00:00:00.0000000+00:00"
+    },
+    {
         "email": "danavuzman@gmail.com",
         "first_name": "Dana",
         "groups": ["admin"],

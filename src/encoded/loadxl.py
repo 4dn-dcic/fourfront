@@ -436,7 +436,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
     return None
 
 
-def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
+def generate_access_key(testapp, store_access_key, email='cgap.platform@gmail.com'):
     # get admin user and generate access keys
     if store_access_key:
         # we probably don't have elasticsearch index updated yet
