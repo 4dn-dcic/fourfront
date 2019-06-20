@@ -352,7 +352,6 @@
 
         }
 
-        // TODO: Self opacity to 1 and sibling opacity to 0.5 if child of XAxis
         &.hover, &:hover {
             z-index: 10;
             > .label-text {
@@ -376,6 +375,15 @@
             }
         }
 
+    }
+
+    &:hover {
+        .rotated-label {
+            opacity: 0.33;
+            &.hover, &:hover {
+                opacity: 1;
+            }
+        }
     }
 }
 

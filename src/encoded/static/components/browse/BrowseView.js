@@ -474,37 +474,6 @@ export default class BrowseView extends React.Component {
     }
 
     /**
-     * Called by `componentDidMount` and/or `componentDidUpdate` to redirect to correct Browse page URI params, if needed.
-     *
-     * @todo Move to back-end. If award.project=4DN not in initial /browse/ href, then set browseBaseState to all in App root.
-     *
-     * @param {URLParts} [hrefParts=null] If not passed, is obtained by parsing `this.props.href`.
-     * @returns {void}
-     */
-    redirectToCorrectBrowseView(hrefParts = null){
-        const { href, context } = this.props;
-        if (!hrefParts) hrefParts = url.parse(href, true);
-
-        let nextBrowseHref = navigate.getBrowseBaseHref();
-        const expSetFilters = Filters.contextFiltersToExpSetFilters((context && context.filters) || null);
-
-        // If no 4DN projects available in this query but there are External Items, redirect to external view instead.
-        //var availableProjectsInResults = Array.isArray(context.facets) ? _.uniq(_.pluck(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key')) : [];
-        //if (this.props.browseBaseState === 'only_4dn' && availableProjectsInResults.indexOf('External') > -1 && availableProjectsInResults.indexOf('4DN') === -1){
-        //    navigate.setBrowseBaseStateAndRefresh('all', this.props.href, context);
-        //    return;
-        //}
-
-        if (_.keys(expSetFilters).length > 0){
-            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + Filters.expSetFiltersToURLQuery(expSetFilters);
-        }
-        if (typeof hrefParts.query.q === 'string'){
-            nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
-        }
-        navigate(nextBrowseHref, { 'inPlace' : true, 'dontScrollToTop' : true, 'replace' : true });
-    }
-
-    /**
      * Fallback view for no results found.
      * If no 4DN projects available in this query but there are External Items, let user know.
      * And, show list of suggested actions.
