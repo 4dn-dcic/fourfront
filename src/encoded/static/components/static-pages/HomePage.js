@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, navigate } from'./../util';
+import { console, navigate, ajax } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { Collapse, Button } from 'react-bootstrap';
 import { Announcements, BasicStaticSectionBody } from './components';
@@ -53,28 +53,29 @@ const MyDashboard = React.memo(function MyDashboard(props){
             <div className="mt-4 homepage-dashboard">
                 <h2 className="homepage-section-title">Actions</h2>
                 <div className="row">
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add">New Case</a>
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled >Pipeline Admin</a>
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Quality Controls</a>
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Curation</a>
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Crowdsourcing</a>
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Item">Clinical Reports</a>
                     </div>
 
                 </div>
             </div>
             <RecentCasesSection/>
+
         </React.Fragment>
     );
 });
@@ -85,14 +86,11 @@ const GuestHomeView = React.memo(function GuestHomeView(props){
     return (
         <React.Fragment>
             <div className="row mt-5">
-                <div className="col-xs-12 col-md-8">
+                <div className="col-xs-12 col-md-12">
                     <h2 className="homepage-section-title">Marketing Stuff Here (maybe)</h2>
+                    <h4 className="text-500">(maybe) Publicly-viewable cases as entrance to crowdsourcing UI/UX</h4>
                     <p>
-                        (TODO)<br/>
-                        Per-role content or something else could go here, such as searchview of recent
-                        cases or individuals if are clinician; new pipelines if are pipeline admin, etc.
-                        Could be above dashboard actions.
-                        Or be daily cat facts here.
+
                     </p>
                 </div>
             </div>

@@ -391,11 +391,18 @@ const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
 
     if (session){
         return (
-            <h1 className="home-page-title page-title top-of-page" >
+            <h1 className="home-page-title page-title top-of-page">
                 <span className="title">My Dashboard</span>
             </h1>
         );
     }
+
+    return (
+        <h1 className="home-page-title page-title top-of-page">
+            <span className="title"><strong>TODO:</strong> Portal Title Here</span>
+            <div className="subtitle">Clinical Genomics Analysis Platform</div>
+        </h1>
+    );
 
     console.log('SESS', session);
 
@@ -404,8 +411,8 @@ const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
 
     return (
         <h1 className="home-page-title page-title top-of-page" style={style} >
-            <span className="title"><em>TODO:</em> Portal Title Here</span>
-            <div className="subtitle">Genomics Analysis Platform</div>
+            <span className="title"><strong>TODO:</strong> Portal Title Here</span>
+            <div className="subtitle">Clinical Genomics Analysis Platform</div>
         </h1>
     );
 });
