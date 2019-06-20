@@ -95,22 +95,25 @@ export class FourfrontLogo extends React.PureComponent {
 
     setHoverStateOnDoTiming(e){
         const { circlePathDefinitionHover, textTransformHover, fgCircleTransformHover, hoverDelayUntilTransform } = this.props;
-        const { hover } = this.state;
         // CSS styles controlled via stylesheets
 
         setTimeout(()=>{
+            const { hover } = this.state;
             if (!hover) return; // No longer hovering. Cancel.
             d3.select(this.bgCircleRef.current)
+                .interrupt()
                 .transition()
                 .duration(1000)
                 .attr('d', circlePathDefinitionHover);
 
             d3.select(this.fgTextRef.current)
+                .interrupt()
                 .transition()
                 .duration(700)
                 .attr('transform', textTransformHover);
 
             d3.select(this.fgCircleRef.current)
+                .interrupt()
                 .transition()
                 .duration(1200)
                 .attr('transform', fgCircleTransformHover);
@@ -164,7 +167,7 @@ export class FourfrontLogo extends React.PureComponent {
         return (
             <Navbar.Brand>
                 <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
-                    <span className="img-container">
+                    <span className={"img-container" + (hover ? " is-hovering" : "")}>
                         <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={FourfrontLogo.svgElemStyle}>
                             { this.renderDefs() }
                             <path d={circlePathDefinitionOrig} style={FourfrontLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
