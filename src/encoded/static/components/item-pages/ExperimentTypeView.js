@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, Schemas } from './../util';
 import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
-import { Publications, SOPBelowHeaderRow, WrappedCollapsibleList, ExperimentSetTableTabView } from './components';
+import { Publications, SOPBelowHeaderRow, LinkBelowHeaderRow, WrappedCollapsibleList, ExperimentSetTableTabView } from './components';
 import { UserContentBodyList } from './../static-pages/components';
 
 
@@ -39,25 +39,28 @@ export default class ExperimentTypeView extends DefaultItemView {
      * @returns {JSX.Element[]} React elements or components to display between Item header and Item TabbedView.
      */
     itemMidSection(){
-        var context = this.props.context || {},
-            pubsLen = (Array.isArray(context.reference_pubs) && context.reference_pubs.length) || 0,
-            publicationArea;
+        const { context : { reference_pubs = [], sop, reference_protocol = {} } } = this.props;
 
+        const pubsLen = reference_pubs.length || 0;
+
+        let publicationArea;
         if (pubsLen === 1){
             publicationArea = (
                 <Publications.PublicationBelowHeaderRow singularTitle="Reference Publication"
-                    publication={context.reference_pubs[0]} outerClassName={null} />
+                    publication={reference_pubs[0]} outerClassName={null} />
             );
         } else if (pubsLen > 1){
             publicationArea = (
-                <WrappedCollapsibleList items={context.reference_pubs} singularTitle="Reference Publication" itemClassName="publication" />
+                <WrappedCollapsibleList items={reference_pubs} singularTitle="Reference Publication" itemClassName="publication" />
             );
         }
 
+        const { link : refProtocolUrl, title: refProtocolTitle } = reference_protocol;
         return (
             <div className="mb-2">
                 { publicationArea }
-                <SOPBelowHeaderRow sop={context.sop} outerClassName={null} />
+                <SOPBelowHeaderRow sop={sop} />
+                <LinkBelowHeaderRow url={refProtocolUrl} title={refProtocolTitle} />
                 <StaticHeadersArea context={this.props.context} key="static-headers-area" />
             </div>
         );
