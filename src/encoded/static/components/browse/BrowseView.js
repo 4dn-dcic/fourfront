@@ -17,6 +17,8 @@ import {
     FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
 
+import { store } from './../../store';
+
 //import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 //import { BROWSE } from './../testdata/browse/checkboxes';
 
@@ -425,11 +427,16 @@ export default class BrowseView extends React.Component {
      * @returns {void}
      */
     componentDidMount(){
-        var { href, context } = this.props;
-        var hrefParts = url.parse(href, true);
-        if (!navigate.isValidBrowseQuery(hrefParts.query)){
-            this.redirectToCorrectBrowseView(hrefParts);
-            return;
+        const { href, context } = this.props;
+        const hrefParts = url.parse(href, true);
+        const { query = {} } = hrefParts;
+
+        if (query['award.project'] !== '4DN'){
+            store.dispatch({
+                'type' : {
+                    'browseBaseState' : 'all'
+                }
+            });
         }
 
         BrowseView.checkResyncChartData(hrefParts, context);
@@ -460,14 +467,8 @@ export default class BrowseView extends React.Component {
      * @returns {void}
      */
     componentDidUpdate(pastProps){
-        var { context, href } = this.props;
-        var hrefParts = url.parse(href, true);
-        if (pastProps.href !== href){
-            if (!navigate.isValidBrowseQuery(hrefParts.query)){
-                this.redirectToCorrectBrowseView(hrefParts);
-                return;
-            }
-        }
+        const { context, href } = this.props;
+        const hrefParts = url.parse(href, true);
 
         BrowseView.checkResyncChartData(hrefParts, context);
     }
@@ -573,20 +574,6 @@ export default class BrowseView extends React.Component {
         // No results found!
         if (context.total === 0 && context.notification){
             return this.renderNoResultsView(hrefParts, countExternalSets);
-        }
-
-        // Browse is only for experiment sets w. award.project=4DN and experimentset_type=replicates
-        if (!navigate.isValidBrowseQuery(hrefParts.query)){
-            return(
-                <div className="error-page text-center">
-                    <h3 className="text-300">
-                        Redirecting
-                    </h3>
-                    <h4 className="text-400">
-                        Please wait...
-                    </h4>
-                </div>
-            );
         }
 
         return (

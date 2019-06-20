@@ -95,32 +95,6 @@ navigate.getBrowseBaseHref = function(browseBaseParams = null){
 };
 
 
-navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
-
-    if (!browseBaseParams || typeof browseBaseParams !== 'object') browseBaseParams = navigate.getBrowseBaseParams(typeof browseBaseParams === 'string' ? browseBaseParams : null);
-    if (typeof hrefQuery === 'string'){
-        hrefQuery = url.parse(hrefQuery, true).query;
-    }
-
-    return _.every(_.pairs(browseBaseParams), function([field, listOfTerms]){
-        if (typeof hrefQuery[field] === 'undefined') return false;
-        if (Array.isArray(listOfTerms) && listOfTerms.length === 1) listOfTerms = listOfTerms[0];
-        if (Array.isArray(hrefQuery[field])){
-            if (Array.isArray(listOfTerms)){
-                return _.every(listOfTerms, function(arrItem){
-                    return hrefQuery[field].indexOf(arrItem) > -1;
-                });
-            } else {
-                return hrefQuery[field].indexOf(listOfTerms) > -1;
-            }
-        } else if (Array.isArray(listOfTerms)){
-            return false;
-        } else {
-            return hrefQuery[field] === listOfTerms;
-        }
-    });
-};
-
 navigate.isBaseBrowseQuery = function(hrefQuery, browseBaseState = null){
     var baseParams = navigate.getBrowseBaseParams(browseBaseState),
         field_diff1 = _.difference(_.keys(hrefQuery), _.keys(baseParams)),
