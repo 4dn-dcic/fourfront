@@ -210,8 +210,10 @@ class Protocol(Item, ItemWithAttachment):
         "description": "A calculated title",
         "type": "string"
     })
-    def display_title(self, protocol_type, attachment=None, date_created=None):
-        if attachment:
+    def display_title(self, protocol_type, title=None, attachment=None, date_created=None):
+        if title:
+            return title
+        elif attachment:
             return attachment.get('download')
         else:
             if protocol_type == 'Other':

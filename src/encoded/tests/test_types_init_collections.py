@@ -97,8 +97,19 @@ def test_organism_display_title_no_scientific_name(testapp, human_data):
     assert res.get('display_title') == 'human'
 
 
-def test_protocol_display_title_w_attachment(testapp, protocol_w_attach):
-    assert protocol_w_attach['display_title'] == 'red-dot.png'
+def test_protocol_display_title_w_attachment(testapp, protocol_data, attachment):
+    res = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert res.get('display_title').startswith('Experimental protocol')
+    patched = testapp.patch_json(res['@id'], {'attachment': attachment}).json['@graph'][0]
+    assert patched.get('display_title') == 'red-dot.png'
+
+
+def test_protocol_display_title_w_title(testapp, protocol_data, attachment):
+    protocol_data['attachment'] = attachment
+    res = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert res.get('display_title') == 'red-dot.png'
+    patched = testapp.patch_json(res['@id'], {'title': 'The best method'}).json['@graph'][0]
+    assert patched.get('display_title') == 'The best method'
 
 
 def test_protocol_display_title_wo_attachment(testapp, protocol_data):

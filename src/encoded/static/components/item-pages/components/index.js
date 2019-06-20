@@ -19,7 +19,7 @@ export { FilesInSetTable, FileItemRow } from './FilesInSetTable';
 export { ItemFileAttachment } from './ItemFileAttachment';
 export { ItemFooterRow } from './ItemFooterRow';
 export { Publications } from './Publications';
-export { SOPBelowHeaderRow } from './SOPBelowHeaderRow';
+export { SOPBelowHeaderRow, LinkBelowHeaderRow } from './LinkBelowHeaderRow';
 export { TabbedView } from './TabbedView';
 export { ItemDetailList, Detail } from './ItemDetailList';
 export { BadgesTabView } from './BadgesTabView';
