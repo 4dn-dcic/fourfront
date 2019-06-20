@@ -24,7 +24,10 @@ from elasticsearch import (
     RequestError,
     ConnectionTimeout
 )
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPFound
+)
 from urllib.parse import urlencode
 from collections import OrderedDict
 from copy import deepcopy
@@ -186,11 +189,38 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     return result
 
 
+DEFAULT_BROWSE_PARAM_LISTS = {
+    'type'                  : ["ExperimentSetReplicate"],
+    'experimentset_type'    : ['replicate'],
+    'award.project'         : ['4DN']
+}
+
 @view_config(route_name='browse', request_method='GET', permission='search')
 def browse(context, request, search_type='ExperimentSetReplicate', return_generator=False):
     """
     Simply use search results for browse view
+    Redirect to proper URL w. params if needed
     """
+    orig_params = request.params
+    for k,vals in DEFAULT_BROWSE_PARAM_LISTS.items():
+        if k == 'award.project':
+            # Could be external or not
+            continue
+        if k not in orig_params or orig_params[k] not in vals:
+            # Redirect to DEFAULT_BROWSE_PARAM_LISTS URL
+            next_qs = MultiDict()
+            for k2, v2list in DEFAULT_BROWSE_PARAM_LISTS.items():
+                for v2 in v2list:
+                    next_qs.add(k2, v2)
+            # Preserve other keys that arent in DEFAULT_BROWSE_PARAM_LISTS
+            for k2, v2 in orig_params.items():
+                if k2 not in DEFAULT_BROWSE_PARAM_LISTS:
+                    next_qs.add(k2, v2)
+            # next_qs.add("redirected_from", str(request.path_qs))
+            return HTTPFound(
+                location=str(request.path) + '?' +  urlencode(next_qs),
+                detail="Redirected from " + str(request.path_info)
+            )
     return search(context, request, search_type, return_generator, forced_type='Browse')
 
 
@@ -1304,11 +1334,6 @@ def make_search_subreq(request, path):
     subreq.headers['Accept'] = 'application/json'
     return subreq
 
-DEFAULT_BROWSE_PARAM_LISTS = {
-    'type'                  : ["ExperimentSetReplicate"],
-    'experimentset_type'    : ['replicate'],
-    'award.project'         : ['4DN']
-}
 
 def get_iterable_search_results(request, search_path='/search/', param_lists=None, **kwargs):
     '''
