@@ -31,10 +31,7 @@ import FallbackView             from './item-pages/FallbackView';
 import DocumentView             from './item-pages/DocumentView';
 import StaticSectionView        from './item-pages/StaticSectionView';
 import SubmissionView           from './forms/SubmissionView';
-import BrowseView               from './browse/BrowseView';
 import SearchView               from './browse/SearchView';
-import SubscriptionsView        from './browse/SubscriptionsView';
-
 
 content_views.register(StaticPage,    'StaticPage');
 content_views.register(DirectoryPage, 'DirectoryPage');
@@ -64,11 +61,8 @@ content_views.register(SubmissionView,          'Item', 'create');
 content_views.register(SubmissionView,          'Item', 'clone');
 content_views.register(SubmissionView,          'Search', 'add');
 
-content_views.register(BrowseView,              'Browse');
 content_views.register(SearchView,              'Search');
 content_views.register(SearchView,              'Search', 'selection');
-content_views.register(SearchView,              'Browse', 'selection');
-content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
 
 
 // Fallback for anything we haven't registered

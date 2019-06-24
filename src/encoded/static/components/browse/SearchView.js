@@ -7,13 +7,15 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
-import { ajax, console, object, Filters, Schemas, DateUtility, navigate, JWT, typedefs } from './../util';
+import { console, object, Filters, Schemas, navigate, typedefs } from './../util';
 import { SortController, SearchResultTable, SearchResultDetailPane,
     AboveTableControls, CustomColumnController, FacetList, onFilterHandlerMixin,
     AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns
 } from './components';
 
-var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
+
+// eslint-disable-next-line no-unused-vars
+const { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
 
 /**
  * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
@@ -41,8 +43,8 @@ export class SearchControllersContainer extends React.PureComponent {
     }
 
     render(){
-        var { context } = this.props,
-            defaultHiddenColumns = defaultHiddenColumnMapFromColumns(context.columns);
+        const { context } = this.props;
+        const defaultHiddenColumns = defaultHiddenColumnMapFromColumns(context.columns);
 
         return (
             <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
@@ -67,16 +69,15 @@ class ControlsAndResults extends React.PureComponent {
      * Ex: `{ abstractType: null, specificType: "Item" }`, `{ abstractType: "Experiment", specificType: "ExperimentHiC" }`
      */
     static searchItemTypesFromHref = memoize(function(href){
-        var specificType        = 'Item', // Default
-            abstractType        = null,   // Will be equal to specificType if no parent type.
-            itemTypeForSchemas  = null,
-            urlParts            = url.parse(href, true);
+        let specificType = 'Item';    // Default
+        let abstractType = null;      // Will be equal to specificType if no parent type.
+        const urlParts = url.parse(href, true);
 
         // Non-zero chance of having array here - though shouldn't occur unless URL entered into browser manually
         // If we do get multiple Item types defined, we treat as if searching `type=Item` (== show `type` facet + column).
         if (typeof urlParts.query.type === 'string') {
             if (urlParts.query.type !== 'Item') {
-                specificType = itemTypeForSchemas = urlParts.query.type;
+                specificType = urlParts.query.type;
             }
         }
 
@@ -120,9 +121,8 @@ class ControlsAndResults extends React.PureComponent {
         window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
     }
 
-    columnExtensionMapWithSelectButton = memoize((columnExtensionMap, currentAction, specificType, abstractType) => {
-        var inSelectionMode = currentAction === 'selection';
-
+    columnExtensionMapWithSelectButtonn(columnExtensionMap, currentAction, specificType, abstractType){
+        const inSelectionMode = currentAction === 'selection';
         if (!inSelectionMode && (!abstractType || abstractType !== specificType)){
             return columnExtensionMap;
         }
@@ -155,7 +155,7 @@ class ControlsAndResults extends React.PureComponent {
             });
         }
         return columnExtensionMap;
-    });
+    }
 
     forceUpdateOnSelf(){
         var searchResultTable   = this.searchResultTableRef.current,
@@ -166,65 +166,66 @@ class ControlsAndResults extends React.PureComponent {
     handleClearFilters(evt){
         evt.preventDefault();
         evt.stopPropagation();
-        var { href, context } = this.props;
-        var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+        const { href, context, navigate: propNavigate } = this.props;
+        let clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
         if (!clearFiltersURL) {
             console.error("No Clear Filters URL");
             return;
         }
 
         // If we have a '#' in URL, add to target URL as well.
-        var hashFragmentIdx = href.indexOf('#');
+        const hashFragmentIdx = href.indexOf('#');
         if (hashFragmentIdx > -1 && clearFiltersURL.indexOf('#') === -1){
             clearFiltersURL += href.slice(hashFragmentIdx);
         }
 
-        this.props.navigate(clearFiltersURL, {});
+        propNavigate(clearFiltersURL, {});
     }
 
     isClearFiltersBtnVisible(){
-        var { href, context } = this.props,
-            urlPartsQuery                   = url.parse(href, true).query,
-            clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
-            clearFiltersURLQuery            = clearFiltersURL && url.parse(clearFiltersURL, true).query;
+        const { href, context } = this.props;
+        const urlPartsQuery = url.parse(href, true).query;
+        const clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
+        const clearFiltersURLQuery = clearFiltersURL && url.parse(clearFiltersURL, true).query;
 
         return !!(clearFiltersURLQuery && !_.isEqual(clearFiltersURLQuery, urlPartsQuery));
     }
 
     renderSearchDetailPane(result, rowNumber, containerWidth){
-        return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />;
+        const { windowWidth } = this.props;
+        return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={windowWidth} />;
     }
 
     render() {
-        var { context, hiddenColumns, columnExtensionMap, currentAction, isFullscreen, href } = this.props,
-            results                         = context['@graph'],
-            inSelectionMode                 = currentAction === 'selection',
-            // Facets are transformed by the SearchView component to make adjustments to the @type facet re: currentAction.
-            facets                          = this.props.facets || context.facets,
-            { specificType, abstractType }  = ControlsAndResults.searchItemTypesFromHref(href),
-            selfExtendedColumnExtensionMap  = this.columnExtensionMapWithSelectButton(columnExtensionMap, currentAction, specificType, abstractType),
-            columnDefinitions               = columnsToColumnDefinitions(context.columns || {}, selfExtendedColumnExtensionMap);
+        const { context, hiddenColumns, columnExtensionMap, currentAction, isFullscreen, href, facets: propFacets } = this.props;
+        const results                         = context['@graph'];
+        // Facets are transformed by the SearchView component to make adjustments to the @type facet re: currentAction.
+        const facets                          = propFacets || context.facets;
+        const { specificType, abstractType }  = ControlsAndResults.searchItemTypesFromHref(href);
+        const selfExtendedColumnExtensionMap  = this.columnExtensionMapWithSelectButton(columnExtensionMap, currentAction, specificType, abstractType);
+        const columnDefinitions               = columnsToColumnDefinitions(context.columns || {}, selfExtendedColumnExtensionMap);
 
         return (
             <div className="row">
                 { facets.length ?
                     <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
                         <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth',
-                        'currentAction', 'windowHeight')}
-                            className="with-header-bg" facets={facets} filters={context.filters}
+                        <FacetList className="with-header-bg" facets={facets} filters={context.filters}
                             onClearFilters={this.handleClearFilters} itemTypeForSchemas={specificType}
-                            showClearFiltersButton={this.isClearFiltersBtnVisible()} />
-                        </div>
-                : null }
+                            showClearFiltersButton={this.isClearFiltersBtnVisible()}
+                            {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter',
+                                'currentAction', 'windowWidth', 'windowHeight')} />
+                    </div>
+                    : null }
                 <div className={!facets.length ? "col-sm-12 expset-result-table-fix" : ("expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9'))}>
-                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'isFullscreen',
-                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
-                        {...{ hiddenColumns, columnDefinitions }} showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf} />
-                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
-                        'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
-                        {...{ hiddenColumns, results, columnDefinitions }}
-                        ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total} />
+                    <AboveTableControls showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf}
+                        {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'isFullscreen', 'context', 'columns',
+                            'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
+                        {...{ hiddenColumns, columnDefinitions }} />
+                    <SearchResultTable ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total}
+                        {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
+                            'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
+                        {...{ hiddenColumns, results, columnDefinitions }} />
                 </div>
             </div>
         );
@@ -325,23 +326,6 @@ export default class SearchView extends React.PureComponent {
 
         return facets;
     });
-
-    /*
-    constructor(props){
-        super(props);
-        this.filterFacet = this.filterFacet.bind(this);
-        this.transformedFacets = this.transformedFacets.bind(this);
-        this.state = {
-            'transformedFacets' : this.transformedFacets(props)
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (this.props.context !== nextProps.context){
-            this.setState({ 'transformedFacets' : this.transformedFacets(nextProps) });
-        }
-    }
-    */
 
     componentDidMount(){
         ReactTooltip.rebuild();

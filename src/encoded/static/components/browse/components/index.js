@@ -5,7 +5,6 @@ export {
     ResultRowColumnBlockValue, sanitizeOutputValue, getColumnWidthFromDefinition, TableRowToggleOpenButton,
     defaultHiddenColumnMapFromColumns, haveContextColumnsChanged
 } from './table-commons';
-export { LimitAndPageControls, ColumnSorterIcon } from './LimitAndPageControls';
 export { SortController } from './SortController';
 export { SelectedFilesController, uniqueFileCount, uniqueFileCountNonMemoized, fileCountWithDuplicates } from './SelectedFilesController';
 export { CustomColumnController, CustomColumnSelector } from './CustomColumnController';

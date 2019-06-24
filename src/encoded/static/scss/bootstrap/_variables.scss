@@ -45,6 +45,9 @@ $green:   #28a745 !default;
 $teal:    #20c997 !default;
 $cyan:    #17a2b8 !default;
 
+/** Added from Bootstrap v3 **/
+$blue-faint: #4F689E !default;
+
 $colors: () !default;
 // stylelint-disable-next-line scss/dollar-variable-default
 $colors: map-merge(
@@ -66,10 +69,13 @@ $colors: map-merge(
   $colors
 );
 
+
 $primary:       $blue !default;
 $secondary:     $gray-600 !default;
 $success:       $green !default;
-$info:          $cyan !default;
+/** $info:          $cyan !default; **/
+/** CGAP: Adjusted to be closer to Bootstrap v3 for compatibility with 4DN styling. **/
+$info:          $blue-faint !default;
 $warning:       $yellow !default;
 $danger:        $red !default;
 $light:         $gray-100 !default;

@@ -12,6 +12,7 @@ import { FilesInSetTable } from './FilesInSetTable';
 import JSONTree from 'react-json-tree';
 
 
+// eslint-disable-next-line no-unused-vars
 const { Item } = typedefs;
 
 
@@ -884,10 +885,36 @@ export class Detail extends React.PureComponent {
     render(){
         const { context, excludedKeys, stickyKeys, alwaysCollapsibleKeys, open } = this.props;
         const { persistentKeys, collapsibleKeys } = Detail.generatedKeysLists(context, excludedKeys, stickyKeys, alwaysCollapsibleKeys);
-        return <PartialList persistent={_.map(persistentKeys, this.renderDetailRow)} collapsible={ _.map(collapsibleKeys, this.renderDetailRow)} open={open} />;
+        return (
+            <div className="overflow-hidden">
+                <PartialList persistent={_.map(persistentKeys, this.renderDetailRow)} collapsible={ _.map(collapsibleKeys, this.renderDetailRow)} open={open} />
+            </div>
+        );
     }
 
 }
+
+
+const ToggleJSONButton = React.memo(function ToggleJSONButton({ onClick, showingJSON, className }){
+    return (
+        <button type="button" className="btn btn-block btn-outline-secondary" onClick={onClick}>
+            { showingJSON ?
+                <React.Fragment><i className="icon icon-fw icon-list"/> View as List</React.Fragment>
+                :
+                <React.Fragment><i className="icon icon-fw icon-code"/> View as JSON</React.Fragment>
+            }
+        </button>
+    );
+});
+
+const SeeMoreRowsButton = React.memo(function SeeMoreRowsButton({ onClick, collapsed, className }){
+    return (
+        <button type="button" className="btn btn-block btn-outline-secondary" onClick={onClick}>
+            { collapsed ? "See advanced information" : "Hide" }
+        </button>
+    );
+});
+
 
 /**
  * A list of properties which belong to Item shown by ItemView.
@@ -899,7 +926,7 @@ export class Detail extends React.PureComponent {
  */
 export class ItemDetailList extends React.PureComponent {
 
-    static Detail = Detail
+    static Detail = Detail;
 
     static getTabObject(props){
         return {
@@ -927,8 +954,6 @@ export class ItemDetailList extends React.PureComponent {
         super(props);
         this.handleToggleJSON = this.handleToggleJSON.bind(this);
         this.handleToggleCollapsed = this.handleToggleCollapsed.bind(this);
-        this.seeMoreButton = this.seeMoreButton.bind(this);
-        this.toggleJSONButton = this.toggleJSONButton.bind(this);
         this.state = {
             'collapsed' : true,
             'showingJSON' : false
@@ -947,15 +972,6 @@ export class ItemDetailList extends React.PureComponent {
         });
     }
 
-    seeMoreButton(){
-        if (typeof this.props.collapsed === 'boolean') return null;
-        return (
-            <button type="button" className="item-page-detail-toggle-button btn btn-default btn-outline-dark btn-block" onClick={this.handleToggleCollapsed}>
-                { this.state.collapsed ? "See advanced information" : "Hide" }
-            </button>
-        );
-    }
-
     componentDidMount(){
         ReactTooltip.rebuild();
     }
@@ -966,66 +982,72 @@ export class ItemDetailList extends React.PureComponent {
         }
     }
 
-    toggleJSONButton(){
-        return (
-            <button type="button" className="btn btn-block btn-default btn-outline-dark" onClick={this.handleToggleJSON}>
-                { this.state.showingJSON ?
-                    <span><i className="icon icon-fw icon-list"/> View as List</span>
-                    :
-                    <span><i className="icon icon-fw icon-code"/> View as JSON</span>
-                }
-            </button>
-        );
-    }
-
-    buttonsRow(){
-        const { hideButtons, showJSONButton } = this.props;
-        if (hideButtons) return null;
-        if (!showJSONButton){
-            return (
-                <div className="row">
-                    <div className="col-xs-12 col-12">{ this.seeMoreButton() }</div>
-                </div>
-            );
-        }
-        return (
-            <div className="row">
-                <div className="col-xs-6 col-6">{ this.seeMoreButton() }</div>
-                <div className="col-xs-6 col-6">{ this.toggleJSONButton() }</div>
-            </div>
-        );
-    }
-
     render(){
-        const { keyTitleDescriptionMap, columnDefinitions, minHeight, context, schemas, popLink, excludedKeys, stickyKeys } = this.props;
-        var collapsed;
-        if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;
-        else collapsed = this.state.collapsed;
+        const {
+            keyTitleDescriptionMap, columnDefinitions, minHeight, context, schemas, popLink,
+            excludedKeys, stickyKeys, collapsed : propCollapsed, hideButtons, showJSONButton
+        } = this.props;
+        const { showingJSON, collapsed } = this.state;
+        let body;
 
-        const colDefs = _.extend({}, keyTitleDescriptionMap || {}, columnDefinitions || {});
+        if (showingJSON){
+            body = (
+                <React.Fragment>
+                    <div className="json-tree-wrapper">
+                        <JSONTree data={context} />
+                    </div>
+                    <br/>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 pull-right">
+                            <ToggleJSONButton onClick={this.handleToggleJSON} showingJSON={showingJSON} />
+                        </div>
+                    </div>
+                </React.Fragment>
+            );
+        } else {
+            const colDefs = _.extend({}, keyTitleDescriptionMap || {}, columnDefinitions || {});
+            let isCollapsed;
+            if (typeof propCollapsed === 'boolean') isCollapsed = propCollapsed;
+            else isCollapsed = collapsed;
+            let buttonsRow;
+            if (hideButtons) {
+                buttonsRow = null;
+            } else if (!showJSONButton){
+                buttonsRow = (
+                    <div className="row">
+                        <div className="col-xs-12 col-12">
+                            <SeeMoreRowsButton onClick={this.handleToggleCollapsed} collapsed={collapsed}/>
+                        </div>
+                    </div>
+                );
+            } else {
+                buttonsRow = (
+                    <div className="row">
+                        <div className="col-xs-6 col-6">
+                            <SeeMoreRowsButton onClick={this.handleToggleCollapsed} collapsed={collapsed}/>
+                        </div>
+                        <div className="col-xs-6 col-6">
+                            <ToggleJSONButton onClick={this.handleToggleJSON} showingJSON={showingJSON} />
+                        </div>
+                    </div>
+                );
+            }
+
+            body = (
+                <React.Fragment>
+                    <Detail context={context} schemas={schemas} popLink={popLink}
+                        open={!isCollapsed} columnDefinitions={colDefs}
+                        excludedKeys={excludedKeys || Detail.defaultProps.excludedKeys}
+                        stickyKeys={stickyKeys || Detail.defaultProps.stickyKeys} />
+                    { buttonsRow }
+                </React.Fragment>
+            );
+
+        }
 
         return (
             <div className="item-page-detail" style={typeof minHeight === 'number' ? { minHeight } : null}>
-                { !this.state.showingJSON ?
-                    <div className="overflow-hidden">
-                        <Detail context={context} schemas={schemas} popLink={popLink}
-                            open={!collapsed} columnDefinitions={colDefs}
-                            excludedKeys={excludedKeys || Detail.defaultProps.excludedKeys}
-                            stickyKeys={stickyKeys || Detail.defaultProps.stickyKeys} />
-                        { this.buttonsRow() }
-                    </div>
-                    :
-                    <div className="overflow-hidden">
-                        <div className="json-tree-wrapper">
-                            <JSONTree data={context} />
-                        </div>
-                        <br/>
-                        <div className="row">
-                            <div className="col-xs-12 col-sm-6 pull-right">{ this.toggleJSONButton() }</div>
-                        </div>
-                    </div>
-                }
-
+                { body }
             </div>
         );
     }
