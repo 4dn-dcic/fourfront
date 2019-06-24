@@ -51,6 +51,7 @@
 .btn-outline-info,
 .btn-outline-warning,
 .btn-outline-danger,
+.btn-outline-dark,
 .btn-outline-white {
     background-image: none;
     background-color: transparent;
@@ -74,12 +75,14 @@
     }
 }
 
+/** Uses Bootstrap v4 (gray-600) colors, not default colors **/
 .btn-outline-secondary {
-    color: $btn-default-border;
-    border-color: $btn-default-border;
+    /* color: #6c757d; */
+    color: #333; /* Might change back to above */
+    border-color: #6c757d;
     &:hover {
-        color: $btn-default-bg;
-        background-color: $btn-default-border;
+        color: #fff;
+        background-color: #6c757d;
     }
 }
 
@@ -116,6 +119,15 @@
     &:hover {
         color: $btn-danger-color;
         background-color: $brand-danger;
+    }
+}
+
+.btn-outline-dark {
+    color: #343a40;
+    border-color: #343a40;
+    &:hover {
+        color: #fff;
+        background-color: #343a40;
     }
 }
 

@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Collapse, Button } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { console, object, Schemas, typedefs } from './../../util';
 import * as vizUtil from './../../viz/utilities';
@@ -12,7 +11,9 @@ import { PartialList } from './PartialList';
 import { FilesInSetTable } from './FilesInSetTable';
 import JSONTree from 'react-json-tree';
 
-var { Item } = typedefs;
+
+// eslint-disable-next-line no-unused-vars
+const { Item } = typedefs;
 
 
 
@@ -27,108 +28,73 @@ var { Item } = typedefs;
  */
 
 
-/**
- * Contains and toggles visibility/mounting of a Subview. Renders title for the Subview.
- */
-class SubItemTitle extends React.Component {
-
-    static propTypes = {
-        'onToggle' : PropTypes.func,
-        'isOpen' : PropTypes.bool,
-        'title' : PropTypes.string,
-        'content' : PropTypes.object
-    };
-
-    componentDidMount(){
-        ReactTooltip.rebuild();
+/** Contains and toggles visibility/mounting of a Subview. Renders title for the Subview. */
+const SubItemTitle = React.memo(function SubItemTitle({ isOpen, title, onToggle, countProperties, content }){
+    const iconType = isOpen ? 'icon-minus' : 'icon-plus';
+    let showTitle = title;
+    let subtitle = null;
+    if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
+        showTitle = isOpen ? "Collapse" : "Expand";
     }
-
-    componentDidUpdate(pastProps){
-        if (!pastProps.isOpen && this.props.isOpen){
-            ReactTooltip.rebuild();
-        }
-    }
-
-    /**
-     * @returns {JSX.Element} React Span element containing expandable link, and maybe open panel below it.
-     */
-    render() {
-        var { isOpen, title, onToggle, countProperties, content } = this.props;
-        var iconType = isOpen ? 'icon-minus' : 'icon-plus';
-        var subtitle = null;
-        if (typeof title !== 'string' || title.toLowerCase() === 'no title found'){
-            title = isOpen ? "Collapse" : "Expand";
-        }
-        if (content && _.any([content.title, content.display_title, content.name], function(p){ return typeof p === 'string'; })) {
-            subtitle = (
-                <span className="text-600">
-                    {
-                        typeof content.title === 'string' ? content.title :
-                            typeof content.display_title === 'string' ? content.display_title : content.name
-                    }
-                </span>
-            );
-        }
-        return (
-            <span className="subitem-toggle">
-                <span className="link" onClick={onToggle}>
-                    <i style={{'color':'black', 'paddingRight': 10, 'paddingLeft' : 5}} className={"icon " + iconType}/>
-                    { title } { subtitle } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
-                </span>
+    if (content && _.any([content.title, content.display_title, content.name], function(p){ return typeof p === 'string'; })) {
+        subtitle = (
+            <span className="text-600">
+                {
+                    typeof content.title === 'string' ? content.title :
+                        typeof content.display_title === 'string' ? content.display_title : content.name
+                }
             </span>
         );
     }
-}
+    return (
+        <span className="subitem-toggle">
+            <span className="link" onClick={onToggle}>
+                <i style={{ 'color':'black', 'paddingRight': 10, 'paddingLeft' : 5 }} className={"icon " + iconType}/>
+                { showTitle } { subtitle } { countProperties && !isOpen ? <span>({ countProperties })</span> : null }
+            </span>
+        </span>
+    );
+});
+SubItemTitle.propTypes = {
+    'onToggle' : PropTypes.func,
+    'isOpen' : PropTypes.bool,
+    'title' : PropTypes.string,
+    'content' : PropTypes.object
+};
 
-class SubItemListView extends React.Component {
-
-    static shouldRenderTable(content){
-        var itemKeys = _.keys(content);
-        var itemKeysLength = itemKeys.length;
-        if (itemKeysLength > 6) {
-            return false;
-        }
-        for (var i = 0; i < itemKeysLength; i++){
-            if ( typeof content[itemKeys[i]] !== 'string' && typeof content[itemKeys[i]] !== 'number' ) return false;
-        }
-    }
-
-    render(){
-        if (!this.props.isOpen) return null;
-        var item = this.props.content;
-        var props = {
-            'context' : item,
-            'schemas' : this.props.schemas,
-            'popLink' : this.props.popLink,
-            'alwaysCollapsibleKeys' : [],
-            'excludedKeys' : (this.props.excludedKeys || _.without(Detail.defaultProps.excludedKeys,
+export const SubItemListView = React.memo(function SubItemListView(props){
+    const { isOpen, content : item, schemas, popLink, excludedKeys, columnDefinitions } = props;
+    if (!isOpen) return null;
+    const passProps = {
+        schemas, popLink,
+        'context' : item,
+        'alwaysCollapsibleKeys' : [],
+        'excludedKeys' : (
+            excludedKeys || _.without(Detail.defaultProps.excludedKeys,
                 // Remove
-                    'lab', 'award', 'description'
-                ).concat([
-                // Add
-                    'schema_version', 'uuid'
-                ])
-            ),
-            'columnDefinitions' : this.props.columnDefinitions || {},
-            'showJSONButton' : false,
-            'hideButtons': true
-
-        };
-        return (
-            <div className="sub-panel data-display panel-body-with-header">
-                <div className="key-value sub-descriptions">
-                    { React.createElement((typeof item.display_title === 'string' ? ItemDetailList : Detail), props) }
-                </div>
+                'lab', 'award', 'description'
+            ).concat([
+            // Add
+                'schema_version', 'uuid'
+            ])
+        ),
+        'columnDefinitions' : columnDefinitions || {},
+        'showJSONButton' : false,
+        'hideButtons': true
+    };
+    return (
+        <div className="sub-panel data-display panel-body-with-header">
+            <div className="key-value sub-descriptions">
+                { React.createElement((typeof item.display_title === 'string' ? ItemDetailList : Detail), passProps) }
             </div>
-        );
-    }
-}
+        </div>
+    );
+});
+
 
 /**
- *  Messiness.
- *
- * @class SubItemTable
- * @extends {React.Component}
+ * Messiness.
+ * @todo refactor or get rid of.
  */
 class SubItemTable extends React.Component {
 
@@ -264,19 +230,9 @@ class SubItemTable extends React.Component {
         return true;
     }
 
-    constructor(props){
-        super(props);
-        this.state = { 'mounted' : false };
-    }
 
-    componentDidMount(){
-        vizUtil.requestAnimationFrame(()=>{
-            this.setState({ 'mounted' : true });
-        });
-    }
-
-    getColumnKeys(){
-        var objectWithAllItemKeys = _.reduce(this.props.items, function(m, v){
+    static getColumnKeys(items, columnDefinitions){
+        const objectWithAllItemKeys = _.reduce(items, function(m, v){
             return _.extend(m, v);
         }, {});
         //var schemas = this.props.schemas || Schemas.get();
@@ -284,10 +240,10 @@ class SubItemTable extends React.Component {
         //if (typeof this.props.keyTitleDescriptionMap === 'object' && this.props.keyTitleDescriptionMap){
         //    _.extend(tips, this.props.keyTitleDescriptionMap);
         //}
-        // Property columns to push to front (common across all objects)
-        var rootKeys = _.keys(objectWithAllItemKeys);
 
-        var columnKeys = [];
+        // Property columns to push to front (common across all objects)
+        const rootKeys = _.keys(objectWithAllItemKeys);
+        let columnKeys = [];
 
         // Use schema columns
         if (typeof objectWithAllItemKeys.display_title === 'string' && Array.isArray(objectWithAllItemKeys['@type'])){
@@ -310,7 +266,7 @@ class SubItemTable extends React.Component {
                         columnKeys.push({
                             'key' : rootKeys[i],
                             'childKeys' : _.keys(
-                                _.reduce(this.props.items, function(m1,v1){
+                                _.reduce(items, function(m1,v1){
                                     return _.extend(
                                         m1,
                                         _.reduce(v1[rootKeys[i]], function(m2,v2) {
@@ -324,7 +280,7 @@ class SubItemTable extends React.Component {
                         columnKeys.push({ 'key' : rootKeys[i] });
                     }
                 } else if (objectWithAllItemKeys[rootKeys[i]] && typeof objectWithAllItemKeys[rootKeys[i]] === 'object'){
-                    var itemAtID = typeof objectWithAllItemKeys[rootKeys[i]].display_title === 'string' && object.atIdFromObject(objectWithAllItemKeys[rootKeys[i]]);
+                    const itemAtID = typeof objectWithAllItemKeys[rootKeys[i]].display_title === 'string' && object.atIdFromObject(objectWithAllItemKeys[rootKeys[i]]);
                     if (itemAtID) {
                         columnKeys.push({ 'key' : rootKeys[i] }); // Keep single key if is an Item, we'll make it into a link.
                     } else { // Flatten up, otherwise.
@@ -340,11 +296,11 @@ class SubItemTable extends React.Component {
         }
 
         return columnKeys.filter((k)=>{
-            if (this.props.columnDefinitions){
-                if (this.props.columnDefinitions[k.key]){
-                    if (typeof this.props.columnDefinitions[k.key].hide === 'boolean' && this.props.columnDefinitions[k.key].hide) return false;
-                    if (typeof this.props.columnDefinitions[k.key].hide === 'function'){
-                        return !(this.props.columnDefinitions[k.key].hide(objectWithAllItemKeys));
+            if (columnDefinitions){
+                if (columnDefinitions[k.key]){
+                    if (typeof columnDefinitions[k.key].hide === 'boolean' && columnDefinitions[k.key].hide) return false;
+                    if (typeof columnDefinitions[k.key].hide === 'function'){
+                        return !(columnDefinitions[k.key].hide(objectWithAllItemKeys));
                     }
                 }
             }
@@ -367,24 +323,54 @@ class SubItemTable extends React.Component {
         });
     }
 
+
+    static jsonify(val, key){
+        let newVal;
+        try {
+            newVal = JSON.stringify(val);
+            if (_.keys(val).length > 1){
+                console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + key + '; Value: ' + newVal);
+            }
+            newVal = <code>{ newVal.length <= 25 ? newVal : newVal.slice(0,25) + '...' }</code>;
+        } catch (e){
+            console.error(e, val);
+            newVal = <em>{'{obj}'}</em>;
+        }
+        return newVal;
+    }
+
+    constructor(props){
+        super(props);
+        this.state = { 'mounted' : false };
+    }
+
+    componentDidMount(){
+        vizUtil.requestAnimationFrame(()=>{
+            this.setState({ 'mounted' : true });
+        });
+    }
+
     render(){
-        var columnKeys = this.getColumnKeys();
+        const { items, columnDefinitions, parentKey, atType } = this.props;
+        const { mounted } = this.state;
+        let columnKeys = SubItemTable.getColumnKeys(items, columnDefinitions);
 
         // If is an Item, grab properties for it.
-        var tipsFromSchema = null;
-        if (this.props.items[0] && this.props.items[0].display_title){
-            tipsFromSchema = object.tipsFromSchema(Schemas.get(), this.props.items[0]);
+        let tipsFromSchema = null;
+        if (items[0] && items[0].display_title){
+            tipsFromSchema = object.tipsFromSchema(Schemas.get(), items[0]);
             columnKeys = columnKeys.filter(function(k){
                 if (k === '@id') return false;
                 return true;
             });
         }
 
+        // TODO: Get rid of this.
         var subListKeyWidths = this.subListKeyWidths;
         if (!subListKeyWidths){
-            subListKeyWidths = this.subListKeyWidths = !this.state.mounted || !this.subListKeyRefs ? null : (function(refObj){
-                var keys = _.keys(refObj);
-                var widthObj = {};
+            subListKeyWidths = this.subListKeyWidths = !mounted || !this.subListKeyRefs ? null : (function(refObj){
+                const keys = _.keys(refObj);
+                const widthObj = {};
                 for (var i = 0; i < keys.length; i++){
                     widthObj[keys[i]] = _.object(_.pairs(refObj[keys[i]]).map(function(refSet){
                         //var colKey = refSet[1].getAttribute('data-key');
@@ -400,193 +386,176 @@ class SubItemTable extends React.Component {
             })(this.subListKeyRefs);
         }
 
-        var rowData = _.map(
-            this.props.items,
-            (item)=>{
-                return _.map(columnKeys, (colKeyContainer, colKeyIndex)=>{
-                    var colKey = colKeyContainer.key;
-                    var value = object.getNestedProperty(item, colKey);
-                    if (!value) return { 'value' : '-', 'key' : colKey };
-                    if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey] !== 'undefined'){
-                        if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey].render === 'function'){
-                            return {
-                                'value' : this.props.columnDefinitions[this.props.parentKey + '.' + colKey].render(value, item, colKeyIndex, this.props.items),
-                                'colKey' : colKey
-                            };
-                        }
+        const rowData = _.map(items, function(item){
+            return _.map(columnKeys, (colKeyContainer, colKeyIndex)=>{
+                const colKey = colKeyContainer.key;
+                const value = object.getNestedProperty(item, colKey);
+                if (!value) return { 'value' : '-', 'key' : colKey };
+                if (typeof columnDefinitions[parentKey + '.' + colKey] !== 'undefined'){
+                    if (typeof columnDefinitions[parentKey + '.' + colKey].render === 'function'){
+                        return {
+                            'value' : columnDefinitions[parentKey + '.' + colKey].render(value, item, colKeyIndex, items),
+                            'colKey' : colKey
+                        };
                     }
-                    if (Array.isArray(value)){
-                        if (_.all(value, function(v){ return typeof v === 'string'; })) return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
-                        if (_.any(value, function(v){ return typeof v === 'object' && v; }) && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
-                            var allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
-                            return {
-                                'value' : value.map((embeddedRow, i)=>{
-                                    return (
-                                        <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row" key={colKey + '--row-' + i}>
-                                            <div className="inline-block child-list-row-number">{ i + 1 }.</div>
-                                            { allKeys.map((k, j)=>{
-                                                var renderedSubVal;// = Schemas.Term.toName(k, embeddedRow[k]);
-                                                if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k] !== 'undefined'){
-                                                    if (typeof this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render === 'function'){
-                                                        renderedSubVal = this.props.columnDefinitions[this.props.parentKey + '.' + colKey + '.' + k].render(embeddedRow[k], embeddedRow, colKeyIndex, value);
-                                                    }
+                }
+                if (Array.isArray(value)){
+                    if (_.all(value, function(v){ return typeof v === 'string'; })) return { 'value' : value.map(function(v){ return Schemas.Term.toName(colKey, v); }).join(', '), 'key' : colKey };
+                    if (_.any(value, function(v){ return typeof v === 'object' && v; }) && Array.isArray(colKeyContainer.childKeys)){ // Embedded list of objects.
+                        const allKeys = colKeyContainer.childKeys; //_.keys(  _.reduce(value, function(m,v){ return _.extend(m,v); }, {})   );
+                        return {
+                            'value' : _.map(value, function(embeddedRow, i){
+                                return (
+                                    <div style={{ whiteSpace: "nowrap" }} className="text-left child-list-row" key={colKey + '--row-' + i}>
+                                        <div className="inline-block child-list-row-number">{ i + 1 }.</div>
+                                        { allKeys.map((k, j)=>{
+                                            var renderedSubVal;// = Schemas.Term.toName(k, embeddedRow[k]);
+                                            if (typeof columnDefinitions[parentKey + '.' + colKey + '.' + k] !== 'undefined'){
+                                                if (typeof columnDefinitions[parentKey + '.' + colKey + '.' + k].render === 'function'){
+                                                    renderedSubVal = columnDefinitions[parentKey + '.' + colKey + '.' + k].render(embeddedRow[k], embeddedRow, colKeyIndex, value);
                                                 }
-                                                if (!renderedSubVal && embeddedRow[k] && typeof embeddedRow[k] === 'object' && !object.isAnItem(embeddedRow[k])){
-                                                    renderedSubVal = <code>{ JSON.stringify(embeddedRow[k]) }</code>;
-                                                }
-                                                if (!renderedSubVal) {
-                                                    renderedSubVal = object.itemUtil.isAnItem(embeddedRow[k]) ?
-                                                        <a href={object.itemUtil.atId(embeddedRow[k])}>{ object.itemUtil.getTitleStringFromContext(embeddedRow[k]) }</a>
-                                                        :
-                                                        Schemas.Term.toName(k, embeddedRow[k]);
-                                                }
-                                                return (
-                                                    <div
-                                                        key={colKey + '.' + k + '--row-' + i}
-                                                        className={"inline-block child-column-" + colKey + '.' + k}
-                                                        style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
-                                                    >
-                                                        { renderedSubVal }
-                                                    </div>
-                                                );
-                                            }) }
-                                        </div>
-                                    );
-                                }),
-                                'className' : 'child-list-row-container',
-                                'key' : colKey
-                            };
-                        }
+                                            }
+                                            if (!renderedSubVal && embeddedRow[k] && typeof embeddedRow[k] === 'object' && !object.isAnItem(embeddedRow[k])){
+                                                renderedSubVal = <code>{ JSON.stringify(embeddedRow[k]) }</code>;
+                                            }
+                                            if (!renderedSubVal) {
+                                                renderedSubVal = object.itemUtil.isAnItem(embeddedRow[k]) ?
+                                                    <a href={object.itemUtil.atId(embeddedRow[k])}>{ object.itemUtil.getTitleStringFromContext(embeddedRow[k]) }</a>
+                                                    :
+                                                    Schemas.Term.toName(k, embeddedRow[k]);
+                                            }
+                                            return (
+                                                <div
+                                                    key={colKey + '.' + k + '--row-' + i}
+                                                    className={"inline-block child-column-" + colKey + '.' + k}
+                                                    style={{ width : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[k] || null) }}
+                                                >
+                                                    { renderedSubVal }
+                                                </div>
+                                            );
+                                        }) }
+                                    </div>
+                                );
+                            }),
+                            'className' : 'child-list-row-container',
+                            'key' : colKey
+                        };
                     }
-                    if (object.isAnItem(value)) {
-                        return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a>, 'key' : colKey };
-                    }
-                    if (typeof value === 'string' && value.length < 25) {
-                        return { 'value' : Schemas.Term.toName(colKey, value), 'className' : 'no-word-break', 'key' : colKey };
-                    }
-                    return { 'value' : Schemas.Term.toName(colKey, value), 'key' : colKey };
-                });
-            }
-        );
+                }
+                if (object.isAnItem(value)) {
+                    return { 'value' : <a href={object.atIdFromObject(value)}>{ value.display_title }</a>, 'key' : colKey };
+                }
+                if (typeof value === 'string' && value.length < 25) {
+                    return { 'value' : Schemas.Term.toName(colKey, value), 'className' : 'no-word-break', 'key' : colKey };
+                }
+                return { 'value' : Schemas.Term.toName(colKey, value), 'key' : colKey };
+            });
+        });
 
         // Get property of parent key which has items.properties : { ..these_keys.. }
-        var parentKeySchemaProperty = Schemas.Field.getSchemaProperty(
-            this.props.parentKey, Schemas.get(), this.props.atType
+        const parentKeySchemaProperty = Schemas.Field.getSchemaProperty(
+            parentKey, Schemas.get(), atType
         );
 
-        var keyTitleDescriptionMap = _.extend(
+        const keyTitleDescriptionMap = _.extend(
             {},
             // We have list of sub-embedded Items or sub-embedded objects which have separate 'get properties from schema' funcs (== tipsFromSchema || parentKeySchemaProperty).
             Schemas.flattenSchemaPropertyToColumnDefinition(tipsFromSchema || parentKeySchemaProperty),
-            this.props.columnDefinitions
+            columnDefinitions
         );
 
-        var subListKeyRefs = this.subListKeyRefs = {};
+        const subListKeyRefs = this.subListKeyRefs = {};
 
         return (
             <div className="detail-embedded-table-container">
                 <table className="detail-embedded-table">
                     <thead>
-                        <tr>{
-                            [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map((colKeyContainer, colIndex)=>{
-                                //var tips = object.tipsFromSchema(Schemas.get(), context) || {};
-                                var colKey = colKeyContainer.key;
-
-                                var title = (
-                                    (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] && keyTitleDescriptionMap[this.props.parentKey + '.' + colKey].title) ||
-                                    (keyTitleDescriptionMap[colKey] && keyTitleDescriptionMap[colKey].title) ||
-                                    colKey
-                                );
-
-                                var tooltip = (
-                                    (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] && keyTitleDescriptionMap[this.props.parentKey + '.' + colKey].description) ||
-                                    (keyTitleDescriptionMap[colKey] && keyTitleDescriptionMap[colKey].description) ||
-                                    null
-                                );
-
-                                var hasChildren = Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0;
-
-                                return (
-                                    <th key={"header-for-" + colKey} className={hasChildren ? 'has-children' : null}>
-                                        <object.TooltipInfoIconContainer title={title} tooltip={tooltip}/>
-                                        {
-                                            hasChildren ? (()=>{
-                                                //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
-                                                //var subKeyTitleDescriptionMap = keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey] || {};
-                                                var subKeyTitleDescriptionMap = (( (keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey]) || {}).items || {}).properties || {};
-                                                subListKeyRefs[colKey] = {};
-                                                return (
-                                                    <div style={{ whiteSpace: "nowrap" }} className="sub-list-keys-header">{
-                                                        [<div key="sub-header-rowNumber" className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map((ck)=>{
-                                                            return (
-                                                                <div key={"sub-header-for-" + colKey + '.' + ck} className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
-                                                                    if (r) subListKeyRefs[colKey][ck] = r;
-                                                                }} style={{ 'width' : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[ck] || null) }}>
-                                                                    <object.TooltipInfoIconContainer
-                                                                        title={(keyTitleDescriptionMap[this.props.parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).title || ck}
-                                                                        tooltip={(keyTitleDescriptionMap[this.props.parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).description || null}
-                                                                    />
-                                                                </div>
-                                                            );
-                                                        }))
-                                                    }</div>
-                                                );
-                                            })()
-                                            :
-                                            null
-                                        }
-                                    </th>
-                                );
-                            }))
-                        }</tr>
-                    </thead>
-                    <tbody>{
-                        rowData.map(function(row,i){
-
-                            function jsonify(val, key){
-                                var newVal;
-                                try {
-                                    newVal = JSON.stringify(val);
-                                    if (_.keys(val).length > 1){
-                                        console.error("ERROR: Value for table cell is not a string, number, or JSX element.\nKey: " + key + '; Value: ' + newVal);
-                                    }
-                                    newVal = <code>{ newVal.length <= 25 ? newVal : newVal.slice(0,25) + '...' }</code>;
-                                } catch (e){
-                                    console.error(e, val);
-                                    newVal = <em>{'{obj}'}</em>;
-                                }
-                                return newVal;
+                        <tr>
+                            {
+                                [<th key="rowNumber" style={{ minWidth: 36, maxWidth : 36, width: 36 }}>#</th>].concat(columnKeys.map((colKeyContainer, colIndex)=>{
+                                    //var tips = object.tipsFromSchema(Schemas.get(), context) || {};
+                                    const colKey = colKeyContainer.key;
+                                    const title = (
+                                        (keyTitleDescriptionMap[parentKey + '.' + colKey] && keyTitleDescriptionMap[parentKey + '.' + colKey].title) ||
+                                        (keyTitleDescriptionMap[colKey] && keyTitleDescriptionMap[colKey].title) ||
+                                        colKey
+                                    );
+                                    const tooltip = (
+                                        (keyTitleDescriptionMap[parentKey + '.' + colKey] && keyTitleDescriptionMap[parentKey + '.' + colKey].description) ||
+                                        (keyTitleDescriptionMap[colKey] && keyTitleDescriptionMap[colKey].description) ||
+                                        null
+                                    );
+                                    const hasChildren = Array.isArray(colKeyContainer.childKeys) && colKeyContainer.childKeys.length > 0;
+                                    return (
+                                        <th key={"header-for-" + colKey} className={hasChildren ? 'has-children' : null}>
+                                            <object.TooltipInfoIconContainer title={title} tooltip={tooltip}/>
+                                            {
+                                                hasChildren ? (()=>{
+                                                    //var subKeyTitleDescriptionMap = (((this.props.keyTitleDescriptionMap || {})[this.props.parentKey] || {}).items || {}).properties || {};
+                                                    //var subKeyTitleDescriptionMap = keyTitleDescriptionMap[this.props.parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey] || {};
+                                                    const subKeyTitleDescriptionMap = (( (keyTitleDescriptionMap[parentKey + '.' + colKey] || keyTitleDescriptionMap[colKey]) || {}).items || {}).properties || {};
+                                                    subListKeyRefs[colKey] = {};
+                                                    return (
+                                                        <div style={{ whiteSpace: "nowrap" }} className="sub-list-keys-header">
+                                                            {
+                                                                [<div key="sub-header-rowNumber" className="inline-block child-list-row-number">&nbsp;</div>].concat(colKeyContainer.childKeys.map((ck)=>
+                                                                    <div key={"sub-header-for-" + colKey + '.' + ck} className="inline-block" data-key={colKey + '.' + ck} ref={function(r){
+                                                                        if (r) subListKeyRefs[colKey][ck] = r;
+                                                                    }} style={{ 'width' : !subListKeyWidths ? null : ((subListKeyWidths[colKey] || {})[ck] || null) }}>
+                                                                        <object.TooltipInfoIconContainer
+                                                                            title={(keyTitleDescriptionMap[parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).title || ck}
+                                                                            tooltip={(keyTitleDescriptionMap[parentKey + '.' + colKey + '.' + ck] || subKeyTitleDescriptionMap[ck] || {}).description || null}
+                                                                        />
+                                                                    </div>
+                                                                ))
+                                                            }
+                                                        </div>
+                                                    );
+                                                })()
+                                                    : null
+                                            }
+                                        </th>
+                                    );
+                                }))
                             }
-
-                            return (
-                                <tr key={"row-" + i}>{
-                                    [<td key="rowNumber">{ i + 1 }.</td>].concat(row.map(function(colVal, j){
-                                        var val = colVal.value;
-                                        if (typeof val === 'boolean'){
-                                            val = <code>{ val ? 'True' : 'False' }</code>;
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            _.map(rowData, function(row,i){
+                                return (
+                                    <tr key={"row-" + i}>
+                                        {
+                                            [<td key="rowNumber">{ i + 1 }.</td>]
+                                                .concat(row.map(function(colVal, j){
+                                                    var val = colVal.value;
+                                                    if (typeof val === 'boolean'){
+                                                        val = <code>{ val ? 'True' : 'False' }</code>;
+                                                    }
+                                                    if (colVal.key === '@id' && val.slice(0,1) === '/') {
+                                                        val = <a href={val}>{ val }</a>;
+                                                    }
+                                                    if (typeof val === 'string' && val.length > 50){
+                                                        val = val.slice(0,50) + '...';
+                                                    }
+                                                    if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
+                                                        val = SubItemTable.jsonify(val, columnKeys[j].key);
+                                                    }
+                                                    if (Array.isArray(val) && val.length > 0 && !_.all(val, React.isValidElement) ){
+                                                        val = _.map(val, function(v,i){ return SubItemTable.jsonify(v, columnKeys[j].key + ':' + i); });
+                                                    }
+                                                    return (
+                                                        <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
+                                                            { val }
+                                                        </td>
+                                                    );
+                                                }))
                                         }
-                                        if (colVal.key === '@id' && val.slice(0,1) === '/') {
-                                            val = <a href={val}>{ val }</a>;
-                                        }
-                                        if (typeof val === 'string' && val.length > 50){
-                                            val = val.slice(0,50) + '...';
-                                        }
-                                        if (val && typeof val === 'object' && !React.isValidElement(val) && !Array.isArray(val)) {
-                                            val = jsonify(val, columnKeys[j].key);
-                                        }
-                                        if (Array.isArray(val) && val.length > 0 && !_.all(val, React.isValidElement) ){
-                                            val = _.map(val, function(v,i){ return jsonify(v, columnKeys[j].key + ':' + i); });
-                                        }
-                                        return (
-                                            <td key={("column-for-" + columnKeys[j].key)} className={colVal.className || null}>
-                                                { val }
-                                            </td>
-                                        );
-                                    }))
-                                }</tr>
-                            );
-                        })
-                    }</tbody>
+                                    </tr>
+                                );
+                            })
+                        }
+                    </tbody>
                 </table>
             </div>
         );
@@ -600,7 +569,6 @@ class DetailRow extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleToggle = this.handleToggle.bind(this);
-        this.render = this.render.bind(this);
         this.state = { 'isOpen' : false };
     }
 
@@ -618,12 +586,14 @@ class DetailRow extends React.PureComponent {
     }
 
     render(){
-        var { label, labelNumber, item, popLink, itemType, columnDefinitions, className, schemas } = this.props;
-        var value = Detail.formValue(item, popLink, this.props['data-key'], itemType, columnDefinitions);
+        const { label, labelNumber, item, popLink, itemType, columnDefinitions, className, schemas } = this.props;
+        const { isOpen } = this.state;
+        let value = Detail.formValue(item, popLink, this.props['data-key'], itemType, columnDefinitions);
+        let labelToShow = label;
         if (labelNumber) {
-            label = (
+            labelToShow = (
                 <span>
-                    <span className={"label-number right inline-block" + (this.state.isOpen ? ' active' : '')}><span className="number-icon text-200">#</span> { this.props.labelNumber }</span>
+                    <span className={"label-number right inline-block" + (isOpen ? ' active' : '')}><span className="number-icon text-200">#</span> { labelNumber }</span>
                     { label }
                 </span>
             );
@@ -631,14 +601,14 @@ class DetailRow extends React.PureComponent {
 
         if (value.type === SubItemTitle) {
             // What we have here is an embedded object of some sort. Lets override its 'isOpen' & 'onToggle' functions.
-            value = React.cloneElement(value, { 'onToggle' : this.handleToggle, 'isOpen' : this.state.isOpen });
+            value = React.cloneElement(value, { 'onToggle' : this.handleToggle, 'isOpen' : isOpen });
 
             return (
                 <div>
-                    <PartialList.Row label={label} children={value} className={(className || '') + (this.state.isOpen ? ' open' : '')} />
+                    <PartialList.Row label={labelToShow} className={(className || '') + (isOpen ? ' open' : '')}>{ value }</PartialList.Row>
                     <SubItemListView
-                        popLink={popLink} content={item} schemas={schemas} isOpen={this.state.isOpen}
-                        columnDefinitions={value.props.columnDefinitions || this.props.columnDefinitions} // Recursively pass these down
+                        popLink={popLink} content={item} schemas={schemas} isOpen={isOpen}
+                        columnDefinitions={value.props.columnDefinitions || columnDefinitions} // Recursively pass these down
                     />
                 </div>
             );
@@ -649,16 +619,16 @@ class DetailRow extends React.PureComponent {
             // What we have here is a list of embedded objects. Render them out recursively and adjust some styles.
             return (
                 <div className="array-group" data-length={item.length}>
-                { React.Children.map(value.props.children, (c, i)=>
-                    <DetailRow
-                        {...this.props} label={i === 0 ? label : <span className="dim-duplicate">{ label }</span>} labelNumber={i + 1} item={item[i]}
-                        className={("array-group-row item-index-" + i) + (i === item.length - 1 ? ' last-item' : '') + (i === 0 ? ' first-item' : '')} />
-                ) }
+                    { React.Children.map(value.props.children, (c, i)=>
+                        <DetailRow
+                            {...this.props} label={i === 0 ? labelToShow : <span className="dim-duplicate">{ labelToShow }</span>} labelNumber={i + 1} item={item[i]}
+                            className={("array-group-row item-index-" + i) + (i === item.length - 1 ? ' last-item' : '') + (i === 0 ? ' first-item' : '')} />
+                    ) }
                 </div>
             );
         }
         // Default / Pass-Thru
-        return <PartialList.Row label={label} children={value} className={(className || '') + (this.state.isOpen ? ' open' : '')} />;
+        return <PartialList.Row label={labelToShow} className={(className || '') + (isOpen ? ' open' : '')}>{ value }</PartialList.Row>;
     }
 
 }
@@ -742,14 +712,9 @@ export class Detail extends React.PureComponent {
                     _.map(_.filter(_.pairs(columnDefinitions), function(c){ return c[0].indexOf(keyPrefix + '.') === 0; }), function(c){ c[0] = c[0].replace(keyPrefix + '.', ''); return c; })
                 );
                 return (
-                    <SubItemTitle
-                        schemas={schemas}
-                        content={item}
-                        key={keyPrefix}
-                        countProperties={_.keys(item).length}
-                        popLink={popLink}
-                        columnDefinitions={releventProperties}
-                    />
+                    <SubItemTitle schemas={schemas} content={item}
+                        key={keyPrefix} countProperties={_.keys(item).length}
+                        popLink={popLink} columnDefinitions={releventProperties} />
                 );
             }
         } else if (typeof item === 'string'){
@@ -920,10 +885,36 @@ export class Detail extends React.PureComponent {
     render(){
         const { context, excludedKeys, stickyKeys, alwaysCollapsibleKeys, open } = this.props;
         const { persistentKeys, collapsibleKeys } = Detail.generatedKeysLists(context, excludedKeys, stickyKeys, alwaysCollapsibleKeys);
-        return <PartialList persistent={_.map(persistentKeys, this.renderDetailRow)} collapsible={ _.map(collapsibleKeys, this.renderDetailRow)} open={open} />;
+        return (
+            <div className="overflow-hidden">
+                <PartialList persistent={_.map(persistentKeys, this.renderDetailRow)} collapsible={ _.map(collapsibleKeys, this.renderDetailRow)} open={open} />
+            </div>
+        );
     }
 
 }
+
+
+const ToggleJSONButton = React.memo(function ToggleJSONButton({ onClick, showingJSON, className }){
+    return (
+        <button type="button" className="btn btn-block btn-outline-secondary" onClick={onClick}>
+            { showingJSON ?
+                <React.Fragment><i className="icon icon-fw icon-list"/> View as List</React.Fragment>
+                :
+                <React.Fragment><i className="icon icon-fw icon-code"/> View as JSON</React.Fragment>
+            }
+        </button>
+    );
+});
+
+const SeeMoreRowsButton = React.memo(function SeeMoreRowsButton({ onClick, collapsed, className }){
+    return (
+        <button type="button" className="btn btn-block btn-outline-secondary" onClick={onClick}>
+            { collapsed ? "See advanced information" : "Hide" }
+        </button>
+    );
+});
+
 
 /**
  * A list of properties which belong to Item shown by ItemView.
@@ -933,9 +924,9 @@ export class Detail extends React.PureComponent {
  * @class
  * @type {Component}
  */
-export class ItemDetailList extends React.Component {
+export class ItemDetailList extends React.PureComponent {
 
-    static Detail = Detail
+    static Detail = Detail;
 
     static getTabObject(props){
         return {
@@ -957,14 +948,12 @@ export class ItemDetailList extends React.Component {
         'showJSONButton' : true,
         'hideButtons': false,
         'columnDefinitions' : Detail.defaultColumnDefinitions
-    }
+    };
 
     constructor(props){
         super(props);
         this.handleToggleJSON = this.handleToggleJSON.bind(this);
         this.handleToggleCollapsed = this.handleToggleCollapsed.bind(this);
-        this.seeMoreButton = this.seeMoreButton.bind(this);
-        this.toggleJSONButton = this.toggleJSONButton.bind(this);
         this.state = {
             'collapsed' : true,
             'showingJSON' : false
@@ -983,15 +972,6 @@ export class ItemDetailList extends React.Component {
         });
     }
 
-    seeMoreButton(){
-        if (typeof this.props.collapsed === 'boolean') return null;
-        return (
-            <button type="button" className="item-page-detail-toggle-button btn btn-default btn-block" onClick={this.handleToggleCollapsed}>
-                { this.state.collapsed ? "See advanced information" : "Hide" }
-            </button>
-        );
-    }
-
     componentDidMount(){
         ReactTooltip.rebuild();
     }
@@ -1002,66 +982,72 @@ export class ItemDetailList extends React.Component {
         }
     }
 
-    toggleJSONButton(){
-        return (
-            <button type="button" className="btn btn-block btn-default" onClick={this.handleToggleJSON}>
-                { this.state.showingJSON ?
-                    <span><i className="icon icon-fw icon-list"/> View as List</span>
-                    :
-                    <span><i className="icon icon-fw icon-code"/> View as JSON</span>
-                }
-            </button>
-        );
-    }
-
-    buttonsRow(){
-        const { hideButtons, showJSONButton } = this.props;
-        if (hideButtons) return null;
-        if (!showJSONButton){
-            return (
-                <div className="row">
-                    <div className="col-xs-12">{ this.seeMoreButton() }</div>
-                </div>
-            );
-        }
-        return (
-            <div className="row">
-                <div className="col-xs-6">{ this.seeMoreButton() }</div>
-                <div className="col-xs-6">{ this.toggleJSONButton() }</div>
-            </div>
-        );
-    }
-
     render(){
-        const { keyTitleDescriptionMap, columnDefinitions, minHeight, context, schemas, popLink, excludedKeys, stickyKeys } = this.props;
-        var collapsed;
-        if (typeof this.props.collapsed === 'boolean') collapsed = this.props.collapsed;
-        else collapsed = this.state.collapsed;
+        const {
+            keyTitleDescriptionMap, columnDefinitions, minHeight, context, schemas, popLink,
+            excludedKeys, stickyKeys, collapsed : propCollapsed, hideButtons, showJSONButton
+        } = this.props;
+        const { showingJSON, collapsed } = this.state;
+        let body;
 
-        const colDefs = _.extend({}, keyTitleDescriptionMap || {}, columnDefinitions || {});
+        if (showingJSON){
+            body = (
+                <React.Fragment>
+                    <div className="json-tree-wrapper">
+                        <JSONTree data={context} />
+                    </div>
+                    <br/>
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6 pull-right">
+                            <ToggleJSONButton onClick={this.handleToggleJSON} showingJSON={showingJSON} />
+                        </div>
+                    </div>
+                </React.Fragment>
+            );
+        } else {
+            const colDefs = _.extend({}, keyTitleDescriptionMap || {}, columnDefinitions || {});
+            let isCollapsed;
+            if (typeof propCollapsed === 'boolean') isCollapsed = propCollapsed;
+            else isCollapsed = collapsed;
+            let buttonsRow;
+            if (hideButtons) {
+                buttonsRow = null;
+            } else if (!showJSONButton){
+                buttonsRow = (
+                    <div className="row">
+                        <div className="col-xs-12 col-12">
+                            <SeeMoreRowsButton onClick={this.handleToggleCollapsed} collapsed={collapsed}/>
+                        </div>
+                    </div>
+                );
+            } else {
+                buttonsRow = (
+                    <div className="row">
+                        <div className="col-xs-6 col-6">
+                            <SeeMoreRowsButton onClick={this.handleToggleCollapsed} collapsed={collapsed}/>
+                        </div>
+                        <div className="col-xs-6 col-6">
+                            <ToggleJSONButton onClick={this.handleToggleJSON} showingJSON={showingJSON} />
+                        </div>
+                    </div>
+                );
+            }
+
+            body = (
+                <React.Fragment>
+                    <Detail context={context} schemas={schemas} popLink={popLink}
+                        open={!isCollapsed} columnDefinitions={colDefs}
+                        excludedKeys={excludedKeys || Detail.defaultProps.excludedKeys}
+                        stickyKeys={stickyKeys || Detail.defaultProps.stickyKeys} />
+                    { buttonsRow }
+                </React.Fragment>
+            );
+
+        }
 
         return (
             <div className="item-page-detail" style={typeof minHeight === 'number' ? { minHeight } : null}>
-                { !this.state.showingJSON ?
-                    <div className="overflow-hidden">
-                        <Detail context={context} schemas={schemas} popLink={popLink}
-                            open={!collapsed} columnDefinitions={colDefs}
-                            excludedKeys={excludedKeys || Detail.defaultProps.excludedKeys}
-                            stickyKeys={stickyKeys || Detail.defaultProps.stickyKeys} />
-                        { this.buttonsRow() }
-                    </div>
-                    :
-                    <div className="overflow-hidden">
-                        <div className="json-tree-wrapper">
-                            <JSONTree data={context} />
-                        </div>
-                        <br/>
-                        <div className="row">
-                            <div className="col-xs-12 col-sm-6 pull-right">{ this.toggleJSONButton() }</div>
-                        </div>
-                    </div>
-                }
-
+                { body }
             </div>
         );
     }
