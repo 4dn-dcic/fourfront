@@ -8,10 +8,15 @@ import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
 import { console, object, Filters, Schemas, navigate, typedefs } from './../util';
-import { SortController, SearchResultTable, SearchResultDetailPane,
-    AboveTableControls, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns
-} from './components';
+
+import { defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components/table-commons';
+import { AboveSearchTablePanel } from './components/AboveSearchTablePanel';
+import { AboveSearchViewTableControls } from './components/above-table-controls/AboveSearchViewTableControls';
+import { CustomColumnController } from './components/CustomColumnController';
+import { SearchResultTable } from './components/SearchResultTable';
+import { FacetList, onFilterHandlerMixin } from './components/FacetList';
+import { SearchResultDetailPane } from './components/SearchResultDetailPane';
+import { SortController } from './components/SortController';
 
 
 // eslint-disable-next-line no-unused-vars
@@ -121,7 +126,7 @@ class ControlsAndResults extends React.PureComponent {
         window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
     }
 
-    columnExtensionMapWithSelectButtonn(columnExtensionMap, currentAction, specificType, abstractType){
+    columnExtensionMapWithSelectButton(columnExtensionMap, currentAction, specificType, abstractType){
         const inSelectionMode = currentAction === 'selection';
         if (!inSelectionMode && (!abstractType || abstractType !== specificType)){
             return columnExtensionMap;
@@ -218,10 +223,10 @@ class ControlsAndResults extends React.PureComponent {
                     </div>
                     : null }
                 <div className={!facets.length ? "col-sm-12 expset-result-table-fix" : ("expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9'))}>
-                    <AboveTableControls showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf}
+                    <AboveSearchViewTableControls showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf}
                         {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'isFullscreen', 'context', 'columns',
-                            'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
-                        {...{ hiddenColumns, columnDefinitions }} />
+                            'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
+                        {...{ hiddenColumns, columnDefinitions }}/>
                     <SearchResultTable ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total}
                         {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
                             'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
