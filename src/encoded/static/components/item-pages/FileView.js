@@ -39,7 +39,7 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     shouldGraphExist(){
-        const context = this.props.context;
+        const { context } = this.props;
         return (
             (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
             // We can uncomment below line once do permissions checking on backend for graphing
@@ -48,9 +48,9 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
-        const context = this.props.context;
+        const { context } = this.props;
         const width = this.getTabViewWidth();
-        let tabs = [];
+        const tabs = [];
 
         tabs.push(FileViewOverview.getTabObject(this.props, width));
 
@@ -123,7 +123,7 @@ class FileViewOverview extends React.PureComponent {
                 </div>
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
                     <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                : null }
+                    : null }
             </div>
         );
     }

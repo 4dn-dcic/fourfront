@@ -35,7 +35,7 @@ export { OverviewHeadingContainer } from './OverviewHeadingContainer';
 
 
 export {
-    ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader,
+    ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader,
     ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoadedFromSearch, ExperimentSetTableTabView,
     SimpleFilesTable, SimpleFilesTableLoaded
 } from './tables';

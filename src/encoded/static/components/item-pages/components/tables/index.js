@@ -8,7 +8,7 @@
  * @module
  */
 
-export { ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader } from './ItemPageTable';
+export { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader } from './ItemPageTable';
 
 export { ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoadedFromSearch, ExperimentSetTableTabView } from './ExperimentSetTables';
 

@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ItemPageTable, ItemPageTableLoader } from './ItemPageTable';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader } from './ItemPageTable';
 import { console, expFxn } from './../../../util';
 
 
@@ -63,12 +63,12 @@ export class SimpleFilesTableLoaded extends React.PureComponent {
     };
 
     render(){
-        var { fileUrls, id } = this.props;
+        const { fileUrls, id } = this.props;
         return (
-            <ItemPageTableLoader itemUrls={fileUrls} key={id}>
+            <ItemPageTableIndividualUrlLoader itemUrls={fileUrls} key={id}>
                 <SimpleFilesTable {..._.pick(this.props, 'width', 'defaultOpenIndices',
                     'defaultOpenIds', 'columns', 'columnExtensionMap')} />
-            </ItemPageTableLoader>
+            </ItemPageTableIndividualUrlLoader>
         );
     }
 }

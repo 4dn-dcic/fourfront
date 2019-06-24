@@ -4,14 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import url from 'url';
-import { Collapse, Button } from 'react-bootstrap';
 import _ from 'underscore';
 import Alerts from './../alerts';
 import { ItemHeader, ItemDetailList, TabbedView, Publications, AttributionTabView, BadgesTabView } from './components';
 import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
 import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
 
-var { TabObject, Item } = typedefs;
+// eslint-disable-next-line no-unused-vars
+const { TabObject, Item } = typedefs;
 
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific

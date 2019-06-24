@@ -156,30 +156,6 @@ table.matrix {
 			position: static;
 		}
 
-		@media screen and (min-width: $screen-sm-min){
-
-			.addinfo-properties-section.col-sm-6 {
-				padding-left : 18px;
-			}
-
-			.row > .addinfo-description-section.col-sm-6:after {
-				content : "";
-				width: 1px;
-				height: 100%;
-				position: absolute;
-				left: 50%;
-				top: 0;
-				margin-left: -1px;
-				border-left: 1px solid #f4f4f4;
-			}
-
-			label.description-label {
-				font-weight: 500;
-				margin-bottom: 2px;
-				display: block;
-			}
-		}
-
 		.expset-addinfo-val {
 			padding-right: 25px;
 		}

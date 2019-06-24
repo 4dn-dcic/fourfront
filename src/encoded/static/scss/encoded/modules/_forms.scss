@@ -217,29 +217,6 @@ label {
 	}
 }
 
-.item-picker {
-	@include clearfix;
-	@extend .form-control;
-	height: auto;
-	.item-picker-preview {
-		overflow: hidden;
-		.result-table > li {
-			margin: 4px 6px;
-			border: none;
-		}
-		.clear {
-			float: right;
-		}
-	}
-	> .btn {
-		margin-left: 1em;
-	}
-	&.disabled {
-	    cursor: not-allowed;
-	    background-color: $input-bg-disabled;
-	}
-}
-
 .collapsible {
 	padding-left: 20px;
 	position: relative;
