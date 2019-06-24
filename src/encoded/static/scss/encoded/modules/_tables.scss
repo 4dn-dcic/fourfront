@@ -73,7 +73,7 @@ table>tbody>tr>td {
     }
 }
 
-@media (max-width: $screen-xs-max) {
+@include media-breakpoint-down(xs) {
     .table-responsive {
         th,
         td {
@@ -156,30 +156,6 @@ table.matrix {
 			position: static;
 		}
 
-		@media screen and (min-width: $screen-sm-min){
-
-			.addinfo-properties-section.col-sm-6 {
-				padding-left : 18px;
-			}
-
-			.row > .addinfo-description-section.col-sm-6:after {
-				content : "";
-				width: 1px;
-				height: 100%;
-				position: absolute;
-				left: 50%;
-				top: 0;
-				margin-left: -1px;
-				border-left: 1px solid #f4f4f4;
-			}
-
-			label.description-label {
-				font-weight: 500;
-				margin-bottom: 2px;
-				display: block;
-			}
-		}
-
 		.expset-addinfo-val {
 			padding-right: 25px;
 		}
@@ -188,7 +164,7 @@ table.matrix {
 	.files-tables-container {
 
 		// Only when present on item page(s)
-		@media screen and (max-width: $screen-sm-max){
+		@include media-breakpoint-down(sm) {
 			.item-page-table-row-container & {
 				border-bottom: 1px solid #ddd;
 			}
@@ -466,25 +442,25 @@ $small-label-accession-font-size : 0.75rem;
 			}
 
 			&.odd {
-				@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(245, 240, 240, 0.4), 0%, 30%);
+				@include gradient-x(rgba(245, 235, 235, 0), rgba(245, 240, 240, 0.4), 0%, 30%);
 
 				&:hover {
-					@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(255, 252, 250, 1), 0%, 12%);
+					@include gradient-x(rgba(245, 235, 235, 0), rgba(255, 252, 250, 1), 0%, 12%);
 				}
 				> .file-groups > .view-more-button {
-					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+					@include gradient-x(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 				}
 			}
 
 			&.even {
 				//background-color: rgba(255, 220, 200, 0.5);
-				@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 250, 250, 0.4), 0%, 30%);
+				@include gradient-x(rgba(255, 250, 250, 0), rgba(255, 250, 250, 0.4), 0%, 30%);
 
 				&:hover {
-					@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 252, 250, 1), 0%, 12%);
+					@include gradient-x(rgba(255, 250, 250, 0), rgba(255, 252, 250, 1), 0%, 12%);
 				}
 				> .file-groups > .view-more-button {
-					@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+					@include gradient-x(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 				}
 			}
 
@@ -759,21 +735,21 @@ $small-label-accession-font-size : 0.75rem;
 			// BG coloring by type + position
 			.s-block.biosample.stack-depth-1 {
 				&:nth-child(2n-1){
-					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-odd, 0%, 12%);
+					@include gradient-x(rgba(255, 255, 255, 0), $expset-biosample-bg-odd, 0%, 12%);
 				}
 
 				&:nth-child(2n-2){
-					@include gradient-horizontal(rgba(255, 255, 255, 0), $expset-biosample-bg-even, 0%, 12%);
+					@include gradient-x(rgba(255, 255, 255, 0), $expset-biosample-bg-even, 0%, 12%);
 					> .experiments > .view-more-button {
-						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+						@include gradient-x(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 					}
 				}
 			}
 
 			.s-block.experiment.stack-depth-1 {
-					@include gradient-horizontal(rgba(255, 255, 255, 0), #f7f8f9, 0%, 12%);
+					@include gradient-x(rgba(255, 255, 255, 0), #f7f8f9, 0%, 12%);
 					> .experiments > .view-more-button {
-						@include gradient-horizontal(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
+						@include gradient-x(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
 					}
 			}
 

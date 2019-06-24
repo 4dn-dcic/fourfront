@@ -1,7 +1,7 @@
 
 // make footer look good on larger screens
 // and activate sticky footer
-@media (min-width: $screen-md-min) {
+@include media-breakpoint-up(md) {
     .footer-row { margin-left: 0; margin-right: 0; }
 
     #page-footer {
@@ -17,9 +17,7 @@
         text-align: center;
         display: block;
         padding: 15px 15px;
-        @media (min-width: $screen-sm-min) {
-            text-align: left;
-        }
+        text-align: left;
     }
 
     @include sticky-footer($footerHeight, $footerTopBorderHeight, "#layout", "#layout-footer", "#page-footer");

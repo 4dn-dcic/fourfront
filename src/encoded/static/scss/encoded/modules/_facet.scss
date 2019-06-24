@@ -48,7 +48,7 @@
 
 }
 
-@media screen and (max-width: $screen-sm-min) {
+@include media-breakpoint-down(xs) {
     .sm-no-padding {
         padding-left: 0 !important;
         padding-right: 0 !important;
@@ -57,7 +57,7 @@
         width: auto !important;
     }
 }
-@media screen and (min-width: $screen-sm-min) {
+@include media-breakpoint-up(sm) {
     .facets.horizontal {
         .facet {
             width: 50% !important;
@@ -66,7 +66,7 @@
         }
     }
 }
-@media screen and (min-width: $screen-lg-min) {
+@include media-breakpoint-up(lg) {
     .facets.horizontal {
         display: table;
         width: 100%;

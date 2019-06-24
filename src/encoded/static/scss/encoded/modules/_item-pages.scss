@@ -10,15 +10,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-@media screen and (min-width: $screen-md-min){
-	/* Nudge accession #, etc. closer to title on wide desktop views */
-	/*
-	.item-view-header {
-		margin-top: -27px;
-	}
-	*/
-
-}
 
 /*************************
         TabbedView
@@ -262,7 +253,7 @@ body .rc-tabs-top {
 		padding-bottom: 0;
 		border-bottom: none;
 		border-top-color: #eee;
-		@media screen and (min-width: $screen-md-min){
+		@include media-breakpoint-up(md) {
 			width: 33%;
 			float: right;
 		}
@@ -286,7 +277,7 @@ body .rc-tabs-top {
 		//padding-top: 10px;
 		padding-left: 12px;
 
-		@media screen and (max-width: $screen-xs-max){
+		@include media-breakpoint-down(xs) {
 			min-height: 42px;
 		}
 
@@ -322,7 +313,7 @@ body .rc-tabs-top {
 		font-weight: 300;
 	}
 
-	@media screen and (max-width: $screen-xs-max){
+	@include media-breakpoint-down(xs) {
 
 		.item-label-extra.text-right {
 			text-align: left !important;
@@ -579,7 +570,7 @@ i.item-status-indicator-dot {
 	}
 
 	.list-item {
-		@media screen and (min-width: $screen-sm-min) {
+		@include media-breakpoint-up(sm) {
 			/* Equalize Height of Columns, unsupported for IE9 and below: */
 			display: -webkit-box;
 			display: -webkit-flex;
@@ -600,7 +591,7 @@ i.item-status-indicator-dot {
 		.item-label {
 			font-weight: 500;
 			flex-grow: 1;
-			@media screen and (min-width: $screen-sm-min) {
+			@include media-breakpoint-up(sm) {
 				> div {
 					border-bottom: 1px solid #eee;
 					padding-bottom: 8px;
@@ -624,7 +615,7 @@ i.item-status-indicator-dot {
 		.subitem-toggle {
 			display: inline-block;
 			> .link {
-				@include user-select(none);
+				user-select: none;
 				color: #00cca3; // temporary?
 				cursor:pointer;
 				&:hover {
@@ -783,7 +774,7 @@ i.item-status-indicator-dot {
 
 	}
 
-	@media screen and (max-width: $screen-xs-max) {
+	@include media-breakpoint-down(xs) {
 		.array-group .array-group-row.list-item:not(.first-item) {
 			.item-label {
 				display: none;
@@ -964,14 +955,14 @@ $download-button-width : 100px;
 }
 
 // Tablet & mobile screen size adjustments
-@media screen and (max-width : $screen-sm-max){
+@include media-breakpoint-down(sm) {
 	.files-in-set-table .row > .download-button {
 		margin-bottom: -50px;
 	}
 }
 
 // Mobile screen size
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(xs) {
 	.files-in-set-table .row > .download-button {
 		> .button-dl-file {
 			margin-bottom: 5px;
@@ -980,7 +971,7 @@ $download-button-width : 100px;
 }
 
 // Large screen adjustments
-@media screen and (min-width : $screen-md-min){
+@include media-breakpoint-up(md) {
 
 	.files-in-set-table-title {
 		margin-top: 20px;
@@ -1637,7 +1628,7 @@ $badge-item-min-height: 90px;
 	}
 
 	.expset-higlass-panel {
-		@media screen and (min-width: $screen-md-min) {
+		@include media-breakpoint-up(md) {
 			margin-bottom: -20px;
 		}
 	}
@@ -1753,7 +1744,7 @@ $badge-item-min-height: 90px;
 		left: 0;
 		right: 0;
 		top: 0;
-		@media (min-width: $screen-md-min) {
+		@include media-breakpoint-up(md) {
 			top: 41px;
 			z-index: 1000;
 		}
@@ -1779,16 +1770,10 @@ $badge-item-min-height: 90px;
 			padding-left: 16px;
 			padding-right: 16px;
 			body:not(.is-full-screen) & {
-				@media (min-width: $screen-sm-min) {
-					max-width: $container-sm;
-				}
-				@media (min-width: $screen-md-min) {
-					max-width: $container-md;
+				@include make-max-widths-container-width();
+				@include media-breakpoint-up(md) {
 					padding-left: 0;
 					padding-right: 0;
-				}
-				@media (min-width: $screen-lg-min) {
-					max-width: $container-lg;
 				}
 			}
 		}
@@ -1854,7 +1839,7 @@ $badge-item-min-height: 90px;
 
 				&.buttons-container {
 					text-align: left;
-					@media screen and (min-width: $screen-sm-min){
+					@include media-breakpoint-up(sm) {
 						text-align: right;
 					}
 				}
@@ -1900,7 +1885,7 @@ $badge-item-min-height: 90px;
 				}
 
 				.download-button-container.exists + h3.node-file-title {
-					@media screen and (max-width: $screen-md-max){
+					@include media-breakpoint-down(md) {
 						padding-right: 30px;
 					}
 				}
@@ -2171,7 +2156,7 @@ div.user-profile-page {
 
 		}
 
-		@media screen and (min-width: $screen-sm-min){
+		@include media-breakpoint-up(sm) {
 
 			.user-title-col {
 				padding-top: 15px;
@@ -2186,7 +2171,7 @@ div.user-profile-page {
 			}
 		}
 
-		@media screen and (max-width: $screen-xs-max){
+		@include media-breakpoint-down(xs) {
 
 			.user-title-col {
 				padding-top: 2px;
@@ -2235,7 +2220,7 @@ div.user-profile-page {
 				}
 			}
 
-			@media screen and (max-width: $screen-xs-max){
+			@include media-breakpoint-down(xs) {
 				img.gravatar {
 					width: 94px; /* Account for border */
 					height: 70px;
@@ -2250,7 +2235,7 @@ div.user-profile-page {
 
 	}
 
-	@media screen and (min-width: $screen-sm-min){
+	@include media-breakpoint-up(sm) {
 		.editing .user-title .editable-field-entry.inline:not(.editing) {
 			display: inline-block;
 			//max-width: 30%;

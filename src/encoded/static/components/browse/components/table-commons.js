@@ -10,7 +10,6 @@ import memoize from 'memoize-one';
 import queryString from 'querystring';
 import Draggable from 'react-draggable';
 import { isServerSide, navigate, object, layout, Schemas, DateUtility, analytics, typedefs, expFxn } from './../../util';
-import { ColumnSorterIcon } from './LimitAndPageControls';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, ColumnDefinition } = typedefs;
@@ -80,19 +79,18 @@ export function sanitizeOutputValue(value){
 }
 
 
-export class TableRowToggleOpenButton extends React.PureComponent {
-    render(){
-        return (
-            <div className="inline-block toggle-detail-button-container">
-                <button type="button" className="toggle-detail-button" onClick={this.props.onClick || this.props.toggleDetailOpen}>
-                    <div className="icon-container">
-                        <i className={"icon icon-fw icon-" + (this.props.open ? 'minus' : 'plus') }/>
-                    </div>
-                </button>
-            </div>
-        );
-    }
-}
+export const TableRowToggleOpenButton = React.memo(function TableRowToggleOpenButton({ onClick, toggleDetailOpen, open }){
+    return (
+        <div className="inline-block toggle-detail-button-container">
+            <button type="button" className="toggle-detail-button" onClick={onClick || toggleDetailOpen}>
+                <div className="icon-container">
+                    <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus') }/>
+                </div>
+            </button>
+        </div>
+    );
+});
+
 
 
 
@@ -103,22 +101,23 @@ export const defaultColumnExtensionMap = {
         'minColumnWidth' : 90,
         'order' : -100,
         'render' : function renderDisplayTitleColumn(result, columnDefinition, props, width, popLink = false){
-            var title = object.itemUtil.getTitleStringFromContext(result),
-                link = object.itemUtil.atId(result),
-                tooltip,
-                hasPhoto = false;
+            const { href, rowNumber, currentAction, navigate: propNavigate, detailOpen, toggleDetailOpen } = props;
+            let title = object.itemUtil.getTitleStringFromContext(result);
+            const link = object.itemUtil.atId(result);
+            let tooltip;
+            let hasPhoto = false;
 
             /** Registers a list click event for Google Analytics then performs navigation. */
             function handleClick(evt){
-                var tableType = navigate.isBrowseHref(props.href) ? 'browse' : (navigate.isSearchHref(props.href) ? 'search' : 'other');
+                var tableType = navigate.isBrowseHref(href) ? 'browse' : (navigate.isSearchHref(href) ? 'search' : 'other');
                 if (tableType === 'browse' || tableType === 'search'){
                     evt.preventDefault();
                     evt.stopPropagation();
                     analytics.productClick(result, {
-                        'list'      : tableType === 'browse' ? 'Browse Results' : (props.currentAction === 'selection' ? 'Selection Search Results' : 'Search Results'),
-                        'position'  : props.rowNumber + 1
+                        'list'      : tableType === 'browse' ? 'Browse Results' : (currentAction === 'selection' ? 'Selection Search Results' : 'Search Results'),
+                        'position'  : rowNumber + 1
                     }, function(){
-                        (props.navigate || navigate)(link);
+                        (propNavigate || navigate)(link);
                     });
                     return false;
                 } else {
@@ -128,7 +127,7 @@ export const defaultColumnExtensionMap = {
 
             if (title && (title.length > 20 || width < 100)) tooltip = title;
             if (link){ // This should be the case always
-                title = <a key="title" href={link || '#'} children={title} onClick={handleClick} />;
+                title = <a key="title" href={link || '#'} onClick={handleClick}>{ title }</a>;
                 if (typeof result.email === 'string' && result.email.indexOf('@') > -1){
                     // Specific case for User items. May be removed or more cases added, if needed.
                     hasPhoto = true;
@@ -142,10 +141,10 @@ export const defaultColumnExtensionMap = {
             }
 
             return (
-                <span>
-                    <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />
+                <React.Fragment>
+                    <TableRowToggleOpenButton open={detailOpen} onClick={toggleDetailOpen} />
                     <div key="title-container" className={"title-block" + (hasPhoto ? ' has-photo' : " text-ellipsis-container")} data-tip={tooltip}>{ title }</div>
-                </span>
+                </React.Fragment>
             );
         }
     },
@@ -507,6 +506,50 @@ export class ResultRowColumnBlockValue extends React.Component {
     }
 }
 
+
+export class ColumnSorterIcon extends React.PureComponent {
+
+    static icon(style="descend"){
+        if (style === 'descend')        return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}/>;
+        else if (style === 'ascend')    return <i className="icon icon-sort-asc" style={{ transform: 'translateY(4px)' }}/>;
+    }
+
+    static propTypes = {
+        'currentSortColumn' : PropTypes.string,
+        'descend' : PropTypes.bool,
+        'value' : PropTypes.string.isRequired,
+        'sortByFxn' : PropTypes.func.isRequired
+    };
+
+    static defaultProps = {
+        'descend' : false
+    };
+
+    constructor(props){
+        super(props);
+        this.sortClickFxn = this.sortClickFxn.bind(this);
+    }
+
+    sortClickFxn(e){
+        const { value, descend, currentSortColumn, sortByFxn } = this.props;
+        e.preventDefault();
+        const reverse = (currentSortColumn === value) && !descend;
+        sortByFxn(value, reverse);
+    }
+
+    render(){
+        const { value, descend, currentSortColumn } = this.props;
+        if (typeof value !== 'string' || value.length === 0) {
+            return null;
+        }
+        const style = !descend && currentSortColumn === value ? 'ascend' : 'descend';
+        const linkClass = (
+            (currentSortColumn === value ? 'active ' : '') +
+            'column-sort-icon'
+        );
+        return <span className={linkClass} onClick={this.sortClickFxn}>{ ColumnSorterIcon.icon(style) }</span>;
+    }
+}
 
 
 class HeadersRowColumn extends React.PureComponent {

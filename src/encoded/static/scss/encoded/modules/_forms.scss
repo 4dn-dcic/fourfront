@@ -21,7 +21,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 
 	&[disabled] { background-color: #ddd; }
 
-	@media (min-width: $screen-sm-min) {
+	@include media-breakpoint-up(sm) {
 		font-size: inherit;
 	}
 }
@@ -36,7 +36,7 @@ label {
 	position: relative;
 	margin-top: -1px;
 	float: left;
-	@media (max-width: $screen-xs-max) {
+	@include media-breakpoint-down(xs) {
 		width: 100%;
 		display: block;
 		float: none;
@@ -53,18 +53,18 @@ label {
 		-moz-transition: width 0.3s ease-out;
 		-webkit-transition: width 0.3s ease-out;
 		transition: width 0.3s ease-out;
-		@media (max-width: $screen-xs-max) {
+		@include media-breakpoint-down(xs) {
 			width: 100%;
 			display: block;
 		}
 	}
-	@media (max-width: $screen-sm-max) {
+	@include media-breakpoint-down(sm) {
 		line-height: normal;
 		padding-top: 15px;
 		padding-bottom: 15px;
 		border-top: 1px solid #ccc;
 	}
-	@media (min-width: $screen-sm-min) {
+	@include media-breakpoint-up(sm) {
 		margin-left: -20px;
 		#navbar-search {
 			margin-top: -1px;
@@ -79,12 +79,12 @@ label {
 			border-color: rgba(125,125,125,1.0);
 			@include transition(width 0.3s ease-out);
 		}
-		@media (max-width: $screen-sm-max) {
+		@include media-breakpoint-down(sm) {
 			#navbar-search { width: 200px; }
 			&.has-input #navbar-search, #navbar-search:focus { width: 277px; }
 		}
 	}
-	@media (min-width: $screen-lg-min) {
+	@include media-breakpoint-up(lg) {
 		#navbar-search {
 			width: 200px;
 		}
@@ -103,7 +103,7 @@ label {
 		&:hover {
 			opacity: 1;
 		}
-		@media (max-width: $screen-xs-max) {
+		@include media-breakpoint-down(xs) {
 			right: 32px;
 		}
 	}
@@ -119,16 +119,16 @@ label {
 		background: none;
 		padding: 4px 4px 2px;
 
-		@media (max-width: $screen-xs-max) {
+		@include media-breakpoint-down(xs) {
 			right: 32px;
 		}
 	}
-	@media (max-width: $screen-xs-max) {
+	@include media-breakpoint-down(xs) {
 		padding-left : 25px;
 		padding-right: 25px;
 	}
 	.dropdown.btn-group {
-		@media (max-width: $screen-xs-max) {
+		@include media-breakpoint-down(xs) {
 			display: none;
 		}
 		#search-item-type-selector {
@@ -147,7 +147,7 @@ label {
 		background-color: transparent;
 		border-color: #ddd;
 	}
-	@media (min-width: $screen-sm-min) {
+	@include media-breakpoint-up(sm) {
 		&.has-query,
 		&.has-input {
 			.dropdown.btn-group {
@@ -217,29 +217,6 @@ label {
 	}
 }
 
-.item-picker {
-	@include clearfix;
-	@extend .form-control;
-	height: auto;
-	.item-picker-preview {
-		overflow: hidden;
-		.result-table > li {
-			margin: 4px 6px;
-			border: none;
-		}
-		.clear {
-			float: right;
-		}
-	}
-	> .btn {
-		margin-left: 1em;
-	}
-	&.disabled {
-	    cursor: not-allowed;
-	    background-color: $input-bg-disabled;
-	}
-}
-
 .collapsible {
 	padding-left: 20px;
 	position: relative;
@@ -276,7 +253,7 @@ div.fieldset.editable-fields {
 
 	padding-bottom: 15px;
 
-	@media screen and (min-width: $screen-md-min){
+	@include media-breakpoint-up(md) {
 		// Transition is too laggy on (some) mobile
 		transition: padding-bottom .5s linear;
 	}
@@ -334,7 +311,7 @@ div.fieldset.editable-fields {
 	opacity: 1;
 	min-height: 30px;
 
-	@media screen and (min-width: $screen-sm-min){
+	@include media-breakpoint-up(sm) {
 		transition: filter .75s, opacity .5s, min-height .5s linear;
 	}
 
@@ -371,11 +348,11 @@ div.fieldset.editable-fields {
 		}
 
 		.cancel-button {
-			color : $state-danger-text;
+			color : theme-color("danger");
 		}
 
 		.save-button {
-			color : $state-success-text;
+			color : theme-color("success");
 		}
 
 		.field-loading-icon {
@@ -422,7 +399,7 @@ div.fieldset.editable-fields {
 		.edit-button { visibility: hidden; }
 
 		span.input-wrapper {
-			@media screen and (min-width: $screen-sm-min){
+			@include media-breakpoint-up(sm) {
 				margin-bottom : -100px; // For min-height transition (prevent jumping).
 			}
 			margin-right: 75px; // Room for action icons/buttons.
@@ -566,7 +543,7 @@ div.fieldset.editable-fields {
 
 .onoffswitch {
     position: relative; width: 40px;
-	@include user-select(none);
+	user-select: none;
 	&.disabled {
 		opacity: 0.75;
 	}
@@ -910,7 +887,7 @@ div.fieldset.editable-fields {
 				margin: 0 !important;
 				font-weight: 500;
 				padding-top: 18px;
-				@media screen and (min-width: $screen-md-min) {
+				@include media-breakpoint-up(md) {
 					text-align: right;
 				}
 

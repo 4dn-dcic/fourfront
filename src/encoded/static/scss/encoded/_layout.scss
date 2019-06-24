@@ -4,13 +4,12 @@
 /* Note: most base styles handled by Bootstrap, with variable settings in bootstrap/_variables.scss */
 
 html {
-    font-size: $font-size-base * $mobile-font-factor;
+	font-size: $font-size-base * $mobile-font-factor;
+	
+	@include media-breakpoint-up(sm) {
+		font-size: $font-size-base;
+	}
 
-    @media screen and (min-width: $screen-sm-min) {
-        font-size: $font-size-base;
-
-    /* overflow-y: scroll; */
-    }
 }
 
 body {
@@ -146,7 +145,7 @@ blockquote {
 	display: none;
 	height: 0px;
 
-	@media (min-width: $navbar-fixed-breakpoint) {
+	@include media-breakpoint-up(md) {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
 	}
@@ -184,7 +183,7 @@ body.is-full-screen {
 		}
 	}
 
-	@media screen and (min-width: $screen-lg-min){
+	@include media-breakpoint-up(lg) {
 		.container {
 			width: auto;
 			margin-left: 20px;
@@ -211,7 +210,7 @@ h1.page-title {
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
 		&.home-page-title {
-			@media screen and (min-width: $screen-sm-min){
+			@include media-breakpoint-up(sm) {
 				height: 64px;
 				margin-bottom: -3px;
 				//height: 70px;
@@ -312,7 +311,7 @@ h1.page-title + .page-subtitle {
 		text-align: center;
 		color: #bfbfbf;
 		padding: 15px 0px 14px;
-		@media (min-width: $screen-md-min) {
+		@include media-breakpoint-up(sm) {
 
 			text-align: right;
 			&.copy-notice {
@@ -347,7 +346,7 @@ h1.page-title + .page-subtitle {
 .flexrow {
     @extend .row;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(sm) {
         .flexbox & {
             display: flex;
         }
@@ -357,7 +356,7 @@ h1.page-title + .page-subtitle {
 .flexcol-sm-6 {
     @extend .col-sm-6;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(sm) {
         .flexbox & {
             flex: 1 1 0px;
             width: auto;
@@ -398,15 +397,11 @@ h1.page-title + .page-subtitle {
 }
 
 .no-user-select {
-	@include user-select(none);
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
-
-/** Extending Bootstrap grid to allow blocks to flow right in a row **/
-
-@media screen                           		 { .col-xs-float-right { float : right; } }
-@media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
-@media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
-@media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
 
 /** Equal Height Columns in Bootstrap Row on IE9+ **/
 
@@ -417,7 +412,7 @@ h1.page-title + .page-subtitle {
     display: flex;
 }
 
-@media screen and (min-width: $screen-sm-min) {
+@include media-breakpoint-up(sm) {
 	.row.row-eq-height-sm {
 		display: -webkit-box;
 		display: -webkit-flex;
@@ -431,7 +426,7 @@ h1.page-title + .page-subtitle {
 	}
 }
 
-@media screen and (min-width: $screen-md-min) {
+@include media-breakpoint-up(md) {
 	.row.row-eq-height-md {
 		display: -webkit-box;
 		display: -webkit-flex;
@@ -445,7 +440,7 @@ h1.page-title + .page-subtitle {
 	}
 }
 
-@media screen and (min-width: $screen-lg-min) {
+@include media-breakpoint-up(lg) {
 	.row.row-eq-height-lg {
 		display: -webkit-box;
 		display: -webkit-flex;
@@ -645,7 +640,7 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 	font-family: $font-family-monospace;
 }
 
-@media screen and (max-width: $screen-xs-max){
+@include media-breakpoint-down(xs) {
 
 	.text-left-xs {
 		// Make text left-aligned for collapsed mobile view(s),

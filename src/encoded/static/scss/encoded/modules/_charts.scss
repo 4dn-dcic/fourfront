@@ -34,7 +34,7 @@
 
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(xs) {
     .facet-charts {
         height : auto !important;
         margin-top: 20px;
@@ -597,7 +597,7 @@
 
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(xs) {
     .bar-plot-chart {
         position: relative;
     }
@@ -683,7 +683,7 @@
             right: 0px;
             font-size: 1.35rem;
             cursor: pointer;
-            @include user-select(none);
+            user-select: none;
             .text {
                 font-size: 0.85rem;
                 line-height: 0.9rem;
@@ -810,7 +810,7 @@
     }
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(xs) {
     .bar-plot-chart-controls-wrapper {
         position: relative;
 
@@ -1809,7 +1809,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
         padding-top: 7px;
         padding-bottom: 5px;
         font-size: 0.9rem;
-        @include user-select(none);
+        user-select: none;
         &.disabled{
             color: #999;
         }
@@ -1819,14 +1819,14 @@ $workflow-node-color-type-global-context: #ffb3b3;
         min-width: 120px;
     }
     
-    @media screen and (min-width: $screen-lg-min){
+    @include media-breakpoint-up(lg) {
 
         .checkbox-container {
             float: left;
         }
 
     }
-    @media screen and (max-width: $screen-md-max){
+    @include media-breakpoint-down(md) {
         > .inner-panel:first-child {
             min-width: 200px;
             padding-left: 10px;
@@ -2332,7 +2332,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     background-color: #f7f7f7;
                     border-radius: 0 10px 0 0;
                     border-top: 3px solid #eee;
-                    @include gradient-vertical($start-color: #f7f7f7, $end-color: #fff);
+                    @include gradient-y($start-color: #f7f7f7, $end-color: #fff);
                 }
             }
 
@@ -2340,7 +2340,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
         
 
-        @media screen and (min-width: $screen-md-min){
+        @include media-breakpoint-up(md) {
             .grouping-row > .label-section > .label-container > small {
                 color: #ddd;
                 transition: color .33s;

@@ -10,7 +10,7 @@ $navbar-transition-easing: ease-out;
     margin-bottom: 0;
     transform: translate3d(0,0,0);
 
-    @media screen and (min-width: $navbar-fixed-breakpoint){
+    @include media-breakpoint-up(md) {
         background-color: rgba(255,255,255,0.933);
     }
 
@@ -25,7 +25,7 @@ $navbar-transition-easing: ease-out;
         line-height: $navbar-full-height;
         position: relative;
 
-        @media screen and (min-width: $navbar-fixed-breakpoint){
+        @include media-breakpoint-up(md) {
             
             min-height: $navbar-small-height;
             height: $navbar-full-height;
@@ -75,15 +75,15 @@ $navbar-transition-easing: ease-out;
         white-space: nowrap;
 
         /* Match browse page facets width */
-        @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max){
+        @include media-breakpoint-only(md) {
             min-width: 300px;
         }
 
-        @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max){
+        @include media-breakpoint-only(sm) {
             min-width: 290px;
         }
 
-        @media screen and (max-width: $screen-xs-max){
+        @include media-breakpoint-only(xs) {
             min-width: 225px;
             max-width: 240px;
         }
@@ -114,7 +114,7 @@ $navbar-transition-easing: ease-out;
                     padding-top: 10px;
                     transition: padding $navbar-transition-length, transform $navbar-transition-length;
                     max-height: inherit;
-                    @media screen and (min-width: $navbar-fixed-breakpoint){
+                    @include media-breakpoint-up(md) {
                         body.scrolled-past-top & {
                             padding-top: 6px !important;
                             padding-bottom: 6px !important;
@@ -131,7 +131,7 @@ $navbar-transition-easing: ease-out;
                 transform: translate3d(0px,0,0);
                 transition: font-size $navbar-transition-length, transform $navbar-transition-length;
 
-                @media screen and (min-width: $navbar-fixed-breakpoint){
+                @include media-breakpoint-up(md) {
                     body.scrolled-past-top & {
                         font-size: 1.25rem;
                         transform: translate3d(-5px,0,0);
@@ -151,7 +151,7 @@ $navbar-transition-easing: ease-out;
                         font-size: 1.25rem;
                         line-height: inherit;
                         vertical-align: bottom;
-                        color: $navbar-default-link-active-bg;
+                        color: $navbar-light-active-color;
                     }
                 }
                 > .img-container > svg#fourfront_logo_svg {
@@ -208,7 +208,7 @@ $navbar-transition-easing: ease-out;
                         width: 30px;
                         height: 30px;
                     }
-                    @media screen and (min-width: $screen-lg-min){
+                    @include media-breakpoint-up(lg) {
                         padding-left: 10px;
                         img.account-icon-image {
                             margin-right: 12px;
@@ -225,7 +225,7 @@ $navbar-transition-easing: ease-out;
         &.active > a {
             color: $navbar-link-active-color; /* Set in _base.scss */
             //text-shadow: 0 0 0px $navbar-link-active-color;
-            background-color: $navbar-link-active-background-color;
+            background-color: $dropdown-link-active-bg;
 
             i.icon {
                 text-shadow: none;
@@ -237,7 +237,7 @@ $navbar-transition-easing: ease-out;
         &.dropdown-open-for > a {
             color: $navbar-link-hover-color; /* Set in _base.scss */
             text-shadow: 0 0 0px $navbar-link-hover-color;
-            background-color: $navbar-default-link-active-bg;
+            background-color: $dropdown-link-active-bg;
 
             i.icon {
                 text-shadow: none;
@@ -246,12 +246,12 @@ $navbar-transition-easing: ease-out;
 
         /* Disabled sign-in link */
         > a[disabled] {
-            color: $gray-light;
+            color: $gray-400;
 
             &:focus,
             &:hover {
                 background-color: transparent;
-                color: $gray-light;
+                color: $gray-400;
                 cursor: default;
             }
         }
@@ -393,7 +393,7 @@ $navbar-transition-easing: ease-out;
     box-shadow: 0 0 3px rgba(0,0,0,0);
     transition: border-color $navbar-transition-length, box-shadow $navbar-transition-length;
 
-    @media (min-width: $navbar-fixed-breakpoint) {
+    @include media-breakpoint-up(md) {
         position: fixed;
 
         body.scrolled-past-top &,
@@ -488,7 +488,7 @@ $navbar-transition-easing: ease-out;
         //transform: rotate3d(0, 0, 1, -45deg) translate3d(25px,-5px,0);
     //}
 
-    @media screen and (min-width: $screen-sm-min){
+    @include media-breakpoint-up(sm) {
         padding-top: 11px;
         line-height: 28px;
         padding-bottom: 12px;
@@ -501,7 +501,7 @@ $navbar-transition-easing: ease-out;
         width: 90%;
         @include font-size(0.85);
 
-        @media screen and (min-width: $screen-md-min) {
+        @include media-breakpoint-up(md) {
             width: 100%;
             text-align: center;
         }
@@ -540,7 +540,7 @@ $navbar-transition-easing: ease-out;
         transform: scale3d(1.5,1.5,1.5) translate3d(0, 0, 0);
     }
 
-    @media screen and (min-width: $screen-md-min) {
+    @include media-breakpoint-up(md) {
         position: static;
         margin-top: -4px;
         margin-left: 30px;
@@ -548,7 +548,7 @@ $navbar-transition-easing: ease-out;
     }
 }
 
-@media (min-width: $screen-md-min) {
+@include media-breakpoint-up(md) {
     .navbar-container {
 
         &.scrolled-at-top {
@@ -561,7 +561,7 @@ $navbar-transition-easing: ease-out;
     }
 }
 
-@media (max-width: $screen-xs-max) {
+@include media-breakpoint-only(xs) {
 	ul.navbar-nav {
 		margin-bottom: 10px !important;
 		margin-top: 10px;
@@ -602,7 +602,7 @@ $navbar-transition-easing: ease-out;
         }
     }
 
-    @media screen and (min-width: $grid-float-breakpoint) {
+    @include media-breakpoint-up(sm) {
         /* left: -1px; */
         /* margin-top: 1px !important; */
         padding: 10px 0;
@@ -638,7 +638,7 @@ $navbar-transition-easing: ease-out;
     margin-bottom: 0;//($navbar-full-height - $navbar-small-height) / 2;
     line-height: inherit;
 
-    @media screen and (max-width: $grid-float-breakpoint-max){
+    @include media-breakpoint-only(xs) {
         line-height: $navbar-small-height;
     }
 
@@ -668,7 +668,7 @@ $navbar-transition-easing: ease-out;
         
     }*/
 
-    @media (max-width: $grid-float-breakpoint-max) {
+    @include media-breakpoint-only(xs) {
         // Dropdowns get custom display when collapsed
 
         margin-bottom: 0px !important;
@@ -696,7 +696,7 @@ $navbar-transition-easing: ease-out;
             }
 
             > li > a {
-                line-height: $line-height-computed;
+                line-height: $line-height-base * $font-size-base;
                 &:hover,
                 &:focus {
                     color: #fff;
@@ -704,7 +704,7 @@ $navbar-transition-easing: ease-out;
             }
                         
             > li > div > a {
-                line-height: $line-height-computed;
+                line-height: $line-height-base * $font-size-base;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
@@ -713,7 +713,7 @@ $navbar-transition-easing: ease-out;
             }
 
             > li > div > div > a {
-                line-height: $line-height-computed;
+                line-height: $line-height-base * $font-size-base;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
@@ -759,7 +759,7 @@ $navbar-transition-easing: ease-out;
 // User Actions Dropwdown
 
 .navbar-acct {
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(sm) {
         margin-left: 10px;
         margin-right: 0px; // Align w/ right-most container edge.
     }
@@ -789,15 +789,15 @@ $navbar-transition-easing: ease-out;
     max-width: 145px;
     min-width: 80px;
 
-    @media screen and (min-width: $screen-lg-min) {
+    @include media-breakpoint-up(lg) {
         max-width: 210px;
         min-width: 120px;
     }
-    @media screen and (max-width: $screen-sm-max) {
+    @include media-breakpoint-down(sm) {
         max-width: 200px;
         //width: 150px;
     }
-    @media screen and (max-width: $screen-xs-max) {
+    @include media-breakpoint-down(xs) {
         max-width: none;
         width: auto;
     }

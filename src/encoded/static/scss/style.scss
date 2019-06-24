@@ -28,19 +28,25 @@ $link-color: #428bca;
 /** Setup some other variables for tables, etc. **/
 $expset-table-border-color : #eee;
 
+
+@import "bootstrap/bootstrap";
+
+
 // Bootstrap default variables and mixins
-@import "bootstrap/variables";
-@import "bootstrap/mixins";
+//@import "bootstrap/variables";
+//@import "bootstrap/mixins";
+
 
 // Fourfront variables & mixins - (some used in overridden bootstrap CSS)
 @import "encoded/mixins-custom";
 @import "encoded/base";
 
 // Reset
-@import "bootstrap/normalize";
+//@import "bootstrap/normalize";
 //@import "bootstrap/print";
 
 // Core CSS
+/*
 @import "bootstrap/scaffolding";
 @import "bootstrap/type";
 @import "bootstrap/code";
@@ -48,8 +54,9 @@ $expset-table-border-color : #eee;
 @import "bootstrap/tables";
 @import "bootstrap/forms";
 @import "bootstrap/buttons";
-
+*/
 // Components
+/*
 @import "bootstrap/component-animations";
 //@import "bootstrap/glyphicons";
 @import "bootstrap/dropdowns";
@@ -77,7 +84,7 @@ $expset-table-border-color : #eee;
 @import "bootstrap/tooltip";
 @import "bootstrap/popovers";
 //@import "bootstrap/carousel";
-
+*/
 // ENCODED
 
 // Font Awesome
@@ -85,8 +92,6 @@ $expset-table-border-color : #eee;
 
 
 // ENCODE Layout etc. SCSS
-
-// SMACSS-based architecture (http://smacss.com/)
 
 @import "encoded/layout";
 // @import "encoded/modals"; -- Deleted
@@ -105,5 +110,7 @@ $expset-table-border-color : #eee;
 @import "encoded/theme";
 
 // Utility classes - Bootstrap 3, keep last
+/*
 @import "bootstrap/utilities";
 @import "bootstrap/responsive-utilities";
+*/
