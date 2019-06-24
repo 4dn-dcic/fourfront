@@ -40,7 +40,7 @@ describe('Testing ExperimentSetView', function() {
         );
 
         ExperimentSetView = require('../item-pages/ExperimentSetView').default;
-        RawFilesStackedTable = require('../browse/components').RawFilesStackedTable;
+        RawFilesStackedTable = require('../browse/components/file-tables').RawFilesStackedTable;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
 

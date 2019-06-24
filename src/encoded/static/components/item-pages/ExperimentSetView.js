@@ -13,11 +13,10 @@ import {
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { QCMetricFromSummary } from './FileView';
-import {
-    RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton,
-    SelectedFilesController, uniqueFileCountNonMemoized
-} from './../browse/components';
-import SelectedFilesDownloadButton from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
+
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components/file-tables';
+import { SelectedFilesController, uniqueFileCountNonMemoized } from './../browse/components/SelectedFilesController';
+import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
 // eslint-disable-next-line no-unused-vars

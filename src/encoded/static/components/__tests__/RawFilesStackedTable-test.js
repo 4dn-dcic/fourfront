@@ -19,8 +19,8 @@ describe('Testing RawFilesStackedTable', function() {
 
     beforeEach(function() {
 
-        RawFilesStackedTable = require('./../browse/components').RawFilesStackedTable;
-        SelectedFilesController = require('./../browse/components').SelectedFilesController;
+        RawFilesStackedTable = require('./../browse/components/file-tables').RawFilesStackedTable;
+        SelectedFilesController = require('./../browse/components/SelectedFilesController').SelectedFilesController;
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;

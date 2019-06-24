@@ -15,7 +15,7 @@ import { CustomColumnSelector } from './../CustomColumnController';
  * This component must be fed props from CustomColumnController (for columns UI), SelectedFilesController (for selected files read-out).
  * Some may need to be transformed to exclude certain non-user-controlled columns (e.g. @type) and such.
  */
-export class AboveTableControls extends React.PureComponent {
+export class AboveTableControlsBase extends React.PureComponent {
 
     static getCustomColumnSelectorPanelMapDefinition(props){
         return {

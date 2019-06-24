@@ -10,7 +10,7 @@ import { ChartDataController } from './../../../viz/chart-data-controller';
 import { AboveTablePanelWrapper } from './AboveTablePanelWrapper';
 import { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedFilesControls';
 import { fileCountWithDuplicates, SelectedFilesController } from './../SelectedFilesController';
-import { AboveTableControls } from './AboveTableControls';
+import { AboveTableControlsBase } from './AboveTableControlsBase';
 
 
 
@@ -36,21 +36,6 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
         }
         return _.keys(existingFileTypeFiltersObject);
     });
-
-    /*
-    static getDerivedStateFromProps(props, state){
-        const { selectedFiles } = props;
-        const selectedFileCount = fileCountWithDuplicates(selectedFiles);
-        const newState = {
-            'fileTypeFilters' : AboveBrowseViewTableControls.filterFileTypeFilters(state.fileTypeFilters, selectedFiles)
-        };
-        // Close FileType filter panel if no selected files.
-        if (state.open === 'filterFilesBy' && selectedFileCount === 0){
-            newState.open = newState.reallyOpen = false;
-        }
-        return newState;
-    }
-    */
 
     static getDerivedStateFromProps(props, state){
         // Keep up to date if unselect files w/ such active filters.
@@ -112,11 +97,11 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
                             "close" : selectedFileCount === 0
                         }
                     },
-                    AboveTableControls.getCustomColumnSelectorPanelMapDefinition(this.props)
+                    AboveTableControlsBase.getCustomColumnSelectorPanelMapDefinition(this.props)
                 )
             }
         );
 
-        return <AboveTableControls {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControls>;
+        return <AboveTableControlsBase {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControlsBase>;
     }
 }

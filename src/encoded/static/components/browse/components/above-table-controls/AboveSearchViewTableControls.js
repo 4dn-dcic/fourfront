@@ -3,7 +3,7 @@
 import React from 'react';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { AboveTableControls } from './AboveTableControls';
+import { AboveTableControlsBase } from './AboveTableControlsBase';
 
 
 export const AboveSearchViewTableControls = React.memo(function AboveSearchViewTableControls(props){
@@ -55,5 +55,5 @@ export const AboveSearchViewTableControls = React.memo(function AboveSearchViewT
         { "panelMap" : AboveTableControls.getCustomColumnSelectorPanelMapDefinition(props) }
     );
 
-    return <AboveTableControls {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControls>;
+    return <AboveTableControlsBase {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControlsBase>;
 });

@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
-import { ExperimentSetDetailPane, defaultColumnExtensionMap } from './../../../browse/components';
+import { defaultColumnExtensionMap } from './../../../browse/components/table-commons';
+import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
 import { console } from './../../../util';
 
 

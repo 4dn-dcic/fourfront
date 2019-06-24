@@ -9,13 +9,18 @@ import ReactTooltip from 'react-tooltip';
 import { Button } from 'react-bootstrap';
 import { IndeterminateCheckbox } from './../forms/components/IndeterminateCheckbox';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
-import { Filters, navigate, typedefs, JWT } from './../util';
+import { Filters, navigate, typedefs } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
-import {
-    SearchResultTable, defaultColumnExtensionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, ExperimentSetDetailPane,
-    FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
-} from './components';
+
+import { defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components/table-commons';
+import { CustomColumnController } from './components/CustomColumnController';
+import { SearchResultTable } from './components/SearchResultTable';
+import { FacetList, onFilterHandlerMixin } from './components/FacetList';
+import { SortController } from './components/SortController';
+
+import { SelectedFilesController } from './components/SelectedFilesController';
+import { ExperimentSetDetailPane } from './components/ExperimentSetDetailPane';
+
 
 import { store } from './../../store';
 import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';

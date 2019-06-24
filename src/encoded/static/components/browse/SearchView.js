@@ -8,11 +8,15 @@ import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import Alerts from './../alerts';
 import { console, object, Filters, Schemas, navigate, typedefs } from './../util';
-import { SortController, SearchResultTable, SearchResultDetailPane,
-    CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns
-} from './components';
+
+import { defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components/table-commons';
+import { AboveSearchTablePanel } from './components/AboveSearchTablePanel';
 import { AboveSearchViewTableControls } from './components/above-table-controls/AboveSearchViewTableControls';
+import { CustomColumnController } from './components/CustomColumnController';
+import { SearchResultTable } from './components/SearchResultTable';
+import { FacetList, onFilterHandlerMixin } from './components/FacetList';
+import { SearchResultDetailPane } from './components/SearchResultDetailPane';
+import { SortController } from './components/SortController';
 
 
 // eslint-disable-next-line no-unused-vars
