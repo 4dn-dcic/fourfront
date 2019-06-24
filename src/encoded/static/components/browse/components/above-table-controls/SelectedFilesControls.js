@@ -174,7 +174,7 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         'selectedFiles' : PropTypes.object.isRequired,
         'currentFileTypeFilters' : PropTypes.arrayOf(PropTypes.string).isRequired,
         'setFileTypeFilters' : PropTypes.func.isRequired,
-        'closeButtonClickHandler' : PropTypes.func
+        'onClosePanel' : PropTypes.func
     };
 
     static fileFormatButtonProps = {
@@ -216,14 +216,14 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
 
 const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByButton(props){
 
-    const { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, currentOpenPanel } = props;
+    const { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, active } = props;
     const isDisabled = !selectedFiles || _.keys(selectedFiles).length === 0;
     const currentFiltersLength = currentFileTypeFilters.length;
     const tooltip = "<div class='text-center'>Filter down selected files based on their file type.<br/>(does not affect checkboxes below)</div>";
 
     return (
         <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled}
-            onClick={onFilterFilesByClick} active={currentOpenPanel === 'filterFilesBy'} data-tip={tooltip} data-html>
+            onClick={onFilterFilesByClick} active={active} data-tip={tooltip} data-html>
             <i className="icon icon-filter icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
@@ -239,7 +239,7 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
 
 export const SelectedFilesControls = React.memo(function SelectedFilesControls(props){
 
-    const { barplot_data_filtered, barplot_data_unfiltered } = props;
+    const { barplot_data_filtered, barplot_data_unfiltered, currentOpenPanel } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
     const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
     // This gets unique file count from ES aggs. In future we might be able to get total including
@@ -253,8 +253,9 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
             <div className="pull-left box selection-buttons">
                 <ButtonGroup>
                     <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalUniqueFilesCount} />
-                    <SelectedFilesFilterByButton {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters',
-                        'onFilterFilesByClick', 'currentOpenPanel' ), selectedFileProps)} totalFilesCount={totalUniqueFilesCount} />
+                    <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
+                        active={currentOpenPanel === "filterFilesBy"}
+                        {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters', 'currentOpenPanel' ), selectedFileProps)} />
                 </ButtonGroup>
             </div>
         </div>

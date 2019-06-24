@@ -15,8 +15,9 @@ import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTraci
 import { QCMetricFromSummary } from './FileView';
 import {
     RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton,
-    SelectedFilesController, SelectedFilesDownloadButton, uniqueFileCountNonMemoized
+    SelectedFilesController, uniqueFileCountNonMemoized
 } from './../browse/components';
+import SelectedFilesDownloadButton from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
 // eslint-disable-next-line no-unused-vars

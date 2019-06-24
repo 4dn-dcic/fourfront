@@ -283,7 +283,7 @@ class Provider extends React.PureComponent {
      */
     render(){
         const { children } = this.props;
-        const childChartProps = _.extend({}, children.props,
+        const childChartProps = _.extend({}, this.props, children.props,
             _.pick(state, 'barplot_data_filtered', 'barplot_data_unfiltered', 'barplot_data_fields', 'isLoadingChartData'),
             {
                 'updateBarPlotFields'   : ChartDataController.updateBarPlotFields,

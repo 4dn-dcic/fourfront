@@ -13,11 +13,12 @@ import { Filters, navigate, typedefs, JWT } from './../util';
 import { ChartDataController } from './../viz/chart-data-controller';
 import {
     SearchResultTable, defaultColumnExtensionMap, columnsToColumnDefinitions,
-    SortController, SelectedFilesController, CustomColumnController, AboveTableControls, ExperimentSetDetailPane,
+    SortController, SelectedFilesController, CustomColumnController, ExperimentSetDetailPane,
     FacetList, onFilterHandlerMixin, defaultHiddenColumnMapFromColumns
 } from './components';
 
 import { store } from './../../store';
+import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';
 
 //import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 //import { BROWSE } from './../testdata/browse/checkboxes';
@@ -249,7 +250,7 @@ class ResultTableContainer extends React.PureComponent {
                     null
                 }
                 <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9')}>
-                    <AboveTableControls parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
+                    <AboveBrowseViewTableControls parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
                         {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',
                             'columns', 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles',

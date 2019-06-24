@@ -9,7 +9,7 @@ export { SortController } from './SortController';
 export { SelectedFilesController, uniqueFileCount, uniqueFileCountNonMemoized, fileCountWithDuplicates } from './SelectedFilesController';
 export { CustomColumnController, CustomColumnSelector } from './CustomColumnController';
 export { SearchResultTable } from './SearchResultTable';
-export { AboveTableControls, BrowseViewSelectedFilesDownloadButton, SelectedFilesDownloadButton } from './AboveTableControls';
+export { BrowseViewSelectedFilesDownloadButton, SelectedFilesDownloadButton } from './above-table-controls/SelectedFilesDownloadButton';
 export { AboveSearchTablePanel } from './AboveSearchTablePanel';
 export { ExperimentSetDetailPane } from './ExperimentSetDetailPane';
 export { SearchResultDetailPane } from './SearchResultDetailPane';
