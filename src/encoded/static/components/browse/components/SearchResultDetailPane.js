@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
-import { Detail, FlexibleDescriptionBox } from './../../item-pages/components';
+import { Detail } from './../../item-pages/components/ItemDetailList';
+import { FlexibleDescriptionBox } from './../../item-pages/components/FlexibleDescriptionBox';
 
 
 export class SearchResultDetailPane extends React.Component {
@@ -16,7 +17,7 @@ export class SearchResultDetailPane extends React.Component {
         }),
         'popLink' : PropTypes.bool,
         //'windowWidth' : PropTypes.number.isRequired
-    }
+    };
 
     componentDidMount(){
         ReactTooltip.rebuild();
@@ -26,29 +27,23 @@ export class SearchResultDetailPane extends React.Component {
         if (this.props.open && !pastProps.open) ReactTooltip.rebuild();
     }
 
-    descriptionBox(description = this.props.result.description){
-        if (!description) return null;
-        return (
-            <div className="flex-description-container">
-                <h5><i className="icon icon-fw icon-align-left"/>&nbsp; Description</h5>
-                <FlexibleDescriptionBox
-                    //windowWidth={this.props.windowWidth}
-                    description={ description }
-                    fitTo="self"
-                    textClassName="text-normal"
-                    collapsedHeight="auto"
-                    linesOfText={2}
-                />
-                <hr className="desc-separator" />
-            </div>
-        );
-    }
-
     render (){
-        var { result, popLink } = this.props;
+        const { result, popLink } = this.props;
         return (
             <div>
-                { this.descriptionBox(result.description) }
+                { !result.description ? null : (
+                    <div className="flex-description-container">
+                        <h5><i className="icon icon-fw icon-align-left"/>&nbsp; Description</h5>
+                        <FlexibleDescriptionBox
+                            //windowWidth={this.props.windowWidth}
+                            description={result.description}
+                            fitTo="self"
+                            textClassName="text-normal"
+                            collapsedHeight="auto"
+                            linesOfText={2} />
+                        <hr className="desc-separator" />
+                    </div>
+                )}
                 <div className="item-page-detail">
                     <h5 className="text-500"><i className="icon icon-fw icon-list"/>&nbsp; Details</h5>
                     <Detail context={result} open={false} popLink={popLink}/>

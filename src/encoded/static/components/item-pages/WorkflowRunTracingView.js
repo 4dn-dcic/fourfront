@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
-import { Checkbox, Button } from 'react-bootstrap';
-import * as globals from './../globals';
-import { console, object, expFxn, ajax, Schemas, layout } from './../util';
-import { WorkflowNodeElement, TabbedView, WorkflowDetailPane, WorkflowGraphSectionControls } from './components';
+import { console, ajax } from './../util';
+import { WorkflowNodeElement } from './components/WorkflowNodeElement';
+import { WorkflowDetailPane } from './components/WorkflowDetailPane';
+import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
+import Graph, { parseAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
@@ -73,8 +72,8 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     }
 
     loadGraphSteps(force = false, cb = null, cache = false){
-        const context = this.props.context;
-        const steps = this.state.steps;
+        const { context } = this.props;
+        const { steps } = this.state;
 
         if (typeof context.uuid !== 'string') return;
         if (!this.shouldGraphExist()) return;
@@ -129,10 +128,10 @@ export class FileViewGraphSection extends WorkflowGraphSection {
      * @returns {{ tab: JSX.Element, key: string, disabled?: boolean, isDefault?: boolean, content: JSX.Element }} Tab object
      */
     static getTabObject(props, state, onToggleAllRuns, width){
-        var { loadingGraphSteps, steps } = state,
-            { context } = props,
-            iconClass   = "icon icon-fw icon-",
-            tooltip     = null;
+        const { loadingGraphSteps, steps } = state;
+        const { context } = props;
+        let iconClass = "icon icon-fw icon-";
+        let tooltip = null;
 
         if (steps === null || loadingGraphSteps){
             iconClass += 'circle-o-notch icon-spin';
@@ -247,12 +246,12 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     render(){
-        var { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props,
-            { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state,
-            graphProps = Array.isArray(steps) ? this.commonGraphProps() : null,
-            isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes,
-            isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false),
-            isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
+        const { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props;
+        const { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state;
+        const graphProps = Array.isArray(steps) ? this.commonGraphProps() : null;
+        const isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes;
+        const isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false);
+        const isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
 
         return (
             <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>

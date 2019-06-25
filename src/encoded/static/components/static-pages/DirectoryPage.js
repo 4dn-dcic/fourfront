@@ -3,21 +3,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import url from 'url';
 import { console, object } from'./../util';
-import StaticPage, { StaticEntry, parseSectionsContent } from './StaticPage';
+import StaticPage, { parseSectionsContent } from './StaticPage';
 import { NextPreviousPageSection } from './components';
 
 
-export default class DirectoryPage extends React.Component {
+export default class DirectoryPage extends React.PureComponent {
 
     render(){
-        var { context } = this.props,
-            atId = object.itemUtil.atId(context),
-            childrenHaveChildren = _.any(context.children || [], function(c){
-                return c && c.children && c.children.length > 0;
-            }),
-            content = (context.content || []).length > 0 ? StaticPage.renderSections(StaticPage.defaultProps.entryRenderFxn, parseSectionsContent(context)) : null;
+        const { context } = this.props;
+        const childrenHaveChildren = _.any(context.children || [], function(c){
+            return c && c.children && c.children.length > 0;
+        });
+        const content = (context.content || []).length > 0 ? StaticPage.renderSections(StaticPage.defaultProps.entryRenderFxn, parseSectionsContent(context)) : null;
 
         return (
             <div id="content" className="container">
@@ -33,34 +31,31 @@ export default class DirectoryPage extends React.Component {
 }
 
 
+export const DirectoryBodyGrid = React.memo(function DirectoryBodyGrid(props){
+    const { context : { children = [] }, childrenHaveChildren } = props;
+    return (
+        <div className={"row grid-of-sections" + (childrenHaveChildren ? ' with-sub-children' : '')}>
+            { _.map(children, function(child){
+                const atId = object.itemUtil.atId(child);
+                return <DirectoryBodyGridItem childrenHaveChildren={childrenHaveChildren} {...child} atId={atId} key={atId} />;
+            }) }
+        </div>
+    );
+});
 
-export class DirectoryBodyGrid extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.renderGridItem = this.renderGridItem.bind(this);
-    }
-
-    renderGridItem(child, index, all){
-        var childrenHaveChildren = this.props.childrenHaveChildren;
-        var childPageCount = (child.children || []).length;
-        var childID = object.itemUtil.atId(child);
-        return (
-            <div className={"grid-item col-xs-12 col-md-" + (childrenHaveChildren ? '4' : '12')} key={childID || child.name}>
-                <a href={childID} className="inner">
-                    <h3 className="text-300 mb-05 mt-05 title-link text-ellipsis-container">{ child.display_title }</h3>
-                    { child.description ?
-                        <div className={"page-description" + (childrenHaveChildren ? ' text-ellipsis-container' : '')}>{ child.description }</div> : null
-                    }
-                    { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-right">{ childPageCount }&nbsp; <i className={"icon icon-fw icon-file" + (childPageCount > 1 ? "s" : "") + "-o"}/></h6> : null }
-                </a>
-            </div>
-        );
-    }
-
-    render(){
-        var { context, childrenHaveChildren } = this.props;
-        return <div className={"row grid-of-sections" + (childrenHaveChildren ? ' with-sub-children' : '')} children={_.map(context.children || [], this.renderGridItem)}/>;
-    }
-
+function DirectoryBodyGridItem(props){
+    const { childrenHaveChildren, children = [], atId: childID, name, description, display_title } = props;
+    const childPageCount = children.length;
+    return (
+        <div className={"grid-item col-xs-12 col-md-" + (childrenHaveChildren ? '4' : '12')} key={childID || name}>
+            <a href={childID} className="inner">
+                <h3 className="text-300 mb-05 mt-05 title-link text-ellipsis-container">{ display_title }</h3>
+                { description ?
+                    <div className={"page-description" + (childrenHaveChildren ? ' text-ellipsis-container' : '')}>{ description }</div> : null
+                }
+                { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-right">{ childPageCount }&nbsp; <i className={"icon icon-fw icon-file" + (childPageCount > 1 ? "s" : "") + "-o"}/></h6> : null }
+            </a>
+        </div>
+    );
 }
+
