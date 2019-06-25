@@ -6,6 +6,7 @@ import _ from 'underscore';
 import { AboveTableControlsBase } from './AboveTableControlsBase';
 
 
+/** This left section for Search should be made prettier, either kept in 4DN or re-used. */
 export const AboveSearchViewTableControls = React.memo(function AboveSearchViewTableControls(props){
     const { context, currentAction, showTotalResults } = props;
 
@@ -25,7 +26,6 @@ export const AboveSearchViewTableControls = React.memo(function AboveSearchViewT
         );
     }
 
-
     // FOR NOW, we'll stick 'add' button here. -- IF NO SELECTED FILES CONTROLS
     let addButton = null;
     // don't show during submission search "selecting existing"
@@ -33,9 +33,9 @@ export const AboveSearchViewTableControls = React.memo(function AboveSearchViewT
         const addAction = _.findWhere(context.actions, { 'name' : 'add' });
         if (addAction && typeof addAction.href === 'string'){
             addButton = (
-                <a className={"btn btn-primary btn-xs" + (total ? " ml-05" : "")} href={addAction.href} data-skiprequest="true">
-                    <i className="icon icon-fw icon-plus shift-down-1"/>
-                    <span>Create</span>
+                <a className={"btn btn-primary btn-xs" + (total ? " ml-1" : "")} href={addAction.href} data-skiprequest="true">
+                    <i className="icon icon-fw icon-plus shift-down-1 mr-03"/>
+                    Create New
                     &nbsp;
                 </a>
             );
