@@ -56,7 +56,7 @@ body .rc-tabs-top {
 	.rc-tabs-bar.extra-style-2 {
 		border-top: none;
 		border-bottom: none;
-		background: #22656d;
+		background: $brand-primary-dark;
 
 		.rc-tabs-nav {
 			padding: 4px 0px 4px;
@@ -193,7 +193,7 @@ body .rc-tabs-top {
 .rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
 	height: 48px;
 	background: none;
-	border: 2px solid #22656d;
+	border: 2px solid $brand-primary-dark;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 	border-bottom: none;
 	border-left: none;

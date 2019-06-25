@@ -45,9 +45,11 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
         );
     }
 
+    const cls = "btn-primary"; //disabled ? 'btn-outline-primary' : 'btn-primary';
+
     return (
         <SelectedFilesDownloadButton selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
-            id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={disabled ? 'btn-secondary' : 'btn-primary'}>
+            id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={cls}>
             <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
             <span className="hidden-xs hidden-sm">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
@@ -86,7 +88,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         'id' : null,
         'filenamePrefix' : "metadata_",
         'children' : "Download",
-        'className' : 'btn-primary'
+        'className' : "btn-primary"
     };
 
     constructor(props){
@@ -111,11 +113,12 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         // so ideally will calculate `props.disabled` rather than use the memoized
         // fileCountWithDuplicates here
         const isDisabled = typeof disabled === 'boolean' ? disabled : fileCountWithDuplicates(selectedFiles) === 0;
+        btnProps.className = "btn " + (modalOpen ? "active " : "") + btnProps.className;
         return (
             <React.Fragment>
-                <Button {...btnProps} disabled={isDisabled} onClick={this.showModal}>
+                <button type="button" {...btnProps} disabled={isDisabled} onClick={this.showModal}>
                     { children }
-                </Button>
+                </button>
                 { modalOpen ?
                     <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix }} onHide={this.hideModal}/>
                     : null }

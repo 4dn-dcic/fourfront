@@ -41,6 +41,22 @@
 	border-radius: 11px;
 }
 
+/** Overrides for own styled btns **/
+
+.btn.btn-primary-dark {
+    @include button-variant($btn-primary-color, $brand-primary-dark, $brand-primary-dark);
+}
+
+.btn.btn-primary {
+    /* Using brand-primary-dark color in place of default "darken(...)" to match rest of UI more nicely. */
+    border-color: $brand-primary-dark;
+    &:hover, &:active, &.active {
+        background-color: $brand-primary-dark;
+        border-color: $brand-primary-dark;
+    }
+}
+
+
 /** Adding Bootstrap 4 CSS button 'Outline' styles **/
 /** Copied from https://v4-alpha.getbootstrap.com/components/buttons/ **/
 
@@ -57,12 +73,21 @@
     background-color: transparent;
 }
 
-.btn-outline-primary {
+.btn-outline-primary-light {
     color: $brand-primary;
     border-color: $brand-primary;
     &:hover, &:active, &.active {
         color: $btn-primary-color;
         background-color: $brand-primary;
+    }
+}
+
+.btn-outline-primary {
+    color: $brand-primary-dark;
+    border-color: $brand-primary-dark;
+    &:hover, &:active, &.active {
+        color: $btn-primary-color;
+        background-color: $brand-primary-dark;
     }
 }
 

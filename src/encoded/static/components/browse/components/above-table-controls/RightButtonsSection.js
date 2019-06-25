@@ -29,7 +29,7 @@ export const ConfigureVisibleColumnsButton = React.memo(function ConfigureVisibl
     );
 });
 ConfigureVisibleColumnsButton.defaultProps = {
-    "className" : "btn btn-outline-secondary"
+    "className" : "btn btn-outline-primary"
 };
 
 
@@ -45,7 +45,7 @@ export class ToggleLayoutButton extends React.PureComponent {
     };
 
     static defaultProps = {
-        'className' : "btn btn-info"
+        'className' : "btn btn-outline-primary"
     };
 
     constructor(props){

@@ -71,15 +71,13 @@ export class SelectAllFilesButton extends React.PureComponent {
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
 
-        var isAllSelected = this.isAllSelected();
-
         this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
-            if (!isAllSelected){
-                var currentHrefParts = url.parse(href, true);
-                var currentHrefQuery = _.extend({}, currentHrefParts.query);
+            if (!this.isAllSelected()){
+                const currentHrefParts = url.parse(href, true);
+                const currentHrefQuery = _.extend({}, currentHrefParts.query);
                 currentHrefQuery.field = SelectAllFilesButton.fieldsToRequest;
                 currentHrefQuery.limit = 'all';
-                var reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
+                const reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
                 ajax.load(reqHref, (resp)=>{
                     const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
                     const filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
@@ -98,16 +96,18 @@ export class SelectAllFilesButton extends React.PureComponent {
         const isAllSelected = this.isAllSelected();
         const isEnabled = this.isEnabled();
         const iconClassName = "mr-05 icon icon-fw shift-down-1 icon-" + (selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'));
+        const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
 
         return (
             <div className="pull-left box selection-buttons">
-                <ButtonGroup>
-                    <Button id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)} className="btn-secondary" onClick={this.handleSelectAll}>
+                <div className="btn-group">
+                    <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
+                        className={cls} onClick={this.handleSelectAll}>
                         <i className={iconClassName}/>
                         <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>
-                    </Button>
-                </ButtonGroup>
+                    </button>
+                </div>
             </div>
         );
     }
@@ -220,10 +220,11 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
     const isDisabled = !selectedFiles || _.keys(selectedFiles).length === 0;
     const currentFiltersLength = currentFileTypeFilters.length;
     const tooltip = "<div class='text-center'>Filter down selected files based on their file type.<br/>(does not affect checkboxes below)</div>";
+    const cls = "btn btn-outline-primary" + (active ? " active" : "");
 
     return (
-        <Button id="selected-files-file-type-filter-button" className="btn-secondary" key="filter-selected-files-by" disabled={isDisabled}
-            onClick={onFilterFilesByClick} active={active} data-tip={tooltip} data-html>
+        <button type="button" id="selected-files-file-type-filter-button" className={cls} onClick={onFilterFilesByClick}
+            key="filter-selected-files-by" disabled={isDisabled} active={active} data-tip={tooltip} data-html>
             <i className="icon icon-filter icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
@@ -232,7 +233,7 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
             }
             <span className="text-400 hidden-xs hidden-sm mr-05">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>
             <i className="icon icon-angle-down icon-fw"/>
-        </Button>
+        </button>
     );
 });
 
@@ -251,12 +252,12 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
         <div>
             <SelectAllFilesButton {..._.extend(_.pick(props, 'href'), selectedFileProps)} totalFilesCount={totalUniqueFilesCount} />
             <div className="pull-left box selection-buttons">
-                <ButtonGroup>
+                <div className="btn-group">
                     <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalUniqueFilesCount} />
                     <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
                         active={currentOpenPanel === "filterFilesBy"}
                         {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters', 'currentOpenPanel' ), selectedFileProps)} />
-                </ButtonGroup>
+                </div>
             </div>
         </div>
     );

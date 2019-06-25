@@ -1288,7 +1288,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 } // .search-results-outer-container
 
 .search-headers-row {
-	background-color: #22656d;
+	background-color: $brand-primary-dark;
 	z-index: 50;
 	transform: translate3d(0,0,0) !important;
 	overflow-x: hidden;
@@ -1445,7 +1445,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 					}
 					&.is-active {
 						background-color: #eef4f5;
-						border-color: #22656d;
+						border-color: $brand-primary-dark;
 					}
 				}
 

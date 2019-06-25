@@ -1879,7 +1879,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-bottom: 15px;
                 display: block;
                 transition: border-color .25s ease-in-out, background-color .25s ease-in-out, color .25s ease-in-out;
-                background-color: #22656d;
+                background-color: $brand-primary-dark;
                 color: #fff;
                 border-radius: 3px;
                 line-height: 1.35rem;
