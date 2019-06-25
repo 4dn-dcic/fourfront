@@ -220,7 +220,7 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
     const isDisabled = !selectedFiles || _.keys(selectedFiles).length === 0;
     const currentFiltersLength = currentFileTypeFilters.length;
     const tooltip = "<div class='text-center'>Filter down selected files based on their file type.<br/>(does not affect checkboxes below)</div>";
-    const cls = "btn btn-outline-primary" + (active ? " active" : "");
+    const cls = "btn btn-primary" + (active ? " active" : "");
 
     return (
         <button type="button" id="selected-files-file-type-filter-button" className={cls} onClick={onFilterFilesByClick}
