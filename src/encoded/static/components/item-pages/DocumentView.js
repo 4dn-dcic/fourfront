@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { console, object, Schemas } from './../util';
-import { ItemFileAttachment } from './components';
+import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
 
 
