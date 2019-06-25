@@ -244,27 +244,25 @@ export const groupFilesByQCSummaryTitles = memoize(function(filesWithMetrics, se
  ** Common React Classes **
  ************************/
 
-export class FileDownloadButton extends React.PureComponent {
 
-    static defaultProps = {
-        'title' : 'Download',
-        'disabled' : false,
-        'size' : null
-    };
-
-    render(){
-        var { href, className, disabled, title, filename, size } = this.props;
-        return (
-            <a href={ href } className={(className || '') + " btn btn-default btn-primary download-button btn-block " + (disabled ? ' disabled' : '') + (size ? ' btn-' + size : '')} download data-tip={filename || null}>
-                <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
-            </a>
-        );
-    }
-}
+export const FileDownloadButton = React.memo(function FileDownloadButton(props){
+    const { href, className, disabled, title, filename, size } = props;
+    const cls = (className || '') + " btn btn-primary download-button btn-block " + (disabled ? ' disabled' : '') + (size ? ' btn-' + size : '');
+    return (
+        <a href={ href } className={cls} download data-tip={filename || null}>
+            <i className="icon icon-fw icon-cloud-download"/>{ title ? <span>&nbsp; { title }</span> : null }
+        </a>
+    );
+});
+FileDownloadButton.defaultProps = {
+    'title' : 'Download',
+    'disabled' : false,
+    'size' : null
+};
 
 export class FileDownloadButtonAuto extends React.PureComponent {
 
-    static canDownload(file, validStatuses = FileDownloadButtonAuto.defaultProps.canDownloadStatuses){
+    static canDownload = memoize(function(file, validStatuses = FileDownloadButtonAuto.defaultProps.canDownloadStatuses){
         if (!file || typeof file !== 'object'){
             console.error("Incorrect data type");
             return false;
@@ -278,7 +276,7 @@ export class FileDownloadButtonAuto extends React.PureComponent {
             return true;
         }
         return false;
-    }
+    });
 
     static propTypes = {
         'result' : PropTypes.shape({
@@ -301,17 +299,18 @@ export class FileDownloadButtonAuto extends React.PureComponent {
     canDownload(){ return FileDownloadButtonAuto.canDownload(this.props.result, this.props.canDownloadStatuses); }
 
     render(){
-        var file = this.props.result;
-        var isDisabled = !this.canDownload();
-        var props = {
+        const { result: file } = this.props;
+        const isDisabled = !this.canDownload();
+        const passProps = {
             'href' : file.href,
             'filename' : file.filename,
             'disabled' : isDisabled,
             'title' : isDisabled ? 'Not ready to download' : FileDownloadButton.defaultProps.title
         };
-        return <FileDownloadButton {...this.props} {...props} />;
+        return <FileDownloadButton {...this.props} {...passProps} />;
     }
 }
+
 
 export class ViewFileButton extends React.Component {
 
