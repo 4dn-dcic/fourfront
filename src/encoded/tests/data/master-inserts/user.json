@@ -4,7 +4,7 @@
         "first_name" : "Genomics Platform",
         "last_name" : "Administration",
         "groups": ["admin"],
-        "job_title": "Admin",
+        "role": "developer",
         "submits_for": ["hms-dbmi"],
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "uuid": "b5f738b6-455a-42e5-bc1c-77fbfd9b15d2",
