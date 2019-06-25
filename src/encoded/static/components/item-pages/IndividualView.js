@@ -3,16 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import {
-    ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AttributionTabView,
-    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
-    WorkflowNodeElement, CollapsibleItemViewButtonToolbar, WorkflowGraphSectionControls
-} from './components';
 import DefaultItemView from './DefaultItemView';
-import { console, DateUtility, navigate } from './../util';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
-import ReactTooltip from 'react-tooltip';
 
 
 export default class IndividualView extends DefaultItemView {

@@ -13,7 +13,7 @@ import { Publications } from './components/Publications';
 import { AttributionTabView } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
 import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
-import { ExpandableStaticHeader } from './../static-pages/components/BasicStaticSectionBody';
+import { ExpandableStaticHeader } from './../static-pages/components';
 
 // eslint-disable-next-line no-unused-vars
 const { TabObject, Item } = typedefs;

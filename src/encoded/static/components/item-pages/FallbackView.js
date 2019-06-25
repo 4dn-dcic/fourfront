@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { console } from './../util';
-import { ItemDetailList } from './components';
+import { ItemDetailList } from './components/ItemDetailList';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.

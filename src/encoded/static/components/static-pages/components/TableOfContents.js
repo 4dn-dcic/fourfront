@@ -9,7 +9,7 @@ import { getElementTop, animateScrollTo, getScrollingOuterElement, getPageVertic
 import { isServerSide, console, navigate, object } from './../../util';
 
 
-class TableEntry extends React.PureComponent {
+class TableEntry extends React.Component {
 
     static getChildHeaders = memoize(function(content, maxHeaderDepth, currentDepth){
         if (!TableOfContents.isContentJSX(content) || !content.props || !content.props.children) return [];
