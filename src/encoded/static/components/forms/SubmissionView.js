@@ -10,7 +10,7 @@ import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, 
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import Alerts from '../alerts';
-import { Detail } from '../item-pages/components';
+import { Detail } from './../item-pages/components/ItemDetailList';
 
 import { SubmissionTree, fieldSchemaLinkToType, fieldSchemaLinkToPath } from './components/SubmissionTree';
 import { BuildField, AliasInputField, isValueNull } from './components/submission-fields';
@@ -1296,20 +1296,21 @@ export default class SubmissionView extends React.PureComponent{
         console.log('TOP LEVEL STATE:', this.state);
         const { schemas } = this.props;
         const { currKey, keyContext, ambiguousIdx, ambiguousType, creatingType, creatingIdx, keyTypes, fullScreen, keyDisplay, keyHierarchy } = this.state;
+
         // see if initialized
         if (!keyContext || currKey === null){
             return null;
         }
-        var showAmbiguousModal = ambiguousIdx !== null && ambiguousType !== null;
-        var showAliasModal = !showAmbiguousModal && creatingIdx !== null && creatingType !== null;
-        var currType = keyTypes[currKey];
-        var currContext = keyContext[currKey];
-        var navCol = fullScreen ? 'submission-hidden-nav' : 'col-sm-3';
-        var bodyCol = fullScreen ? 'col-sm-12' : 'col-sm-9';
+        const showAmbiguousModal = ambiguousIdx !== null && ambiguousType !== null;
+        const showAliasModal = !showAmbiguousModal && creatingIdx !== null && creatingType !== null;
+        const currType = keyTypes[currKey];
+        const currContext = keyContext[currKey];
+        const navCol = fullScreen ? 'submission-hidden-nav' : 'col-sm-3';
+        const bodyCol = fullScreen ? 'col-sm-12' : 'col-sm-9';
 
         // remove context and navigate from this.props
         const { context, navigate, ...propsToPass } = this.props;
-        var currObjDisplay = keyDisplay[currKey] || currType;
+        const currObjDisplay = keyDisplay[currKey] || currType;
         return (
             <div className="submission-view-page-container container" id="content">
                 <TypeSelectModal
@@ -1600,7 +1601,7 @@ class DetailTitleBanner extends React.PureComponent {
 }
 
 
-
+/** TODO: DropdownButton to be v4 bootstrap compliant */
 class TypeSelectModal extends React.Component {
 
     constructor(props){
@@ -1643,25 +1644,24 @@ class TypeSelectModal extends React.Component {
                 </Modal.Header>
                 <Modal.Body>
                     <div onKeyDown={this.onContainerKeyDown.bind(this, submitAmbiguousType)}>
-                        <p className="mb-15">
-                            {'Please select a specific object type from the menu below.'}
-                        </p>
+                        <p>Please select a specific object type from the menu below.</p>
                         <div className="input-wrapper mb-15">
-                            <DropdownButton bsSize="small" id="dropdown-size-extra-small" title={ambiguousSelected || "No value"}>
+                            <DropdownButton id="dropdown-type-select" title={ambiguousSelected || "No value"}>
                                 { ambiguousType !== null ?
                                     itemTypeHierarchy[ambiguousType].map((val) => buildAmbiguousEnumEntry(val))
                                     : null
                                 }
                             </DropdownButton>
                         </div>
-                        <Collapse in={ambiguousDescrip !== null}>
-                            <div className="mb-15 text-larger">
-                                {'Description: ' + ambiguousDescrip}
+                        { ambiguousDescrip ?
+                            <div className="mb-15 mt-15">
+                                <h5 className="text-500 mb-02">Description</h5>
+                                { ambiguousDescrip }
                             </div>
-                        </Collapse>
-                        <Button bsSize="xsmall" bsStyle="success" disabled={ambiguousSelected === null} onClick={submitAmbiguousType}>
+                            : null}
+                        <button type="button" className="btn btn-primary" disabled={ambiguousSelected === null} onClick={submitAmbiguousType}>
                             Submit
-                        </Button>
+                        </button>
                     </div>
                 </Modal.Body>
             </Modal>
@@ -1676,6 +1676,8 @@ class AliasSelectModal extends TypeSelectModal {
         const { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias, currentSubmittingUser } = this.props;
         if (!show) return null;
 
+        const disabledBtn = creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length);
+
         return (
             <Modal show onHide={this.onHide} className="submission-view-modal">
                 <Modal.Header>
@@ -1688,17 +1690,17 @@ class AliasSelectModal extends TypeSelectModal {
                         <div className="input-wrapper mt-2 mb-2">
                             <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} withinModal />
                         </div>
-                        <Collapse in={creatingAliasMessage !== null}>
+                        { creatingAliasMessage ?
                             <div style={{ 'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em' }}>
                                 { creatingAliasMessage }
                             </div>
-                        </Collapse>
+                            : null }
                         <div className="text-right">
                             {/*
                             <Button type="button" bsStyle="danger" onClick={this.onHide}>Cancel / Exit</Button>
                             {' '}
                             */}
-                            <Button type="button" bsStyle="success" disabled={creatingAlias.indexOf(':') < 0 || (creatingAlias.indexOf(':') + 1 === creatingAlias.length)} onClick={submitAlias}>Submit</Button>
+                            <button type="button" className="btn btn-primary" disabled={disabledBtn} onClick={submitAlias}>Submit</button>
                         </div>
                     </div>
                 </Modal.Body>
