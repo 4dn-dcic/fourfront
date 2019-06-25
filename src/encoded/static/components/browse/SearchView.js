@@ -14,7 +14,7 @@ import { AboveSearchTablePanel } from './components/AboveSearchTablePanel';
 import { AboveSearchViewTableControls } from './components/above-table-controls/AboveSearchViewTableControls';
 import { CustomColumnController } from './components/CustomColumnController';
 import { SearchResultTable } from './components/SearchResultTable';
-import { FacetList, onFilterHandlerMixin } from './components/FacetList';
+import { FacetList, performFilteringQuery } from './components/FacetList';
 import { SearchResultDetailPane } from './components/SearchResultDetailPane';
 import { SortController } from './components/SortController';
 
@@ -39,8 +39,12 @@ export class SearchControllersContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.onFilter = onFilterHandlerMixin.bind(this);
+        this.onFilter = this.onFilter.bind(this);
         this.isTermSelected = this.isTermSelected.bind(this);
+    }
+
+    onFilter(facet, term, callback, skipNavigation = false, currentHref = null){
+        performFilteringQuery(this.props, facet, term, callback, skipNavigation, currentHref);
     }
 
     isTermSelected(term, facet){

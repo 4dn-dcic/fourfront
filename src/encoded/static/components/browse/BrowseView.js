@@ -15,7 +15,7 @@ import { ChartDataController } from './../viz/chart-data-controller';
 import { defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components/table-commons';
 import { CustomColumnController } from './components/CustomColumnController';
 import { SearchResultTable } from './components/SearchResultTable';
-import { FacetList, onFilterHandlerMixin } from './components/FacetList';
+import { FacetList, performFilteringQuery } from './components/FacetList';
 import { SortController } from './components/SortController';
 
 import { SelectedFilesController } from './components/SelectedFilesController';
@@ -182,7 +182,7 @@ class ResultTableContainer extends React.PureComponent {
     constructor(props){
         super(props);
         this.isTermSelected = this.isTermSelected.bind(this);
-        this.onFilter = onFilterHandlerMixin.bind(this);
+        this.onFilter = this.onFilter.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
@@ -196,6 +196,10 @@ class ResultTableContainer extends React.PureComponent {
             dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
 
         return dimContainer && dimContainer.resetWidths();
+    }
+
+    onFilter(facet, term, callback, skipNavigation = false, currentHref = null){
+        performFilteringQuery(this.props, facet, term, callback, skipNavigation, currentHref);
     }
 
 

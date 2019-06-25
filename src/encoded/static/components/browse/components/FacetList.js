@@ -9,7 +9,7 @@ import memoize from 'memoize-one';
 import moment from 'moment';
 import { Collapse, Fade } from 'react-bootstrap';
 import { console, Filters, Schemas, layout, analytics, navigate, DateUtility } from './../../util';
-import { PartialList } from './../../item-pages/components';
+import { PartialList } from './../../item-pages/components/PartialList';
 import ReactTooltip from 'react-tooltip';
 
 /**
@@ -68,7 +68,7 @@ class Term extends React.PureComponent {
      * Handle date fields, etc.
      */
     customTitleRender(){
-        var { facet, term } = this.props;
+        const { facet, term } = this.props;
 
         if (facet.aggregation_type === 'range'){
             return (
@@ -89,18 +89,21 @@ class Term extends React.PureComponent {
     }
 
     render() {
-        var { term, facet, isTermSelected } = this.props,
-            selected    = isTermSelected(term, facet),
-            title       = this.customTitleRender() || Schemas.Term.toName(facet.field, term.key) || term.key,
-            count       = (term && term.doc_count) || 0;
+        const { term, facet, isTermSelected } = this.props;
+        const { filtering } = this.state;
+        const selected    = isTermSelected(term, facet);
+        let title       = this.customTitleRender() || Schemas.Term.toName(facet.field, term.key) || term.key;
+        const count       = (term && term.doc_count) || 0;
 
-        if (!title || title === 'null' || title === 'undefined') title = 'None';
+        if (!title || title === 'null' || title === 'undefined'){
+            title = 'None';
+        }
 
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={term.key} data-key={term.key}>
                 <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={term.key}>
                     <span className="pull-left facet-selector">
-                        { this.state.filtering ?
+                        { filtering ?
                             <i className="icon icon-circle-o-notch icon-spin icon-fw"></i>
                             : selected ?
                                 <i className="icon icon-times-circle icon-fw"></i>
@@ -134,55 +137,66 @@ class FacetTermsList extends React.Component {
     }
 
     componentDidUpdate(pastProps, pastState){
+        const { mounted, defaultFacetOpen } = this.props;
+        const { facetOpen } = this.state;
         if (
             (
-                !pastProps.mounted && this.props.mounted &&
-                typeof this.props.defaultFacetOpen === 'boolean' && this.props.defaultFacetOpen !== pastProps.defaultFacetOpen
+                !pastProps.mounted && mounted &&
+                typeof defaultFacetOpen === 'boolean' && defaultFacetOpen !== pastProps.defaultFacetOpen
             ) || (
-                this.props.defaultFacetOpen === true && !pastProps.defaultFacetOpen && !this.state.facetOpen
+                defaultFacetOpen === true && !pastProps.defaultFacetOpen && !facetOpen
             )
         ){
             this.setState({ 'facetOpen' : true });
         }
-        if (pastState.facetOpen !== this.state.facetOpen){
+        if (pastState.facetOpen !== facetOpen){
             ReactTooltip.rebuild();
         }
     }
 
     handleOpenToggleClick(e) {
         e.preventDefault();
-        var willBeOpen = !this.state.facetOpen;
-        if (!willBeOpen){
-            this.setState({'facetClosing': true}, ()=>{
-                setTimeout(()=>{
-                    this.setState({ 'facetOpen' : false, 'facetClosing' : false });
-                }, 350);
-            });
-        } else {
-            this.setState({'facetOpen': true});
-        }
+        this.setState(function({ facetOpen }){
+            const willBeOpen = !facetOpen;
+            if (willBeOpen) {
+                return { 'facetOpen': true };
+            } else {
+                return { 'facetClosing': true };
+            }
+        }, ()=>{
+            setTimeout(()=>{
+                this.setState(function({ facetOpen, facetClosing }){
+                    if (facetClosing){
+                        return { 'facetOpen' : false, 'facetClosing' : false };
+                    }
+                    return null;
+                });
+            }, 350);
+        });
     }
 
     handleExpandListToggleClick(e){
         e.preventDefault();
         this.setState(function({ expanded }){
-            return {'expanded' : !expanded };
+            return { 'expanded' : !expanded };
         });
     }
 
 
     renderTerms(terms){
-        var { facet, persistentCount, onTermClick } = this.props,
-            { expanded } = this.state,
-            makeTermComponent = (term) => <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />;
+        const { facet, persistentCount, onTermClick } = this.props;
+        const { expanded } = this.state;
+        const makeTermComponent = (term) => (
+            <Term {...this.props} onClick={onTermClick} key={term.key} term={term} total={facet.total} />
+        );
 
         if (terms.length > persistentCount){
-            var persistentTerms     = terms.slice(0, persistentCount),
-                collapsibleTerms    = terms.slice(persistentCount),
-                remainingTermsCount = !expanded ? _.reduce(collapsibleTerms, function(m, term){
-                    return m + (term.doc_count || 0);
-                }, 0) : null,
-                expandButtonTitle;
+            const persistentTerms     = terms.slice(0, persistentCount);
+            const collapsibleTerms    = terms.slice(persistentCount);
+            const remainingTermsCount = !expanded ? _.reduce(collapsibleTerms, function(m, term){
+                return m + (term.doc_count || 0);
+            }, 0) : null;
+            let expandButtonTitle;
 
             if (expanded){
                 expandButtonTitle = (
@@ -202,28 +216,28 @@ class FacetTermsList extends React.Component {
             return (
                 <div className="facet-list nav">
                     <PartialList open={expanded} persistent={ _.map(persistentTerms,  makeTermComponent)} collapsible={_.map(collapsibleTerms, makeTermComponent)} />
-                    <div className="view-more-button" onClick={this.handleExpandListToggleClick} children={expandButtonTitle} />
+                    <div className="view-more-button" onClick={this.handleExpandListToggleClick}>{ expandButtonTitle }</div>
                 </div>
             );
         } else {
             return (
-                <div className="facet-list nav" children={_.map(terms, makeTermComponent)} />
+                <div className="facet-list nav">{ _.map(terms, makeTermComponent) }</div>
             );
         }
     }
 
     render(){
-        var { facet, tooltip, title } = this.props,
-            { facetOpen, facetClosing } = this.state,
-            // Filter out terms w/ 0 counts in case of range, etc.
-            terms = _.filter(facet.terms, function(term){ return term.doc_count > 0; });
+        const { facet, tooltip, title } = this.props;
+        const { facetOpen, facetClosing } = this.state;
+        // Filter out terms w/ 0 counts in case of range, etc.
+        let terms = _.filter(facet.terms, function(term){ return term.doc_count > 0; });
 
         // Filter out type=Item for now (hardcode)
         if (facet.field === 'type'){
             terms = _.filter(terms, function(t){ return t !== 'Item' && t && t.key !== 'Item'; });
         }
 
-        var indicator = ( // Small indicator to help represent how many terms there are available for this Facet.
+        const indicator = ( // Small indicator to help represent how many terms there are available for this Facet.
             <Fade in={facetClosing || !facetOpen}>
                 <span className="pull-right closed-terms-count" data-tip={terms.length + " options"}>
                     { _.range(0, Math.min(Math.ceil(terms.length / 3), 8)).map((c)=>
@@ -243,7 +257,7 @@ class FacetTermsList extends React.Component {
                     <span className="inline-block" data-tip={tooltip} data-place="right">{ title }</span>
                     { indicator }
                 </h5>
-                <Collapse in={facetOpen && !facetClosing} children={this.renderTerms(terms)}/>
+                <Collapse in={facetOpen && !facetClosing}>{ this.renderTerms(terms) }</Collapse>
             </div>
         );
     }
@@ -277,7 +291,8 @@ class Facet extends React.PureComponent {
         'onFilter'              : PropTypes.func,           // Executed on term click
         'extraClassname'        : PropTypes.string,
         'schemas'               : PropTypes.object,
-        'isTermSelected'        : PropTypes.func.isRequired
+        'isTermSelected'        : PropTypes.func.isRequired,
+        'href'                  : PropTypes.string.isRequired
     };
 
     constructor(props){
@@ -300,8 +315,8 @@ class Facet extends React.PureComponent {
      * @todo Allow to specify interval for histogram & date_histogram in schema instead of hard-coding 'month' interval.
      */
     handleStaticClick(e) {
-        var { facet } = this.props,
-            term = facet.terms[0]; // Would only have 1
+        const { facet } = this.props;
+        const term = facet.terms[0]; // Would only have 1
 
         e.preventDefault();
         if (!this.isStatic(facet)) return false;
@@ -320,22 +335,24 @@ class Facet extends React.PureComponent {
      * @todo Allow to specify interval for histogram & date_histogram in schema instead of hard-coding 'month' interval.
      */
     handleTermClick(facet, term, e, callback) {
-        var { onFilter, href } = this.props;
+        const { onFilter, href } = this.props;
         onFilter(facet, term, callback, false, href);
     }
 
     render() {
-        var { facet, isTermSelected, extraClassname } = this.props,
-            { filtering } = this.state,
-            description = facet.description || null,
-            title       = facet.title || facet.field;
+        const { facet, isTermSelected, extraClassname } = this.props;
+        const { filtering } = this.state;
+        const description = facet.description || null;
+        const title       = facet.title || facet.field;
 
         if (this.isStatic(facet)){
             // Only one term
-            var selected = isTermSelected(facet.terms[0], facet),
-                termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
+            const selected = isTermSelected(facet.terms[0], facet);
+            let termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
 
-            if (!termName || termName === 'null' || termName === 'undefined') termName = 'None';
+            if (!termName || termName === 'null' || termName === 'undefined'){
+                termName = 'None';
+            }
 
             return (
                 <div className={"facet static row" + (selected ? ' selected' : '') + ( filtering ? ' filtering' : '') + ( extraClassname ? ' ' + extraClassname : '' )}
@@ -380,23 +397,28 @@ class Facet extends React.PureComponent {
  * Use this function as part of SearchView and BrowseView to be passed down to FacetList.
  * Should be bound to a component instance, with `this` providing 'href', 'context' (with 'filters' property), and 'navigate'.
  *
+ * @todo deprecate somehow. Mixins havent been part of React standards for a while now...
+ * @todo Keep in mind is only for TERMS filters. Would not work for date histograms..
+ *
  * @param {string} field - Field for which a Facet term was clicked on.
  * @param {string} term - Term clicked on.
  * @param {function} callback - Any function to execute afterwards.
  * @param {boolean} [skipNavigation=false] - If true, will return next targetSearchHref instead of going to it. Use to e.g. batch up filter changes on multiple fields.
  */
-export function onFilterHandlerMixin(facet, term, callback, skipNavigation = false, currentHref = null){
+export function performFilteringQuery(props, facet, term, callback, skipNavigation = false, currentHref = null){
+    const { href: propHref, navigate: propNavigate, context } = props;
+    let targetSearchHref;
 
-    var targetSearchHref;
+    currentHref = currentHref || propHref;
 
-    currentHref = currentHref || this.props.href;
-
-    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, this.props.context.filters),
+    var unselectHrefIfSelected = Filters.getUnselectHrefIfSelectedFromResponseFilters(term, facet, context.filters),
         isUnselecting = !!(unselectHrefIfSelected);
 
     if (unselectHrefIfSelected){
         targetSearchHref = unselectHrefIfSelected;
     } else {
+        targetSearchHref = Filters.buildSearchHref(facet.field, term.key, currentHref);
+        /*
         var interval, nextHref;
         if (facet.aggregation_type === 'date_histogram'){
             interval = Filters.getDateHistogramIntervalFromFacet(facet) || 'month';
@@ -410,6 +432,7 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
         } else { // Default - regular term matching
             targetSearchHref    = Filters.buildSearchHref(facet.field, term.key, currentHref);
         }
+        */
     }
 
     // Ensure only 1 type filter is selected at once.
@@ -432,7 +455,7 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
     }
 
     // If we have a '#' in URL, add to target URL as well.
-    var hashFragmentIdx = currentHref.indexOf('#');
+    const hashFragmentIdx = currentHref.indexOf('#');
     if (hashFragmentIdx > -1 && targetSearchHref.indexOf('#') === -1){
         targetSearchHref += currentHref.slice(hashFragmentIdx);
     }
@@ -445,7 +468,7 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
     });
 
     if (!skipNavigation){
-        (this.props.navigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true }, callback);
+        (propNavigate || navigate)(targetSearchHref, { 'dontScrollToTop' : true }, callback);
     } else {
         return targetSearchHref;
     }
@@ -453,8 +476,6 @@ export function onFilterHandlerMixin(facet, term, callback, skipNavigation = fal
 }
 
 export class FacetList extends React.PureComponent {
-
-    static onFilterHandlerMixin = onFilterHandlerMixin
 
     static propTypes = {
         'facets' : PropTypes.arrayOf(PropTypes.shape({
@@ -531,55 +552,47 @@ export class FacetList extends React.PureComponent {
         this.setState({ 'mounted' : true });
     }
 
-    UNSAFE_componentWillReceiveProps(nextProps){
-        if (!this.props.debug) return;
-
-        if (!_.isEqual(nextProps.facets, this.props.facets)){
-            if (nextProps.facets && this.props.facets !== nextProps.facets) console.log('FacetList props.facets updated.');
-        }
-    }
-
     searchQueryTerms(){
-        var href = this.props.href || this.props.context && this.props.context['@id'] ? this.props.context['@id'] : null;
+        const { href: propHref, context } = this.props;
+        const href = propHref || context && context['@id'] ? context['@id'] : null;
         if (!href) return null;
         return href && url.parse(href, true).query;
     }
 
     renderFacets(maxTermsToShow = 12){
-
-        var { facets, href, onFilter, schemas, isTermSelected, itemTypeForSchemas, windowWidth } = this.props;
-
-        // Ensure facets are unique, field-wise.
-        facets = _.uniq(facets, false, function(f){ return f.field; });
+        const { facets, href, onFilter, schemas, isTermSelected, itemTypeForSchemas, windowWidth, persistentCount } = this.props;
+        const { mounted } = this.state;
 
         // Ensure each facets has an `order` property and default it to 0 if not.
         // And then sort by `order`.
-        facets = _.sortBy(
-            _.map(facets, function(f){
-                if (typeof f.order !== 'number'){
-                    return _.extend({ 'order' : 0 }, f);
+        const useFacets = _.sortBy(
+            _.map(
+                _.uniq(facets, false, function(f){ return f.field; }), // Ensure facets are unique, field-wise.
+                function(f){
+                    if (typeof f.order !== 'number'){
+                        return _.extend({ 'order' : 0 }, f);
+                    }
+                    return f;
                 }
-                return f;
-            }),
+            ),
             'order'
         );
 
-        var facetIndexWherePastXTerms = _.reduce(facets, (m, facet, index) => {
+        const facetIndexWherePastXTerms = _.reduce(useFacets, (m, facet, index) => {
             if (m.end) return m;
             m.facetIndex = index;
             m.termCount = m.termCount + Math.min( // Take into account 'view more' button
-                facet.terms.length,
-                this.props.persistentCount || FacetTermsList.defaultProps.persistentCount
+                facet.terms.length, persistentCount || FacetTermsList.defaultProps.persistentCount
             );
             if (m.termCount > maxTermsToShow) m.end = true;
             return m;
         }, { facetIndex : 0, termCount: 0, end : false }).facetIndex;
 
-        return _.map(facets, (facet, i) =>
+        return _.map(useFacets, (facet, i) =>
             <Facet onFilter={onFilter} key={facet.field}
                 facet={facet} href={href} isTermSelected={isTermSelected}
-                schemas={schemas} itemTypeForSchemas={itemTypeForSchemas} mounted={this.state.mounted}
-                defaultFacetOpen={ !this.state.mounted ? false : !!(
+                schemas={schemas} itemTypeForSchemas={itemTypeForSchemas} mounted={mounted}
+                defaultFacetOpen={!mounted ? false : !!(
                     _.any(facet.terms, (t) => isTermSelected(t, facet)) ||
                     ( layout.responsiveGridState(windowWidth || null) !== 'xs' && i < (facetIndexWherePastXTerms || 1) )
                 )} />
@@ -588,7 +601,7 @@ export class FacetList extends React.PureComponent {
 
 
     render() {
-        var { debug, facets, className, title, showClearFiltersButton, onClearFilters, windowHeight } = this.props;
+        const { debug, facets, className, title, showClearFiltersButton, onClearFilters, windowHeight } = this.props;
         if (debug) console.log('render facetlist');
 
         if (!facets || !Array.isArray(facets) || facets.length === 0) {
@@ -599,16 +612,16 @@ export class FacetList extends React.PureComponent {
             );
         }
 
-        var clearButtonClassName = (
+        const clearButtonClassName = (
             (className && className.indexOf('with-header-bg') > -1) ?
                 "btn-outline-white" : "btn-outline-default"
-            ),
-            maxTermsToShow          = typeof windowHeight === 'number' && !isNaN(windowHeight) ? Math.floor(windowHeight / 60) : 12,
-            allFacetElements        = this.renderFacets(maxTermsToShow),
-            staticFacetElements     = _.filter(allFacetElements, function(f){
-                return Facet.isStatic(f.props.facet);
-            }),
-            selectableFacetElements = _.difference(allFacetElements, staticFacetElements);
+        );
+        const maxTermsToShow = typeof windowHeight === 'number' && !isNaN(windowHeight) ? Math.floor(windowHeight / 60) : 12;
+        const allFacetElements = this.renderFacets(maxTermsToShow);
+        const staticFacetElements = _.filter(allFacetElements, function(f){
+            return Facet.isStatic(f.props.facet);
+        });
+        const selectableFacetElements = _.difference(allFacetElements, staticFacetElements);
 
         return (
             <div className={"facets-container facets" + (className ? ' ' + className : '')}>
@@ -631,7 +644,7 @@ export class FacetList extends React.PureComponent {
                             { staticFacetElements.length } Common Properties
                         </div>
                     </div>
-                : null }
+                    : null }
                 { staticFacetElements }
             </div>
         );
