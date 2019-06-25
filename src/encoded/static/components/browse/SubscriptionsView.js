@@ -2,7 +2,8 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
+/** @deprecated - DropDownButton, Button */
+import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Table } from 'react-bootstrap';
 import { ajax, DateUtility } from './../util';
 
 /**

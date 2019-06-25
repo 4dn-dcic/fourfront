@@ -6,7 +6,7 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { ButtonGroup, Checkbox, Button } from 'react-bootstrap';
+import { Checkbox } from './../../../forms/components/Checkbox';
 import { Schemas, ajax, typedefs } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import * as vizUtil from './../../../viz/utilities';
@@ -19,11 +19,6 @@ const { Item } = typedefs;
 
 
 export class SelectAllFilesButton extends React.PureComponent {
-
-    static fileFormatButtonProps = {
-        'bsStyle' : "primary",
-        'bsSize' : 'small'
-    };
 
     /** These are fields included when "Select All" button is clicked to AJAX all files in */
     static fieldsToRequest = [
@@ -175,11 +170,6 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
         'currentFileTypeFilters' : PropTypes.arrayOf(PropTypes.string).isRequired,
         'setFileTypeFilters' : PropTypes.func.isRequired,
         'onClosePanel' : PropTypes.func
-    };
-
-    static fileFormatButtonProps = {
-        'bsStyle' : "primary",
-        'bsSize' : 'small'
     };
 
     constructor(props){

@@ -4,7 +4,7 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
+import { DropdownButton, DropdownItem } from './../../forms/components/DropdownButton';
 import * as vizUtil from './../utilities';
 import { Legend } from './../components';
 import { console, Filters, Schemas, layout, analytics } from './../../util';
@@ -234,9 +234,9 @@ export class UIControlsWrapper extends React.PureComponent {
             }
 
             return (
-                <MenuItem key={key} eventKey={key} active={key === active} disabled={disabled}>
+                <DropdownItem key={key} eventKey={key} active={key === active} disabled={disabled}>
                     { title || this.titleMap(key, true) }
-                </MenuItem>
+                </DropdownItem>
             );
         });
     }

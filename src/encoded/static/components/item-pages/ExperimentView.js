@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import { console, object, Schemas, expFxn } from './../util';
 
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';

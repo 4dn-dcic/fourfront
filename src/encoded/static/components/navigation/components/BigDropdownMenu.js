@@ -28,8 +28,8 @@ export class BigDropdownMenu extends React.PureComponent {
     }
 
     renderMenuItems(){
-        var { openDropdownID, menuTree, windowWidth, href, setOpenDropdownID } = this.props;
-        var handleMenuItemClick = this.handleMenuItemClick;
+        const { openDropdownID, menuTree, windowWidth, href, setOpenDropdownID } = this.props;
+        const handleMenuItemClick = this.handleMenuItemClick;
         /*
         var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
             return (c.children || []).length > 0;
@@ -73,7 +73,7 @@ export class BigDropdownMenu extends React.PureComponent {
                                 </a>
                             );
                         })
-                    : null }
+                        : null }
                 </div>
             );
         }

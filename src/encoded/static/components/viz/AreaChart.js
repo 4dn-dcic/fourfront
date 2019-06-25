@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
-import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
+import { DropdownButton, DropdownItem } from './../forms/components/DropdownButton';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
 import { console, layout, ajax, DateUtility } from'./../util';
@@ -329,7 +329,7 @@ export class GroupByDropdown extends React.PureComponent {
     render(){
         const { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, children, id } = this.props;
         const optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
-            <MenuItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</MenuItem>
+            <DropdownItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</DropdownItem>
         );
         const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
 
@@ -1153,9 +1153,9 @@ export class AreaChartContainer extends React.Component {
         if (gridState !== 'lg') return null;
         const expanded = AreaChartContainer.isExpanded(this.props);
         return (
-            <Button bsSize="sm" onClick={this.toggleExpanded}>
+            <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>
                 <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
-            </Button>
+            </button>
         );
     }
 

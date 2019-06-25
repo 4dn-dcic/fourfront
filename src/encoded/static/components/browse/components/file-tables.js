@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
+/** @deprecated */
 import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox } from './StackedBlockTable';
 import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs, fileUtil, navigate } from './../../util';

@@ -4,8 +4,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ButtonToolbar, ButtonGroup, DropdownButton, MenuItem, Button, Modal, Checkbox, Collapse } from 'react-bootstrap';
-import { columnsToColumnDefinitions } from './table-commons';
+import { Checkbox } from './../../forms/components/Checkbox';
 
 
 /**
@@ -27,9 +26,10 @@ export class CustomColumnController extends React.Component {
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.defaultHiddenColumns !== this.props.defaultHiddenColumns){
-            this.setState({ 'hiddenColumns' : _.clone(nextProps.defaultHiddenColumns || {}) });
+    componentDidUpdate(pastProps){
+        const { defaultHiddenColumns } = this.props;
+        if (pastProps.defaultHiddenColumns !== defaultHiddenColumns){
+            this.setState({ 'hiddenColumns' : _.clone(defaultHiddenColumns || {}) });
         }
     }
 
@@ -105,8 +105,7 @@ export class CustomColumnSelector extends React.PureComponent {
      * @returns {Object[]} Copy of columnDefintions with `hiddenState` added.
      */
     columnDefinitionsWithHiddenState(){
-        var { columnDefinitions, hiddenColumns } = this.props;
-
+        const { columnDefinitions, hiddenColumns } = this.props;
         return _.map(
             _.sortBy(
                 _.filter(columnDefinitions, function(c){ return c.field !== 'display_title'; }),
@@ -119,7 +118,7 @@ export class CustomColumnSelector extends React.PureComponent {
     }
 
     handleOptionVisibilityChange(field, evt){
-        var { hiddenColumns, removeHiddenColumn, addHiddenColumn } = this.props;
+        const { hiddenColumns, removeHiddenColumn, addHiddenColumn } = this.props;
         if (hiddenColumns[field] === true){
             removeHiddenColumn(field);
         } else {
@@ -129,7 +128,7 @@ export class CustomColumnSelector extends React.PureComponent {
 
     render(){
         return (
-            <div className="row clearfix" children={_.map(this.columnDefinitionsWithHiddenState(), this.renderHiddenColumnOption)}>
+            <div className="row clearfix">
                 { _.map(this.columnDefinitionsWithHiddenState(), (colDef, idx, all) =>
                     <ColumnOption {...colDef} key={colDef.field || idx} allColumns={all} index={idx} handleOptionVisibilityChange={this.handleOptionVisibilityChange} />
                 ) }
@@ -139,28 +138,26 @@ export class CustomColumnSelector extends React.PureComponent {
 
 }
 
-class ColumnOption extends React.PureComponent {
+const ColumnOption = React.memo(function ColumnOption(props){
+    const { hiddenState, allColumns, field, title, description, index, handleOptionVisibilityChange } = props;
+    const isChecked = !hiddenState;
+    const sameTitleColExists = _.any(allColumns.slice(0,index).concat(allColumns.slice(index + 1)), { title });
+    let showDescription = description;
 
-    render(){
-        var { hiddenState, allColumns, field, title, description, index, handleOptionVisibilityChange } = this.props,
-            isChecked = !hiddenState,
-            sameTitleColExists = _.any(allColumns.slice(0,index).concat(allColumns.slice(index + 1)), { title });
-
-        if (sameTitleColExists){
-            if (!description){
-                description = '<i class="icon icon-fw icon-code">&nbsp;</i><em class="text-300">' + field + '</em>';
-            } else {
-                description += '<br/><i class="icon icon-fw icon-code">&nbsp;</i><em class="text-300">' + field + '</em>';
-            }
+    if (sameTitleColExists){
+        if (!description){
+            showDescription = '<i class="icon icon-fw icon-code">&nbsp;</i><em class="text-300">' + field + '</em>';
+        } else {
+            showDescription += '<br/><i class="icon icon-fw icon-code">&nbsp;</i><em class="text-300">' + field + '</em>';
         }
-
-        return (
-            <div className="col-sm-6 col-lg-3 column-option" key={field} data-tip={description} data-html={true}>
-                <Checkbox checked={isChecked} onChange={(e) => handleOptionVisibilityChange(field,e)}
-                    value={field} className={isChecked ? 'is-active' : null} children={title} />
-            </div>
-        );
     }
 
-}
-
+    return (
+        <div className="col-sm-6 col-lg-3 column-option" key={field} data-tip={showDescription} data-html={true}>
+            <Checkbox checked={isChecked} onChange={(e) => handleOptionVisibilityChange(field,e)}
+                value={field} className={isChecked ? 'is-active' : null}>
+                { title }
+            </Checkbox>
+        </div>
+    );
+});

@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Nav, NavDropdown, MenuItem } from 'react-bootstrap';
+import { DropdownItem } from './../../forms/components/DropdownButton';
+import { Nav, NavDropdown } from 'react-bootstrap';
 import { JWT, isServerSide, navigate, object } from './../../util';
 import { LoginNavItem } from './LoginNavItem';
 
@@ -66,9 +67,9 @@ export class UserActionDropdownMenu extends React.Component {
         });
 
         actions.push(
-            <MenuItem id="logoutbtn" onSelect={this.performLogout} className="global-entry">
+            <DropdownItem id="logoutbtn" onSelect={this.performLogout} className="global-entry">
                 Log Out
-            </MenuItem>
+            </DropdownItem>
         );
 
         return actions;
@@ -146,10 +147,10 @@ export function getActionURL(action, currentHref){
  */
 export function actionToMenuItem(action, currentHref, extraProps){
     return (
-        <MenuItem key={action.id} href={getActionURL(action, currentHref)} onClick={actionToMenuItem.onClick}
+        <DropdownItem key={action.id} href={getActionURL(action, currentHref)} onClick={actionToMenuItem.onClick}
             className="global-entry" active={isActionActive(action, currentHref)} {...extraProps}>
             { action.title }
-        </MenuItem>
+        </DropdownItem>
     );
 }
 actionToMenuItem.onClick = function(e){
