@@ -3,10 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
 import { object, analytics, isServerSide } from './../../util';
 import { BasicStaticSectionBody } from './BasicStaticSectionBody';
-import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
 
@@ -36,8 +34,6 @@ export class BasicUserContentBody extends React.PureComponent {
         if (!Array.isArray(context['@type'])) throw new Error('Expected an @type on context.');
         if (context['@type'].indexOf('StaticSection') > -1){
             return 'StaticSection';
-        } else if (isHiglassViewConfigItem(context)){ // Func internally checks context['@type'].indexOf('HiglassViewConfig') > -1 also
-            return 'HiglassViewConfig';
         } else {
             // TODO: Case for JupyterNotebook (?) and/or yet-to-be-created ones.
             throw new Error('Unsupported Item type.');
@@ -58,13 +54,6 @@ export class BasicUserContentBody extends React.PureComponent {
 
         if (itemType === 'StaticSection') {
             return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} />;
-        } else if (itemType === 'HiglassViewConfig') {
-            return (
-                <React.Fragment>
-                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} />
-                </React.Fragment>
-            );
         } else {
             // TODO handle @type=JupyterHub?
             return (
@@ -77,39 +66,6 @@ export class BasicUserContentBody extends React.PureComponent {
 
 }
 
-
-export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions(props){
-    const { context, parentComponentType, showDescription, constrainDescription } = props;
-    const btnProps = {
-        'href'      : object.itemUtil.atId(context),
-        'data-tip'  : "Open HiGlass display to add other data",
-        'className' : 'pull-right extra-info-higlass-btn'
-    };
-
-    if (parentComponentType === BasicUserContentBody) {
-        btnProps.bsSize = 'sm';
-    }
-
-    return (
-        // Styled as flexrow, which will keep btn-container aligned to right as long as the ".description" container is present.
-        <div className="extra-info extra-info-for-higlass-display" {..._.omit(props, 'context', 'showDescription', 'parentComponentType', 'constrainDescription')}>
-            <div className={"description" + (constrainDescription ? ' text-ellipsis-container' : '')} >
-                { showDescription ? context.description : null }
-            </div>
-            <div className="btn-container">
-                <Button {...btnProps}>
-                    <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
-                    Explore Data
-                </Button>
-            </div>
-        </div>
-    );
-});
-EmbeddedHiglassActions.defaultProps = {
-    'parentComponentType' : BasicUserContentBody,
-    'showDescription' : true,
-    'constrainDescription' : false
-};
 
 
 export class ExpandableStaticHeader extends OverviewHeadingContainer {
@@ -131,11 +87,10 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
     renderInnerBody(){
         const { context, href } = this.props;
         const { open } = this.state;
-        const isHiGlass = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody context={context} href={href} height={isHiGlass ? 300 : null} parentComponentType={ExpandableStaticHeader} />
+                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} />
             </div>
         );
     }

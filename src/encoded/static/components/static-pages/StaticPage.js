@@ -5,14 +5,13 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
-import { CSVMatrixView, MarkdownHeading, EmbeddedHiglassActions } from './components';
-import { HiGlassPlainContainer } from './../item-pages/components/HiGlass/HiGlassPlainContainer';
+import { MarkdownHeading } from './components';
 import { console, object, isServerSide } from './../util';
 import { replaceString as replacePlaceholderString } from './placeholders';
 import { StaticPageBase } from './components/StaticPageBase';
 
 
-
+/** NOT SHARED */
 
 /**
  * Converts context.content into different format if necessary and returns copy of context with updated 'content'.
@@ -45,17 +44,6 @@ export const parseSectionsContent = memoize(function(context){
                     'content' : object.htmlToJSX(section.content)
                 });
             } // else: retain plaintext or HTML representation
-        } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
-            // HiglassViewConfig Parsing
-            if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
-            section =  _.extend({}, section, {
-                'content' : (
-                    <React.Fragment>
-                        <EmbeddedHiglassActions context={section} style={{ marginTop : -10 }} />
-                        <HiGlassPlainContainer viewConfig={section.viewconfig} mountDelay={4000} />
-                    </React.Fragment>
-                )
-            });
         } else if (Array.isArray(section['@type']) && section['@type'].indexOf('JupyterNotebook') > -1){
             // TODO
         }
@@ -95,13 +83,7 @@ export const StaticEntryContent = React.memo(function StaticEntryContent(props){
 
     const cls = "section-content clearfix " + (className? ' ' + className : '');
 
-    if (filetype === 'csv'){
-        // Special case
-        return <CSVMatrixView csv={renderedContent} options={options} />;
-    } else {
-        // Common case - markdown, plaintext, etc.
-        return <div className={cls}>{ renderedContent }</div>;
-    }
+    return <div className={cls}>{ renderedContent }</div>;
 });
 
 
