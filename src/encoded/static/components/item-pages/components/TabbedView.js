@@ -11,7 +11,7 @@ import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
 import { navigate } from './../../util';
-import { UserContentBodyList } from './../../static-pages/components/BasicStaticSectionBody';
+import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
 
