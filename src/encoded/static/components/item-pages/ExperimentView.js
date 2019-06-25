@@ -6,7 +6,12 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
 import { console, object, Schemas, expFxn } from './../util';
-import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
+
+import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
+import { Publications } from './components/Publications';
+import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
+
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 

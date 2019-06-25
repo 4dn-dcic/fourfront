@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { Fade, Button } from 'react-bootstrap';
 import { console, object, layout, ajax, fileUtil, expFxn } from './../../../util';
 import { FlexibleDescriptionBox } from './../FlexibleDescriptionBox';
-import { SimpleFilesTable } from './../tables';
+import { SimpleFilesTable } from './../tables/SimpleFilesTable';
 import { ItemDetailList } from './../ItemDetailList';
 import { ExperimentSetTablesLoaded } from './../tables/ExperimentSetTables';
 import { ViewMetricButton, MetricsView } from './FileDetailBodyMetricsView';

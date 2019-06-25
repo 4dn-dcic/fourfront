@@ -2,23 +2,18 @@
 
 import React from 'react';
 import _ from 'underscore';
-import * as globals from './../globals';
-import { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, TabbedView } from './components';
+import { FilesInSetTable } from './components/FilesInSetTable';
 import DefaultItemView from './DefaultItemView';
 
 
 /**
  * Page view for a FileSetCalibration Item.
  * Renders out a {@link module:item-pages/components.FilesInSetTable} Component.
- * 
+ *
  * @module {Component} item-pages/file-set-calibration-view
  */
 
 export default class FileSetCalibrationView extends DefaultItemView {
-
-    constructor(props){
-        super(props);
-    }
 
     getTabViewContents(){
 

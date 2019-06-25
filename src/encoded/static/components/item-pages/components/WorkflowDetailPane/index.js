@@ -15,9 +15,9 @@ import { WFRStepDetailBody } from './WFRStepDetailBody';
 /**
  * This is the entry-point to the somewhat big-ish WorkflowDetailPane component.
  * It handles (meta-)data specific to the 4DN portal.
- * 
+ *
  * It requires at minimum a 'selectedNode' prop, from which it reads 'selectedNode.meta' and shows stuff like a FileDetailBody if there's a file associated with the node.
- * 
+ *
  * @class WorkflowDetailPane
  * @extends {React.Component}
  * @prop {./../../../viz/Workflow/parsing-functions.Node} selectedNode - Currently-selected node as passed in callback /viz/Workflow/Graph props.renderDetailPane( {Node} selectedNode, {Object} graphProps )

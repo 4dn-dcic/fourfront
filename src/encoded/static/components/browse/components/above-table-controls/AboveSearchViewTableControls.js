@@ -52,7 +52,7 @@ export const AboveSearchViewTableControls = React.memo(function AboveSearchViewT
 
     const aboveTableControlsProps = _.extend(
         _.pick(props, 'isFullscreen', 'windowWidth', 'toggleFullScreen', 'parentForceUpdate'),
-        { "panelMap" : AboveTableControls.getCustomColumnSelectorPanelMapDefinition(props) }
+        { "panelMap" : AboveTableControlsBase.getCustomColumnSelectorPanelMapDefinition(props) }
     );
 
     return <AboveTableControlsBase {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControlsBase>;

@@ -8,7 +8,8 @@ import memoize from 'memoize-one';
 import { Button } from 'react-bootstrap';
 import { store } from './../../store';
 import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { ExperimentSetTablesLoaded, OverviewHeadingContainer } from './components';
+import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
@@ -133,10 +134,14 @@ class FileViewOverview extends React.PureComponent {
 
 export class FileOverviewHeading extends React.PureComponent {
 
+    static fileSizeTitleRenderFxn(field, value){
+        return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
+    }
+
     constructor(props){
         super(props);
-        this.onTransitionSetOpen    = this.onTransition.bind(this, true);
-        this.onTransitionUnsetOpen  = this.onTransition.bind(this, false);
+        this.onTransitionSetOpen = this.onTransition.bind(this, true);
+        this.onTransitionUnsetOpen = this.onTransition.bind(this, false);
         this.state = {
             'isPropertiesOpen' : true,
             'mounted' : false
@@ -154,18 +159,17 @@ export class FileOverviewHeading extends React.PureComponent {
     render(){
         const { context, schemas, gridState } = this.props;
         const { mounted, isPropertiesOpen } = this.state;
-        const isSmallerSize = mounted && (gridState === 'xs' || gridState === 'sm');
-        const commonHeadingBlockProps = { 'tips' : FileView.schemaForFile(context, schemas), 'result' : context, 'wrapInColumn' : "col-sm-6 col-lg-3" };
+        const isSmallerSize = mounted && (gridState === "xs" || gridState === "sm");
+        const commonHeadingBlockProps = { "tips" : FileView.schemaForFile(context, schemas), "result" : context, "wrapInColumn" : "col-sm-6 col-lg-3" };
         return (
-            <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
+            <div className={"row" + (!isSmallerSize ? " flexrow" : "")}>
                 <div className="col-xs-12 col-md-8">
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property='file_format' fallbackTitle="File Format" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property='file_type' fallbackTitle="File Type" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property='file_classification' fallbackTitle="General Classification" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={function(field, value){
-                            return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
-                        }} />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property="file_format" fallbackTitle="File Format" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property="file_type" fallbackTitle="File Type" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification" fallbackTitle="General Classification" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
+                            fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
                     </OverviewHeadingContainer>
                 </div>
                 <div className="col-xs-12 col-md-4 mt-1 mb-3">
@@ -182,12 +186,12 @@ export function FileViewDownloadButtonContainer(props){
     const { className, size, file, context, result } = props;
     const fileToUse = file || context || result;
     return (
-        <div className={"file-download-container" + (className ? ' ' + className : '')}>
+        <div className={"file-download-container" + (className ? " " + className : "")}>
             <fileUtil.FileDownloadButtonAuto result={fileToUse} size={size} />
         </div>
     );
 }
-FileViewDownloadButtonContainer.defaultProps = { 'size' : null };
+FileViewDownloadButtonContainer.defaultProps = { "size" : null };
 
 
 
@@ -387,7 +391,7 @@ export class QualityControlResults extends React.PureComponent {
                             <i className="ml-05 icon icon-fw icon-external-link text-small"/>
                         </React.Fragment>
                     } />
-                : null }
+                    : null }
             </div>
         );
 
@@ -415,7 +419,8 @@ export class QualityControlResults extends React.PureComponent {
         return (
             <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">
                 <div className="inner">
-                <object.TooltipInfoIconContainerAuto result={file} property={titleProperty} tips={tips} elementType="h5" fallbackTitle="Quality Metric Summary" />
+                    <object.TooltipInfoIconContainerAuto result={file} property={titleProperty} tips={tips}
+                        elementType="h5" fallbackTitle="Quality Metric Summary" />
                     { metrics || (<em>Not Available</em>) }
                 </div>
             </WrapInColumn>

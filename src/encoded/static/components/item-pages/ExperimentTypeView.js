@@ -5,7 +5,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, Schemas } from './../util';
 import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
-import { Publications, SOPBelowHeaderRow, LinkBelowHeaderRow, WrappedCollapsibleList, ExperimentSetTableTabView } from './components';
+import { Publications } from './components/Publications';
+import { SOPBelowHeaderRow, LinkBelowHeaderRow } from './components/LinkBelowHeaderRow';
+import { WrappedCollapsibleList } from './components/FormattedInfoBlock';
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import { UserContentBodyList } from './../static-pages/components';
 
 

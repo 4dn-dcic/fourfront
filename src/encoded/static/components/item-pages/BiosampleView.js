@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, Schemas, layout } from './../util';
-import { ItemPageTable, ExperimentSetTableTabView } from './components';
+import { ItemPageTable } from './components/tables/ItemPageTable';
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 

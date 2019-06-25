@@ -9,7 +9,7 @@ import _ from 'underscore';
 import { Modal, FormControl, Button } from 'react-bootstrap';
 var jwt = require('jsonwebtoken');
 import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
-import { FormattedInfoBlock } from './components';
+import { FormattedInfoBlock } from './components/FormattedInfoBlock';
 import { EditableField, FieldSet } from './../forms/components';
 import Alerts from './../alerts';
 

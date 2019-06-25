@@ -3,11 +3,10 @@
 import React from 'react';
 import url from 'url';
 import PropTypes from 'prop-types';
-import * as globals from './../globals';
-import { ItemPageTitle, ItemDetailList } from './components';
+import { ItemDetailList } from './components/ItemDetailList';
 
 
-export default class SchemaView extends React.Component {
+export default class SchemaView extends React.PureComponent {
 
     static keyTitleDescriptionMap = {
         '$schema' : {
@@ -36,12 +35,12 @@ export default class SchemaView extends React.Component {
             title : "Required Properties",
             description : "These may not be blank for an Item of this type."
         }
-    }
+    };
 
     static propTypes = {
         'href' : PropTypes.string.isRequired,
         'schemas' : PropTypes.any.isRequired
-    }
+    };
 
     constructor(props){
         super(props);
@@ -49,14 +48,13 @@ export default class SchemaView extends React.Component {
     }
 
     render() {
-        var context = this.props.context,
-            title = typeof context.title == "string" ? context.title : url.parse(this.props.href).path;
+        const { context, schemas } = this.props;
         return (
             <div className="view-item type-JSONSchema container" id="content">
                 {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
                 <ItemDetailList
                     context={context}
-                    schemas={this.props.schemas}
+                    schemas={schemas}
                     keyTitleDescriptionMap={SchemaView.keyTitleDescriptionMap}
                     excludedKeys={['mixinProperties', 'title', 'type', 'description']}
                     stickyKeys={['properties', 'required', 'identifyingProperties', 'facets']}

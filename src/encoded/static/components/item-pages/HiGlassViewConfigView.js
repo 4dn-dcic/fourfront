@@ -6,10 +6,12 @@ import _ from 'underscore';
 import { Button, Collapse, MenuItem, DropdownButton } from 'react-bootstrap';
 import Alerts from './../alerts';
 import { JWT, console, object, ajax, layout, navigate } from './../util';
-import { HiGlassPlainContainer, CollapsibleItemViewButtonToolbar } from './components';
+import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
+import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
+import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { LinkToSelector } from './../forms/components';
 import DefaultItemView from './DefaultItemView';
-import { ItemHeader } from './components';
+
 
 
 export default class HiGlassViewConfigView extends DefaultItemView {
@@ -20,21 +22,18 @@ export default class HiGlassViewConfigView extends DefaultItemView {
         };
 
         return (
-            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
-                <ItemHeader.TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
+            <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
+                <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
+                <MiddleRow />
+                <BottomRow />
+            </ItemHeaderWrapper>
         );
     }
 
     getTabViewContents(){
-
-        var initTabs    = [],
-            width       = this.getTabViewWidth();
-
+        const initTabs = [];
+        const width = this.getTabViewWidth();
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
-
         return initTabs.concat(this.getCommonTabs());
     }
 
@@ -182,11 +181,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      * @returns {void}
     */
     handleSave(evt){
+        const { href, context } = this.props;
+        const { genome_assembly } = this.state;
         evt.preventDefault();
 
-        var hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -198,25 +199,23 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         // We're updating this object's view conf and the genome assembly.
-        var payload = {
-            'viewconfig' : currentViewConf
-        };
+        const payload = { 'viewconfig' : currentViewConf };
 
-        if (this.state.genome_assembly){
+        if (genome_assembly){
             // If we always include this and its null, then we get validation error because
             // is not of type string. It must be explictly excluded, not just set to null
             // or undefined.
-            payload.genome_assembly = this.state.genome_assembly;
+            payload.genome_assembly = genome_assembly;
         }
 
         this.setState({ 'saveLoading' : true }, ()=>{
             ajax.load(
-                this.props.href,
+                href,
                 (resp)=>{
                     // Success callback... maybe update state.originalViewConfigString or something...
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     Alerts.queue({
-                        'title' : "Saved " + this.props.context.title,
+                        'title' : "Saved " + context.title,
                         'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
@@ -244,25 +243,24 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     handleClone(evt){
         evt.preventDefault();
 
-        var { context }         = this.props,
-            hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const { context } = this.props;
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
 
         // Generate a new title and description based on the current display.
-        var userDetails     = JWT.getUserDetails(),
-            userUUID        = (userDetails && userDetails.uuid) || null,
-            userFirstName   = "Unknown";
+        const userDetails     = JWT.getUserDetails();
+        let userFirstName   = "Unknown";
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        var viewConfTitleAppendStr  = " - " + userFirstName + "'s copy",
-            viewConfDesc            = context.description,
-            viewConfTitle           = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
+        const viewConfTitleAppendStr  = " - " + userFirstName + "'s copy";
+        const viewConfDesc = context.description;
+        let viewConfTitle = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
 
         // Check if our title already has " - user's copy" substring and if so,
         // increment an appended counter instead of re-adding the substring.
@@ -291,7 +289,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
         }
 
-        var fallbackCallback = (errResp, xhr) => {
+        const fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
                 'title' : "Failed to save display.",
@@ -301,7 +299,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({ 'cloneLoading' : false });
         };
 
-        var payload = {
+        const payload = {
             'title'          : viewConfTitle,
             'description'    : viewConfDesc,
             'viewconfig'     : currentViewConf,
@@ -411,7 +409,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        let stateChange = { 'addFileLoading' : false };
+                        const stateChange = { 'addFileLoading' : false };
                         if (resp.success) {
                             // Update the genome assembly and view config.
                             if (resp.new_genome_assembly) {

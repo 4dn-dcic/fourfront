@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import { console, object, Schemas } from './../util';
-import { ExperimentSetTableTabView } from './components';
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
 

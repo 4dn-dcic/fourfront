@@ -3,9 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { console, object, DateUtility } from './../util';
-import { ExperimentSetTableTabView } from './components';
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
 

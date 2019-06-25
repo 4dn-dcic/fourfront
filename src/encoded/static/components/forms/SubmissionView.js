@@ -10,7 +10,7 @@ import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Modal, 
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import Alerts from '../alerts';
-import { Detail } from '../item-pages/components';
+import { Detail } from './../item-pages/components/ItemDetailList';
 
 import { SubmissionTree, fieldSchemaLinkToType, fieldSchemaLinkToPath } from './components/SubmissionTree';
 import { BuildField, AliasInputField, isValueNull } from './components/submission-fields';

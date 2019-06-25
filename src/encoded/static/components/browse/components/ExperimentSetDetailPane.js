@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse } from 'react-bootstrap';
 import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
-import { FlexibleDescriptionBox } from './../../item-pages/components';
+import { FlexibleDescriptionBox } from './../../item-pages/components/FlexibleDescriptionBox';
 import { expFxn, layout, object } from './../../util';
 import { SelectedFilesController } from './SelectedFilesController';
 

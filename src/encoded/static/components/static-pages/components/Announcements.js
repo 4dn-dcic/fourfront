@@ -2,11 +2,9 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, ajax, DateUtility, object, Schemas } from './../../util';
-import { store } from '../../../store';
-import * as globals from './../../globals';
-import { Collapse, Button } from 'react-bootstrap';
-import { PartialList } from './../../item-pages/components';
+import { console, ajax, DateUtility, Schemas } from './../../util';
+import { Button } from 'react-bootstrap';
+import { PartialList } from './../../item-pages/components/PartialList';
 import { BasicStaticSectionBody } from './BasicStaticSectionBody';
 
 /**

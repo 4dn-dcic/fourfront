@@ -6,10 +6,12 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Collapse } from 'react-bootstrap';
 import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import {
-    HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassViewConfigItem,
-    FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer
-} from './components';
+
+import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
+import { HiGlassPlainContainer, isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
+import { FlexibleDescriptionBox } from './components/FlexibleDescriptionBox';
+import { AdjustableDividerRow } from './components/AdjustableDividerRow';
+import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { QCMetricFromSummary } from './FileView';

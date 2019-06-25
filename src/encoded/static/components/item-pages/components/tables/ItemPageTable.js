@@ -238,7 +238,7 @@ export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
     }
 
     loadItems(){
-        const { itemUrls = [] } = this.props;
+        const { itemUrls = [], maxToLoad } = this.props;
         const onFinishLoad = _.after(Math.min(itemUrls.length, maxToLoad), ()=>{
             this.setState({ 'loading' : false });
         });

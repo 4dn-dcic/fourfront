@@ -9,7 +9,7 @@ import { compiler } from 'markdown-to-jsx';
 import { Collapse } from 'react-bootstrap';
 import Alerts from './../alerts';
 import { CSVMatrixView, TableOfContents, MarkdownHeading, HeaderWithLink, EmbeddedHiglassActions } from './components';
-import { HiGlassPlainContainer } from './../item-pages/components';
+import { HiGlassPlainContainer } from './../item-pages/components/HiGlass/HiGlassPlainContainer';
 import { layout, console, object, isServerSide } from './../util';
 import { replaceString as replacePlaceholderString } from './placeholders';
 
