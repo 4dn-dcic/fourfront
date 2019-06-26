@@ -2,71 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
-import { console, object, Schemas, fileUtil, DateUtility } from './../util';
-import { FormattedInfoBlock } from './components';
-import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
-
-
-
-export default class ProtocolView extends DefaultItemView {
-
-    getTabViewContents(){
-
-        var initTabs = [];
-
-        initTabs.push(ProtocolViewOverview.getTabObject(this.props));
-
-        return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
-    }
-
-}
-
-
-class ProtocolViewOverview extends React.PureComponent {
-
-    /**
-     * Get overview tab object for tabpane.
-     *
-     * @param {{ context: Object, schemas: Object|null }} props - Object containing Protocol Item context/result and schemas.
-     */
-    static getTabObject(props){
-        return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
-            'key' : 'protocol-info',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>Overview</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <ProtocolViewOverview context={props.context} schemas={props.schemas} />
-                </div>
-            )
-        };
-    }
-
-    render(){
-        const { context, schemas } = this.props;
-        const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
-        const result = context;
-
-        return (
-            <div className="row overview-blocks">
-
-                <OverViewBodyItem {...{ result, tips }} property='protocol_type' fallbackTitle="Protocol Type" wrapInColumn />
-
-                <OverViewBodyItem {...{ result, tips }} property='protocol_classification' fallbackTitle="Protocol Classification" wrapInColumn />
-
-                <ItemFileAttachment context={result} tips={tips} wrapInColumn includeTitle />
-
-            </div>
-        );
-
-    }
-
-}
+import { console, object, Schemas, fileUtil } from './../../util';
 
 
 export class ItemFileAttachment extends React.PureComponent {
@@ -80,7 +16,7 @@ export class ItemFileAttachment extends React.PureComponent {
     };
 
     wrapInColumn(){
-        var wrapInColumn = this.props.wrapInColumn;
+        const { wrapInColumn } = this.props;
         if (!wrapInColumn) return arguments;
         return (
             <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-12 col-md-4"}>
@@ -90,8 +26,8 @@ export class ItemFileAttachment extends React.PureComponent {
     }
 
     attachmentTips(){
-        var tips = this.props.tips;
-        var fieldInfo = {};
+        const { tips } = this.props;
+        let fieldInfo = {};
         if (tips && tips.attachment && tips.attachment.properties){
             fieldInfo = tips.attachment.properties;
         }
@@ -99,9 +35,9 @@ export class ItemFileAttachment extends React.PureComponent {
     }
 
     size(){
-        var attachment = (this.props.context && this.props.context.attachment) || null;
+        const { context : { attachment = null } } = this.props;
         if (!attachment || !attachment.size || typeof attachment.size !== 'number') return null;
-        var tip = this.attachmentTips().size;
+        const tip = this.attachmentTips().size;
         return (
             <div className="mb-1">
                 <i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { Schemas.Term.bytesToLargerUnit(attachment.size) }
@@ -110,7 +46,7 @@ export class ItemFileAttachment extends React.PureComponent {
     }
 
     md5sum(){
-        var attachment = (this.props.context && this.props.context.attachment) || null;
+        const { context : { attachment = null } } = this.props;
         if (!attachment || !attachment.md5sum || typeof attachment.md5sum !== 'string') return null;
         return (
             <div>
@@ -120,7 +56,7 @@ export class ItemFileAttachment extends React.PureComponent {
     }
 
     attachmentType(){
-        var attachment = (this.props.context && this.props.context.attachment) || null;
+        const { context : { attachment = null } } = this.props;
         if (!attachment || !attachment.md5sum || typeof attachment.md5sum !== 'string') return null;
         return (
             <div>
@@ -130,22 +66,17 @@ export class ItemFileAttachment extends React.PureComponent {
     }
 
     render(){
-        var { context, tips, includeTitle, property, wrapInColumn, btnSize } = this.props;
+        const { context, tips, includeTitle, property, wrapInColumn, btnSize, hideIfNoValue } = this.props;
+        const { attachment = null } = context;
 
-        if ((this.props.hideIfNoValue) && (!context || !context.attachment)) return null;
-        var attachment = (context && context.attachment) || null;
+        if (hideIfNoValue && (!context || !attachment)) return null;
 
-        var fieldInfo = {};
-        if (tips && tips.attachment){
-            fieldInfo = tips.attachment;
-        }
-
-        var title = !includeTitle ? null : (
+        const title = !includeTitle ? null : (
             <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'tips', 'schemas')} fallbackTitle="Attachment"
                 property={property} result={context} elementType="h5" />
         );
 
-        var contents = null;
+        let contents = null;
         if (attachment){
             contents = (
                 <div className={"row" + (includeTitle ? ' mt-1' : '')}>
@@ -165,7 +96,7 @@ export class ItemFileAttachment extends React.PureComponent {
             contents = <div className="overview-single-element no-value">None</div>;
         }
 
-        var elems = (
+        const elems = (
             <div className="item-file-attachment inner">
                 { title } { contents }
             </div>

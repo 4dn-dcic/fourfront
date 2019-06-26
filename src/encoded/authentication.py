@@ -457,9 +457,10 @@ def create_unauthorized_user(request):
 
     email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
     user_props = request.json
-    if user_props.get('email') != email:
+    user_props_email = user_props.get("email", "<no e-mail supplied>").lower()
+    if user_props_email != email:
         raise HTTPUnauthorized(
-            title="Provided email {} not validated with Auth0. Try logging in again.".format(user_props.get('email')),
+            title="Provided email {} not validated with Auth0. Try logging in again.".format(user_props_email),
             headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
         )
 

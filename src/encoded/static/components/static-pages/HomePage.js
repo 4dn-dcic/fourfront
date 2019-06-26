@@ -3,10 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, navigate } from'./../util';
+import { console, navigate, ajax } from'./../util';
 import { requestAnimationFrame } from './../viz/utilities';
 import { Collapse, Button } from 'react-bootstrap';
-import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
+import { Announcements, BasicStaticSectionBody } from './components';
 
 
 /**
@@ -17,48 +17,26 @@ import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './compo
  */
 export default class HomePage extends React.PureComponent {
 
-    static propTypes = {
-        "context" : PropTypes.shape({
-            "content" : PropTypes.array.isRequired,
-            "announcements" : PropTypes.arrayOf(PropTypes.object)
-        }).isRequired,
-        "session": PropTypes.bool.isRequired
-    };
-
-    introText(){
-        var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
-
-        if (introContent){
-            return <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} />;
-        }
-
-        return <p className="text-center">Introduction content not yet indexed.</p>;
-    }
 
     /**
      * The render function. Renders homepage contents.
      * @returns {Element} A React <div> element.
      */
     render() {
+        const { session, context } = this.props;
         return (
             <div className="homepage-wrapper">
 
-                <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
-
                 <div className="container home-content-area" id="content">
-                    <div className="row">
-                        <div className="col-xs-12 col-md-8">
-                            <h2 className="homepage-section-title">Introduction</h2>
-                            { this.introText() }
+
+                    { session ? <MyDashboard /> : <GuestHomeView /> }
+
+                    <div className="row mt-3">
+                        <div className="col-xs-12 col-md-5 pull-right">
+                            <LinksColumn {..._.pick(this.props, 'windowWidth')} />
                         </div>
-                        <div className="col-xs-12 col-md-4 pull-right">
-                            <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
-                        </div>
                     </div>
-                    <div className="mt-4">
-                        <h2 className="homepage-section-title">Announcements</h2>
-                        <Announcements session={this.props.session} announcements={this.props.context.announcements || null} />
-                    </div>
+
                 </div>
 
             </div>
@@ -69,167 +47,133 @@ export default class HomePage extends React.PureComponent {
 
 
 
-class BigBrowseButton extends React.Component {
+const MyDashboard = React.memo(function MyDashboard(props){
+    return (
+        <React.Fragment>
+            <div className="mt-4 homepage-dashboard">
+                <h2 className="homepage-section-title">Actions</h2>
+                <div className="row">
+                    <div className="col-xs-12 col-sm-6 col-md-4">
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add">New Case</a>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4">
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled >Pipeline Admin</a>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4">
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Quality Controls</a>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4">
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Curation</a>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4">
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Crowdsourcing</a>
+                    </div>
+                    <div className="col-xs-12 col-sm-6 col-md-4">
+                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Item">Clinical Reports</a>
+                    </div>
 
-    static defaultProps = {
-        'element' : 'a',
-        'className' : "btn btn-block btn-primary btn-lg text-400",
-        'children' : 'Browse 4DN Data'
-    }
+                </div>
+            </div>
+            <RecentCasesSection/>
 
-    constructor(props){
-        super(props);
-        this.handleMouseEnter = this.handleMouseEnter.bind(this);
-        this.handleMouseLeave = this.handleMouseLeave.bind(this);
-    }
+        </React.Fragment>
+    );
+});
 
-    handleMouseEnter(){
-        requestAnimationFrame(function(){
-            var topMenuBrowseButton = document.getElementById('browse-menu-item');
-            if (topMenuBrowseButton){
-                topMenuBrowseButton.style.textShadow = "0 0 0 #000";
-                topMenuBrowseButton.style.color = "#000";
-                topMenuBrowseButton.style.backgroundColor = "#e7e7e7";
-            }
-        });
-    }
 
-    handleMouseLeave(e){
-        requestAnimationFrame(function(){
-            var topMenuBrowseButton = document.getElementById('browse-menu-item');
-            if (topMenuBrowseButton){
-                topMenuBrowseButton.style.textShadow = '';
-                topMenuBrowseButton.style.color = '';
-                topMenuBrowseButton.style.backgroundColor = '';
-            }
-        });
-    }
 
+const GuestHomeView = React.memo(function GuestHomeView(props){
+    return (
+        <React.Fragment>
+            <div className="row mt-5">
+                <div className="col-xs-12 col-md-12">
+                    <h2 className="homepage-section-title">Marketing Stuff Here (maybe)</h2>
+                    <h4 className="text-500">(maybe) Publicly-viewable cases as entrance to crowdsourcing UI/UX</h4>
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </React.Fragment>
+    );
+});
+
+
+
+class RecentCasesSection extends React.PureComponent { // Is PureComponent so can do AJAX request for cases later. Maybe.
     render(){
-        var children = this.props.children,
-            element = this.props.element,
-            propsToPass = {
-                'onMouseEnter' : this.handleMouseEnter,
-                'onMouseLeave' : this.handleMouseLeave,
-                'onClick' : this.handleMouseLeave,
-                'href' : navigate.getBrowseBaseHref()
-            };
-
-        return React.createElement(element, _.extend(_.omit(this.props, 'element', 'children'), propsToPass), children);
-    }
-}
-
-
-class LinksColumn extends React.PureComponent {
-
-    jointAnalysisPageLink(colSize){
-        var className = "link-block";
-        if (colSize){
-            className += (' col-sm-' + colSize);
-        }
         return (
-            <div className={className}>
-                <a href="/joint-analysis">
-                    <span>Joint Analysis Page</span>
-                </a>
-            </div>
-        );
-    }
-
-    /**
-     * Add a link for the NOFIC-AICS Collaboration page.
-     */
-    nofisAicsCollaborationPageLink(colSize){
-        var className = "link-block";
-        if (colSize){
-            className += (' col-sm-' + colSize);
-        }
-        return (
-            <div className={className}>
-                <a href="/4DN-AICS-Collaboration">
-                    <span>NOFIC-AICS Collaboration</span>
-                </a>
-            </div>
-        );
-    }
-
-    internalLinks(){
-        var { linkBoxVerticalPaddingOffset, session } = this.props;
-
-        return (
-            <div className="homepage-links-column internal-links">
-                <h4 className="text-400 mb-15 mt-0">Getting Started</h4>
-                <div className="links-wrapper clearfix">
-                    <div className="link-block">
-                        <BigBrowseButton className="browse-btn">
-                            <span>{ BigBrowseButton.defaultProps.children }</span>
-                        </BigBrowseButton>
-                    </div>
-                    <div className="link-block">
-                        <a href="/search/?award.project=4DN&type=Publication">
-                            <span>Browse 4DN Publications</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="/jupyterhub">
-                            <span>Explore 4DN Data (JupyterHub)</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="/visualization/index">
-                            <span>Visualize 4DN Data (HiGlass)</span>
-                        </a>
-                    </div>
-                    {/*
-                    <div className="link-block">
-                        <a href="/help/user-guide/data-organization">
-                            <span>Introduction to 4DN Metadata</span>
-                        </a>
-                    </div>
-                    */}
-                    { (session && this.jointAnalysisPageLink()) || null }
-                    { (session && this.nofisAicsCollaborationPageLink()) || null }
+            <div className="row mt-5">
+                <div className="col-xs-12">
+                    <h2 className="homepage-section-title">Recent Cases</h2>
+                </div>
+                <div className="col-xs-12 col-sm-4 col-md-3 hidden-xs">
+                    <a href="/search/?type=Case" className="btn btn-lg btn-primary btn-block">View All</a>
+                </div>
+                <div className="col-xs-12 col-sm-8 col-md-9">
+                    <p>
+                        <b>(TODO) Visible cases sorted by date-modified be here</b><br/>
+                        Per-role content or something else could go here also, such as searchview of recent
+                        cases or individuals if are clinician; new pipelines if are pipeline admin, etc.
+                        <br/><br/>
+                        (or per-role content can be above dashboard actions; final layout / location etc TBD)
+                        <br/><br/>
+                        <b>
+                        This could also be visible for public visitors as an entrance to a crowdsourcing UI/UX
+                        Or be daily cat facts here.
+                        </b>
+                    </p>
                 </div>
             </div>
         );
     }
-
-    externalLinks(){
-        var linkBoxVerticalPaddingOffset = this.props.linkBoxVerticalPaddingOffset;
-        return (
-            <div className="homepage-links-column external-links">
-                {/* <h3 className="text-300 mb-2 mt-3">External Links</h3> */}
-                <h4 className="text-400 mb-15 mt-25">External Links</h4>
-                <div className="links-wrapper clearfix">
-                    <div className="link-block">
-                        <a href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>Main Portal</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>4DN DCIC</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>NIH Common Fund</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>Centers and Labs</span>
-                        </a>
-                    </div>
-                </div>
-                <br/>
-            </div>
-        );
-    }
-
-    render(){
-        return <div className="homepage-links">{ this.internalLinks() }{ this.externalLinks() }</div>;
-    }
-
 }
 
+
+
+const ExternalLinksColumn = React.memo(function ExternalLinksColumn(props){
+    return (
+        <div className="homepage-links-column external-links">
+            {/* <h3 className="text-300 mb-2 mt-3">External Links</h3> */}
+            <h4 className="text-400 mb-15 mt-25">External Links</h4>
+            ( layout & location not final / TBD )
+            <div className="links-wrapper clearfix">
+                <div className="link-block">
+                    <a href="https://dbmi.hms.harvard.edu/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>HMS DBMI</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="https://www.brighamandwomens.org/medicine/genetics/genetics-genomic-medicine-service" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>Brigham Genomic Medicine</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="https://undiagnosed.hms.harvard.edu/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>Undiagnosed Diseased Network (UDN)</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="https://forome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>Forome</span>
+                    </a>
+                </div>
+                <div className="link-block">
+                    <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
+                        <span>4DN DCIC</span>
+                    </a>
+                </div>
+            </div>
+            <br/>
+        </div>
+    );
+});
+
+
+const LinksColumn = React.memo(function LinksColumn(props){
+    return (
+        <div className="homepage-links">
+            <ExternalLinksColumn />
+        </div>
+    );
+});

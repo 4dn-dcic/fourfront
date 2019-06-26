@@ -6,7 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import { console, ajax } from './../util';
-import { FourfrontLogo } from './../viz/utilities';
+import { CGAPLogo } from './../viz/CGAPLogo';
 import { productionHost } from './../globals';
 import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, getActionURL } from './components';
 import QuickInfoBar from './../viz/QuickInfoBar';
@@ -135,7 +135,7 @@ export class NavigationBar extends React.PureComponent {
      */
     hideTestWarning(e) {
         // Remove the warning banner because the user clicked the close icon
-        this.setState({'testWarning': false});
+        this.setState({ 'testWarning': false });
 
         // If collection with .sticky-header on page, jiggle scroll position
         // to force the sticky header to jump to the top of the page.
@@ -205,7 +205,7 @@ export class NavigationBar extends React.PureComponent {
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main"
                         id="navbar-icon" onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
                         <Navbar.Header>
-                            <FourfrontLogo onClick={this.resetOpenDropdownID} />
+                            <CGAPLogo onClick={this.resetOpenDropdownID} />
                             <Navbar.Toggle>
                                 <i className="icon icon-bars icon-fw"></i>
                             </Navbar.Toggle>
