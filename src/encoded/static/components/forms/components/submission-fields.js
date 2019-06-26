@@ -4,7 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { DropdownButton, Button, MenuItem, Panel, Table, Collapse, Fade, Checkbox, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
+import { Checkbox } from './Checkbox';
+import { DropdownItem, DropdownButton } from './DropdownButton';
+import { Button, Fade, InputGroup, FormGroup, FormControl } from 'react-bootstrap';
 import { ajax, console, object, Schemas } from './../../util';
 import Alerts from './../../alerts';
 import { BasicStaticSectionBody } from './../../static-pages/components/BasicStaticSectionBody';
@@ -154,9 +156,9 @@ export class BuildField extends React.PureComponent {
     // create a dropdown item corresponding to one enum value
     buildEnumEntry(val){
         return (
-            <MenuItem key={val} title={val || ''} eventKey={val} onSelect={this.submitEnumVal}>
+            <DropdownItem key={val} title={val || ''} eventKey={val} onSelect={this.submitEnumVal}>
                 {val || ''}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 
@@ -1242,7 +1244,9 @@ export class AliasInputField extends React.Component {
                         </span>
                     )) || 'Select a Lab'}>
                     {_.map(submits_for_list, (lab) =>
-                        <MenuItem key={lab.name} eventKey={lab.name}><span className="text-500">{ lab.name }</span> ({ lab.display_title })</MenuItem>
+                        <DropdownItem key={lab.name} eventKey={lab.name}>
+                            <span className="text-500">{ lab.name }</span> ({ lab.display_title })
+                        </DropdownItem>
                     )}
                 </DropdownButton>
             );

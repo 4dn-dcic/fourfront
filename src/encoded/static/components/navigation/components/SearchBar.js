@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { MenuItem, Checkbox, DropdownButton, Fade, Collapse } from 'react-bootstrap';
+import { DropdownItem, DropdownButton } from './../../forms/components/DropdownButton';
+import { Fade } from 'react-bootstrap';
 import { console, navigate, Filters } from './../../util';
 
 
@@ -105,20 +106,20 @@ export class SearchBar extends React.PureComponent{
     }
 
     selectItemTypeDropdown(visible = false){
-        var { currentAction } = this.props,
-            { searchAllItems } = this.state;
+        const { currentAction } = this.props;
+        const { searchAllItems } = this.state;
         if (currentAction === 'selection') return null;
         return (
             <Fade in={visible} appear>
                 <DropdownButton id="search-item-type-selector" bsSize="sm" pullRight
                     onSelect={(eventKey, evt)=>{ this.toggleSearchAllItems(eventKey === 'all' ? true : false); }}
                     title={searchAllItems ? 'All Items' : 'Experiment Sets'}>
-                    <MenuItem eventKey='sets' data-key="sets" active={!searchAllItems}>
+                    <DropdownItem eventKey="sets" data-key="sets" active={!searchAllItems}>
                         Experiment Sets
-                    </MenuItem>
-                    <MenuItem eventKey='all' data-key="all" active={searchAllItems}>
+                    </DropdownItem>
+                    <DropdownItem eventKey="all" data-key="all" active={searchAllItems}>
                         All Items (advanced)
-                    </MenuItem>
+                    </DropdownItem>
                 </DropdownButton>
             </Fade>
         );

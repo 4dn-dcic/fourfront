@@ -117,7 +117,7 @@
     "rc-progress": "^2.3.0",
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
-    "react-bootstrap": "0.32.4",
+    "react-bootstrap": "1.0.0-beta.9",
     "universal-cookie": "^4.0.0",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.1.1",

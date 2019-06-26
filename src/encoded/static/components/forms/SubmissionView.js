@@ -5,7 +5,8 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import { ajax, console, JWT, object, layout, Schemas, itemTypeHierarchy } from '../util';
-import { DropdownButton, Button, MenuItem, Collapse, Modal } from 'react-bootstrap';
+import { DropdownButton, DropdownItem } from './../forms/components/DropdownButton';
+import { Collapse, Modal } from 'react-bootstrap';
 import ReactTooltip from 'react-tooltip';
 import { getLargeMD5 } from '../util/file';
 import Alerts from '../alerts';
@@ -398,9 +399,9 @@ export default class SubmissionView extends React.PureComponent{
     /** Simple function to generate enum entries for ambiguous types */
     buildAmbiguousEnumEntry(val){
         return(
-            <MenuItem key={val} title={val || ''} eventKey={val} onSelect={this.handleTypeSelection}>
+            <DropdownItem key={val} title={val || ''} eventKey={val} onSelect={this.handleTypeSelection}>
                 {val || ''}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 
@@ -2086,9 +2087,9 @@ class RoundTwoDetailPanel extends React.PureComponent {
         return(
             <div className="current-item-properties round-two-panel">
                 <h4 className="clearfix page-subtitle submission-field-header">
-                    <Button bsSize="xsmall" className="icon-container pull-left" onClick={this.handleToggle}>
+                    <button type="button" className="btn btn-xs icon-container pull-left" onClick={this.handleToggle}>
                         <i className={"icon " + (open ? "icon-minus" : "icon-plus")}></i>
-                    </Button>
+                    </button>
                     <span>Object Attributes</span>
                 </h4>
                 <Collapse in={open}>
