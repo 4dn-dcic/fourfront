@@ -86,8 +86,8 @@ export default class SubmissionView extends React.PureComponent{
         _.bindAll(this, 'modifyKeyContext', 'initializePrincipal', 'initCreateObj',
             'initCreateAlias', 'submitAmbiguousType', 'buildAmbiguousEnumEntry', 'handleTypeSelection',
             'handleAliasChange', 'handleAliasLabChange', 'submitAlias', 'modifyAlias', 'createObj', 'removeObj',
-            'initExistingObj', 'addExistingObj', 'setSubmissionState', 'updateUpload', 'generateValidationButton',
-            'generateSubmitButton', 'testPostNewContext', 'realPostNewContext', 'removeNullsFromContext', 'checkRoundTwo',
+            'initExistingObj', 'addExistingObj', 'setSubmissionState', 'updateUpload',
+            'testPostNewContext', 'realPostNewContext', 'removeNullsFromContext', 'checkRoundTwo',
             'buildDeleteFields', 'modifyMD5Progess', 'submitObject', 'finishRoundTwo', 'cancelCreateNewObject', 'cancelCreatePrimaryObject'
         );
 
@@ -361,14 +361,14 @@ export default class SubmissionView extends React.PureComponent{
         }
         if (schema && schema.properties.aliases){
             this.setState(_.extend({
-                'creatingAlias' : autoSuggestedAlias,
-                'creatingIdx': newIdx,
-                'creatingType': type,
-                'creatingLink': newLink,
-                'creatingLinkForField' : parentField
+                'creatingAlias'         : autoSuggestedAlias,
+                'creatingIdx'           : newIdx,
+                'creatingType'          : type,
+                'creatingLink'          : newLink,
+                'creatingLinkForField'  : parentField
             }, extraState));
         } else { // schema doesn't support aliases
-            var fallbackAlias = 'My ' + type + ' ' + newIdx;
+            const fallbackAlias = 'My ' + type + ' ' + newIdx;
             this.createObj(type, newIdx, newLink, fallbackAlias, extraState);
         }
     }
@@ -450,9 +450,10 @@ export default class SubmissionView extends React.PureComponent{
         if (type === null || newIdx === null || newLink === null){
             return false;
         }
+
         // check if created object supports aliases
         const hasAlias = schema && schema.properties && schema.properties.aliases;
-        if(alias.length > 0 && hasAlias){
+        if (alias.length > 0 && hasAlias){
             var patt = new RegExp('\\S+:\\S+');
             var regexRes = patt.test(alias);
             if(!regexRes){
@@ -560,11 +561,11 @@ export default class SubmissionView extends React.PureComponent{
             }
 
             typesCopy[keyIdx] = type;
-            var contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
-            if (contextWithAlias.aliases) {
-                contextWithAlias.aliases.push(alias);
+            const contextWithAlias = (contextCopy && contextCopy[keyIdx]) ? contextCopy[keyIdx] : {};
+            if (Array.isArray(contextWithAlias.aliases)) {
+                contextWithAlias.aliases = _.uniq(_.filter(contextWithAlias.aliases.slice(0)).concat([ alias ]));
             } else {
-                contextWithAlias.aliases = [alias];
+                contextWithAlias.aliases = [ alias ];
             }
 
             contextCopy[keyIdx] = buildContext(contextWithAlias, schemas[type], bookmarksList, true, false);
@@ -777,7 +778,7 @@ export default class SubmissionView extends React.PureComponent{
             this.setState(stateToSet);
         }else if(failed){
             var destination = this.state.keyComplete[this.state.currKey];
-            var payload = JSON.stringify({'status':'upload failed'});
+            var payload = JSON.stringify({ 'status':'upload failed' });
             // set status to upload failed for the file
             ajax.promise(destination, 'PATCH', {}, payload).then((data) => {
                 // doesn't really matter what response is
@@ -823,85 +824,6 @@ export default class SubmissionView extends React.PureComponent{
                 this.setState(stateToSet);
             });
         }
-    }
-
-    /**
-     * Generate JSX for a validation button. Disabled unless validation state == 1
-     * (when all children are complete and no errors/unsubmitted) or == 2
-     * (submitted by validation errors). If the submission is processing, render
-     * a spinner icon.
-     * When roundTwo, validation becomes Skip, which allows you to skip roundTwo
-     * submissions for an object. Disable when the is an initialized upload or the
-     * md5 is calculating.
-     */
-    generateValidationButton(){
-        var validity = this.state.keyValid[this.state.currKey];
-        // when roundTwo, replace the validation button with a Skip
-        // button that completes the submission process for currKey
-        if (this.state.roundTwo){
-            if(this.state.upload === null && this.state.md5Progress === null){
-                return(
-                    <Button bsStyle="warning" onClick={function(e){
-                        e.preventDefault();
-                        this.finishRoundTwo();
-                    }.bind(this)}>Skip</Button>
-                );
-            }else{
-                return <Button bsStyle="warning" disabled>Skip</Button>;
-            }
-        } else if(validity === 3 || validity === 4){
-            return(
-                <Button bsStyle="info" disabled>Validated</Button>
-            );
-        } else if(validity === 2){
-            if (this.state.processingFetch) {
-                return <Button bsStyle="danger" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
-            } else {
-                return <Button bsStyle="danger" onClick={this.testPostNewContext}>Validate</Button>;
-            }
-        } else if (validity === 1){
-            if (this.state.processingFetch) {
-                return <Button bsStyle="info" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
-            } else {
-                return <Button bsStyle="info" onClick={this.testPostNewContext}>Validate</Button>;
-            }
-        } else {
-            return <Button bsStyle="info" disabled>Validate</Button>;
-        }
-    }
-
-    /**
-     * Generate JSX for the the button that allows users to submit their custom
-     * objects. Only active when validation state == 3 (validation successful).
-     *
-     * In roundTwo, there is no validation step, so only inactive when there is
-     * an active upload of md5 calculation.
-     */
-    generateSubmitButton(){
-        var validity = this.state.keyValid[this.state.currKey];
-        if (this.state.roundTwo) {
-            if (this.state.upload !== null || this.state.processingFetch || this.state.md5Progress !== null) {
-                return <Button bsStyle="success" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
-            } else {
-                return <Button bsStyle="success" onClick={this.realPostNewContext}>Submit</Button>;
-            }
-        } else if (validity == 3) {
-            if(this.state.processingFetch){
-                return <Button bsStyle="success" disabled><i className="icon icon-spin icon-circle-o-notch"/></Button>;
-            }else{
-                return <Button bsStyle="success" onClick={this.realPostNewContext}>Submit</Button>;
-            }
-        } else if (validity == 4) {
-            return <Button bsStyle="success" disabled>Submitted</Button>;
-        } else {
-            return <Button bsStyle="success" disabled>Submit</Button>;
-        }
-    }
-
-    generateCancelButton(){
-        return(
-            <Button bsStyle="danger" onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</Button>
-        );
     }
 
     testPostNewContext(e){
@@ -1399,7 +1321,11 @@ export default class SubmissionView extends React.PureComponent{
                     handleAliasChange={this.handleAliasChange} submitAlias={this.submitAlias} cancelCreateNewObject={this.cancelCreateNewObject} cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}
                 />
                 <WarningBanner cancelCreatePrimaryObject={this.cancelCreatePrimaryObject}>
-                    { this.generateCancelButton() }{ this.generateValidationButton() }{ this.generateSubmitButton() }
+                    <button type="button" className="btn btn-danger" onClick={this.cancelCreatePrimaryObject}>Cancel / Exit</button>
+                    <ValidationButton {..._.pick(this.state, 'currKey', 'keyValid', 'md5Progress', 'upload', 'roundTwo', 'processingFetch')}
+                        testPostNewContext={this.testPostNewContext} finishRoundTwo={this.finishRoundTwo}  />
+                    <SubmitButton {..._.pick(this.state, 'keyValid', 'currKey', 'roundTwo', 'upload', 'processingFetch', 'md5Progress')}
+                        realPostNewContext={this.realPostNewContext} />
                 </WarningBanner>
                 <DetailTitleBanner
                     hierarchy={keyHierarchy} setSubmissionState={this.setSubmissionState}
@@ -1436,6 +1362,96 @@ export default class SubmissionView extends React.PureComponent{
         );
     }
 }
+
+/**
+ * Generate JSX for a validation button. Disabled unless validation state == 1
+ * (when all children are complete and no errors/unsubmitted) or == 2
+ * (submitted by validation errors). If the submission is processing, render
+ * a spinner icon.
+ * When roundTwo, validation becomes Skip, which allows you to skip roundTwo
+ * submissions for an object. Disable when the is an initialized upload or the
+ * md5 is calculating.
+ */
+const ValidationButton = React.memo(function ValidationButton(props){
+    const { currKey, keyValid, md5Progress, upload, roundTwo, processingFetch, finishRoundTwo, testPostNewContext } = props;
+    const validity = keyValid[currKey];
+    // when roundTwo, replace the validation button with a Skip
+    // button that completes the submission process for currKey
+    if (roundTwo){
+        if (upload === null && md5Progress === null){
+            return (
+                <button type="button" className="btn btn-warning" onClick={finishRoundTwo}>
+                    Skip
+                </button>
+            );
+        } else {
+            return <button type="button" className="btn btn-warning" disabled>Skip</button>;
+        }
+    } else if (validity === 3 || validity === 4){
+        return <button type="button" className="btn btn-info" disabled>Validated</button>;
+    } else if (validity === 2){
+        if (processingFetch) {
+            return (
+                <button type="button" className="btn btn-danger" disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"/>
+                </button>
+            );
+        } else {
+            return <button type="button" className="btn btn-danger" onClick={testPostNewContext}>Validate</button>;
+        }
+    } else if (validity === 1){
+        if (processingFetch) {
+            return (
+                <button type="button" className="btn btn-info" disabled>
+                    <i className="icon icon-spin icon-circle-o-notch"/>
+                </button>
+            );
+        } else {
+            return <button type="button" className="btn btn-info" onClick={testPostNewContext}>Validate</button>;
+        }
+    } else {
+        return <button type="button" className="btn btn-info" disabled>Validate</button>;
+    }
+});
+
+/**
+ * Generate JSX for the the button that allows users to submit their custom
+ * objects. Only active when validation state == 3 (validation successful).
+ *
+ * In roundTwo, there is no validation step, so only inactive when there is
+ * an active upload of md5 calculation.
+ */
+
+const SubmitButton = React.memo(function(props){
+    const { keyValid, currKey, roundTwo, upload, processingFetch, md5Progress, realPostNewContext } = props;
+    const validity = keyValid[currKey];
+    if (roundTwo) {
+        if (upload !== null || processingFetch || md5Progress !== null) {
+            return (
+                <button type="button" disabled className="btn btn-success">
+                    <i className="icon icon-spin icon-circle-o-notch"/>
+                </button>
+            );
+        } else {
+            return <button type="button" className="btn btn-success" onClick={realPostNewContext}>Submit</button>;
+        }
+    } else if (validity == 3) {
+        if (processingFetch){
+            return (
+                <button type="button" disabled className="btn btn-success">
+                    <i className="icon icon-spin icon-circle-o-notch"/>
+                </button>
+            );
+        } else {
+            return <button type="button" className="btn btn-success" onClick={realPostNewContext}>Submit</button>;
+        }
+    } else if (validity == 4) {
+        return <button type="button" className="btn btn-success" disabled>Submitted</button>;
+    } else {
+        return <button type="button" className="btn btn-success" disabled>Submit</button>;
+    }
+});
+
 
 const WarningBanner = React.memo(function WarningBanner(props){
     const { children } = props;
@@ -1583,6 +1599,8 @@ class DetailTitleBanner extends React.PureComponent {
     }
 }
 
+
+
 class TypeSelectModal extends React.Component {
 
     constructor(props){
@@ -1614,7 +1632,7 @@ class TypeSelectModal extends React.Component {
         const { show, ambiguousType, ambiguousSelected, buildAmbiguousEnumEntry, submitAmbiguousType, schemas } = this.props;
         if (!show) return null;
 
-        var ambiguousDescrip = null;
+        let ambiguousDescrip = null;
         if (ambiguousSelected !== null && schemas[ambiguousSelected].description){
             ambiguousDescrip = schemas[ambiguousSelected].description;
         }
@@ -1655,7 +1673,7 @@ class TypeSelectModal extends React.Component {
 class AliasSelectModal extends TypeSelectModal {
 
     render(){
-        var { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias, currentSubmittingUser } = this.props;
+        const { show, creatingType, creatingAlias, handleAliasChange, creatingAliasMessage, submitAlias, currentSubmittingUser } = this.props;
         if (!show) return null;
 
         return (
@@ -1671,8 +1689,8 @@ class AliasSelectModal extends TypeSelectModal {
                             <AliasInputField value={creatingAlias} errorMessage={creatingAliasMessage} onAliasChange={handleAliasChange} currentSubmittingUser={currentSubmittingUser} withinModal />
                         </div>
                         <Collapse in={creatingAliasMessage !== null}>
-                            <div style={{'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em'}}>
-                                {creatingAliasMessage}
+                            <div style={{ 'marginBottom':'15px', 'color':'#7e4544','fontSize':'1.2em' }}>
+                                { creatingAliasMessage }
                             </div>
                         </Collapse>
                         <div className="text-right">
@@ -1704,7 +1722,7 @@ class AliasSelectModal extends TypeSelectModal {
  * @todo
  * Use _.bindAll, make sure setState is using functional updater anywhere state update may derive from other state.
  */
-class IndividualObjectView extends React.Component{
+class IndividualObjectView extends React.Component {
 
     constructor(props){
         super(props);
@@ -1926,17 +1944,17 @@ class IndividualObjectView extends React.Component{
 
         if (!fieldSchema) return null;
 
-        var secondRoundField    = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round',
-            fieldTitle          = fieldSchema.title || field;
+        const secondRoundField    = fieldSchema.ff_flag && fieldSchema.ff_flag == 'second round';
+        const fieldTitle          = fieldSchema.title || field;
 
         if(roundTwo && !secondRoundField){
             return null;
         } else if (!roundTwo && secondRoundField){
             // return a placeholder informing user that this field is for roundTwo
             return(
-                <div key={fieldTitle} className="row field-row" required={false} title={fieldTitle} style={{'overflow':'visible'}}>
+                <div key={fieldTitle} className="row field-row" required={false} title={fieldTitle} style={{ 'overflow':'visible' }}>
                     <div className="col-sm-12 col-md-4">
-                        <h5 className="facet-title submission-field-title" children={fieldTitle}/>
+                        <h5 className="facet-title submission-field-title">{ fieldTitle }</h5>
                     </div>
                     <div className="col-sm-12 col-md-8">
                         <div className="field-container">

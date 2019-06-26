@@ -375,7 +375,7 @@ class Item(snovault.Item):
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
         "type": "string"
-    },)
+    })
     def display_title(self, request=None):
         """create a display_title field."""
         display_title = ""

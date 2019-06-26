@@ -1,5 +1,6 @@
 {
     "title": "Sample",
+    "description": "A DNA sample from an individual",
     "id": "/profiles/sample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

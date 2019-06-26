@@ -3,31 +3,39 @@
     "id": "/profiles/case.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "project", "institution"],
+    "required": ["title", "project", "institution", "proband"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
+        "accession" : {
+            "accessionType" : "CA"
+        },
         "title": {
             "title": "Title",
             "description": "Identifying for this case",
             "type": "string"
         },
-        "individuals": {
-            "title": "Individuals in Case",
-            "description": "All individuals within scope of case",
-            "type": "array",
-            "items": {
-                "title": "Individual",
-                "type": "string",
-                "linkTo": "Individual"
-            }
+        "proband" : {
+            "title" : "Proband of Case",
+            "description": "Individual who is proband scope of case",
+            "type" : "string",
+            "linkTo" : "Individual"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A description of this case",
+            "type": "string",
+            "lookup": 20,
+            "formInput": "textarea"
         }
     }
 }

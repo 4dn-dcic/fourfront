@@ -1,0 +1,51 @@
+{
+    "title": "Disease",
+    "description": "We should get this from HPO or something --- https://hpo.jax.org/app/download/ontology",
+    "id": "/profiles/disease.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["term_name"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": true,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/static_embeds" }
+    ],
+    "properties": {
+        "synonyms" : {
+            "type" : "array",
+            "title" : "Synonyms",
+            "items" : {
+                "type" : "string",
+                "title": "Synonym"
+            }
+        },
+        "term_name" : {
+            "title" : "Standard Term Name",
+            "type" : "string"
+        },
+        "definition" : {
+            "title" : "Definition",
+            "description": "Definition of this disease",
+            "type" : "string"
+        },
+        "parent_term" : {
+            "title": "Categorization",
+            "type" : "string",
+            "linkTo" : "Disease",
+            "comment" : "yes? No? Maybe? for phhenotypes?"
+        },
+        "comment" : {
+            "type" : "string",
+            "title" : "Comment"
+        },
+        "hpo_identifier" : {
+            "title" : "HPO Identifier",
+            "description" : "Identifier of disease at hpo.jax.org. E.g. \"ORPHA:529962\"",
+            "type" : "string"
+        }
+    }
+}
