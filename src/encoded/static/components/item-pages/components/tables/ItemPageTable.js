@@ -13,7 +13,7 @@ import {
 import { SearchResultDetailPane } from './../../../browse/components/SearchResultDetailPane';
 
 
-
+/** @todo - refactor. Not too important since parent components almost always a PureComponent so perf gain would b minimal */
 export class ItemPageTable extends React.Component {
 
     static propTypes = {
@@ -203,7 +203,7 @@ class ItemPageTableRow extends React.PureComponent {
                 { this.renderRowOfColumns() }
                 { this.state.open && typeof renderDetailPane === 'function' ?
                     <div className="inner-wrapper">{ renderDetailPane(result, rowNumber, width, this.props) }</div>
-                : null }
+                    : null }
             </div>
         );
     }
@@ -228,13 +228,17 @@ export class ItemPageTableLoader extends React.PureComponent {
         };
     }
 
-    loadItems(){
-        var itemUrls = this.props.itemUrls,
-            onFinishLoad = _.after(itemUrls.length, ()=>{
-                this.setState({ 'loading' : false });
-            });
+    componentDidMount(){
+        this.loadItems();
+    }
 
-        if (Array.isArray(itemUrls) && itemUrls.length > 0){
+    loadItems(){
+        const { itemUrls = [] } = this.props;
+        const onFinishLoad = _.after(itemUrls.length, ()=>{
+            this.setState({ 'loading' : false });
+        });
+
+        if (itemUrls.length > 0){
             _.forEach(itemUrls, (uri)=>{
                 ajax.load(uri, (r)=>{
                     this.setState(function({ items, itemIndexMapping }){
@@ -252,18 +256,21 @@ export class ItemPageTableLoader extends React.PureComponent {
         }
     }
 
-    componentDidMount(){
-        this.loadItems();
-    }
-
     render(){
-        return React.cloneElement(this.props.children, _.extend({}, this.props, { 'loading' : this.state.loading, 'results' : this.state.items }) );
+        const { children } = this.props, { loading, items } = this.state;
+        return React.cloneElement(children, _.extend({}, this.props, { 'loading' : loading, 'results' : items }) );
     }
 
 }
 
 
-export class ItemPageTableSearchLoader extends React.Component {
+export class ItemPageTableSearchLoader extends React.PureComponent {
+
+    static propTypes = {
+        "requestHref" : PropTypes.string.isRequired,
+        "children" : PropTypes.node.isRequired,
+        "onLoad" : PropTypes.func
+    };
 
     constructor(props){
         super(props);
@@ -275,57 +282,43 @@ export class ItemPageTableSearchLoader extends React.Component {
     }
 
     componentDidMount(){
-        if (this.props.requestHref) this.doRequest();
+        this.doRequest();
     }
 
     componentDidUpdate(pastProps){
+        // eslint-disable-next-line react/destructuring-assignment
         if (pastProps.requestHref !== this.props.requestHref){
             this.doRequest();
         }
     }
 
     doRequest(){
+        const { requestHref } = this.props;
         this.setState({ 'loading' : true }, ()=>{
-            ajax.load(this.props.requestHref, this.handleResponse, 'GET', this.handleResponse);
+            ajax.load(requestHref, this.handleResponse, 'GET', this.handleResponse);
         });
     }
 
     handleResponse(resp){
-        var results = (resp && resp['@graph']) || [];
+        const { onLoad } = this.props;
+        const results = (resp && resp['@graph']) || [];
         this.setState({
             'loading' : false,
             'results' : results
         });
-        if (typeof this.props.onLoad === 'function'){
-            this.props.onLoad(resp);
+        if (typeof onLoad === 'function'){
+            onLoad(resp);
         }
     }
 
     render(){
-        var { requestHref } = this.props;
+        const { requestHref, children } = this.props;
         if (!requestHref) return null;
-        return React.cloneElement(this.props.children, _.extend({}, this.props, this.state) );
+        return React.cloneElement(children, _.extend({}, this.props, this.state) );
     }
 
 }
 
-export class ItemPageTableSearchLoaderPageController extends React.Component {
-
-    constructor(props){
-        super(props);
-        this.state = { 'page' : 1 };
-    }
-
-    render(){
-        var requestHref = this.props.requestHref;
-        var hrefParts = url.parse(requestHref, true);
-        hrefParts.query.limit = hrefParts.query.limit || 25;
-        hrefParts.query.from = (hrefParts.query.limit || 25) * (this.state.page - 1);
-        var correctedHref = hrefParts.pathname + '?' + queryString.stringify(hrefParts.query);
-        return <ItemPageTableSearchLoader {...this.props} requestHref={correctedHref} />;
-    }
-
-}
 
 /**
  * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.

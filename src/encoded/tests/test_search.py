@@ -501,7 +501,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
 def test_barplot_aggregation_endpoint(workbook, testapp):
 
     # Check what we get back -
-    search_result = testapp.get('/browse/?type=ExperimentSetReplicate').json
+    search_result = testapp.get('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate').json
     search_result_count = len(search_result['@graph'])
 
     # We should get back same count as from search results here. But on Travis oftentime we don't, so we compare either against count of inserts --or-- count returned from regular results.
@@ -514,6 +514,8 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
         "search_query_params" : { "type" : ['ExperimentSetReplicate'] },
         "fields_to_aggregate_for" : ["experiments_in_set.experiment_type.display_title", "award.project"]
     }).json
+
+    print()
 
     # Our total count for experiment_sets should match # of exp_set_replicate inserts.abs
 

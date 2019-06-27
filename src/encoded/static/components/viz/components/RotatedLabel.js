@@ -32,67 +32,51 @@ const commonDefaultProps = {
 // This will improve positioning to be pixel-perfect, but is not too important at moment.
 
 
-
-class RotatedLabelAxis extends React.PureComponent {
-
-    static defaultProps = _.extend({}, commonDefaultProps, {
-        'labels' : [
-            { name : "Label1" }, { name : "Label 2 Extra Long Ok Maybe Longer", term: 'test2' }
-        ],
-        'labelClassName' : null,
-        //'availWidth' : 200, // ToDo calculate X coord positions on labels along this 0...N range if not present.
-        'className' : null,
-    });
-
-
-    render(){
-        var props = this.props;
-        var maxTextHeight = RotatedLabel.maxTextHeight(
-            props.placementWidth,
-            props.lineHeight,
-            props.extraHeight || 0
-        );
-        var labelWidth = Math.min(
-            RotatedLabel.maxHypotenuse(props.placementHeight, props.angle),
-            props.maxLabelWidth || 1000
-        );
-        return (
-            <div className={"rotated-labels-axis " + (props.className || '')}>
-                { props.labels.map(function(label, i){
-                    if (typeof label === 'string') label = { name : label };
-                    var childProps = {
-                        'label'             : label.name || "No Label",
-                        'key'               : label.term || label.name || i,
-                        'className'         : props.labelClassName || null,
-                        'term'              : label.term || props.term || null,
-                        'field'             : label.field || props.field || null,
-                        'extraHeight'       : props.extraHeight || 0,
-                        'x'                 : label.x || props.x || 0,
-                        'y'                 : label.y || props.y || 0,
-                        'placementWidth'    : props.placementWidth,
-                        'placementHeight'   : props.placementHeight,
-                        'isMounted'         : props.isMounted,
-                        'maxTextHeight'     : maxTextHeight,
-                        'labelWidth'        : labelWidth,
-                        'maxLabelWidth'     : props.maxLabelWidth,
-                        'deRotateAppend'    : props.deRotateAppend
-                    };
-                    if (typeof props.angle === 'number') childProps.angle = props.angle;
-                    else childProps.angle = 45;
-                    if (props.append)       childProps.append = props.append;
-                    if (props.debug)        childProps.debug = props.debug;
-                    if (props.lineHeight)   childProps.lineHeight = props.lineHeight;
-                    if (props.appendOffset) childProps.appendOffset = props.appendOffset;
-                    if (!props.appendOffset && props.deRotateAppend) childProps.appendOffset = 3;
-                    if (typeof label.opacity !== 'undefined')   childProps.opacity = label.opacity;
-                    else if (typeof props.opacity !== 'undefined')   childProps.opacity = props.opacity;
-                    if (label.color)        childProps.color = label.color;
-                    return React.createElement(RotatedLabel, childProps);
-                }) }
-            </div>
-        );
-    }
-}
+const RotatedLabelAxis = React.memo(function RotatedLabelAxis(props){
+    const {
+        placementWidth, placementHeight, angle, lineHeight, extraHeight, maxLabelWidth, append, debug,
+        labels, labelClassName, className, x, y, isMounted, deRotateAppend, term : propTerm, field : propField,
+        appendOffset
+    } = props;
+    const maxTextHeight = RotatedLabel.maxTextHeight(placementWidth, lineHeight, extraHeight || 0);
+    const labelWidth = Math.min(RotatedLabel.maxHypotenuse(placementHeight, angle), maxLabelWidth || 1000);
+    return (
+        <div className={"rotated-labels-axis " + (className || '')}>
+            { _.map(labels, function(label, i){
+                if (typeof label === 'string') label = { 'name' : label };
+                const childProps = {
+                    'label'             : label.name || "No Label",
+                    'key'               : label.term || label.name || i,
+                    'className'         : labelClassName || null,
+                    'term'              : label.term || propTerm || null,
+                    'field'             : label.field || propField || null,
+                    'extraHeight'       : extraHeight || 0,
+                    'x'                 : label.x || x || 0,
+                    'y'                 : label.y || y || 0,
+                    placementWidth, placementHeight, isMounted,
+                    maxTextHeight, labelWidth, maxLabelWidth, deRotateAppend
+                };
+                if (typeof angle === 'number') childProps.angle = angle;
+                else childProps.angle = 45;
+                if (append)       childProps.append = append;
+                if (debug)        childProps.debug = debug;
+                if (lineHeight)   childProps.lineHeight = lineHeight;
+                if (appendOffset) childProps.appendOffset = appendOffset;
+                if (!appendOffset && deRotateAppend) childProps.appendOffset = 3;
+                if (label.color)        childProps.color = label.color;
+                return React.createElement(RotatedLabel, childProps);
+            }) }
+        </div>
+    );
+});
+RotatedLabelAxis.defaultProps = _.extend({}, commonDefaultProps, {
+    'labels' : [
+        { name : "Label1" }, { name : "Label 2 Extra Long Ok Maybe Longer", term: 'test2' }
+    ],
+    'labelClassName' : null,
+    //'availWidth' : 200, // ToDo calculate X coord positions on labels along this 0...N range if not present.
+    'className' : null,
+});
 
 
 /**
@@ -119,9 +103,7 @@ export class RotatedLabel extends React.PureComponent {
      * @returns {number} Length of hypotenuse.
      */
     static maxHypotenuse = memoize(function(height, angle){
-        return Math.floor((
-            1 / Math.abs(Math.sin((angle / 180) * Math.PI)
-        )) * height);
+        return Math.floor(( 1 / Math.abs(Math.sin((angle / 180) * Math.PI) )) * height);
     });
 
     /**
@@ -145,7 +127,6 @@ export class RotatedLabel extends React.PureComponent {
         'term'      : null,
         'field'     : null,
         'x'         : 0,
-        'opacity'   : 1,
         'style'     : {
             fontSize    : '0.85rem',
             fontFamily  : 'Work Sans',
@@ -163,37 +144,42 @@ export class RotatedLabel extends React.PureComponent {
 
         // State is null unless text is too long and we need a 'show full label' state.
         this.state = {
-            textHeight  : null,
-            shortLabel  : null,
-            expanded    : null,
-            hover       : false
+            'textHeight'  : null,
+            'shortLabel'  : null,
+            'expanded'    : null,
+            'hover'       : false
         };
 
         this.textContainerRef = React.createRef();
     }
 
     componentDidMount(){
-        if (this.state.textHeight === null && this.props.label){
+        const { label } = this.props, { textHeight } = this.state;
+        if (textHeight === null && label){
             this.setState(this.getTextHeightState());
         }
     }
 
     getTextHeightState(){
-        var textHeight,
-            shortLabel  = null,
-            expanded    = null,
-            maxHeight   = this.maxTextHeight();
-
-        textHeight = layout.textHeight(
-            this.props.label,
+        const { label, lineHeight, style } = this.props;
+        let shortLabel  = null;
+        let expanded    = null;
+        const maxHeight = this.maxTextHeight();
+        const textHeight = layout.textHeight(
+            label,
             this.labelWidth(),
             'label-text',
-            _.extend({}, this.props.style || {}, { lineHeight : this.props.lineHeight + 'px' }),
+            _.extend({}, style || {}, { 'lineHeight' : lineHeight + 'px' }),
             this.textContainerRef.current
         );
 
         if (textHeight > maxHeight){
-            shortLabel = layout.shortenString(this.props.label, 28, true);
+            // maxHeight just aligns conveniently to be val of maxChars
+            // TODO: In the future maybe some smarter logic could be used, such as
+            // length of hypotenuse divided by avg character width (+~1px) in
+            // context of maxTextHeight and maxLabelWidth.
+            const maxChars = maxHeight;
+            shortLabel = layout.shortenString(label, maxChars, true, ' ');
             expanded = false;
         }
 
@@ -201,31 +187,29 @@ export class RotatedLabel extends React.PureComponent {
     }
 
     maxTextHeight(){
-        if (typeof this.props.maxTextHeight === 'number') return this.props.maxTextHeight;
-        return RotatedLabel.maxTextHeight(this.props.placementWidth, this.props.lineHeight, this.props.extraHeight);
+        const { maxTextHeight, placementWidth, lineHeight, extraHeight } = this.props;
+        if (typeof maxTextHeight === 'number') return maxTextHeight;
+        return RotatedLabel.maxTextHeight(placementWidth, lineHeight, extraHeight);
     }
 
-    labelWidth(props = this.props){
-        if (typeof props.labelWidth === 'number') return props.labelWidth;
-        return Math.min(
-            RotatedLabel.maxHypotenuse(props.placementHeight, props.angle),
-            props.maxLabelWidth
-        );
+    labelWidth(){
+        const { labelWidth, placementHeight, angle, maxLabelWidth } = this.props;
+        if (typeof labelWidth === 'number') return labelWidth;
+        return Math.min( RotatedLabel.maxHypotenuse(placementHeight, angle), maxLabelWidth );
     }
 
     onMouseEnter(e){
         this.setState(function({ expanded, hover }){
-            var nextExpanded = (typeof expanded === 'boolean' || null) && true;
+            const nextExpanded = (typeof expanded === 'boolean' || null) && true;
             if (!hover || expanded !== nextExpanded){
                 return { 'hover' : true, 'expanded' : nextExpanded };
             }
         });
-        //this.state && typeof this.state.expanded === 'boolean' && !this.state.expanded && this.setState({ expanded : true });
     }
 
     onMouseLeave(e){
         this.setState(function({ expanded, hover }){
-            var nextExpanded = (typeof expanded === 'boolean' || null) && false;
+            const nextExpanded = (typeof expanded === 'boolean' || null) && false;
             if (hover || expanded !== nextExpanded){
                 return { 'hover' : false, 'expanded' : nextExpanded };
             }
@@ -241,34 +225,34 @@ export class RotatedLabel extends React.PureComponent {
      * @returns {ReactElement|null} The React element to append or null.
      */
     renderLabelAppend(labelHeight, labelWidth){
-        if (!this.props.append) return null;
+        const { append, appendOffset, angle, lineHeight, appendExpanded, deRotateAppend } = this.props;
+        const { expanded,  } = this.state;
+        if (!append) return null;
 
-        var offTop = 0, offRight = 0;
+        let offTop = 0;
+        let offRight = 0;
 
-        if (this.props.appendOffset > 0){
+        if (appendOffset > 0){
             // Move appendor upwards by appendOffset, in context of angle/rotation.
-            offRight = this.props.appendOffset * Math.sin(this.props.angle/180 * Math.PI);
-            offTop = this.props.appendOffset * Math.cos(this.props.angle/180 * Math.PI);
+            offRight = appendOffset * Math.sin(angle/180 * Math.PI);
+            offTop = appendOffset * Math.cos(angle/180 * Math.PI);
         }
 
-        var dims = {
-                // right is same thing as adjacent (= right) = cotan(angle) * (opposite (= labelHeight) / 2)
-                right : - ( (labelHeight / 2) / Math.tan(this.props.angle/180 * Math.PI) ) - offRight,
-                top : (labelHeight / 2) - offTop,
-            },
-            innerStyle = {
-                position : 'relative',
-                left : - ((labelHeight - this.props.lineHeight) / 4)
-                        * Math.sin(this.props.angle/180 * Math.PI)
-            };
+        const dims = {
+            // right is same thing as adjacent (= right) = cotan(angle) * (opposite (= labelHeight) / 2)
+            'right' : - ( (labelHeight / 2) / Math.tan(angle / 180 * Math.PI) ) - offRight,
+            'top' : (labelHeight / 2) - offTop,
+        };
+        const innerStyle = {
+            'position' : 'relative',
+            'left' : - ((labelHeight - lineHeight) / 4) * Math.sin(angle/180 * Math.PI)
+        };
 
         return (
             <span className="append" style={dims}>
-                <div style={this.props.deRotateAppend ? { transform : vizUtil.style.rotate3d(Math.abs(this.props.angle), 'z') } : null}>
+                <div style={deRotateAppend ? { transform : vizUtil.style.rotate3d(Math.abs(angle), 'z') } : null}>
                     <div style={innerStyle}>
-                    { (this.state && this.state.expanded && this.props.appendExpanded) ?
-                        this.props.appendExpanded : this.props.append
-                    }
+                        { (expanded && appendExpanded) ? appendExpanded : append }
                     </div>
                 </div>
             </span>
@@ -276,26 +260,22 @@ export class RotatedLabel extends React.PureComponent {
     }
 
     render(){
-        var { lineHeight, angle, className, x, y, placementWidth, opacity, label, color } = this.props,
-            { expanded, shortLabel, hover } = this.state,
-            term = this.props['data-term'] || this.props.term || null,
-            labelWidth = this.labelWidth(),
-            labelHeight = Math.min(
-                (this.state && this.state.textHeight) || lineHeight,
-                this.maxTextHeight()
-            ),
-            angleToUse = - Math.abs(angle),
-            fullClassName = (
-                "rotated-label " + (className || '') + ((expanded && ' expanded') || '') +
-                (hover ? ' hover' : '')
-            );
+        const { lineHeight, angle, className, x, y, placementWidth, label, color, term: propTerm } = this.props;
+        const { expanded, shortLabel, hover, textHeight } = this.state;
+        const term = this.props['data-term'] || propTerm || null;
+        const labelWidth = this.labelWidth();
+        const labelHeight = Math.min(textHeight || lineHeight, this.maxTextHeight());
+        const angleToUse = - Math.abs(angle);
+        const fullClassName = (
+            "rotated-label " + (className || '') + ((expanded && ' expanded') || '') +
+            (hover ? ' hover' : '')
+        );
 
         return (
             <div data-term={term} className={fullClassName} title={shortLabel ? label : null}
                 style={{
                     transform : vizUtil.style.translate3d(x, y, 0),
                     width : placementWidth,
-                    opacity : opacity,
                 }}
                 onMouseEnter={this.onMouseEnter}
                 onMouseLeave={this.onMouseLeave}
@@ -309,12 +289,10 @@ export class RotatedLabel extends React.PureComponent {
                     transform : vizUtil.style.rotate3d(angleToUse, 'z')
                 }}>
 
-                    <span className="inner" style={lineHeight ? {
-                        lineHeight : lineHeight + 'px'
-                    } : null }>
+                    <span className="inner" style={lineHeight ? { 'lineHeight' : lineHeight + 'px' } : null }>
                         { color ?
                             <i className="icon icon-circle color-indicator" style={{ color }}/>
-                        : null }
+                            : null }
                         { expanded ? label : shortLabel || label }
                     </span>
 

@@ -95,37 +95,11 @@ navigate.getBrowseBaseHref = function(browseBaseParams = null){
 };
 
 
-navigate.isValidBrowseQuery = function(hrefQuery, browseBaseParams = null){
-
-    if (!browseBaseParams || typeof browseBaseParams !== 'object') browseBaseParams = navigate.getBrowseBaseParams(typeof browseBaseParams === 'string' ? browseBaseParams : null);
-    if (typeof hrefQuery === 'string'){
-        hrefQuery = url.parse(hrefQuery, true).query;
-    }
-
-    return _.every(_.pairs(browseBaseParams), function([field, listOfTerms]){
-        if (typeof hrefQuery[field] === 'undefined') return false;
-        if (Array.isArray(listOfTerms) && listOfTerms.length === 1) listOfTerms = listOfTerms[0];
-        if (Array.isArray(hrefQuery[field])){
-            if (Array.isArray(listOfTerms)){
-                return _.every(listOfTerms, function(arrItem){
-                    return hrefQuery[field].indexOf(arrItem) > -1;
-                });
-            } else {
-                return hrefQuery[field].indexOf(listOfTerms) > -1;
-            }
-        } else if (Array.isArray(listOfTerms)){
-            return false;
-        } else {
-            return hrefQuery[field] === listOfTerms;
-        }
-    });
-};
-
 navigate.isBaseBrowseQuery = function(hrefQuery, browseBaseState = null){
-    var baseParams = navigate.getBrowseBaseParams(browseBaseState),
-        field_diff1 = _.difference(_.keys(hrefQuery), _.keys(baseParams)),
-        field_diff2 = _.difference(_.keys(baseParams), _.keys(hrefQuery)),
-        failed = false;
+    const baseParams = navigate.getBrowseBaseParams(browseBaseState);
+    const field_diff1 = _.difference(_.keys(hrefQuery), _.keys(baseParams));
+    const field_diff2 = _.difference(_.keys(baseParams), _.keys(hrefQuery));
+    let failed = false;
 
     if (field_diff1.length > 0 || field_diff2.length > 0){
         return false;
@@ -133,11 +107,11 @@ navigate.isBaseBrowseQuery = function(hrefQuery, browseBaseState = null){
 
     _.forEach(_.pairs(hrefQuery), function([field, term]){
         if (failed) return;
-        var baseParamTermList = baseParams[field];
+        const baseParamTermList = baseParams[field];
         if (!Array.isArray(term)) term = [term];
 
-        var term_diff1 = _.difference(term, baseParamTermList),
-            term_diff2 = _.difference(baseParamTermList, term);
+        const term_diff1 = _.difference(term, baseParamTermList);
+        const term_diff2 = _.difference(baseParamTermList, term);
 
         if (term_diff1.length > 0 || term_diff2.length > 0){
             failed = true;
@@ -199,11 +173,8 @@ navigate.setBrowseBaseStateAndRefresh = function(
 
 navigate.determineSeparatorChar = function(href){
     return (
-        ['?','&'].indexOf(href.charAt(href.length - 1)) > -1 ? // Is last character a '&' or '?' ?
-        '' : (
-            href.match(/\?./) ?
-            '&' : '?'
-        )
+        ['?','&'].indexOf(href.charAt(href.length - 1)) > -1 ? '' // Is last character a '&' or '?' ?
+            : href.match(/\?./) ? '&' : '?'
     );
 };
 

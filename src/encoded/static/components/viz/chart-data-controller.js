@@ -227,22 +227,24 @@ var lastTimeSyncCalled = 0;
  * @prop {string} id - Unique ID.
  * @prop {Object} children - Must be a Chart or Chart controller component.
  */
-class Provider extends React.Component {
+class Provider extends React.PureComponent {
 
     static propTypes = {
         'id' : PropTypes.string,
         'children' : PropTypes.object.isRequired
-    }
+    };
 
     constructor(props){
         super(props);
         if (typeof props.id === 'string') this.id = props.id;
         else this.id = object.randomId();
+
+        this.state = { 'updateCount' : 0 };
     }
 
     /**
-     * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
-     * using ChartDataController.registerUpdateCallback(cb, this.props.id).
+     * Registers a callback function, which itself just updates own state trivially to
+     * basically force an update ChartDataController.registerUpdateCallback(cb, this.props.id).
      *
      * @memberof module:viz/chart-data-controller.Provider
      * @private
@@ -252,7 +254,9 @@ class Provider extends React.Component {
      */
     componentDidMount(){
         ChartDataController.registerUpdateCallback(()=>{
-            this.forceUpdate();
+            this.setState(function({ updateCount }){
+                return { 'updateCount' : updateCount + 1 };
+            });
         }, this.id);
     }
 
@@ -278,15 +282,15 @@ class Provider extends React.Component {
      * @instance
      */
     render(){
-        var childChartProps = _.extend({}, this.props.children.props,
+        const { children } = this.props;
+        const childChartProps = _.extend({}, children.props,
             _.pick(state, 'barplot_data_filtered', 'barplot_data_unfiltered', 'barplot_data_fields', 'isLoadingChartData'),
             {
                 'updateBarPlotFields'   : ChartDataController.updateBarPlotFields,
                 'providerId'            : this.id
             }
         );
-
-        return React.cloneElement(this.props.children, childChartProps);
+        return React.cloneElement(children, childChartProps);
     }
 
 }
@@ -527,7 +531,7 @@ export const ChartDataController = {
         if (!isInitialized) throw Error("Not initialized.");
         lastTimeSyncCalled = Date.now();
         if (!syncOpts.fromSync) syncOpts.fromSync = true;
-        ChartDataController.setState({'isLoadingChartData' : true }, function(){
+        ChartDataController.setState({ 'isLoadingChartData' : true }, function(){
             ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, syncOpts);
         });
     },
