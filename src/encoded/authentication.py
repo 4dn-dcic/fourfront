@@ -435,7 +435,7 @@ def generate_password():
              permission=NO_PERMISSION_REQUIRED)
 def create_unauthorized_user(request):
     """
-    Endpoint to create an unauthorized user, which will have no lab or award.
+    Endpoint to create an unauthorized user, which will have no institution/project.
     Requires a reCAPTCHA response, which is propogated from the front end
     registration form. This is so the endpoint cannot be abused.
     Given a user properties in the request body, will validate those and also

@@ -19,7 +19,7 @@
             "default": "1"
         },
         "status": {
-            "default": "processing"
+            "default": "in review"
         },
         "tracking_type": {
             "title": "Tracking Type",
