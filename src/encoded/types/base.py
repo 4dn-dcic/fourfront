@@ -41,7 +41,6 @@ ONLY_ADMIN_VIEW = [
 # This acl allows item creation; it is easily overwritten in lab and user,
 # as these items should not be available for creation
 SUBMITTER_CREATE = [
-    (Allow, 'group.submitter', 'add'),
     (Allow, 'group.submitter', 'create')
 ]
 
@@ -77,18 +76,13 @@ DELETED = [
     (Deny, Everyone, 'visible_for_edit')
 ] + ONLY_ADMIN_VIEW
 
-# For running pipelines
-ALLOW_INSTITUTION_PROJECT_VIEW_WITHOUT_CREATE = [
-    (Allow, 'role.institution_member', 'view'),
-    (Allow, 'role.project_member', 'view')
-] + ONLY_ADMIN_VIEW
-
 # Collection acls
-ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
+ALLOW_SUBMITTER_ADD = [
+    (Allow, 'group.submitter', 'add'),
+]
 
 ALLOW_ANY_USER_ADD = [
     (Allow, Authenticated, 'add'),
-    (Allow, Authenticated, 'create')
 ] + ALLOW_EVERYONE_VIEW
 
 
@@ -240,7 +234,10 @@ class Collection(snovault.Collection, AbstractCollection):
         super(Collection, self).__init__(*args, **kw)
         if hasattr(self, '__acl__'):
             return
-        # XXX collections should be setup after all types are registered.
+
+        # If no ACLs are defined for collection, allow submitter add/create
+        # if the collection schema includes 'institution'
+        # collections should be setup after all types are registered.
         # Don't access type_info.schema here as that precaches calculated schema too early.
         if 'institution' in self.type_info.factory.schema['properties']:
             self.__acl__ = ALLOW_SUBMITTER_ADD
@@ -260,7 +257,7 @@ class Item(snovault.Item):
         'in public review': ALLOW_CURRENT_AND_SUBMITTER_EDIT,
         'in review': ALLOW_INSTITUTION_MEMBER_EDIT,
         'obsolete': DELETED,
-        'inactive': ALLOW_INSTITUTION_PROJECT_VIEW_WITHOUT_CREATE,
+        'inactive': ALLOW_INSTITUTION_MEMBER_VIEW,
         'deleted': DELETED
     }
 
