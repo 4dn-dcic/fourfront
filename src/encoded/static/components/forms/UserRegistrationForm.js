@@ -5,16 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
 import memoize from 'memoize-one';
-import jwt from 'jsonwebtoken';
-import Alerts from './../alerts';
 import { Button, FormGroup, ControlLabel, FormControl, HelpBlock, Alert, Collapse } from 'react-bootstrap';
 import { console, object, ajax, JWT, analytics } from './../util';
 import { LinkToSelector } from './components/LinkToSelector';
-
-
-export const decodeJWT = memoize(function decodeJWT(jwtToken){
-    return jwtToken && jwt.decode(jwtToken);
-});
 
 
 export default class UserRegistrationForm extends React.PureComponent {
@@ -89,16 +82,15 @@ export default class UserRegistrationForm extends React.PureComponent {
     }
 
     onRecaptchaLibLoaded(){
+        const { captchaSiteKey } = this.props;
+        const { onReCaptchaResponse, onReCaptchaExpiration } = this;
         console.info('Loaded Google reCaptcha library..');
-        grecaptcha.render(
-            this.recaptchaContainerRef.current,
-            {
-                'sitekey'           : this.props.captchaSiteKey,
-                'callback'          : this.onReCaptchaResponse,
-                'error-callback'    : this.onReCaptchaExpiration,
-                'expired-callback'  : this.onReCaptchaExpiration
-            }
-        );
+        grecaptcha.render(this.recaptchaContainerRef.current, {
+            'sitekey'           : captchaSiteKey,
+            'callback'          : onReCaptchaResponse,
+            'error-callback'    : onReCaptchaExpiration,
+            'expired-callback'  : onReCaptchaExpiration
+        });
     }
 
     /** We deliver token received here with POSTed form data for server-side validation. */
@@ -120,11 +112,17 @@ export default class UserRegistrationForm extends React.PureComponent {
         });
     }
 
-    onFirstNameChange(e){ this.setState({ 'value_for_first_name' : e.target.value }); }
+    onFirstNameChange(e){
+        this.setState({ 'value_for_first_name' : e.target.value });
+    }
 
-    onLastNameChange(e){ this.setState({ 'value_for_last_name' : e.target.value }); }
+    onLastNameChange(e){
+        this.setState({ 'value_for_last_name' : e.target.value });
+    }
 
-    onContactEmailChange(e){ this.setState({ 'value_for_contact_email' : e.target.value }); }
+    onContactEmailChange(e){
+        this.setState({ 'value_for_contact_email' : e.target.value });
+    }
 
     onSelectLab(value_for_pending_lab, value_for_pending_lab_details){
         // TODO: If value_for_pending_lab exists but not value_for_pending_lab_details,
@@ -146,10 +144,11 @@ export default class UserRegistrationForm extends React.PureComponent {
         evt.preventDefault();
         evt.stopPropagation();
 
-        var { jwtToken, value_for_pending_lab } = this.state,
-            maySubmit       = this.maySubmitForm(),
-            formData        = serialize(this.formRef.current, { 'hash' : true }),
-            decodedToken    = decodeJWT(jwtToken);
+        const { endpoint, onComplete } = this.props;
+        const { jwtToken, value_for_pending_lab } = this.state;
+        const maySubmit = this.maySubmitForm();
+        const formData = serialize(this.formRef.current, { 'hash' : true });
+        const decodedToken = JWT.decode(jwtToken);
 
         if (!maySubmit) {
             return;
@@ -167,7 +166,7 @@ export default class UserRegistrationForm extends React.PureComponent {
 
         console.log('Full data being sent - ', formData);
 
-        this.setState({'registrationStatus' : 'loading' }, ()=>{
+        this.setState({ 'registrationStatus' : 'loading' }, ()=>{
 
             // We may have lost our JWT, e.g. by opening a new 4DN window which unsets the cookie.
             // So we reset our cached JWT token to our cookies/localStorage prior to making request
@@ -175,25 +174,25 @@ export default class UserRegistrationForm extends React.PureComponent {
             var existingToken = JWT.get();
             if (!existingToken){
                 if (!jwtToken){
-                    this.setState({'registrationStatus' : 'network-failure'});
+                    this.setState({ 'registrationStatus' : 'network-failure' });
                     return;
                 }
                 JWT.save(jwtToken);
             }
 
             ajax.load(
-                this.props.endpoint,
+                endpoint,
                 (resp) => {
                     // TODO
-                    this.setState({'registrationStatus' : 'success-loading'});
-                    this.props.onComplete(); // <- Do request to login, then hide/unmount this component.
+                    this.setState({ 'registrationStatus' : 'success-loading' });
+                    onComplete(); // <- Do request to login, then hide/unmount this component.
                 },
                 'POST',
                 (err) => {
                     // TODO
                     // If validation failure, set / show status message, return;
                     // Else If unknown failure:
-                    this.setState({'registrationStatus' : 'network-failure'});
+                    this.setState({ 'registrationStatus' : 'network-failure' });
                     analytics.exception("Registration Error - Error on post to /create-unauthorized-user.", true);
                 },
                 JSON.stringify(formData)
@@ -211,18 +210,20 @@ export default class UserRegistrationForm extends React.PureComponent {
     }
 
     render(){
-        var { schemas, heading } = this.props,
-            { registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
-                value_for_pending_lab_details, value_for_pending_lab, jwtToken } = this.state,
-            decodedToken        = decodeJWT(jwtToken),
-            email               = decodedToken.email,
-            captchaError        = this.state.captchaErrorMsg,
-            emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-            contactEmail        = value_for_contact_email && value_for_contact_email.toLowerCase(),
-            isContactEmailValid = !contactEmail || emailValidationRegex.test(contactEmail),
-            maySubmit           = this.maySubmitForm(),
-            errorIndicator      = null,
-            loadingIndicator    = null;
+        const { schemas, heading } = this.props;
+        const {
+            registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
+            value_for_pending_lab_details, value_for_pending_lab, jwtToken, captchaErrorMsg : captchaError
+        } = this.state;
+        const decodedToken = JWT.decode(jwtToken);
+        const { email } = decodedToken;
+        // eslint-disable-next-line no-useless-escape
+        const emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const contactEmail = value_for_contact_email && value_for_contact_email.toLowerCase();
+        const isContactEmailValid = !contactEmail || emailValidationRegex.test(contactEmail);
+        const maySubmit = this.maySubmitForm();
+        let errorIndicator = null;
+        let loadingIndicator = null;
 
         if (registrationStatus === 'network-failure'){
             // TODO: Hide form in this case?
@@ -270,7 +271,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <FormGroup controlId="email-address" validationState={null}>
                         <ControlLabel>Primary E-Mail or Username</ControlLabel>
                         <h4 id="email-address" className="text-300 mt-0">
-                            { object.itemUtil.User.gravatar(email, 36, {'style' : { 'borderRadius': '50%', 'marginRight' : 10 }}, 'mm') }
+                            { object.itemUtil.User.gravatar(email, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
                             { email }
                         </h4>
                     </FormGroup>
@@ -380,37 +381,38 @@ class LookupLabField extends React.PureComponent {
 
         this.setState({ 'isSelecting' : false }, ()=>{
             // Invoke the object callback function, using the text input.
+            // eslint-disable-next-line react/destructuring-assignment
             this.props.onSelect(selectionAtID, selectionItemContext);
         });
     }
 
     render(){
-        var { loading, currentLabDetails } = this.props,
-            { isSelecting } = this.state,
-            tooltip         = "Search for a Lab and add it to the display.",
-            dropMessage     = "Drop a Lab here.",
-            searchURL       = '/search/?currentAction=selection&type=Lab',
-            currLabTitle    = (
-                isSelecting && (
-                    <div style={LookupLabField.fieldTitleColStyle}>
-                        Select a lab or drag & drop Lab Item or URL into this window.
-                    </div>
-                )
-            ) || (
-                currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
-                    <div style={LookupLabField.fieldTitleColStyle}>
-                        <a href={object.itemUtil.atId(currentLabDetails)} target="_blank" data-tip="View lab in new tab"
-                            rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
-                            { currentLabDetails.display_title }
-                        </a>
-                        &nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small"/>
-                    </div>
-                )
-            ) || (
-                <div style={LookupLabField.fieldTitleColStyle} onClick={this.setIsSelecting} className="clickable" data-tip={tooltip}>
-                    No Lab selected
+        const { loading, currentLabDetails, onClear } = this.props;
+        const { isSelecting } = this.state;
+        const tooltip = "Search for a Lab and add it to the display.";
+        const dropMessage = "Drop a Lab here.";
+        const searchURL = '/search/?currentAction=selection&type=Lab';
+        const currLabTitle = (
+            isSelecting && (
+                <div style={LookupLabField.fieldTitleColStyle}>
+                    Select a lab or drag & drop Lab Item or URL into this window.
                 </div>
-            );
+            )
+        ) || (
+            currentLabDetails && currentLabDetails['@id'] && currentLabDetails.display_title && (
+                <div style={LookupLabField.fieldTitleColStyle}>
+                    <a href={object.itemUtil.atId(currentLabDetails)} target="_blank" data-tip="View lab in new tab"
+                        rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
+                        { currentLabDetails.display_title }
+                    </a>
+                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small"/>
+                </div>
+            )
+        ) || (
+            <div style={LookupLabField.fieldTitleColStyle} onClick={this.setIsSelecting} className="clickable" data-tip={tooltip}>
+                No Lab selected
+            </div>
+        );
 
         return (
             <React.Fragment>
@@ -418,10 +420,10 @@ class LookupLabField extends React.PureComponent {
                     { currLabTitle }
                     <div className="field-buttons">
                         { currentLabDetails && currentLabDetails['@id'] ?
-                            <Button onClick={this.props.onClear} className="mr-05">
+                            <Button onClick={onClear} className="mr-05">
                                 Clear
                             </Button>
-                        : null }
+                            : null }
                         <Button className="btn-primary" onClick={this.setIsSelecting} disabled={loading || isSelecting} data-tip={tooltip}>
                             Select
                         </Button>
@@ -434,52 +436,41 @@ class LookupLabField extends React.PureComponent {
 }
 
 
-class JobTitleField extends React.PureComponent {
+function JobTitleField(props) {
+    const { value_for_pending_lab, value_for_pending_lab_details, schemas } = props;
+    const fieldSchema = JobTitleField.getJobTitleSchema(schemas);
+    let formControl;
 
-    constructor(props){
-        super(props);
-        this.getJobTitleSchema = this.getJobTitleSchema.bind(this);
-    }
-
-    getJobTitleSchema(){
-        var schemas = this.props.schemas;
-        return (
-            schemas && schemas.User && schemas.User.properties &&
-            schemas.User.properties.job_title
-        ) || null;
-    }
-
-    render(){
-
-        var { value_for_pending_lab, value_for_pending_lab_details } = this.props,
-            fieldSchema = this.getJobTitleSchema(),
-            formControl;
-
-        if (fieldSchema && Array.isArray(fieldSchema.suggested_enum) && fieldSchema.suggested_enum.length > 0){
-            formControl = (
-                <FormControl componentClass="select" name="job_title" defaultValue="null">
-                    <option hidden disabled value="null"> -- select an option -- </option>
-                    { _.map(fieldSchema.suggested_enum, function(val){ return <option value={val} key={val}>{ val }</option>; }) }
-                </FormControl>
-            );
-        } else {
-            formControl = <FormControl name="job_title" type="text"/>;
-        }
-
-        return (
-            <Collapse in={!!(value_for_pending_lab)}>
-                <div className="clearfix">
-                    <FormGroup controlId="jobTitle" validationState={null}>
-                        <ControlLabel>
-                            Job Title
-                            { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
-                            <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
-                            <span className="text-300"> (Optional)</span>
-                        </ControlLabel>
-                        { formControl }
-                    </FormGroup>
-                </div>
-            </Collapse>
+    if (fieldSchema && Array.isArray(fieldSchema.suggested_enum) && fieldSchema.suggested_enum.length > 0){
+        formControl = (
+            <FormControl componentClass="select" name="job_title" defaultValue="null">
+                <option hidden disabled value="null"> -- select an option -- </option>
+                { _.map(fieldSchema.suggested_enum, function(val){ return <option value={val} key={val}>{ val }</option>; }) }
+            </FormControl>
         );
+    } else {
+        formControl = <FormControl name="job_title" type="text"/>;
     }
+
+    return (
+        <Collapse in={!!(value_for_pending_lab)}>
+            <div className="clearfix">
+                <FormGroup controlId="jobTitle" validationState={null}>
+                    <ControlLabel>
+                        Job Title
+                        { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
+                        <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
+                        <span className="text-300"> (Optional)</span>
+                    </ControlLabel>
+                    { formControl }
+                </FormGroup>
+            </div>
+        </Collapse>
+    );
 }
+JobTitleField.getJobTitleSchema = function(schemas){
+    return (
+        schemas && schemas.User && schemas.User.properties &&
+        schemas.User.properties.job_title
+    ) || null;
+};

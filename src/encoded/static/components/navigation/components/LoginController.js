@@ -4,13 +4,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { NavItem, Modal } from 'react-bootstrap';
-import Auth0Lock from 'auth0-lock';
 import { JWT, ajax, navigate, isServerSide, analytics, object, layout } from './../../util';
 import Alerts from './../../alerts';
-import UserRegistrationForm, { decodeJWT } from './../../forms/UserRegistrationForm';
 
-
+/** Imported in componentDidMount. */
+let Auth0Lock = null;
 
 /** Controls Login process, also shows Registration Modal */
 export class LoginController extends React.PureComponent {
@@ -24,7 +22,8 @@ export class LoginController extends React.PureComponent {
         'schemas'             : PropTypes.object,
         'auth0ClientID'       : PropTypes.string.isRequired,
         'auth0Domain'         : PropTypes.string.isRequired,
-        'auth0Options'        : PropTypes.object
+        'auth0Options'        : PropTypes.object,
+        'children'            : PropTypes.node.isRequired
     };
 
     static defaultProps = {
@@ -55,21 +54,26 @@ export class LoginController extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.showLock           = _.throttle(this.showLock.bind(this), 1000, { trailing: false });
-        this.loginCallback      = this.loginCallback.bind(this);
+        this.showLock = _.throttle(this.showLock.bind(this), 1000, { trailing: false });
+        this.loginCallback = this.loginCallback.bind(this);
         this.loginErrorCallback = this.loginErrorCallback.bind(this);
         this.onRegistrationComplete = this.onRegistrationComplete.bind(this);
         this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.state = {
-            "showRegistrationModal" : false,
+            "isRegistrationModalVisible" : false,
             "isLoading" : false // Whether are currently performing login/registration request.
         };
     }
 
     componentDidMount () {
         const { auth0ClientID, auth0Domain, auth0Options } = this.props;
-        this.lock = new Auth0Lock(auth0ClientID, auth0Domain, auth0Options);
-        this.lock.on("authenticated", this.loginCallback);
+        require.ensure(["auth0-lock"], (require) => {
+            // As of 9.11.0, auth0-js (dependency of Auth0Lock) cannot work outside of browser context.
+            // We import it here in separate bundle instead to avoid issues during server-side render.
+            Auth0Lock = require("auth0-lock").default;
+            this.lock = new Auth0Lock(auth0ClientID, auth0Domain, auth0Options);
+            this.lock.on("authenticated", this.loginCallback);
+        }, "auth0-lock-bundle");
     }
 
     showLock(evtKey, e){
@@ -166,7 +170,7 @@ export class LoginController extends React.PureComponent {
         } else if (error.code === 401) {
             // Present a registration form
             //navigate('/error/login-failed');
-            this.setState({ 'showRegistrationModal' : true });
+            this.setState({ 'isRegistrationModalVisible' : true });
         } else {
             Alerts.queue(Alerts.LoginFailed);
         }
@@ -174,7 +178,7 @@ export class LoginController extends React.PureComponent {
 
     onRegistrationComplete(){
         const token = JWT.get();
-        const decodedToken = decodeJWT(token);
+        const decodedToken = JWT.decode(token);
 
         this.loginCallback(
             { 'idToken' : token },
@@ -192,7 +196,7 @@ export class LoginController extends React.PureComponent {
                         <li>Please visit <b><a href={userProfileURL}>your profile</a></b> to edit your account settings or information.</li>
                     </ul>
                 );
-                this.setState({ 'showRegistrationModal' : false });
+                this.setState({ 'isRegistrationModalVisible' : false });
                 // Moved out of setState callback because no guarantee that setState callback is fired
                 // if component becomes unmounted (which occurs after login).
                 Alerts.queue({
@@ -203,7 +207,7 @@ export class LoginController extends React.PureComponent {
                 });
             },
             (err) => {
-                this.setState({ 'showRegistrationModal' : false });
+                this.setState({ 'isRegistrationModalVisible' : false });
                 JWT.remove(); // Cleanup any remaining JWT, just in case.
                 Alerts.queue(Alerts.LoginFailed);
             }
@@ -212,115 +216,55 @@ export class LoginController extends React.PureComponent {
 
     onRegistrationCancel(){
         // TODO:
-        this.setState({ 'showRegistrationModal' : false });
+        this.setState({ 'isRegistrationModalVisible' : false });
     }
 
     render(){
-
-        // TODO
-
-        return;
+        const { children, ...passProps } = this.props;
+        const { isLoading, isRegistrationModalVisible } = this.state;
+        const { showLock, onRegistrationCancel, onRegistrationComplete } = this;
+        return React.cloneElement(
+            children,
+            { isLoading, isRegistrationModalVisible, showLock, onRegistrationCancel, onRegistrationComplete, ...passProps }
+        );
     }
 
 }
 
 
-export class LoginNavItem extends React.Component {
+export class LogoutController extends React.PureComponent {
 
-
-    
-
-    renderRegistrationModal(){
-        const { schemas } = this.props;
-        const { showRegistrationModal } = this.state;
-
-        if (!showRegistrationModal) return null;
-
-        const token = JWT.get();
-        // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
-        const decodedToken = token && decodeJWT(token);
-        const unverifiedEmail = decodedToken && decodedToken.email;
-        const onExitLinkClick = (e) => {
-            e.preventDefault();
-            this.setState({ 'showRegistrationModal' : false }, this.showLock);
-        };
-
-        if (!unverifiedEmail){
-            // Error (maybe if user manually cleared cookies or localStorage... idk)
-            return (
-                <Modal show onHide={this.onRegistrationCancel}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Missing Email</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p>An error has occurred. Please try to login/register again.</p>
-                    </Modal.Body>
-                </Modal>
-            );
-        }
-
-        const isEmailAGmail = unverifiedEmail.slice(-10) === "@gmail.com";
-        const onGoogleLinkClick = (e) => {
-            e.preventDefault();
-            analytics.event('Authentication', 'CreateGoogleAccountLinkClick', { eventLabel : "None" });
-            window.open(e.target.href);
-        };
-        const formHeading = (
-            <div className="mb-3">
-                <h4 className="text-400 mb-2 mt-05">
-                    You have never logged in as <span className="text-600">{ unverifiedEmail }</span> before.
-                </h4>
-                <ul>
-                    <li>
-                        Please <span className="text-500">register below</span> or{' '}
-                        <a href="#" className="text-500" onClick={onExitLinkClick}>use a different email address</a>{' '}
-                        if you have an existing account.
-                    </li>
-                    { isEmailAGmail?
-                        <li>
-                            If you prefer, you can use your institutional email address as your account ID by creating a new google account at{' '}
-                            <a href="https://accounts.google.com/signup/v2" target="_blank" rel="noopener noreferrer" onClick={onGoogleLinkClick}>
-                                https://accounts.google.com/signup/v2
-                            </a> and selecting &quot;Use my current email address instead&quot;.
-                        </li>
-                        : null }
-                </ul>
-            </div>
-        );
-
-        return (
-            <Modal show bsSize="large" onHide={this.onRegistrationCancel}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Registration</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <UserRegistrationForm heading={formHeading} schemas={schemas} jwtToken={token}
-                        onComplete={this.onRegistrationComplete} onCancel={this.onRegistrationCancel} />
-                </Modal.Body>
-            </Modal>
-        );
+    constructor(props){
+        super(props);
+        this.performLogout = this.performLogout.bind(this);
     }
 
-    render() {
-        const { windowWidth, id } = this.props;
-        const { showRegistrationModal, isLoading } = this.state;
-        const gridState = layout.responsiveGridState(windowWidth);
+    /**
+     * Removes JWT from cookies, as well as userInfo from localStorage
+     * and then refreshes current view/href via navigate fxn.
+     *
+     * @param {string} eventKey - Not needed.
+     * @param {Event} eventObject - Not needed.
+     */
+    performLogout(eventKey, eventObject){
+        const { updateUserInfo } = this.props;
 
-        return (
-            <React.Fragment>
-                <NavItem key="login-reg-btn" active={showRegistrationModal} onClick={this.showLock} className="user-account-item" id={id}>
-                    { isLoading ? (
-                        <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>
-                    ) : (
-                        <React.Fragment>
-                            <i className="account-icon icon icon-user-o" />
-                            { gridState === 'lg' ? "Log In / Register" : "Log In" }
-                        </React.Fragment>
-                    )}
-                </NavItem>
-                { this.renderRegistrationModal() }
-            </React.Fragment>
-        );
+        // Removes both idToken (cookie) and userInfo (localStorage)
+        JWT.remove();
+
+        // Refetch page context without our old JWT to hide any forbidden content.
+        updateUserInfo();
+        navigate('', { 'inPlace':true });
+
+        if (typeof document !== 'undefined'){
+            // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
+            document.dispatchEvent(new MouseEvent('click'));
+        }
+    }
+
+    render(){
+        const { children, ...passProps } = this.props;
+        return React.cloneElement(children, { performLogout : this.performLogout, ...passProps });
     }
 
 }

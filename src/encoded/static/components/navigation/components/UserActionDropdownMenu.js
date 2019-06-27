@@ -7,7 +7,8 @@ import url from 'url';
 import { DropdownItem } from './../../forms/components/DropdownButton';
 import { Nav, NavDropdown } from 'react-bootstrap';
 import { JWT, isServerSide, navigate, object } from './../../util';
-import { LoginNavItem } from './LoginNavItem';
+import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
+import { LoginController, LogoutController } from './LoginController';
 
 
 /**
@@ -22,7 +23,7 @@ import { LoginNavItem } from './LoginNavItem';
  *
  * @todo Refactor this into a BigDropdown menu. Get rid of listActionsFor at some point from App.js.
  */
-export class UserActionDropdownMenu extends React.Component {
+export class UserActionDropdownMenu extends React.PureComponent {
 
     static propTypes = {
         'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
@@ -34,42 +35,20 @@ export class UserActionDropdownMenu extends React.Component {
 
     constructor(props){
         super(props);
-        this.performLogout = this.performLogout.bind(this);
         this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
-        this.state = { 'isLoading' : false };
-    }
-
-    /**
-     * Removes JWT from cookies, as well as userInfo from localStorage
-     * and then refreshes current view/href via navigate fxn.
-     */
-    performLogout(eventKey, eventObject){
-        const { updateUserInfo } = this.props;
-
-        // Removes both idToken (cookie) and userInfo (localStorage)
-        JWT.remove();
-
-        // Refetch page context without our old JWT to hide any forbidden content.
-        updateUserInfo();
-        navigate('', { 'inPlace':true });
-
-        if (typeof document !== 'undefined'){
-            // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
-            document.dispatchEvent(new MouseEvent('click'));
-        }
     }
 
     /** Shown for logged in users. */
     listUserActionsAsMenuItems(){
-        const { listActionsFor, href } = this.props;
+        const { listActionsFor, href, updateUserInfo } = this.props;
         const actions = _.map(listActionsFor('user'), function(action){
             return actionToMenuItem(action, href, { "data-no-cache" : true });
         });
 
         actions.push(
-            <DropdownItem id="logoutbtn" onSelect={this.performLogout} className="global-entry">
-                Log Out
-            </DropdownItem>
+            <LogoutController updateUserInfo={updateUserInfo}>
+                <LogoutDropdownItem/>
+            </LogoutController>
         );
 
         return actions;
@@ -93,7 +72,11 @@ export class UserActionDropdownMenu extends React.Component {
                 </NavDropdown>
             );
         } else {
-            acctBtn = <LoginNavItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')} key="login-register" id="user_account_nav_button" />;
+            acctBtn = (
+                <LoginController {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}>
+                    <LoginNavItem key="login-register" id="user_account_nav_button" />
+                </LoginController>
+            );
         }
 
         return <Nav className="navbar-acct" pullRight>{ acctBtn }</Nav>;
