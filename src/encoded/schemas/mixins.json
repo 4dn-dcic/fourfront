@@ -74,12 +74,16 @@
             "default": "in review by lab",
             "permission": "import_items",
             "enum": [
-                "released",
                 "current",
-                "revoked",
-                "deleted",
+                "released",
+                "replaced",
+                "released to project",
+                "released to institution",
+                "in public review",
+                "in review",
                 "obsolete",
-                "replaced"
+                "inactive",
+                "deleted"
             ]
         }
     },
@@ -140,7 +144,8 @@
         "institution": {
             "title": "Institution",
              "description": "Institution associated with the submission.",
-             "exclude_from": ["submit4dn", "FFedit-create"],
+             "exclude_from": ["submit4dn"],
+             "permission": "import_items",
              "type": "string",
              "linkTo": "Institution",
              "linkSubmitsFor": true
@@ -148,7 +153,8 @@
         "project": {
             "title": "Project",
             "description": "Project associated with the submission.",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
             "type": "string",
             "linkTo": "Project"
         }
@@ -156,7 +162,7 @@
     "notes": {
         "notes": {
             "title": "Notes",
-            "description": "DCIC internal notes.",
+            "description": "Internal notes.",
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"],
             "elasticsearch_mapping_index_type": {

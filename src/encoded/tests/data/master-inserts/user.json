@@ -2,13 +2,12 @@
     {
         "email": "danavuzman@gmail.com",
         "first_name": "Dana",
-        "groups": ["admin"],
         "role": "director",
         "last_name": "Vuzman",
-        "status": "current",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "groups": ["admin"],
         "submits_for": ["hms-dbmi"],
-        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
     },
     {
         "email": "alexander_balashov@hms.harvard.edu",
@@ -36,6 +35,26 @@
         "last_name": "Clinician",
         "role": "clinician",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab26722aa99",
+        "submits_for": ["hms-dbmi"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
+    },
+    {
+        "email": "jkrier@bwh.harvard.edu",
+        "first_name": "Joel",
+        "last_name": "Krier",
+        "role": "clinician",
+        "uuid": "986b362f-4eb6-4a9c-8173-3acba722bba1",
+        "groups": ["admin"],
+        "submits_for": ["bwh"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
+    },
+    {
+        "email": "andrew_schroeder@hms.harvard.edu",
+        "first_name": "Andy",
+        "last_name": "Schroeder",
+        "role": "scientist",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777",
+        "groups": ["admin"],
         "submits_for": ["hms-dbmi"],
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
     }

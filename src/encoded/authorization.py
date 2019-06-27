@@ -51,15 +51,15 @@ def groupfinder(login, request):
     principals = ['userid.%s' % user.uuid]
     institution = user_properties.get('institution')
     if institution:
-        principals.append('lab.%s' % institution)
+        principals.append('institution.%s' % institution)
 
     project = user_properties.get('project')
     if project:
-        principals.append('award.%s' % project)
+        principals.append('project.%s' % project)
 
     submits_for = user_properties.get('submits_for', [])
-    principals.extend('lab.%s' % lab_uuid for lab_uuid in submits_for)
-    principals.extend('submits_for.%s' % lab_uuid for lab_uuid in submits_for)
+    principals.extend('institution.%s' % inst_uuid for inst_uuid in submits_for)
+    principals.extend('submits_for.%s' % inst_uuid for inst_uuid in submits_for)
     if submits_for:
         principals.append('group.submitter')
 
@@ -68,8 +68,6 @@ def groupfinder(login, request):
     if user_role:
         principals.append('user_role.%s' % user_role)
 
-    # groups = user_properties.get('groups', [])
-    # principals.extend('group.%s' % group for group in groups)
-    # viewing_groups = user_properties.get('viewing_groups', [])
-    # principals.extend('viewing_group.%s' % group for group in viewing_groups)
+    groups = user_properties.get('groups', [])
+    principals.extend('group.%s' % group for group in groups)
     return principals

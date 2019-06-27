@@ -35,7 +35,7 @@ ALLOW_EVERYONE_VIEW = [
 
 ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
+    (Allow, 'role.institution_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW
 
 
@@ -69,8 +69,8 @@ class Institution(Item):
     def __ac_local_roles__(self):
         """This creates roles that the lab item needs so it can be edited & viewed"""
         roles = {}
-        lab_submitters = 'submits_for.%s' % self.uuid
-        roles[lab_submitters] = 'role.lab_submitter'
-        lab_member = 'lab.%s' % self.uuid
-        roles[lab_member] = 'role.lab_member'
+        institution_submitters = 'submits_for.%s' % self.uuid
+        roles[institution_submitters] = 'role.institution_submitter'
+        institution_member = 'lab.%s' % self.uuid
+        roles[institution_member] = 'role.institution_member'
         return roles

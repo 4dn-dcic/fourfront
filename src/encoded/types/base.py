@@ -29,12 +29,6 @@ import string
 import re
 
 
-@lru_cache()
-def _project_viewing_group(proj_uuid, root):
-    proj = root.get_by_uuid(proj_uuid)
-    return proj.upgrade_properties().get('viewing_group')
-
-
 # Item acls
 ONLY_ADMIN_VIEW = [
     (Allow, 'group.admin', ['view', 'edit']),
@@ -51,32 +45,30 @@ SUBMITTER_CREATE = [
     (Allow, 'group.submitter', 'create')
 ]
 
+ALLOW_OWNER_EDIT = [
+    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
+]
+
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-ALLOW_LAB_MEMBER_VIEW = [
-    (Allow, 'role.lab_member', 'view'),
+ALLOW_PROJECT_MEMBER_VIEW = [
+    (Allow, 'role.project_member', 'view'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
-ALLOW_VIEWING_GROUP_VIEW = [
-    (Allow, 'role.viewing_group_member', 'view'),
-] + ALLOW_LAB_MEMBER_VIEW
+# institutions are more general than projects
+ALLOW_INSTITUTION_MEMBER_VIEW = [
+    (Allow, 'role.institution_member', 'view'),
+] + ALLOW_PROJECT_MEMBER_VIEW
 
-ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
-    (Allow, 'role.viewing_group_member', 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
-] + ALLOW_LAB_MEMBER_VIEW
-
-ALLOW_LAB_SUBMITTER_EDIT = [
-    (Allow, 'role.lab_member', 'view'),
-    (Allow, 'role.award_member', 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
+ALLOW_INSTITUTION_MEMBER_EDIT = [
+    (Allow, 'role.institution_submitter', 'edit'),
+] + ALLOW_INSTITUTION_MEMBER_VIEW
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
-    (Allow, 'role.lab_submitter', 'edit'),
+    (Allow, 'role.institution_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT = ALLOW_EVERYONE_VIEW
@@ -86,15 +78,10 @@ DELETED = [
 ] + ONLY_ADMIN_VIEW
 
 # For running pipelines
-ALLOW_LAB_VIEW_ADMIN_EDIT = [
-    (Allow, 'role.lab_member', 'view'),
-    (Allow, 'role.award_member', 'view'),
-    (Allow, 'role.lab_submitter', 'view'),
+ALLOW_INSTITUTION_PROJECT_VIEW_WITHOUT_CREATE = [
+    (Allow, 'role.institution_member', 'view'),
+    (Allow, 'role.project_member', 'view')
 ] + ONLY_ADMIN_VIEW
-
-ALLOW_OWNER_EDIT = [
-    (Allow, 'role.owner', ['edit', 'view', 'view_details']),
-]
 
 # Collection acls
 ALLOW_SUBMITTER_ADD = SUBMITTER_CREATE
@@ -268,8 +255,12 @@ class Item(snovault.Item):
         'current': ALLOW_CURRENT,
         'released': ALLOW_CURRENT,
         'replaced': ALLOW_CURRENT,
-        'processing': ALLOW_VIEWING_GROUP_VIEW,
+        'released to project': ALLOW_PROJECT_MEMBER_VIEW,
+        'released to institution': ALLOW_INSTITUTION_MEMBER_VIEW,
+        'in public review': ALLOW_CURRENT_AND_SUBMITTER_EDIT,
+        'in review': ALLOW_INSTITUTION_MEMBER_EDIT,
         'obsolete': DELETED,
+        'inactive': ALLOW_INSTITUTION_PROJECT_VIEW_WITHOUT_CREATE,
         'deleted': DELETED
     }
 
@@ -298,7 +289,7 @@ class Item(snovault.Item):
         # Don't finalize to avoid validation here.
         properties = self.upgrade_properties().copy()
         status = properties.get('status')
-        return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
+        return self.STATUS_ACL.get(status, ALLOW_INSTITUTION_MEMBER_EDIT)
 
     def __ac_local_roles__(self):
         """this creates roles based on properties of the object being accessed"""
@@ -306,17 +297,13 @@ class Item(snovault.Item):
         properties = self.upgrade_properties()
         if 'institution' in properties:
             inst_submitters = 'submits_for.%s' % properties['institution']
-            roles[inst_submitters] = 'role.lab_submitter'
-            # add lab_member as well
-            inst_member = 'lab.%s' % properties['institution']
-            roles[inst_member] = 'role.lab_member'
+            roles[inst_submitters] = 'role.institution_submitter'
+            # add institution_member as well
+            inst_member = 'institution.%s' % properties['institution']
+            roles[inst_member] = 'role.institution_member'
         if 'project' in properties:
-            viewing_group = _project_viewing_group(properties['project'], find_root(self))
-            if viewing_group is not None:
-                viewing_group_members = 'viewing_group.%s' % viewing_group
-                roles[viewing_group_members] = 'role.viewing_group_member'
-                proj_group_members = 'award.%s' % properties['project']
-                roles[proj_group_members] = 'role.award_member'
+            proj_group_members = 'project.%s' % properties['project']
+            roles[proj_group_members] = 'role.project_member'
 
         # This emulates __ac_local_roles__ of User.py (role.owner)
         if 'submitted_by' in properties:
@@ -413,20 +400,6 @@ class Item(snovault.Item):
         conn = request.registry[CONNECTION]
         return [request.resource_path(conn[uuid]) for uuid in
                 self.get_filtered_rev_links(request, rev_name)]
-
-
-class SharedItem(Item):
-    """An Item visible to all authenticated users while "proposed" or "in progress"."""
-
-    def __ac_local_roles__(self):
-        """smth."""
-        roles = {}
-        properties = self.upgrade_properties().copy()
-        if 'institution' in properties:
-            inst_submitters = 'submits_for.%s' % properties['institution']
-            roles[inst_submitters] = 'role.lab_submitter'
-        roles[Authenticated] = 'role.viewing_group_member'
-        return roles
 
 
 @snovault.calculated_property(context=Item.AbstractCollection, category='action')
