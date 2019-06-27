@@ -1,11 +1,12 @@
 'use strict';
 
 import _ from 'underscore';
-//var cookie = require('react-cookie');
 import Cookies from 'universal-cookie';
+import memoize from 'memoize-one';
 import { isServerSide } from './misc';
 import patchedConsoleInstance from './patched-console';
 import { getNestedProperty } from './object';
+import jwt from 'jsonwebtoken';
 
 const console = patchedConsoleInstance;
 const COOKIE_ID = 'jwtToken';
@@ -250,4 +251,7 @@ export function isLoggedInAsAdmin(){
     return false;
 }
 
-
+/** Memoized clone of jwt.decode, for performance */
+export const decode = memoize(function decodeJWT(jwtToken){
+    return jwtToken && jwt.decode(jwtToken);
+});
