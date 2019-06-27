@@ -11,7 +11,8 @@ from .base import (
     Item,
     ALLOW_CURRENT,
     DELETED,
-    ALLOW_VIEWING_GROUP_VIEW,
+    ALLOW_PROJECT_MEMBER_VIEW,
+    ALLOW_INSTITUTION_MEMBER_VIEW,
     ONLY_ADMIN_VIEW,
     ALLOW_OWNER_EDIT
 )
@@ -33,10 +34,11 @@ class UserContent(Item):
     # embedded_list = lab_award_attribution_embed_list
 
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
-        'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
-        'deleted'               : ALLOW_OWNER_EDIT + DELETED,
-        'draft'                 : ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
-        'processing'            : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
+        'released': ALLOW_OWNER_EDIT + ALLOW_CURRENT,
+        'deleted': ALLOW_OWNER_EDIT + DELETED,
+        'draft': ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
+        'released to project': ALLOW_OWNER_EDIT + ALLOW_PROJECT_MEMBER_VIEW,
+        'released to institution': ALLOW_OWNER_EDIT + ALLOW_INSTITUTION_MEMBER_VIEW
     }
 
     @calculated_property(schema={

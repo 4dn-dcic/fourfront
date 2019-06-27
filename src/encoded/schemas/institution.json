@@ -24,7 +24,7 @@
             "permission": "import_items",
             "enum": [
                 "current",
-                "revoked",
+                "obsolete",
                 "deleted",
                 "inactive"
             ]

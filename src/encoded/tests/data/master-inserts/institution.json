@@ -11,10 +11,28 @@
         "pi": "danavuzman@gmail.com",
         "postal_code": "02115",
         "state": "MA",
-        "title": "4DN DCIC, HMS",
+        "title": "HMS DBMI",
         "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "contact_persons" : [
             "danavuzman@gmail.com"
+        ]
+    },
+    {
+        "address2": "75 Francis Street",
+        "address1": "Brigham and Women's Hospital",
+        "city": "Boston",
+        "country": "USA",
+        "fax": "000-000-0000",
+        "name": "bwh",
+        "phone1": "000-000-0000",
+        "phone2": "000-000-0000",
+        "pi": "jkrier@bwh.harvard.edu",
+        "postal_code": "02115",
+        "state": "MA",
+        "title": "BWH",
+        "uuid": "828cd4fe-ebb0-4b36-ccbb-d2e3a36ca234",
+        "contact_persons" : [
+            "jkrier@bwh.harvard.edu"
         ]
     }
 ]

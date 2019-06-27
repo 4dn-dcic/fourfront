@@ -37,7 +37,7 @@
             "enum" : [
                 "released",
                 "released to project",
-                "released to lab",
+                "released to institution",
                 "draft",
                 "deleted"
             ],
