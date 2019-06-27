@@ -123,7 +123,6 @@
         "title": {
             "title": "Title",
             "description": "DON'T SUBMIT, auto-generated.",
-            "uniqueKey": true,
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
