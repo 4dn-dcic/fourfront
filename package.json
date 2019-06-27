@@ -94,7 +94,7 @@
   },
   "dependencies": {
     "acorn": "^6.0.5",
-    "auth0-lock": "^11.14.0",
+    "auth0-lock": "^11.16.3",
     "aws-sdk": "^2.421.0",
     "babel-polyfill": "^6.26.0",
     "color": "^0.10.1",
@@ -118,7 +118,6 @@
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
     "react-bootstrap": "0.32.4",
-    "universal-cookie": "^4.0.0",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.1.1",
     "react-infinite": "^0.13.0",
@@ -131,6 +130,7 @@
     "react-transition-group": "^2.7.1",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
-    "underscore": "^1.9.1"
+    "underscore": "^1.9.1",
+    "universal-cookie": "^4.0.0"
   }
 }

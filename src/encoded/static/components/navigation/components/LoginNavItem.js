@@ -5,12 +5,11 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { NavItem, Modal } from 'react-bootstrap';
-import Auth0Lock from 'auth0-lock';
 import { JWT, ajax, navigate, isServerSide, analytics, object, layout } from './../../util';
 import Alerts from './../../alerts';
 import UserRegistrationForm, { decodeJWT } from './../../forms/UserRegistrationForm';
 
-
+let Auth0Lock = null; // Imported in componentDidMount.
 
 /** Component that contains auth0 functions */
 export class LoginNavItem extends React.Component {
@@ -33,36 +32,43 @@ export class LoginNavItem extends React.Component {
         this.onRegistrationCancel = this.onRegistrationCancel.bind(this);
         this.state = {
             "showRegistrationModal" : false,
-            "isLoading" : false // Whether are currently performing login/registration request.
+            // Whether are currently performing login/registration request.
+            "isLoading" : false
         };
     }
 
     componentDidMount () {
         // Login / logout actions must be deferred until Auth0 is ready.
         // TODO: these should be read in from base and production.ini
-        this.lock = new Auth0Lock(
-            'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
-            'hms-dbmi.auth0.com', {
-                auth: {
-                    sso: false,
-                    redirect: false,
-                    responseType: 'token',
-                    params: {
-                        scope: 'openid email',
-                        prompt: 'select_account'
-                    }
-                },
-                socialButtonStyle: 'big',
-                languageDictionary: { title: "Log in" },
-                theme: {
-                    logo: '/static/img/4dn_logo.svg',
-                    icon: '/static/img/4dn_logo.svg',
-                    primaryColor: '#009aad'
-                },
-                allowedConnections: ['github', 'google-oauth2']
-            }
-        );
-        this.lock.on("authenticated", this.loginCallback);
+
+        require.ensure(["auth0-lock"], (require) => {
+            // As of 9.11.0, auth0-js (dependency of Auth0Lock) cannot work outside of browser context.
+            // We import it here in separate bundle instead to avoid issues during server-side render.
+            Auth0Lock = require("auth0-lock").default;
+            this.lock = new Auth0Lock(
+                'DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
+                'hms-dbmi.auth0.com', {
+                    auth: {
+                        sso: false,
+                        redirect: false,
+                        responseType: 'token',
+                        params: {
+                            scope: 'openid email',
+                            prompt: 'select_account'
+                        }
+                    },
+                    socialButtonStyle: 'big',
+                    languageDictionary: { title: "Log in" },
+                    theme: {
+                        logo: '/static/img/4dn_logo.svg',
+                        icon: '/static/img/4dn_logo.svg',
+                        primaryColor: '#009aad'
+                    },
+                    allowedConnections: ['github', 'google-oauth2']
+                }
+            );
+            this.lock.on("authenticated", this.loginCallback);
+        }, "auth0-lock-bundle");
     }
 
     showLock(evtKey, e){
