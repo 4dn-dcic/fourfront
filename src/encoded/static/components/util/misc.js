@@ -1,6 +1,6 @@
 'use strict';
 
-    
+
 /**
  * Check if JS is processing on serverside, vs in browser (clientside).
  * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()

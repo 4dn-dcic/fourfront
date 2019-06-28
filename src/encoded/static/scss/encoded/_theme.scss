@@ -1,42 +1,25 @@
-.btn {
-    font-weight: 500;
-    /* @include box-shadow(0 1px 3px rgba(0,0,0,.1), inset 0 -2px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.3)); */
-    //@include box-shadow(0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 4px rgba(0,0,0,0.2),inset 0 1px 4px rgba(255,255,255,0.3));
-}
 
-.btn-link {
-    font-weight: normal;
-    @include box-shadow(none);
-}
+/** This is imported by bootstrap.scss **/
 
-.btn-svgicon {
-    line-height: 0.9;
-    margin-right: 0 !important;
-    border-radius: 0;
+$primary:       $blue !default;
+$secondary:     $gray-600 !default;
+$success:       $green !default;
+/** $info:          $cyan !default; **/
+/** CGAP: Adjusted to be closer to Bootstrap v3 for compatibility with 4DN styling. **/
+$info:          $blue-faint !default;
+$warning:       $yellow !default;
+$danger:        $red !default;
+$light:         $gray-100 !default;
+$dark:          $gray-800 !default;
 
-    .svg-icon {
-        fill: #fff;
-    }
 
-    &:first-child {
-        border-top-left-radius: $border-radius-small;
-        border-bottom-left-radius: $border-radius-small;
-    }
 
-    &:last-child {
-        border-top-right-radius: $border-radius-small;
-        border-bottom-right-radius: $border-radius-small;
-    }
-}
+$font-family-sans-serif:  "Mada", "Work Sans", Helvetica, Arial, sans-serif;
+$font-family-serif:       Georgia, "Times New Roman", Times, serif;
 
-/** extending Bootstrap button w/ rounded & ext-padding class **/
+/** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`. */
+$font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
+$font-family-base:        $font-family-sans-serif;
 
-.btn-xs.rounded,
-.btn-xs.ext-padding {
-    padding-left: 7px;
-    padding-right: 7px;
-}
+$font-size-base:          0.925rem;
 
-.btn-xs.rounded {
-	border-radius: 11px;
-}

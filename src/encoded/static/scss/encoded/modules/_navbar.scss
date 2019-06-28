@@ -1,5 +1,7 @@
 /* NavBar */
 
+/* HAS DIVERGED FROM 4DN */
+
 $navbar-full-height : 80px;
 $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .3s;
@@ -9,6 +11,8 @@ $navbar-transition-easing: ease-out;
     background: #ffffff;
     margin-bottom: 0;
     transform: translate3d(0,0,0);
+    width: 100%;
+    z-index: 100;
 
     @include media-breakpoint-up(md) {
         background-color: rgba(255,255,255,0.933);
@@ -24,6 +28,10 @@ $navbar-transition-easing: ease-out;
         min-height: $navbar-full-height; /* Mobile default */
         line-height: $navbar-full-height;
         position: relative;
+
+        /** CGAP additions **/
+        background-color: #f8f8f8;
+        padding: 0 10px;
 
         @include media-breakpoint-up(md) {
             
@@ -65,7 +73,6 @@ $navbar-transition-easing: ease-out;
     .navbar-brand {
         padding: 0px !important;
         display: block;
-        // margin-left: -50px !important;
         color: $navbar-default-brand-color;
         min-width: 270px;
         height: inherit;
@@ -73,115 +80,94 @@ $navbar-transition-easing: ease-out;
         max-height: $navbar-full-height;
         margin-left: 0px;
         white-space: nowrap;
+        text-decoration: none;
+        position: relative;
 
-        /* Match browse page facets width */
-        @include media-breakpoint-only(md) {
-            min-width: 300px;
-        }
-
-        @include media-breakpoint-only(sm) {
-            min-width: 290px;
-        }
-
-        @include media-breakpoint-only(xs) {
-            min-width: 225px;
-            max-width: 240px;
-        }
-
-        > a {
-            display: block;
-            line-height: inherit;
+        > .img-container {
             height: inherit;
-            text-decoration: none;
-            position: relative;
+            display: block;
+            font-size: 0rem;
+            float: left;
+            margin-right: 15px;
+            text-align: center;
             max-height: inherit;
-            
-            > .img-container {
-                height: inherit;
-                display: block;
-                font-size: 0rem;
-                float: left;
-                margin-right: 15px;
-                text-align: center;
-                max-height: inherit;
-                //> img, 
-                //> .navbar-logo-img,
-                > svg#fourfront_logo_svg {
-                    vertical-align: middle;
-                    display: inline-block;
-                    height: 100%;
-                    padding-bottom: 10px;
-                    padding-top: 10px;
-                    transition: padding $navbar-transition-length, transform $navbar-transition-length;
-                    max-height: inherit;
-                    @include media-breakpoint-up(md) {
-                        body.scrolled-past-top & {
-                            padding-top: 6px !important;
-                            padding-bottom: 6px !important;
-                        }
-                    }
-                }
-            }
-            > .navbar-title {
-                font-weight: 300;
-                color: #444;
-                margin-right: 15px;
-                font-size: 1.7rem;
+            //> img, 
+            //> .navbar-logo-img,
+            > svg#fourfront_logo_svg {
+                vertical-align: middle;
                 display: inline-block;
-                transform: translate3d(0px,0,0);
-                transition: font-size $navbar-transition-length, transform $navbar-transition-length;
-
+                height: 100%;
+                padding-bottom: 10px;
+                padding-top: 10px;
+                transition: padding $navbar-transition-length, transform $navbar-transition-length;
+                max-height: inherit;
                 @include media-breakpoint-up(md) {
                     body.scrolled-past-top & {
-                        font-size: 1.25rem;
-                        transform: translate3d(-5px,0,0);
+                        padding-top: 6px !important;
+                        padding-bottom: 6px !important;
                     }
                 }
             }
+        }
+        > .navbar-title {
+            font-weight: 300;
+            color: #444;
+            margin-right: 15px;
+            font-size: 1.7rem;
+            display: inline-block;
+            transform: translate3d(0px,0,0);
+            transition: font-size $navbar-transition-length, transform $navbar-transition-length;
 
-            // Hover over title link state
-            &:hover {
-                .navbar-title {
-                    color: #000;
-                    text-shadow: 0 0 0 #000;
-                    &:after {
-                        content: "\f105";
-                        font-family: FontAwesome;
-                        margin-left: 12px;
-                        font-size: 1.25rem;
-                        line-height: inherit;
-                        vertical-align: bottom;
-                        color: $navbar-light-active-color;
-                    }
+            @include media-breakpoint-up(md) {
+                body.scrolled-past-top & {
+                    font-size: 1.25rem;
+                    transform: translate3d(-5px,0,0);
                 }
-                > .img-container > svg#fourfront_logo_svg {
-                    > ellipse, > .fourfront-logo-background-circle {
-                        //fill:url(#fourfront_linear_gradient_darker);
-                        //-webkit-animation: fa-spin 2s infinite linear;
-    		            //animation: fa-spin 2s infinite linear;
-                        //fourfront_linear_gradient_reversed
-                    }
+            }
+        }
 
-                    text.fourfront-logo-text {
-                        transition: letter-spacing 1s .4s linear, opacity .7s .4s, stroke .7s 4s, stroke-width .7s 4s, fill .7s .4s;
-                        letter-spacing: -14px;
-                        stroke: rgba(0,0,0,0.2);
-                        opacity: 0;
-                        fill: rgba(0,0,0,0);
-                        stroke-width: 15px;
-                    }
+        // Hover over title link state
+        &:hover {
+            .navbar-title {
+                color: #000;
+                text-shadow: 0 0 0 #000;
+                &:after {
+                    content: "\f105";
+                    font-family: FontAwesome;
+                    margin-left: 12px;
+                    font-size: 1.25rem;
+                    line-height: inherit;
+                    vertical-align: bottom;
+                    color: $navbar-light-active-color;
+                }
+            }
+            > .img-container > svg#fourfront_logo_svg {
+                > ellipse, > .fourfront-logo-background-circle {
+                    //fill:url(#fourfront_linear_gradient_darker);
+                    //-webkit-animation: fa-spin 2s infinite linear;
+                    //animation: fa-spin 2s infinite linear;
+                    //fourfront_linear_gradient_reversed
+                }
 
-                    .fourfront-logo-foreground-circle {
-                        transition: opacity 1.2s .6s;
-                        opacity: 1;
-                    }
+                text.fourfront-logo-text {
+                    transition: letter-spacing 1s .4s linear, opacity .7s .4s, stroke .7s 4s, stroke-width .7s 4s, fill .7s .4s;
+                    letter-spacing: -14px;
+                    stroke: rgba(0,0,0,0.2);
+                    opacity: 0;
+                    fill: rgba(0,0,0,0);
+                    stroke-width: 15px;
+                }
+
+                .fourfront-logo-foreground-circle {
+                    transition: opacity 1.2s .6s;
+                    opacity: 1;
                 }
             }
         }
     }
 
     .nav > li { 
-        
+
         > a {
             font-size: 1.125rem;
             font-weight: 400;
@@ -254,6 +240,31 @@ $navbar-transition-easing: ease-out;
                 color: $gray-400;
                 cursor: default;
             }
+        }
+
+    }
+
+    ul.navbar-nav li.dropdown {
+
+        > .nav-dropdown-btn {
+            > button {
+                /** Reset button style **/
+                /* color: #000; */
+                border-color: transparent;
+                background-color: transparent;
+                color: $navbar-light-color;
+                &:hover {
+                    color: $navbar-light-hover-color;
+                }
+                &:active, &.active {
+                    color: $navbar-light-active-color;
+                }
+            }
+        }
+
+        .dropdown-item {
+            min-height: none;
+            line-height: $line-height-base;
         }
 
     }
@@ -393,7 +404,7 @@ $navbar-transition-easing: ease-out;
     box-shadow: 0 0 3px rgba(0,0,0,0);
     transition: border-color $navbar-transition-length, box-shadow $navbar-transition-length;
 
-    @include media-breakpoint-up(md) {
+    @include media-breakpoint-up(lg) {
         position: fixed;
 
         body.scrolled-past-top &,

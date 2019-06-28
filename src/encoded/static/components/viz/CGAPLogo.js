@@ -16,8 +16,7 @@ export class CGAPLogo extends React.PureComponent {
         'textTransformHover'        : "translate(48, 24) scale(0.2, 0.6)",
         'fgCircleTransformOrig'     : "translate(50, 20) scale(0.35, 0.35) rotate(-135)",
         'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)",
-        'hoverDelayUntilTransform'  : 400,
-        'title'                     : " "
+        'hoverDelayUntilTransform'  : 400
     };
 
     static svgElemStyle = {
@@ -154,27 +153,22 @@ export class CGAPLogo extends React.PureComponent {
     }
 
     render(){
-        const { id, circlePathDefinitionOrig, textTransformOrig, fgCircleTransformOrig, onClick, title } = this.props;
+        const { id, circlePathDefinitionOrig, textTransformOrig, fgCircleTransformOrig, onClick } = this.props;
         const { hover } = this.state;
 
         return (
-            <Navbar.Brand>
-                <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
-                    <span className="img-container">
-                        <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={CGAPLogo.svgElemStyle}>
-                            { this.renderDefs() }
-                            <path d={circlePathDefinitionOrig} style={CGAPLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
-                            <text transform={textTransformOrig} style={hover ? _.extend({}, CGAPLogo.svgTextStyleOut, CGAPLogo.svgTextStyleIn) : CGAPLogo.svgTextStyleOut} ref={this.fgTextRef}>
-                                CGAP
-                            </text>
-                            <text transform={fgCircleTransformOrig} style={hover ? _.extend({}, CGAPLogo.svgInnerCircleStyleOut, CGAPLogo.svgInnerCircleStyleIn) : CGAPLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
-                                O
-                            </text>
-                        </svg>
-                    </span>
-                    <span className="navbar-title">{ title }</span>
-                </NavItem>
-            </Navbar.Brand>
+            <div className="img-container" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
+                <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={CGAPLogo.svgElemStyle}>
+                    { this.renderDefs() }
+                    <path d={circlePathDefinitionOrig} style={CGAPLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
+                    <text transform={textTransformOrig} style={hover ? _.extend({}, CGAPLogo.svgTextStyleOut, CGAPLogo.svgTextStyleIn) : CGAPLogo.svgTextStyleOut} ref={this.fgTextRef}>
+                        CGAP
+                    </text>
+                    <text transform={fgCircleTransformOrig} style={hover ? _.extend({}, CGAPLogo.svgInnerCircleStyleOut, CGAPLogo.svgInnerCircleStyleIn) : CGAPLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
+                        O
+                    </text>
+                </svg>
+            </div>
         );
     }
 
