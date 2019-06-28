@@ -400,6 +400,9 @@ h1.page-title + .page-subtitle {
 
 .clickable {
 	cursor: pointer;
+	> label {
+		cursor: pointer;
+	}
 }
 
 .no-user-select {

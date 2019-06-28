@@ -268,4 +268,3 @@ export class LogoutController extends React.PureComponent {
     }
 
 }
-
