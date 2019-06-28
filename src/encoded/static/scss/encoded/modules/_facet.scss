@@ -23,7 +23,9 @@
         border-top-left-radius: inherit;
         border-top-right-radius: inherit;
         color: #111;
-        .facets-title-column {  top : -1px; }
+        .facets-title-column {
+            top : -1px;
+        }
         .facets-title {
             font-weight: 300;
             margin: 0;
@@ -48,39 +50,6 @@
 
 }
 
-@media screen and (max-width: $screen-sm-min) {
-    .sm-no-padding {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-    .facets.horizontal .facet {
-        width: auto !important;
-    }
-}
-@media screen and (min-width: $screen-sm-min) {
-    .facets.horizontal {
-        .facet {
-            width: 50% !important;
-            padding: 0 10px;
-            float: left;
-        }
-    }
-}
-@media screen and (min-width: $screen-lg-min) {
-    .facets.horizontal {
-        display: table;
-        width: 100%;
-        .facet {
-            width: initial !important;
-            display: table-cell;
-            float: none;
-        }
-        .facet[hidden] {
-            display: table-cell !important;
-            visibility: hidden;
-        }
-    }
-}
 
 .clear-filters-control {
     margin: 1px 0;
@@ -122,14 +91,14 @@
         padding-top: 9px;
         padding-bottom: 0px;
 
-        &.row {
-            // .row not for inner columns, used for margin offset
-            padding-left : 10px;
-            padding-right : 10px;
-            &.active-submission-row {
-                position: relative;
-                z-index: 5;
-            }
+        margin-left: -10px;
+        margin-right: -10px;
+        padding-left : 10px;
+        padding-right : 10px;
+
+        &.active-submission-row {
+            position: relative;
+            z-index: 5;
         }
 
         &:not(:last-child) {
@@ -288,6 +257,7 @@
 
         .facet-list {
             margin: 0;
+            list-style: none;
 
             li {
                 margin-bottom: 1px;
