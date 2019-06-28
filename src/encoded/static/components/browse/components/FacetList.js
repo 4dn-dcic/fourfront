@@ -214,14 +214,14 @@ class FacetTermsList extends React.Component {
             }
 
             return (
-                <div className="facet-list nav">
+                <div className="facet-list">
                     <PartialList open={expanded} persistent={ _.map(persistentTerms,  makeTermComponent)} collapsible={_.map(collapsibleTerms, makeTermComponent)} />
                     <div className="view-more-button" onClick={this.handleExpandListToggleClick}>{ expandButtonTitle }</div>
                 </div>
             );
         } else {
             return (
-                <div className="facet-list nav">{ _.map(terms, makeTermComponent) }</div>
+                <div className="facet-list">{ _.map(terms, makeTermComponent) }</div>
             );
         }
     }
@@ -249,7 +249,7 @@ class FacetTermsList extends React.Component {
 
         // List of terms
         return (
-            <div className={"facet row" + (facetOpen ? ' open' : ' closed') + (facetClosing ? ' closing' : '')} data-field={facet.field}>
+            <div className={"facet" + (facetOpen ? ' open' : ' closed') + (facetClosing ? ' closing' : '')} data-field={facet.field}>
                 <h5 className="facet-title" onClick={this.handleOpenToggleClick}>
                     <span className="expand-toggle">
                         <i className={"icon icon-fw " + (facetOpen && !facetClosing ? "icon-minus" : "icon-plus")}/>
@@ -297,14 +297,10 @@ class Facet extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.isStatic = memoize(this.isStatic.bind(this));
+        this.isStatic = memoize(Facet.isStatic);
         this.handleStaticClick = this.handleStaticClick.bind(this);
         this.handleTermClick = this.handleTermClick.bind(this);
         this.state = { 'filtering' : false };
-    }
-
-    isStatic(facet){
-        return Facet.isStatic(facet);
     }
 
     /**
@@ -342,55 +338,59 @@ class Facet extends React.PureComponent {
     render() {
         const { facet, isTermSelected, extraClassname } = this.props;
         const { filtering } = this.state;
-        const description = facet.description || null;
-        const title       = facet.title || facet.field;
+        const { description = null, field, title, terms = [] } = facet;
+        const showTitle = title || field;
 
         if (this.isStatic(facet)){
-            // Only one term
-            const selected = isTermSelected(facet.terms[0], facet);
-            let termName = Schemas.Term.toName(facet.field, facet.terms[0].key);
-
-            if (!termName || termName === 'null' || termName === 'undefined'){
-                termName = 'None';
-            }
-
-            return (
-                <div className={"facet static row" + (selected ? ' selected' : '') + ( filtering ? ' filtering' : '') + ( extraClassname ? ' ' + extraClassname : '' )}
-                    data-field={facet.field}>
-                    <div className="facet-static-row clearfix">
-                        <h5 className="facet-title">
-                            <span className="inline-block" data-tip={description} data-place="right">&nbsp;{ title }</span>
-                        </h5>
-                        <div className={ "facet-item term" + (selected? ' selected' : '') + (filtering ? ' filtering' : '')}>
-                            <span onClick={this.handleStaticClick} title={
-                                'All results have ' +
-                                facet.terms[0].key +
-                                ' as their ' +
-                                title.toLowerCase() + '; ' +
-                                (selected ?
-                                    'currently active as portal-wide filter.' :
-                                    'not currently active as portal-wide filter.'
-                                )
-                            }>
-                                <i className={
-                                    "icon icon-fw " +
-                                    (filtering ? 'icon-spin icon-circle-o-notch' :
-                                        ( selected ? 'icon-times-circle' : 'icon-circle' )
-                                    )
-                                }/>{ termName }
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            );
+            // Only one term exists.
+            return <StaticSingleTerm {...{ facet, term : terms[0], filtering, showTitle, onClick : this.handleStaticClick, isTermSelected, extraClassname }} />;
         } else {
-            return <FacetTermsList {...this.props} onTermClick={this.handleTermClick} tooltip={description} title={title} />;
+            return <FacetTermsList {...this.props} onTermClick={this.handleTermClick} tooltip={description} title={showTitle} />;
         }
 
     }
 
 }
 
+const StaticSingleTerm = React.memo(function StaticSingleTerm({ term, facet, showTitle, filtering, onClick, isTermSelected, extraClassname }){
+    const { description = null, field } = facet;
+    const selected = isTermSelected(term, facet);
+    let termName = Schemas.Term.toName(field, term.key);
+
+    if (!termName || termName === 'null' || termName === 'undefined'){
+        termName = 'None';
+    }
+
+    return (
+        <div className={"facet static" + (selected ? ' selected' : '') + ( filtering ? ' filtering' : '') + ( extraClassname ? ' ' + extraClassname : '' )}
+            data-field={field}>
+            <div className="facet-static-row clearfix">
+                <h5 className="facet-title">
+                    <span className="inline-block" data-tip={description} data-place="right">&nbsp;{ showTitle }</span>
+                </h5>
+                <div className={ "facet-item term" + (selected? ' selected' : '') + (filtering ? ' filtering' : '')}>
+                    <span onClick={onClick} title={
+                        'All results have ' +
+                        term.key +
+                        ' as their ' +
+                        showTitle.toLowerCase() + '; ' +
+                        (selected ?
+                            'currently active as portal-wide filter.' :
+                            'not currently active as portal-wide filter.'
+                        )
+                    }>
+                        <i className={"icon icon-fw " +
+                            (filtering ? 'icon-spin icon-circle-o-notch' :
+                                ( selected ? 'icon-times-circle' : 'icon-circle' )
+                            )
+                        }/>
+                        { termName }
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+});
 
 
 /**
@@ -626,12 +626,12 @@ export class FacetList extends React.PureComponent {
         return (
             <div className={"facets-container facets" + (className ? ' ' + className : '')}>
                 <div className="row facets-header">
-                    <div className="col-xs-7 facets-title-column text-ellipsis-container">
+                    <div className="col col-xs-7 facets-title-column text-ellipsis-container">
                         <i className="icon icon-fw icon-filter"></i>
                         &nbsp;
                         <h4 className="facets-title">{ title }</h4>
                     </div>
-                    <div className={"col-xs-5 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
+                    <div className={"col col-xs-5 clear-filters-control" + (showClearFiltersButton ? '' : ' placeholder')}>
                         <a href="#" onClick={onClearFilters} className={"btn btn-xs rounded " + clearButtonClassName}>
                             <i className="icon icon-times"></i> Clear All
                         </a>
@@ -640,7 +640,7 @@ export class FacetList extends React.PureComponent {
                 { selectableFacetElements }
                 { staticFacetElements.length > 0 ?
                     <div className="row facet-list-separator">
-                        <div className="col-xs-12">
+                        <div className="col col-xs-12">
                             { staticFacetElements.length } Common Properties
                         </div>
                     </div>
