@@ -11,6 +11,12 @@ import UserRegistrationForm, { decodeJWT } from './../../forms/UserRegistrationF
 
 let Auth0Lock = null; // Imported in componentDidMount.
 
+// Manual polyfill for NPM tests, @see https://github.com/facebook/create-react-app/issues/1064
+if (!require.ensure) {
+    console.error("No require.ensure present - \nFine if within an NPM test, error if in browser/webpack context.");
+    require.ensure = (deps, cb) => cb(require);
+}
+
 /** Component that contains auth0 functions */
 export class LoginNavItem extends React.Component {
 
