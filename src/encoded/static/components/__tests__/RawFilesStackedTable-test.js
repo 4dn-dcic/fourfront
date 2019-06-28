@@ -3,7 +3,6 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 /** Test RawFilesStackedTable for Replicate Experiment Set */
 

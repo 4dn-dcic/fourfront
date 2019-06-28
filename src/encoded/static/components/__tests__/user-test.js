@@ -3,7 +3,6 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 /* Basing off of browse.js to test user.js */
 

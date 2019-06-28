@@ -13,7 +13,6 @@ jest.dontMock('underscore');
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 
 

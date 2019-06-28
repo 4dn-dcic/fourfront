@@ -6,7 +6,6 @@ Made for 1st round browse (without file selectors).*/
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 /**
  * Some test portions currently disabled re: edits. Will need to rewrite some eventually after another round of Browse page edits.

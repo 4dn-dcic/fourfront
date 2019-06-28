@@ -1,6 +1,5 @@
 'use strict';
 
-import createReactClass from 'create-react-class';
 import PropTypes from 'prop-types';
 import TestUtils from 'react-dom/test-utils';
 import React from 'react';
@@ -36,13 +35,12 @@ describe('Testing home.js', function() {
             ]
         );
 
-        Wrapper = createReactClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
+        function Wrapper(props){
+            return (
+                <div>{ props.children }</div>
+            );
+        };
+
         page = TestUtils.renderIntoDocument(
             <Wrapper>
                 <HomePage context={{ 'content' : [

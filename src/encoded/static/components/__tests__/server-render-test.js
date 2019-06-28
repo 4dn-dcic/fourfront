@@ -6,7 +6,6 @@ import ReactDOM from 'react-dom';
 import ReactDOMServer from 'react-dom/server';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 jest.autoMockOff();
 
