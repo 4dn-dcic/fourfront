@@ -142,6 +142,7 @@ const ColumnOption = React.memo(function ColumnOption(props){
     const { hiddenState, allColumns, field, title, description, index, handleOptionVisibilityChange } = props;
     const isChecked = !hiddenState;
     const sameTitleColExists = _.any(allColumns.slice(0,index).concat(allColumns.slice(index + 1)), { title });
+    const cls = "clickable" + (isChecked ? ' is-active' : '');
     let showDescription = description;
 
     if (sameTitleColExists){
@@ -155,7 +156,7 @@ const ColumnOption = React.memo(function ColumnOption(props){
     return (
         <div className="col-sm-6 col-lg-3 column-option" key={field} data-tip={showDescription} data-html={true}>
             <Checkbox checked={isChecked} onChange={(e) => handleOptionVisibilityChange(field,e)}
-                value={field} className={isChecked ? 'is-active' : null}>
+                value={field} className={cls}>
                 { title }
             </Checkbox>
         </div>

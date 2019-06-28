@@ -42,18 +42,24 @@ export const AboveSearchViewTableControls = React.memo(function AboveSearchViewT
         }
     }
 
-    const wrappedLeftSectionControls = (total || addButton) && (
-        <div key="total-count" className="pull-left pt-11 box results-count">
-            { total }{ addButton }
-        </div>
-    );
-
-    if (!total && !addButton) return null;
-
     const aboveTableControlsProps = _.extend(
         _.pick(props, 'isFullscreen', 'windowWidth', 'toggleFullScreen', 'parentForceUpdate'),
         { "panelMap" : AboveTableControlsBase.getCustomColumnSelectorPanelMapDefinition(props) }
     );
 
-    return <AboveTableControlsBase {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControlsBase>;
+    return (
+        <AboveTableControlsBase {...aboveTableControlsProps}>
+            <LeftSectionControls {...{ total, addButton }} />
+        </AboveTableControlsBase>
+    );
 });
+
+
+function LeftSectionControls({ total, addButton }){
+    if (!total && !addButton) return null;
+    return (
+        <div key="total-count" className="pull-left pt-11 box results-count">
+            { total }{ addButton }
+        </div>
+    );
+}

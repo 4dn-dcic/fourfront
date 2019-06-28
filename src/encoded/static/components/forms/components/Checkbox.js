@@ -8,7 +8,7 @@ export const Checkbox = React.memo(function Checkbox(props){
     return (
         <div className={cls}>
             <label title={title}>
-                <input type="checkbox" value="number_of_files" {...passProps} />
+                <input type="checkbox" className="mr-08" {...passProps} />
                 { children }
             </label>
         </div>
