@@ -13,13 +13,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
 jest.dontMock('react');
 jest.dontMock('underscore');
+
 
 describe('Testing about.js', function() {
     
