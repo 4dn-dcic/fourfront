@@ -65,6 +65,7 @@
     "coveralls": "^3.0.2",
     "create-react-class": "^15.6.3",
     "cypress": "^3.3.1",
+    "echo-loader": "0.0.1",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-external-nodejs-plugin": "^1.0.0",
@@ -93,7 +94,7 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "auth0-lock": "^11.14.0",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#master",
     "aws-sdk": "^2.421.0",
     "babel-polyfill": "^6.26.0",
     "crypto-js": "^3.1.9-1",
@@ -104,7 +105,6 @@
     "higlass": "^1.5.7",
     "html-react-parser": "^0.4.7",
     "js-md5": "^0.4.2",
-    "jsonwebtoken": "^7.4.3",
     "markdown-to-jsx": "^6.9.3",
     "memoize-one": "^5.0.1",
     "moment": "^2.24.0",
@@ -116,19 +116,17 @@
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
     "react-bootstrap": "1.0.0-beta.9",
-    "universal-cookie": "^4.0.0",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.1.1",
-    "react-infinite": "^0.13.0",
     "react-json-tree": "^0.11.2",
     "react-jsx-parser": "^1.15.1",
     "react-matrix-viz": "^0.2.2",
     "react-redux": "^6.0.1",
-    "react-sticky": "^6.0.3",
     "react-tooltip": "^3.10.0",
     "react-transition-group": "^2.7.1",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
-    "underscore": "^1.9.1"
+    "underscore": "^1.9.1",
+    "universal-cookie": "^4.0.0"
   }
 }

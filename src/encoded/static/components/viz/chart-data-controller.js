@@ -4,7 +4,7 @@
 var React = require('react');
 import PropTypes from 'prop-types';
 var _ = require('underscore');
-import queryString from 'querystring';
+import queryString from 'query-string';
 var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate, object } = require('./../util');
 import ChartDetailCursor from './ChartDetailCursor';
 var vizUtil = require('./utilities');

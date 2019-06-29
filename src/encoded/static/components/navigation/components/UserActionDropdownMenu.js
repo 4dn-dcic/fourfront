@@ -4,11 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { DropdownItem } from './../../forms/components/DropdownButton';
+import { Dropdown, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/LoginController';
+import { getUserDetails } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/json-web-token';
+import { isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/misc';
+import { itemUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/object';
+
 import { Nav, NavDropdown } from 'react-bootstrap';
-import { JWT, isServerSide, navigate, object } from './../../util';
 import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
-import { LoginController, LogoutController } from './LoginController';
 
 
 /**
@@ -59,10 +62,10 @@ export class UserActionDropdownMenu extends React.PureComponent {
         let acctBtn = null;
 
         if (session){
-            const userDetails = JWT.getUserDetails();
+            const userDetails = getUserDetails();
             const acctTitle = (userDetails && userDetails.first_name) || "Account";
             const acctIcon = (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1 && (
-                object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm')
+                itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm')
             )) || <i className="account-icon icon icon-user-o" />;
 
             acctBtn = (

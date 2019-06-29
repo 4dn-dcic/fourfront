@@ -185,11 +185,13 @@ export function registerPageView(href = null, context = {}){
 
             // If browse or search page, get current filters and add to pageview event for 'dimension1'.
             var filtersToRegister = null;
+
             if (navigate.isBrowseHref(parts)){
                 filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters)) || null;
             } else if (navigate.isSearchHref(parts)){
                 filtersToRegister = (context && context.filters && Filters.contextFiltersToExpSetFilters(context.filters, 'item_search')) || null;
             }
+
             if(filtersToRegister) {
                 pageViewObject[GADimensionMap.currentFilters] = getStringifiedCurrentFilters(filtersToRegister);
             }

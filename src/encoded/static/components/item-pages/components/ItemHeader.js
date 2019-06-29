@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import queryString from 'querystring';
+import queryString from 'query-string';
 import { console, DateUtility, Schemas, object } from './../../util';
 import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
 

@@ -166,7 +166,8 @@ $navbar-transition-easing: ease-out;
         }
     }
 
-    .nav > li { 
+    .nav > li,
+    .navbar-nav > li {
 
         > a {
             font-size: 1.125rem;
@@ -253,6 +254,9 @@ $navbar-transition-easing: ease-out;
                 border-color: transparent;
                 background-color: transparent;
                 color: $navbar-light-color;
+                border: none;
+                padding-top: 0;
+                padding-bottom: 0;
                 &:hover {
                     color: $navbar-light-hover-color;
                 }

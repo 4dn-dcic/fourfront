@@ -1,36 +1,6 @@
-// Override Bootstrap default variables:
 
-//$screen-md:                                 960px;
-//$screen-lg:                                 1160px;
-$border-radius-base:                        3px;
-$border-radius-large:                       4px;
-$border-radius-small:                       2px;
-$input-border-radius:                       3px;
-//$grid-float-breakpoint:                     $screen-md;
-$navbar-height:                             80px;
-$navbar-inverse-link-active-bg:             #ffffff;
-$navbar-inverse-link-active-color:          #000000;
-$navbar-inverse-toggle-hover-bg:            #ffffff;
-$navbar-inverse-toggle-border-color:        #999999;
-$navbar-inverse-link-color:                 #999999;
-$navbar-default-brand-color:                #999999;
-$headings-font-weight:                      bold;
-$grid-gutter-width:                         20px;
-
-$brand-warning: #E59545;
-$brand-success: #4C994C;
-$brand-danger: #B24342;
-$brand-info: #4F689E;
-$brand-primary: #057eaf; //#1a9dad; //#22656d;
-
-$link-color: #428bca;
-
-/** Setup some other variables for tables, etc. **/
-$expset-table-border-color : #eee;
-
-
+@import "encoded/theme";
 @import "bootstrap/bootstrap";
-
 
 // Bootstrap default variables and mixins
 //@import "bootstrap/variables";
@@ -100,12 +70,12 @@ $expset-table-border-color : #eee;
         "encoded/modules/lists",
         "encoded/modules/navbar",
         "encoded/modules/tables",
-        "encoded/modules/facet",
         "encoded/modules/search",
         "encoded/modules/charts",
         "encoded/modules/tooltip",
         "encoded/modules/item-pages",
         "encoded/modules/static-pages";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 @import "encoded/state";
 @import "encoded/theme";
 
