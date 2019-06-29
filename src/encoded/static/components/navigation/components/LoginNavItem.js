@@ -13,18 +13,21 @@ import { UserRegistrationModal } from './UserRegistrationModal';
 export const LoginNavItem = React.memo(function LoginNavItem(props){
     const { windowWidth, id, isRegistrationModalVisible, showLock, isLoading } = props;
     const gridState = layout.responsiveGridState(windowWidth);
+    const cls = "nav-item user-account-item" + (isRegistrationModalVisible ? " active" : '');
     return (
         <React.Fragment>
-            <NavItem key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
+            <li className={cls} id={id} onClick={showLock}>
                 { isLoading ? (
-                    <span className="pull-right"><i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/></span>
+                    <span className="pull-right">
+                        <i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/>
+                    </span>
                 ) : (
-                    <React.Fragment>
+                    <a href="#" className="nav-link">
                         <i className="account-icon icon icon-user-o" />
                         { gridState === 'lg' ? "Log In / Register" : "Log In" }
-                    </React.Fragment>
+                    </a>
                 )}
-            </NavItem>
+            </li>
             { isRegistrationModalVisible ? <UserRegistrationModal {...props} /> : null }
         </React.Fragment>
     );

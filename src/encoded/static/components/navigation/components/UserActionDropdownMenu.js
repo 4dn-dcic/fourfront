@@ -7,8 +7,8 @@ import url from 'url';
 import { Dropdown, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
 import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/LoginController';
 import { getUserDetails } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/json-web-token';
-import { isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/misc';
-import { itemUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/object';
+import { isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/misc';
+import { itemUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/object';
 
 import { Nav, NavDropdown } from 'react-bootstrap';
 import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
@@ -62,17 +62,8 @@ export class UserActionDropdownMenu extends React.PureComponent {
         let acctBtn = null;
 
         if (session){
-            const userDetails = getUserDetails();
-            const acctTitle = (userDetails && userDetails.first_name) || "Account";
-            const acctIcon = (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1 && (
-                itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm')
-            )) || <i className="account-icon icon icon-user-o" />;
-
             acctBtn = (
-                <NavDropdown className={'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')}
-                    title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} id="user_account_nav_button" label="context">
-                    { this.listUserActionsAsMenuItems() }
-                </NavDropdown>
+                <LoggedInDropdown {...this.props} />
             );
         } else {
             acctBtn = (
@@ -82,9 +73,48 @@ export class UserActionDropdownMenu extends React.PureComponent {
             );
         }
 
-        return <Nav className="navbar-acct" pullRight>{ acctBtn }</Nav>;
+        return <ul className="nav navbar-nav navbar-right">{ acctBtn }</ul>;
     }
 }
+
+export const LoggedInDropdown = function LoggedInDropdown(props){
+    const { listActionsFor, href, updateUserInfo } = props;
+    const userDetails = getUserDetails();
+    const acctTitle = (userDetails && userDetails.first_name) || "Account";
+    let acctImg;
+    if (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1){
+        acctImg = itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm');
+    }
+    const items = LoggedInDropdown.listUserActionsAsMenuItems(listActionsFor, href, updateUserInfo);
+    items.push(
+        <LogoutController updateUserInfo={updateUserInfo}>
+            <LogoutDropdownItem/>
+        </LogoutController>
+    );
+    return (
+        <li className={"dropdown user-account-item" + (acctImg ? " has-image" : "")}>
+            <Dropdown className="nav-dropdown-btn">
+                <Dropdown.Toggle>
+                    { acctImg || <i className="account-icon icon icon-user-o" /> }
+                    { acctTitle }
+                </Dropdown.Toggle>
+                <Dropdown.Menu>{ items }</Dropdown.Menu>
+            </Dropdown>
+        </li>
+    );
+};
+/** Shown for logged in users. */
+LoggedInDropdown.listUserActionsAsMenuItems = function(listActionsFor, href, updateUserInfo){
+    const actions = _.map(listActionsFor('user'), function(action){
+        return actionToMenuItem(action, href, { "data-no-cache" : true });
+    });
+    actions.push(
+        <LogoutController updateUserInfo={updateUserInfo}>
+            <LogoutDropdownItem/>
+        </LogoutController>
+    );
+    return actions;
+};
 
 
 

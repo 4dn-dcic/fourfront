@@ -104,13 +104,13 @@ class RecentCasesSection extends React.PureComponent { // Is PureComponent so ca
     render(){
         return (
             <div className="row mt-5">
-                <div className="col-xs-12">
+                <div className="col-12 col-xs-12">
                     <h2 className="homepage-section-title">Recent Cases</h2>
                 </div>
-                <div className="col-xs-12 col-sm-4 col-md-3 hidden-xs">
+                <div className="col col-xs-12 col-sm-4 col-md-3 hidden-xs">
                     <a href="/search/?type=Case" className="btn btn-lg btn-primary btn-block">View All</a>
                 </div>
-                <div className="col-xs-12 col-sm-8 col-md-9">
+                <div className="col col-xs-12 col-sm-8 col-md-9">
                     <p>
                         <b>(TODO) Visible cases sorted by date-modified be here</b><br/>
                         Per-role content or something else could go here also, such as searchview of recent

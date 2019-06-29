@@ -7,6 +7,11 @@ $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .3s;
 $navbar-transition-easing: ease-out;
 
+$navbar-light-active-color: #000;
+$navbar-light-hover-color: #000;
+$navbar-link-active-bg: #eee;
+$navbar-link-hover-bg: #d7d7d7;
+
 #top-nav {
     background: #ffffff;
     margin-bottom: 0;
@@ -169,8 +174,9 @@ $navbar-transition-easing: ease-out;
     .nav > li,
     .navbar-nav > li {
 
-        > a {
-            font-size: 1.125rem;
+        > a,
+        > .nav-dropdown-btn > button {
+            font-size: 1rem;
             font-weight: 400;
             color: $navbar-link-color;
 
@@ -212,7 +218,7 @@ $navbar-transition-easing: ease-out;
         &.active > a {
             color: $navbar-link-active-color; /* Set in _base.scss */
             //text-shadow: 0 0 0px $navbar-link-active-color;
-            background-color: $dropdown-link-active-bg;
+            background-color: $navbar-link-active-bg;
 
             i.icon {
                 text-shadow: none;
@@ -221,10 +227,11 @@ $navbar-transition-easing: ease-out;
 
         > a:focus,
         > a:hover,
-        &.dropdown-open-for > a {
+        &.dropdown-open-for > a,
+        &.dropdown .nav-dropdown-btn.show > button {
             color: $navbar-link-hover-color; /* Set in _base.scss */
             text-shadow: 0 0 0px $navbar-link-hover-color;
-            background-color: $dropdown-link-active-bg;
+            background-color: $navbar-link-hover-bg;
 
             i.icon {
                 text-shadow: none;
@@ -257,11 +264,22 @@ $navbar-transition-easing: ease-out;
                 border: none;
                 padding-top: 0;
                 padding-bottom: 0;
+                height: inherit;
+                line-height: inherit;
+                min-height: inherit;
+                border-radius: 0;
+
                 &:hover {
                     color: $navbar-light-hover-color;
+                    background-color: $navbar-link-hover-bg;
                 }
-                &:active, &.active {
+                &:active, &.active, &:focus {
                     color: $navbar-light-active-color;
+                    background-color: $navbar-link-active-bg;
+                }
+                &:focus {
+                    outline: none;
+                    box-shadow: none;
                 }
             }
         }
