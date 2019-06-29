@@ -6,7 +6,6 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import moment from 'moment';
 import { Collapse, Fade } from 'react-bootstrap';
 import { console, Filters, Schemas, layout, analytics, navigate, DateUtility } from './../../util';
 import { PartialList } from './../../item-pages/components/PartialList';
