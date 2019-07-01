@@ -5,9 +5,9 @@ import _ from 'underscore';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemFooterRow } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemFooterRow';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
-import { ItemFooterRow } from './ItemFooterRow';
 
 
 
@@ -101,7 +101,7 @@ export class AttributionTabView extends React.PureComponent {
                         <Publications context={context} />
                         <hr className="mt-1 mb-2"/>
                     </div>
-                : null }
+                    : null }
 
                 <div className="row">
 
@@ -110,13 +110,13 @@ export class AttributionTabView extends React.PureComponent {
                             <LabsSection context={context} />
                             { awardExists ? FormattedInfoBlock.Award(award) : null }
                         </div>
-                    : null }
+                        : null }
 
                     { submittedByExists ?
                         <div className={"col-xs-12 col-md-" + (labsExist ? '5' : '12')}>
                             { FormattedInfoBlock.User(submitted_by) }
                         </div>
-                    : null }
+                        : null }
 
                 </div>
 
@@ -157,7 +157,7 @@ class LabsSection extends React.PureComponent {
                 </h5>
                 { contactPersons && contactPersons.length > 0 ?
                     <ul className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</ul>
-                : null }
+                    : null }
             </div>
         );
     }
@@ -175,7 +175,7 @@ class LabsSection extends React.PureComponent {
                 { contributingLabs ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
                         iconClass='user-plus' itemRenderFxn={this.contributingLabRenderFxn} />
-                : null }
+                    : null }
                 { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
             </div>
         );

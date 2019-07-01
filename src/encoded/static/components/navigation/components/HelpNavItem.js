@@ -6,6 +6,8 @@ import url from 'url';
 import _ from 'underscore';
 import { NavItem } from 'react-bootstrap';
 
+/** WILL BE PROJECT-SPECIFIC */
+
 /**
  * Renders a Menu Item in NavBar for "Help".
  * Sends its `props.dropdownID` (or null, if === `props.openDropdownID`) to (function) `props.setOpenDropdownID` on click.

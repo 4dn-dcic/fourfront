@@ -4,7 +4,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ButtonToolbar, Collapse, Button, DropdownButton } from 'react-bootstrap';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { ButtonToolbar } from 'react-bootstrap';
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
@@ -46,7 +47,8 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
     }
 
     render(){
-        if (!this.state.mounted) {
+        const { mounted, open } = this.state;
+        if (!mounted) {
             return (
                 <div className="pull-right pt-23 text-medium" key="loading-indicator">
                     <i className="icon icon-fw icon-circle-o-notch icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -54,10 +56,10 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
             );
         }
 
-        var { children, windowWidth, collapseButtonTitle, tooltip } = this.props,
-            gridState       = this.state.mounted && layout.responsiveGridState(windowWidth),
-            isMobileSize    = gridState && gridState !== 'lg',
-            isOpen          = !isMobileSize || this.state.open;
+        const { children, windowWidth, collapseButtonTitle, tooltip, constantButtons } = this.props;
+        const gridState = mounted && layout.responsiveGridState(windowWidth);
+        const isMobileSize = gridState && gridState !== 'lg';
+        const isOpen = !isMobileSize || open;
 
         return (
             <div className="pull-right tabview-title-controls-container">
@@ -71,11 +73,12 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                     : null }
                 <div className="toolbar-wrapper pull-right" key="toolbar">
                     <ButtonToolbar data-tip={ isMobileSize ? null : tooltip }>
-                        { !isMobileSize && this.props.children }
-                        <Button className="hidden-lg toggle-open-button" onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
+                        { !isMobileSize && children }
+                        <button type="button" className="btn btn-outline-dark hidden-lg toggle-open-button"
+                            onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
                             { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }
-                        </Button>
-                        { this.props.constantButtons }
+                        </button>
+                        { constantButtons }
                     </ButtonToolbar>
                 </div>
             </div>

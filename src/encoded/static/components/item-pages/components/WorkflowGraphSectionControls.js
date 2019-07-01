@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, MenuItem, Checkbox, Button } from 'react-bootstrap';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
 import { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 
 
@@ -55,10 +56,10 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         var { isFullscreen, onToggleFullScreenView } = this.props;
         if (typeof isFullscreen === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled"
-                    data-tip={!isFullscreen ? 'Expand to full screen' : null} key="full-screen-btn">
+                <button type="button" className="btn btn-outline-dark for-state-fullscreenViewEnabled" key="full-screen-btn"
+                    onClick={onToggleFullScreenView} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
-                </Button>
+                </button>
             );
         }
         return null;
@@ -120,15 +121,15 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
     chartTypeDropdown(){
         var { context, showChartType, onChangeShowChartType } = this.props;
         var detail = WorkflowGraphSectionControls.analysisStepsSet(context) ? (
-            <MenuItem eventKey='detail' active={showChartType === 'detail'}>
+            <DropdownItem eventKey="detail" active={showChartType === 'detail'}>
                 Analysis Steps
-            </MenuItem>
+            </DropdownItem>
         ) : null;
-    
+
         var basic = (
-            <MenuItem eventKey='basic' active={showChartType === 'basic'}>
+            <DropdownItem eventKey="basic" active={showChartType === 'basic'}>
                 Basic Inputs & Outputs
-            </MenuItem>
+            </DropdownItem>
         );
 
         return (
@@ -202,7 +203,7 @@ class RowSpacingTypeDropdown extends React.Component {
     render(){
         var currentKey = this.props.currentKey,
             menuItems = _.map(_.keys(RowSpacingTypeDropdown.titleMap), function(k){
-                return  <MenuItem key={k} eventKey={k} active={currentKey === k} children={RowSpacingTypeDropdown.titleMap[k]} />;
+                return  <DropdownItem key={k} eventKey={k} active={currentKey === k} children={RowSpacingTypeDropdown.titleMap[k]} />;
             });
 
         return (

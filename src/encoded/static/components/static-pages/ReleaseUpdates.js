@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Table } from 'react-bootstrap';
 import { console, object, ajax, isServerSide, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
@@ -251,7 +250,7 @@ class SingleUpdate extends React.Component {
                                 <div className="col-sm-11">{updateData.comments || "No comments."}</div>
                                 <div className="col-sm-1 text-right">{editLink}</div>
                             </div>
-                            <Table className="mb-1" striped bordered condensed>
+                            <table className="mb-1 table table-striped table-bordered table-condensed">
                                 <thead>
                                     <tr>
                                         <th>Replicate set</th>
@@ -262,7 +261,7 @@ class SingleUpdate extends React.Component {
                                     </tr>
                                 </thead>
                                 <tbody children={_.map(updateData.update_items, this.buildItem)} />
-                            </Table>
+                            </table>
                         </div>
                     </div>
                 </Collapse>
