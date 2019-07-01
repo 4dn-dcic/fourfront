@@ -5,6 +5,19 @@
         "institution": "hms-dbmi",
         "status": "released",
         "uuid": "cc7d83a2-6886-4ca0-9402-7c49734cf3c4",
-        "proband": "5ec91041-78a0-4758-abef-21c7f5fd9ffc"
+        "case_samples": [
+            {
+                "sample": "4fdb481a-fbdb-4c0f-a68d-aac87f847bec",
+                "proband": true
+            },
+            {
+                "sample": "283f6047-61cd-4ddb-8881-ec1c87082569",
+                "proband": false
+            },
+            {
+                "sample": "f4bbc709-40fe-48a4-afde-8e886b571903",
+                "proband": false
+            }
+        ]
     }
 ]

@@ -67,13 +67,8 @@
                 "other"
             ]
         },
-        "bgm_id": {
-            "title": "BGM Identifier",
-            "type": "string",
-            "uniqueKey": true
-        },
-        "other_id": {
-            "description": "Non-BGM Identifier",
+        "institutional_id": {
+            "description": "Custom identifier provided by the institution",
             "type": "object",
             "required": ["id", "id_source"],
             "properties": {
@@ -82,9 +77,10 @@
                     "type": "string",
                     "uniqueKey": true
                 },
-                "id_source": {
-                    "title": "Source of Identifier",
-                    "type": "string"
+                "institution": {
+                    "title": "Institution",
+                    "type": "string",
+                    "linkTo": "Institution"
                 }
             }
         },

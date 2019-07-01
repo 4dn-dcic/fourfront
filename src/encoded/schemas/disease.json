@@ -22,7 +22,7 @@
         },
         "term_id" : {
             "title" : "HPO Identifier",
-            "description" : "Identifier of disease at hpo.jax.org. E.g. \"ORPHA:529962\"",
+            "description" : "Identifier of disease. E.g. \"ORPHA:529962\"",
             "type" : "string",
             "uniqueKey": true
         },

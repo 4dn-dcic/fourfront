@@ -33,7 +33,7 @@
         },
         "definition" : {
             "title" : "Definition",
-            "description": "Definition of this disease",
+            "description": "Definition of this phenotype",
             "type" : "string"
         },
         "synonyms" : {

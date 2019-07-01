@@ -4,7 +4,7 @@
     "id": "/profiles/sample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["proband"],
+    "required": [],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -25,11 +25,6 @@
             "description": "Individual this sample is derived from",
             "type": "string",
             "linkTo": "Individual"
-        },
-        "proband": {
-            "title": "Proband",
-            "description": "Whether this sample represents the proband of the case",
-            "type": "boolean"
         },
         "specimen_accession": {
             "title": "Specimen Accession",
