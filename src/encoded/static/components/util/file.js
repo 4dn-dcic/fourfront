@@ -312,51 +312,51 @@ export class FileDownloadButtonAuto extends React.PureComponent {
 }
 
 
-export class ViewFileButton extends React.Component {
+export const ViewFileButton = React.memo(function ViewFileButton(props){
+    const { filename, href, target, title, mimeType, size, className } = props;
+    let action = 'View';
+    //let extLink = null;
+    let preLink = null;
 
-    static defaultProps = {
-        'className' : "text-ellipsis-container mb-1",
-        'target' : "_blank",
-        'bsStyle' : "primary",
-        'href' : null,
-        'disabled' : false,
-        'title' : null,
-        'mimeType' : null,
-        'size' : null
+    preLink = <i className="icon icon-fw icon-cloud-download" />;
+
+    const fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
+    const fileNameLowerEnds = {
+        '3' : fileNameLower.slice(-3),
+        '4' : fileNameLower.slice(-4),
+        '5' : fileNameLower.slice(-5)
     };
-
-    render(){
-        var { filename, href, target, title, mimeType, size } = this.props;
-        var action = 'View', extLink = null, preLink = null;
-
-        preLink = <i className="icon icon-fw icon-cloud-download" />;
-
-        var fileNameLower = (filename && filename.length > 0 && filename.toLowerCase()) || '';
-        var fileNameLowerEnds = {
-            '3' : fileNameLower.slice(-3),
-            '4' : fileNameLower.slice(-4),
-            '5' : fileNameLower.slice(-5)
-        };
-        if (isFilenameAnImage(fileNameLowerEnds)){
-            action = 'View';
-            preLink = <i className="icon icon-fw icon-picture-o" />;
-        } else if (fileNameLowerEnds['4'] === '.pdf'){
-            action = 'View';
-            //if (target === '_blank') extLink = <i className="icon icon-fw icon-external-link"/>;
-            preLink = <i className="icon icon-fw icon-file-pdf-o" />;
-        } else if (fileNameLowerEnds['3'] === '.gz' || fileNameLowerEnds['4'] === '.zip' || fileNameLowerEnds['4'] === '.tgx'){
-            action = 'Download';
-        }
-
-        return (
-            <Button bsSize={size} download={action === 'Download' ? true : null} {..._.omit(this.props, 'filename', 'title')} title={filename} data-tip={mimeType}>
-                <span className={title ? null : "text-400"}>
-                    { preLink } { action } { title || (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
-                </span>
-            </Button>
-        );
+    if (isFilenameAnImage(fileNameLowerEnds)){
+        action = 'View';
+        preLink = <i className="icon icon-fw icon-picture-o" />;
+    } else if (fileNameLowerEnds['4'] === '.pdf'){
+        action = 'View';
+        //if (target === '_blank') extLink = <i className="icon icon-fw icon-external-link"/>;
+        preLink = <i className="icon icon-fw icon-file-pdf-o" />;
+    } else if (fileNameLowerEnds['3'] === '.gz' || fileNameLowerEnds['4'] === '.zip' || fileNameLowerEnds['4'] === '.tgx'){
+        action = 'Download';
     }
-}
+
+    const cls = ("btn" + (size ? " btn-" + size : "") + className ? " " + className : "");
+
+    return (
+        <button type="button" className={cls} download={action === 'Download' ? true : null}
+            {..._.omit(props, 'filename', 'title')} title={filename} data-tip={mimeType}>
+            <span className={title ? null : "text-400"}>
+                { preLink } { action } { title || (filename && <span className="text-600">{ filename }</span>) || 'File' } { extLink }
+            </span>
+        </button>
+    );
+});
+ViewFileButton.defaultProps = {
+    'className' : "text-ellipsis-container mb-1",
+    'target' : "_blank",
+    'href' : null,
+    'disabled' : false,
+    'title' : null,
+    'mimeType' : null,
+    'size' : null
+};
 
 export function isFilenameAnImage(filename, suppressErrors = false){
     var fileNameLower, fileNameLowerEnds;
