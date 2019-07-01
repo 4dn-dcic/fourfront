@@ -2,7 +2,8 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object, Schemas, fileUtil } from './../../util';
+import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FileDownloadButton';
 
 
 export class ItemFileAttachment extends React.PureComponent {
@@ -40,7 +41,7 @@ export class ItemFileAttachment extends React.PureComponent {
         const tip = this.attachmentTips().size;
         return (
             <div className="mb-1">
-                <i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { Schemas.Term.bytesToLargerUnit(attachment.size) }
+                <i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { valueTransforms.bytesToLargerUnit(attachment.size) }
             </div>
         );
     }
@@ -81,12 +82,12 @@ export class ItemFileAttachment extends React.PureComponent {
             contents = (
                 <div className={"row" + (includeTitle ? ' mt-1' : '')}>
                     <div className="col-xs-12">
-                        <fileUtil.ViewFileButton
+                        <ViewFileButton
                             size={btnSize}
                             filename={(attachment && attachment.download) || null}
                             href={object.itemUtil.atId(context) + attachment.href}
                             disabled={typeof attachment.href !== 'string' || attachment.href.length === 0}
-                            className={fileUtil.ViewFileButton.defaultProps.className + ' btn-block'}
+                            className={ViewFileButton.defaultProps.className + ' btn-block'}
                         />
                     </div>
                     <div className="col-xs-12">{ this.size() }{ this.md5sum() }{ this.attachmentType() }</div>

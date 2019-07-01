@@ -5,14 +5,20 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import url from 'url';
 import _ from 'underscore';
-import Alerts from './../alerts';
+
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, object, layout, ajax, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FileDownloadButton';
+import { Schemas, fileUtil, typedefs } from './../util';
+
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
-import { ItemDetailList } from './components/ItemDetailList';
 import { TabbedView } from './components/TabbedView';
 import { Publications } from './components/Publications';
 import { AttributionTabView } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
-import { console, object, DateUtility, layout, Schemas, fileUtil, isServerSide, ajax, typedefs } from './../util';
+
 import { ExpandableStaticHeader } from './../static-pages/components';
 
 // eslint-disable-next-line no-unused-vars
@@ -376,7 +382,7 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
     let viewAttachmentButton = null;
     if (EmbeddedItemWithAttachment.haveAttachment(item)){
         viewAttachmentButton = (
-            <fileUtil.ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={filename}
+            <ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={filename}
                 href={linkToItem + item.attachment.href} disabled={!haveAttachment} className="text-ellipsis-container btn-block" />
         );
     }
@@ -432,9 +438,9 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
         </div>
     );
 });
-EmbeddedItemWithImageAttachment.isAttachmentImage = function(filename){
-    return fileUtil.isFilenameAnImage(filename);
-};
+EmbeddedItemWithImageAttachment.isAttachmentImage = memoize(function(filename){
+    return commonFileUtil.isFilenameAnImage(filename);
+});
 
 
 
@@ -462,10 +468,10 @@ export class OverViewBodyItem extends React.PureComponent {
             );
         },
         'local_date_time' : function(field, timestamp){
-            return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-time-md" /> : null;
+            return timestamp ? <LocalizedTime timestamp={timestamp} formatType="date-time-md" /> : null;
         },
         'local_date' : function(field, timestamp){
-            return timestamp ? <DateUtility.LocalizedTime timestamp={timestamp} formatType="date-md" /> : null;
+            return timestamp ? <LocalizedTime timestamp={timestamp} formatType="date-md" /> : null;
         },
         'embedded_item_with_attachment' : function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             return <EmbeddedItemWithAttachment {...{ item, index }} />;

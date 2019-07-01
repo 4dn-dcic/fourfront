@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import * as d3 from 'd3';
-import { console } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import Node from './Node';
 import { traceNodePathAndRun } from './parsing-functions';
@@ -15,7 +15,7 @@ export const pathDimensionFunctions = {
 
     /**
      * Draw a bezier path from startPt to endPt.
-     * 
+     *
      * @param {Object} startPt - Object with x and y coordinates.
      * @param {Object} endPt - Object with x and y coordinates.
      * @param {Number[]} [ledgeWidths] - Little widths of line right before/after node. To allow for horizontal arrow.
@@ -43,8 +43,8 @@ export const pathDimensionFunctions = {
         var bezierXDif = Math.abs(bezierStartPt.x - bezierEndPt.x);
 
         var controlPoints = [
-            {'x' : bezierStartPt.x + (bezierXDif * 0.5),   'y': startPt.y},
-            {'x' : bezierEndPt.x - (bezierXDif * 0.5),     'y': endPt.y}
+            { 'x' : bezierStartPt.x + (bezierXDif * 0.5),   'y': startPt.y },
+            { 'x' : bezierEndPt.x - (bezierXDif * 0.5),     'y': endPt.y }
         ];
 
         if (startPt.x > endPt.x){
@@ -64,7 +64,7 @@ export const pathDimensionFunctions = {
             controlPoints[1].y,// + pathAscend,
             bezierEndPt.x, endPt.y
         );
-        
+
         // Final ledge
         path.lineTo(
             endPt.x,
@@ -164,7 +164,7 @@ export default class Edge extends React.Component {
         var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
 
         if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
-            var resultsHistory = _.flatten(_.map(selectedInputs, (sI)=>{
+            var resultsHistory = _.flatten(_.map(selectedInputs, function(sI){
                 return traceNodePathAndRun(sI, checkInput, 'input', selectedNode);
             }), false);
             if (_.any(resultsHistory)) return true;
@@ -302,20 +302,20 @@ export default class Edge extends React.Component {
             return true;
         }
 
-        var propKeys = _.without(
+        const propKeys = _.without(
             _.keys(nextProps),
             'scrollContainerWrapperElement', 'scrollContainerWrapperMounted', 'nodes', 'edges', 'href', 'renderDetailPane',
             'isNodeCurrentContext', 'contentWidth', 'onNodeClick', 'edgeCount'
-        ),
-            propKeysLen = propKeys.length,
-            i;
+        );
+        const propKeysLen = propKeys.length;
+        var i;
 
         for (i = 0; i < propKeysLen; i++){
             if (this.props[propKeys[i]] !== nextProps[propKeys[i]]){
                 return true;
             }
         }
-        
+
         // If state.pathDimension changes we _do not_ update, since DOM elements should already be transitioned.
         return false;
     }
@@ -347,15 +347,14 @@ export default class Edge extends React.Component {
             interpolateTargetX = d3.interpolateNumber(endPtA.x, endPtB.x),
             interpolateTargetY = d3.interpolateNumber(endPtA.y, endPtB.y),
             pathElem = this.pathRef.current, // Necessary if using alternate transition approach(es).
-            changeTween = () => {
-                return (t)=>{
+            changeTween = () =>
+                (t) => {
                     var nextCoords = [
                         { 'x' : interpolateSourceX(t), 'y' : interpolateSourceY(t) },
                         { 'x' : interpolateTargetX(t), 'y' : interpolateTargetY(t) }
                     ];
                     pathElem.setAttribute('d', this.generatePathDimension(...nextCoords));
                 };
-            };
 
         if (!pathElem) return;
 
@@ -382,19 +381,20 @@ export default class Edge extends React.Component {
     }
 
     generatePathDimension(startPtOverride = null, endPtOverride = null){
-        var { 
-                edgeStyle, startX, startY, endX, endY, columnWidth,
-                curveRadius, columnSpacing, rowSpacing, nodeEdgeLedgeWidths
-            } = this.props,
-            { startOffset, endOffset } = this.getPathOffsets();
+        const {
+            edgeStyle, startX, startY, endX, endY, columnWidth,
+            curveRadius, columnSpacing, rowSpacing, nodeEdgeLedgeWidths
+        } = this.props;
+        const { startOffset, endOffset } = this.getPathOffsets();
 
-        var startPt = {
-                'x' : ((startPtOverride && startPtOverride.x) || startX) + columnWidth + startOffset,
-                'y' : ((startPtOverride && startPtOverride.y) || startY)
-            }, endPt = {
-                'x' : ((endPtOverride && endPtOverride.x) || endX) + endOffset,
-                'y' : ((endPtOverride && endPtOverride.y) || endY)
-            };
+        const startPt = {
+            'x' : ((startPtOverride && startPtOverride.x) || startX) + columnWidth + startOffset,
+            'y' : ((startPtOverride && startPtOverride.y) || startY)
+        };
+        const endPt = {
+            'x' : ((endPtOverride && endPtOverride.x) || endX) + endOffset,
+            'y' : ((endPtOverride && endPtOverride.y) || endY)
+        };
 
         if (edgeStyle === 'straight'){
             return pathDimensionFunctions.drawStraightEdge(startPt, endPt);

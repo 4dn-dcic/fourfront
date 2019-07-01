@@ -2,18 +2,16 @@
 
 import React from 'react';
 import _ from 'underscore';
-import * as d3 from 'd3';
-import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
-import { expFxn, Schemas, console, object, isServerSide } from './../../util';
+import { console, object, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+// `Schemas` kept for project-specific transforms
+import { Schemas } from './../../util';
 import CursorComponent from './CursorComponent';
-import { Button } from 'react-bootstrap';
-
 
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
  * These become transformed into buttons.
- * 
+ *
  * @typedef {Object} Action
  * @property {string} title - Title or text of the button to be shown.
  * @property {function} function - A function to be called when the button is pressed.
@@ -39,41 +37,39 @@ class Body extends React.Component {
 
     /**
      * Under development.
-     * 
+     *
      * @private
      * @instance
      * @returns {JSX.Element} React DIV element with .row class.
      */
     renderActions(){
-        if (!this.props.sticky) return null;
-        if (!Array.isArray(this.props.actions) || !this.props.actions.length === 0) return null;
+        const { sticky, actions } = this.props;
+        if (!sticky) return null;
+        if (!Array.isArray(actions) || !actions.length === 0) return null;
 
-        var colWidth = 12 / Math.min(4, this.props.actions.length);
+        const colWidth = 12 / Math.min(4, actions.length);
 
-        var actions = _.map(this.props.actions, (action, i, a)=>{
-            var title       = typeof action.title === 'function'    ? action.title(this.props) : action.title,
-                disabled    = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
-
+        const renderedActions = _.map(actions, (action, i, a)=>{
+            const title = typeof action.title === 'function' ? action.title(this.props) : action.title;
+            const disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+            const cls = "btn btn-primary btn-sm" (a.length < 2 ? " btn-block" : "");
             return (
                 <div className={"button-container col-xs-" + colWidth} key={title || i}>
-                    <Button
-                        bsSize="small"
-                        bsStyle={action.bsStyle || 'primary'}
-                        onClick={action.function.bind(action.function, this.props)}
-                        className={a.length < 2 ? "btn-block" : null}
-                        disabled={disabled || false}
-                    >{ title }</Button>
+                    <button type="button" className={cls} disabled={disabled || false}
+                        onClick={action.function.bind(action.function, this.props)}>
+                        { title }
+                    </button>
                 </div>
             );
         });
         return (
-            <div className="actions buttons-container">{ actions }</div>
+            <div className="actions buttons-container">{ renderedActions }</div>
         );
     }
 
     /**
      * Renders out a row containing 2 counts out of [Exp Sets, Exps, Files], minus whatever is the primary count.
-     * 
+     *
      * @param {Object} props - Props of this component.
      * @returns {JSX.Element} - A DIV React element with a 'row' className.
      */
@@ -99,7 +95,7 @@ class Body extends React.Component {
                 </div>
             );
         });
-        
+
         return (
             <div className='row'>
                 { this.props.primaryCount !== 'files' ? <div className="col-xs-2"></div> : null }
@@ -130,8 +126,8 @@ class Body extends React.Component {
         if (Array.isArray(this.props.path) && this.props.path.length === 0){
             return null;
         }
-        var leafNode = this.props.path[this.props.path.length - 1];
-        var leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, this.props.schemas);
+        const leafNode = this.props.path[this.props.path.length - 1];
+        const leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, this.props.schemas);
         return (
             <div className="mosaic-cursor-body">
                 <Crumbs path={this.props.path} schemas={this.props.schemas} />

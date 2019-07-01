@@ -4,19 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
-import { console } from './../util';
-import { BasicStaticSectionBody } from './../static-pages/components/BasicStaticSectionBody';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
 import { HomePageCarouselSlide } from './../static-pages/components/HomePageCarousel';
 
 
 export default class StaticSectionView extends DefaultItemView {
 
     getTabViewContents(){
-
-        var initTabs = [];
-
+        const initTabs = [];
         initTabs.push(StaticSectionViewPreview.getTabObject(this.props));
-
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 

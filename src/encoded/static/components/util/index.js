@@ -8,12 +8,12 @@
 
 
 // Misc functions are top-level
-export { isServerSide } from './misc';
+//export { isServerSide } from './misc';
 
 
 // Transforms, manipulations, parsers, etc. re: objects.
-import * as objectMethods from './object';
-export const object = objectMethods;
+//import * as objectMethods from './object';
+//export const object = objectMethods;
 
 
 // Navigation
@@ -21,23 +21,23 @@ export { navigate } from './navigate';
 
 
 // Analytics
-import * as analyticsMethods from './analytics';
-export const analytics = analyticsMethods;
+//import * as analyticsMethods from './analytics';
+//export const analytics = analyticsMethods;
 
 
 // Layout
-import * as layoutMethods from './layout';
-export const layout = layoutMethods;
+//import * as layoutMethods from './layout';
+//export const layout = layoutMethods;
 
 
 // AJAX
-import * as ajaxMethods from './ajax';
-export const ajax = ajaxMethods;
+//import * as ajaxMethods from './ajax';
+//export const ajax = ajaxMethods;
 
 
 // Patches over browser window's console and disables logging (e.g. console.log) on production. Just import from this module to patch.
-import patchedConsoleInstance from './patched-console';
-export const console = patchedConsoleInstance;
+//import patchedConsoleInstance from './patched-console';
+//export const console = patchedConsoleInstance;
 
 
 // Type definitions
@@ -46,14 +46,14 @@ export const typedefs = typeDefinitions;
 
 
 // Functions related to JWT encoding/decoding/storage. Prevent name interference with 'jwt' NPM package.
-import * as JWTMethods from './json-web-token';
-export const JWT = JWTMethods;
+//import * as JWTMethods from './json-web-token';
+//export const JWT = JWTMethods;
 
 
 // Use momentjs to parse and localize datetime.
 // Has useful React component - DateUtility.LocalizedTime - which shows time in user's timezone after mount.
-import * as DateUtilities from './date-utility';
-export const DateUtility = DateUtilities;
+//import * as DateUtilities from './date-utility';
+//export const DateUtility = DateUtilities;
 
 
 import * as experimentTransformFunctions from './experiments-transforms';

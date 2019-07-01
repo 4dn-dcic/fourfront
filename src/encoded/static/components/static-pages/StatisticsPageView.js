@@ -4,17 +4,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { Checkbox } from './../forms/components/Checkbox';
-import { DropdownButton, DropdownItem } from './../forms/components/DropdownButton';
 import url from 'url';
-import { console, navigate, ajax, analytics, DateUtility } from './../util';
+import * as d3 from 'd3';
+import moment from 'moment';
+
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { console, navigate, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import {
     StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
 } from './../viz/AreaChart';
 import StaticPage from './StaticPage';
-import * as d3 from 'd3';
-import moment from 'moment';
+
 
 
 

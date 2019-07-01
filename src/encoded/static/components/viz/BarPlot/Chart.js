@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas } from './../../util';
 import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
-import { console, isServerSide, Schemas } from './../../util';
 import { PopoverViewContainer } from './ViewContainer';
 
 
@@ -365,15 +366,18 @@ export class Chart extends React.PureComponent {
      * @returns {JSX.Element} - Chart markup wrapped in a div.
      */
     render(){
+        const {
+            context, width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
+            aggregateType, useOnlyPopulatedFields, cursorDetailActions, href
+        } = this.props;
         if (this.state.mounted === false) return <div/>;
+
+        const styleOptions = this.styleOptions();
 
         // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
         barplot_color_cycler.resetCache();
 
-        var { width, height, showType, barplot_data_unfiltered, barplot_data_filtered, aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props,
-            styleOptions = this.styleOptions();
-
-        var topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
+        const topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
 
         // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
         var barData = genChartBarDims(
@@ -386,7 +390,7 @@ export class Chart extends React.PureComponent {
         );
 
         return (
-            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href }}
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href, context }}
                 actions={cursorDetailActions}
                 leftAxis={this.renderParts.leftAxis.call(this, width, height, barData, styleOptions)}
                 bottomAxis={this.renderParts.bottomXAxis.call(this, width, height, barData.bars, styleOptions)}

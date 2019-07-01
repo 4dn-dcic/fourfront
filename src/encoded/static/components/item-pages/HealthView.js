@@ -4,11 +4,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import { Button } from 'react-bootstrap';
-import { ajax, layout, navigate } from './../util';
-import { ItemDetailList } from './components/ItemDetailList';
 import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
+
+import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.

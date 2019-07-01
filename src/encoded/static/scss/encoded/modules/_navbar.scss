@@ -192,14 +192,18 @@ $navbar-link-hover-bg: #d7d7d7;
                 margin-right: 8px;
             }
 
-            &.has-image {
-                > a {
+            &.has-image > div {
+                > button {
                     padding-left: 8px;
                     img.account-icon-image {
                         margin-right: 8px;
                         border-radius: 8px;
                         width: 30px;
                         height: 30px;
+                        vertical-align: middle;
+                    }
+                    span {
+                        vertical-align: middle;
                     }
                     @include media-breakpoint-up(lg) {
                         padding-left: 10px;

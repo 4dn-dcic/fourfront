@@ -4,10 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import {  Collapse, Table } from 'react-bootstrap';
-import { console, object, ajax, JWT, analytics, isServerSide } from'./../util';
+import { Table } from 'react-bootstrap';
+import { console, object, ajax, isServerSide, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
 import StaticPage from './StaticPage';
-import { BasicStaticSectionBody } from './components';
 
 
 export default class ReleaseUpdates extends React.Component {
@@ -47,15 +48,11 @@ export default class ReleaseUpdates extends React.Component {
         var useTag = updateTag || this.state.updateTag || '*';
         if (useTag){
             var section_url = '/static-sections/release-updates.' + useTag;
-            ajax.promise(section_url).then(response => {
+            ajax.promise(section_url).then((response) => {
                 if (response['name'] && response['content']){
-                    var section_data = {
-                        'content': response['content'],
-                        '@id': response['@id']
-                    };
-                    this.setState({'sectionData': section_data});
-                }else{
-                    this.setState({'sectionData': null});
+                    this.setState({ 'sectionData': _.pick(response, '@id', 'content') });
+                } else {
+                    this.setState({ 'sectionData': null });
                 }
             });
         }
@@ -74,30 +71,31 @@ export default class ReleaseUpdates extends React.Component {
             update_url += '&parameters=' + encodeURIComponent(useParam);
         }
 
-        this.setState({'updateData': null});
-        ajax.promise(update_url).then(response => {
-            if (response['@graph'] && response['@graph'].length > 0){
-                this.setState({'updateData': response['@graph']});
-            }else{
-                this.setState({'updateData': []});
-            }
+        this.setState({ 'updateData': null }, ()=>{
+            ajax.promise(update_url).then((response) => {
+                if (response['@graph'] && response['@graph'].length > 0){
+                    this.setState({ 'updateData': response['@graph'] });
+                }else{
+                    this.setState({ 'updateData': [] });
+                }
+            });
         });
     }
 
     viewUpdates(){
-        if(this.state.updateData === null){
+        if (this.state.updateData === null){
             return(
                 <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}>
                     <i className="mt-3 icon icon-spin icon-circle-o-notch"/>
                 </div>
             );
-        }else if(this.state.updateData.length == 0){
-            return(
-                <div style={{'textAlign': 'center'}}>
+        }else if (this.state.updateData.length == 0){
+            return (
+                <div className="text-center">
                     <h5>No results.</h5>
                 </div>
             );
-        }else{
+        } else {
             return(
                 <div className="item-page-container">
                     {this.state.updateData.map((update) =>

@@ -1,9 +1,9 @@
 'use strict';
 
 import React from 'react';
-import url from 'url';
 import PropTypes from 'prop-types';
-import { ItemDetailList } from './components/ItemDetailList';
+
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
 
 
 export default class SchemaView extends React.PureComponent {

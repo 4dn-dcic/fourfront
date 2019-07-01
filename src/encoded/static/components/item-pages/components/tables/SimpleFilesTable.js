@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ItemPageTable, ItemPageTableLoader } from './ItemPageTable';
-import { console, expFxn } from './../../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../../../util';
 
 
 export class SimpleFilesTable extends React.PureComponent {

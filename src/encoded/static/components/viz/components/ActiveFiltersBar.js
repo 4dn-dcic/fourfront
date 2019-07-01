@@ -1,9 +1,10 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-var vizUtil = require('./../utilities');
-var { console, isServerSide, Filters, Schemas, analytics } = require('./../../util');
+import React from 'react';
+import _ from 'underscore';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas, navigate } from './../../util';
 
 
 
@@ -37,16 +38,13 @@ export class ActiveFiltersBar extends React.Component {
     }
 
     renderCrumbs(){
-        if (this.props.invisible) return null;
+        const { invisible, expSetFilters, context, orderedFieldNames, href } = this.props;
+        if (invisible) return null;
 
-        if (this.props.expSetFilters) {
-            var contextFacets = (this.props.context && this.props.context.facets) || null;
-            var _this = this;
+        if (expSetFilters) {
+            var contextFacets = (context && context.facets) || null;
 
-            return Filters.filtersToNodes(
-                this.props.expSetFilters,
-                this.props.orderedFieldNames
-            ).map(function(nodeSet, j){
+            return searchFilters.filtersToNodes(expSetFilters, orderedFieldNames).map(function(nodeSet, j){
 
                 // Try to get more accurate title from context.facets list, if available.
                 var releventContextFacet = contextFacets && _.findWhere(contextFacets, { 'field' : nodeSet[0].data.field });
@@ -55,13 +53,10 @@ export class ActiveFiltersBar extends React.Component {
                 return (
                     <div className="field-group" key={j} data-field={nodeSet[0].data.field}>
                         { nodeSet.map(function(node, i){
-                            return (<RegularCrumb
-                                node={node}
-                                expSetFilters={_this.props.expSetFilters}
-                                href={_this.props.href}
-                                key={node.data.term}
-                                color={node.color || null}
-                            />);
+                            return (
+                                <RegularCrumb {...{ node, expSetFilters, href }}
+                                    key={node.data.term} color={node.color || null} />
+                            );
                         }) }
                         <div className="field-label">{ facetFieldTitle }</div>
                     </div>
@@ -85,43 +80,35 @@ export class ActiveFiltersBar extends React.Component {
 
 }
 
-class Container extends React.Component {
-    render(){
-        var title = null;
-        if (this.props.sequential){
-            title = "Examining";
-        } else {
-            title = "Currently-selected Filters";
-        }
-        return (
-            <div className="chart-breadcrumbs-container">
-                <h5 className="crumbs-title">
-                    { title }
-                </h5>
-                { this.props.children }
-            </div>
-        );
-    }
+function Container({ sequential, children }){
+    const title = sequential ? "Examining" : "Currently-selected Filters";
+    return (
+        <div className="chart-breadcrumbs-container">
+            <h5 className="crumbs-title">
+                { title }
+            </h5>
+            { children }
+        </div>
+    );
 }
 
-class RegularCrumb extends React.PureComponent {
-    render(){
-        var { node, color, expSetFilters } = this.props;
-        return (
-            <span className="chart-crumb no-highlight-color"
-                data-term={node.data.term ? node.data.term : null}
-                style={{ backgroundColor : color }}>
-                { node.data.name }
-                <span className="icon-container" onClick={()=>{
-                    Filters.changeFilter( node.data.field, node.data.term, expSetFilters );
-                    analytics.event('QuickInfoBar', 'Unset Filter', {
-                        'eventLabel' : analytics.eventLabelFromChartNode(node.data),
-                        'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
-                    });
-                }}>
-                    <i className="icon icon-times"/>
-                </span>
+
+const RegularCrumb = React.memo(function RegularCrumb(props){
+    const { node, color, expSetFilters } = props;
+    const { data : { term = null, name, field } } = node;
+    return (
+        <span className="chart-crumb no-highlight-color"
+            data-term={term}
+            style={{ backgroundColor : color }}>
+            { name }
+            <span className="icon-container" onClick={()=>{
+                searchFilters.changeFilter(field, term, expSetFilters, null, false, null, navigate.getBrowseBaseParams());
+                analytics.event('QuickInfoBar', 'Unset Filter', {
+                    'eventLabel' : analytics.eventLabelFromChartNode(node.data),
+                    'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
+                });
+            }}>
+                <i className="icon icon-times"/>
             </span>
-        );
-    }
-}
+        </span>
+});

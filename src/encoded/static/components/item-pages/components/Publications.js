@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { console, DateUtility, object } from './../../util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 
@@ -84,7 +85,7 @@ class ShortAttribution extends React.PureComponent {
         var yearPublished = null;
         try {
             if (pub.date_published && typeof pub.date_published === 'string'){
-                yearPublished = DateUtility.formatPublicationDate(pub.date_published, false);
+                yearPublished = formatPublicationDate(pub.date_published, false);
             }
             if (journalString && yearPublished){
                 yearPublished = ' ' + yearPublished;
@@ -232,7 +233,7 @@ export class Publications extends React.PureComponent {
         if (typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
-                'content' : DateUtility.formatPublicationDate(publication.date_published)
+                'content' : formatPublicationDate(publication.date_published)
             });
         }
 

@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { ExternalReferenceLink } from './ExternalReferenceLink';
-import { console } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /**
  * Component for showing Aliases, External References, etc.

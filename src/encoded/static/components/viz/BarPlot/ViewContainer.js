@@ -4,10 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { barplot_color_cycler } from './../ColorCycler';
 import { CursorViewBounds } from './../ChartDetailCursor';
-import { console, isServerSide, analytics } from './../../util';
+
 
 
 /**
@@ -371,7 +372,7 @@ export class PopoverViewContainer extends React.PureComponent {
 
     render(){
         return (
-            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href')}
+            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href', 'context')}
                 eventCategory="BarPlot" // For Analytics events
                 highlightTerm={false} clickCoordsFxn={this.getCoordsCallback}>
                 <ViewContainer {...this.props} />

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 import url from 'url';
-import { console, object } from './../../util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 

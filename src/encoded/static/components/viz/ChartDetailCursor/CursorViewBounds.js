@@ -3,10 +3,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide, layout, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { barplot_color_cycler } from './../ColorCycler';
 import ChartDetailCursor from './ChartDetailCursor';
-import { console, isServerSide, Filters, layout, analytics } from './../../util';
+
 
 /**
  * Use this Component to wrap a chart or other view which displays any sort of Experiment Set 'Node'(s).
@@ -90,9 +91,9 @@ export default class CursorViewBounds extends React.PureComponent {
      * Important lifecycle method.
      * Checks if a selected bar section (via state.selectedTerm) has been set or unset.
      * Then passes that to the ChartDetailCursor's 'sticky' state.
-     * 
+     *
      * Also enables or disables a 'click' event listener to cancel out stickiness/selected section.
-     * 
+     *
      * @param {Object} pastProps - Previous props of this component.
      * @param {Object} pastState - Previous state of this component.
      */
@@ -130,7 +131,7 @@ export default class CursorViewBounds extends React.PureComponent {
             'includeTitleDescendentPrefix' : false,
             'actions' : this.props.actions || null,
         };
-        
+
         if (node.parent) newCursorDetailState.path.push(node.parent);
         if (typeof this.props.aggregateType === 'string') {
             newCursorDetailState.primaryCount = this.props.aggregateType;
@@ -190,11 +191,14 @@ export default class CursorViewBounds extends React.PureComponent {
      * queued this.hovers nodes get an Analytics events sent, with multiple node hover instances delimited by '; '.
      */
     sendHoverEvent(){
+        const { context, eventCategory } = this.props;
         setTimeout(()=>{
-            analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Hover Node', {
-                eventLabel : analytics.eventLabelFromChartNodes(this.hovers),
-                currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters()),
-                eventValue : this.hovers.length
+            analytics.event(eventCategory || 'CursorViewBounds', 'Hover Node', {
+                'eventLabel' : analytics.eventLabelFromChartNodes(this.hovers),
+                'currentFilters' : analytics.getStringifiedCurrentFilters(
+                    searchFilters.contextFiltersToExpSetFilters(context && context.filters)
+                ),
+                'eventValue' : this.hovers.length
             });
             this.hovers = [];
         }, 10);
@@ -242,19 +246,20 @@ export default class CursorViewBounds extends React.PureComponent {
     }
 
     onNodeClick(node, evt){
+        const { selectedTerm, selectedParentTerm } = this.state;
         evt.preventDefault();
         evt.stopPropagation(); // Prevent this event from being captured by this.handleClickAnywhere() listener.
         // If this section already selected:
-        if (CursorViewBounds.isSelected(node, this.state.selectedTerm, this.state.selectedParentTerm)){
+        if (CursorViewBounds.isSelected(node, selectedTerm, selectedParentTerm)){
             this.setState({
                 'selectedTerm' : null,
                 'selectedParentTerm' : null
             });
         } else {
-            var { styleOptions, windowWidth, clickCoordsFxn, eventCategory } = this.props;
+            const { context, styleOptions, windowWidth, clickCoordsFxn, eventCategory } = this.props;
 
             // Manually adjust popover position if a different bar section is already selected.
-            if (this.state.selectedTerm) {
+            if (selectedTerm) {
 
                 var container       = this.boundsContainerRef && this.boundsContainerRef.current,
                     containerPos    = layout.getElementOffset(container),
@@ -288,9 +293,11 @@ export default class CursorViewBounds extends React.PureComponent {
             }, function(){
                 // Track 'BarPlot':'Change Experiment Set Filters':ExpSetFilters event.
                 setTimeout(()=>{
-                    analytics.event(this.props.eventCategory || 'CursorViewBounds', 'Select Node', {
+                    analytics.event(eventCategory || 'CursorViewBounds', 'Select Node', {
                         eventLabel : analytics.eventLabelFromChartNode(node),
-                        currentFilters : analytics.getStringifiedCurrentFilters(Filters.currentExpSetFilters())
+                        currentFilters : analytics.getStringifiedCurrentFilters(
+                            searchFilters.contextFiltersToExpSetFilters(context && context.filters)
+                        )
                     });
                 }, 10);
             });

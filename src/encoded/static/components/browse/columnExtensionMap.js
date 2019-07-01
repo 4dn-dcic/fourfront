@@ -1,14 +1,12 @@
 'use strict';
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import url from 'url';
 import _ from 'underscore';
-import queryString from 'query-string';
-import { isServerSide, navigate, object, Schemas, analytics, typedefs } from './../util';
-import { getItemType, getTitleForType } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { LocalizedTime, formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { TableRowToggleOpenButton, basicColumnExtensionMap } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
+import { basicColumnExtensionMap } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
+import {  Schemas, typedefs } from './../util';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, ColumnDefinition } = typedefs;

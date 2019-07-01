@@ -3,9 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object } from'./../util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { NextPreviousPageSection } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/TableOfContents';
 import StaticPage, { parseSectionsContent } from './StaticPage';
-import { NextPreviousPageSection } from './components';
 
 
 export default class DirectoryPage extends React.PureComponent {

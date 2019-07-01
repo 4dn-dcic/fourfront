@@ -95,7 +95,6 @@
   },
   "dependencies": {
     "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#master",
-    "aws-sdk": "^2.421.0",
     "babel-polyfill": "^6.26.0",
     "crypto-js": "^3.1.9-1",
     "d3": "^5.9.0",
@@ -104,7 +103,6 @@
     "form-serialize": "^0.6.0",
     "higlass": "^1.5.7",
     "html-react-parser": "^0.4.7",
-    "js-md5": "^0.4.2",
     "markdown-to-jsx": "^6.9.3",
     "memoize-one": "^5.0.1",
     "moment": "^2.24.0",
@@ -112,7 +110,6 @@
     "prop-types": "^15.7.2",
     "query-string": "^4.3.4",
     "radium": "^0.25.1",
-    "rc-progress": "^2.3.0",
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
     "react-bootstrap": "1.0.0-beta.9",

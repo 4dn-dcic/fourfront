@@ -5,11 +5,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
-import { MarkdownHeading } from './components';
-import { console, object, isServerSide } from './../util';
+import { MarkdownHeading } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/TableOfContents';
+import { console, object, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { StaticPageBase } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/StaticPageBase';
 import { replaceString as replacePlaceholderString } from './placeholders';
-import { StaticPageBase } from './components/StaticPageBase';
-
 
 /** NOT SHARED */
 

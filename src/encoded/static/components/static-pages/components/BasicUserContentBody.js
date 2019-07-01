@@ -3,9 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, analytics, isServerSide } from './../../util';
-import { BasicStaticSectionBody } from './BasicStaticSectionBody';
+import { analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
+import { replaceString as replacePlaceholderString } from './../placeholders';
 
 
 /** THIS FILE NOT SHARED OR COMMON */
@@ -53,7 +54,10 @@ export class BasicUserContentBody extends React.PureComponent {
         var itemType = this.itemType();
 
         if (itemType === 'StaticSection') {
-            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} />;
+            return (
+                <BasicStaticSectionBody content={context.content} filetype={context.filetype}
+                    markdownCompilerOptions={markdownCompilerOptions} placeholderReplacementFxn={replacePlaceholderString} />
+            );
         } else {
             // TODO handle @type=JupyterHub?
             return (

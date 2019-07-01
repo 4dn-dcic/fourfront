@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, analytics, isServerSide } from './../../util';
+import { object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { BasicUserContentBody, ExpandableStaticHeader } from './BasicUserContentBody';
 
 

@@ -3,10 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, navigate, ajax } from'./../util';
-import { requestAnimationFrame } from './../viz/utilities';
-import { Collapse, Button } from 'react-bootstrap';
-import { Announcements, BasicStaticSectionBody } from './components';
+
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 /**

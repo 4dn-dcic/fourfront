@@ -5,7 +5,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ButtonToolbar, Collapse, Button, DropdownButton } from 'react-bootstrap';
-import { layout } from './../../util';
+import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
 
@@ -68,7 +68,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                             <hr/>
                         </div>
                     </Collapse>
-                : null }
+                    : null }
                 <div className="toolbar-wrapper pull-right" key="toolbar">
                     <ButtonToolbar data-tip={ isMobileSize ? null : tooltip }>
                         { !isMobileSize && this.props.children }

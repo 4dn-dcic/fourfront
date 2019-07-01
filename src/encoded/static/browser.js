@@ -8,8 +8,9 @@ import App from './components';
 var domready = require('domready');
 import { store, mapStateToProps } from './store';
 import { Provider, connect } from 'react-redux';
-import { console, JWT } from './components/util';
-import { BrowserFeat } from './components/util/layout';
+
+import * as JWT from '@hms-dbmi-bgm/shared-portal-components/src/components/util/json-web-token';
+import { BrowserFeat } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/layout';
 
 /**
  * Unset JWT/auth and reload page if missing user info which should be paired with otherwise valid JWT token.
@@ -32,6 +33,8 @@ function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
     }
 
     const { user_details } = props;
+
+    console.log('TTT', user_details);
 
     if (user_details && typeof user_details.email === 'string'){
         // We have userDetails from server-side; keep client-side in sync (in case updated via/by back-end / dif client at some point)

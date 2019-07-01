@@ -28,7 +28,8 @@ import SchemaView               from './item-pages/SchemaView';
 import FallbackView             from './item-pages/FallbackView';
 import DocumentView             from './item-pages/DocumentView';
 import StaticSectionView        from './item-pages/StaticSectionView';
-import SubmissionView           from './forms/SubmissionView';
+import CGAPSubmissionView       from './forms/CGAPSubmissionView';
+//import SubmissionView           from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/SubmissionView';
 import SearchView               from './browse/SearchView';
 
 content_views.register(StaticPage,    'StaticPage');
@@ -50,10 +51,10 @@ content_views.register(UserView,                'User');
 content_views.register(ImpersonateUserForm,     'User', 'impersonate-user');
 content_views.register(StaticSectionView,       'StaticSection');
 
-content_views.register(SubmissionView,          'Item', 'edit');
-content_views.register(SubmissionView,          'Item', 'create');
-content_views.register(SubmissionView,          'Item', 'clone');
-content_views.register(SubmissionView,          'Search', 'add');
+content_views.register(CGAPSubmissionView,      'Item', 'edit');
+content_views.register(CGAPSubmissionView,      'Item', 'create');
+content_views.register(CGAPSubmissionView,      'Item', 'clone');
+content_views.register(CGAPSubmissionView,      'Search', 'add');
 
 content_views.register(SearchView,              'Search');
 content_views.register(SearchView,              'Search', 'selection');

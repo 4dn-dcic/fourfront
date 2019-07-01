@@ -3,10 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
-import { console } from './../../util';
-import { requestAnimationFrame } from './../utilities';
 import _ from 'underscore';
-import { Fade } from 'react-bootstrap';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { traceNodePathAndRun } from './parsing-functions';
 
 

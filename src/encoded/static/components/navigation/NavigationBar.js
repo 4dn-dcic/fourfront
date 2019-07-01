@@ -4,11 +4,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { console, ajax, layout } from './../util';
+import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { CGAPLogo } from './../viz/CGAPLogo';
-import { DropdownItem, DropdownButton, Dropdown } from './../forms/components/DropdownButton';
-import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, getActionURL } from './components';
-import QuickInfoBar from './../viz/QuickInfoBar';
+
+import { UserActionDropdownMenu } from './components/UserActionDropdownMenu';
 
 
 export class NavigationBar extends React.PureComponent {

@@ -6,8 +6,8 @@ import { transformResponse } from 'subprocess-middleware';
 import fs from 'fs';
 import { store, mapStateToProps } from './../store';
 import { Provider, connect } from 'react-redux';
-import { JWT, object } from './../components/util';
-import Alerts from './../components/alerts';
+import { JWT, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 
 
 const cssFileStats = fs.statSync(__dirname + '/../css/style.css');

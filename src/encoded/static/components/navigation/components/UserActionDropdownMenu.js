@@ -26,56 +26,31 @@ import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
  *
  * @todo Refactor this into a BigDropdown menu. Get rid of listActionsFor at some point from App.js.
  */
-export class UserActionDropdownMenu extends React.PureComponent {
+export const UserActionDropdownMenu = React.memo(function UserActionDropdownMenu(props){
+    const { session } = props;
+    let acctBtn = null;
 
-    static propTypes = {
-        'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
-        'listActionsFor'  : PropTypes.func.isRequired,      /** Passed in by App TODO: Make this a global function, or have it be in util/json-web-token.js */
-        'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
-        'updateUserInfo'  : PropTypes.func.isRequired,      /** Passed in by App */
-        'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
-    };
-
-    constructor(props){
-        super(props);
-        this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
-    }
-
-    /** Shown for logged in users. */
-    listUserActionsAsMenuItems(){
-        const { listActionsFor, href, updateUserInfo } = this.props;
-        const actions = _.map(listActionsFor('user'), function(action){
-            return actionToMenuItem(action, href, { "data-no-cache" : true });
-        });
-
-        actions.push(
-            <LogoutController updateUserInfo={updateUserInfo}>
-                <LogoutDropdownItem/>
-            </LogoutController>
+    if (session){
+        acctBtn = (
+            <LoggedInDropdown {...props} />
         );
-
-        return actions;
+    } else {
+        acctBtn = (
+            <LoginController {..._.pick(props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}>
+                <LoginNavItem key="login-register" id="user_account_nav_button" />
+            </LoginController>
+        );
     }
 
-    render() {
-        const { session } = this.props;
-        let acctBtn = null;
-
-        if (session){
-            acctBtn = (
-                <LoggedInDropdown {...this.props} />
-            );
-        } else {
-            acctBtn = (
-                <LoginController {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}>
-                    <LoginNavItem key="login-register" id="user_account_nav_button" />
-                </LoginController>
-            );
-        }
-
-        return <ul className="nav navbar-nav navbar-right">{ acctBtn }</ul>;
-    }
-}
+    return <ul className="nav navbar-nav navbar-right">{ acctBtn }</ul>;
+});
+UserActionDropdownMenu.propTypes = {
+    'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
+    'listActionsFor'  : PropTypes.func.isRequired,      /** Passed in by App TODO: Make this a global function, or have it be in util/json-web-token.js */
+    'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
+    'updateUserInfo'  : PropTypes.func.isRequired,      /** Passed in by App */
+    'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
+};
 
 export const LoggedInDropdown = function LoggedInDropdown(props){
     const { listActionsFor, href, updateUserInfo } = props;
@@ -86,17 +61,12 @@ export const LoggedInDropdown = function LoggedInDropdown(props){
         acctImg = itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm');
     }
     const items = LoggedInDropdown.listUserActionsAsMenuItems(listActionsFor, href, updateUserInfo);
-    items.push(
-        <LogoutController updateUserInfo={updateUserInfo}>
-            <LogoutDropdownItem/>
-        </LogoutController>
-    );
     return (
         <li className={"dropdown user-account-item" + (acctImg ? " has-image" : "")}>
             <Dropdown className="nav-dropdown-btn">
                 <Dropdown.Toggle>
                     { acctImg || <i className="account-icon icon icon-user-o" /> }
-                    { acctTitle }
+                    <span>{ acctTitle }</span>
                 </Dropdown.Toggle>
                 <Dropdown.Menu>{ items }</Dropdown.Menu>
             </Dropdown>
@@ -109,7 +79,7 @@ LoggedInDropdown.listUserActionsAsMenuItems = function(listActionsFor, href, upd
         return actionToMenuItem(action, href, { "data-no-cache" : true });
     });
     actions.push(
-        <LogoutController updateUserInfo={updateUserInfo}>
+        <LogoutController updateUserInfo={updateUserInfo} key="user-logout">
             <LogoutDropdownItem/>
         </LogoutController>
     );
