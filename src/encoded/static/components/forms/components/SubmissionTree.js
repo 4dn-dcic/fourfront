@@ -89,7 +89,7 @@ class SubmissionProperty extends React.Component {
 
         return(
             <div key={bookmark} className={"submission-nav-leaf linked-item-type-name leaf-depth-" + depth + (isRequired ? ' is-required' : '') + (!noChildren ? ' has-children' : '' )}>
-                <div className={"clearfix inner-title" + (!noChildren ? ' clickable' : '')} onClick={!noChildren && this.handleToggle}>
+                <div className={"clearfix inner-title" + (!noChildren ? ' clickable' : '')} onClick={!noChildren ? this.handleToggle : undefined}>
                     <i className={"icon property-expand-icon icon-" + (open ? 'minus' : 'plus')}/>
                     <span>{ children.length } { bookmark || field }</span>
                 </div>
@@ -258,18 +258,13 @@ class SubmissionLeaf extends React.Component{
     }
 }
 
-class InfoIcon extends React.Component{
 
-    constructor(props){
-        super(props);
-    }
-
-    render() {
-        if (!this.props.children) return null;
-        return (
-            <i style={{"marginLeft":"6px", 'fontSize':'0.8em'}} className={"icon icon-info-circle" + (this.props.className ? ' ' + this.props.className : '')} data-place="right" data-html={true} data-tip={this.props.children}/>
-        );
-    }
+function InfoIcon({ children, className }){
+    if (!children) return null;
+    return (
+        <i style={{ "marginLeft":"6px", 'fontSize':'0.8em' }} className={"icon icon-info-circle" + (className ? ' ' + className : '')}
+            data-place="right" data-html={true} data-tip={children}/>
+    );
 }
 
 
