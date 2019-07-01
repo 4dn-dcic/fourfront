@@ -13,7 +13,6 @@ import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './footer';
 import { store } from './../store';
-import * as origin from '../libs/origin';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { ajax, JWT, console, isServerSide, object, layout, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
@@ -546,7 +545,7 @@ export default class App extends React.PureComponent {
         if (targetHref.indexOf('javascript:') === 0) return false;
 
         // Skip external links
-        if (!origin.same(targetHref)) return false;
+        if (!navigate.sameOrigin(targetHref)) return false;
 
         // Skip links with a different target
         if (target.getAttribute('target')) return false;
@@ -607,7 +606,7 @@ export default class App extends React.PureComponent {
         if (target.getAttribute('data-bypass')) return;
 
         // Skip external forms
-        if (!origin.same(target.action)) return;
+        if (!navigate.sameOrigin(target.action)) return;
 
         const actionUrlParts  = url.parse(url.resolve(href, target.action));
         const currentAction   = this.currentAction();
