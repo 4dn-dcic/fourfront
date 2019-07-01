@@ -685,7 +685,7 @@ def parse_args(args):
     parser.add_argument('--ontologies',
                         nargs='+',
                         default='all',
-                        help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
+                        help="Short Names of ontologies to process - eg. HP (for Human Phenotype Ontology); \
                         all retrieves all ontologies that exist in db")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
@@ -698,7 +698,7 @@ def parse_args(args):
                         action='store_true',
                         help="Default False - set True to generate full file to load - do not filter out existing unchanged terms")
     parser.add_argument('--env',
-                        default='data',
+                        default='fourfront-cgap',
                         help="The environment to use i.e. data, webdev, mastertest.\
                         Default is 'data')")
     parser.add_argument('--key',
