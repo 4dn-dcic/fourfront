@@ -2,9 +2,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
 import url from 'url';
 import { console, object } from './../../util';
+// Soon:
+//import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 
@@ -130,19 +131,15 @@ export class FileItemRow extends React.Component {
                 </div>
 
                 <div className="col-xs-3 col-md-2 text-right download-button pull-right">
-                    <Button className="button-dl-file" bsStyle="primary" bsSize="small" href={ fileDownloadHref } download disabled={!fileDownloadHref}>
+                    <button type="button" className="btn btn-primary btn-sm button-dl-file"
+                        href={fileDownloadHref} download disabled={!fileDownloadHref}>
                         <i className={"icon icon-" + (fileItemClass) }/>
                         { '\u00A0  Download' }
-                    </Button>
-                    <Button
-                        className={"button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}
-                        bsStyle="default"
-                        bsSize="small"
-                        href={ attachmentDownloadHref }
-                        download
-                        disabled={!attachmentDownloadHref}
-                        children={<i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>}
-                    />
+                    </button>
+                    <button type="button" href={attachmentDownloadHref} download disabled={!attachmentDownloadHref}
+                        className={"btn btn-outline-dark button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}>
+                        <i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>
+                    </button>
                 </div>
 
                 <div className="col-xs-12 col-md-4 col-lg-5 description">
@@ -207,9 +204,9 @@ class Small extends React.Component {
                                     { file.description }
                                 </div>
                                 <div className="col-xs-12 col-md-2 text-right download-button">
-                                    <Button bsSize="small" href={ downloadHref } download disabled={!downloadHref}>
+                                    <button type="button" className="btn btn-sm btn-primary" href={downloadHref} download disabled={!downloadHref}>
                                         <i className="icon icon-download"/>
-                                    </Button>
+                                    </button>
                                 </div>
                             </div>
                         );

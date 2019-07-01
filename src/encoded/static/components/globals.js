@@ -2,6 +2,10 @@
 
 import Registry from './../libs/registry';
 import { console, isServerSide } from './util';
+// soon:
+// import import Registry from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/Registry';
+// import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 
 /**
  * Registry of views for Item pages, keyed by Item type.

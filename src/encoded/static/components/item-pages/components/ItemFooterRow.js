@@ -3,12 +3,15 @@
 import React from 'react';
 import _ from 'underscore';
 import { ExternalReferenceLink } from './ExternalReferenceLink';
-import { console } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
+
+/** @todo: cleanup, refactor into sep. functional components */
 
 /**
  * Component for showing Aliases, External References, etc.
  * Shown at bottom of Item pages.
- * 
+ *
  * @class ItemFooterRow
  * @type {Component}
  * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
@@ -38,18 +41,18 @@ export class ItemFooterRow extends React.Component {
         ) return null;
         if (!Array.isArray(this.props.context.actions)) return null;
         if (!_.find(this.props.context.actions, { 'name' : 'edit' })) return null; // No 'Edit' action for this Item.
-        
+
         var aliases = this.props.context.aliases.length > 0 ? this.props.context.aliases : [<em>None</em>];
         return (
             <div>
                 <h4 className="text-500">Aliases</h4>
                 <div>
                     <ul>
-                    { aliases.map(function(alias, i){
-                        return (
-                            <li key={i}>{ alias }</li>
-                        );
-                    }) }
+                        { aliases.map(function(alias, i){
+                            return (
+                                <li key={i}>{ alias }</li>
+                            );
+                        }) }
                     </ul>
                 </div>
             </div>
@@ -68,11 +71,11 @@ export class ItemFooterRow extends React.Component {
                 <h4 className="text-300">Alternate Accessions</h4>
                 <div>
                     <ul>
-                    { alternateAccessions.map(function(alias, i){
-                        return (
-                            <li key={i}>{ alias }</li>
-                        );
-                    }) }
+                        { alternateAccessions.map(function(alias, i){
+                            return (
+                                <li key={i}>{ alias }</li>
+                            );
+                        }) }
                     </ul>
                 </div>
             </div>
@@ -91,18 +94,18 @@ export class ItemFooterRow extends React.Component {
                 <h4 className="text-300">External References</h4>
                 <div>
                     <ul>
-                    { externalRefs.map(function(extRef, i){
-                        return (
-                            <li key={i}>
-                                { typeof extRef.ref === 'string' ?
-                                    <ExternalReferenceLink uri={extRef.uri || null} children={extRef.ref} />
-                                    :
-                                    extRef
-                                }
+                        { externalRefs.map(function(extRef, i){
+                            return (
+                                <li key={i}>
+                                    { typeof extRef.ref === 'string' ?
+                                        <ExternalReferenceLink uri={extRef.uri || null} children={extRef.ref} />
+                                        :
+                                        extRef
+                                    }
 
-                            </li>
-                        );
-                    }) }
+                                </li>
+                            );
+                        }) }
                     </ul>
                 </div>
             </div>
@@ -124,10 +127,10 @@ export class ItemFooterRow extends React.Component {
                 <hr className="mb-08 mt-1"/>
 
                 { externalReferences ?
-                <div className="col-xs-12 col-md-6">
-                    { externalReferences }
-                </div>
-                : null }
+                    <div className="col-xs-12 col-md-6">
+                        { externalReferences }
+                    </div>
+                    : null }
 
                 {/* aliases ?
                 <div className="col-xs-12 col-md-4">
@@ -136,14 +139,13 @@ export class ItemFooterRow extends React.Component {
                 : null */}
 
                 { alternateAccessions ?
-                <div className="col-xs-12 col-md-6">
-                    { alternateAccessions }
-                </div>
-                : null }
+                    <div className="col-xs-12 col-md-6">
+                        { alternateAccessions }
+                    </div>
+                    : null }
 
             </div>
         );
-        
 
     }
 }
