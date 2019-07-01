@@ -3,6 +3,7 @@
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "institution": "hms-dbmi",
         "status": "released",
+        "proband": true,
         "uuid": "4fdb481a-fbdb-4c0f-a68d-aac87f847bec",
         "individual": "5ec91041-78a0-4758-abef-21c7f5fd9ffc"
     },
@@ -10,6 +11,7 @@
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "institution": "hms-dbmi",
         "status": "released",
+        "proband": false,
         "uuid": "283f6047-61cd-4ddb-8881-ec1c87082569",
         "individual": "5c302401-88f6-44b8-9cf9-f062dfaa98c4"
     },
@@ -17,6 +19,7 @@
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "institution": "hms-dbmi",
         "status": "released",
+        "proband": false,
         "uuid": "f4bbc709-40fe-48a4-afde-8e886b571903",
         "individual": "96974f2e-de0a-4f3a-9be5-543359da74a1"
     }

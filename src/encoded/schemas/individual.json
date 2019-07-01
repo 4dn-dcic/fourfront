@@ -3,7 +3,7 @@
     "id": "/profiles/individual.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["first_name", "last_name"],
+    "required": ["life_status", "sex"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -16,19 +16,18 @@
         { "$ref": "mixins.json#/modified" }
     ],
     "properties": {
-        "first_name": {
-            "title": "First name",
-            "description": "The user's first (given) name.",
-            "type": "string"
+        "accession" : {
+            "accessionType" : "ID"
         },
-        "last_name": {
-            "title": "Last name",
-            "description": "The user's last (family) name.",
-            "type": "string"
-        },
-        "gender": {
-            "title": "Gender",
-            "type": "string"
+        "sex": {
+            "title": "Sex",
+            "type": "string",
+            "enum": [
+                "male",
+                "female",
+                "other",
+                "unknown"
+            ]
         },
         "diseases" : {
             "title" : "Diseases",
@@ -40,10 +39,74 @@
                 "linkTo" : "Disease"
             }
         },
-        "birth_date" : {
-            "title" : "Date of Birth",
-            "type" : "string",
-            "format" : "date"
+        "birth_year" : {
+            "title" : "Year of Birth",
+            "type" : "integer"
+        },
+        "life_status": {
+            "title": "Life Status",
+            "type": "string",
+            "enum": [
+                "alive",
+                "deceased"
+            ]
+        },
+        "ethnicity": {
+            "title": "Ethnicity",
+            "type": "string",
+            "enum": [
+                "asian",
+                "black",
+                "hispanic",
+                "indian",
+                "middle_eastern",
+                "native_american",
+                "pacific_islander",
+                "white",
+                "other"
+            ]
+        },
+        "bgm_id": {
+            "title": "BGM Identifier",
+            "type": "string",
+            "uniqueKey": true
+        },
+        "other_id": {
+            "description": "Non-BGM Identifier",
+            "type": "object",
+            "required": ["id", "id_source"],
+            "properties": {
+                "id": {
+                    "title": "Identifier",
+                    "type": "string",
+                    "uniqueKey": true
+                },
+                "id_source": {
+                    "title": "Source of Identifier",
+                    "type": "string"
+                }
+            }
+        },
+        "clinical_indication": {
+            "title": "Clinical Indication",
+            "description": "Clinical indication for referral",
+            "type": "string",
+            "formInput": "textarea"
+        },
+        "age_of_onset": {
+            "title": "Age of Onset",
+            "type": "string",
+            "enum": [
+                "unknown",
+                "congenital onset",
+                "embryonal onset",
+                "fetal onset",
+                "neonatal onset",
+                "infantile onset",
+                "childhood onset",
+                "juvenile onset",
+                "adult onset"
+            ]
         },
         "related_individuals": {
             "title": "Related Individuals",
@@ -52,6 +115,7 @@
             "items": {
                 "title": "Related Individual",
                 "type": "object",
+                "required": ["related_individual", "relationship_type"],
                 "properties": {
                     "related_individual": {
                         "title": "Individual",
@@ -62,18 +126,8 @@
                         "title": "Relationship Type",
                         "type": "string",
                         "enum": [
-                            "mother",
-                            "father",
                             "parent",
-                            "sister",
-                            "brother",
-                            "sibling",
-                            "daughter",
-                            "son",
-                            "child",
-                            "wife",
-                            "husband",
-                            "partner"
+                            "child"
                         ]
                     }
                 }

@@ -22,14 +22,17 @@
         },
         "title": {
             "title": "Title",
-            "description": "Identifying for this case",
+            "description": "Optional title for this case",
             "type": "string"
         },
-        "proband" : {
-            "title" : "Proband of Case",
-            "description": "Individual who is proband scope of case",
-            "type" : "string",
-            "linkTo" : "Individual"
+        "samples": {
+            "type": "array",
+            "uniqueItems": true,
+            "items" : {
+                "title" : "Sample",
+                "type" : "string",
+                "linkTo" : "Sample"
+            }
         },
         "description": {
             "title": "Description",

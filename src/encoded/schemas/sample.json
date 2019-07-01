@@ -4,7 +4,7 @@
     "id": "/profiles/sample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": ["proband"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -16,11 +16,55 @@
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
+        "accession" : {
+            "accessionType" : "SA"
+        },
         "individual": {
             "title": "Individual",
             "description": "Individual this sample is derived from",
             "type": "string",
             "linkTo": "Individual"
+        },
+        "proband": {
+            "title": "Proband",
+            "description": "Whether this sample represents the proband of the case",
+            "type": "boolean"
+        },
+        "specimen_accession": {
+            "title": "Specimen Accession",
+            "description": "Accession of specimen from sequencing lab",
+            "type": "string",
+            "uniqueKey": true
+        },
+        "specimen_type": {
+            "title": "Specimen Type",
+            "type": "string",
+            "enum": [
+                "blood",
+                "saliva",
+                "tissue"
+            ]
+        },
+        "specimen_accession_date": {
+            "title": "Specimen Accession Date",
+            "description": "Date of specimen accessioning by sequencing lab",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
+        "date_received": {
+            "title": "Date Received in Sequencing Lab",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
+        "sequence_id": {
+            "title": "Sequence Identifier",
+            "type": "string"
         }
     }
 }
