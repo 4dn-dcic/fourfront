@@ -81,7 +81,7 @@ class Individual(Item):
         elif other_id:
             title = '%s (%s)' % (other_id['id'], other_id['id_source'])
         else:
-            title = accesssion
+            title = accession
         return title
 
 
@@ -98,7 +98,7 @@ class Case(Item):
     schema = load_schema('encoded:schemas/case.json')
     embedded_list = [
         'samples.proband',
-        'samples.sample_type',
+        'samples.specimen_type',
         'samples.individual.sex',
         'samples.individual.bgm_id',
         'samples.individual.other_id'
@@ -226,7 +226,6 @@ class Phenotype(Item):
     })
     def associated_diseases(self, request):
         return self.rev_link_atids(request, "associated_diseases")
-
 
     @calculated_property(schema={
         "title": "Display Title",
