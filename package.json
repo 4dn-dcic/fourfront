@@ -92,6 +92,7 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#master",
     "auth0-lock": "^11.16.3",
     "aws-sdk": "^2.421.0",
     "babel-polyfill": "^6.26.0",
@@ -124,7 +125,7 @@
     "react-redux": "^6.0.1",
     "react-sticky": "^6.0.3",
     "react-tooltip": "^3.10.0",
-    "react-transition-group": "^2.7.1",
+    "react-transition-group": "^4.2.0",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.9.1",

@@ -53,6 +53,12 @@ var rules = [
         test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
+            path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components'),
+            // TODO:
+            // Fill this automatically by accessing this config in gulpfile.js and then passing it
+            // dynamically. Do by finding '@hms-dbmi-bgm/shared-portal-components' symlink target location
+            // and if one exists, add to here.
+            path.resolve(__dirname, '../ext-projects/shared-portal-components')
         ],
         use: [
             {
