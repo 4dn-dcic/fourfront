@@ -101,7 +101,7 @@ export class AttributionTabView extends React.PureComponent {
                         <Publications context={context} />
                         <hr className="mt-1 mb-2"/>
                     </div>
-                : null }
+                    : null }
 
                 <div className="row">
 
@@ -110,13 +110,13 @@ export class AttributionTabView extends React.PureComponent {
                             <LabsSection context={context} />
                             { awardExists ? FormattedInfoBlock.Award(award) : null }
                         </div>
-                    : null }
+                        : null }
 
                     { submittedByExists ?
                         <div className={"col-xs-12 col-md-" + (labsExist ? '5' : '12')}>
                             { FormattedInfoBlock.User(submitted_by) }
                         </div>
-                    : null }
+                        : null }
 
                 </div>
 
@@ -157,7 +157,7 @@ class LabsSection extends React.PureComponent {
                 </h5>
                 { contactPersons && contactPersons.length > 0 ?
                     <ul className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</ul>
-                : null }
+                    : null }
             </div>
         );
     }
@@ -174,8 +174,8 @@ class LabsSection extends React.PureComponent {
                 { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, isMounted) : null }
                 { contributingLabs ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
-                        iconClass='user-plus' itemRenderFxn={this.contributingLabRenderFxn} />
-                : null }
+                        iconClass="user-plus" itemRenderFxn={this.contributingLabRenderFxn} />
+                    : null }
                 { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
             </div>
         );
