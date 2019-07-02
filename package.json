@@ -1,5 +1,5 @@
 {
-  "name": "fourfront",
+  "name": "cgap-portal",
   "version": "0.0.0",
   "scripts": {
     "test": "jest",
@@ -21,7 +21,7 @@
   "author": "",
   "license": "MIT",
   "files": [],
-  "repository": "4dn-dcic/fourfront",
+  "repository": "dbmi-bgm/cgap-portal",
   "sideEffects": false,
   "jest": {
     "rootDir": "src/encoded/static",
@@ -120,7 +120,7 @@
     "react-matrix-viz": "^0.2.2",
     "react-redux": "^6.0.1",
     "react-tooltip": "^3.10.0",
-    "react-transition-group": "^2.7.1",
+    "react-transition-group": "^4.2.0",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.9.1",
