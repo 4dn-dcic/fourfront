@@ -112,7 +112,7 @@
             "title": "Slim Branch",
             "description": "If the term is a slim term the value is the slot that the slim is for",
             "type": "string",
-            "enum": ["developmental", "organ", "system", "assay", "cell"]
+            "enum": ["Phenotypic abnormality"]
         }
     },
     "facets": {
@@ -136,6 +136,5 @@
         "source_ontology": {
             "title": "Ontology"
         }
-    },
-    "excludedColumns" : ["lab.display_title"]
+    }
 }

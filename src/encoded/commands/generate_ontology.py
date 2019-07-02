@@ -371,7 +371,7 @@ def get_slim_terms(connection):
     # currently need to hard code the categories of slims but once the ability
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
-    slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
+    slim_categories = ['Phenotypic abnormality']
     search_suffix = 'search/?type=OntologyTerm&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
@@ -699,12 +699,12 @@ def parse_args(args):
                         help="Default False - set True to generate full file to load - do not filter out existing unchanged terms")
     parser.add_argument('--env',
                         default='fourfront-cgap',
-                        help="The environment to use i.e. data, webdev, mastertest.\
-                        Default is 'data')")
+                        help="The environment to use i.e. fourfront-cgap, cgap-test ....\
+                        Default is 'fourfront-cgap')")
     parser.add_argument('--key',
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
-                        {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
+                        {'key'='ABCDEF', 'secret'='supersecret', 'server'='http://fourfront-cgap.9wzadzju3p.us-east-1.elasticbeanstalk.com/'}")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 

@@ -1,0 +1,19 @@
+[
+    {
+        "uuid": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "ontology_name": "Human Phenotype Ontology",
+        "ontology_url": "https://hpo.jax.org/app/",
+        "download_url": "http://purl.obolibrary.org/obo/hp.owl",
+        "namespace_url": "http://purl.obolibrary.org/obo/",
+        "ontology_prefix": "HP",
+        "description": "The Human Phenotype Ontology (HPO) provides a standardized vocabulary of phenotypic abnormalities encountered in human disease. Each term in the HPO describes a phenotypic abnormality, such as Atrial septal defect.",
+        "synonym_terms": ["111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233", "111114bc-8535-4448-903e-854af460a233"],
+        "definition_terms": ["111116bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "096bfe7f-803b-40da-ae1b-b011aa10101b",
+        "ontology_name": "CGAP Controlled Vocabulary",
+        "ontology_prefix": "CGAP",
+        "description": "These are controlled terms that are taken from other ontologies but are not directly part of the main HPO.  They are used for things like synonyms, definitions and relationships"
+    }
+]
