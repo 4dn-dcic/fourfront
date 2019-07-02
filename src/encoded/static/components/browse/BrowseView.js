@@ -5,25 +5,29 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import ReactTooltip from 'react-tooltip';
-import { Button } from 'react-bootstrap';
-import { IndeterminateCheckbox } from './../forms/components/IndeterminateCheckbox';
-import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
-import { Filters, navigate, typedefs } from './../util';
-import { ChartDataController } from './../viz/chart-data-controller';
 
-import { defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from './components/table-commons';
-import { CustomColumnController } from './components/CustomColumnController';
-import { SearchResultTable } from './components/SearchResultTable';
-import { FacetList, performFilteringQuery } from './components/FacetList';
-import { SortController } from './components/SortController';
+import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/IndeterminateCheckbox';
+import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
+import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/CustomColumnController';
+import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultTable';
+import { FacetList, performFilteringQuery } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/FacetList';
+import { SortController } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SortController';
 
-import { SelectedFilesController } from './components/SelectedFilesController';
-import { ExperimentSetDetailPane } from './components/ExperimentSetDetailPane';
-
+// We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
+// We could probably also create different 'browseState' module for it, however.
+import { navigate, typedefs } from './../util';
 
 import { store } from './../../store';
+import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
+import { ChartDataController } from './../viz/chart-data-controller';
+import { columnExtensionMap } from './columnExtensionMap';
+import { SelectedFilesController } from './components/SelectedFilesController';
+import { ExperimentSetDetailPane } from './components/ExperimentSetDetailPane';
 import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';
+
+
+
 
 //import { BROWSE } from './../testdata/browse/4DNESYUY-test';
 //import { BROWSE } from './../testdata/browse/checkboxes';
@@ -137,18 +141,20 @@ class ResultTableContainer extends React.PureComponent {
      * @param {ColumnDefinition} columnExtensionMap - Colummn overrides or extensions from props.
      * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
      */
-    static colDefOverrides = memoize(function(selectedFiles, columnExtensionMap, selectFile, unselectFile){
+    static colDefOverrides = memoize(function(selectedFiles, propColumnExtensionMap, selectFile, unselectFile){
         if (typeof selectedFiles === 'undefined'){
             // We don't need to add checkbox(es) for file selection.
-            return columnExtensionMap || null;
+            return propColumnExtensionMap || null;
         }
 
         // Add Checkboxes
-        return _.extend({}, columnExtensionMap, {
-            'display_title' : _.extend({}, defaultColumnExtensionMap.display_title, {
+        return _.extend({}, propColumnExtensionMap, {
+            // We extend the display_title of global constant columnExtensionMap, not the propColumnExtensionMap,
+            // incase the prop version's render fxn is different than what we expect.
+            'display_title' : _.extend({}, columnExtensionMap.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
                 'render' : (expSet, columnDefinition, paneProps, width) => {
-                    var origTitleBlock          = defaultColumnExtensionMap.display_title.render(expSet, columnDefinition, paneProps, width),
+                    var origTitleBlock          = columnExtensionMap.display_title.render(expSet, columnDefinition, paneProps, width),
                         newChildren             = origTitleBlock.props.children.slice(0);
 
                     newChildren[2] = newChildren[1];
@@ -176,7 +182,7 @@ class ResultTableContainer extends React.PureComponent {
         'href'      : '/browse/',
         'debug'     : false,
         'navigate'  : navigate,
-        'columnExtensionMap' : defaultColumnExtensionMap
+        'columnExtensionMap' : columnExtensionMap
     };
 
     constructor(props){
@@ -219,7 +225,7 @@ class ResultTableContainer extends React.PureComponent {
     }
 
     isTermSelected(term, facet){
-        return Filters.determineIfTermFacetSelected(term, facet, this.props);
+        return searchFilters.determineIfTermFacetSelected(term, facet, this.props);
     }
 
     handleClearFilters(evt){
@@ -241,7 +247,7 @@ class ResultTableContainer extends React.PureComponent {
             context, href, countExternalSets, session, browseBaseState, schemas, windowHeight,
             totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets
         } = this.props;
-        const showClearFiltersButton = _.keys(Filters.currentExpSetFilters() || {}).length > 0;
+        const showClearFiltersButton = _.keys(searchFilters.contextFiltersToExpSetFilters(context && context.filters) || {}).length > 0;
         const columnDefinitions = this.getColumnDefinitions();
 
         return (
@@ -522,9 +528,10 @@ export default class BrowseView extends React.Component {
                         }
                         { browseBaseState !== 'all' && countExternalSets > 0 ?
                             <div className="mb-10 mt-1">
-                                <Button bsSize="large" bsStyle="primary" className="text-400 inline-block clickable in-stacked-table-button" data-tip="Keep current filters and browse External data" onClick={browseExternalData}>
+                                <button type="button" className="btn btn-primary text-400 inline-block clickable in-stacked-table-button"
+                                    onClick={browseExternalData} data-tip="Keep current filters and browse External data">
                                     Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
-                                </Button>
+                                </button>
                             </div>
                             : null }
                         <hr/>

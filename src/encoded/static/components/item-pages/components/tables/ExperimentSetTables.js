@@ -4,10 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
-import { defaultColumnExtensionMap } from './../../../browse/components/table-commons';
+import { columnExtensionMap } from './../../../browse/columnExtensionMap';
 import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
-import { console } from './../../../util';
+
 
 
 export class ExperimentSetTables extends React.PureComponent {
@@ -87,7 +88,7 @@ export class ExperimentSetTables extends React.PureComponent {
                         "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
                         "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
                         "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-                        "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
+                        "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
                     }}
                     {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')}
                 />

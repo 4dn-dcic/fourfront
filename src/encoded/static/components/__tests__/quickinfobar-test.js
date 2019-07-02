@@ -13,16 +13,16 @@ jest.dontMock('underscore');
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
+import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 
 
 describe('Testing viz/QuickInfoBar.js', function() {
-    var page, context, Filters, Wrapper, QuickInfoBar, href, expSetFilters, contextFilters, barplot_data_unfiltered, barplot_data_filtered;
+    var page, context, Wrapper, QuickInfoBar, href, expSetFilters, contextFilters, barplot_data_unfiltered, barplot_data_filtered;
 
     beforeEach(function() {
         var { Provider, connect } = require('react-redux');
-        Filters = require('./../util/experiments-filters');
         context = require('../testdata/browse/context');
         QuickInfoBar = require('./../viz/QuickInfoBar').default;
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.biosource.individual.organism.name=mouse&experiments_in_set.biosample.biosource.biosource_type=immortalized+cell+line";
@@ -103,7 +103,7 @@ describe('Testing viz/QuickInfoBar.js', function() {
 
         var crumbs = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-crumb');
 
-        var filterTerms = _.reduce(_.values(Filters.contextFiltersToExpSetFilters(contextFilters)), function(m,v){ return m.concat(Array.from(v.values())); }, []);
+        var filterTerms = _.reduce(_.values(searchFilters.contextFiltersToExpSetFilters(contextFilters)), function(m,v){ return m.concat(Array.from(v.values())); }, []);
 
         console.log("Testing for presence of terms in ActiveFiltersBar: ", filterTerms.join(', '));
         crumbs.forEach(function(c,i){

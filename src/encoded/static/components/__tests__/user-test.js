@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
+import { object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /* Basing off of browse.js to test user.js */
 
@@ -19,13 +20,12 @@ function mapStateToProps(store) {
 }
 
 describe('Testing user.js', function() {
-    var  User, user, testItem, page, store, context, filters, Wrapper, sinon, getNestedProperty, props;
+    var  User, user, testItem, page, store, context, filters, Wrapper, sinon, props;
     beforeAll(function() {
         var { Provider, connect } = require('react-redux');
         User = require('./../item-pages/UserView').default;
         context = require('../testdata/submitter');
         store = require('../../store').store;
-        getNestedProperty = require('../util').object.getNestedProperty;
         var dispatch_vals = {
             'context' : context
         };
@@ -182,7 +182,7 @@ describe('Testing user.js', function() {
 
                 // Make sure value is now up-to-date in Redux store/context
                 var updatedContext = store.getState().context;
-                var updatedValueInContext = getNestedProperty(updatedContext,inputFieldID);
+                var updatedValueInContext = object.getNestedProperty(updatedContext,inputFieldID);
                 expect(updatedValueInContext).toBe(finalVal);
             }
 

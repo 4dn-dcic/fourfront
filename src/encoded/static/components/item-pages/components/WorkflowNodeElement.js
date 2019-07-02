@@ -2,12 +2,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { console, Schemas, fileUtil, object, expFxn } from './../../util';
 import _ from 'underscore';
-import { requestAnimationFrame } from './../../viz/utilities';
+import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../../util';
 import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
 
 
+/** TODO codify what we want shown here and cleanup code */
 
 export class WorkflowNodeElement extends React.PureComponent {
 
@@ -153,7 +154,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         // If file, and has file-size, add it (idk, why not)
         var fileSize = hasRunDataFile && typeof node.meta.run_data.file.file_size === 'number' && node.meta.run_data.file.file_size;
         if (fileSize){
-            output += '<div class="mb-05"><span class="text-300">Size:</span> ' + Schemas.Term.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
+            output += '<div class="mb-05"><span class="text-300">Size:</span> ' + valueTransforms.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
         }
 
         // Workflow name, if any
@@ -224,13 +225,13 @@ export class WorkflowNodeElement extends React.PureComponent {
         // If Analysis Step (---  this case is unused since node.meta.workflow.steps is used up above?)
         if (node.nodeType === 'step' && node.meta.uuid){
             if (node.meta.uuid && Array.isArray(node.meta.analysis_step_types) && node.meta.analysis_step_types.length > 0){
-                return <div {...elemProps}>{  _.map(node.meta.analysis_step_types, Schemas.Term.capitalize).join(', ') }</div>;
+                return <div {...elemProps}>{  _.map(node.meta.analysis_step_types, valueTransforms.capitalize).join(', ') }</div>;
             }
             if (node.meta.workflow && Array.isArray(node.meta.workflow.experiment_types) && node.meta.workflow.experiment_types.length > 0){
                 // Currently these are strings but might change to linkTo Item in near future(s).
                 // TODO: Remove this block once is never string
                 if (typeof node.meta.workflow.experiment_types[0] === 'string'){
-                    return <div {...elemProps}>{  _.map(node.meta.workflow.experiment_types, Schemas.Term.capitalize).join(', ') }</div>;
+                    return <div {...elemProps}>{  _.map(node.meta.workflow.experiment_types, valueTransforms.capitalize).join(', ') }</div>;
                 }
                 return <div {...elemProps}>{ _.map(node.meta.workflow.experiment_types, expFxn.getExperimentTypeStr).join(', ') }</div>;
             }
@@ -248,7 +249,7 @@ export class WorkflowNodeElement extends React.PureComponent {
 
         // Default-ish for IO node
         if (typeof node.ioType === 'string') {
-            return <div {...elemProps}>{ Schemas.Term.capitalize(node.ioType) }</div>;
+            return <div {...elemProps}>{ valueTransforms.capitalize(node.ioType) }</div>;
         }
 
         return null;
@@ -334,10 +335,12 @@ export class WorkflowNodeElement extends React.PureComponent {
 
         if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
             var file = node.meta.run_data.file;
-            return <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
-                { this.icon() }
-                { typeof file === 'string' ? node.ioType : file.accession || file.display_title }
-            </span>;
+            return (
+                <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
+                    { this.icon() }
+                    { typeof file === 'string' ? node.ioType : file.accession || file.display_title }
+                </span>
+            );
         }
 
         if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){

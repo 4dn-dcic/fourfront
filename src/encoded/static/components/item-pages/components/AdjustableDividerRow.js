@@ -4,31 +4,28 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
-import { console, layout } from './../../util';
-import { requestAnimationFrame } from './../../viz/utilities';
+import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 
 
-export class DraggableVerticalBorder extends React.PureComponent {
-
-    static defaultProps = {
-        'handleHeight' : 24
-    };
-
-    render(){
-        var { xOffset, height, left, handleHeight } = this.props;
-        return (
-            <Draggable axis="x" position={{ 'x': xOffset, 'y': 0 }} {..._.pick(this.props, 'onStart', 'onStop', 'onDrag', 'bounds')}>
-                <div className="draggable-border vertical-border" style={{ 'height' : height, 'left': left - 5 }}>
-                    <div className="inner">
-                        <div className="drag-handle" style={{ 'height' : handleHeight, 'top' : (Math.max(height - handleHeight, 10) / 2) }}/>
-                    </div>
+export const DraggableVerticalBorder = React.memo(function DraggableVerticalBorder(props){
+    const { xOffset, height, left, handleHeight } = props;
+    return (
+        <Draggable axis="x" position={{ 'x': xOffset, 'y': 0 }} {..._.pick(props, 'onStart', 'onStop', 'onDrag', 'bounds')}>
+            <div className="draggable-border vertical-border" style={{ 'height' : height, 'left': left - 5 }}>
+                <div className="inner">
+                    <div className="drag-handle" style={{ 'height' : handleHeight, 'top' : (Math.max(height - handleHeight, 10) / 2) }}/>
                 </div>
-            </Draggable>
-        );
-    }
-}
+            </div>
+        </Draggable>
+    );
+});
+DraggableVerticalBorder.defaultProps = {
+    'handleHeight' : 24
+};
 
 
+/** This is pretty ugly. @todo refactor, reimplement, something... */
 export class AdjustableDividerRow extends React.PureComponent {
 
     static defaultProps = {
@@ -139,8 +136,8 @@ export class AdjustableDividerRow extends React.PureComponent {
     }
 
     handleDrag(evt, data){
-        requestAnimationFrame(()=>{
-            this.setState({ 'xOffset' : data.x }, (this.props && this.props.onDrag));
+        raf(()=>{
+            this.setState({ 'xOffset' : data.x }, this.props.onDrag);
         });
     }
 

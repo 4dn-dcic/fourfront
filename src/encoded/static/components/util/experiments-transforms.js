@@ -1,13 +1,12 @@
 'use strict';
 
 import _ from 'underscore';
-import { atIdFromObject } from './object';
-import patchedConsoleInstance from './patched-console';
+import { atIdFromObject } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/object';
+import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/patched-console';
 
 // eslint-disable-next-line no-unused-vars
 import { Item, File, Experiment, ExperimentSet } from './typedefs';
 
-var console = patchedConsoleInstance;
 
 
 

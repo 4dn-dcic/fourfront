@@ -4,9 +4,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import Alerts from './alerts';
+
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 import { content_views } from './globals';
-import { console, object, Schemas, JWT, layout, DateUtility, typedefs, itemTypeHierarchy } from './util';
+import { typedefs, itemTypeHierarchy } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
 
@@ -36,8 +40,8 @@ const TITLE_PATHNAME_MAP = {
             if (currentAction === 'selection') return 'Selecting';
             return 'Search';
         },
-        'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction){
-            var thisTypeTitle = Schemas.getSchemaTypeFromSearchContext(context);
+        'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
+            var thisTypeTitle = schemaTransforms.getSchemaTypeFromSearchContext(context, schemas);
             return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){
@@ -157,7 +161,7 @@ export default class PageTitle extends React.PureComponent {
             if (currentAction === 'create') {
                 return {
                     'title' : "Creating",
-                    'calloutTitle' : Schemas.getItemTypeTitle(context, schemas) // Create is called from current item view.
+                    'calloutTitle' : schemaTransforms.getItemTypeTitle(context, schemas) // Create is called from current item view.
                 };
             }
 
@@ -166,7 +170,7 @@ export default class PageTitle extends React.PureComponent {
                     'title' : "Creating",
                     'calloutTitle' : (
                         currentPathName.indexOf('/search/') > -1 ?
-                            Schemas.getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas)
+                            Schemas.getSchemaTypeFromSearchContext(context) : schemaTransforms.getItemTypeTitle(context, schemas)
                     )
                 };
             }
@@ -188,7 +192,7 @@ export default class PageTitle extends React.PureComponent {
 
         function getProp(prop){
             if (typeof prop === 'string') return prop;
-            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction);
+            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction, schemas);
             return prop;
         }
 
@@ -208,7 +212,7 @@ export default class PageTitle extends React.PureComponent {
         if (object.isAnItem(context)){ // If Item
 
             title = object.itemUtil.getTitleStringFromContext(context);
-            var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
+            var itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
 
             // Handle long title strings by Item type
             if (itemTypeTitle === 'Publication'){
@@ -234,7 +238,7 @@ export default class PageTitle extends React.PureComponent {
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
             } else {
                 if (title.indexOf(context['@type'][0] + ' from ') === 0){ // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
-                    title = (context.date_created && <span>from <DateUtility.LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
+                    title = (context.date_created && <span>from <LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
                 }
                 // Check if long title & no 'typeInfo' text right under it from Item page -- if so: render it _under_ Type title instead of to the right of it.
                 var viewForItem = content_views.lookup(context, null);

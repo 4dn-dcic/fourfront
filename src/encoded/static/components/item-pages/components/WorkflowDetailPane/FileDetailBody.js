@@ -3,15 +3,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Fade, Button } from 'react-bootstrap';
-import { console, object, layout, ajax, fileUtil, expFxn } from './../../../util';
-import { FlexibleDescriptionBox } from './../FlexibleDescriptionBox';
+
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { fileUtil, expFxn } from './../../../util';
+
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+
 import { SimpleFilesTable } from './../tables/SimpleFilesTable';
-import { ItemDetailList } from './../ItemDetailList';
 import { ExperimentSetTablesLoaded } from './../tables/ExperimentSetTables';
 import { ViewMetricButton, MetricsView } from './FileDetailBodyMetricsView';
 import { WorkflowNodeElement } from './../WorkflowNodeElement';
-
 
 
 
@@ -27,7 +29,7 @@ export class FileDetailBody extends React.PureComponent {
     };
 
     doesDescriptionOrNotesExist(){
-        var file = this.props.file;
+        const { file } = this.props;
         return !!(file.description || file.notes || false);
     }
 

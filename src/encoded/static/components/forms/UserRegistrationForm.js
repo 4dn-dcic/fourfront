@@ -5,9 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
 import memoize from 'memoize-one';
-import { Button, FormGroup, ControlLabel, FormControl, HelpBlock, Alert, Collapse } from 'react-bootstrap';
-import { console, object, ajax, JWT, analytics } from './../util';
-import { LinkToSelector } from './components/LinkToSelector';
+import { FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
+
+import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
 
 
 export default class UserRegistrationForm extends React.PureComponent {
@@ -228,9 +230,9 @@ export default class UserRegistrationForm extends React.PureComponent {
         if (registrationStatus === 'network-failure'){
             // TODO: Hide form in this case?
             errorIndicator = (
-                <Alert bsStyle="danger">
+                <div className="alert alert-danger" role="alert">
                     <span className="text-500">Failed to register new account. Please try again later.</span>
-                </Alert>
+                </div>
             );
         } else if (registrationStatus === 'loading' || registrationStatus === 'success-loading'){
             loadingIndicator = (
@@ -250,12 +252,12 @@ export default class UserRegistrationForm extends React.PureComponent {
             );
         } else if (registrationStatus === 'success' || registrationStatus === 'success-loading'){
             errorIndicator = (
-                <Alert bsStyle="success">
+                <div className="alert alert-success" role="alert">
                     <span className="text-500">
                         <i className="icon icon-fw icon-circle-o-notch"/>&nbsp;&nbsp;{' '}
                         Registered account, logging in...
                     </span>
-                </Alert>
+                </div>
             );
         }
 
@@ -321,9 +323,9 @@ export default class UserRegistrationForm extends React.PureComponent {
                     </div>
 
                     <div className="clearfix">
-                        <Button type="submit" disabled={!(maySubmit)} className="right text-300 btn-block mt-2" bsSize="lg" bsStyle="primary">
+                        <button type="submit" disabled={!(maySubmit)} className="btn btn-lg btn-primary right text-300 btn-block mt-2">
                             Sign Up
-                        </Button>
+                        </button>
                     </div>
                 </form>
 
@@ -420,13 +422,13 @@ class LookupLabField extends React.PureComponent {
                     { currLabTitle }
                     <div className="field-buttons">
                         { currentLabDetails && currentLabDetails['@id'] ?
-                            <Button onClick={onClear} className="mr-05">
+                            <button type="button" onClick={onClear} className="btn btn-secondary mr-05">
                                 Clear
-                            </Button>
+                            </button>
                             : null }
-                        <Button className="btn-primary" onClick={this.setIsSelecting} disabled={loading || isSelecting} data-tip={tooltip}>
+                        <button type="button" className="btn btn-primary" onClick={this.setIsSelecting} disabled={loading || isSelecting} data-tip={tooltip}>
                             Select
-                        </Button>
+                        </button>
                     </div>
                 </div>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />

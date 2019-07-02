@@ -3,10 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
-import { FlexibleDescriptionBox } from './../../item-pages/components/FlexibleDescriptionBox';
-import { expFxn, layout, object } from './../../util';
+import { expFxn } from './../../util';
 import { SelectedFilesController } from './SelectedFilesController';
 
 export class ExperimentSetDetailPane extends React.PureComponent {

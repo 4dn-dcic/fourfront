@@ -6,11 +6,12 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
-import { object, ajax, Schemas, layout, isServerSide } from './../../../util';
+import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './../../../browse/components/table-commons';
-import { SearchResultDetailPane } from './../../../browse/components/SearchResultDetailPane';
+    HeadersRow, TableRowToggleOpenButton
+} from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
+import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultDetailPane';
 
 
 /** @todo - refactor. Not too important since parent components almost always a PureComponent so perf gain would b minimal */
@@ -48,7 +49,7 @@ export class ItemPageTable extends React.Component {
 
                     var typeTitle = null;
                     if (!props.hideTypeTitle){
-                        typeTitle = Schemas.getItemTypeTitle(result);
+                        typeTitle = schemaTransforms.getItemTypeTitle(result);
                         if (typeof typeTitle === 'string'){
                             typeTitle += ' ';
                         }
