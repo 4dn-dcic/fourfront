@@ -13,14 +13,54 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/attribution" }
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/accession"}
     ],
     "properties": {
+        "accession" : {
+            "accessionType" : "SA"
+        },
         "individual": {
             "title": "Individual",
             "description": "Individual this sample is derived from",
             "type": "string",
             "linkTo": "Individual"
+        },
+        "specimen_accession": {
+            "title": "Specimen Accession",
+            "description": "Accession of specimen from sequencing lab",
+            "type": "string",
+            "uniqueKey": true
+        },
+        "specimen_type": {
+            "title": "Specimen Type",
+            "type": "string",
+            "enum": [
+                "blood",
+                "saliva",
+                "tissue"
+            ]
+        },
+        "specimen_accession_date": {
+            "title": "Specimen Accession Date",
+            "description": "Date of specimen accessioning by sequencing lab",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
+        "date_received": {
+            "title": "Date Received in Sequencing Lab",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
+        "sequence_id": {
+            "title": "Sequence Identifier",
+            "type": "string"
         }
     }
 }

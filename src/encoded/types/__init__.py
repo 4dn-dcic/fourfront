@@ -24,121 +24,125 @@ def includeme(config):
     config.scan()
 
 
-
-
 @collection(
     name='individuals',
+    unique_key='accession',
     properties={
         'title': 'Individuals',
         'description': 'Listing of Individuals',
     })
 class Individual(Item):
     item_type = 'individual'
+    name_key = 'accession'
     schema = load_schema('encoded:schemas/individual.json')
 
     embedded_list = []
 
-    rev = {
-        'cases_proband': ('Case', 'proband'),
-        'cases_affiliate' : ('Case', 'trio.individual')
-    }
+    # rev = {
+    #     'cases_proband': ('Case', 'proband'),
+    #     'cases_affiliate' : ('Case', 'trio.individual')
+    # }
 
-    #@calculated_property(schema=display_title_schema)
-    #def display_title(self, first_name, last_name):
-    #    """return first and last name."""
-    #    title = u'{} {}'.format(first_name, last_name)
-    #    return title
+    # @calculated_property(schema={
+    #     "title": "Cases (proband)",
+    #     "description": "Cases that this individual is a proband of",
+    #     "type": "array",
+    #     "items": {
+    #         "title": "Case",
+    #         "type": "string",
+    #         "linkTo": "Case"
+    #     }
+    # })
+    # def cases_proband(self, request):
+    #     return self.rev_link_atids(request, "cases_proband")
 
-    @calculated_property(schema={
-        "title": "Cases (proband)",
-        "description": "Cases that this individual is a proband of",
-        "type": "array",
-        "items": {
-            "title": "Case",
-            "type": "string",
-            "linkTo": "Case"
-        }
-    })
-    def cases_proband(self, request):
-        return self.rev_link_atids(request, "cases_proband")
-
-    @calculated_property(schema={
-        "title": "Cases (affiliated)",
-        "description": "Cases that this individual is affiliated with",
-        "type": "array",
-        "items": {
-            "title": "Case",
-            "type": "string",
-            "linkTo": "Case"
-        }
-    })
-    def cases_affiliate(self, request):
-        return self.rev_link_atids(request, "cases_affiliate")
-
+    # @calculated_property(schema={
+    #     "title": "Cases (affiliated)",
+    #     "description": "Cases that this individual is affiliated with",
+    #     "type": "array",
+    #     "items": {
+    #         "title": "Case",
+    #         "type": "string",
+    #         "linkTo": "Case"
+    #     }
+    # })
+    # def cases_affiliate(self, request):
+    #     return self.rev_link_atids(request, "cases_affiliate")
 
     @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, first_name, last_name):
-        """return first and last name."""
-        title = u'{} {}'.format(first_name, last_name)
+    def display_title(self, accession, bgm_id=None, other_id=None):
+        """Use bgm_id, other_id, or accession (in that order)"""
+        if bgm_id:
+            title = bgm_id
+        elif other_id:
+            title = '%s (%s)' % (other_id['id'], other_id['id_source'])
+        else:
+            title = accession
         return title
-
-
 
 
 @collection(
     name='cases',
+    unique_key='accession',
     properties={
         'title': 'Cases',
         'description': 'Listing of Cases',
     })
 class Case(Item):
     item_type = 'case'
+    name_key = 'accession'
     schema = load_schema('encoded:schemas/case.json')
-    embedded_list = []
+    embedded_list = [
+        'samples.proband',
+        'samples.specimen_type',
+        'samples.individual.sex',
+        'samples.individual.bgm_id',
+        'samples.individual.other_id'
+    ]
 
-    @calculated_property(schema={
-        "title" : "Family Trio",
-        "type" : "array",
-        "items" : {
-            "type" : "object",
-            "title" : "Trio Relationship",
-            "properties" : {
-                "individual": {
-                    "title": "Individual",
-                    "type": "string",
-                    "linkTo": "Individual"
-                },
-                "relationship_type": {
-                    "title": "Relationship Type",
-                    "type": "string"
-                }
-            }
-        }
-    })
-    def trio(self, request, proband=None):
-        if not proband:
-            return []
-        individual_list = [{ "individual" : proband, "relationship_type" : "self" }]
-        proband_object = get_item_if_you_can(request, proband, "Individual")
-        for relation in proband_object.get("related_individuals", []):
-            if relation["relationship_type"] in ["mother", "father", "parent"]:
-                relationship_type = relation["relationship_type"]
-                if relationship_type == "parent": # no gender defined
-                    related_individual_object = get_item_if_you_can(request, relation['related_individual'], "Individual")
-                    related_individual_gender = related_individual_object.get("gender")
-                    if related_individual_gender == "male":
-                        relationship_type = "father"
-                    elif related_individual_gender == "female":
-                        relationship_type = "mother"
-                individual_list.append({
-                    "individual" : relation['related_individual'],
-                    "relationship_type" : relationship_type
-                })
-        return individual_list
+    # @calculated_property(schema={
+    #     "title" : "Family Trio",
+    #     "type" : "array",
+    #     "items" : {
+    #         "type" : "object",
+    #         "title" : "Trio Relationship",
+    #         "properties" : {
+    #             "individual": {
+    #                 "title": "Individual",
+    #                 "type": "string",
+    #                 "linkTo": "Individual"
+    #             },
+    #             "relationship_type": {
+    #                 "title": "Relationship Type",
+    #                 "type": "string"
+    #             }
+    #         }
+    #     }
+    # })
+    # def trio(self, request, proband=None):
+    #     if not proband:
+    #         return []
+    #     individual_list = [{ "individual" : proband, "relationship_type" : "self" }]
+    #     proband_object = get_item_if_you_can(request, proband, "Individual")
+    #     for relation in proband_object.get("related_individuals", []):
+    #         if relation["relationship_type"] in ["mother", "father", "parent"]:
+    #             relationship_type = relation["relationship_type"]
+    #             if relationship_type == "parent": # no gender defined
+    #                 related_individual_object = get_item_if_you_can(request, relation['related_individual'], "Individual")
+    #                 related_individual_gender = related_individual_object.get("gender")
+    #                 if related_individual_gender == "male":
+    #                     relationship_type = "father"
+    #                 elif related_individual_gender == "female":
+    #                     relationship_type = "mother"
+    #             individual_list.append({
+    #                 "individual" : relation['related_individual'],
+    #                 "relationship_type" : relationship_type
+    #             })
+    #     return individual_list
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -149,24 +153,22 @@ class Case(Item):
         return title
 
 
-
-
 @collection(
     name='samples',
+    unique_key='accession',
     properties={
         'title': 'Samples',
         'description': 'Listing of Samples',
     })
 class Sample(Item):
     item_type = 'sample'
+    name_key = 'accession'
     schema = load_schema('encoded:schemas/sample.json')
-
     embedded_list = [
-        "individual.display_title",
-        "individual.gender"
+        "individual.sex",
+        "individual.bgm_id",
+        "individual.other_id"
     ]
-
-
 
 
 @collection(
@@ -178,6 +180,11 @@ class Sample(Item):
 class Disease(Item):
     item_type = 'disease'
     schema = load_schema('encoded:schemas/disease.json')
+    embedded_list = [
+        'associated_phenotypes.term_name',
+        'associated_phenotypes.term_id',
+        'associated_phenotypes.definition'
+    ]
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -188,6 +195,45 @@ class Disease(Item):
         return term_name
 
 
+@collection(
+    name='phenotypes',
+    properties={
+        'title': 'Phenotypes',
+        'description': 'Listing of Phenotypes',
+    })
+class Phenotype(Item):
+    item_type = 'phenotype'
+    schema = load_schema('encoded:schemas/phenotype.json')
+    rev = {
+        'associated_diseases': ('Disease', 'associated_phenotypes')
+    }
+    embedded_list = [
+        'associated_diseases.term_name',
+        'associated_diseases.term_id',
+        'associated_diseases.associated_genes'
+    ]
+
+    @calculated_property(schema={
+        "title": "Associated Diseases",
+        "description": "Diseases associated with this phenotype",
+        "type": "array",
+        "exclude_from": ["submit4dn", "FFedit-create"],
+        "items": {
+            "title": "Disease",
+            "type": "string",
+            "linkTo": "Disease"
+        }
+    })
+    def associated_diseases(self, request):
+        return self.rev_link_atids(request, "associated_diseases")
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, term_name):
+        return term_name
 
 
 @collection(
@@ -215,8 +261,6 @@ class Document(ItemWithAttachment, Item):
         return Item.display_title(self)
 
 
-
-
 @collection(
     name='sysinfos',
     unique_key='sysinfo:name',
@@ -231,8 +275,6 @@ class Sysinfo(Item):
     schema = load_schema('encoded:schemas/sysinfo.json')
     name_key = 'name'
     embedded_list = []
-
-
 
 
 @collection(

@@ -63,7 +63,7 @@ def groupfinder(login, request):
     if submits_for:
         principals.append('group.submitter')
 
-    # user role
+    # user role. should always be present
     user_role = user_properties.get('role')
     if user_role:
         principals.append('user_role.%s' % user_role)
