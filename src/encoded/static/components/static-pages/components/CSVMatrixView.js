@@ -1,10 +1,11 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
-import MatrixView, {  } from './../../viz/MatrixView';
+import React from 'react';
+import _ from 'underscore';
+import MatrixView from './../../viz/MatrixView';
 import * as d3 from 'd3';
-var { console } = require('./../../util');
+
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 export const CSVParsingUtilities = {

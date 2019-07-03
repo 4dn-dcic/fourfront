@@ -4,11 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { DropdownItem } from './../../forms/components/DropdownButton';
 import { Nav, NavDropdown } from 'react-bootstrap';
-import { JWT, isServerSide, navigate, object } from './../../util';
+
+import { DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/LoginController';
+
 import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
-import { LoginController, LogoutController } from './LoginController';
+
 
 
 /**

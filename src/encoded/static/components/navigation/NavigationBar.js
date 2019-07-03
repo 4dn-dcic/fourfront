@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
-import { console, ajax } from './../util';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { productionHost } from './../globals';
 import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, getActionURL } from './components';

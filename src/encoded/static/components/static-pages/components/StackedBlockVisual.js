@@ -4,9 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
-import ReactTooltip from 'react-tooltip';
-import { console, object } from'./../../util';
+import { OverlayTrigger } from 'react-bootstrap';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 export function groupByMultiple(objList, propertiesList){

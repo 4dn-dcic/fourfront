@@ -3,9 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
-import { object, analytics, isServerSide } from './../../util';
-import { BasicStaticSectionBody } from './BasicStaticSectionBody';
+import { object, analytics, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
@@ -83,11 +82,11 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
     const btnProps = {
         'href'      : object.itemUtil.atId(context),
         'data-tip'  : "Open HiGlass display to add other data",
-        'className' : 'pull-right extra-info-higlass-btn'
+        'className' : 'btn btn-outline-dark pull-right extra-info-higlass-btn'
     };
 
     if (parentComponentType === BasicUserContentBody) {
-        btnProps.bsSize = 'sm';
+        btnProps.className += ' btn-sm';
     }
 
     return (
@@ -97,10 +96,10 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
                 { showDescription ? context.description : null }
             </div>
             <div className="btn-container">
-                <Button {...btnProps}>
+                <button type="button" {...btnProps}>
                     <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                     Explore Data
-                </Button>
+                </button>
             </div>
         </div>
     );

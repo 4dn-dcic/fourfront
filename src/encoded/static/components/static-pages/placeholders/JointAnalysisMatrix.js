@@ -6,7 +6,8 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import { Popover, Button } from 'react-bootstrap';
-import { console, object, ajax } from'./../../util';
+
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { StackedBlockVisual } from './../components';
 
 

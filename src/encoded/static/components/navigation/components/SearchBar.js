@@ -4,9 +4,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { DropdownItem, DropdownButton } from './../../forms/components/DropdownButton';
-import { Fade } from 'react-bootstrap';
-import { console, navigate, Filters } from './../../util';
+import { DropdownItem, DropdownButton } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
+import { console, navigate, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 
 
 export class SearchBar extends React.PureComponent{
@@ -36,7 +37,7 @@ export class SearchBar extends React.PureComponent{
 
         var initialQuery = '';
         if (props.href){
-            initialQuery = Filters.searchQueryStringFromHref(props.href) || '';
+            initialQuery = searchFilters.searchQueryStringFromHref(props.href) || '';
         }
         this.state = {
             'searchAllItems'    : props.href && navigate.isSearchHref(props.href),
@@ -46,7 +47,7 @@ export class SearchBar extends React.PureComponent{
 
     componentWillReceiveProps(nextProps){
         if (nextProps.href !== this.props.href){
-            var query = Filters.searchQueryStringFromHref(nextProps.href) || '';
+            var query = searchFilters.searchQueryStringFromHref(nextProps.href) || '';
             if (query !== this.state.typedSearchQuery){
                 this.setState({ 'typedSearchQuery' : query });
             }
@@ -87,7 +88,7 @@ export class SearchBar extends React.PureComponent{
     }
 
     onSearchInputBlur(e){
-        var lastQuery = Filters.searchQueryStringFromHref(this.props.href);
+        var lastQuery = searchFilters.searchQueryStringFromHref(this.props.href);
         if (this.hasInput(lastQuery) && !this.hasInput(this.state.typedSearchQuery)) {
             this.setState({ 'typedSearchQuery' : lastQuery });
         }

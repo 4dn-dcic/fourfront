@@ -4,8 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { NavItem } from 'react-bootstrap';
-import { DropdownItem } from './../../forms/components/DropdownButton';
-import { layout } from './../../util';
+
+import { DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserRegistrationModal } from './UserRegistrationModal';
 
 
