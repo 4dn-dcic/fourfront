@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import { Fade } from 'react-bootstrap';
-import { console, isServerSide } from './../../util';
+import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
+import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import StateContainer from './StateContainer';
 import ScrollContainer from './ScrollContainer';
@@ -17,7 +17,7 @@ import { DefaultNodeElement } from './Node';
 
 /**
  * Primary/entry component for the Workflow graph.
- * 
+ *
  * @class Graph
  * @prop {Object[]}     nodes                   Array of node objects to plot. Both nodes and edges can be generated from a CWL-like structure using static functions, including the provided 'parseAnalysisSteps'. See propTypes in class def below for object structure.
  * @prop {Object[]}     edges                   Array of edge objects to plot. See propTypes in class def below for object structure.
@@ -110,12 +110,12 @@ export default class Graph extends React.Component {
         }
         return Math.max(
             _(nodes).chain()
-            .groupBy('column')
-            .pairs()
-            .reduce(function(maxCount, nodeSet){
-                return Math.max(nodeSet[1].length, maxCount);
-            }, 0)
-            .value() * (rowSpacing) - rowSpacing,
+                .groupBy('column')
+                .pairs()
+                .reduce(function(maxCount, nodeSet){
+                    return Math.max(nodeSet[1].length, maxCount);
+                }, 0)
+                .value() * (rowSpacing) - rowSpacing,
             minimumHeight
         );
     });

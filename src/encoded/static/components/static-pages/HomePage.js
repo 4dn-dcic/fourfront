@@ -3,9 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, navigate } from'./../util';
-import { requestAnimationFrame } from './../viz/utilities';
-import { Collapse, Button } from 'react-bootstrap';
+
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { navigate } from'./../util';
+
 import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
 
 

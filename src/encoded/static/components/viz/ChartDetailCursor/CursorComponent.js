@@ -3,8 +3,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import * as vizUtil from '../utilities';
-import { console, object, isServerSide, layout } from './../../util';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /**
  * @typedef {Object} Offset
@@ -35,18 +35,18 @@ class CursorContent extends React.Component {
     }
 
     render(){
-        if (!this.props.isVisible || !this.props.children) return null;
-
+        const { isVisible, children, className, sticky, width, height, x, y, cursorOffset, onRightSide, pointerStyle } = this.props;
+        if (!isVisible || !children) return null;
+        const cls = 'cursor-component-container ' + (className || '') + (sticky ? ' sticky' : '');
         return (
             <div
-                className={'cursor-component-container ' + (this.props.className || '') + (this.props.sticky ? ' sticky' : '')}
+                className={cls}
                 style={{
-                    display: this.props.isVisible ? 'block' : 'none',
-                    width: this.props.width,
-                    height: this.props.height,
-                    transform : vizUtil.style.translate3d(this.props.x, this.props.y),
-                    marginLeft: -(this.props.width / 2) + ((this.props.onRightSide ? -1 : 1) * this.props.cursorOffset.x),
-                    marginTop: -(this.props.height / 2) + this.props.cursorOffset.y,
+                    width, height,
+                    display: isVisible ? 'block' : 'none',
+                    transform : vizUtil.style.translate3d(x, y),
+                    marginLeft: -(width / 2) + ((onRightSide ? -1 : 1) * cursorOffset.x),
+                    marginTop: -(height / 2) + cursorOffset.y,
                     opacity : 0
                 }}
                 ref={function(r){
@@ -56,16 +56,9 @@ class CursorContent extends React.Component {
                     }, 0);
                 }}
             >
-                { this.props.pointerStyle && 
-                    <div
-                        className={'cursor-zoom-pointer'}
-                        style={this.props.pointerStyle}
-                    />
-                }
+                { pointerStyle && <div className="cursor-zoom-pointer" style={pointerStyle} /> }
 
-                <div className={'inner' + (this.props.className ? ' ' + this.props.className : '')}>
-                    { this.props.children }
-                </div>
+                <div className="inner">{ children }</div>
 
             </div>
 
@@ -93,8 +86,7 @@ export default class CursorComponent extends React.Component {
         'containingHeight'  : 200,
         'offsetLeft'        : 0,
         'offsetTop'         : 0
-    }
-
+    };
 
     constructor(props){
         super(props);
@@ -121,7 +113,7 @@ export default class CursorComponent extends React.Component {
     }
 
 
-    /** 
+    /**
      * @return {Offset} Offsets or margins from SVG for visibility. Defaults to 5 for top, right, bottom, & left unless set in props.
      */
     visibilityMargin(){
@@ -164,7 +156,7 @@ export default class CursorComponent extends React.Component {
         this.overlaysRoot.removeChild(this.portalElement);
         this.portalElement = null;
 
-        this.setState({ 'mounted' : false });   
+        this.setState({ 'mounted' : false });
     }
 
     getHoverComponentDimensions(){
@@ -210,9 +202,9 @@ export default class CursorComponent extends React.Component {
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        
+
         var onRightSide = this.props.horizontalAlign === 'auto' && e.clientX + scrollX > (
-            //(this.props.containingElement && this.props.containingElement.clientWidth) || 
+            //(this.props.containingElement && this.props.containingElement.clientWidth) ||
             (document && document.body && document.body.clientWidth) ||
             (window && window.innerWidth)
         ) / 2;

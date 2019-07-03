@@ -5,12 +5,14 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { compiler } from 'markdown-to-jsx';
-import { CSVMatrixView, MarkdownHeading, EmbeddedHiglassActions } from './components';
-import { HiGlassPlainContainer } from './../item-pages/components/HiGlass/HiGlassPlainContainer';
-import { console, object, isServerSide } from './../util';
-import { replaceString as replacePlaceholderString } from './placeholders';
-import { StaticPageBase } from './components/StaticPageBase';
 
+import { MarkdownHeading } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/TableOfContents';
+import { console, object, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { StaticPageBase } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/StaticPageBase';
+
+import { CSVMatrixView, EmbeddedHiglassActions } from './components';
+import { HiGlassPlainContainer } from './../item-pages/components/HiGlass/HiGlassPlainContainer';
+import { replaceString as replacePlaceholderString } from './placeholders';
 
 
 

@@ -7,7 +7,9 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
-import { Schemas, DateUtility, ajax, JWT, typedefs } from './../../../util';
+
+import { console, ajax, JWT, typedefs } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 import { uniqueFileCount, fileCountWithDuplicates, uniqueFileCountNonMemoized } from './../SelectedFilesController';
 
 
@@ -156,7 +158,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const { onHide, filenamePrefix, selectedFiles } = this.props;
         const { disclaimerAccepted } = this.state;
 
-        const suggestedFilename = filenamePrefix + DateUtility.display(moment().utc(), 'date-time-file', '-', false) + '.tsv';
+        const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
         const userInfo = JWT.getUserInfo();
         const isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
         const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
@@ -201,15 +203,15 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                     </div>
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
-                        <Button bsStyle="info" onClick={this.handleAcceptDisclaimer}>
+                        <button type="button" className="btn btn-info" onClick={this.handleAcceptDisclaimer}>
                             <i className="icon icon-fw icon-check mr-05"/>
                             I have read and understand the notes.
-                        </Button>
+                        </button>
                         :
                         <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename }} />
                     }
 
-                    <Button type="reset" onClick={onHide} className="ml-05">Cancel</Button>
+                    <button type="reset" onClick={onHide} className="btn btn-outline-dark ml-05">Cancel</button>
 
                 </Modal.Body>
             </Modal>
@@ -246,9 +248,9 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
         <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-            <Button type="submit" name="Download" bsStyle="primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
+            <button type="submit" name="Download" className="btn btn-primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
                 <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
-            </Button>
+            </button>
         </form>
     );
 });

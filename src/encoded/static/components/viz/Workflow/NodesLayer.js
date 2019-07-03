@@ -6,7 +6,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { console, Filters } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import Node from './Node';
 
@@ -35,16 +35,13 @@ export default class NodesLayer extends React.PureComponent {
         if (!this.props.scrollContainerWrapperMounted){
             return null;
         }
-        var {
-                nodes, outerHeight, innerWidth, innerMargin,
-                onNodeMouseEnter, onNodeMouseLeave, onNodeClick, nodeClassName
-            } = this.props,
-            sortedNodes             = NodesLayer.sortedNodes(nodes),
-            countInActiveContext    = _.reduce(sortedNodes, function(m,n){ return ( n.isCurrentContext ? ++m : m ); }, 0),
-            lastActiveContextNode   = countInActiveContext === 0 ? null : _.sortBy(_.filter(sortedNodes, function(n){ return n.isCurrentContext; }), 'column' ).reverse()[0];
+        const { nodes, onNodeMouseEnter, onNodeMouseLeave, onNodeClick, nodeClassName } = this.props;
+        const sortedNodes = NodesLayer.sortedNodes(nodes);
+        const countInActiveContext = _.reduce(sortedNodes, function(m,n){ return ( n.isCurrentContext ? ++m : m ); }, 0);
+        const lastActiveContextNode = countInActiveContext === 0 ? null : _.sortBy(_.filter(sortedNodes, function(n){ return n.isCurrentContext; }), 'column' ).reverse()[0];
 
         return _.map(sortedNodes, (node, nodeIndex) => {
-            var nodeProps = _.extend(
+            const nodeProps = _.extend(
                 _.omit(this.props, 'children', 'nodes', 'width', 'innerWidth', 'outerWidth', 'windowWidth'),
                 {
                     node, countInActiveContext, lastActiveContextNode,

@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas } from './../../util';
 import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
-import { console, isServerSide, Schemas } from './../../util';
 import { PopoverViewContainer } from './ViewContainer';
 
 

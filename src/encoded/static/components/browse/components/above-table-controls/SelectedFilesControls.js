@@ -6,10 +6,13 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Checkbox } from './../../../forms/components/Checkbox';
-import { Schemas, ajax, typedefs } from './../../../util';
+
+import { Checkbox, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
+import { Schemas, typedefs } from './../../../util';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
-import * as vizUtil from './../../../viz/utilities';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
 
@@ -66,7 +69,7 @@ export class SelectAllFilesButton extends React.PureComponent {
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
 
-        this.setState({ 'selecting' : true }, () => vizUtil.requestAnimationFrame(()=>{
+        this.setState({ 'selecting' : true }, () => raf(()=>{
             if (!this.isAllSelected()){
                 const currentHrefParts = url.parse(href, true);
                 const currentHrefQuery = _.extend({}, currentHrefParts.query);

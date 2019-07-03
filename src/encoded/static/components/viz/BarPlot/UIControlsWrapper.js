@@ -4,10 +4,12 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { DropdownButton, DropdownItem } from './../../forms/components/DropdownButton';
-import * as vizUtil from './../utilities';
+
+import { console, layout, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas } from './../../util';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 import { Legend } from './../components';
-import { console, Filters, Schemas, layout, analytics } from './../../util';
 
 /**
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
@@ -122,7 +124,7 @@ export class UIControlsWrapper extends React.PureComponent {
     // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
     filterObjExistsAndNoFiltersSelected(){
         const { expSetFilters, href } = this.props;
-        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters) && !Filters.searchQueryStringFromHref(href);
+        return searchFilters.filterObjExistsAndNoFiltersSelected(expSetFilters) && !searchFilters.searchQueryStringFromHref(href);
     }
 
     titleMap(key = null, fromDropdown = false){
@@ -259,7 +261,7 @@ export class UIControlsWrapper extends React.PureComponent {
             return null;
         }
         // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-        const isSelectedDisabled = (this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(href)) || (barplot_data_filtered && barplot_data_filtered.total.experiment_sets === 0);
+        const isSelectedDisabled = (this.filterObjExistsAndNoFiltersSelected() && !searchFilters.searchQueryStringFromHref(href)) || (barplot_data_filtered && barplot_data_filtered.total.experiment_sets === 0);
         const aggrTypeTitle = this.titleMap(aggregateType);
         const showStateTitle = showState === 'all' ? 'All' : 'Selected';
         return (
