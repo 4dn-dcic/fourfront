@@ -28,8 +28,4 @@ export default class FileSetCalibrationView extends DefaultItemView {
         }));
     }
 
-    render(){
-        return super.render();
-    }
-
 }

@@ -6,12 +6,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, FormControl, Button } from 'react-bootstrap';
-var jwt = require('jsonwebtoken');
-import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
+import { Modal, FormControl } from 'react-bootstrap';
+
+import { console, object, JWT, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/EditableField';
+
+import { store } from './../../store';
 import { FormattedInfoBlock } from './components/FormattedInfoBlock';
-import { EditableField, FieldSet } from './../forms/components';
-import Alerts from './../alerts';
 
 // eslint-disable-next-line no-unused-vars
 import { Item } from './../util/typedefs';
@@ -108,7 +111,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
         const item = {};
         const idToken = JWT.get();
         if (idToken){
-            const decoded = jwt.decode(idToken);
+            const decoded = JWT.decode(idToken);
             item.user = decoded.email_verified ? decoded.email : "";
         } else {
             console.warn("Access key aborted");
@@ -307,7 +310,7 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
                     return (
                         <tr key={id || idx}>
                             <td className="access-key-id">{ id }</td>
-                            <td>{ date_created ? <DateUtility.LocalizedTime timestamp={date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
+                            <td>{ date_created ? <LocalizedTime timestamp={date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
                             <td>{ description }</td>
                             <td className="access-key-buttons">
                                 <button type="button" className="btn btn-xs btn-success" onClick={resetKey}>Reset</button>
@@ -334,6 +337,12 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
  */
 
 export default class UserView extends React.Component {
+
+    static onEditableFieldSave(nextContext){
+        store.dispatch({
+            type: { 'context': nextContext }
+        });
+    }
 
     static propTypes = {
         'context' : PropTypes.shape({
@@ -407,7 +416,7 @@ export default class UserView extends React.Component {
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
                                                 <FieldSet context={user} parent={this} style="inline"
-                                                    inputSize="lg" absoluteBox objectType="User"
+                                                    inputSize="lg" absoluteBox objectType="User" onSave={UserView.onEditableFieldSave}
                                                     schemas={schemas} disabled={!mayEdit} href={href} windowWidth={windowWidth}>
                                                     <EditableField labelID="first_name" fallbackText="No first name set"
                                                         placeholder="First name" />
@@ -450,7 +459,7 @@ function ProfileContactFields(props){
     const { user, windowWidth, parent, mayEdit, href, schemas } = props;
     const { email, phone1, fax, skype } = user;
     return (
-        <FieldSet context={user}
+        <FieldSet context={user} onSave={UserView.onEditableFieldSave}
             parent={parent} className="profile-contact-fields"
             disabled={!mayEdit} objectType="User" windowWidth={windowWidth}
             schemas={schemas} href={href}>
@@ -682,9 +691,9 @@ class BasicForm extends React.PureComponent {
             <form onSubmit={this.handleSubmit}>
                 <FormControl className="mt-08" type="text" placeholder="Enter an email to impersonate..."
                     onChange={this.handleChange} value={value}/>
-                <Button className="mt-15 pull-right" type="submit" bsStyle="primary" bsSize="md">
+                <button type="submit" className="btn btn-primary btn-md mt-15">
                     <i className="icon icon-fw icon-user"/>&nbsp; Impersonate
-                </Button>
+                </button>
             </form>
         );
     }

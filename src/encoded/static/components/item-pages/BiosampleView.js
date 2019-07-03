@@ -3,7 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object, Schemas, layout } from './../util';
+
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 import { ItemPageTable } from './components/tables/ItemPageTable';
 import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
@@ -119,7 +121,7 @@ class BiosampleViewOverview extends React.PureComponent {
 
 const OverViewBody = React.memo(function OverViewBody(props) {
     const { context, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const tips = object.tipsFromSchema(schemas, context);
     const commonProps = {
         'result' : context, tips,
         'wrapInColumn' : true,
@@ -153,8 +155,8 @@ const CellCultureInfoBody = React.memo(function CellCultureInfoBody(props){
 
     if (cell_cultures.length === 0) return null;
 
-    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), context);
-    const tipsForCellCulture = object.tipsFromSchema(schemas || Schemas.get(), cell_cultures[0]);
+    const tipsForBiosample = object.tipsFromSchema(schemas, context);
+    const tipsForCellCulture = object.tipsFromSchema(schemas, cell_cultures[0]);
 
     let body = null;
 
@@ -206,8 +208,8 @@ const BiosourceInfoBody = React.memo(function BiosourceInfoBody(props){
     }
 
     if (biosources.length === 1){
-        const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), context);
-        const tipsForBiosource = object.tipsFromSchema(schemas || Schemas.get(), biosources[0]);
+        const tipsForBiosample = object.tipsFromSchema(schemas, context);
+        const tipsForBiosource = object.tipsFromSchema(schemas, biosources[0]);
         title = "Biosource";
         body = (
             <div className="row overview-blocks">

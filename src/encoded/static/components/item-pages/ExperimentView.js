@@ -4,7 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console, object, Schemas, expFxn } from './../util';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../util';
 
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
@@ -228,8 +230,8 @@ ExperimentSetsViewOverview.parentExpSetsExistForExp = memoize(function(exp){
 const OverviewHeading = React.memo(function OverviewHeading(props){
     const { context, schemas } = props;
     const { biosample } = context;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({ '@type' : ['Biosample', 'Item'] }, biosample));
+    const tips = object.tipsFromSchema(schemas, context); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+    const tipsForBiosample = object.tipsFromSchema(schemas, _.extend({ '@type' : ['Biosample', 'Item'] }, biosample));
     const commonProps = {
         'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
         'result'        : context,              // The Item from which are getting value for 'property'.
@@ -256,8 +258,8 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
  */
 const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
     const { context: exp, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({ '@type' : ['Biosample', 'Item'] }, exp.biosample));
+    const tips = object.tipsFromSchema(schemas, exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+    const tipsForBiosample = object.tipsFromSchema(schemas, _.extend({ '@type' : ['Biosample', 'Item'] }, exp.biosample));
     const commonProps = {
         'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
         'result'        : exp,                  // The Item from which are getting value for 'property'.

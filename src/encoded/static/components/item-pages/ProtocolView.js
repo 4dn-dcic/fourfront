@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object, Schemas } from './../util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
@@ -20,7 +20,7 @@ export default class ProtocolView extends DefaultItemView {
 
 
 const ProtocolViewOverview = React.memo(function ProtocolViewOverview({ context, schemas }){
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const tips = object.tipsFromSchema(schemas, context);
     const result = context;
 
     return (

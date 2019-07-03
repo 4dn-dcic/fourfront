@@ -3,14 +3,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
+
+import { console, object, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
-import { console, navigate } from './../util';
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
-import ReactTooltip from 'react-tooltip';
 
 
 

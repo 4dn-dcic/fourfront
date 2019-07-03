@@ -1,7 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, ajax } from './../util';
+import moment from 'moment';
+import ReactTooltip from 'react-tooltip';
+
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
@@ -10,8 +13,6 @@ import Graph, { parseAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Wor
 import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
-import moment from 'moment';
-import ReactTooltip from 'react-tooltip';
 
 // Testing / Dummy data
 var _testing_data;

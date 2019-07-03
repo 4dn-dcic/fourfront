@@ -3,8 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
-import { console, object, DateUtility } from './../util';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+
 import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
@@ -118,7 +120,7 @@ class PublicationSummary extends React.PureComponent {
     details(){
         const { context } = this.props;
         const { journal, categories, date_published, ID } = context;
-        const datePublished = DateUtility.formatPublicationDate(date_published);
+        const datePublished = formatPublicationDate(date_published);
 
         return (
             <React.Fragment>
@@ -151,10 +153,10 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <Button bsSize="xs" bsStyle="info" className="mr-02 mb-02 text-capitalize"
+                                        <button type="button" className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
                                             href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
                                             { cat }
-                                        </Button>
+                                        </button>
                                     )
                                 }
                             </React.Fragment>

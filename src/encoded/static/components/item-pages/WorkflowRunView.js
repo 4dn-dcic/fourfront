@@ -2,10 +2,12 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { ItemDetailList } from './components/ItemDetailList';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import DefaultItemView from './DefaultItemView';
-import { console, object } from './../util';
 
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, WorkflowGraphSection } from './WorkflowView';
 

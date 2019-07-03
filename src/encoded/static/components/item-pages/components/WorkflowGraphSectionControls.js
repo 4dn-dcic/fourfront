@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Checkbox } from './../../forms/components/Checkbox';
-import { DropdownButton, DropdownItem } from './../../forms/components/DropdownButton';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
 import { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 
 
@@ -57,7 +57,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         if (typeof isFullscreen === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
                 <button type="button" onClick={onToggleFullScreenView} key="full-screen-btn"
-                    className="btn btn-outline-secondary for-state-fullscreenViewEnabled"
+                    className="btn btn-outline-dark for-state-fullscreenViewEnabled"
                     data-tip={!isFullscreen ? 'Expand to full screen' : null}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </button>

@@ -3,8 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Thumbnail, Button } from 'react-bootstrap';
-import { console, object, expFxn, Schemas, isServerSide } from './../util';
+import { Thumbnail } from 'react-bootstrap';
+import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../util';
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock, QualityControlResults } from './FileView';
@@ -98,9 +99,9 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         );
     } else if (file.omerolink){
         thumbnailLink = (
-            <Button className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
+            <button type="button" className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
                 View in OMERO
-            </Button>
+            </button>
         );
     }
 
@@ -112,7 +113,7 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
 
                 { parentExperimentWithImagingPaths ?
                     <OverViewBodyItem
-                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas || Schemas.get(), parentExperimentWithImagingPaths)}
+                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas, parentExperimentWithImagingPaths)}
                         wrapInColumn={"col-xs-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} property="imaging_paths" fallbackTitle="Imaging Paths"
                         listItemElement="div" listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
                     : null }

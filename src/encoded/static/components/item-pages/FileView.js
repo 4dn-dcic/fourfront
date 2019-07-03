@@ -5,9 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { Button } from 'react-bootstrap';
+
+import { isServerSide, console, object, layout, valueTransforms, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
-import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
+
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
@@ -210,10 +212,11 @@ export class ExternalVisualizationButtons extends React.PureComponent {
      * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
      */
     renderJuiceboxBtn(fileHref){
+        const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
-            <Button bsStyle="primary" href={"http://aidenlab.org/juicebox/?hicUrl=" + fileHref} className="mr-05" tagret="_blank">
+            <button type="button" href={btnHref} className="btn btn-primary mr-05" tagret="_blank">
                 <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-            </Button>
+            </button>
         );
     }
 
@@ -236,17 +239,18 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
         if (!genome) return null;
 
-        // Build the Epigenome button
+        const btnHref = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" + fileHref;
         return (
-            <Button bsStyle="primary" href={"http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" +fileHref} target="_blank" rel="noreferrer noopener">
-                <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-            </Button>
+            <button type="button" href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
+                <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
+                <i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+            </button>
         );
     }
 
     render(){
         const { file, href, wrapInColumn, className } = this.props;
-        var epigenomeBtn, juiceBoxBtn;
+        let epigenomeBtn, juiceBoxBtn;
 
         if (!(file.status === 'archived' || file.status === 'released')){
             return null; // External tools cannot access non-released files.
@@ -255,7 +259,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
             return null;
         }
 
-        const fileFormat = fileUtil.getFileFormatStr(file);
+        const fileFormat = commonFileUtil.getFileFormatStr(file);
         const hrefParts = url.parse(href || (store && store.getState().href));
         const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
 
@@ -307,7 +311,7 @@ QCMetricFromEmbed.percentOfTotalReads = function(quality_metric, field){
     var numVal = object.getNestedProperty(quality_metric, field);
     if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
         var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
-        var numValRounded = Schemas.Term.roundLargeNumber(numVal);
+        var numValRounded = valueTransforms.roundLargeNumber(numVal);
         return (
             <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
         );
@@ -344,9 +348,9 @@ QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }
     } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
         value = parseFloat(value);
         if (!tooltip && value >= 1000) {
-            tooltip = Schemas.Term.decorateNumberWithCommas(value);
+            tooltip = valueTransforms.decorateNumberWithCommas(value);
         }
-        value = Schemas.Term.roundLargeNumber(value);
+        value = valueTransforms.roundLargeNumber(value);
     }
     return { value, tooltip };
 };
@@ -361,7 +365,7 @@ export class QualityControlResults extends React.PureComponent {
     /** To be deprecated (?) */
     metricsFromEmbeddedReport(){
         const { file, schemas } = this.props;
-        const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas || Schemas.get(), file.quality_metric) };
+        const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas, file.quality_metric) };
         return (
             <div className="overview-list-elements-container">
                 <QCMetricFromEmbed {...commonProps} qcProperty="Total reads" fallbackTitle="Total Reads in File" />
@@ -387,7 +391,7 @@ export class QualityControlResults extends React.PureComponent {
                 { metricURL ?
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
-                            <a href={metricURL} target="_blank" rel="noopener noreferrer">{ Schemas.Term.hrefToFilename(metricURL) }</a>
+                            <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
                             <i className="ml-05 icon icon-fw icon-external-link text-small"/>
                         </React.Fragment>
                     } />

@@ -4,12 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Collapse } from 'react-bootstrap';
-import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
+
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { console, object, isServerSide, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn, Schemas, typedefs } from './../util';
 
 import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
 import { HiGlassPlainContainer, isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
-import { FlexibleDescriptionBox } from './components/FlexibleDescriptionBox';
 import { AdjustableDividerRow } from './components/AdjustableDividerRow';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
@@ -175,7 +177,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
 const OverviewHeading = React.memo(function OverviewHeading(props){
     const { context, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const tips = object.tipsFromSchema(schemas, context);
     const commonProps = { 'result' : context, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
     return (
         <OverviewHeadingContainer {...props}>
@@ -243,7 +245,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 
     render(){
         const { context, files } = this.props;
-        const anyFilesWithMetrics = !!(fileUtil.filterFilesWithEmbeddedMetricItem(files, true));
+        const anyFilesWithMetrics = !!(commonFileUtil.filterFilesWithEmbeddedMetricItem(files, true));
         return (
             <div className="overflow-hidden">
                 { this.renderHeader() }
@@ -405,12 +407,12 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     renderQCMetricsTablesRow(){
         const { width, files, windowWidth, href } = this.props;
-        const filesWithMetrics = fileUtil.filterFilesWithQCSummary(files);
+        const filesWithMetrics = commonFileUtil.filterFilesWithQCSummary(files);
         const filesWithMetricsLen = filesWithMetrics.length;
 
         if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
-        const filesByTitles = fileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
 
         return (
             <div className="row">

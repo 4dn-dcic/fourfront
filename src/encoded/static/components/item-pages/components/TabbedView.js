@@ -10,7 +10,7 @@ import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate } from './../../util';
+import { navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
