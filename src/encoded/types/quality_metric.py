@@ -35,9 +35,8 @@ class QualityMetricFlag(Item):
     })
 class QualityMetric(Item):
     """Quality metrics class."""
-
-    base_types = ['QualityMetric'] + Item.base_types
     item_type = 'quality_metric'
+    base_types = ['QualityMetric'] + Item.base_types
     schema = load_schema('encoded:schemas/quality_metric.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 

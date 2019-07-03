@@ -29,7 +29,7 @@ import requests
         'description': 'Listing of all types of content which may be created by people.',
     })
 class UserContent(Item):
-
+    item_type = 'user_content'
     base_types = ['UserContent'] + Item.base_types
     schema = load_schema('encoded:schemas/user_content.json')
     embedded_list = lab_award_attribution_embed_list
