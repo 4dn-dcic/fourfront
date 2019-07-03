@@ -1,7 +1,7 @@
 {
-    "title": "Disease",
+    "title": "Phenotype",
     "description": "We should get this from HPO or something --- https://hpo.jax.org/app/download/ontology",
-    "id": "/profiles/disease.json",
+    "id": "/profiles/phenotype.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["term_name", "term_id"],
@@ -22,34 +22,27 @@
         },
         "term_id" : {
             "title" : "HPO Identifier",
-            "description" : "Identifier of disease. E.g. \"ORPHA:529962\"",
+            "description" : "Identifier of phenotype at hpo.jax.org. E.g. \"HP:0000347\"",
             "type" : "string",
             "uniqueKey": true
         },
-        "associated_phenotypes": {
-            "title": "Associated Phenotypes",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title" : "Phenotype",
-                "type" : "string",
-                "linkTo" : "Phenotype"
-            }
-        },
-        "associated_genes": {
-            "title": "Associated Genes",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title" : "Gene",
-                "type" : "string",
-                "comment": "Likely a linkTo, but wait until Gene is defined"
-            }
+        "parent_term" : {
+            "title": "Parent Term",
+            "type" : "string",
+            "linkTo" : "Phenotype"
         },
         "definition" : {
             "title" : "Definition",
-            "description": "Definition of this disease",
+            "description": "Definition of this phenotype",
             "type" : "string"
+        },
+        "synonyms" : {
+            "type" : "array",
+            "title" : "Synonyms",
+            "items" : {
+                "type" : "string",
+                "title": "Synonym"
+            }
         },
         "comment" : {
             "type" : "string",

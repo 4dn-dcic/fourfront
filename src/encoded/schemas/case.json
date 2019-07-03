@@ -3,7 +3,7 @@
     "id": "/profiles/case.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "project", "institution", "proband"],
+    "required": ["title", "project", "institution"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -22,14 +22,30 @@
         },
         "title": {
             "title": "Title",
-            "description": "Identifying for this case",
+            "description": "Optional title for this case",
             "type": "string"
         },
-        "proband" : {
-            "title" : "Proband of Case",
-            "description": "Individual who is proband scope of case",
-            "type" : "string",
-            "linkTo" : "Individual"
+        "case_samples": {
+            "title": "Case Samples",
+            "type": "array",
+            "uniqueItems": true,
+            "items" : {
+                "title": "Case Sample",
+                "type": "object",
+                "properties": {
+                    "sample": {
+                        "title" : "Sample",
+                        "description": "Sample used in the case",
+                        "type" : "string",
+                        "linkTo" : "Sample"
+                    },
+                    "proband": {
+                        "title": "Proband",
+                        "description": "Whether this sample represents the proband of the case",
+                        "type": "boolean"
+                    }
+                }
+            }
         },
         "description": {
             "title": "Description",
