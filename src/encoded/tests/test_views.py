@@ -279,7 +279,6 @@ def test_profiles(testapp, item_type):
 
 
 def test_profiles_all(testapp, registry):
-    from jsonschema_serialize_fork import Draft4Validator
     res = testapp.get('/profiles/').maybe_follow(status=200)
     # make sure all types are present, including abstract types
     for ti in registry[TYPES].by_item_type.values():
