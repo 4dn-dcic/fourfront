@@ -260,8 +260,19 @@ class Collection(snovault.Collection, AbstractCollection):
             self.__acl__ = ALLOW_SUBMITTER_ADD
 
 
+@snovault.abstract_collection(
+    name='items',
+    properties={
+        'title': "Item Listing",
+        'description': 'Abstract collection of all Items.',
+    })
 class Item(snovault.Item):
-    """smth."""
+    """
+    The abstract base type for all other Items.
+    All methods & properties are inherited by
+    sub-types unless overridden.
+    """
+    item_type = 'item'
     AbstractCollection = AbstractCollection
     Collection = Collection
     STATUS_ACL = {
