@@ -1,0 +1,268 @@
+[
+    {
+        "uuid": "111112bc-8535-4448-903e-854af460a233",
+        "term_name": "has_exact_synonym",
+        "term_id": "oboInOwl:hasExactSynonym",
+        "source_ontology": "096bfe7f-803b-40da-ae1b-b011aa10101b",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+        "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111113bc-8535-4448-903e-854af460a233",
+        "term_name": "has_narrow_synonym",
+        "term_id": "oboInOwl:hasNarrowSynonym",
+        "source_ontology": "096bfe7f-803b-40da-ae1b-b011aa10101b",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111114bc-8535-4448-903e-854af460a233",
+        "term_name": "has_related_synonym",
+        "term_id": "oboInOwl:hasRelatedSynonym",
+        "source_ontology": "096bfe7f-803b-40da-ae1b-b011aa10101b",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111116bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "term_id": "IAO:0000115",
+        "source_ontology": "096bfe7f-803b-40da-ae1b-b011aa10101b",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
+        "namespace": "http://purl.obolibrary.org/obo"
+    },
+    {
+        "uuid": "111117bc-8535-4448-903e-854af460a233",
+        "term_name": "alternative term",
+        "term_id": "IAO:0000118",
+        "source_ontology": "096bfe7f-803b-40da-ae1b-b011aa10101b",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000118",
+        "namespace": "http://purl.obolibrary.org/obo"
+    },
+    {
+        "uuid": "34256f98-f28f-449d-b7f1-dc0beb280f53",
+        "term_name": "Abnormal cellular phenotype",
+        "term_id": "HP:0025354",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0025354",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "d4d89b36-c9b4-4b0a-b28e-07fa961ff28b",
+        "term_name": "Abnormality of blood and blood-forming tissues",
+        "term_id": "HP:0001871",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001871",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "444abc93-a44b-4191-a6ae-7f7cbac1b3e8",
+        "term_name": "Abnormality of connective tissue",
+        "term_id": "HP:0003549",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0003549",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "ad6a0c73-7f40-4da2-b803-a90343d10433",
+        "term_name": "Abnormality of head or neck",
+        "term_id": "HP:0000152",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000152",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "13cb2f6f-59aa-4db4-a1f6-3c3711b10a09",
+        "term_name": "Abnormality of limbs",
+        "term_id": "HP:0040064",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0040064",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "5e08c45a-31a8-4367-9119-45d688a15bfe",
+        "term_name": "Abnormality of metabolism/homeostasis",
+        "term_id": "HP:0001939",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001939",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "425eb66a-b6d5-49fd-b5b6-f5eed132a35c",
+        "term_name": "Abnormality of prenatal development or birth",
+        "term_id": "HP:0001197",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001197",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "13c1e3d5-35ea-4e97-982e-7d57e569dc8b",
+        "term_name": "Abnormality of the breast",
+        "term_id": "HP:0000769",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000769",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "d564ae0a-20b1-4e6c-9077-a751fdaf3b61",
+        "term_name": "Abnormality of the cardiovascular system",
+        "term_id": "HP:0001626",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001626",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "620d2047-473d-4d1b-ace7-aafb4a6f2597",
+        "term_name": "Abnormality of the digestive system",
+        "term_id": "HP:0025031",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0025031",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "6136d4e6-ccc9-4438-addc-eaaa255c6fa0",
+        "term_name": "Abnormality of the ear",
+        "term_id": "HP:0000598",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000598",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "fdfd3533-7d86-44bd-a027-b13900fc544e",
+        "term_name": "Abnormality of the endocrine system",
+        "term_id": "HP:0000818",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000818",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "9b05fd01-a754-4d15-8515-a73038f604c0",
+        "term_name": "Abnormality of the eye",
+        "term_id": "HP:0000478",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000478",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "7599589f-e634-4584-aa49-6f30e9f71ad8",
+        "term_name": "Abnormality of the genitourinary system",
+        "term_id": "HP:0000119",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000119",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "908c90d0-6b58-4144-b516-bff0da9ce07c",
+        "term_name": "Abnormality of the immune system",
+        "term_id": "HP:0002715",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0002715",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "fd01fae6-1abe-41a8-9d0d-5da3cce214fb",
+        "term_name": "Abnormality of the integument",
+        "term_id": "HP:0001574",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001574",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "bd2e1957-0282-44ab-bb66-1a875683cdfb",
+        "term_name": "Abnormality of the musculature",
+        "term_id": "HP:0003011",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0003011",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "b309ddf1-539a-4266-9b70-2c9aadd65308",
+        "term_name": "Abnormality of the nervous system",
+        "term_id": "HP:0000707",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000707",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "279d6057-ea28-4e21-9c18-e294c84a0ba8",
+        "term_name": "Abnormality of the respiratory system",
+        "term_id": "HP:0002086",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0002086",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "63e16941-37f1-4271-a928-51d54b728b21",
+        "term_name": "Abnormality of the skeletal system",
+        "term_id": "HP:0000924",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0000924",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "4b82107f-423b-4312-9afb-3e3fbb43179e",
+        "term_name": "Abnormality of the thoracic cavity",
+        "term_id": "HP:0045027",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0045027",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "9a975b9f-661c-4a51-ac4e-728fc88a9efc",
+        "term_name": "Abnormality of the voice",
+        "term_id": "HP:0001608",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001608",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "848c3fcc-dd47-4f2e-98f2-e9c94c9360db",
+        "term_name": "Constitutional symptom",
+        "term_id": "HP:0025142",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0025142",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "c4e2994d-a1e2-406d-8ae7-80339bbb38de",
+        "term_name": "Growth abnormality",
+        "term_id": "HP:0001507",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0001507",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    },
+    {
+        "uuid": "1dfc3994-9be5-4f59-be08-611c7c0383c5",
+        "term_name": "Neoplasm",
+        "term_id": "HP:0002664",
+        "term_url": "http://purl.obolibrary.org/obo/HP_0002664",
+        "source_ontology": "00a4ae82-ac29-41b9-90a0-7898d06e0e76",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "is_slim_for": "Phenotypic abnormality"
+    }
+]
