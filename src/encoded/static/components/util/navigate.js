@@ -132,7 +132,7 @@ navigate.setBrowseBaseStateAndRefresh = function(
 ){
 
     if (!currentHref || !context){
-        var storeState = store.getState();
+        const storeState = store.getState();
         currentHref = storeState.href;
         context = storeState.context;
     }
@@ -142,12 +142,14 @@ navigate.setBrowseBaseStateAndRefresh = function(
     }
 
     if (navigate.isBrowseHref(currentHref)){
-        var currentExpSetFilters = contextFiltersToExpSetFilters((context && context.filters || null));
-        var nextBrowseHref = navigate.getBrowseBaseHref(newBrowseBaseState);
+        const currBrowseBaseParams = navigate.getBrowseBaseParams();
+        const currentExpSetFilters = contextFiltersToExpSetFilters((context && context.filters || null), currBrowseBaseParams);
+        let nextBrowseHref = navigate.getBrowseBaseHref(newBrowseBaseState);
+
         if (_.keys(currentExpSetFilters).length > 0){
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + expSetFiltersToURLQuery(currentExpSetFilters);
         }
-        var hrefParts = url.parse(currentHref, true);
+        const hrefParts = url.parse(currentHref, true);
         if (hrefParts.query.q) {
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
         }

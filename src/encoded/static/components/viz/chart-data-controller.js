@@ -582,14 +582,17 @@ export const ChartDataController = {
      */
     fetchAndSetFilteredBarPlotData : function(callback = null, opts = {}){
 
-        var reduxStoreState = refs.store.getState();
+        const reduxStoreState = refs.store.getState();
 
-        var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
+        const currentBrowseBaseParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
+        const currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters(
+            (reduxStoreState.context && reduxStoreState.context.filters) || null,
+            // currentBrowseBaseParams - not rly needed for BarPlot agg endpoint
+        );
 
-        var currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
-        var searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(reduxStoreState.href);
+        const searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(reduxStoreState.href);
 
-        var filteredSearchParams = navigate.mergeObjectsOfLists(
+        const filteredSearchParams = navigate.mergeObjectsOfLists(
             { 'q' : searchQuery || null },
             navigate.getBrowseBaseParams(opts.browseBaseState || null),
             searchFilters.expSetFiltersToJSON(currentExpSetFilters)

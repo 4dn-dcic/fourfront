@@ -13,32 +13,34 @@ const { Item, ColumnDefinition } = typedefs;
 
 export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120, 'xs' : 120 };
 
+/** Is reused in a couple of places */
+function labDisplayTitleRenderFxn(result, columnDefinition, props, width, popLink = false){
+    var labItem = result.lab;
+    if (!labItem) return null;
+    var labLink;
+    if (popLink){
+        labLink = <a href={object.atIdFromObject(labItem)} target="_blank" rel="noopener noreferrer">{ labItem.display_title }</a>;
+    }else{
+        labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
+    }
+
+    if (!result.submitted_by || !result.submitted_by.display_title){
+        return labLink;
+    }
+    return (
+        <span>
+            <i className="icon icon-fw icon-user-o user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
+            { labLink }
+        </span>
+    );
+}
 
 export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     // TODO: change to organization
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 160 },
-        'render' : function labTitle(result, columnDefinition, props, width, popLink = false){
-            var labItem = result.lab;
-            if (!labItem) return null;
-            var labLink;
-            if (popLink){
-                labLink = <a href={object.atIdFromObject(labItem)} target="_blank" rel="noopener noreferrer">{ labItem.display_title }</a>;
-            }else{
-                labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
-            }
-
-            if (!result.submitted_by || !result.submitted_by.display_title){
-                return labLink;
-            }
-            return (
-                <span>
-                    <i className="icon icon-fw icon-user-o user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
-                    { labLink }
-                </span>
-            );
-        }
+        'render' : labDisplayTitleRenderFxn
     },
     'date_published' : {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
@@ -89,7 +91,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
                 result.track_and_facet_info && result.track_and_facet_info.lab_name && result.track_and_facet_info.lab_name
                 && result.lab && result.lab.display_title && result.lab.display_title === result.track_and_facet_info.lab_name
             ){
-                return defaultColumnExtensionMap['lab.display_title'].render.apply(null, Array.from(arguments));
+                return labDisplayTitleRenderFxn(...arguments);
             } else {
                 return (result.track_and_facet_info && result.track_and_facet_info.lab_name) || null;
             }

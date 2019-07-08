@@ -247,7 +247,8 @@ class ResultTableContainer extends React.PureComponent {
             context, href, countExternalSets, session, browseBaseState, schemas, windowHeight,
             totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets
         } = this.props;
-        const showClearFiltersButton = _.keys(searchFilters.contextFiltersToExpSetFilters(context && context.filters) || {}).length > 0;
+        const currExpSetFilters = searchFilters.contextFiltersToExpSetFilters(context && context.filters, navigate.getBrowseBaseParams());
+        const showClearFiltersButton = _.keys(currExpSetFilters || {}).length > 0;
         const columnDefinitions = this.getColumnDefinitions();
 
         return (
@@ -301,11 +302,19 @@ class ExternaDataExpSetsCount extends React.PureComponent {
 
     render(){
         const { countExternalSets, browseBaseState } = this.props;
-        if (countExternalSets < 1) return <div className="above-results-table-row" />;
+        if (countExternalSets < 1){
+            return <div className="above-results-table-row" />;
+        }
+        const midString = (
+            (browseBaseState === 'all' ? ' fewer' : ' more') + " set" + (countExternalSets > 1 ? 's' : '') +
+            (browseBaseState === 'all' ? '' : ' available') + " in "
+        );
         return (
             <div className="above-results-table-row text-right text-ellipsis-container">
                 <span className="inline-block mt-1">
-                    <span className="text-600 text-large">{ countExternalSets }</span> { browseBaseState === 'all' ? 'fewer' : 'more' } { "set" + (countExternalSets > 1 ? 's' : '') }{ browseBaseState === 'all' ? '' : ' available' } in <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
+                    <span className="text-600 text-large">{ countExternalSets }</span>
+                    { midString }
+                    <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
                 </span>
             </div>
         );

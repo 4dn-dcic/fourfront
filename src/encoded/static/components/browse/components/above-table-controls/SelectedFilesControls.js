@@ -208,7 +208,6 @@ export class SelectedFilesFilterByContent extends React.PureComponent {
 
 
 const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByButton(props){
-
     const { selectedFiles, currentFileTypeFilters, onFilterFilesByClick, active } = props;
     const isDisabled = !selectedFiles || _.keys(selectedFiles).length === 0;
     const currentFiltersLength = currentFileTypeFilters.length;
@@ -217,7 +216,7 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
 
     return (
         <button type="button" id="selected-files-file-type-filter-button" className={cls} onClick={onFilterFilesByClick}
-            key="filter-selected-files-by" disabled={isDisabled} active={active} data-tip={tooltip} data-html>
+            key="filter-selected-files-by" disabled={isDisabled} active={active.toString()} data-tip={tooltip} data-html>
             <i className="icon icon-filter icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
@@ -248,7 +247,7 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
                 <div className="btn-group">
                     <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalUniqueFilesCount} />
                     <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
-                        active={currentOpenPanel === "filterFilesBy"}
+                        active={currentOpenPanel === "filterFilesBy"} // <- must be boolean
                         {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters', 'currentOpenPanel' ), selectedFileProps)} />
                 </div>
             </div>
