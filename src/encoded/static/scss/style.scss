@@ -1,5 +1,9 @@
 
-@import "encoded/theme";
+@import "encoded/base";
+
+// Fourfront variables & mixins - (some used in overridden bootstrap CSS)
+@import "encoded/mixins-custom";
+
 @import "bootstrap/bootstrap";
 
 // Bootstrap default variables and mixins
@@ -61,6 +65,12 @@
 @import "fontawesome/font-awesome";
 
 
+// Shared Components
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
+
 // ENCODE Layout etc. SCSS
 
 @import "encoded/layout";
@@ -75,11 +85,6 @@
         "encoded/modules/tooltip",
         "encoded/modules/item-pages",
         "encoded/modules/static-pages";
-
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
 
 @import "encoded/state";
 @import "encoded/theme";

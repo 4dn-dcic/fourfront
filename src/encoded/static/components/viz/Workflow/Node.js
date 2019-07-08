@@ -8,6 +8,7 @@ import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/u
 import { traceNodePathAndRun } from './parsing-functions';
 
 
+/** @todo separate methods out into functional components */
 export class DefaultNodeElement extends React.PureComponent {
 
     static propTypes = {
@@ -16,12 +17,13 @@ export class DefaultNodeElement extends React.PureComponent {
         'selected' : PropTypes.bool,
         'related'  : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
         'columnWidth' : PropTypes.number
-    }
+    };
 
     icon(){
-        var iconClass;
-        if (this.props.node.type === 'input' || this.props.node.type === 'output'){
-            var formats = this.props.node.format;
+        const { node : { type, format } } = this.props;
+        let iconClass;
+        if (type === 'input' || type === 'output'){
+            let formats = format;
             if (typeof formats === 'undefined'){
                 iconClass = 'question';
             } else if (typeof formats === 'string') {
@@ -35,7 +37,7 @@ export class DefaultNodeElement extends React.PureComponent {
                 }
             }
 
-        } else if (this.props.node.type === 'step'){
+        } else if (type === 'step'){
             iconClass = 'cogs';
         }
         if (!iconClass) return null;
@@ -43,8 +45,8 @@ export class DefaultNodeElement extends React.PureComponent {
     }
 
     tooltip(){
-        var node = this.props.node;
-        var output = '';
+        const { node } = this.props;
+        let output = '';
 
         // Node Type
         if (node.nodeType === 'step'){
@@ -65,28 +67,20 @@ export class DefaultNodeElement extends React.PureComponent {
             output += '<div>' + (node.description || node.meta.description) + '</div>';
         }
 
-        return output; 
+        return output;
     }
 
-    style(){
-        if (this.props.node.nodeType === 'input' || this.props.node.nodeType === 'output'){
-            return {
-                width : (this.props.columnWidth || 100)
-            };
-        }
-    }
-    
     render(){
-        var node = this.props.node;
+        const { node, title, columnWidth } = this.props;
+        const style = node.nodeType === 'input' || node.nodeType === 'output' ?
+            { width : (columnWidth || 100) }
+            : null;
         return (
             <div
                 className="node-visible-element"
                 data-tip={this.tooltip()}
-                data-place="top"
-                data-html
-                style={this.style()}
-            >
-                <span className="node-name">{ this.icon() }{ this.props.title || node.title || node.name }</span>
+                data-place="top" data-html style={style}>
+                <span className="node-name">{ this.icon() }{ title || node.title || node.name }</span>
             </div>
         );
     }
@@ -103,7 +97,7 @@ export default class Node extends React.PureComponent {
     static isSelected(currentNode, selectedNode){
         if (!selectedNode) return false;
         if (selectedNode === currentNode) return true;
-        /* 
+        /*
         // We shouldn't need the below and can just rely on a simple reference comparison
         // Keeping around for now/reference.
         if (typeof selectedNode.name === 'string' && typeof currentNode.name === 'string') {
@@ -133,14 +127,14 @@ export default class Node extends React.PureComponent {
             results;
 
         if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
-            results = _.flatten(_.map(selectedInputs, (sI)=>{
+            results = _.flatten(_.map(selectedInputs, function(sI){
                 return traceNodePathAndRun(sI, check, 'input', selectedNode);
             }), false);
             if (_.any(results)) return true;
         }
 
         if (Array.isArray(selectedOutputs) && selectedOutputs.length > 0){
-            results = _.flatten(_.map(selectedOutputs, (sO)=>{
+            results = _.flatten(_.map(selectedOutputs, function(sO){
                 return traceNodePathAndRun(sO, check, 'output', selectedNode);
             }), false);
             if (_.any(results)) return true;
@@ -206,19 +200,19 @@ export default class Node extends React.PureComponent {
 
     /** Scrolls the scrollable element to the current context node, if any. */
     componentDidMount(){
-        var { 
+        const {
             countInActiveContext, lastActiveContextNode,
             node, scrollContainerWrapperElement, columnWidth, columnSpacing
-        } = this.props,
-            sw = scrollContainerWrapperElement;
+        } = this.props;
+        const sw = scrollContainerWrapperElement;
 
         if (
             node.isCurrentContext && sw &&
             (countInActiveContext === 1 || (countInActiveContext > 1 && lastActiveContextNode === node))
         ){
-            var scrollLeft = sw.scrollLeft,
-                containerWidth = sw.offsetWidth || sw.clientWidth,
-                nodeXEnd = node.x + columnWidth + columnSpacing;
+            const scrollLeft = sw.scrollLeft;
+            const containerWidth = sw.offsetWidth || sw.clientWidth;
+            const nodeXEnd = node.x + columnWidth + columnSpacing;
 
             if (nodeXEnd > (containerWidth + scrollLeft)){
                 sw.scrollLeft = (nodeXEnd - containerWidth);

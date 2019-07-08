@@ -97,7 +97,7 @@ class Body extends React.Component {
         });
 
         return (
-            <div className='row'>
+            <div className="row">
                 { this.props.primaryCount !== 'files' ? <div className="col-xs-2"></div> : null }
                 { countsToShow }
             </div>
@@ -123,19 +123,21 @@ class Body extends React.Component {
     }
 
     render(){
-        if (Array.isArray(this.props.path) && this.props.path.length === 0){
+        const { path, schemas, includeTitleDescendentPrefix } = this.props;
+        if (Array.isArray(path) && path.length === 0){
             return null;
         }
-        const leafNode = this.props.path[this.props.path.length - 1];
-        const leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, this.props.schemas);
+        const leafNode = path[path.length - 1];
+        const leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, schemas);
+
         return (
             <div className="mosaic-cursor-body">
-                <Crumbs path={this.props.path} schemas={this.props.schemas} />
+                <Crumbs path={path} schemas={schemas} />
                 <h6 className="field-title">
                     { this.primaryCountLabel() }
-                    { 
-                        this.props.includeTitleDescendentPrefix && this.props.path.length > 1 ?
-                        <small className="descendent-prefix"> &gt; </small> : null
+                    {
+                        includeTitleDescendentPrefix && props.path.length > 1 ?
+                            <small className="descendent-prefix"> &gt; </small> : null
                     }{ leafNodeFieldTitle }
                     {/* this.props.filteredOut ?
                         <small className="filtered-out-label"> (filtered out)</small>
@@ -148,7 +150,7 @@ class Body extends React.Component {
                     />
                     { this.primaryCount(leafNode) }
                     <span>{ Schemas.Term.toName(leafNode.field, leafNode.term) }</span>
-                    
+
                 </h3>
                 <div className="details row">
                     <div className="col-sm-12">
@@ -161,61 +163,38 @@ class Body extends React.Component {
     }
 }
 
-class Crumbs extends React.Component {
+const Crumbs = React.memo(function Crumbs({ path, schemas }){
+    const offsetPerDescendent = 10;
+    const isEmpty = path.length < 2;
+    if (isEmpty) return null;
+    //var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
 
-    header(isEmpty = false){
-        return (
-            <div className="crumb-header row">
-                <div className="field col-xs-5">
-                    Looking at
-                </div>
-                <div className="name col-xs-2">
-                    
-                </div>
-                { isEmpty ? null :
-                <div className="count col-xs-5 text-right">
-                    # Sets
-                </div>
-                }
-            </div>
-        );
-    }
-
-    render(){
-        var offsetPerDescendent = 10;
-        var isEmpty = this.props.path.length < 2;
-        if (isEmpty) return null;
-        //var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
-        
-        return (
-            <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
-                {/* this.header(isEmpty) */}
-                {
-                    this.props.path.slice(0,-1).map((n, i)=>{
-                        return (
-                            <div
-                                data-depth={i}
-                                className={"crumb row" + (i===0 ? ' first' : '')}
-                                key={i}
-                            >
-                                <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
-                                    { Schemas.Field.toName(n.field, Schemas.get()) }
-                                </div>
-                                <div className="name col-xs-5">
-                                    { n.name || Schemas.Term.toName(n.field, n.term) }
-                                </div>
-                                <div className="count col-xs-2 pull-right text-right">
-                                    { n.experiment_sets }
-                                </div>
+    return (
+        <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
+            {
+                path.slice(0,-1).map(function(n, i){
+                    return (
+                        <div
+                            data-depth={i}
+                            className={"crumb row" + (i===0 ? ' first' : '')}
+                            key={i}
+                        >
+                            <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
+                                { Schemas.Field.toName(n.field, Schemas.get()) }
                             </div>
-                        );
-                    })
-                }
-            </div>
-        );
-    }
-
-}
+                            <div className="name col-xs-5">
+                                { n.name || Schemas.Term.toName(n.field, n.term) }
+                            </div>
+                            <div className="count col-xs-2 pull-right text-right">
+                                { n.experiment_sets }
+                            </div>
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
+});
 
 
 const initialDetailCursorState = {
@@ -293,7 +272,7 @@ export default class ChartDetailCursor extends React.PureComponent {
 
     componentDidMount(){
         console.log('Mounted MouseDetailCursor');
-        this.setState({'mounted' : true});
+        this.setState({ 'mounted' : true });
     }
 
     getCursorOffset(){

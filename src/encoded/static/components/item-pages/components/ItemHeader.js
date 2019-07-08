@@ -327,30 +327,14 @@ export class BottomRow extends React.PureComponent {
  * @prop {string} href - Location from Redux store or '@id' of current Item. Used for View JSON button.
  * @prop {Object} schemas - Pass from app.state. Used for tooltips and such.
  */
-export class Wrapper extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.adjustChildren = this.adjustChildren.bind(this);
-    }
-
-    /** Passes down own props to all children */
-    adjustChildren(){
-        var { context, href, schemas, children, windowWidth } = this.props;
-        if (!context) return children;
-        // We shouldn't ever receive a single Child.
-        return React.Children.map(children, (child)=>
-            React.cloneElement(child, { context, href, windowWidth, schemas })
-        );
-    }
-
-    render(){
-        const { context, className } = this.props;
-        return (
-            <div className={"item-view-header " + (className || '') + (!context.description ? ' no-description' : '')}>
-                { this.adjustChildren() }
-            </div>
-        );
-    }
-
-}
+export const Wrapper = React.memo(function Wrapper(props){
+    const { context, className, href, schemas, children, windowWidth  } = props;
+    const extendedChildren = !context ? children : React.Children.map(children, (child)=>
+        React.cloneElement(child, { context, href, windowWidth, schemas })
+    );
+    return (
+        <div className={"item-view-header " + (className || '') + (!context.description ? ' no-description' : '')}>
+            { extendedChildren }
+        </div>
+    );
+});

@@ -111,4 +111,6 @@ const RegularCrumb = React.memo(function RegularCrumb(props){
                 <i className="icon icon-times"/>
             </span>
         </span>
+    );
 });
+
