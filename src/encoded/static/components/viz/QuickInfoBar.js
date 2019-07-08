@@ -63,8 +63,8 @@ export default class QuickInfoBar extends React.PureComponent {
     };
 
     static getDerivedStateFromProps(props, state){
-        var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null, navigate.getBrowseBaseParams());
-        var show = state.show && expSetFilters && _.keys(expSetFilters).length > 0 && state.show;
+        const expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null, navigate.getBrowseBaseParams());
+        const show = state.show && expSetFilters && _.keys(expSetFilters).length > 0 && state.show;
         return { show };
     }
 
@@ -133,7 +133,8 @@ export default class QuickInfoBar extends React.PureComponent {
 
     anyFiltersSet(){
         const { context, browseBaseState } = this.props;
-        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
+        const browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
         return (expSetFilters && _.keys(expSetFilters).length > 0);
     }
 

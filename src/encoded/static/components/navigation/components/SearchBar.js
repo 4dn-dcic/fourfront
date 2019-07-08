@@ -162,7 +162,7 @@ export class SearchBar extends React.PureComponent{
         }
 
         return (
-            <form className={"navbar-search-form-container navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (this.hasInput() ? ' has-input' : '')}
+            <form className={"navbar-search-form-container navbar-form navbar-right" + (searchQueryFromHref ? ' has-query' : '') + (searchBoxHasInput ? ' has-input' : '')}
                 action={searchAllItems ? "/search/" : "/browse/" } method="GET">
                 { this.selectItemTypeDropdown(!!(searchBoxHasInput || searchQueryFromHref)) }
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"

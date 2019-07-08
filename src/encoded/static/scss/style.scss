@@ -1,3 +1,4 @@
+// SMACSS-based architecture (http://smacss.com/)
 // Override Bootstrap default variables:
 
 //$screen-md:                                 960px;
@@ -30,12 +31,20 @@ $link-color: #428bca;
 $expset-table-border-color : #eee;
 
 // Bootstrap default variables and mixins
+// Some of these are used by `encoded/base` & others
 @import "bootstrap/variables";
 @import "bootstrap/mixins";
 
+// Common mixins, some used by base & bootstrap-theme-overrides
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/mixins.scss";
+
 // Fourfront variables & mixins - (some used in overridden bootstrap CSS)
-@import "encoded/mixins-custom";
+// Some are used in shared-portal-components scss
 @import "encoded/base";
+@import "encoded/bootstrap-theme-overrides";
+
+
+/*** Bootstrap SCSS ***/
 
 // Reset
 @import "bootstrap/normalize";
@@ -85,9 +94,15 @@ $expset-table-border-color : #eee;
 @import "fontawesome/font-awesome";
 
 
-// ENCODE Layout etc. SCSS
+// Common shared portal components -
 
-// SMACSS-based architecture (http://smacss.com/)
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
+
+
+// ENCODE Layout etc.
 
 @import "encoded/layout";
 // @import "encoded/modals"; -- Deleted
@@ -96,14 +111,12 @@ $expset-table-border-color : #eee;
         "encoded/modules/lists",
         "encoded/modules/navbar",
         "encoded/modules/tables",
-        "encoded/modules/facet",
         "encoded/modules/search",
         "encoded/modules/charts",
         "encoded/modules/tooltip",
         "encoded/modules/item-pages",
         "encoded/modules/static-pages";
 @import "encoded/state";
-@import "encoded/theme";
 
 // Utility classes - Bootstrap 3, keep last
 @import "bootstrap/utilities";

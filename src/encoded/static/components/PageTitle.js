@@ -128,12 +128,12 @@ export default class PageTitle extends React.PureComponent {
      * @public
      * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
      * @param {string} href - Current URI or href.
-     * @param {{}[]} [schemas=Schemas.get()] - List of schemas as returned from Redux.
+     * @param {{}[]} schemas - List of schemas as returned from Redux.
      * @param {boolean} [isMounted=false] - Whether page is currently mounted. Needed to determine whether can use LocalizedTime and similar.
      * @param {string} currentAction - Current action if any, e.g. 'edit', 'add'.
      * @returns {{ title: string, subtitle: ?string, calloutTitle: ?string }} Object with title and any subtitle/calloutTitle.
      */
-    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false, currentAction){
+    static calculateTitles(context, href, schemas, isMounted = false, currentAction){
         var currentPathName = null,
             currentPathRoot, title,
             atId = object.atIdFromObject(context),
@@ -170,7 +170,7 @@ export default class PageTitle extends React.PureComponent {
                     'title' : "Creating",
                     'calloutTitle' : (
                         currentPathName.indexOf('/search/') > -1 ?
-                            Schemas.getSchemaTypeFromSearchContext(context) : schemaTransforms.getItemTypeTitle(context, schemas)
+                            schemaTransforms.getSchemaTypeFromSearchContext(context) : schemaTransforms.getItemTypeTitle(context, schemas)
                     )
                 };
             }
@@ -335,7 +335,7 @@ export default class PageTitle extends React.PureComponent {
         }
 
         var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(
-            context, href, (schemas || Schemas.get()), mounted, currentAction
+            context, href, schemas, mounted, currentAction
         );
 
         if (title) {
