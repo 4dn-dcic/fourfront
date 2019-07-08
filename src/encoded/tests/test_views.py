@@ -1,6 +1,7 @@
 import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 from time import sleep
+from snovault import TYPES
 
 
 def _type_length():
@@ -266,9 +267,27 @@ def test_jsonld_term(testapp):
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
 def test_profiles(testapp, item_type):
     from jsonschema_serialize_fork import Draft4Validator
+    # this will only be non-abstract types
     res = testapp.get('/profiles/%s.json' % item_type).maybe_follow(status=200)
     errors = Draft4Validator.check_schema(res.json)
     assert not errors
+    # added from snovault.schema_views._annotated_schema
+    assert 'rdfs:seeAlso' in res.json
+    assert 'rdfs:subClassOf' in res.json
+    assert 'children' in res.json
+    assert res.json['isAbstract'] is False
+
+
+def test_profiles_all(testapp, registry):
+    from jsonschema_serialize_fork import Draft4Validator
+    res = testapp.get('/profiles/').maybe_follow(status=200)
+    # make sure all types are present, including abstract types
+    for ti in registry[TYPES].by_item_type.values():
+        assert ti.name in res.json
+        assert res.json[ti.name]['isAbstract'] is False
+    for ti in registry[TYPES].by_abstract_type.values():
+        assert ti.name in res.json
+        assert res.json[ti.name]['isAbstract'] is True
 
 
 def test_bad_frame(testapp, human):
