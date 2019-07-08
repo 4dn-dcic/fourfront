@@ -82,13 +82,14 @@ export default class ReleaseUpdates extends React.Component {
     }
 
     viewUpdates(){
-        if (this.state.updateData === null){
+        const { updateData, isAdmin } = this.state;
+        if (updateData === null){
             return(
                 <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}>
                     <i className="mt-3 icon icon-spin icon-circle-o-notch"/>
                 </div>
             );
-        } else if (this.state.updateData.length == 0){
+        } else if (updateData.length == 0){
             return (
                 <div className="text-center">
                     <h5>No results.</h5>
@@ -97,14 +98,9 @@ export default class ReleaseUpdates extends React.Component {
         } else {
             return(
                 <div className="item-page-container">
-                    {this.state.updateData.map((update) =>
-                        <SingleUpdate
-                            {...this.props}
-                            id={update.uuid}
-                            key={update.uuid}
-                            isAdmin={this.state.isAdmin}
-                            updateData={update}
-                        />
+                    { updateData.map((update) =>
+                        <SingleUpdate {...this.props} id={update.uuid}
+                            key={update.uuid} isAdmin={isAdmin} updateData={update} />
                     )}
                 </div>
             );
