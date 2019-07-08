@@ -23,7 +23,7 @@ from .base import (
     })
 class Individual(Item):
     """the base class for individual collection."""
-
+    item_type = 'individual'
     base_types = ['Individual'] + Item.base_types
     schema = load_schema('encoded:schemas/individual.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + ['organism.name']

@@ -106,7 +106,7 @@ def test_order_complete(app, conn):
     master_types = []
     profiles = testapp.get('/profiles/?frame=raw').json
     for a_type in profiles:
-        if profiles[a_type].get('id'):
+        if profiles[a_type].get('id') and profiles[a_type]['isAbstract'] is False:
             schema_name = profiles[a_type]['id'].split('/')[-1][:-5]
             master_types.append(schema_name)
     print(ORDER)
