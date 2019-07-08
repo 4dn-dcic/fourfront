@@ -5,12 +5,12 @@ import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
 import Graph, { parseAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
 import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 
@@ -82,7 +82,7 @@ export default class WorkflowRunTracingView extends DefaultItemView {
 
         var tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/',
             callback = (r) => {
-                requestAnimationFrame(()=>{
+                raf(()=>{
                     if (Array.isArray(r) && r.length > 0){
                         this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
                     } else {

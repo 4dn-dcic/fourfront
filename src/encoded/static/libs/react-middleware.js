@@ -6,7 +6,8 @@ import { transformResponse } from 'subprocess-middleware';
 import fs from 'fs';
 import { store, mapStateToProps } from './../store';
 import { Provider, connect } from 'react-redux';
-import { console, object, JWT } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+// We get a different console w. different methods & properties on server-side.
+import { console as browserConsole, object, JWT } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 
 

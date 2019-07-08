@@ -6,8 +6,8 @@ import url from 'url';
 import _ from 'underscore';
 import { DropdownItem, DropdownButton } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
 import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
-import { console, navigate, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-
+import { console, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate } from './../../util';
 
 
 export class SearchBar extends React.PureComponent{
@@ -25,6 +25,10 @@ export class SearchBar extends React.PureComponent{
                 }
             }
         ));
+    }
+
+    static hasInput(typedSearchQuery){
+        return (typedSearchQuery && typeof typedSearchQuery === 'string' && typedSearchQuery.length > 0) || false;
     }
 
     constructor(props){
@@ -45,17 +49,17 @@ export class SearchBar extends React.PureComponent{
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (nextProps.href !== this.props.href){
-            var query = searchFilters.searchQueryStringFromHref(nextProps.href) || '';
-            if (query !== this.state.typedSearchQuery){
-                this.setState({ 'typedSearchQuery' : query });
-            }
+    componentDidUpdate(pastProps){
+        const { href } = this.props;
+        if (pastProps.href !== href){
+            const query = searchFilters.searchQueryStringFromHref(href) || '';
+            this.setState(function({ typedSearchQuery }){
+                if (query !== typedSearchQuery){
+                    return { 'typedSearchQuery' : query };
+                }
+                return null;
+            });
         }
-    }
-
-    hasInput(typedSearchQuery = this.state.typedSearchQuery){
-        return (typedSearchQuery && typeof typedSearchQuery === 'string' && typedSearchQuery.length > 0) || false;
     }
 
     getCurrentResultsSearchQuery(hrefParts){
@@ -79,17 +83,17 @@ export class SearchBar extends React.PureComponent{
     }
 
     onSearchInputChange(e){
-        var newValue = e.target.value;
-        var state = { 'typedSearchQuery' : newValue };
-        if (!this.hasInput(newValue) && this.props.currentAction !== 'selection') {
+        const newValue = e.target.value;
+        const state = { 'typedSearchQuery' : newValue };
+        if (!SearchBar.hasInput(newValue) && this.props.currentAction !== 'selection') {
             state.searchAllItems = false;
         }
         this.setState(state);
     }
 
     onSearchInputBlur(e){
-        var lastQuery = searchFilters.searchQueryStringFromHref(this.props.href);
-        if (this.hasInput(lastQuery) && !this.hasInput(this.state.typedSearchQuery)) {
+        const lastQuery = searchFilters.searchQueryStringFromHref(this.props.href);
+        if (SearchBar.hasInput(lastQuery) && !SearchBar.hasInput(this.state.typedSearchQuery)) {
             this.setState({ 'typedSearchQuery' : lastQuery });
         }
     }
@@ -145,7 +149,7 @@ export class SearchBar extends React.PureComponent{
                     </button>
                 )
             ),
-            searchBoxHasInput   = this.hasInput(),
+            searchBoxHasInput   = SearchBar.hasInput(typedSearchQuery),
             query               = {}, // Don't preserve facets.
             browseBaseParams    = navigate.getBrowseBaseParams();
 

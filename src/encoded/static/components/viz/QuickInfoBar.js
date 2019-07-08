@@ -5,10 +5,12 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { Filters, console,  analytics, navigate } from '../util';
-import { Toggle } from './../forms/components';
-import { ActiveFiltersBar } from './components/ActiveFiltersBar';
 import ReactTooltip from 'react-tooltip';
+import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Filters, navigate } from '../util';
+import { Toggle } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Toggle';
+import { ActiveFiltersBar } from './components/ActiveFiltersBar';
+
 
 
 
@@ -49,8 +51,8 @@ export default class QuickInfoBar extends React.PureComponent {
         return { current, total };
     }
 
-    static expSetFilters = memoize(function(contextFilters, browseBaseState){
-        return Filters.contextFiltersToExpSetFilters(contextFilters, browseBaseState);
+    static expSetFilters = memoize(function(contextFilters, browseBaseParams){
+        return searchFilters.contextFiltersToExpSetFilters(contextFilters, browseBaseParams);
     });
 
     static defaultProps = {
@@ -61,7 +63,7 @@ export default class QuickInfoBar extends React.PureComponent {
     };
 
     static getDerivedStateFromProps(props, state){
-        var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null, props.browseBaseState);
+        var expSetFilters = QuickInfoBar.expSetFilters((props.context && props.context.filters) || null, navigate.getBrowseBaseParams());
         var show = state.show && expSetFilters && _.keys(expSetFilters).length > 0 && state.show;
         return { show };
     }
@@ -99,7 +101,7 @@ export default class QuickInfoBar extends React.PureComponent {
 
     /** @private */
     componentDidMount(){
-        this.setState({'mounted' : true});
+        this.setState({ 'mounted' : true });
     }
 
     /**
@@ -271,7 +273,7 @@ class Stat extends React.PureComponent {
         'longLabel' : 'Experiments',
         'classNameID': 'experiments',
         'id' : null
-    }
+    };
 
     /**
      * { classNameID : @type }
@@ -283,33 +285,36 @@ class Stat extends React.PureComponent {
     }
 
     filtersHrefChunk(){
-        if (this.props.classNameID === 'experiments'){
-            return Filters.expSetFiltersToURLQuery(Filters.transformExpSetFiltersToExpFilters(this.props.expSetFilters));
-        } else if (this.props.classNameID === 'expsets') {
-            return Filters.expSetFiltersToURLQuery(this.props.expSetFilters);
-        } else if (this.props.classNameID === 'files') {
-            return Filters.expSetFiltersToURLQuery(Filters.transformExpSetFiltersToFileFilters(this.props.expSetFilters));
+        const { expSetFilters, classNameID } = this.props;
+        if (classNameID === 'experiments'){
+            return searchFilters.expSetFiltersToURLQuery(Filters.transformExpSetFiltersToExpFilters(expSetFilters));
+        } else if (classNameID === 'expsets') {
+            return searchFilters.expSetFiltersToURLQuery(expSetFilters);
+        } else if (classNameID === 'files') {
+            return searchFilters.expSetFiltersToURLQuery(Filters.transformExpSetFiltersToFileFilters(expSetFilters));
         }
     }
 
     label(){
-        if (!this.props.value) {
-            return this.props.shortLabel;
+        const { value, shortLabel, expSetFilters, href } = this.props;
+        if (!value) {
+            return shortLabel;
         }
 
         // Always goto Browse page for now
-        var filtersHrefChunk = Filters.expSetFiltersToURLQuery(this.props.expSetFilters); //this.filtersHrefChunk();
+        var filtersHrefChunk = searchFilters.expSetFiltersToURLQuery(expSetFilters); //this.filtersHrefChunk();
         var targetHref = navigate.getBrowseBaseHref();
         targetHref += (filtersHrefChunk ? navigate.determineSeparatorChar(targetHref) + filtersHrefChunk : '');
 
-        if (typeof this.props.href === 'string'){
+        if (typeof href === 'string'){
             // Strip hostname/port from this.props.href and compare pathnames to check if we are already on this page.
-            if (navigate.isBrowseHref(this.props.href)) return <span>{ this.props.shortLabel }</span>;
-            if (this.props.href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ this.props.shortLabel }</span>;
+            if (navigate.isBrowseHref(href)) return <span>{ shortLabel }</span>;
+            // eslint-disable-next-line no-useless-escape
+            if (href.replace(/(http:|https:)(\/\/)[^\/]+(?=\/)/, '') === targetHref) return <span>{ shortLabel }</span>;
         }
 
         return (
-            <a href={targetHref}>{ this.props.shortLabel }</a>
+            <a href={targetHref}>{ shortLabel }</a>
         );
     }
 

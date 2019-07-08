@@ -4,6 +4,7 @@ import React from 'react';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';

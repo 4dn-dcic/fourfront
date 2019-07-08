@@ -7,8 +7,8 @@ import queryString from 'query-string';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { Checkbox, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';

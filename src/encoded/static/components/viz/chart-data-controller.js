@@ -1,13 +1,10 @@
 'use strict';
 
-/** @ignore */
-var React = require('react');
+import React from 'react';
 import PropTypes from 'prop-types';
-var _ = require('underscore');
-import queryString from 'querystring';
-var { expFxn, Filters, Schemas, ajax, console, layout, isServerSide, navigate, object } = require('./../util');
-import ChartDetailCursor from './ChartDetailCursor';
-var vizUtil = require('./utilities');
+import _ from 'underscore';
+import { ajax, console, isServerSide, object, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate } from './../util';
 
 
 /**
@@ -51,83 +48,7 @@ var state = {
     'barplot_data_filtered'   : null,
     'barplot_data_unfiltered' : null,
     'barplot_data_fields'     : null,
-    'isLoadingChartData'      : false,
-
-    chartFieldsHierarchy: [
-        //{
-        //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
-        //    title : "Primary Organism",
-        //    name : function(val, id, exps, filteredExps){
-        //        return Schemas.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
-        //    }
-        //},
-        //{ title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-        //{ title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-        { title : "Experiment Type", field : 'experiments_in_set.experiment_type.display_title' },
-        {
-            title : "Digestion Enzyme",
-            field : 'experiments_in_set.digestion_enzyme.name',
-            /** @ignore */
-            description : function(val, id, exps, filteredExps, exp){
-                return 'Enzyme ' + val;
-            }
-        },
-        {
-            title : "Experiment Set",
-            aggregatefield : "experiment_sets.accession",
-            field : "accession",
-            isFacet : false,
-            size : 1
-        },
-        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
-        //{
-        //    title: "Experiment Accession",
-        //    field : 'experiments_in_set.accession',
-        //    //size : function(val, id, exps, filteredExps, exp, parentNode){
-        //    //    return 1 / (_.findWhere(exp.experiment_sets, { 'accession' : parentNode.term }).experiments_in_set);
-        //    //},
-        //    color : "#eee",
-        //    isFacet : false,
-        //}
-    ],
-    /** @ignore */
-    chartFieldsHierarchyRight : [
-        {
-            field : 'experiments_in_set.biosample.biosource.individual.organism.name',
-            title : "Primary Organism",
-            /** @ignore */
-            name : function(val, id, exps, filteredExps){
-                return Schemas.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
-            }
-        },
-        { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-        { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-        //{ title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-        //{
-        //    title : "Digestion Enzyme",
-        //    field : 'experiments_in_set.digestion_enzyme.name',
-        //    description : function(val, id, exps, filteredExps, exp){
-        //        return 'Enzyme ' + val;
-        //    }
-        //},
-        {
-            title : "Experiment Set",
-            aggregatefield : "experiment_sets.accession",
-            field : "accession",
-            isFacet : false,
-            size : 1
-        },
-        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
-        //{
-        //    title: "Experiment Accession",
-        //    field : 'experiments_in_set.accession',
-        //    //size : function(val, id, exps, filteredExps, exp, parentNode){
-        //    //    return 1 / (_.findWhere(exp.experiment_sets, { 'accession' : parentNode.term }).experiments_in_set);
-        //    //},
-        //    color : "#eee",
-        //    isFacet : false,
-        //}
-    ]
+    'isLoadingChartData'      : false
 };
 
 /** Private state & functions **/
@@ -335,10 +256,10 @@ export const ChartDataController = {
 
         // Subscribe to Redux store updates to listen for (changed href + context.filters) || browseBaseState.
         reduxSubscription = refs.store.subscribe(function(){
-            var reduxStoreState     = refs.store.getState(),
-                prevHref            = refs.href,
-                prevBrowseBaseState = refs.browseBaseState,
-                prevContextFilters  = refs.contextFilters || []; // If falsy, we get current ones instead of 'no filters'
+            const reduxStoreState     = refs.store.getState();
+            const prevHref            = refs.href;
+            const prevBrowseBaseState = refs.browseBaseState;
+            const prevContextFilters  = refs.contextFilters || []; // If falsy, we get current ones instead of 'no filters'
 
             refs.href               = reduxStoreState.href;
             refs.browseBaseState    = reduxStoreState.browseBaseState;
@@ -349,8 +270,11 @@ export const ChartDataController = {
                 return;
             }
 
-            var prevSearchQuery = Filters.searchQueryStringFromHref(prevHref),
-                nextSearchQuery = Filters.searchQueryStringFromHref(refs.href);
+            const prevSearchQuery = searchFilters.searchQueryStringFromHref(prevHref);
+            const nextSearchQuery = searchFilters.searchQueryStringFromHref(refs.href);
+
+            const prevBrowseBaseParams = navigate.getBrowseBaseParams(prevBrowseBaseState);
+            const nextBrowseBaseParams = navigate.getBrowseBaseParams(refs.browseBaseState);
 
             // Step 1. Check if need to refetch both unfiltered & filtered data.
             if (refs.browseBaseState !== prevBrowseBaseState){
@@ -362,10 +286,10 @@ export const ChartDataController = {
             // if we are not on the browse page, no need to get chart info
             var isBrowseHrefPrev = prevHref.indexOf('/browse/') !== -1,
                 isBrowseHrefNext = refs.href.indexOf('/browse/') !== -1,
-                prevExpSetFilters = isBrowseHrefPrev ? Filters.contextFiltersToExpSetFilters(prevContextFilters,  prevBrowseBaseState ) : {},
-                nextExpSetFilters = isBrowseHrefNext ? Filters.contextFiltersToExpSetFilters(refs.contextFilters, refs.browseBaseState) : {},
+                prevExpSetFilters = isBrowseHrefPrev ? searchFilters.contextFiltersToExpSetFilters(prevContextFilters,  prevBrowseBaseParams) : {},
+                nextExpSetFilters = isBrowseHrefNext ? searchFilters.contextFiltersToExpSetFilters(refs.contextFilters, nextBrowseBaseParams) : {},
                 didFiltersChange = (
-                    !Filters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
+                    !searchFilters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
                     (prevHref && (prevSearchQuery !== nextSearchQuery))
                 );
 
@@ -566,12 +490,14 @@ export const ChartDataController = {
             reduxStoreState = refs.store.getState();
         }
 
-        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters(
+
+        const currentBrowseBaseParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
+        const currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters(
             (reduxStoreState.context && reduxStoreState.context.filters) || null,
-            opts.browseBaseState || null
+            currentBrowseBaseParams
         );
 
-        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
+        var searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(reduxStoreState.href);
         var filtersSet = (_.keys(currentExpSetFilters).length > 0) || searchQuery;
 
         var barplot_data_filtered = null,
@@ -624,7 +550,7 @@ export const ChartDataController = {
             var filteredSearchParams = navigate.mergeObjectsOfLists(
                 { 'q' : searchQuery || null },
                 baseSearchParams,
-                Filters.expSetFiltersToJSON(currentExpSetFilters)
+                searchFilters.expSetFiltersToJSON(currentExpSetFilters)
             );
             currentRequests.filtered = ajax.load(
                 refs.baseSearchPath,
@@ -660,13 +586,13 @@ export const ChartDataController = {
 
         var fieldsQuery = '?' + _.map(state.barplot_data_fields, function(f){ return 'field=' + f; }).join('&');
 
-        var currentExpSetFilters = Filters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
-        var searchQuery = opts.searchQuery || Filters.searchQueryStringFromHref(reduxStoreState.href);
+        var currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters((reduxStoreState.context && reduxStoreState.context.filters) || null);
+        var searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(reduxStoreState.href);
 
         var filteredSearchParams = navigate.mergeObjectsOfLists(
             { 'q' : searchQuery || null },
             navigate.getBrowseBaseParams(opts.browseBaseState || null),
-            Filters.expSetFiltersToJSON(currentExpSetFilters)
+            searchFilters.expSetFiltersToJSON(currentExpSetFilters)
         );
 
         if (currentRequests.filtered !== null){
