@@ -116,8 +116,8 @@
         }
     },
     "facets": {
-        "slim_terms.term_name": {
-            "title": "Slim Terms"
+        "slim_terms.display_title": {
+            "title": "Category"
         },
         "source_ontology.ontology_name" : {
             "title" : "Ontology"
@@ -127,10 +127,10 @@
         "term_id": {
             "title": "Term ID"
         },
-        "slim_terms": {
+        "slim_terms.display_title": {
             "title": "Category"
         },
-        "source_ontology": {
+        "source_ontology.ontology_name": {
             "title": "Ontology",
             "default_hidden": true
         },
