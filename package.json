@@ -109,7 +109,7 @@
     "radium": "^0.25.1",
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
-    "react-bootstrap": "0.32.4",
+    "react-bootstrap": "1.0.0-beta.9",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.3.0",
     "react-json-tree": "^0.11.2",

@@ -10,13 +10,6 @@ $tableHeadFootBackgroundColor: #000000;
 
 $mobile-font-factor: 1;
 
-$navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
-$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
-$navbar-link-color : #777;
-$navbar-link-hover-color : #000000;
-$navbar-link-active-color : #000;
-$navbar-link-active-background-color: #eee;
-
 $modal-backdrop-opacity : 0.8;
 
 $facetlist-selected-term-color : #248bac;
@@ -28,6 +21,61 @@ $badge-color-internal-action: #d0d0d0;
 $font-family-sans-serif     : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
 $font-family-serif          : "Yrsa", "Times New Roman", Georgia, Times, serif;
 $font-family-monospace      : "Source Code Pro", Consolas, monospace;
+
+
+// Override Bootstrap default variables:
+
+$border-radius-base:                        3px;
+$border-radius-large:                       4px;
+$border-radius-small:                       2px;
+$input-border-radius:                       3px;
+//$grid-float-breakpoint:                     $screen-md;
+
+
+$navbar-height:                             80px;
+$navbar-inverse-link-active-bg:             #ffffff;
+$navbar-inverse-link-active-color:          #000000;
+$navbar-inverse-toggle-hover-bg:            #ffffff;
+$navbar-inverse-toggle-border-color:        #999999;
+$navbar-inverse-link-color:                 #999999;
+$navbar-default-brand-color:                #999999;
+
+$navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
+$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
+$navbar-link-color : #777;
+$navbar-link-hover-color : #000000;
+$navbar-link-active-color : #000;
+$navbar-link-active-background-color: #eee;
+
+$headings-font-weight:                      bold;
+$grid-gutter-width:                         20px;
+
+$link-color: #428bca;
+
+/** Setup some other variables for tables, etc. **/
+$expset-table-border-color : #eee;
+
+
+$primary:       #009aad;
+$secondary:     #6c757d;
+$success:       #4C994C;
+$info:          #4F689E;
+$warning:       #E59545;
+$danger:        #B24342;
+$light:         #f8f9fa;
+$dark:          #343a40;
+// Ext:
+$primary-dark: #22656d;
+
+
+$brand-warning: $warning;
+$brand-success: $success;
+$brand-danger: $danger;
+$brand-info: $info;
+$brand-primary: $primary;
+$brand-primary-dark: $primary-dark;
+$brand-secondary: $secondary;
+
 
 @mixin planned-submitted-cell-styles {
 

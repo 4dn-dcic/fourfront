@@ -202,20 +202,20 @@ export class NavigationBar extends React.PureComponent {
                 { inclBigMenu ? <div className="big-dropdown-menu-background" onClick={this.resetOpenDropdownID} /> : null }
                 <div id="top-nav" className="navbar-fixed-top">
                     <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
-                    <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main"
+                    <Navbar label="main" className="navbar-main"
                         id="navbar-icon" onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
-                        <Navbar.Header>
+                        <Navbar.Brand>
                             <FourfrontLogo onClick={this.resetOpenDropdownID} />
                             <Navbar.Toggle>
                                 <i className="icon icon-bars icon-fw"></i>
                             </Navbar.Toggle>
-                        </Navbar.Header>
+                        </Navbar.Brand>
                         <Navbar.Collapse>
                             <Nav>
                                 { browseMenuItemOpts ?
                                     <NavItem key={browseMenuItemOpts.id} id={browseMenuItemOpts.id}
                                         href={getActionURL(browseMenuItemOpts, href)}
-                                        active={isActionActive(browseMenuItemOpts, href)}>
+                                        active={(!!(isActionActive(browseMenuItemOpts, href))).toString()}>
                                         { browseMenuItemOpts.title || "Browse" }
                                     </NavItem>
                                     : null }

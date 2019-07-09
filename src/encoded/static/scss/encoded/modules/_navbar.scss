@@ -5,10 +5,17 @@ $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .3s;
 $navbar-transition-easing: ease-out;
 
+$navbar-light-active-color: #000;
+$navbar-light-hover-color: #000;
+$navbar-link-active-bg: #eee;
+$navbar-link-hover-bg: #d7d7d7;
+
 #top-nav {
     background: #ffffff;
     margin-bottom: 0;
     transform: translate3d(0,0,0);
+    width: 100%;
+    z-index: 100;
 
     @media screen and (min-width: $navbar-fixed-breakpoint){
         background-color: rgba(255,255,255,0.933);
@@ -24,6 +31,8 @@ $navbar-transition-easing: ease-out;
         min-height: $navbar-full-height; /* Mobile default */
         line-height: $navbar-full-height;
         position: relative;
+        padding: 0 10px;
+        
 
         @media screen and (min-width: $navbar-fixed-breakpoint){
             
@@ -151,7 +160,7 @@ $navbar-transition-easing: ease-out;
                         font-size: 1.25rem;
                         line-height: inherit;
                         vertical-align: bottom;
-                        color: $navbar-default-link-active-bg;
+                        color: $navbar-link-active-background-color;
                     }
                 }
                 > .img-container > svg#fourfront_logo_svg {
@@ -180,9 +189,11 @@ $navbar-transition-easing: ease-out;
         }
     }
 
-    .nav > li { 
+    .nav > li,
+    .navbar-nav > li { 
         
-        > a {
+        > a,
+        > .nav-dropdown-btn > button {
             font-size: 1.125rem;
             font-weight: 400;
             color: $navbar-link-color;
@@ -200,13 +211,17 @@ $navbar-transition-easing: ease-out;
             }
 
             &.has-image {
-                > a {
+                > a,
+                > div > button {
                     padding-left: 8px;
                     img.account-icon-image {
                         margin-right: 8px;
                         border-radius: 8px;
                         width: 30px;
                         height: 30px;
+                    }
+                    span {
+                        vertical-align: middle;
                     }
                     @media screen and (min-width: $screen-lg-min){
                         padding-left: 10px;
@@ -237,7 +252,7 @@ $navbar-transition-easing: ease-out;
         &.dropdown-open-for > a {
             color: $navbar-link-hover-color; /* Set in _base.scss */
             text-shadow: 0 0 0px $navbar-link-hover-color;
-            background-color: $navbar-default-link-active-bg;
+            background-color: $navbar-link-active-background-color;
 
             i.icon {
                 text-shadow: none;
@@ -246,14 +261,53 @@ $navbar-transition-easing: ease-out;
 
         /* Disabled sign-in link */
         > a[disabled] {
-            color: $gray-light;
+            color: $gray-300;
 
             &:focus,
             &:hover {
                 background-color: transparent;
-                color: $gray-light;
+                color: $gray-300;
                 cursor: default;
             }
+        }
+
+    }
+
+    ul.navbar-nav li.dropdown {
+
+        > .nav-dropdown-btn {
+            > button {
+                /** Reset button style **/
+                /* color: #000; */
+                border-color: transparent;
+                background-color: transparent;
+                color: $navbar-light-color;
+                border: none;
+                padding-top: 0;
+                padding-bottom: 0;
+                height: inherit;
+                line-height: inherit;
+                min-height: inherit;
+                border-radius: 0;
+
+                &:hover {
+                    color: $navbar-light-hover-color;
+                    background-color: $navbar-link-hover-bg;
+                }
+                &:active, &.active, &:focus {
+                    color: $navbar-light-active-color;
+                    background-color: $navbar-link-active-bg;
+                }
+                &:focus {
+                    outline: none;
+                    box-shadow: none;
+                }
+            }
+        }
+
+        .dropdown-item {
+            min-height: none;
+            line-height: $line-height-base;
         }
 
     }
@@ -602,7 +656,7 @@ $navbar-transition-easing: ease-out;
         }
     }
 
-    @media screen and (min-width: $grid-float-breakpoint) {
+    @media screen and (min-width: $navbar-fixed-breakpoint) {
         /* left: -1px; */
         /* margin-top: 1px !important; */
         padding: 10px 0;
@@ -638,7 +692,7 @@ $navbar-transition-easing: ease-out;
     margin-bottom: 0;//($navbar-full-height - $navbar-small-height) / 2;
     line-height: inherit;
 
-    @media screen and (max-width: $grid-float-breakpoint-max){
+    @media screen and (max-width: $navbar-fixed-breakpoint - 1){
         line-height: $navbar-small-height;
     }
 
@@ -668,7 +722,7 @@ $navbar-transition-easing: ease-out;
         
     }*/
 
-    @media (max-width: $grid-float-breakpoint-max) {
+    @media (max-width: $navbar-fixed-breakpoint - 1) {
         // Dropdowns get custom display when collapsed
 
         margin-bottom: 0px !important;
@@ -696,7 +750,7 @@ $navbar-transition-easing: ease-out;
             }
 
             > li > a {
-                line-height: $line-height-computed;
+                //line-height: $line-height-computed;
                 &:hover,
                 &:focus {
                     color: #fff;
@@ -704,7 +758,7 @@ $navbar-transition-easing: ease-out;
             }
                         
             > li > div > a {
-                line-height: $line-height-computed;
+                //line-height: $line-height-computed;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;
@@ -713,7 +767,7 @@ $navbar-transition-easing: ease-out;
             }
 
             > li > div > div > a {
-                line-height: $line-height-computed;
+                //line-height: $line-height-computed;
                 &:hover,
                 &:focus {
                     text-decoration: none !important;

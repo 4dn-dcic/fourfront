@@ -44,7 +44,7 @@
 /** Overrides for own styled btns **/
 
 .btn.btn-primary-dark {
-    @include button-variant($btn-primary-color, $brand-primary-dark, $brand-primary-dark);
+    @include button-variant($brand-primary-dark, $brand-primary-dark, $brand-primary-dark);
 }
 
 .btn.btn-primary {
@@ -74,43 +74,56 @@
 }
 
 .btn-outline-primary-light {
+    @include button-variant($brand-primary, $brand-primary);
+    /*
     color: $brand-primary;
     border-color: $brand-primary;
     &:hover, &:active, &.active {
         color: $btn-primary-color;
         background-color: $brand-primary;
     }
+    */
 }
 
 .btn-outline-primary {
+    @include button-variant($brand-primary-dark, $brand-primary-dark);
+    /*
     color: $brand-primary-dark;
     border-color: $brand-primary-dark;
     &:hover, &:active, &.active {
         color: $btn-primary-color;
         background-color: $brand-primary-dark;
     }
+    */
 }
 
 .btn-outline-default {
+    @include button-variant($dark, $dark);
+    /*
     color: $btn-default-color;
     border-color: $btn-default-color;
     &:hover, &:active, &.active {
         color: $btn-default-bg;
         background-color: $btn-default-color;
     }
+    */
 }
 
 /** Uses Bootstrap v4 (gray-600) colors, not default colors **/
 .btn-outline-secondary {
+    @include button-variant($gray-800, $gray-600);
     /* color: #6c757d; */
-    color: #333; /* Might change back to above */
+    /*
+    color: #333; // Might change back to above
     border-color: #6c757d;
     &:hover, &:active, &.active {
         color: #fff;
         background-color: #6c757d;
     }
+    */
 }
 
+/*
 .btn-outline-success {
     color: $brand-success;
     border-color: $brand-success;
@@ -163,11 +176,11 @@
         color: $btn-default-color;
         background-color: $btn-primary-color;
     }
-    /*
-    &:focus {
-        color: $btn-primary-color;
-        border-color: $btn-primary-color;
-        background-color: transparent;
-    }
-    */
+    
+    //&:focus {
+    //    color: $btn-primary-color;
+    //    border-color: $btn-primary-color;
+    //    background-color: transparent;
+    //}
 }
+*/

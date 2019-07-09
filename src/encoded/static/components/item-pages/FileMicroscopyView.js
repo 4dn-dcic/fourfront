@@ -3,7 +3,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Thumbnail } from 'react-bootstrap';
 import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { expFxn } from './../util';
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
@@ -93,15 +92,23 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         if (thumbnailSrc.slice(-5) === '/100/') {
             thumbnailSrc = thumbnailSrc.slice(0, -5) + '/360/';
         }
-        thumbnailLink = (
-            <Thumbnail href={ file.omerolink || null } className="inline-block" alt="OMERO Thumbnail" target="_blank"
-                src={thumbnailSrc} style={{ margin : '12px 0px 0px 0px' }} data-tip={ file.omerolink ? "View in OMERO" : null} />
-        );
+        if (file.omerolink){
+            thumbnailLink = (
+                <a href={file.omerolink} className="image-wrapper inline-block img-thumbnail" target="_blank"
+                    data-tip="View in OMERO" rel="noopener noreferrer">
+                    <img className="embedded-item-image" src={thumbnailSrc} alt="OMERO Thumbnail" />
+                </a>
+            );
+        } else {
+            thumbnailLink = (
+                <img className="embedded-item-image image-wrapper inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
+            );
+        }
     } else if (file.omerolink){
         thumbnailLink = (
-            <button type="button" className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
                 View in OMERO
-            </button>
+            </a>
         );
     }
 

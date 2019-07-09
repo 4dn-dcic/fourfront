@@ -52,7 +52,7 @@ class Body extends React.Component {
         const renderedActions = _.map(actions, (action, i, a)=>{
             const title = typeof action.title === 'function' ? action.title(this.props) : action.title;
             const disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
-            const cls = "btn btn-primary btn-sm" (a.length < 2 ? " btn-block" : "");
+            const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " btn-block" : "");
             return (
                 <div className={"button-container col-xs-" + colWidth} key={title || i}>
                     <button type="button" className={cls} disabled={disabled || false}

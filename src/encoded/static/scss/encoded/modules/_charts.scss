@@ -2346,7 +2346,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     background-color: #f7f7f7;
                     border-radius: 0 10px 0 0;
                     border-top: 3px solid #eee;
-                    @include gradient-vertical($start-color: #f7f7f7, $end-color: #fff);
+                    @include gradient-y($start-color: #f7f7f7, $end-color: #fff);
                 }
             }
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
 import memoize from 'memoize-one';
-import { FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
+import { FormGroup, FormLabel, FormControl } from 'react-bootstrap';
 
 import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
@@ -271,7 +271,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                 <form method="POST" name="user-registration-form" ref={this.formRef} onSubmit={this.onFormSubmit}>
 
                     <FormGroup controlId="email-address" validationState={null}>
-                        <ControlLabel>Primary E-Mail or Username</ControlLabel>
+                        <FormLabel>Primary E-Mail or Username</FormLabel>
                         <h4 id="email-address" className="text-300 mt-0">
                             { object.itemUtil.User.gravatar(email, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
                             { email }
@@ -281,18 +281,18 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <div className="row">
                         <div className="col-sm-12 col-md-6">
                             <FormGroup controlId="firstName" validationState={value_for_first_name === '' ? 'error' : null}>
-                                <ControlLabel>First Name <span className="text-danger">*</span></ControlLabel>
+                                <FormLabel>First Name <span className="text-danger">*</span></FormLabel>
                                 <FormControl name="first_name" type="text" onChange={this.onFirstNameChange}/>
                                 <FormControl.Feedback />
-                                { value_for_first_name === '' ? <HelpBlock>First name cannot be blank</HelpBlock> : null }
+                                { value_for_first_name === '' ? <span className="help-block">First name cannot be blank</span> : null }
                             </FormGroup>
                         </div>
                         <div className="col-sm-12 col-md-6">
                             <FormGroup controlId="lastName" validationState={value_for_last_name === '' ? 'error' : null}>
-                                <ControlLabel>Last Name <span className="text-danger">*</span></ControlLabel>
+                                <FormLabel>Last Name <span className="text-danger">*</span></FormLabel>
                                 <FormControl name="last_name" type="text" onChange={this.onLastNameChange}/>
                                 <FormControl.Feedback />
-                                { value_for_last_name === '' ? <HelpBlock>Last name cannot be blank</HelpBlock> : null }
+                                { value_for_last_name === '' ? <span className="help-block">Last name cannot be blank</span> : null }
                             </FormGroup>
                         </div>
                     </div>
@@ -300,26 +300,26 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <hr className="mt-1 mb-2" />
 
                     <FormGroup controlId="pendingLab" validationState={null}>
-                        <ControlLabel>Lab / Affiliation <span className="text-300">(for 4DN members)</span></ControlLabel>
+                        <FormLabel>Lab / Affiliation <span className="text-300">(for 4DN members)</span></FormLabel>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
-                        <HelpBlock>Lab or Institute with which you are associated.</HelpBlock>
+                        <span className="help-block">Lab or Institute with which you are associated.</span>
                     </FormGroup>
 
                     <JobTitleField {...{ value_for_pending_lab, value_for_pending_lab_details, schemas }}  />
 
                     <FormGroup controlId="contactEmail" validationState={!isContactEmailValid ? 'error' : null}>
-                        <ControlLabel>Preferred Contact Email <span className="text-300">(Optional)</span></ControlLabel>
+                        <FormLabel>Preferred Contact Email <span className="text-300">(Optional)</span></FormLabel>
                         <FormControl name="preferred_email" type="text" onChange={this.onContactEmailChange}/>
-                        <HelpBlock>
+                        <span className="help-block">
                             { isContactEmailValid ? "Preferred contact email, if different from login/primary email." : "Please enter a valid e-mail address." }
-                        </HelpBlock>
+                        </span>
                     </FormGroup>
 
                     <div className={"recaptcha-container" + (captchaError ? ' has-error' : '')}>
                         <div className="g-recaptcha" ref={this.recaptchaContainerRef} />
-                        { captchaError ? <HelpBlock>{ captchaError }</HelpBlock> : null }
+                        { captchaError ? <span className="help-block">{ captchaError }</span> : null }
                     </div>
 
                     <div className="clearfix">
@@ -458,12 +458,12 @@ function JobTitleField(props) {
         <Collapse in={!!(value_for_pending_lab)}>
             <div className="clearfix">
                 <FormGroup controlId="jobTitle" validationState={null}>
-                    <ControlLabel>
+                    <FormLabel>
                         Job Title
                         { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
                         <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
                         <span className="text-300"> (Optional)</span>
-                    </ControlLabel>
+                    </FormLabel>
                     { formControl }
                 </FormGroup>
             </div>
