@@ -10,7 +10,7 @@ import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/compon
 import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import { content_views } from './globals';
-import { typedefs, itemTypeHierarchy } from './util';
+import { typedefs } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
 
@@ -212,7 +212,9 @@ export default class PageTitle extends React.PureComponent {
         if (object.isAnItem(context)){ // If Item
 
             title = object.itemUtil.getTitleStringFromContext(context);
-            var itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
+
+            const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
+            const itemTypeHierarchy = schemaTransforms.schemasToItemTypeHierarchy(schemas);
 
             // Handle long title strings by Item type
             if (itemTypeTitle === 'Publication'){

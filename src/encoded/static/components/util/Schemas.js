@@ -10,7 +10,6 @@ import { getTitleForType, getSchemaProperty } from '@hms-dbmi-bgm/shared-portal-
 import {
     capitalize, capitalizeSentence, bytesToLargerUnit, roundLargeNumber, roundDecimal, hrefToFilename
 } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/value-transforms';
-import { itemTypeHierarchy } from './itemTypeHierarchy';
 
 let cachedSchemas = null;
 
@@ -145,7 +144,7 @@ export const Field = {
         if (!schemaOnly && Field.nameMap[field]){
             return Field.nameMap[field];
         } else {
-            var schemaProperty = getSchemaProperty(field, schemas, itemTypeHierarchy, itemType);
+            var schemaProperty = getSchemaProperty(field, schemas, itemType);
             if (schemaProperty && schemaProperty.title){
                 Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
                 return schemaProperty.title;
@@ -158,7 +157,7 @@ export const Field = {
     },
 
     getSchemaProperty : function(field, schemas = null, startAt = 'ExperimentSet'){
-        return getSchemaProperty(field, schemas, itemTypeHierarchy, startAt);
+        return getSchemaProperty(field, schemas, startAt);
     }
 
 };
