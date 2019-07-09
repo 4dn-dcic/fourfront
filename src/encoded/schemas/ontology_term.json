@@ -116,25 +116,27 @@
         }
     },
     "facets": {
-        "source_ontology.ontology_name" : {
-            "title" : "Ontology"
-        },
-        "namespace": {
-            "title": "Namespace"
-        },
         "slim_terms.term_name": {
             "title": "Slim Terms"
         },
-        "is_slim_for": {
-            "title": "Slim Category"
+        "source_ontology.ontology_name" : {
+            "title" : "Ontology"
         }
     },
     "columns": {
         "term_id": {
             "title": "Term ID"
         },
+        "slim_terms": {
+            "title": "Category"
+        },
         "source_ontology": {
-            "title": "Ontology"
+            "title": "Ontology",
+            "default_hidden": true
+        },
+        "term_url": {
+            "title": "External Link",
+            "default_hidden": true
         }
     }
 }
