@@ -59,7 +59,7 @@ EXP_CATEGORIZER_SCHEMA = {
     })
 class Experiment(Item):
     """The main experiment class."""
-
+    item_type = 'experiment'
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
     name_key = 'accession'

@@ -22,7 +22,7 @@ from .base import (
     })
 class Treatment(Item):
     """Treatment class."""
-
+    item_type = 'treatment'
     base_types = ['Treatment'] + Item.base_types
     schema = load_schema('encoded:schemas/treatment.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list

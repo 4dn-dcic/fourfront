@@ -22,6 +22,7 @@ from .base import (
     })
 class MicroscopeSetting(Item):
     """the base class for microscope settings collection."""
+    item_type = 'microscope_setting'
     base_types = ['MicroscopeSetting'] + Item.base_types
     schema = load_schema('encoded:schemas/microscope_setting.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list
