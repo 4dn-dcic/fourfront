@@ -11,7 +11,7 @@ import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/sh
 
 import { content_views } from './globals';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
-import { typedefs, itemTypeHierarchy } from './util';
+import { typedefs } from './util';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
@@ -211,7 +211,7 @@ export default class PageTitle extends React.PureComponent {
         if (object.isAnItem(context)){ // If Item
 
             title = object.itemUtil.getTitleStringFromContext(context);
-            var itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
+            const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
 
             // Handle long title strings by Item type
             if (itemTypeTitle === 'Publication'){
@@ -248,6 +248,7 @@ export default class PageTitle extends React.PureComponent {
                     viewReturnsTypeInfo = true; // Assume it failed because trying to access "this", which means typeInfo() most likely does & returns something.
                     console.warn(e);
                 }
+                const itemTypeHierarchy = schemaTransforms.schemasToItemTypeHierarchy(schemas);
                 if (!context.accession && !itemTypeHierarchy[context['@type'][0]] && !viewReturnsTypeInfo && typeof title === 'string' && title.length > 20) {
                     return { 'title' : itemTypeTitle, 'subtitle' : title };
                 }
@@ -382,7 +383,7 @@ const PageTitleElement = React.memo(function PageTitleElement(props) {
 
 const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
     const { session } = props;
-    let { style } = props;
+    //let { style } = props;
 
     if (session){
         return (
@@ -398,7 +399,7 @@ const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
             <div className="subtitle">Clinical Genomics Analysis Platform</div>
         </h1>
     );
-
+    /* old 4dn stuff -
     console.log('SESS', session);
 
     style = _.clone(style);
@@ -410,6 +411,7 @@ const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
             <div className="subtitle">Clinical Genomics Analysis Platform</div>
         </h1>
     );
+    */
 });
 
 
