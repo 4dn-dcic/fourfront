@@ -48,7 +48,7 @@ ITEM_INDEX_ORDER = [
     'IndividualHuman',
     'IndividualMouse',
     'IndividualPrimate',
-    'IndividualZebrafish'
+    'IndividualZebrafish',
 
     'Image',
     'Modification',
