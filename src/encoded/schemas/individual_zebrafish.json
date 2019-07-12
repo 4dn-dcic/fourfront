@@ -38,13 +38,9 @@
             "type": "string",
             "lookup": 20,
             "suggested_enum": [
-                "oogenesis",
-                "egg stage",
                 "embryonic stage",
                 "larval stage",
-                "prepupal stage",
-                "pupal stage",
-                "pharate adult stage",
+                "juvenile stage",
                 "adult stage"
             ]
         },
@@ -103,9 +99,6 @@
         }
     },
     "facets": {
-        "sex": {
-            "title" : "Sex"
-        },
         "zebrafish_life_stage": {
             "title" : "Life Stage"
         },
