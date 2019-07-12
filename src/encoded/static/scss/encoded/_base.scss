@@ -83,11 +83,6 @@ $font-size-base:          0.925rem;
 $dropdown-link-hover-bg: #ddd;
 
 
-// Pass value with CSS units and get just the value back
-@function strip-units($value) {
-    @return $value / ($value * 0 + 1);
-}
-
 // rem font sizing with pre-CSS3 fallback. Pass "true" in 2nd parm to add !important
 // Conversions from px (not exact -- just convenient)
 // 10px: 0.7
@@ -99,11 +94,6 @@ $dropdown-link-hover-bg: #ddd;
 // 16px: 1.2
 // 18px: 1.3
 // 20px: 1.4
-
-@mixin font-size($size, $important: false) {
-    font-size: round($size * strip-units($font-size-base)) + px + (if($important, ' !important',''));
-    font-size: $size + rem + (if($important, ' !important',''));
-}
 
 
 @mixin planned-submitted-cell-styles {
