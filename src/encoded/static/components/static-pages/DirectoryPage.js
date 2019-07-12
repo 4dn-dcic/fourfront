@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { NextPreviousPageSection } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/TableOfContents';
-import StaticPage, { parseSectionsContent } from './StaticPage';
+import { parseSectionsContent, StaticEntryContent } from './StaticPage';
+import { StaticPageBase } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/StaticPageBase';
 
 
 export default class DirectoryPage extends React.PureComponent {
@@ -15,7 +16,13 @@ export default class DirectoryPage extends React.PureComponent {
         const childrenHaveChildren = _.any(context.children || [], function(c){
             return c && c.children && c.children.length > 0;
         });
-        const content = (context.content || []).length > 0 ? StaticPage.renderSections(StaticPage.defaultProps.entryRenderFxn, parseSectionsContent(context)) : null;
+        const content = (context.content || []).length > 0 ? (
+            StaticPageBase.renderSections(
+                StaticPageBase.defaultProps.entryRenderFxn,
+                parseSectionsContent(context),
+                { 'childComponent' : StaticEntryContent }
+            )
+        ) : null;
 
         return (
             <div id="content" className="container">
@@ -47,7 +54,7 @@ function DirectoryBodyGridItem(props){
     const { childrenHaveChildren, children = [], atId: childID, name, description, display_title } = props;
     const childPageCount = children.length;
     return (
-        <div className={"grid-item col-xs-12 col-md-" + (childrenHaveChildren ? '4' : '12')} key={childID || name}>
+        <div className={"grid-item col-12 col-md-" + (childrenHaveChildren ? '6' : '12') + " col-lg-" + (childrenHaveChildren ? '4' : '12')} key={childID || name}>
             <a href={childID} className="inner">
                 <h3 className="text-300 mb-05 mt-05 title-link text-ellipsis-container">{ display_title }</h3>
                 { description ?

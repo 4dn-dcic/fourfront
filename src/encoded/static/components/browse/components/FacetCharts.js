@@ -9,7 +9,6 @@ import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/s
 import { object, layout, ajax, console, isServerSide, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import { navigate } from '../../util';
-import ChartDetailCursor from '../../viz/ChartDetailCursor';
 import { ChartDataController } from '../../viz/chart-data-controller';
 import * as BarPlot from '../../viz/BarPlot';
 

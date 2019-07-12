@@ -4,13 +4,7 @@
 /* Note: most base styles handled by Bootstrap, with variable settings in bootstrap/_variables.scss */
 
 html {
-    font-size: $font-size-base * $mobile-font-factor;
-
-    @media screen and (min-width: $screen-sm-min) {
-        font-size: $font-size-base;
-
-    /* overflow-y: scroll; */
-    }
+    font-size: $font-size-base;
 }
 
 body {
@@ -146,7 +140,7 @@ blockquote {
 	display: none;
 	height: 0px;
 
-	@media (min-width: $navbar-fixed-breakpoint) {
+	@include navbar-fixed-position {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
 	}
@@ -184,7 +178,7 @@ body.is-full-screen {
 		}
 	}
 
-	@media screen and (min-width: $screen-lg-min){
+	@include media-breakpoint-up(xl){
 		.container {
 			width: auto;
 			max-width: none;
@@ -217,9 +211,9 @@ h1.page-title {
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
 		&.home-page-title {
-			@media screen and (min-width: $screen-sm-min){
+			//@include media-breakpoint-up(xl){
+			@include navbar-fixed-position {
 				height: 64px;
-				margin-bottom: -3px;
 				//height: 70px;
 				//margin-bottom: 1px;
 				//padding-top: 5px;
@@ -318,8 +312,8 @@ h1.page-title + .page-subtitle {
 		text-align: center;
 		color: #bfbfbf;
 		padding: 15px 0px 14px;
-		@media (min-width: $screen-md-min) {
 
+		@include media-breakpoint-up(md){
 			text-align: right;
 			&.copy-notice {
 				text-align: left;
@@ -353,7 +347,7 @@ h1.page-title + .page-subtitle {
 .flexrow {
     @extend .row;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(md){
         .flexbox & {
             display: flex;
         }
@@ -363,7 +357,7 @@ h1.page-title + .page-subtitle {
 .flexcol-sm-6 {
     @extend .col-sm-6;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(md){
         .flexbox & {
             flex: 1 1 0px;
             width: auto;
@@ -409,65 +403,6 @@ h1.page-title + .page-subtitle {
 .no-user-select {
 	@include user-select(none);
 }
-
-/** Extending Bootstrap grid to allow blocks to flow right in a row **/
-
-@media screen                           		 { .col-xs-float-right { float : right; } }
-@media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
-@media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
-@media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
-
-/** Equal Height Columns in Bootstrap Row on IE9+ **/
-
-.row.row-eq-height-xs {
-	display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-}
-
-@media screen and (min-width: $screen-sm-min) {
-	.row.row-eq-height-sm {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-		.panel {
-			margin-top: 0;
-			margin-bottom: 0;
-			height: 100%;
-		}
-	}
-}
-
-@media screen and (min-width: $screen-md-min) {
-	.row.row-eq-height-md {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-		.panel {
-			margin-top: 0;
-			margin-bottom: 0;
-			height: 100%;
-		}
-	}
-}
-
-@media screen and (min-width: $screen-lg-min) {
-	.row.row-eq-height-lg {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-		.panel {
-			margin-top: 0;
-			margin-bottom: 0;
-			height: 100%;
-		}
-	}
-}
-
 
 
 .off-screen {
@@ -654,7 +589,7 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 	font-family: $font-family-monospace;
 }
 
-@media screen and (max-width: $screen-xs-max){
+@include media-breakpoint-down(xs){
 
 	.text-left-xs {
 		// Make text left-aligned for collapsed mobile view(s),
@@ -704,10 +639,6 @@ div.dropdown.btn-group {
 	top: 1px;
 }
 
-/* Override sizing of btn-sm button re: our font */
-.btn.btn-sm {
-	padding-bottom: 4px;
-}
 
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
 
@@ -716,57 +647,6 @@ body .__react_component_tooltip {
 }
 
 
-/* *********************************************************
-		CARL'S LOGIN BOX
-********************************************************** */
-
-.login-box{
-    width: inherit;
-	height: inherit;
-    border: 2px solid #000000;
-    background-color: #ffffff;
-    padding: 5px;
-	display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-.sexy-btn{
-    background-color: #ffffff;
-	color: #b3b3b3;
-    border: 2px solid #b3b3b3;
-    padding: 5px 10px;
-    text-align: center;
-    font-size: 16px;
-    cursor: pointer;
-	font-family: $font-family-sans-serif;
-}
-.sexy-btn:hover, .sexy-btn:focus {
-  color: #000000;
-  border: 2px solid #000000;
-}
-
-.sexy-btn span{
-  display: inline-block;
-  position: relative;
-  transition: 0.5s;
-}
-.sexy-btn span:after {
-  content: '»';
-  position: absolute;
-  opacity: 0;
-  top: 0;
-  right: -20px;
-  transition: 0.5s;
-}
-
-.sexy-btn:hover span, .sexy-btn:focus span {
-  padding-right: 25px;
-}
-
-.sexy-btn:hover span:after, .sexy-btn:focus span:after {
-  opacity: 1;
-  right: 0;
-}
 
 
 .links {

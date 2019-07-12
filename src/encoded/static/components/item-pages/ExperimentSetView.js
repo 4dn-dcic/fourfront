@@ -233,9 +233,9 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-raw-files-download-files-btn">
                             <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
-                            <span className="hidden-xs hidden-sm">Download </span>
+                            <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-                            <span className="hidden-xs hidden-sm text-400"> Raw Files</span>
+                            <span className="d-none d-sm-inline text-400"> Raw Files</span>
                         </SelectedFilesDownloadButton>
                     </div>
                     : null }
@@ -333,7 +333,7 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        const { mounted, width, renderRightPanel, minOpenHeight, leftPanelCollapseWidth, higlassItem } = this.props;
+        const { mounted, width, renderRightPanel, minOpenHeight, leftPanelCollapseWidth, higlassItem, windowWidth } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
         if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
@@ -342,9 +342,11 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
         // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
         const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
+        const rgs = layout.responsiveGridState(windowWidth);
+        const leftPanelDefaultWidth = rgs === 'xl' ? 400 : 300;
 
         return (
-            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel"
+            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel" leftPanelDefaultWidth={leftPanelDefaultWidth}
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
         );
@@ -467,9 +469,9 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-processed-files-download-files-btn">
                             <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
-                            <span className="hidden-xs hidden-sm">Download </span>
+                            <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-                            <span className="hidden-xs hidden-sm text-400"> Processed Files</span>
+                            <span className="d-none d-sm-inline text-400"> Processed Files</span>
                         </SelectedFilesDownloadButton>
                     </div>
                     : null }

@@ -79,14 +79,10 @@ export class BasicUserContentBody extends React.PureComponent {
 
 export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions(props){
     const { context, parentComponentType, showDescription, constrainDescription } = props;
-    const btnProps = {
-        'href'      : object.itemUtil.atId(context),
-        'data-tip'  : "Open HiGlass display to add other data",
-        'className' : 'btn btn-outline-dark pull-right extra-info-higlass-btn'
-    };
+    let cls = "btn btn-outline-dark pull-right extra-info-higlass-btn";
 
     if (parentComponentType === BasicUserContentBody) {
-        btnProps.className += ' btn-sm';
+        cls += ' btn-sm';
     }
 
     return (
@@ -96,10 +92,11 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
                 { showDescription ? context.description : null }
             </div>
             <div className="btn-container">
-                <button type="button" {...btnProps}>
+                <a href={object.itemUtil.atId(context)} className={cls}
+                    data-tip="Open HiGlass display to add other data">
                     <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
                     Explore Data
-                </button>
+                </a>
             </div>
         </div>
     );

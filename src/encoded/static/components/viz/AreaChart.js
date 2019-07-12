@@ -1102,7 +1102,7 @@ export class AreaChartContainer extends React.Component {
     static isExpanded(props){
         const { windowWidth, chartToggles, id } = props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState && gridState !== 'lg') return false;
+        if (gridState && gridState !== 'xl') return false;
         return !!((chartToggles || {})[id]);
     }
 
@@ -1152,7 +1152,7 @@ export class AreaChartContainer extends React.Component {
     expandButton(){
         const { windowWidth } = this.props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState !== 'lg') return null;
+        if (gridState !== 'xl') return null;
         const expanded = AreaChartContainer.isExpanded(this.props);
         return (
             <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>

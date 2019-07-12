@@ -36,11 +36,12 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      * @prop {function} onChangeShowChartType - Callback accepting key of new chart type.
      */
     rowSpacingTypeDropdown(){
-        if (typeof this.props.rowSpacingType !== 'string' || typeof this.props.onChangeRowSpacingType !== 'function') {
+        const { rowSpacingType, onChangeRowSpacingType } = this.props;
+        if (typeof rowSpacingType !== 'string' || typeof onChangeRowSpacingType !== 'function') {
             return null;
         }
         return (
-            <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType} key="row-spacing-type"/>
+            <RowSpacingTypeDropdown currentKey={rowSpacingType} onSelect={onChangeRowSpacingType} key="row-spacing-type"/>
         );
     }
 
@@ -53,7 +54,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      * @prop {function} onToggleFullScreenView - Callback to toggle full screen state. Should be passed from BodyElement.
      */
     fullScreenButton(){
-        var { isFullscreen, onToggleFullScreenView } = this.props;
+        const { isFullscreen, onToggleFullScreenView } = this.props;
         if (typeof isFullscreen === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
                 <button type="button" onClick={onToggleFullScreenView} key="full-screen-btn"
@@ -174,10 +175,9 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      */
     wrapper(elems){
         return (
-            <CollapsibleItemViewButtonToolbar
-                children={elems}
-                constantButtons={this.fullScreenButton()}
-                windowWidth={this.props.windowWidth} />
+            <CollapsibleItemViewButtonToolbar constantButtons={this.fullScreenButton()} windowWidth={this.props.windowWidth}>
+                { elems }
+            </CollapsibleItemViewButtonToolbar>
         );
     }
 
@@ -187,36 +187,32 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
     }
 }
 
+const RowSpacingTypeDropdown = React.memo(function RowSpacingTypeDropdown({ currentKey, id, onSelect, titleMap }){
+    const menuItems = _.map(_.keys(titleMap), function(k){
+        return (
+            <DropdownItem key={k} eventKey={k} active={currentKey === k}>
+                { titleMap[k] }
+            </DropdownItem>
+        );
+    });
 
-class RowSpacingTypeDropdown extends React.Component {
-
-    static propTypes = {
-        'onSelect' : PropTypes.func.isRequired,
-        'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])
-    };
-
-    static titleMap = {
+    return (
+        <DropdownButton id={id || "rowspacingtype-select"} variant="outline-dark"
+            onSelect={onSelect} title={titleMap[currentKey]}>
+            { menuItems }
+        </DropdownButton>
+    );
+});
+RowSpacingTypeDropdown.propTypes = {
+    'onSelect' : PropTypes.func.isRequired,
+    'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ]),
+    'id' : PropTypes.string,
+    'titleMap' : PropTypes.objectOf(PropTypes.string).isRequired
+};
+RowSpacingTypeDropdown.defaultProps = {
+    'titleMap' : {
         'stacked' : 'Stack Nodes',
         'compact' : 'Center Nodes',
         'wide' : 'Spread Nodes'
-    };
-
-    render(){
-        const { currentKey, id, onSelect } = this.props;
-        const menuItems = _.map(_.keys(RowSpacingTypeDropdown.titleMap), function(k){
-            return (
-                <DropdownItem key={k} eventKey={k} active={currentKey === k}>
-                    { RowSpacingTypeDropdown.titleMap[k] }
-                </DropdownItem>
-            );
-        });
-
-        return (
-            <DropdownButton id={id || "rowspacingtype-select"}
-                pullRight onSelect={onSelect} title={RowSpacingTypeDropdown.titleMap[currentKey]}>
-                { menuItems }
-            </DropdownButton>
-        );
     }
-
-}
+};

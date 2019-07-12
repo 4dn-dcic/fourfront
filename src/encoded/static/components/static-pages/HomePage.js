@@ -88,7 +88,7 @@ class BigBrowseButton extends React.Component {
 
     handleMouseEnter(){
         requestAnimationFrame(function(){
-            var topMenuBrowseButton = document.getElementById('browse-menu-item');
+            const [ topMenuBrowseButton ] = document.getElementsByClassName('browse-nav-btn');
             if (topMenuBrowseButton){
                 topMenuBrowseButton.style.textShadow = "0 0 0 #000";
                 topMenuBrowseButton.style.color = "#000";
@@ -99,7 +99,7 @@ class BigBrowseButton extends React.Component {
 
     handleMouseLeave(e){
         requestAnimationFrame(function(){
-            var topMenuBrowseButton = document.getElementById('browse-menu-item');
+            const [ topMenuBrowseButton ] = document.getElementsByClassName('browse-nav-btn');
             if (topMenuBrowseButton){
                 topMenuBrowseButton.style.textShadow = '';
                 topMenuBrowseButton.style.color = '';

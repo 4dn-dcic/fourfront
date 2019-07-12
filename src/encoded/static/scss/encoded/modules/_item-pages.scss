@@ -1621,6 +1621,22 @@ $badge-item-min-height: 90px;
 	}
 }
 
+/**********************************************************
+					AdjustableDividerRow
+**********************************************************/
+
+.adjustable-divider-row {
+	margin-left: 0;
+	margin-right: 0;
+	@include media-breakpoint-up(lg) {
+		> .left-panel {
+			padding-right: 10px;
+		}
+		> .right-panel {
+			padding-left: 10px;
+		}
+	}
+}
 
 /**********************************************************
 				Experiments Set View
@@ -1745,6 +1761,7 @@ $badge-item-min-height: 90px;
 	.graph-wrapper {
 		opacity : 1;
 		transition: opacity .5s ease-out;
+		overflow: hidden;
 	}
 
 	// Full Screen Styling
@@ -1963,7 +1980,6 @@ $badge-item-min-height: 90px;
 
 		> a.btn-block.btn-lg {
 			font-weight: 400;
-			padding-top: 11px;
 			> i {
 				position: relative;
 				top: 1px;
@@ -1983,9 +1999,13 @@ $badge-item-min-height: 90px;
 
 	.higlass-instance {
 
-		height: 600px;
+		margin-left: -10px;
+		margin-right: -10px;
+		height: 600px; // Default. May be overriden.
 		transition: opacity 1s;
 		opacity: 0;
+
+
 		.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
 			.TrackControl-module_track-control-button-2fdIb { // Hide "add track" button.
 				display: none;

@@ -400,8 +400,8 @@ export class UIControlsWrapper extends React.PureComponent {
                 </div>
 
                 <div className="row">
-                    <div className="col-12 col-sm-9">{ this.adjustedChildChart() }</div>
-                    <div className="col-12 col-sm-3 chart-aside" style={{ 'height' : chartHeight }}>
+                    <div className="col-12 col-md-9">{ this.adjustedChildChart() }</div>
+                    <div className="col-12 col-md-3 chart-aside" style={{ 'height' : chartHeight }}>
                         { this.renderShowTypeDropdown() }
                         { this.renderGroupByFieldDropdown() }
                         <div className="legend-container" style={{ 'height' : legendContainerHeight }}>

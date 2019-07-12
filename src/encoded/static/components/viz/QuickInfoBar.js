@@ -89,8 +89,6 @@ export default class QuickInfoBar extends React.PureComponent {
         this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
         this.onBrowseStateToggle = _.throttle(this.onBrowseStateToggle.bind(this), 1000, { trailing: false });
         this.onPanelAreaMouseLeave = this.onPanelAreaMouseLeave.bind(this);
-        this.renderStats = this.renderStats.bind(this);
-        this.renderHoverBar = this.renderHoverBar.bind(this);
         this.state = {
             'mounted'               : false,
             'show'                  : false,
@@ -147,11 +145,14 @@ export default class QuickInfoBar extends React.PureComponent {
 
     onIconMouseEnter(e){
         const { context, browseBaseState } = this.props;
-        var areAnyFiltersSet = this.anyFiltersSet();
+        const browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+        const areAnyFiltersSet = this.anyFiltersSet();
         if (this.timeout) clearTimeout(this.timeout);
-        if (areAnyFiltersSet) this.setState({ 'show' : 'activeFilters', 'reallyShow' : true });
+        if (areAnyFiltersSet) {
+            this.setState({ 'show' : 'activeFilters', 'reallyShow' : true });
+        }
 
-        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
 
         analytics.event('QuickInfoBar', 'Hover over Filters Icon', {
             'eventLabel' : ( areAnyFiltersSet ? "Some filters are set" : "No filters set" ),
@@ -166,39 +167,6 @@ export default class QuickInfoBar extends React.PureComponent {
         });
     }
 
-    renderStats(extraClassName = null){
-        const { context, browseBaseState } = this.props;
-        const areAnyFiltersSet = this.anyFiltersSet();
-        const { total, current } = QuickInfoBar.getCountsFromProps(this.props);
-        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
-
-        var stats;
-        if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
-            stats = {
-                'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
-                'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
-                'files'             : <span>{ current.files }<small> / {total.files || 0}</small></span>
-            };
-        } else {
-            stats = {
-                'experiment_sets'   : total.experiment_sets || 0,
-                'experiments'       : total.experiments || 0,
-                'files'             : total.files || 0
-            };
-        }
-        var statProps = _.extend(_.pick(this.props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : expSetFilters });
-        return (
-            <div className={"left-side clearfix" + (extraClassName ? ' ' + extraClassName : '')}>
-                <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
-                <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
-                <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
-                <div className="any-filters glance-label" data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"} onMouseEnter={this.onIconMouseEnter}>
-                    <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
-                </div>
-            </div>
-        );
-    }
-
     onBrowseStateToggle(){
         const { context, browseBaseState, href } = this.props;
         this.setState({ 'togglingBrowseState' : true }, () => {
@@ -208,24 +176,12 @@ export default class QuickInfoBar extends React.PureComponent {
         });
     }
 
-    renderBrowseStateToggle(){
-        const { browseBaseState, isLoadingChartData } = this.props;
-        const checked = browseBaseState === 'all';
-        return (
-            <div className="col-xs-4 text-right browse-base-state-toggle-container">
-                <div className="inner-more">
-                    <Toggle disabled={isLoadingChartData || this.state.togglingBrowseState} id="toggle-external-data-switch"
-                        checked={checked} onChange={this.onBrowseStateToggle} />
-                    <small>Include External Data</small>
-                </div>
-            </div>
-        );
-    }
-
     renderHoverBar(){
         const { context, browseBaseState, href, schemas } = this.props;
-        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseState);
-        if (this.state.show === 'activeFilters' || (this.state.show === false && this.state.reallyShow)) {
+        const { show, reallyShow } = this.state;
+        const browseBaseParams = navigate.getBrowseBaseParams();
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
+        if (show === 'activeFilters' || (show === false && reallyShow)) {
             return (
                 <div className="bottom-side">
                     <div className="crumbs-label">
@@ -238,34 +194,82 @@ export default class QuickInfoBar extends React.PureComponent {
                     </div>
                 </div>
             );
-        } else return null;
+        } else {
+            return null;
+        }
     }
 
-    renderBar(){
-        var { show, mounted } = this.state;
+    render(){
+        const { id, isLoadingChartData, browseBaseState } = this.props;
+        const { show, mounted, togglingBrowseState } = this.state;
+        const anyFiltersSet = this.anyFiltersSet();
         if (!mounted) return null;
 
-        var className = "inner container";
+        let className = "inner container";
         if (show !== false) className += ' showing';
         if (show === 'activeFilters') className += ' showing-filters';
         if (show === 'mosaicCharts') className += ' showing-charts';
 
         return (
-            <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
-                <div className="row">
-                    { this.renderStats('col-xs-8') }
-                    { this.renderBrowseStateToggle() }
+            <div id={id} className={this.className()}>
+                <div className={className} onMouseLeave={this.onPanelAreaMouseLeave}>
+                    <div className="row">
+                        <StatsCol {...this.props} anyFiltersSet={anyFiltersSet} onIconMouseEnter={this.onIconMouseEnter} show={show} />
+                        <BrowseBaseStateToggleCol browseBaseState={browseBaseState} onToggle={this.onBrowseStateToggle}
+                            isLoading={togglingBrowseState || isLoadingChartData} />
+                    </div>
+                    { this.renderHoverBar() }
                 </div>
-                { this.renderHoverBar() }
             </div>
         );
     }
-
-    render(){
-        return <div id={this.props.id} className={this.className()}>{ this.renderBar() }</div>;
-    }
-
 }
+
+const BrowseBaseStateToggleCol = React.memo(function(props){
+    const { browseBaseState, isLoading, onToggle } = props;
+    const checked = browseBaseState === 'all';
+    return (
+        <div className="col-4 text-right browse-base-state-toggle-container">
+            <div className="inner-more">
+                <Toggle disabled={isLoading} id="toggle-external-data-switch" checked={checked} onChange={onToggle} />
+                <small>Include External Data</small>
+            </div>
+        </div>
+    );
+});
+
+const StatsCol = React.memo(function StatsCol(props){
+    const { context, browseBaseState, onIconMouseEnter, anyFiltersSet, show } = props;
+    const { total, current } = QuickInfoBar.getCountsFromProps(props);
+    const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, navigate.getBrowseBaseParams(browseBaseState));
+
+    let stats;
+    if (current && (typeof current.experiment_sets === 'number' || typeof current.experiments === 'number' || typeof current.files === 'number')) {
+        stats = {
+            'experiment_sets'   : <span>{ current.experiment_sets }<small> / { total.experiment_sets || 0 }</small></span>,
+            'experiments'       : <span>{ current.experiments }<small> / {total.experiments || 0}</small></span>,
+            'files'             : <span>{ current.files }<small> / {total.files || 0}</small></span>
+        };
+    } else {
+        stats = {
+            'experiment_sets'   : total.experiment_sets || 0,
+            'experiments'       : total.experiments || 0,
+            'files'             : total.files || 0
+        };
+    }
+    const statProps = _.extend(_.pick(props, 'id', 'href', 'isLoadingChartData'), { 'expSetFilters' : expSetFilters });
+    return (
+        <div className="col-8 left-side clearfix">
+            <Stat {...statProps} shortLabel="Experiment Sets" longLabel="Experiment Sets" classNameID="expsets" value={stats.experiment_sets} key="expsets" />
+            <Stat {...statProps} shortLabel="Experiments" longLabel="Experiments" classNameID="experiments" value={stats.experiments} key="experiments" />
+            <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
+            <div className={"any-filters glance-label" + (show ? " showing" : "")} data-tip={anyFiltersSet ? "Filtered" : "No Filters Set"}
+                onMouseEnter={onIconMouseEnter}>
+                <i className="icon icon-filter" style={{ 'opacity' : anyFiltersSet ? 1 : 0.25 }} />
+            </div>
+        </div>
+    );
+});
 
 class Stat extends React.PureComponent {
 

@@ -102,7 +102,7 @@ export class HomePageCarousel extends React.PureComponent {
         // Do some responsive stuff
         var gridState = layout.responsiveGridState(windowWidth);
 
-        if (gridState === 'sm' || sections.length === 2){
+        if (gridState === 'sm' || gridState === 'md' || sections.length === 2){
             settings = _.extend({}, settings, {
                 'slidesToShow' : 2
             });

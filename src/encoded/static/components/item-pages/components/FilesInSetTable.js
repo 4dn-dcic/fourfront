@@ -282,7 +282,7 @@ export class FilesInSetTable extends React.PureComponent {
     */
     header(){
         return (
-            <div className="row hidden-xs hidden-sm header-row">
+            <div className="row d-none d-lg-block header-row">
                 <div className="col-xs-9 col-md-2 col-lg-2 title">
                     Accession
                 </div>

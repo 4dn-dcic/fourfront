@@ -73,17 +73,6 @@ table>tbody>tr>td {
     }
 }
 
-@media (max-width: $screen-xs-max) {
-    .table-responsive {
-        th,
-        td {
-            max-width: 250px !important;
-            white-space: normal !important;
-        }
-    }
-}
-
-
 // note the position of the inner span isn't calculated correctly yet
 $rotated-th-height: 130px;
 $rotated-th-width: 20px;
@@ -1065,6 +1054,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 						padding-bottom: 10px;
 						width: 100%;
 						font-weight: 400;
+						font-size: 0.925rem;
 					}
 					&:hover {
 						background-color: #f5f5f5;
@@ -1077,6 +1067,11 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 
 			}
 			.panel-title {
+				margin-bottom: 0;
+				margin-top: 0;
+				font-size: $font-size-base * 1.125;
+
+
 				padding-bottom: 13px;
 				padding-top: 12px;
 				padding-left: 10px;

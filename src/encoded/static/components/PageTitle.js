@@ -291,7 +291,7 @@ export default class PageTitle extends React.PureComponent {
             }
         }
 
-        if (hasToc && (gridSize === 'lg' || !mounted)) style.width = '75%';
+        if (hasToc && (gridSize === 'xl' || !mounted)) style.width = '75%';
 
         return style;
     }
@@ -395,7 +395,7 @@ const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
     let { style } = props;
 
     style = _.clone(style);
-    style.marginTop ? style.marginTop -= 3 : null;
+    //style.marginTop ? style.marginTop -= 3 : null;
 
     return (
         <h1 className="home-page-title page-title top-of-page" style={style} >

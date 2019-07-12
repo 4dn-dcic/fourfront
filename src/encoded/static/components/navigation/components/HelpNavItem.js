@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { NavItem } from 'react-bootstrap';
+import { NavItem, Nav } from 'react-bootstrap';
 
 /**
  * Renders a Menu Item in NavBar for "Help".
@@ -26,7 +26,7 @@ export class HelpNavItem extends React.PureComponent {
     }
 
     handleToggle(e){
-        var { setOpenDropdownID, openDropdownID } = this.props;
+        const { setOpenDropdownID, openDropdownID } = this.props;
         if (typeof setOpenDropdownID !== 'function') {
             throw new Error('No func setOpenDropdownID passed in props.');
         }
@@ -34,20 +34,22 @@ export class HelpNavItem extends React.PureComponent {
     }
 
     render(){
-        var { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowWidth } = this.props,
-            isOpen          = openDropdownID === this.dropdownID,
-            active          = href.indexOf(helpItemHref) > -1,
-            commonProps     = { id, active, 'key' : id },
-            isDesktopView   = windowWidth >= 768;
+        const { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowWidth } = this.props;
+        const isOpen = openDropdownID === this.dropdownID;
+        const active = href.indexOf(helpItemHref) > -1;
+        const commonProps = { id, active, 'key' : id };
+        const isDesktopView = windowWidth >= 768;
 
         if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView){
-            return <NavItem {...commonProps} href={helpItemHref} children="Help" />;
+            return <Nav.Link {...commonProps} href={helpItemHref}>Help</Nav.Link>;
         }
 
+        const cls = "dropdown-toggle" + (isOpen ? " dropdown-open-for" : "");
+
         return (
-            <NavItem {...commonProps} onClick={this.handleToggle} className={isOpen ? 'dropdown-open-for' : null}>
+            <Nav.Link {...commonProps} onClick={this.handleToggle} className={cls} href="#">
                 Help <span className="caret"/>
-            </NavItem>
+            </Nav.Link>
         );
 
     }

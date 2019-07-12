@@ -65,11 +65,10 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        const gridState = layout.responsiveGridState(this.props.windowWidth);
         return (
             <React.Fragment>
                 { super.itemMidSection() }
-                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas')} gridState={gridState} />
+                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas', 'windowWidth')} />
             </React.Fragment>
         );
     }
@@ -159,13 +158,14 @@ export class FileOverviewHeading extends React.PureComponent {
     }
 
     render(){
-        const { context, schemas, gridState } = this.props;
+        const { context, schemas, windowWidth } = this.props;
         const { mounted, isPropertiesOpen } = this.state;
+        const gridState = layout.responsiveGridState(windowWidth);
         const isSmallerSize = mounted && (gridState === "xs" || gridState === "sm");
         const commonHeadingBlockProps = { "tips" : FileView.schemaForFile(context, schemas), "result" : context, "wrapInColumn" : "col-sm-6 col-lg-3" };
         return (
-            <div className={"row" + (!isSmallerSize ? " flexrow" : "")}>
-                <div className="col-xs-12 col-md-8">
+            <div className="row">
+                <div className="col-12 col-md-8">
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property="file_format" fallbackTitle="File Format" />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property="file_type" fallbackTitle="File Type" />
@@ -174,7 +174,7 @@ export class FileOverviewHeading extends React.PureComponent {
                             fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
                     </OverviewHeadingContainer>
                 </div>
-                <div className="col-xs-12 col-md-4 mt-1 mb-3">
+                <div className="col-12 col-md-4 mt-1 mb-3">
                     <FileViewDownloadButtonContainer file={context} size="lg" verticallyCentered={!isSmallerSize && isPropertiesOpen} />
                 </div>
 

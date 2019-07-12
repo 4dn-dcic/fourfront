@@ -14,7 +14,7 @@ export const SimpleFilesTable = React.memo(function SimpleFilesTable(props){
     return (
         <ItemPageTable {...props} results={reducedFiles} loading={loading && (!reducedFiles || !reducedFiles.length)}
             //renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
-            //    'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
+            //    'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
             //}} />}
         />
     );

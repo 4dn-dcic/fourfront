@@ -1,3 +1,10 @@
+// Root HTML doc variables/settings
+
+:root {
+    font-size: 14px;
+}
+
+
 /* Variables */
 $mainThemeColor: 			#ffffff; /* i.e. the background color ..for now */
 
@@ -18,13 +25,13 @@ $badge-color-warning : #e29302;
 $badge-color-error : #bd0000;
 $badge-color-internal-action: #d0d0d0;
 
-$font-family-sans-serif     : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
-$font-family-serif          : "Yrsa", "Times New Roman", Georgia, Times, serif;
+$font-family-sans-serif : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
+$font-family-serif : "Yrsa", "Times New Roman", Georgia, Times, serif;
 /** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`. */
-$font-family-monospace      : "Source Code Pro", Consolas, monospace;
-$font-family-base:        $font-family-sans-serif;
+$font-family-monospace : "Source Code Pro", Consolas, monospace;
+$font-family-base: $font-family-sans-serif;
 
-$font-size-base:          0.9rem;
+$font-size-base: 1rem;
 
 $dropdown-link-hover-bg: #ddd;
 
@@ -35,23 +42,30 @@ $border-radius-base:                        3px;
 $border-radius-large:                       4px;
 $border-radius-small:                       2px;
 $input-border-radius:                       3px;
-//$grid-float-breakpoint:                     $screen-md;
 
-
+$navbar-brand-font-size:                    1.7rem;
 $navbar-height:                             80px;
-$navbar-inverse-link-active-bg:             #ffffff;
-$navbar-inverse-link-active-color:          #000000;
-$navbar-inverse-toggle-hover-bg:            #ffffff;
-$navbar-inverse-toggle-border-color:        #999999;
-$navbar-inverse-link-color:                 #999999;
 $navbar-default-brand-color:                #999999;
 
 $navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
-$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
+
+//$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
 $navbar-link-color : #777;
 $navbar-link-hover-color : #000000;
 $navbar-link-active-color : #000;
 $navbar-link-active-background-color: #eee;
+
+// We set navbar to become fixed position @ Bootstrap's medium size.
+@mixin navbar-fixed-position {
+    @include media-breakpoint-up(md) {
+        @content;
+    }
+}
+@mixin navbar-static-position {
+    @include media-breakpoint-down(sm) {
+        @content;
+    }
+}
 
 $headings-font-weight:                      bold;
 $grid-gutter-width:                         20px;

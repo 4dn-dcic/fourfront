@@ -14,7 +14,7 @@ export class ActiveFiltersBar extends React.Component {
         'parentId' : 'main',
         'expSetFilters' : {},
         'invisible' : false
-    }
+    };
 
     constructor(props){
         super(props);

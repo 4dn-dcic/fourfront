@@ -574,11 +574,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     copyURLButton(){
         const { windowWidth, href } = this.props;
-        const gridState   = layout.responsiveGridState(windowWidth);
-        const isMobile    = gridState !== 'lg';
+        const gridState = layout.responsiveGridState(windowWidth);
+        const isMobile = gridState !== 'lg' && gridState !== 'xl';
         return (
             <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button" value={href}>
-                <i className="icon icon-fw icon-copy"/>{ isMobile ?
+                <i className="icon icon-fw icon-copy"/>
+                { isMobile ?
                     <React.Fragment>
                         &nbsp;&nbsp; Copy URL
                     </React.Fragment>

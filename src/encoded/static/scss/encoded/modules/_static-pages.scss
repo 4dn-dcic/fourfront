@@ -186,7 +186,7 @@ h5.fourDN-header {
 
 	position: relative;
 
-	@media screen and (min-width : $screen-lg-min){
+	@include media-breakpoint-up(xl){
 		position: fixed;
 		margin: 0 -10px;
 		padding: 0 10px;
@@ -212,7 +212,7 @@ h5.fourDN-header {
 		//}
 	}
 
-	@media screen and (max-width : $screen-md-max){
+	@include media-breakpoint-down(lg){
 		> ol.inner {
 			border-top: 1px solid #eee;
 		}
@@ -419,7 +419,7 @@ h5.fourDN-header {
 	padding-top: 29px; 
 
 	&.page-has-toc {
-		@media screen and (min-width: $screen-lg-min) {
+		@include media-breakpoint-up(xl){
 			width: 75%;
 		}
 	}
@@ -475,7 +475,7 @@ h5.fourDN-header {
 					display: none;
 				}
 
-				@media screen and (min-width: $screen-sm-min) {
+				@include media-breakpoint-up(md){
 					height: 98px;
 					.section-page-count {
 						display: block;
@@ -489,7 +489,7 @@ h5.fourDN-header {
 
 
 				&:hover {
-					@media screen and (min-width: $screen-sm-min) {
+					@include media-breakpoint-up(md){
 						.section-page-count {
 							opacity: 1;
 						}
@@ -1028,7 +1028,7 @@ $carousel-height : 240px;
  *** Temporary NOFIC Matrices Side by Side ***
  *********************************************/
 
-@media screen and (min-width: $screen-lg-min){
+ @include media-breakpoint-up(xl){
 
 	#content.container > .static-page.row #nofic-matrix-1,
 	#content.container > .static-page.row #nofic-matrix-2,

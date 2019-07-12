@@ -102,7 +102,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                     <button type="button" id="select-all-files-button" disabled={selecting || (!isAllSelected && !isEnabled)}
                         className={cls} onClick={this.handleSelectAll}>
                         <i className={iconClassName}/>
-                        <span className="text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
+                        <span className="d-none d-md-inline text-400">{ isAllSelected ? 'Deselect' : 'Select' } </span>
                         <span className="text-600">All</span>
                     </button>
                 </div>
@@ -220,10 +220,10 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
             <i className="icon icon-filter icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
-                    <span className="hidden-xs hidden-sm">All </span>
+                    <span className="d-none d-lg-inline">All </span>
                 )
             }
-            <span className="text-400 hidden-xs hidden-sm mr-05">File Type{ currentFiltersLength === 1 ? '' : 's' }</span>
+            <span className="text-400 d-none d-lg-inline mr-05">{ "File Type" + (currentFiltersLength === 1 ? '' : 's') }</span>
             <i className="icon icon-angle-down icon-fw"/>
         </button>
     );

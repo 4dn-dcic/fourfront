@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
+import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 export class BigDropdownMenu extends React.PureComponent {
 
@@ -36,18 +37,18 @@ export class BigDropdownMenu extends React.PureComponent {
         }).length >= parseInt(helpMenuTree.children.length / 2);
         */
 
-        var urlParts = url.parse(href);
+        const urlParts = url.parse(href);
 
         function filterOutChildren(child){
             return !child.error && child.display_title && child.name;
         }
 
-        var level1ChildrenToRender = _.filter(menuTree.children, function(child){
-            var childValid = filterOutChildren(child);
+        const level1ChildrenToRender = _.filter(menuTree.children, function(child){
+            const childValid = filterOutChildren(child);
             if (!childValid) return false;
             if ((child.content || []).length > 0) return true;
             if ((child.children || []).length === 0) return false;
-            var filteredChildren = _.filter(child.children || [], filterOutChildren);
+            const filteredChildren = _.filter(child.children || [], filterOutChildren);
             if (filteredChildren.length > 0) return true;
             return false;
         });
@@ -56,7 +57,7 @@ export class BigDropdownMenu extends React.PureComponent {
             var level1Children = _.filter(childLevel1.children || [], filterOutChildren);
             var hasChildren = level1Children.length > 0;
             return (
-                <div className={"help-menu-tree level-1 col-xs-12 col-sm-6 col-md-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
+                <div className={"help-menu-tree level-1 col-12 col-md-6 col-lg-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
                     <div className="level-1-title-container">
                         <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
                             data-delay-show={1000} onClick={handleMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
@@ -78,9 +79,15 @@ export class BigDropdownMenu extends React.PureComponent {
             );
         }
 
-        var columnsPerRow = 3;
-        if (windowWidth >= 768 && windowWidth < 992) columnsPerRow = 2;
-        else if (windowWidth < 768) columnsPerRow = 1;
+        let columnsPerRow;
+        const rgs = layout.responsiveGridState(windowWidth);
+        if (rgs === 'xs'){
+            columnsPerRow = 1;
+        } else if (rgs === 'md'){
+            columnsPerRow = 2;
+        } else { // md & greater
+            columnsPerRow = 3;
+        }
 
 
         var rowsOfLevel1Children = [];

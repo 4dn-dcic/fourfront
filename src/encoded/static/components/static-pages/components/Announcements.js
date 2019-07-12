@@ -12,49 +12,40 @@ import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/s
  * A single Announcement block/view.
  * @todo refactor into functional components, if not getting rid of
  */
-class Announcement extends React.Component {
 
-    subtitleAuthor(author){
-        if (!author) return null;
-    }
-
-    subtitle(){
-        const { section : { date_created : date = null, submitted_by : { display_title : authorDisplayTitle = null } = {}, status = null } } = this.props;
-        const authorName = (authorDisplayTitle && <span className="text-500">{ authorDisplayTitle }</span>) || null;
-        const unreleasedStatus = status && status !== 'released' ? (
-            <span className="text-500"> - { valueTransforms.capitalizeSentence(status) }</span>
-        ) : null;
-        //var authorLink = authorName && object.itemUtil.atId(author);
-        //if (authorLink) authorName = <a href={authorLink}>{ authorName }</a>;
-        return (
-            <div className="fourDN-section-info announcement-subtitle">
-                { authorName ? <span>Posted by { authorName }</span>: null }
-                { date ? <span>{!authorName ? ' Posted ' : ' '}on <LocalizedTime timestamp={date}/></span> : null }
-                { unreleasedStatus }
+const Announcement = React.memo(function Announcement(props){
+    const { section } = props;
+    if (!section || !section.content) return null;
+    const filetype = section.filetype || 'html';
+    return (
+        <div className="announcement">
+            <div className="announcement-title">
+                <span dangerouslySetInnerHTML={{ __html: section.title || '<em>Untitled</em>' }}/>
             </div>
-        );
-    }
-
-    render() {
-        const { section } = this.props;
-        if (!section || !section.content) return null;
-
-        const filetype = section.filetype || 'html';
-
-        return (
-            <div className="announcement">
-                <div className="announcement-title">
-                    <span dangerouslySetInnerHTML={{ __html: section.title || '<em>Untitled</em>' }}/>
-                </div>
-                { this.subtitle() }
-                <div className="announcement-content">
-                    <BasicStaticSectionBody content={section.content} filetype={filetype} />
-                </div>
+            <AnnouncementSubTitle {...props}/>
+            <div className="announcement-content">
+                <BasicStaticSectionBody content={section.content} filetype={filetype} />
             </div>
-        );
-    }
+        </div>
+    );
+});
 
-}
+const AnnouncementSubTitle = React.memo(function AnnouncementSubTitle(props){
+    const { section : { date_created : date = null, submitted_by : { display_title : authorDisplayTitle = null } = {}, status = null } } = props;
+    const authorName = (authorDisplayTitle && <span className="text-500">{ authorDisplayTitle }</span>) || null;
+    const unreleasedStatus = status && status !== 'released' ? (
+        <span className="text-500"> - { valueTransforms.capitalizeSentence(status) }</span>
+    ) : null;
+    //var authorLink = authorName && object.itemUtil.atId(author);
+    //if (authorLink) authorName = <a href={authorLink}>{ authorName }</a>;
+    return (
+        <div className="fourDN-section-info announcement-subtitle">
+            { authorName ? <span>Posted by { authorName }</span>: null }
+            { date ? <span>{!authorName ? ' Posted ' : ' '}on <LocalizedTime timestamp={date}/></span> : null }
+            { unreleasedStatus }
+        </div>
+    );
+});
 
 class AnnouncementsLoaded extends React.PureComponent {
 
@@ -169,7 +160,7 @@ export class Announcements extends React.PureComponent {
         const onSeeMoreButtonClick = onSeeMoreClick || this.toggleOpen;
 
         return (
-            <div className={className} id={id}>
+            <div className={(className || '') + " clearfix"} id={id}>
                 {
                     collapsible ? [
                         <PartialList key="list" open={open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,

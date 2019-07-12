@@ -67,22 +67,22 @@ export class UserActionDropdownMenu extends React.PureComponent {
             const acctIcon = (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1 && (
                 object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm')
             )) || <i className="account-icon icon icon-user-o" />;
+            const cls = 'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '');
 
             acctBtn = (
-                <NavDropdown className={'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')}
-                    title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} id="user_account_nav_button" label="context">
+                <NavDropdown className={cls} title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} label="context">
                     { this.listUserActionsAsMenuItems() }
                 </NavDropdown>
             );
         } else {
             acctBtn = (
                 <LoginController {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}>
-                    <LoginNavItem key="login-register" id="user_account_nav_button" />
+                    <LoginNavItem key="login-register" className="user-account-item" />
                 </LoginController>
             );
         }
 
-        return <Nav className="navbar-acct" pullRight>{ acctBtn }</Nav>;
+        return <Nav className="navbar-acct">{ acctBtn }</Nav>;
     }
 }
 

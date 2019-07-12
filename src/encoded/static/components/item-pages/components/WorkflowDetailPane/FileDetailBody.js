@@ -59,7 +59,7 @@ export class FileDetailBody extends React.PureComponent {
             fileTitle = null;
         }
         return (
-            <div className="col-sm-6 col-lg-8 file-title box">
+            <div className="col-12 col-sm-6 col-lg-8 file-title box">
                 <div className="text-600">
                     {
                         node.nodeType === 'output' ? 'Generated' :
@@ -89,21 +89,21 @@ export class FileDetailBody extends React.PureComponent {
         }
 
         return (
-            <div className="col-sm-6 col-lg-4 right box buttons-container">
+            <div className="col-12 col-sm-6 col-lg-4 right box buttons-container">
                 { content }
             </div>
         );
     }
 
     descriptionBox(){
-        var { file, windowWidth } = this.props,
-            gridSize = layout.responsiveGridState(windowWidth),
-            lgColSize = (file && file.quality_metric && file.quality_metric.display_title && '8') || '12';
+        const { file, windowWidth } = this.props;
+        const gridSize = layout.responsiveGridState(windowWidth);
+        const lgColSize = (file && file.quality_metric && file.quality_metric.display_title && '8') || '12';
 
         if (!this.doesDescriptionOrNotesExist()) return null;
 
         return (
-            <div className={"col-xs-12 col-lg-" + lgColSize + " box"}>
+            <div className={"col-12 col-lg-" + lgColSize + " box"}>
                 <span className="text-600">{ file.description ? 'Description' : (file.notes ? 'Notes' : 'Description') }</span>
                 <div className="description-box-container">
                     <FlexibleDescriptionBox

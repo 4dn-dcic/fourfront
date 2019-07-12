@@ -34,7 +34,7 @@
 
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(sm){
     .facet-charts {
         height : auto !important;
         margin-top: 20px;
@@ -611,7 +611,7 @@
 
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(sm){
     .bar-plot-chart {
         position: relative;
     }
@@ -823,7 +823,7 @@
     }
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(sm){
     .bar-plot-chart-controls-wrapper {
         position: relative;
 
@@ -1769,20 +1769,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
         .node-type-input-file-reference { background-color: $workflow-node-color-type-input-file-reference; }
         .node-type-global-context { background-color: $workflow-node-color-type-global-context; }
         .node-disabled { background-color: $workflow-node-color-disabled; opacity: 0.5; }
-        
-        /*
-        @media screen and (min-width: $screen-lg-min){
-            display: table;
-            width: 100%;
-            > .legend-item {
-                display: table-cell;
-                
-                &:not(:first-child), &:not(:nth-child(2)) {
-                    padding-left: 10px;
-                }
-            }
-        }
-        */
 
         .node {
             @include workflow-node;
@@ -1808,6 +1794,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
     }
 
     > .toolbar-wrapper > .btn-toolbar {
+        
+        button,
+        .dropdown > button {
+            margin-left: 5px;
+        }
+
         > .btn-group {
             float: none;
         }
@@ -1821,40 +1813,36 @@ $workflow-node-color-type-global-context: #ffb3b3;
         display: block;
         padding-top: 7px;
         padding-bottom: 5px;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         @include user-select(none);
         &.disabled{
             color: #999;
+        }
+        > label {
+            margin-bottom: 0;
+            font-weight: 400;
         }
     }
 
     button#rowspacingtype-select {
         min-width: 120px;
     }
-    
-    @media screen and (min-width: $screen-lg-min){
 
-        .checkbox-container {
-            float: left;
+    /** Only shown/visible at smaller sizes **/
+    > .inner-panel:first-child {
+        min-width: 200px;
+        padding-left: 10px;
+        padding-bottom: 12px;
+        > hr {
+            margin-top: 12px;
+            margin-bottom: 0;
         }
-
-    }
-    @media screen and (max-width: $screen-md-max){
-        > .inner-panel:first-child {
-            min-width: 200px;
-            padding-left: 10px;
-            padding-bottom: 12px;
-            > hr {
-                margin-top: 12px;
-                margin-bottom: 0;
-            }
-            > .mobile-size-elem {
-                > .dropdown.btn-group,
-                > .dropdown.btn-group > button.btn,
-                > button.btn {
-                    width: 100%;
-                    text-align: left;
-                }
+        > .mobile-size-elem {
+            > .dropdown.btn-group,
+            > .dropdown.btn-group > button.btn,
+            > button.btn {
+                width: 100%;
+                text-align: left;
             }
         }
     }
@@ -2351,9 +2339,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
         }
 
-        
-
-        @media screen and (min-width: $screen-md-min){
+        @include media-breakpoint-up(lg){
             .grouping-row > .label-section > .label-container > small {
                 color: #ddd;
                 transition: color .33s;
@@ -2579,17 +2565,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
         }
-        
-        /* Disabled as we now align text to right */
-        //@media screen and (min-width: $screen-sm-min){
-        //    @for $i from 1 through 5 {
-        //        &.depth-#{$i} {
-        //            > .row > .label-section {
-        //                padding-left: 10px + (27px * $i);
-        //            }
-        //        }
-        //    }
-        //}
 
     }
 

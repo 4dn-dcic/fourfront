@@ -11,6 +11,7 @@ import CursorComponent from './CursorComponent';
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
  * These become transformed into buttons.
+ * @todo Refactor lil bit
  *
  * @typedef {Object} Action
  * @property {string} title - Title or text of the button to be shown.
@@ -19,7 +20,7 @@ import CursorComponent from './CursorComponent';
  */
 
 
-class Body extends React.Component {
+class Body extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -54,7 +55,7 @@ class Body extends React.Component {
             const disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
             const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " btn-block" : "");
             return (
-                <div className={"button-container col-xs-" + colWidth} key={title || i}>
+                <div className={"button-container col-" + colWidth} key={title || i}>
                     <button type="button" className={cls} disabled={disabled || false}
                         onClick={action.function.bind(action.function, this.props)}>
                         { title }
@@ -90,7 +91,7 @@ class Body extends React.Component {
             if (countPair[0] === 'files')           name = "Files";
 
             return (
-                <div key={countPair[0] || i} className={"text-right col-xs-" + colSize}>
+                <div key={countPair[0] || i} className={"text-right col-" + colSize}>
                     { countPair[1] }<small> { name }</small>
                 </div>
             );
@@ -98,7 +99,7 @@ class Body extends React.Component {
 
         return (
             <div className="row">
-                { this.props.primaryCount !== 'files' ? <div className="col-xs-2"></div> : null }
+                { this.props.primaryCount !== 'files' ? <div className="col-2"></div> : null }
                 { countsToShow }
             </div>
         );
@@ -179,13 +180,13 @@ const Crumbs = React.memo(function Crumbs({ path, schemas }){
                             className={"crumb row" + (i===0 ? ' first' : '')}
                             key={i}
                         >
-                            <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
+                            <div className="field col-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
                                 { Schemas.Field.toName(n.field, Schemas.get()) }
                             </div>
-                            <div className="name col-xs-5">
+                            <div className="name col-5">
                                 { n.name || Schemas.Term.toName(n.field, n.term) }
                             </div>
-                            <div className="count col-xs-2 pull-right text-right">
+                            <div className="count col-2 pull-right text-right">
                                 { n.experiment_sets }
                             </div>
                         </div>
