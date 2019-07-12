@@ -187,6 +187,7 @@ body.is-full-screen {
 	@media screen and (min-width: $screen-lg-min){
 		.container {
 			width: auto;
+			max-width: none;
 			margin-left: 20px;
 			margin-right: 20px;
 		}
@@ -675,26 +676,6 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 
 /************** MORE BUTTON STYLES ***********/
 
-/* Light gray BG, more prominent button style than btn-default */
-.btn.btn-secondary {
-  @include button-variant(#000, #e4e4e4, rgba(0,0,0,0.125));
-  &:active, &:focus {
-	  background-color: #e4e4e4;
-  }
-}
-
-/* Moving caret to always right position */
-.dropdown-toggle.btn {
-	position: relative;
-	padding-right: 24px;
-	padding-left: 10px;
-	span.caret {
-		position: absolute;
-		top: 50%;
-		margin-top: -2px;
-		right: 10px;
-	}
-}
 
 /*
 TODO: Re-enable for split buttons w/ specific className maybe.

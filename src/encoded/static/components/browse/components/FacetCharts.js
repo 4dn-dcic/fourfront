@@ -208,9 +208,10 @@ export class FacetCharts extends React.PureComponent {
         if (context && context.total === 0) return null;
         if (debug) console.log('WILL SHOW FACETCHARTS', show, href);
 
-        const gridState   = layout.responsiveGridState(windowWidth || null);
+        const gridState = layout.responsiveGridState(windowWidth || null);
         const cursorDetailActions = this.cursorDetailActions();
-        const expSetFilters = searchFilters.contextFiltersToExpSetFilters(context && context.filters);
+        const browseBaseParams = navigate.getBrowseBaseParams();
+        const expSetFilters = searchFilters.contextFiltersToExpSetFilters(context && context.filters, browseBaseParams);
         let height = show === 'small' ? 300 : 450;
         let width;
 

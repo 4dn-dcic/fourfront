@@ -622,7 +622,7 @@
     position: relative;
 
     .dropdown-heading {
-        margin-bottom: 4px;
+        margin-bottom: 2px;
         margin-top: 10px;
         font-weight: 400;
         &:first-child {
@@ -654,18 +654,15 @@
                 }
                 > div:last-child {
                     padding-left: 3px;
-                    .dropdown.btn-group {
+                    .dropdown-toggle.btn.btn-xs {
                         width: 100%;
-                        .dropdown-toggle.btn.btn-xs {
-                            width: 100%;
-                            padding-right: 20px;
-                            text-align: left;
-                            padding-left: 10px;
+                        padding-right: 20px;
+                        text-align: left;
+                        padding-left: 10px;
 
-                            span.caret {
-                                position: absolute;
-                                right: 10px;
-                            }
+                        span.caret {
+                            position: absolute;
+                            right: 10px;
                         }
                     }
                 }
@@ -677,14 +674,16 @@
                 white-space: nowrap;
                 text-align: right;
             }
-
+            /*
             .dropdown-toggle.btn.btn-xs {
                 padding-left: 8px;
                 padding-right: 8px;
             }
+            */
 
             .dropdown-menu {
-                transform: rotate3d(0,0,1,90deg);
+                /* Manually set this re: rotated parent */
+                transform: rotate3d(0, 0, 1, 90deg) translate3d(50px, -30px, 0px) !important;
                 top: 54px;
                 left: 10px;
                 z-index: 100;

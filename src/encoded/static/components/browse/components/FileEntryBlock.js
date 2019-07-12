@@ -211,8 +211,8 @@ export class FileEntryBlock extends React.PureComponent {
     }
 
     render(){
-        const { hideNameOnHover, keepLabelOnHover, isSingleItem, stripe } = this.props;
-        const classList = ['s-block', 'file'];
+        const { hideNameOnHover, keepLabelOnHover, isSingleItem, stripe, stackDepth } = this.props;
+        const classList = ['s-block', 'file', 'stack-depth-' + stackDepth];
 
         if (hideNameOnHover)    classList.push('hide-name-on-block-hover');
         if (keepLabelOnHover)   classList.push('keep-label-on-name-hover');
@@ -354,11 +354,12 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     render(){
-        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover } = this.props;
+        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth } = this.props;
         const isReallySingleItem = this.isSingleItem(isSingleItem, files);
         const cls = (
             "s-block file-group keep-label-on-name-hover" +
-            (hideNameOnHover ? ' hide-name-on-block-hover' : '')
+            (hideNameOnHover ? ' hide-name-on-block-hover' : '') +
+            " stack-depth-" + stackDepth
         );
 
         let childBlocks;
@@ -370,7 +371,7 @@ export class FilePairBlock extends React.PureComponent {
             childBlocks = _.map(files, (file) =>
                 <FileEntryBlock key={object.atIdFromObject(file)}
                     {..._.omit(this.props, 'files', 'file', 'isSingleItem', 'className', 'type', 'excludeChildrenCheckboxes', 'excludeOwnCheckbox', 'name', 'label')}
-                    file={file}
+                    file={file} stackDepth={stackDepth + 1}
                     className={null}
                     isSingleItem={isReallySingleItem} hideNameOnHover={!isReallySingleItem}
                     excludeCheckbox={excludeChildrenCheckboxes} // May be excluded as this block has own checkbox
@@ -381,7 +382,7 @@ export class FilePairBlock extends React.PureComponent {
         return (
             <div className={cls}>
                 { this.nameColumn() }
-                <div className="files s-block-list">{ childBlocks }</div>
+                <div className={"files s-block-list stack-depth-" + stackDepth}>{ childBlocks }</div>
             </div>
         );
     }

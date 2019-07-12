@@ -86,7 +86,8 @@ class FileColumnActionsBtn extends React.PureComponent {
         } else {
             return (
                 <div className="inline-block" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
-                    <button type="button" className="btn btn-xs btn-primary in-stacked-table-button" data-tip="Visualize with HiGlass" onClick={onClick}>
+                    <button type="button" className="btn btn-xs btn-primary in-stacked-table-button"
+                        data-tip="Visualize with HiGlass" onClick={onClick}>
                         <i className="icon icon-fw icon-television"/>
                     </button>
                 </div>
@@ -166,8 +167,8 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         if (hasJBOrEpigenomeBtn){
             return (
-                <DropdownButton className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize this file..."
-                    title={<i className="icon icon-fw icon-television"/>} dropup bsSize="xs">
+                <DropdownButton className="in-stacked-table-button-container" variant="primary" data-tip="Visualize this file..."
+                    data-place="right" title={<i className="icon icon-fw icon-television"/>} drop="up" size="xs">
                     { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
                 </DropdownButton>
             );
@@ -686,7 +687,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
 
             var nameBlock = (
-                <StackedBlockName style={replicateNumbersExists ? { paddingTop : 19, paddingBottom: 19 } : null}>
+                <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
                     { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>

@@ -311,7 +311,7 @@ class ExternaDataExpSetsCount extends React.PureComponent {
         );
         return (
             <div className="above-results-table-row text-right text-ellipsis-container">
-                <span className="inline-block mt-1">
+                <span className="inline-block mt-08">
                     <span className="text-600 text-large">{ countExternalSets }</span>
                     { midString }
                     <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.

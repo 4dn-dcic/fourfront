@@ -1,7 +1,15 @@
 .btn {
     font-weight: 500;
+    font-size: 1rem;
     /* @include box-shadow(0 1px 3px rgba(0,0,0,.1), inset 0 -2px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.3)); */
     //@include box-shadow(0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 4px rgba(0,0,0,0.2),inset 0 1px 4px rgba(255,255,255,0.3));
+
+    /* reduced from 0.375rem */
+    padding-bottom: 0.35rem;
+    padding-top: 0.35rem;
+    > i.icon {
+        transform: translate3d(0,1px,0);
+    }
 }
 
 .btn-link {
@@ -29,7 +37,19 @@
     }
 }
 
+/** Overrides for own styled btns **/
+
 /** extending Bootstrap button w/ rounded & ext-padding class **/
+/** btn-xs was removed in Bootstrap v4 so we recreate it here **/
+.btn.btn-xs {
+    @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
+    font-weight: 400;
+    padding-top: 2px;
+    > i.icon {
+        // Unset btn style
+        transform: none;
+    }
+}
 
 .btn-xs.rounded,
 .btn-xs.ext-padding {
@@ -41,21 +61,51 @@
 	border-radius: 11px;
 }
 
-/** Overrides for own styled btns **/
+
+.btn.btn-sm {
+    /* increased from 0.25rem */
+    padding-top: 0.275rem;
+}
 
 .btn.btn-primary-dark {
-    @include button-variant($brand-primary-dark, $brand-primary-dark, $brand-primary-dark);
+    @include button-variant($brand-primary-dark, $brand-primary-dark);
 }
 
 .btn.btn-primary {
     /* Using brand-primary-dark color in place of default "darken(...)" to match rest of UI more nicely. */
-    border-color: $brand-primary-dark;
+    /* border-color: $brand-primary-dark; */
     &:hover, &:active, &.active {
         background-color: $brand-primary-dark;
         border-color: $brand-primary-dark;
     }
 }
 
+/* Light gray BG, more prominent button style than btn-default */
+.btn.btn-secondary {
+    @include button-variant(#e4e4e4, rgba(0,0,0,0.125));
+    &:active, &:focus {
+        //background-color: #e4e4e4;
+    }
+}
+
+
+/* Moving caret to always right position */
+.dropdown-toggle.btn {
+	position: relative;
+	padding-right: 24px;
+	padding-left: 10px;
+	&:after {
+		position: absolute;
+		top: 50%;
+		margin-top: -2px;
+        right: 10px;
+    }
+    &.btn-xs {
+        &:after {
+            margin-top: -1px;
+        }
+    }
+}
 
 /** Adding Bootstrap 4 CSS button 'Outline' styles **/
 /** Copied from https://v4-alpha.getbootstrap.com/components/buttons/ **/
@@ -74,7 +124,7 @@
 }
 
 .btn-outline-primary-light {
-    @include button-variant($brand-primary, $brand-primary);
+    @include button-outline-variant($brand-primary, $brand-primary);
     /*
     color: $brand-primary;
     border-color: $brand-primary;
@@ -86,7 +136,7 @@
 }
 
 .btn-outline-primary {
-    @include button-variant($brand-primary-dark, $brand-primary-dark);
+    @include button-outline-variant($brand-primary-dark);
     /*
     color: $brand-primary-dark;
     border-color: $brand-primary-dark;
@@ -98,7 +148,7 @@
 }
 
 .btn-outline-default {
-    @include button-variant($dark, $dark);
+    @include button-outline-variant($dark);
     /*
     color: $btn-default-color;
     border-color: $btn-default-color;
@@ -111,7 +161,8 @@
 
 /** Uses Bootstrap v4 (gray-600) colors, not default colors **/
 .btn-outline-secondary {
-    @include button-variant($gray-800, $gray-600);
+    @include button-outline-variant($gray-400);
+    color: $gray-800;
     /* color: #6c757d; */
     /*
     color: #333; // Might change back to above

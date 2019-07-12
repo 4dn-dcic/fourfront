@@ -6,7 +6,7 @@ import _ from 'underscore';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { LocalizedTime, formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 import { basicColumnExtensionMap } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
-import { Schemas, typedefs } from './../util';
+import { Schemas, typedefs, expFxn } from './../util';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, ColumnDefinition } = typedefs;

@@ -20,7 +20,13 @@ $badge-color-internal-action: #d0d0d0;
 
 $font-family-sans-serif     : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
 $font-family-serif          : "Yrsa", "Times New Roman", Georgia, Times, serif;
+/** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`. */
 $font-family-monospace      : "Source Code Pro", Consolas, monospace;
+$font-family-base:        $font-family-sans-serif;
+
+$font-size-base:          0.9rem;
+
+$dropdown-link-hover-bg: #ddd;
 
 
 // Override Bootstrap default variables:
@@ -75,6 +81,8 @@ $brand-info: $info;
 $brand-primary: $primary;
 $brand-primary-dark: $primary-dark;
 $brand-secondary: $secondary;
+
+
 
 
 @mixin planned-submitted-cell-styles {
