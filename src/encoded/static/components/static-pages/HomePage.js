@@ -50,11 +50,11 @@ export default class HomePage extends React.PureComponent {
 
                 <div className="container home-content-area" id="content">
                     <div className="row">
-                        <div className="col-xs-12 col-md-8">
+                        <div className="col-12 col-md-8">
                             <h2 className="homepage-section-title">Introduction</h2>
                             { this.introText() }
                         </div>
-                        <div className="col-xs-12 col-md-4 pull-right">
+                        <div className="col-12 col-md-4 pull-right">
                             <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
                         </div>
                     </div>

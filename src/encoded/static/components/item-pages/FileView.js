@@ -119,7 +119,7 @@ class FileViewOverview extends React.PureComponent {
         return (
             <div>
                 <div className="row overview-blocks">
-                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-xs-12" />
+                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-12" />
                     <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                     <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                 </div>
@@ -202,7 +202,7 @@ FileViewDownloadButtonContainer.defaultProps = { "size" : null };
 export class ExternalVisualizationButtons extends React.PureComponent {
 
     static defaultProps = {
-        'wrapInColumn' : "col-xs-12",
+        'wrapInColumn' : "col-12",
         'className' : "inner"
     };
 
@@ -295,10 +295,10 @@ function QCMetricFromEmbed(props){
     return (
         <div className="overview-list-element">
             <div className="row">
-                <div className="col-xs-4 text-right">
+                <div className="col-4 text-right">
                     <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} tips={tips} elementType="h5" fallbackTitle={fallbackTitle || qcProperty} className="mb-0 mt-02" />
                 </div>
-                <div className="col-xs-8">
+                <div className="col-8">
                     <div className="inner value">
                         { percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, metric[qcProperty], true) }
                     </div>
@@ -327,10 +327,10 @@ export function QCMetricFromSummary(props){
     return (
         <div className="overview-list-element">
             <div className="row">
-                <div className="col-xs-4 text-right">
+                <div className="col-4 text-right">
                     <h5 className="mb-0 mt-02">{ title }</h5>
                 </div>
-                <div className="col-xs-8">
+                <div className="col-8">
                     <div className="inner value">
                         { tooltip ? <i className="icon icon-fw icon-info-circle mr-05" data-tip={tooltip} /> : null }
                         { value }

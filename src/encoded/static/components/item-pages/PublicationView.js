@@ -126,7 +126,7 @@ class PublicationSummary extends React.PureComponent {
             <React.Fragment>
                 <hr className="mb-0" />
                 <div className="row">
-                    <div className="col-xs-12 col-md-8">
+                    <div className="col-12 col-md-8">
                         { journal ?
                             <React.Fragment>
                                 <h4 className="mt-2 mb-15 text-500">
@@ -145,7 +145,7 @@ class PublicationSummary extends React.PureComponent {
                             </React.Fragment>
                             : null }
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-12 col-md-4">
                         { Array.isArray(categories) && categories.length > 0 ?
                             <React.Fragment>
                                 <h4 className="mt-2 mb-15 text-500">
@@ -218,11 +218,11 @@ class PublicationSummary extends React.PureComponent {
             <div>
                 <div className="row">
                     { abstractCol ?
-                        <div className="col-xs-12 col-md-8">
+                        <div className="col-12 col-md-8">
                             { abstractCol }
                         </div>
                         : null }
-                    <div className={"col-xs-12 col-md-" + (abstractCol ? '4' : '12' )}>
+                    <div className={"col-12 col-md-" + (abstractCol ? '4' : '12' )}>
                         { this.attribution() }
                     </div>
                 </div>

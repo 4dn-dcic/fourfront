@@ -10,16 +10,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-@media screen and (min-width: $screen-md-min){
-	/* Nudge accession #, etc. closer to title on wide desktop views */
-	/*
-	.item-view-header {
-		margin-top: -27px;
-	}
-	*/
-
-}
-
 /*************************
         TabbedView
 **************************/
@@ -262,7 +252,7 @@ body .rc-tabs-top {
 		padding-bottom: 0;
 		border-bottom: none;
 		border-top-color: #eee;
-		@media screen and (min-width: $screen-md-min){
+		@include media-breakpoint-up(md){
 			width: 33%;
 			float: right;
 		}
@@ -278,7 +268,8 @@ body .rc-tabs-top {
 }
 
 .item-view-header {
-	.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
+	.item-label-title {
+		/* Is some form of header elem, e.g. h5; shows like "Data File | ACCESSION" at top left of page */
 		font-weight: 300;
 		min-height: 30px;
 		/* line-height: 36px; */
@@ -286,8 +277,10 @@ body .rc-tabs-top {
 		//padding-top: 10px;
 		padding-left: 12px;
 
-		@media screen and (max-width: $screen-xs-max){
-			min-height: 42px;
+		@include media-breakpoint-down(sm){
+			/* Becomes row (not col) at this size, move closer to title */
+			min-height: 50px;
+			margin-top: -5px;
 		}
 
 		> div.inner {
@@ -299,30 +292,17 @@ body .rc-tabs-top {
 			}
 		}
 
-		/*
-		.accession-label {
-			font-size: 1rem;
-			font-weight: 400;
-			color: #888;
-		}
-		*/
-
 		.accession {
 			font-weight: 500;
 			font-size: 1rem;
 		}
 	}
 
-	//&.no-description .item-label-title > div.inner {
-	//	border-top: 1px solid #ddd;
-	//	margin-top: 10px;
-	//}
-
 	.item-label-extra {
 		font-weight: 300;
 	}
 
-	@media screen and (max-width: $screen-xs-max){
+	@include media-breakpoint-down(sm){
 
 		.item-label-extra.text-right {
 			text-align: left !important;
@@ -578,14 +558,7 @@ i.item-status-indicator-dot {
 		overflow: hidden;
 	}
 
-	.list-item {
-		@media screen and (min-width: $screen-sm-min) {
-			/* Equalize Height of Columns, unsupported for IE9 and below: */
-			display: -webkit-box;
-			display: -webkit-flex;
-			display: -ms-flexbox;
-			display: flex;
-		}
+	.list-item.row {
 
 		.item-label, .item-value {
 			> div {
@@ -600,7 +573,7 @@ i.item-status-indicator-dot {
 		.item-label {
 			font-weight: 500;
 			flex-grow: 1;
-			@media screen and (min-width: $screen-sm-min) {
+			@include media-breakpoint-up(md){
 				> div {
 					border-bottom: 1px solid #eee;
 					padding-bottom: 8px;
@@ -783,7 +756,8 @@ i.item-status-indicator-dot {
 
 	}
 
-	@media screen and (max-width: $screen-xs-max) {
+	@include media-breakpoint-down(sm){
+		/* Deprecated ? */
 		.array-group .array-group-row.list-item:not(.first-item) {
 			.item-label {
 				display: none;
@@ -964,23 +938,14 @@ $download-button-width : 100px;
 }
 
 // Tablet & mobile screen size adjustments
-@media screen and (max-width : $screen-sm-max){
+@include media-breakpoint-down(md){
 	.files-in-set-table .row > .download-button {
 		margin-bottom: -50px;
 	}
 }
 
-// Mobile screen size
-@media screen and (max-width : $screen-xs-max){
-	.files-in-set-table .row > .download-button {
-		> .button-dl-file {
-			margin-bottom: 5px;
-		}
-	}
-}
-
 // Large screen adjustments
-@media screen and (min-width : $screen-md-min){
+@include media-breakpoint-up(lg){
 
 	.files-in-set-table-title {
 		margin-top: 20px;
@@ -1653,7 +1618,7 @@ $badge-item-min-height: 90px;
 	}
 
 	.expset-higlass-panel {
-		@media screen and (min-width: $screen-md-min) {
+		@include media-breakpoint-up(lg){
 			margin-bottom: -20px;
 		}
 	}
@@ -1770,7 +1735,7 @@ $badge-item-min-height: 90px;
 		left: 0;
 		right: 0;
 		top: 0;
-		@media (min-width: $screen-md-min) {
+		@include navbar-fixed-position {
 			top: 41px;
 			z-index: 1000;
 		}
@@ -1796,19 +1761,6 @@ $badge-item-min-height: 90px;
 			padding-left: 16px;
 			padding-right: 16px;
 			body:not(.is-full-screen) & {
-				/*
-				@media (min-width: $screen-sm-min) {
-					max-width: $container-sm;
-				}
-				@media (min-width: $screen-md-min) {
-					max-width: $container-md;
-					padding-left: 0;
-					padding-right: 0;
-				}
-				@media (min-width: $screen-lg-min) {
-					max-width: $container-lg;
-				}
-				*/
 				@include make-max-widths-container-width();
 				@include media-breakpoint-up(md) {
 					padding-left: 0;
@@ -1878,7 +1830,7 @@ $badge-item-min-height: 90px;
 
 				&.buttons-container {
 					text-align: left;
-					@media screen and (min-width: $screen-sm-min){
+					@include media-breakpoint-up(md){
 						text-align: right;
 					}
 				}
@@ -1924,7 +1876,7 @@ $badge-item-min-height: 90px;
 				}
 
 				.download-button-container.exists + h3.node-file-title {
-					@media screen and (max-width: $screen-md-max){
+					@include media-breakpoint-down(lg){
 						padding-right: 30px;
 					}
 				}
@@ -2110,7 +2062,7 @@ div.user-profile-page {
 
 	.panel.shadow-border {
 		background-color: inherit;
-		margin-top: 15px;
+		//margin-top: 15px;
 		margin-bottom: 15px;
 		padding: 15px 20px;
 		overflow: visible;
@@ -2126,7 +2078,20 @@ div.user-profile-page {
 	.panel.user-info,
 	.panel.user-work-info {
 
-		margin-bottom: 0;
+		margin-bottom: 20px;
+		margin-top: 0;
+
+		@include media-breakpoint-up(lg){
+			margin-bottom: 0;
+			height: 100%;
+		}
+
+		// Override of prev CSS
+		.col-md-3.text-right.text-left-xs {
+			@include media-breakpoint-down(sm){
+				text-align: left !important;
+			}
+		}
 
 		#email {
 			font-weight: 500;
@@ -2198,12 +2163,11 @@ div.user-profile-page {
 
 		}
 
-		@media screen and (min-width: $screen-sm-min){
+		@include media-breakpoint-up(md){
 
 			.user-title-col {
 				padding-top: 15px;
 				min-height: 85px;
-				padding-bottom: 30px;
 			}
 
 			.user-title {
@@ -2213,7 +2177,7 @@ div.user-profile-page {
 			}
 		}
 
-		@media screen and (max-width: $screen-xs-max){
+		@include media-breakpoint-down(sm){
 
 			.user-title-col {
 				padding-top: 2px;
@@ -2262,13 +2226,13 @@ div.user-profile-page {
 				}
 			}
 
-			@media screen and (max-width: $screen-xs-max){
+			@include media-breakpoint-down(sm){
 				img.gravatar {
 					width: 94px; /* Account for border */
 					height: 70px;
 					position: relative;
 					z-index: 2;
-					margin-bottom: -30px;
+					margin-bottom: -70px;
 					margin-top: 5px;
 					border-left: 24px solid #FFF;
 				}
@@ -2277,7 +2241,7 @@ div.user-profile-page {
 
 	}
 
-	@media screen and (min-width: $screen-sm-min){
+	@include media-breakpoint-up(md){
 		.editing .user-title .editable-field-entry.inline:not(.editing) {
 			display: inline-block;
 			//max-width: 30%;
@@ -2288,7 +2252,7 @@ div.user-profile-page {
 
 		> .block-title {
 			margin-bottom: 20px;
-			padding-bottom: 15px;
+			padding-bottom: 20px;
 			border-bottom: 1px solid #eee;
 			padding-top: 0;
 

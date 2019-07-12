@@ -316,7 +316,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
         return (
             <div className="static-section joint-analysis-matrix">
                 <div className="row">
-                    <div className={"col-xs-12 col-md-" + (encode_results ? '6' : '12')}>
+                    <div className={"col-12 col-md-" + (encode_results ? '6' : '12')}>
                         { headerFor4DN }
                         <VisualBody
                             {..._.pick(this.props, 'self_planned_results_url', 'self_results_url', 'headerColumnsOrder',
@@ -333,7 +333,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
                         />
                     </div>
                     { encode_results ?
-                        <div className="col-xs-12 col-md-6">
+                        <div className="col-12 col-md-6">
                             { headerForEncode }
                             <VisualBody
                                 {..._.pick(this.props, 'encode_results_url', 'headerColumnsOrder', 'titleMap',

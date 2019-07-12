@@ -207,7 +207,7 @@ export class TopRow extends React.Component {
 
         return (
             <div className="row clearfix top-row">
-                <h5 className="col-sm-5 item-label-title">
+                <h5 className="col-12 col-md-5 item-label-title">
                     <div className="inner">
                         { this.typeInfoLabel() }
                         { context.accession ?
@@ -218,7 +218,7 @@ export class TopRow extends React.Component {
                             : null }
                     </div>
                 </h5>
-                <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                <h5 className="col-12 col-md-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                     { this.parsedStatus() }{ this.wrapChildren() }{ this.itemActions() }{ this.viewJSONButton() }
                 </h5>
             </div>

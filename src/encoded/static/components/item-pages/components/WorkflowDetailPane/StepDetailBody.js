@@ -86,7 +86,7 @@ const AnalysisStepSoftwareDetailRow = React.memo(function AnalysisStepSoftwareDe
  * @returns {JSX.Element} Column box with 'Purposes'.
  */
 export const WorkflowStepDetailPurposesBox = React.memo(function WorkflowStepDetailPurposesBox({ step }){
-    if (!WorkflowStepDetailPurposesBox.analysisStepTypesExist(step)){
+    if (!analysisStepTypesExist(step)){
         return null;
     }
 
@@ -104,7 +104,7 @@ export const WorkflowStepDetailPurposesBox = React.memo(function WorkflowStepDet
         </div>
     );
 });
-WorkflowStepDetailPurposesBox.analysisStepTypesExist = memoize(function(step){
+const analysisStepTypesExist = memoize(function(step){
     if (!step || !Array.isArray(step.analysis_step_types) || step.analysis_step_types.length === 0){
         return false;
     }
@@ -131,7 +131,7 @@ export const WorkflowStepTitleBox = React.memo(function WorkflowStepTitleBox({ s
 });
 WorkflowStepTitleBox.defaultProps = {
     'isFullRow' : function(step){
-        return !WorkflowStepDetailPurposesBox.analysisStepTypesExist(step);
+        return !analysisStepTypesExist(step);
     },
     'label' : "Step Name"
 };

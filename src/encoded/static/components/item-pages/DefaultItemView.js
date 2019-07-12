@@ -390,12 +390,12 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
     return (
         <div className={"embedded-item-with-attachment" + (isInArray ? ' in-array' : '')} key={linkToItem}>
             <div className="row">
-                <div className={"col-xs-12 col-sm-6 col-md-6 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
+                <div className={"col-12 col-sm-6 col-md-6 link-to-item-col" + (isInArray ? ' in-array' : '')} data-array-index={index}>
                     <div className="inner">
                         { isInArray ? <span>{ index + 1 }. </span> : null}{ object.itemUtil.generateLink(item, true) }
                     </div>
                 </div>
-                <div className="col-xs-12 col-sm-6 col-md-6 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
+                <div className="col-12 col-sm-6 col-md-6 pull-right view-attachment-button-col">{ viewAttachmentButton }</div>
             </div>
         </div>
     );
@@ -491,9 +491,9 @@ export class OverViewBodyItem extends React.PureComponent {
 
             return (
                 <div className="imaging-path-item-wrapper row">
-                    <div className="index-num col-xs-2 mono-text text-500"><small>{ channel }</small></div>
-                    <div className={"imaging-path col-xs-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
-                    { matchingFile ? <div className="microscope-setting col-xs-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                    <div className="index-num col-2 mono-text text-500"><small>{ channel }</small></div>
+                    <div className={"imaging-path col-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    { matchingFile ? <div className="microscope-setting col-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
         }
@@ -640,5 +640,5 @@ export function WrapInColumn(props){
 }
 WrapInColumn.defaultProps = {
     'wrap' : false,
-    'defaultWrapClassName' : "col-xs-6 col-md-4"
+    'defaultWrapClassName' : "col-6 col-md-4"
 };

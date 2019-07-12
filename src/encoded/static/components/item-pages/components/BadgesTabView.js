@@ -402,8 +402,8 @@ class BadgeItem extends React.PureComponent {
         return (
             <div className="badge-item">
                 <div className="row flexrow">
-                    <div className="col-xs-12 col-sm-2 icon-col">{ image }</div>
-                    <div className="col-xs-12 col-sm-10 title-col">
+                    <div className="col-12 col-sm-2 icon-col">{ image }</div>
+                    <div className="col-12 col-sm-10 title-col">
                         <div className="inner mb-05">
                             <h4 className="text-500 mb-0 mt-0">
                                 { badgeTitle }

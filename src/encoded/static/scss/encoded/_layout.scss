@@ -238,6 +238,11 @@ h1.page-title {
 		&.has-callout-title {
 			/* margin-right: 12px; */
 		}
+
+		@include media-breakpoint-up(md){
+			margin-right: 9px;
+		}
+
 	}
 
 	.page-subtitle {
@@ -256,17 +261,21 @@ h1.page-title {
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
-		
+
 		&.prominent {
 			font-weight: 400;
 			font-size : 0.75em;
 			display: inline-block;
-			margin-left: 9px;
 			vertical-align: middle;
 
 			body[data-pathname="/search/"] & {
 				margin-left: 6px;
 			}
+
+			@include media-breakpoint-down(sm){
+				display: block;
+			}
+
 		}
 
 	}
@@ -587,16 +596,6 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 .mono-text,
 .accession {
 	font-family: $font-family-monospace;
-}
-
-@include media-breakpoint-down(xs){
-
-	.text-left-xs {
-		// Make text left-aligned for collapsed mobile view(s),
-		// e.g. if is aligned right on larger screens.
-		text-align: left !important;
-	}
-
 }
 
 .text-ellipsis-container {

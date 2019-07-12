@@ -63,14 +63,14 @@ export const MetricsViewItem = React.memo(function MetricsViewItem({ metric : m 
         title = <span>{ m.title || m.key }</span>;
     }
     return (
-        <div className="col-xs-12 col-sm-6 col-lg-6 metrics-view-item">
+        <div className="col-12 col-sm-6 col-lg-6 metrics-view-item">
             <div className="inner">
                 <div className="row">
-                    <div className="col-xs-9">
+                    <div className="col-9">
                         { title }
                         {/* <TooltipInfoIconContainer title={m.title || m.key} tooltip={m.description} /> */}
                     </div>
-                    <div className="col-xs-3 text-center">
+                    <div className="col-3 text-center">
                         { MetricsViewItem.resultStringToIcon(m.result) }
                     </div>
                 </div>

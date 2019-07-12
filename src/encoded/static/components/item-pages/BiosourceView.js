@@ -72,16 +72,16 @@ const OverViewBody = React.memo(function OverViewBody({ result, schemas }){
 
     return (
         <div className="row">
-            <div className="col-md-12 col-xs-12">
+            <div className="col-12">
                 <div className="row overview-blocks mb-2">
 
-                    <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block" property="individual" overrideTitle="Organism - Individual" fallbackTitle="Individual" titleRenderFxn={function(field, val){
+                    <OverViewBodyItem {...commonProps} wrapInColumn="col-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block" property="individual" overrideTitle="Organism - Individual" fallbackTitle="Individual" titleRenderFxn={function(field, val){
                         return <IndividualItemTitle context={val} defaultOpen />;
                     }} />
 
-                    <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-3" property="biosource_type" fallbackTitle="Biosource Type" listItemElement="div" listWrapperElement="div" singleItemClassName="block" />
+                    <OverViewBodyItem {...commonProps} wrapInColumn="col-6 col-md-3" property="biosource_type" fallbackTitle="Biosource Type" listItemElement="div" listWrapperElement="div" singleItemClassName="block" />
 
-                    <OverViewBodyItem {...commonProps} wrapInColumn="col-xs-6 col-md-3" property="tissue" fallbackTitle="Tissue Name" hideIfNoValue />
+                    <OverViewBodyItem {...commonProps} wrapInColumn="col-6 col-md-3" property="tissue" fallbackTitle="Tissue Name" hideIfNoValue />
 
                 </div>
 
@@ -113,9 +113,9 @@ const OverViewBodyCellLineDetails = React.memo(function OverViewBodyCellLineDeta
             </h3>
             <hr className="tab-section-title-horiz-divider"/>
             <div className="row overview-blocks">
-                <OverViewBodyItem {...props} wrapInColumn="col-xs-6 col-md-3" property="cell_line" fallbackTitle="Cell Line" />
-                <OverViewBodyItem {...props} wrapInColumn="col-xs-6 col-md-3" property="cell_line_tier" fallbackTitle="Cell Line Tier" />
-                <OverViewBodyItem {...props} wrapInColumn="col-xs-6 col-md-6" property="SOP_cell_line" fallbackTitle="SOP for Cell Line" listItemElement="div"
+                <OverViewBodyItem {...props} wrapInColumn="col-6 col-md-3" property="cell_line" fallbackTitle="Cell Line" />
+                <OverViewBodyItem {...props} wrapInColumn="col-6 col-md-3" property="cell_line_tier" fallbackTitle="Cell Line Tier" />
+                <OverViewBodyItem {...props} wrapInColumn="col-6 col-md-6" property="SOP_cell_line" fallbackTitle="SOP for Cell Line" listItemElement="div"
                     listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_attachment} />
             </div>
         </div>

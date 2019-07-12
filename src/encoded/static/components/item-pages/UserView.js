@@ -152,18 +152,18 @@ class SyncedAccessKeyTable extends React.PureComponent {
                     <br/>(It might take a few minutes for the access key to show up in table after page refresh.)
 
                     <div className="row mt-15">
-                        <div className="col-xs-4 text-600 text-right no-user-select">
+                        <div className="col-4 text-600 text-right no-user-select">
                             Access Key ID
                         </div>
-                        <div className="col-xs-8">
+                        <div className="col-8">
                             <code>{ access_key_id }</code>
                         </div>
                     </div>
                     <div className="row mt-05">
-                        <div className="col-xs-4 text-600 text-right no-user-select">
+                        <div className="col-4 text-600 text-right no-user-select">
                             Secret Access Key
                         </div>
-                        <div className="col-xs-8">
+                        <div className="col-8">
                             <code>{ secret_access_key }</code>
                         </div>
                     </div>
@@ -339,6 +339,7 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
 export default class UserView extends React.Component {
 
     static onEditableFieldSave(nextContext){
+        console.log('NEXT', nextContext);
         store.dispatch({
             type: { 'context': nextContext }
         });
@@ -400,20 +401,20 @@ export default class UserView extends React.Component {
 
                 <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
-                    <div className="row mt-5 mb-12 row-eq-height-md">
+                    <div className="row mt-5 mb-12">
 
-                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-7">
+                        <div className="col-12 col-lg-6 col-xl-7">
 
                             <div className="panel user-info shadow-border">
                                 <div className="user-title-row-container">
                                     <div className="row title-row">
-                                        <div className="col-sm-3 gravatar-container">
+                                        <div className="col-md-3 gravatar-container">
                                             { object.itemUtil.User.gravatar(email, 70) }
                                             <a className="edit-button-remote text-center" target="_blank" rel="noopener noreferrer" href="https://gravatar.com">
                                                 <i className="icon icon-pencil"/>
                                             </a>
                                         </div>
-                                        <div className="col-sm-9 user-title-col">
+                                        <div className="col-md-9 user-title-col">
                                             <h1 className="user-title">
                                                 <FieldSet context={user} parent={this} style="inline"
                                                     inputSize="lg" absoluteBox objectType="User" onSave={UserView.onEditableFieldSave}
@@ -432,7 +433,7 @@ export default class UserView extends React.Component {
                             </div>
 
                         </div>
-                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
+                        <div className="col-12 col-lg-6 col-xl-5">
                             <ProfileWorkFields user={user} parent={this} href={href} />
                         </div>
 
@@ -606,26 +607,26 @@ class ProfileWorkFields extends React.PureComponent {
                     <i className="icon icon-users icon-fw"></i> Organizations
                 </h3>
                 <div className="row field-entry lab">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
-                    <div id="lab" className="col-sm-9 value text-500">
+                    <div id="lab" className="col-md-9 value text-500">
                         { labTitle }
                     </div>
                 </div>
                 <div className="row field-entry job_title">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
-                    <div id="job_title" className="col-sm-9 value">
+                    <div id="job_title" className="col-md-9 value">
                         { job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
                 <div className="row field-entry submits_for">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submits For</label>
                     </div>
-                    <div className="col-sm-9 value text-500">
+                    <div className="col-md-9 value text-500">
                         <FormattedInfoBlock.List
                             renderItem={object.itemUtil.generateLink}
                             endpoints={_.filter(_.map(submits_for, object.itemUtil.atId))}
@@ -636,10 +637,10 @@ class ProfileWorkFields extends React.PureComponent {
                     </div>
                 </div>
                 <div className="row field-entry awards">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="awards">Awards</label>
                     </div>
-                    <div className="col-sm-9 value text-500">
+                    <div className="col-md-9 value text-500">
                         <FormattedInfoBlock.List
                             details={awards}
                             renderItem={object.linkFromItem}
@@ -761,7 +762,7 @@ export class ImpersonateUserForm extends React.PureComponent {
                 <hr />
                 <h2 className="text-400 mt-5">Impersonate a User</h2>
                 <div className="row">
-                    <div className="col-xs-12 col-lg-6">
+                    <div className="col-12 col-lg-6">
                         <BasicForm onSubmit={this.handleSubmit} />
                     </div>
                 </div>

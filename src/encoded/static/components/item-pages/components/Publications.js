@@ -48,7 +48,7 @@ const ShortAttribution = React.memo(function ShortAttribution({ publication : pu
     const authorsLen = authors.length;
 
     let authorsString = null;
-    if (authorsLenh > 0){
+    if (authorsLen > 0){
         if (authorsLen === 1){
             authorsString = pub.authors[0];
         } else {
@@ -247,8 +247,8 @@ export class Publications extends React.PureComponent {
                         _.map(this.detailRows(produced_in_pub), function({ key, label, content }, i){
                             return (
                                 <div className="row details-row" key={ key || label || i }>
-                                    <div className="col-xs-2 text-600 text-right label-col">{ label }</div>
-                                    <div className="col-xs-10">{ content }</div>
+                                    <div className="col-2 text-600 text-right label-col">{ label }</div>
+                                    <div className="col-10">{ content }</div>
                                 </div>
                             );
                         })

@@ -235,7 +235,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
     const commonProps = {
         'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
         'result'        : context,              // The Item from which are getting value for 'property'.
-        'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        'wrapInColumn'  : "col-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
     };
     const commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
@@ -263,7 +263,7 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
     const commonProps = {
         'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
         'result'        : exp,                  // The Item from which are getting value for 'property'.
-        'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        'wrapInColumn'  : "col-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
     };
     const commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
@@ -277,7 +277,7 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
             <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
-                wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                wrapInColumn="col-12 col-md-6 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
 
             <OverViewBodyItem {...commonProps} property="microscopy_technique" fallbackTitle="Microscopy Technique" />

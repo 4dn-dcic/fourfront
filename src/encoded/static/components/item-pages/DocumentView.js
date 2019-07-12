@@ -23,7 +23,7 @@ const DocumentViewOverview = React.memo(function DocumentViewOverview({ context,
     return (
         <div>
             <div className="row overview-blocks">
-                <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-xs-12 col-md-6" includeTitle btnSize="lg" itemType="Document" />
+                <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-12 col-md-6" includeTitle btnSize="lg" itemType="Document" />
             </div>
         </div>
     );

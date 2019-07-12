@@ -21,7 +21,7 @@ export class ItemFileAttachment extends React.PureComponent {
         const { wrapInColumn } = this.props;
         if (!wrapInColumn) return arguments;
         return (
-            <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-xs-12 col-md-4"}>
+            <div className={typeof wrapInColumn === 'string' ? wrapInColumn : "col-12 col-md-4"}>
                 { Array.from(arguments) }
             </div>
         );

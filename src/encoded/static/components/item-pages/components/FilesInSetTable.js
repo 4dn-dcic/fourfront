@@ -92,41 +92,41 @@ export const FileItemRow = React.memo(function FileItemRow(props){
 
     return (
         <div className="row" key={atId || title}>
-            <div className="col col-xs-9 col-md-2 col-lg-2 title">
+            <div className="col col-6 col-lg-2 title">
                 <h6 className="accession">
                     { atId ? <a href={atId}>{ title }</a> : title }
                 </h6>
             </div>
 
-            <div className="col col-xs-3 col-md-2 text-right download-button pull-right">
-                <button type="button" className="btn btn-primary btn-sm button-dl-file"
+            <div className="col col-6 col-lg-2 text-right download-button pull-right">
+                <a className="btn btn-primary btn-sm button-dl-file"
                     href={fileDownloadHref} download disabled={!fileDownloadHref}>
                     <i className={"icon icon-" + (fileItemClass) }/>
                     { '\u00A0  Download' }
-                </button>
-                <button type="button" href={attachmentDownloadHref} download disabled={!attachmentDownloadHref}
-                    className={"btn btn-outline-dark button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}>
+                </a>
+                <a href={attachmentDownloadHref} download disabled={!attachmentDownloadHref}
+                    className={"btn btn-sm btn-outline-dark button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}>
                     <i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>
-                </button>
+                </a>
             </div>
 
-            <div className="col col-xs-12 col-md-4 col-lg-5 description">
+            <div className="col-12 col-lg-4 col-xl-5 description">
                 { file.description }
             </div>
 
-            <div className="col col-xs-1 col-md-1 lab">
+            <div className="col-1 col-md-1 lab">
                 <LabIcon
                     lab={file && file.lab}
                 />
             </div>
 
-            <div className="col col-xs-11 col-md-3 col-lg-2 submitter">
+            <div className="col-11 col-md-3 col-lg-2 submitter">
                 <SubmitterLink
                     user={file && file.submitted_by}
                 />
             </div>
 
-            <div className="col col-xs-12 col-md-12 divider-column">
+            <div className="col-12 col-md-12 divider-column">
                 <div className="divider"/>
             </div>
         </div>
@@ -157,18 +157,18 @@ export const Small = React.memo(function Small({ files }){
                     const downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
                     return (
                         <div className="row" key={atId || title || i}>
-                            <div className="col-xs-12 col-md-4 title">
+                            <div className="col-12 col-md-4 title">
                                 <h6 className="text-500">
                                     { atId ? <a href={atId}>{ title }</a> : title }
                                 </h6>
                             </div>
-                            <div className="col-xs-12 col-md-6 description">
+                            <div className="col-12 col-md-6 description">
                                 { file.description }
                             </div>
-                            <div className="col-xs-12 col-md-2 text-right download-button">
-                                <button type="button" className="btn btn-sm btn-primary" href={downloadHref} download disabled={!downloadHref}>
+                            <div className="col-12 col-md-2 text-right download-button">
+                                <a className="btn btn-sm btn-primary" href={downloadHref} download disabled={!downloadHref}>
                                     <i className="icon icon-download"/>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     );
@@ -282,30 +282,30 @@ export class FilesInSetTable extends React.PureComponent {
     */
     header(){
         return (
-            <div className="row d-none d-lg-block header-row">
-                <div className="col-xs-9 col-md-2 col-lg-2 title">
+            <div className="row d-none d-lg-flex header-row">
+                <div className="col-9 col-lg-2 title">
                     Accession
                 </div>
 
-                <div className="col-xs-3 col-md-2 text-right download-button-title pull-right">
+                <div className="col-3 col-lg-2 text-right download-button-title pull-right">
                     {/* <i className="icon icon-download"/> */}
                     <span className="file">Image Files</span>
                     <span className="docs">Doc</span>
                 </div>
 
-                <div className="col-xs-12 col-md-4 col-lg-5  description">
+                <div className="col-12 col-lg-4 col-xl-5 description">
                     Description
                 </div>
 
-                <div className="col-xs-1 col-md-1 lab" style={{ paddingRight : 6 }}>
+                <div className="col-1 lab" style={{ paddingRight : 6 }}>
                     Lab
                 </div>
 
-                <div className="col-xs-12 col-md-3 col-lg-2 submitter">
+                <div className="col-12 col-lg-2 submitter">
                     Submitter
                 </div>
 
-                <div className="col-xs-12 col-md-12 divider-column">
+                <div className="col-12 col-md-12 divider-column">
                     <div className="divider"/>
                 </div>
             </div>

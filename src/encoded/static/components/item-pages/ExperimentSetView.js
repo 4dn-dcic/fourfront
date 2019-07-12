@@ -194,7 +194,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
                 titleRenderFxn={OverviewHeading.expCategorizerTitle} wrapInColumn="col-sm-6 col-md-3 pull-right" />
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
-                wrapInColumn="col-xs-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                wrapInColumn="col-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} hideIfNoValue />
 
         </OverviewHeadingContainer>
@@ -418,7 +418,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
         return (
             <div className="row">
-                <div className="exp-table-container col-xs-12">
+                <div className="exp-table-container col-12">
                     <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
                         <span>Quality Metrics</span>
                     </h3>

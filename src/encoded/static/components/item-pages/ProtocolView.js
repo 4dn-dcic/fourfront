@@ -26,7 +26,7 @@ const ProtocolViewOverview = React.memo(function ProtocolViewOverview({ context,
     return (
         <div className="container">
             <div className="row overview-blocks">
-                <OverViewBodyItem {...{ result, tips }} property="protocol_type" fallbackTitle="Protocol Type" wrapInColumn="col-xs-6 col-md-4 mb-3" />
+                <OverViewBodyItem {...{ result, tips }} property="protocol_type" fallbackTitle="Protocol Type" wrapInColumn="col-6 col-md-4 mb-3" />
                 <OverViewBodyItem {...{ result, tips }} property="protocol_classification" fallbackTitle="Protocol Classification" wrapInColumn />
                 <ItemFileAttachment context={result} tips={tips} wrapInColumn includeTitle />
             </div>

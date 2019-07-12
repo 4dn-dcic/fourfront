@@ -31,10 +31,10 @@ export const FormattedInfoWrapper =  React.memo(function FormattedInfoWrapper(pr
         <div className={outerClassName}>
             <h6 className="publication-label">{ singularTitle }{ isSingleItem ? '' : 's' }</h6>
             <div className="row">
-                <div className="icon-container col-xs-2 col-lg-1">
+                <div className="icon-container col-2 col-lg-1">
                     <i className={"icon icon-" + iconClass} />
                 </div>
-                <div className={"col-xs-10 col-lg-11" + (isSingleItem && noDetails ? ' no-more-details' : '')}>{ children }</div>
+                <div className={"col-10 col-lg-11" + (isSingleItem && noDetails ? ' no-more-details' : '')}>{ children }</div>
             </div>
         </div>
     );
@@ -572,7 +572,7 @@ export class FormattedInfoBlock extends React.Component {
         if (loading) {
             innerContent = (
                 <div className="row">
-                    <div className="col-xs-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
+                    <div className="col-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
                     </div>
                 </div>
@@ -580,8 +580,8 @@ export class FormattedInfoBlock extends React.Component {
         } else {
             innerContent = (
                 <div className="row loaded">
-                    { iconClass ? <div className="col-xs-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
-                    <div className={"details-col " + (iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
+                    { iconClass ? <div className="col-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
+                    <div className={"details-col " + (iconClass ? "col-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
                         { title ?
                             titleHref ?
                                 <h5 className="block-title"><a href={ titleHref } title={title}>{ title }</a></h5>
