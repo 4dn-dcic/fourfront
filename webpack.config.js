@@ -39,7 +39,7 @@ if (mode === 'production') {
 
 let sharedComponentPath = 'node_modules/@hms-dbmi-bgm/shared-portal-components';
 
-if (mode === "production"){
+if (mode === "development"){
     let isLinked = false;
     try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
         for (var i = 0; i < 10; i++) { // Incase multiple links.

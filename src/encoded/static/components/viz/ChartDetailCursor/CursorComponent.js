@@ -83,7 +83,7 @@ export default class CursorComponent extends React.Component {
         'containingHeight'  : 200,
         'offsetLeft'        : 0,
         'offsetTop'         : 0,
-        'debugStyle'        : true
+        'debugStyle'        : false
     };
 
     constructor(props){

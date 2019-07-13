@@ -385,7 +385,7 @@ export class PopoverViewContainer extends React.PureComponent {
 
     render(){
         return (
-            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href', 'context')}
+            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href', 'context', 'schemas')}
                 eventCategory="BarPlot" // For Analytics events
                 highlightTerm={false} clickCoordsFxn={this.getCoordsCallback}>
                 <ViewContainer {...this.props} />

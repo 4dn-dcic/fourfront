@@ -124,7 +124,7 @@ class Body extends React.PureComponent {
     }
 
     render(){
-        const { path, schemas, includeTitleDescendentPrefix } = this.props;
+        const { path, schemas, includeTitleDescendentPrefix , primaryCount } = this.props;
         if (Array.isArray(path) && path.length === 0){
             return null;
         }
@@ -133,7 +133,7 @@ class Body extends React.PureComponent {
 
         return (
             <div className="mosaic-cursor-body">
-                <Crumbs path={path} schemas={schemas} />
+                <Crumbs path={path} schemas={schemas} primaryCount={primaryCount} />
                 <h6 className="field-title">
                     { this.primaryCountLabel() }
                     {
@@ -164,7 +164,7 @@ class Body extends React.PureComponent {
     }
 }
 
-const Crumbs = React.memo(function Crumbs({ path, schemas }){
+const Crumbs = React.memo(function Crumbs({ path, schemas, primaryCount }){
     const offsetPerDescendent = 10;
     const isEmpty = path.length < 2;
     if (isEmpty) return null;
@@ -174,20 +174,21 @@ const Crumbs = React.memo(function Crumbs({ path, schemas }){
         <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
             {
                 path.slice(0,-1).map(function(n, i){
+                    console.log('TT', n);
                     return (
                         <div
                             data-depth={i}
                             className={"crumb row" + (i===0 ? ' first' : '')}
                             key={i}
                         >
-                            <div className="field col-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
-                                { Schemas.Field.toName(n.field, Schemas.get()) }
+                            <div className="field col-auto" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
+                                { Schemas.Field.toName(n.field, schemas) }
                             </div>
-                            <div className="name col-5">
+                            <div className="name col">
                                 { n.name || Schemas.Term.toName(n.field, n.term) }
                             </div>
-                            <div className="count col-2 pull-right text-right">
-                                { n.experiment_sets }
+                            <div className="count col-auto pull-right text-right">
+                                { n[primaryCount] || n.count }
                             </div>
                         </div>
                     );
@@ -344,13 +345,14 @@ export default class ChartDetailCursor extends React.PureComponent {
     }
 
     render(){
-        var { containingElement, hideWhenNoContainingElement, cursorContainmentDimensions, windowWidth, windowHeight } = this.props,
-            containDims = {};
+        const { containingElement, hideWhenNoContainingElement, cursorContainmentDimensions, windowWidth, windowHeight, visibilityMargin } = this.props;
+        const { sticky, path, xCoordOverride, mounted, bodyComponent } = this.state;
+        let containDims = {};
 
         if (!containingElement){
             if (hideWhenNoContainingElement) return null;
             containDims = cursorContainmentDimensions;
-            if (this.state.mounted && !isServerSide()){
+            if (mounted && !isServerSide()){
                 containDims = {
                     'containingWidth'   : windowWidth,
                     'containingHeight'  : windowHeight,
@@ -360,34 +362,29 @@ export default class ChartDetailCursor extends React.PureComponent {
             }
         }
 
-        var isVisible = this.state.sticky || (Array.isArray(this.state.path) && this.state.path.length > 0);
+        const isVisible = sticky || (Array.isArray(path) && path.length > 0);
 
         //if (!isVisible) return null;
         return (
-            <CursorComponent
-                {...containDims}
+            <CursorComponent {...containDims}
                 {..._.pick(this.props, 'width', 'height', 'horizontalAlign', 'debugStyle')}
-                containingElement={this.props.containingElement}
-                cursorOffset={this.getCursorOffset()}
-                xCoordOverride={this.state.xCoordOverride}
-                className="mosaic-detail-cursor"
-                isVisible={isVisible}
-                visibilityMargin={this.props.visibilityMargin || {
+                containingElement={containingElement} cursorOffset={this.getCursorOffset()}
+                xCoordOverride={xCoordOverride} className="mosaic-detail-cursor"
+                isVisible={isVisible} visibilityMargin={visibilityMargin || {
                     left: 0,
                     right: 0,
                     bottom: -50,
                     top: -10
                 }}
-                ref={this.cursorComponentRef}
-                sticky={this.state.sticky}
-                children={React.createElement(
-                    this.state.bodyComponent,
+                ref={this.cursorComponentRef} sticky={sticky}>
+                { React.createElement(
+                    bodyComponent,
                     _.extend(
                         _.omit(this.props, 'children'),
                         this.state
                     )
-                )}
-            />
+                ) }
+            </CursorComponent>
         );
     }
 

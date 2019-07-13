@@ -132,7 +132,8 @@ export const Field = {
         'accession' : 'Experiment Set',
         'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',
-        'experiments_in_set.lab.title' : 'Lab',
+        'experiments_in_set.lab.display_title' : 'Lab',
+        'lab.display_title' : 'Lab',
         'experiments_in_set.experiment_type' : 'Experiment Type',
         'experiments_in_set.experiment_type.display_title' : 'Experiment Type',
         'experimentset_type' : 'Set Type',
@@ -140,11 +141,11 @@ export const Field = {
         'display_title' : "Title"
     },
 
-    toName : function(field, schemas, schemaOnly = false, itemType = 'ExperimentSet'){
+    toName : function(field, schemas, itemType = 'ExperimentSet', schemaOnly = false){
         if (!schemaOnly && Field.nameMap[field]){
             return Field.nameMap[field];
         } else {
-            var schemaProperty = getSchemaProperty(field, schemas, itemType);
+            const schemaProperty = getSchemaProperty(field, schemas, itemType);
             if (schemaProperty && schemaProperty.title){
                 Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
                 return schemaProperty.title;

@@ -341,8 +341,10 @@ export class Chart extends React.PureComponent {
         // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
         barplot_color_cycler.resetCache();
 
-        const { width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
-            aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props;
+        const {
+            width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
+            aggregateType, useOnlyPopulatedFields, cursorDetailActions, href, schemas
+        } = this.props;
         const styleOptions = this.styleOptions();
         const topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
 
@@ -357,7 +359,7 @@ export class Chart extends React.PureComponent {
         );
 
         return (
-            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href }}
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href, schemas }}
                 actions={cursorDetailActions}
                 leftAxis={this.renderParts.leftAxis(width, height, barData, styleOptions)}
                 bottomAxis={this.renderParts.bottomXAxis(width, height, barData.bars, styleOptions)}
