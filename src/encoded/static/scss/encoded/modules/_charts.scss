@@ -2573,21 +2573,23 @@ $workflow-node-color-type-global-context: #ffb3b3;
 // The popover for matrix is rendered outside of viz container -- 
 
 #jap-popover {
-    h3.popover-title {
+    .popover-header {
         div.matrix-popover-title {
+            font-size: 1.075rem;
+            display: flex;
             .x-axis-title {
-                width: 40%;
+                flex: 0 0 40%;
                 text-align: right;
             }
             .mid-icon {
-                width: 20%;
+                flex: 0 0 20%;
                 text-align: center;
                 padding-top: 8px;
                 font-size: 1.5rem;
                 opacity: 0.33;
             }
             .y-axis-title {
-                width: 40%;
+                flex: 0 0 40%;
                 text-align: left;
                 //padding-left: 10px;
             }

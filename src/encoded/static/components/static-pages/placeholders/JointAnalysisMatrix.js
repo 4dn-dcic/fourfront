@@ -452,14 +452,14 @@ class VisualBody extends React.PureComponent {
         const yAxisGroupingValue = (isGroup ? data[0][columnGrouping] : data[columnGrouping]) || null;
         const popoverTitle = (
             <div className="clearfix matrix-popover-title">
-                <div className="x-axis-title pull-left">
+                <div className="x-axis-title">
                     <div className="text-300">{groupingPropertyCurrentTitle}</div>
                     <div className="text-400">{groupingPropertyCurrentValue}</div>
                 </div>
-                <div className="mid-icon pull-left">
+                <div className="mid-icon">
                     <i className="icon icon-times"/>
                 </div>
-                <div className="y-axis-title pull-left">
+                <div className="y-axis-title">
                     <div className="text-300">{yAxisGroupingTitle}</div>
                     <div className="text-400">{yAxisGroupingValue}</div>
                 </div>
