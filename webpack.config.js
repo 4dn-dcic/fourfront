@@ -37,7 +37,7 @@ if (mode === 'production') {
     devTool = 'inline-source-map';
 }
 
-let sharedComponentPath = 'node_modules/@hms-dbmi-bgm/shared-portal-components';
+let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
 
 if (mode === "development"){
     let isLinked = false;
