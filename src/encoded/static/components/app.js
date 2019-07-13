@@ -278,10 +278,10 @@ export default class App extends React.PureComponent {
 
         // Load up analytics
         // Load up analytics & perform initial pageview track
-        analytics.initializeGoogleAnalytics(
-            getGoogleAnalyticsTrackingID(href),
-            context
-        );
+        const analyticsID = getGoogleAnalyticsTrackingID(href);
+        if (analyticsID){
+            analytics.initializeGoogleAnalytics(analyticsID, context);
+        }
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();

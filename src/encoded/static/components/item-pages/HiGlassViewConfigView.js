@@ -518,7 +518,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var btnProps  = {
             'onSelect'      : this.handleStatusChange,
             //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
-            'bsStyle'       : context.status === 'released' ? 'default' : 'info',
+            'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
             'disabled'      : releaseLoading,
             'key'           : 'statuschangebtn',
             'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
