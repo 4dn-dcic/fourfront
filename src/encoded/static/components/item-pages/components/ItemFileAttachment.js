@@ -68,10 +68,12 @@ export class ItemFileAttachment extends React.PureComponent {
     }
 
     render(){
-        const { context, tips, includeTitle, property, wrapInColumn, btnSize, hideIfNoValue } = this.props;
+        const { context, tips, includeTitle, property, wrapInColumn, hideIfNoValue } = this.props;
         const { attachment = null } = context;
 
         if (hideIfNoValue && (!context || !attachment)) return null;
+
+        const { download = null, href: attachHref = '' } = attachment;
 
         const title = !includeTitle ? null : (
             <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'tips', 'schemas')} fallbackTitle="Attachment"
@@ -82,13 +84,9 @@ export class ItemFileAttachment extends React.PureComponent {
         if (attachment){
             contents = (
                 <div className={includeTitle ? 'mt-1' : null}>
-                    <ViewFileButton
-                        size={btnSize}
-                        filename={(attachment && attachment.download) || null}
-                        href={object.itemUtil.atId(context) + attachment.href}
-                        disabled={typeof attachment.href !== 'string' || attachment.href.length === 0}
-                        className={ViewFileButton.defaultProps.className + ' btn-block'}
-                    />
+                    <ViewFileButton filename={download || null}
+                        href={object.itemUtil.atId(context) + attachHref} disabled={attachHref.length === 0}
+                        className={ViewFileButton.defaultProps.className + ' btn-block'} />
                     <div>
                         { this.size() }
                         { this.md5sum() }

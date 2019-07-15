@@ -268,3 +268,45 @@
     //}
 }
 */
+
+/** Modal Stuff **/
+
+.modal-dialog {
+
+	padding-left: 15px;
+	padding-right: 15px;
+
+	.modal-content {
+
+		> .modal-header {
+			padding-top: 1.125rem; // Overrides 1rem.
+			> button.close {
+				margin-top: -0.875rem; // Overrides -1rem.
+			}
+		}
+
+		.modal-body p {
+			font-family: inherit;
+		}
+
+	}
+}
+
+div[role="dialog"] {
+
+	> .modal-dialog {
+
+		/* Vertical Centering */
+		display: flex;
+		align-items: center;
+		height: 100%;
+		margin-top: 0;
+		margin-bottom: 0;
+
+		> .modal-content {
+			width: 100%;
+		}
+
+	}
+}
+

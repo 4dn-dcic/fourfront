@@ -138,13 +138,11 @@ class SyncedAccessKeyTable extends React.PureComponent {
 
     showNewSecret(response, reset = false) {
         const { secret_access_key, access_key_id } = response;
+        const modalTitle = "Your secret key has been " + (reset ? "reset" : "created" );
         this.setState({ 'modal' : (
             <Modal show onHide={this.hideModal}>
                 <Modal.Header closeButton>
-                    { reset ?
-                        <Modal.Title>Your secret key has been created.</Modal.Title>
-                        : <Modal.Title>Your secret key has been reset.</Modal.Title>
-                    }
+                    <Modal.Title>{ modalTitle }</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     Please make a note of the new secret access key.

@@ -83,14 +83,11 @@ export default class SearchView extends React.PureComponent {
         return facets;
     });
 
-    /**
-     * Filter the `@type` facet options down to abstract types only (if none selected) for Search.
-     */
+    /** Filter the `@type` facet options down to abstract types only (if none selected) for Search. */
     transformedFacets(){
-        var { href, context, currentAction, session, schemas } = this.props;
+        const { href, context, currentAction, session, schemas } = this.props;
         return SearchView.transformedFacets(href, context, currentAction, session, schemas);
     }
-
 
     render(){
         const { isFullscreen, ...passProps } = this.props;

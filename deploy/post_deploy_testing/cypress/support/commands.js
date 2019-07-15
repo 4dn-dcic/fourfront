@@ -27,6 +27,7 @@
 import _ from 'underscore';
 var jwt = require('jsonwebtoken');
 import { Buffer } from 'buffer';
+import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from './variables';
 
 
 /** Expected to throw error of some sort if not on search page, or no results. */
@@ -128,8 +129,9 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 });
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
-    cy.get("#user_account_nav_button").click().wait(100).end()
-        .get('#logoutbtn').click().end().get('#user_account_nav_button').should('contain', 'Log In').wait(300).end()
+    cy.get(navUserAcctDropdownBtnSelector).click().wait(100).end()
+        .get('#logoutbtn').click().end()
+        .get(navUserAcctLoginBtnSelector).should('contain', 'Log In').wait(300).end()
         .get('#slow-load-container').should('not.have.class', 'visible').end();
 });
 

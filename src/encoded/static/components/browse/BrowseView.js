@@ -16,7 +16,7 @@ import { SortController } from '@hms-dbmi-bgm/shared-portal-components/src/compo
 
 // We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
 // We could probably also create different 'browseState' module for it, however.
-import { navigate, typedefs } from './../util';
+import { navigate, typedefs, Schemas } from './../util';
 
 import { store } from './../../store';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
@@ -254,18 +254,18 @@ class ResultTableContainer extends React.PureComponent {
         return (
             <div className="row">
                 { facets && facets.length > 0 ?
-                    <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
+                    <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
                         <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />
                         <FacetList {...{ session, browseBaseState, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
                             orientation="vertical" className="with-header-bg" filters={context.filters}
                             isTermSelected={this.isTermSelected} onFilter={this.onFilter}
-                            itemTypeForSchemas="ExperimentSetReplicate" href={href}
+                            itemTypeForSchemas="ExperimentSetReplicate" href={href} termTransformFxn={Schemas.Term.toName}
                             onClearFilters={this.handleClearFilters} />
                     </div>
                     :
                     null
                 }
-                <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9')}>
+                <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
                     <AboveBrowseViewTableControls parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
                         {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',
                             'context', 'href', 'currentAction',

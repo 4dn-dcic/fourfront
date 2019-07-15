@@ -51,8 +51,8 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
             'files' : 0
         };
 
-
-        return cy.get('#navbar-icon .navbar-header').hoverIn().end().wait(1000).then(function(){
+        // Hover in/out to top left navbar logo to reset x/y position of any 'mouse'.
+        return cy.get('#top-nav .navbar-main a.navbar-brand').hoverIn().end().wait(1000).then(function(){
 
             return cy.get('.bar-plot-chart.chart-container .chart-bar:not(.barplot-transition-exit):not(.barplot-transition-exit-active)').each(function($bar){
                 return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
@@ -66,7 +66,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
             expect(hoverCounts.experiment_sets).to.equal(quickInfoBarCounts.experiment_sets);
             expect(hoverCounts.experiments).to.equal(quickInfoBarCounts.experiments);
             expect(hoverCounts.files).to.equal(quickInfoBarCounts.files);
-        })*/.end().window().scrollTo('top').end().get('#navbar-icon .navbar-header').hoverIn().wait(300).then(()=>{
+        })*/.end().window().scrollTo('top').end().get('#top-nav .navbar-main a.navbar-brand').hoverIn().wait(300).then(()=>{
 
                 if (!options.countChildTypes) {
                     return cy.window().scrollTo('top').end();
@@ -75,7 +75,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
 
                 // Change to 'experiments' (2nd menu item in aggregate type drown); compare bar & legend counts
                 return cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(function(){
-                    return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(2)')
+                    return cy.get('div.dropdown > div.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > a.dropdown-item:nth-child(2)')
                         .should('have.text', 'Experiments').click().end().window().scrollTo('top').wait(750).then(function(){
                             return getBarCounts().then((barCounts)=>{
                                 expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiments);
@@ -95,7 +95,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                         }).end();
                 // Change to 'files' (2nd menu item in aggregate type drown); compare bar & legend counts
                 })/*.get('button#select-barplot-aggregate-type').should('contain', 'Experiments').click({ 'force' : true }).then(()=>{
-                    return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(3)')
+                    return cy.get('div.dropdown > div.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > a.dropdown-item:nth-child(3)')
                         .should('have.text', 'Files').click().end().window().scrollTo('top').wait(750).then(()=>{
                             return getBarCounts().then((barCounts)=>{
                                 expect(sum(...barCounts)).to.equal(quickInfoBarCounts.files);
@@ -115,7 +115,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                             });
                         }).end();
             })*/.get('button#select-barplot-aggregate-type').should('contain', /* 'Files' */ 'Experiments').click({ 'force' : true }).then(function(){
-                        return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(1)')
+                        return cy.get('div.dropdown > div.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > a.dropdown-item:nth-child(1)')
                             .should('have.text', 'Experiment Sets').click().end().window().scrollTo('top').wait(750).then(function(){
                                 return getBarCounts().then((barCounts)=>{
                                     expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);

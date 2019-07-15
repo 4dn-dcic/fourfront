@@ -27,6 +27,7 @@ export class HelpNavItem extends React.PureComponent {
 
     handleToggle(e){
         const { setOpenDropdownID, openDropdownID } = this.props;
+        e.preventDefault();
         if (typeof setOpenDropdownID !== 'function') {
             throw new Error('No func setOpenDropdownID passed in props.');
         }
@@ -37,18 +38,19 @@ export class HelpNavItem extends React.PureComponent {
         const { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowWidth } = this.props;
         const isOpen = openDropdownID === this.dropdownID;
         const active = href.indexOf(helpItemHref) > -1;
-        const commonProps = { id, active, 'key' : id };
+        const commonProps = { id, active, 'key' : id, 'href': helpItemHref };
         const isDesktopView = windowWidth >= 768;
+        let cls = "id-" + id; // `id` is no longer pass as HTML attrib to[NavLink->]Dropdown so we add to className;
 
         if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView){
-            return <Nav.Link {...commonProps} href={helpItemHref}>Help</Nav.Link>;
+            return <Nav.Link {...commonProps} className={cls}>Help</Nav.Link>;
         }
 
-        const cls = "dropdown-toggle" + (isOpen ? " dropdown-open-for" : "");
+        cls += " dropdown-toggle" + (isOpen ? " dropdown-open-for" : "");
 
         return (
-            <Nav.Link {...commonProps} onClick={this.handleToggle} className={cls} href="#">
-                Help <span className="caret"/>
+            <Nav.Link {...commonProps} onClick={this.handleToggle} className={cls}>
+                Help
             </Nav.Link>
         );
 

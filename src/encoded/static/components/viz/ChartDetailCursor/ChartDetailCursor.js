@@ -174,7 +174,6 @@ const Crumbs = React.memo(function Crumbs({ path, schemas, primaryCount }){
         <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
             {
                 path.slice(0,-1).map(function(n, i){
-                    console.log('TT', n);
                     return (
                         <div
                             data-depth={i}

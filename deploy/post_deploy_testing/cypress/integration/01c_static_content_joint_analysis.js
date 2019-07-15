@@ -10,7 +10,7 @@ describe('Joint Analysis Page', function () {
 
     context("Expandable Matrix Section", function(){
 
-        const yAxisTerms = ['ATAC-seq', 'ChIA-PET', 'DamID-seq', 'Repli-seq', 'in situ Hi-C'];
+        const yAxisTerms = ['DNA Binding', 'Open Chromatin', 'Organelle-seq', 'Repli-seq'];
         const xAxisTerms = ['H1-hESC', 'H1-DE', 'HFFc6'];
 
 
@@ -68,7 +68,7 @@ describe('Joint Analysis Page', function () {
             let origTotalCount = 0;
 
 
-            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+            cy.get('.stacked-block-viz-container').first().within(function($firstMatrix){
                 return cy.get('.block-container-group .stacked-block').then(($blocks)=>{
                     Cypress._.forEach($blocks, function(block){
                         origTotalCount += parseInt(Cypress.$(block).text());

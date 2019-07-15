@@ -370,6 +370,10 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
     );
 });
 
+function itemAttachmentFileName(item){
+    return (item && item.attachment && item.attachment.download) || object.itemUtil.getTitleStringFromContext(item) || null;
+}
+
 /** Used in OverViewBodyItem.titleRenderPresets */
 const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachment({ item, index }){
     const linkToItem = object.itemUtil.atId(item);
@@ -377,13 +381,15 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
 
     if (!item || !linkToItem) return null;
 
-    const filename = EmbeddedItemWithAttachment.filename(item);
+    const { attachment = null } = item;
+    const { href: attachmentHref = null, type: attachmentType = null } = attachment || {};
+    const filename = itemAttachmentFileName(item);
 
     let viewAttachmentButton = null;
-    if (EmbeddedItemWithAttachment.haveAttachment(item)){
+    if (attachmentHref){
         viewAttachmentButton = (
-            <ViewFileButton title="File" bsSize="small" mimeType={item.attachment.type || null} filename={filename}
-                href={linkToItem + item.attachment.href} disabled={!haveAttachment} className="text-ellipsis-container btn-block" />
+            <ViewFileButton title="File" mimeType={attachmentType} filename={filename}
+                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-ellipsis-container btn-block btn-sm btn-primary" />
         );
     }
 
@@ -400,13 +406,12 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
         </div>
     );
 });
-EmbeddedItemWithAttachment.filename = function(item){
-    return (item && item.attachment && item.attachment.download) || object.itemUtil.getTitleStringFromContext(item) || null;
-};
-EmbeddedItemWithAttachment.haveAttachment = function(item){
-    return item.attachment && item.attachment.href && typeof item.attachment.href === 'string';
-};
 
+
+
+const isAttachmentImage = memoize(function(filename){
+    return commonFileUtil.isFilenameAnImage(filename);
+});
 
 /** Used in OverViewBodyItem.titleRenderPresets */
 const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImageAttachment(props){
@@ -416,18 +421,19 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
 
     if (!item || !linkToItem) return null;
 
-    const filename = EmbeddedItemWithAttachment.filename(item);
-    const haveAttachment = EmbeddedItemWithAttachment.haveAttachment(item);
-    const isAttachmentImage = EmbeddedItemWithImageAttachment.isAttachmentImage(filename);
+    const { attachment = null } = item;
+    const { href: attachmentHref = null, caption: attachmentCaption = null } = attachment || {};
+    const filename = itemAttachmentFileName(item);
 
-    if (!haveAttachment || !isAttachmentImage) return <EmbeddedItemWithAttachment {...props} />;
+    if (!attachmentHref || !isAttachmentImage(filename)) return <EmbeddedItemWithAttachment {...props} />;
 
     const imageElem = (
         <a href={linkToItem} className="image-wrapper">
-            <img className="embedded-item-image" src={linkToItem + item.attachment.href} />
+            <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
-    const captionText = item.caption || item.description || (item.attachment && item.attachment.caption) || filename;
+
+    const captionText = item.caption || item.description || attachmentCaption || filename;
 
     return (
         <div className={"embedded-item-with-attachment is-image" + (isInArray ? ' in-array' : '')} key={linkToItem}>
@@ -437,9 +443,6 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             </div>
         </div>
     );
-});
-EmbeddedItemWithImageAttachment.isAttachmentImage = memoize(function(filename){
-    return commonFileUtil.isFilenameAnImage(filename);
 });
 
 
