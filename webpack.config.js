@@ -49,8 +49,8 @@ if (mode === "development"){
     } catch (e){ /* .. */ }
 
     console.log(
-        "@hms-dbmi-bgm/shared-portal-components dir",
-        isLinked ? "is linked to `" + sharedComponentPath + "`." : "is NOT linked."
+        "`@hms-dbmi-bgm/shared-portal-components` directory is",
+        isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
     );
 }
 
