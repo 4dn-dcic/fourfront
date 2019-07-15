@@ -25,6 +25,7 @@ var _testing_data;
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNES9L4AK6Q';
 //import { STEPS } from './../testdata/traced_workflow_runs/replicate-4DNESXKBPZKQ';
 //import { STEPS } from './../testdata/traced_workflow_runs/4DNESIQ6IPCO';
+//import { STEPS } from './../testdata/traced_workflow_runs/hotseat-replicate-4DNES18BMU79';
 //_testing_data = STEPS;
 
 
@@ -41,7 +42,7 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         super(props);
         this.shouldGraphExist = this.shouldGraphExist.bind(this);
         this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
-        var steps = _testing_data || null;
+        const steps = _testing_data || null;
         this.state = {
             'mounted' : false,
             'steps' : steps,

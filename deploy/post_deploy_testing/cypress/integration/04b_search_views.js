@@ -46,7 +46,7 @@ describe('Post-Deployment Search View Tests', function () {
 
         it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function(){
 
-            cy.searchPageTotalResultCount().should('be.greaterThan', 100).then((origResultCount)=>{
+            cy.searchPageTotalResultCount().should('be.greaterThan', 100).then(function(origResultCount){
                 return cy.get('input[name="q"]').focus().clear().type('olfactory').wait(10).end()
                     .get('form.navbar-search-form-container').submit().end()
                     .location('search').should('include', 'q=olfactory').end()

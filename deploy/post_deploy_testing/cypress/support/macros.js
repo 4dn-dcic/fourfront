@@ -175,3 +175,91 @@ export function testNodesText(listOfNodeTextNames, nodesListSelector = '.graph-w
     });
 
 }
+
+
+
+/** COPIED FROM SHARED COMPONENTS REPO **/
+
+
+/** Converts e.g. "/profiles/File.json" to "File" */
+function stripTypeFromProfilesHref(profilesHref){
+    return profilesHref.slice(10,-5);
+}
+
+// This is from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms', we redefine here
+// to avoid installing/compiling dependency in full.
+export function schemasToItemTypeHierarchy(schemas){
+    const allTypesArray = _.keys(schemas);
+    const resHierarchy = {};
+
+    // We don't get "Item" delivered from backend else would look for where
+    // lack of "rdfs:subClassOf" property value to find Item and make that root.
+    // Instead we look for where "Item" is parent to gather root schemas.
+    const [ rootTypeNames, remainingTypeNames ] = _.partition(allTypesArray, function(typeName){
+        const typeSchema = schemas[typeName];
+        if (typeSchema["rdfs:subClassOf"] === "/profiles/Item.json"){
+            return true;
+        }
+        return false;
+    });
+
+    function addChildrenRecursively(parentHier, parentTypeSchema){
+        _.forEach(parentTypeSchema.children || [], function(childTypeURI){
+            const childTypeName = stripTypeFromProfilesHref(childTypeURI);
+            parentHier[childTypeName] = {};
+            const childTypeSchema = schemas[childTypeName];
+            if (Array.isArray(childTypeSchema.children) && childTypeSchema.children.length > 0){
+                addChildrenRecursively(parentHier[childTypeName], childTypeSchema);
+            }
+        });
+    }
+
+    _.forEach(rootTypeNames, function(rootTypeName){
+        resHierarchy[rootTypeName] = {};
+
+        // We have 'children' property in schemas, so we just use these
+        // for a performance improvement. See below incomplete fxn for alternative
+        // implementation relying purely on rds:subClassOf.
+        const rootTypeSchema = schemas[rootTypeName];
+        const rootTypeHasChildren = Array.isArray(rootTypeSchema.children) && rootTypeSchema.children.length > 0;
+        if (rootTypeHasChildren){
+            addChildrenRecursively(resHierarchy[rootTypeName], rootTypeSchema);
+        } else {
+            // Cull top-level types to only contain types with children.
+            delete resHierarchy[rootTypeName];
+        }
+    });
+
+    /*
+    function findParentHierarchyObj(hier, typeName){ // Basic DFS
+        const hierKeys = _.keys(hier);
+        const hierKeyLen = hierKeys.length;
+        var i, currType, found;
+        for (i = 0; i < hierKeyLen; i++){
+            currType = hierKeys[i];
+            if (currType === typeName){
+                return hier[currType];
+            }
+            found = findParentHierarchyObj(hier[currType], typeName);
+            if (found){
+                return found;
+            }
+        }
+        return false; // Could also throw Err
+    }
+    */
+
+    /* rds:subClassOf implementation (incomplete)
+       TODO: handle parentHier not being found because parent not yet added (ordering)
+       Could do by making remainingTypeNames into priority queue of some sort or w. multiple iterations of this for-loop.
+    _.forEach(remainingTypeNames, function(typeName){
+        const typeSchema = schemas[typeName];
+        const parentTypeName = stripTypeFromProfilesHref(typeSchema["rdfs:subClassOf"]);
+        const parentHier = findParentHierarchyObj(resHierarchy, parentTypeName);
+        parentHier[typeName] = {};
+    });
+    */
+
+    return resHierarchy;
+}
+

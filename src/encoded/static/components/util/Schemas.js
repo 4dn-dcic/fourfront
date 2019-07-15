@@ -6,7 +6,7 @@ import React from 'react';
 import { linkFromItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/object';
 import { LocalizedTime, format as dateFormat } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/patched-console';
-import { getTitleForType, getSchemaProperty } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
+import { getTitleForType, getSchemaProperty, schemasToItemTypeHierarchy } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
 import {
     capitalize, capitalizeSentence, bytesToLargerUnit, roundLargeNumber, roundDecimal, hrefToFilename
 } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/value-transforms';
@@ -36,14 +36,14 @@ export const Term = {
             return linkFromItem(term, addDescriptionTipForLinkTos);
         }
 
-        var name = null;
+        let name = null;
 
         switch (field) {
             case 'experimentset_type':
                 name = capitalizeSentence(term);
                 break;
             case 'type':
-                name = getTitleForType(term);
+                name = getTitleForType(term, get());
                 break;
             case 'status':
                 name = capitalizeSentence(term);

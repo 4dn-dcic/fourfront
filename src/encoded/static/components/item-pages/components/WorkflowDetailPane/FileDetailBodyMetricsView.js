@@ -30,11 +30,11 @@ export class ViewMetricButton extends React.PureComponent {
     }
 
     render(){
-        var { file, title, className, disabled, defaultBtnClassName } = this.props,
-            type = file.overall_quality_status,
-            typeLowerCased = typeof type === 'string' && type.toLocaleLowerCase(),
-            usedClassName = (className || '') + " btn download-button btn-default" + (disabled ? ' disabled' : ''),
-            btnStyle = defaultBtnClassName;
+        const { file, title, className, disabled, defaultBtnClassName } = this.props;
+        const type = file.overall_quality_status;
+        const typeLowerCased = typeof type === 'string' && type.toLocaleLowerCase();
+        let usedClassName = (className || '') + " btn download-button" + (disabled ? ' disabled' : '');
+        let btnStyle = defaultBtnClassName;
 
         if (typeof file.url !== 'string') return null;
 
