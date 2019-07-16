@@ -71,14 +71,15 @@ export const MetricsViewItem = React.memo(function MetricsViewItem({ metric : m 
                         {/* <TooltipInfoIconContainer title={m.title || m.key} tooltip={m.description} /> */}
                     </div>
                     <div className="col-3 text-center">
-                        { MetricsViewItem.resultStringToIcon(m.result) }
+                        <MetricsViewItemIcon resultStr={m.result} />
                     </div>
                 </div>
             </div>
         </div>
     );
 });
-MetricsViewItem.resultStringToIcon = function(resultStr = "UNKNOWN", extraIconClassName = ''){
+
+function MetricsViewItemIcon({ resultStr = "UNKNOWN", extraIconClassName = "" }){
     if (typeof resultStr !== 'string') return resultStr;
     switch(resultStr.toUpperCase()){
         case 'PASS':
@@ -90,7 +91,7 @@ MetricsViewItem.resultStringToIcon = function(resultStr = "UNKNOWN", extraIconCl
         default:
             return resultStr;
     }
-};
+}
 
 export const MetricsView = React.memo(function MetricsView({ metrics }){
     return (

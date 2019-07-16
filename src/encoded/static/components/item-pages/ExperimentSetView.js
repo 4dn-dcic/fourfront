@@ -168,7 +168,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             <React.Fragment>
                 { super.itemMidSection() }
                 <OverviewHeading context={context} schemas={schemas} key="overview" className="with-background mb-2 mt-1"
-                    title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={OverviewHeading.prependTitleIcon} />
+                    title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={prependOverviewHeadingTitleIcon} />
             </React.Fragment>
         );
     }
@@ -202,11 +202,11 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
 });
 
 // eslint-disable-next-line react/display-name
-OverviewHeading.prependTitleIcon = function(open, props){
+function prependOverviewHeadingTitleIcon(open, props){
     return <i className="expand-icon icon icon-th-list" />;
-};
+}
 
-OverviewHeading.expCategorizerTitle = memoize(function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+const expCategorizerTitleRenderFxn = memoize(function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
     let expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
     expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
     if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){

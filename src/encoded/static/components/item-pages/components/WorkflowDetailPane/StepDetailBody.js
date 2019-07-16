@@ -16,7 +16,8 @@ const SoftwareUsedBox = React.memo(function SoftwareUsedBox({ software: soft }){
     if (!soft || (Array.isArray(soft) && soft.length === 0)){
         inner = <em>N/A</em>;
     } else {
-        inner = Array.isArray(soft) ? _.map(soft, SoftwareUsedBox.renderLink) : SoftwareUsedBox.renderLink(soft);
+        inner = Array.isArray(soft) ? _.map(soft, (s,i)=> <SoftwareUsedBoxLink section={s} index={i} key={i} />)
+            : <SoftwareUsedBoxLink section={soft} />;
     }
 
     return (
@@ -28,19 +29,24 @@ const SoftwareUsedBox = React.memo(function SoftwareUsedBox({ software: soft }){
         </div>
     );
 });
-SoftwareUsedBox.renderLink = function(s, idx=0){
-    const link = object.atIdFromObject(s);
+
+function SoftwareUsedBoxLink({ section, index: idx = 0 }){
+    const link = object.atIdFromObject(section);
+    if (!link) {
+        return <span><em>{ section.error || "No view permissions" }</em></span>;
+    }
+    const { name = null, version = null, display_title } = section;
     let title;
 
-    if (typeof s.name === 'string' && s.version){
-        title = s.name + ' v' + s.version;
-    } else if (s.display_title) {
-        title = s.display_title;
+    if (typeof name === 'string' && version){
+        title = name + ' v' + version;
+    } else if (display_title) {
+        title = display_title;
     } else {
         title = link;
     }
-    return <span key={link || idx}>{ idx > 0 ? ', ' : '' }<a href={link} key={idx}>{ title }</a></span>;
-};
+    return <span>{ idx > 0 ? ', ' : '' }<a href={link}>{ title }</a></span>;
+}
 
 /* Currently not used */
 const SoftwareSourceLinkBox = React.memo(function SoftwareSourceLinkBox({ software: soft }){

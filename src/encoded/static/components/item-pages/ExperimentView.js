@@ -111,7 +111,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const width = this.getTabViewWidth();
         const initTabs = [];
 
-        if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
+        if (parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
         }
 
@@ -193,7 +193,6 @@ const ExperimentSetsViewOverview = React.memo(function ExperimentSetsViewOvervie
 
     return null;
 });
-
 ExperimentSetsViewOverview.propTypes = {
     'context' : PropTypes.shape({
         'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
@@ -204,7 +203,6 @@ ExperimentSetsViewOverview.propTypes = {
     'windowWidth' : PropTypes.number,
     'href' : PropTypes.string
 };
-
 ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWidth }, width){
     return {
         'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
@@ -218,7 +216,7 @@ ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWid
     };
 };
 
-ExperimentSetsViewOverview.parentExpSetsExistForExp = memoize(function(exp){
+const parentExpSetsExistForExp = memoize(function(exp){
     return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
 });
 
