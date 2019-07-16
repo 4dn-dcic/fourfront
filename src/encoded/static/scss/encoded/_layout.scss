@@ -268,10 +268,6 @@ h1.page-title {
 			display: inline-block;
 			vertical-align: middle;
 
-			body[data-pathname="/search/"] & {
-				margin-left: 6px;
-			}
-
 			@include media-breakpoint-down(sm){
 				display: block;
 			}

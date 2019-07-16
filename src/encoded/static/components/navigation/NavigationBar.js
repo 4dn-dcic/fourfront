@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, ajax, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { productionHost } from './../globals';
 import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, getActionURL } from './components';
@@ -176,6 +176,7 @@ export class NavigationBar extends React.PureComponent {
             href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState,
             currentAction, windowWidth, windowHeight, isFullscreen, overlaysContainer
         } = this.props;
+        const rgs = layout.responsiveGridState(windowWidth);
         const testWarningVisible = testWarning & !isFullscreen; // Hidden on full screen mode.
         const navClassName = (
             "navbar-container" +
@@ -195,32 +196,34 @@ export class NavigationBar extends React.PureComponent {
 
                 <div id="top-nav" className="navbar-fixed-top" role="navigation">
                     <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
-                    <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon" onToggle={this.onToggleNavBar}
-                        expanded={mobileDropdownOpen}>
+                    <div className="navbar-inner-container">
+                        <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon"
+                            onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
 
-                        <a className="navbar-brand" href="/">
-                            <FourfrontLogo onClick={this.resetOpenDropdownID} />
-                        </a>
+                            <a className="navbar-brand" href="/">
+                                <FourfrontLogo onClick={this.resetOpenDropdownID} />
+                            </a>
 
-                        <Navbar.Toggle>
-                            <i className="icon icon-bars icon-fw" />
-                        </Navbar.Toggle>
+                            <Navbar.Toggle>
+                                <i className="icon icon-bars icon-fw" />
+                            </Navbar.Toggle>
 
-                        <Navbar.Collapse>
-                            <Nav className="mr-auto">
-                                { browseMenuItemOpts ?
-                                    <Nav.Link key={browseMenuItemOpts.id} href={getActionURL(browseMenuItemOpts, href)}
-                                        active={(!!(isActionActive(browseMenuItemOpts, href)))} className="browse-nav-btn">
-                                        { browseMenuItemOpts.title || "Browse" }
-                                    </Nav.Link>
-                                    : null }
-                                <HelpNavItem {...this.props} {...{ mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
-                                    setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
-                            </Nav>
-                            <SearchBar href={href} currentAction={currentAction} />
-                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted, overlaysContainer, schemas, windowWidth }} />
-                        </Navbar.Collapse>
-                    </Navbar>
+                            <Navbar.Collapse>
+                                <Nav className="mr-auto">
+                                    { browseMenuItemOpts ?
+                                        <Nav.Link key={browseMenuItemOpts.id} href={getActionURL(browseMenuItemOpts, href)}
+                                            active={(!!(isActionActive(browseMenuItemOpts, href)))} className="browse-nav-btn">
+                                            { browseMenuItemOpts.title || "Browse" }
+                                        </Nav.Link>
+                                        : null }
+                                    <HelpNavItem {...this.props} {...{ mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
+                                        setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
+                                </Nav>
+                                <SearchBar href={href} currentAction={currentAction} />
+                                <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted, overlaysContainer, schemas, windowWidth }} />
+                            </Navbar.Collapse>
+                        </Navbar>
+                    </div>
                     { inclBigMenu ?
                         <BigDropdownMenu {...{ windowWidth, windowHeight, mobileDropdownOpen, href }}
                             setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} menuTree={helpMenuTree} />

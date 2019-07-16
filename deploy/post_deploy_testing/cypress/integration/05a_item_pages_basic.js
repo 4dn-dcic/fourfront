@@ -83,7 +83,7 @@ describe('Each Item View Works (most public recent only)', function () {
     it("Each most-recent item can be navigated w.o. errors", function(){
         cy.wrap(currIDs).each(function(currentAtID, currentAtIDIndex){
             cy.log("Visiting", currentAtID, currentAtIDIndex + " of " + currIDs.length);
-            cy.visit(currentAtID).wait(300).end()
+            cy.visit(currentAtID).wait(1000).end()
                 .get('h1.page-title').should('not.be.empty').end()
                 .get('div.rc-tabs span[data-tab-key="details"]').should('contain', 'Details').end()
                 .get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function($tab){

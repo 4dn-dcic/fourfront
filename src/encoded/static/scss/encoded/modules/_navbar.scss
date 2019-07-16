@@ -112,21 +112,33 @@ div#top-nav.navbar-fixed-top {
         }
     }
 
+    > div.navbar-inner-container {
+        background-color: #f8f8f8;
+    }
+
+    > div.navbar-inner-container > nav.navbar-main,
     > nav.navbar-main {
         /* React-Bootstrap Navbar itself */
 
         border-radius: 0;
         border: none;
-        box-sizing: content-box; /* Exclude bottom border from min-height */
+        //box-sizing: content-box; /* Exclude bottom border from min-height */
         min-height: $navbar-full-height; /* Mobile default - overriden for desktop (fixed-position) size */
         line-height: $navbar-small-height; /* Mobile default - overriden for desktop (fixed-position) size */
         position: relative;
 
         padding: 0 10px;
-        background-color: #f8f8f8;
+
+        // Container size for just XL -
+        @include media-breakpoint-up(xl){
+            body:not(.is-full-screen) & {
+                max-width: map-get($container-max-widths, "xl");
+                margin: 0 auto;
+            }
+        }
 
         @include navbar-fixed-position {
-            
+
             min-height: $navbar-small-height;
             height: $navbar-full-height;
             line-height: $navbar-full-height;
@@ -478,6 +490,7 @@ div#top-nav.navbar-fixed-top {
         }
 
         /** When on xs & sm sizes **/
+        > .navbar-toggler,
         > .navbar-toggler {
             margin-top: 20px;
             margin-bottom: 20px;
