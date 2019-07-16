@@ -67,6 +67,10 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 
     renderRawFilesSection(paddingWidth){
         const { containerWidth, result, href, minimumWidth } = this.props;
+
+        // For debugging stacked tables
+        //const useResult = require('./../../testdata/experiment_set/replicate_4DNESH4MYRID');
+
         const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
 
         if (rawFilesCount === 0) return null;

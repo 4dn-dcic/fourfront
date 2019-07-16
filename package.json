@@ -29,6 +29,9 @@
       "../../../jest/environment.js"
     ],
     "timers": "fake",
+    "transformIgnorePatterns" : [
+      "node_modules/@hms-dbmi-bgm/shared-portal-components"
+    ],
     "unmockedModulePathPatterns": [
       "node_modules/react",
       "node_modules/underscore",
@@ -92,7 +95,7 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#master",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.1",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",
     "detect-browser": "^3.0.1",
