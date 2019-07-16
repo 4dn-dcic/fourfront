@@ -8,7 +8,7 @@
     "build-scss": "gulp build-scss",
     "watch-scss": "gulp build-scss-dev && node-sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --recursive --output-style expanded",
     "dev": "gulp dev",
-    "dev-quick": "gulp dev-quick",
+    "dev-quick": "gulp dev-quick --preserve-symlinks",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:open-local": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://localhost:8000",
@@ -29,6 +29,9 @@
       "../../../jest/environment.js"
     ],
     "timers": "fake",
+    "transformIgnorePatterns" : [
+      "node_modules/@hms-dbmi-bgm/shared-portal-components"
+    ],
     "unmockedModulePathPatterns": [
       "node_modules/react",
       "node_modules/underscore",
@@ -63,9 +66,7 @@
     "babel-plugin-minify-dead-code-elimination": "^0.5.0",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.0.2",
-    "create-react-class": "^15.6.3",
-    "cypress": "^3.3.1",
-    "echo-loader": "0.0.1",
+    "cypress": "^3.4.0",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-external-nodejs-plugin": "^1.0.0",
@@ -94,7 +95,7 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#master",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.1",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",
     "detect-browser": "^3.0.1",
@@ -111,18 +112,16 @@
     "radium": "^0.25.1",
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
-    "react-bootstrap": "1.0.0-beta.9",
+    "react-bootstrap": "1.0.0-beta.10",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.3.0",
     "react-json-tree": "^0.11.2",
     "react-jsx-parser": "^1.15.1",
-    "react-matrix-viz": "^0.2.2",
     "react-redux": "^6.0.1",
     "react-tooltip": "^3.10.0",
     "react-transition-group": "^4.2.0",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
-    "underscore": "^1.9.1",
-    "universal-cookie": "^4.0.0"
+    "underscore": "^1.9.1"
   }
 }
