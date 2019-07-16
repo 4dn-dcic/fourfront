@@ -38,17 +38,21 @@ export class ActiveFiltersBar extends React.Component {
     }
 
     renderCrumbs(){
-        const { invisible, expSetFilters, context, orderedFieldNames, href } = this.props;
+        const { invisible, expSetFilters, context, orderedFieldNames, href, schemas } = this.props;
         if (invisible) return null;
 
         if (expSetFilters) {
-            var contextFacets = (context && context.facets) || null;
+            const contextFacets = (context && context.facets) || null;
 
             return searchFilters.filtersToNodes(expSetFilters, orderedFieldNames).map(function(nodeSet, j){
 
                 // Try to get more accurate title from context.facets list, if available.
-                var releventContextFacet = contextFacets && _.findWhere(contextFacets, { 'field' : nodeSet[0].data.field });
-                var facetFieldTitle = (releventContextFacet && releventContextFacet.title) || Schemas.Field.toName(nodeSet[0].data.field, _this.props.schemas) || 'N/A';
+                const releventContextFacet = contextFacets && _.findWhere(contextFacets, { 'field' : nodeSet[0].data.field });
+                const facetFieldTitle = (
+                    (releventContextFacet && releventContextFacet.title) ||
+                    Schemas.Field.toName(nodeSet[0].data.field, schemas) ||
+                    'N/A'
+                );
 
                 return (
                     <div className="field-group" key={j} data-field={nodeSet[0].data.field}>

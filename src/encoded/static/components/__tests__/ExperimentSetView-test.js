@@ -11,6 +11,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 jest.mock('./../util/navigate');
+jest.mock('@hms-dbmi-bgm/shared-portal-components/src/components/util/navigate');
 
 
 function getActiveTabIndex(tabs){
