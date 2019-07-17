@@ -2,21 +2,17 @@
 // Common mixins, some used by base & bootstrap-theme-overrides
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/mixins.scss";
 
-@import "bootstrap/bootstrap";
-
-// Bootstrap default variables and mixins
-//@import "bootstrap/variables";
-//@import "bootstrap/mixins";
-
-
+// Encoded base - variables & similar config
 @import "encoded/base";
 
+// Bootstrap
+@import "bootstrap/bootstrap";
 
-// ENCODED
+// Some are used in shared-portal-components scss
+@import "encoded/bootstrap-theme-overrides";
 
 // Font Awesome
 @import "fontawesome/font-awesome";
-
 
 // Shared Components
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
@@ -24,13 +20,12 @@
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
 
-// ENCODE Layout etc. SCSS
+// ENCODE Layout/Components
 
 @import "encoded/layout";
+
 // @import "encoded/modals"; -- Deleted
 @import "encoded/modules/forms",
-        "encoded/modules/matrix",
-        "encoded/modules/lists",
         "encoded/modules/navbar",
         "encoded/modules/tables",
         "encoded/modules/search",
@@ -40,4 +35,3 @@
         "encoded/modules/static-pages";
 
 @import "encoded/state";
-@import "encoded/theme";

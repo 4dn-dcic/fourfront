@@ -99,3 +99,4 @@ export default class StaticPage extends React.PureComponent {
         return <StaticPageBase {...this.props} childComponent={StaticEntryContent} contentParseFxn={parseSectionsContent} />;
     }
 }
+

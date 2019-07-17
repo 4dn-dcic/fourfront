@@ -3,52 +3,6 @@
 		Common static page components & styles
 ***********************************************************/
 
-.fourDN-header{
-	font-family: $font-family-sans-serif;
-	font-weight: 300;
-	margin-bottom: 20px;
-	margin-top: 20px;
-	padding-bottom: 15px;
-	border-bottom: 1px solid #f4f4f4;
-	font-size: 32px;
-	letter-spacing: -1px;
-	line-height: 38px;
-	position: relative;
-	
-	&[id]:before {
-		content : '';
-		position: relative;
-		top: -150px;
-	}
-}
-
-h4.fourDN-header {
-	font-size: 24px;
-	margin-bottom: 10px;
-	padding-bottom: 8px;
-}
-
-h5.fourDN-header {
-	font-size: 20px;
-}
-
-.fourDN-banner{
-	margin-top: 40px;
-	margin-bottom: 40px;
-	> h4 {
-		font-size: 1.4em;
-		color: #999999;
-		> div {
-			display: inline-block;
-		}
-	}
-}
-
-
-.fourDN-content-panel{
-	margin-top: 0px !important;
-}
-
 
 .static-section-entry,
 .home-content-area {
@@ -186,7 +140,7 @@ h5.fourDN-header {
 
 	position: relative;
 
-	@include media-breakpoint-up(lg) {
+	@include media-breakpoint-up(xl){
 		position: fixed;
 		margin: 0 -10px;
 		padding: 0 10px;
@@ -212,7 +166,7 @@ h5.fourDN-header {
 		//}
 	}
 
-	@include media-breakpoint-down(md) {
+	@include media-breakpoint-down(lg){
 		> ol.inner {
 			border-top: 1px solid #eee;
 		}
@@ -419,7 +373,7 @@ h5.fourDN-header {
 	padding-top: 29px; 
 
 	&.page-has-toc {
-		@include media-breakpoint-up(lg) {
+		@include media-breakpoint-up(xl){
 			width: 75%;
 		}
 	}
@@ -475,7 +429,7 @@ h5.fourDN-header {
 					display: none;
 				}
 
-				@include media-breakpoint-up(sm) {
+				@include media-breakpoint-up(md){
 					height: 98px;
 					.section-page-count {
 						display: block;
@@ -489,7 +443,7 @@ h5.fourDN-header {
 
 
 				&:hover {
-					@include media-breakpoint-up(sm) {
+					@include media-breakpoint-up(md){
 						.section-page-count {
 							opacity: 1;
 						}
@@ -955,51 +909,6 @@ $carousel-height : 240px;
 			}
 		}
 
-		/** TODO: Reduce this if any is deprecated **/
-
-		.announcement {
-			padding-bottom: 10px;
-			margin-top: 20px;
-	
-			.announcement-title {
-				font-weight: 300;
-				font-size: 1.35rem;
-				border-bottom: 2px solid #168369;
-				padding-bottom: 5px;
-				margin-bottom: 5px;
-				i.icon.icon-minus,
-				i.icon.icon-plus {
-					margin-right: 5px;
-				}
-			}
-	
-			.announcement-subtitle {
-				color: #999;
-				font-weight: 400;
-				font-size: 0.9rem;
-			}
-	
-			.announcement-content {
-				margin-top: 3px;
-			}
-		}
-	
-	
-		.fourDN-section-toggle{
-			color: #555;
-			text-decoration: none !important;
-			&:hover,
-			&:focus {
-				color: #000000;
-			}
-		}
-	
-		.fourDN-section-info{
-			color: #999 !important;
-			font-weight: 300;
-			font-size: 1.2em;
-		}
-
 	}
 
 }
@@ -1024,108 +933,6 @@ $carousel-height : 240px;
 }
 
 
-/*********************************************
- *** Temporary NOFIC Matrices Side by Side ***
- *********************************************/
-
- @include media-breakpoint-up(lg) {
-
-	#content.container > .static-page.row #nofic-matrix-1,
-	#content.container > .static-page.row #nofic-matrix-2,
-	#content.container > .static-page.row #nofic-matrix-3,
-	#content.container > .static-page.row #nofic-matrix-4 {
-		position: relative;
-		float: left;
-		width: 50%;
-		margin-top: 0px;
-		margin-bottom: 20px;
-	}
-
-	#content.container > .static-page.row #nofic-matrix-1 {
-		padding-right: 15px;
-	}
-
-	#content.container > .static-page.row #nofic-matrix-2,
-	#content.container > .static-page.row #nofic-matrix-3,
-	#content.container > .static-page.row #nofic-matrix-4 {
-		padding-left: 15px;
-	}
-
-	body[data-path="/joint-analysis-data-plans"],
-	body[data-path="/joint-analysis-data-plans/dev"],
-	body[data-path="/joint-analysis-data-plans/jan2018"],
-	body[data-path="/joint-analysis-data-plans/jan2018/dev"],
-	body[data-path="/joint-analysis-data-plans/july2018"],
-	body[data-path="/joint-analysis-data-plans/july2018/dev"]{
-
-		#content.container > .static-page.row #matrix-1,
-		#content.container > .static-page.row #matrix-2,
-		#content.container > .static-page.row #matrix-3,
-		#content.container > .static-page.row #matrix-4 {
-			position: relative;
-			float: left;
-			width: 50%;
-			margin-top: 0px;
-			margin-bottom: 20px;
-			padding-right: 15px;
-		}
-
-		#content.container > .static-page.row #matrix-2,
-		#content.container > .static-page.row #matrix-3,
-		#content.container > .static-page.row #matrix-4 {
-			float: right;
-			padding-left: 15px;
-		}
-
-		#content.container > .static-page.row #matrix-2,
-		#content.container > .static-page.row #matrix-3 {
-			> div:first-child {
-				border-bottom: 1px solid #bbb;
-			}
-		}
-
-	}
-
-}
 
 
-
-#legend.static-section-entry .section-title,
-#release-updates-section.static-section-entry .section-title {
-	font-weight: 500;
-	padding-bottom: 12px;
-	border-bottom: 1px solid #eee;
-}
-
-
-#content.container,
-#legend.static-section-entry {
-
-	div.rm-cell, div.color-patch {
-		@include planned-submitted-cell-styles;
-	}
-
-}
-
-#legend.static-section-entry {
-	margin-bottom: 10px;
-    padding-bottom: 10px;
-	border-bottom: 1px solid #eee;
-	.section-joint-anlysis-data-legend {
-		font-size: 1rem;
-		> .col-sm-3 {
-			text-align: center;
-		}
-		.color-patch {
-			height: 20px;
-			width: 20px;
-			display: inline-block;
-			margin-right: 5px;
-			vertical-align: text-bottom;
-		}
-		span.legend-label {
-			vertical-align: top;
-		}
-	}
-}
 

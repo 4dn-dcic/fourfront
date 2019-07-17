@@ -4,10 +4,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import Registry from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/Registry';
 
 import { content_views } from './globals';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
@@ -16,68 +18,225 @@ import { typedefs } from './util';
 // eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
 
-/**
- * @module PageTitle - Renders out title on all views.
- */
 
 /**
- * A hardcoded mapping of URIs to title string or function.
+ * Other components may import this and register title views to it.
+ * Custom map-like structure from ENCODE which allows 2 keys.
  *
- * @private
- * @ignore
+ * @see index.js and globals.js for other examples.
  */
-const TITLE_PATHNAME_MAP = {
-    '/' : {
-        'title' : "Welcome"
-    },
-    '/browse/' : {
-        'title' : "Data Browser",
-        'subtitle' : "Filter & browse experiments"
-    },
-    '/search/' : {
-        'title' : function(pathName, context, href, currentAction){
-            if (currentAction === 'selection') return 'Selecting';
-            return 'Search';
-        },
-        'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
-            var thisTypeTitle = schemaTransforms.getSchemaTypeFromSearchContext(context, schemas);
-            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
-        },
-        'subtitle' : function(pathName, context, href, currentAction){
-            if (currentAction === 'selection') {
-                return 'Drag and drop Items from this view into other window(s).';
+export const pageTitleViews = new Registry();
+
+
+/** @todo add proptypes (?) */
+export const PageTitleSection = React.memo(function PageTitle(props){
+    const { context, currentAction, schemas, alerts, session, href } = props;
+
+    // See if any views register their own custom-er title view.
+    const FoundTitleView = pageTitleViews.lookup(context, currentAction);
+    if (FoundTitleView){
+        return <FoundTitleView {...props} />;
+    }
+
+    // Else use fallback(s)
+
+    if (isEditingFormView(context, currentAction)){
+        const subtitle = currentAction === 'edit' ? object.itemUtil.getTitleStringFromContext(context) // on item view
+            : currentAction === 'create' ? schemaTransforms.getItemTypeTitle(context, schemas) // on item view
+                : currentAction === 'create' > -1 ? // on search view
+                    schemaTransforms.getSchemaTypeFromSearchContext(context, schemas)
+                    : schemaTransforms.getItemTypeTitle(context, schemas);
+        return (
+            <TitleAndSubtitleBeside subtitle={subtitle}>
+                { currentAction === 'edit' ? 'Editing' : 'Creating' }
+            </TitleAndSubtitleBeside>
+        );
+    }
+
+    if (isStaticPage(context)){
+        return <StaticPageTitle {...{ context, schemas, currentAction, alerts, session, href }} />;
+    }
+
+    if (object.itemUtil.isAnItem(context)){
+        return <GenericItemPageTitle {...{ context, schemas, alerts }}/>;
+    }
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <OnlyTitle>{ object.itemUtil.getTitleStringFromContext(context) || <em>Unknown</em> }</OnlyTitle>
+        </PageTitleContainer>
+    );
+
+});
+
+
+/** Title Parts/Components **/
+
+
+/** All custom page title views should include this unless alerts strictly not needed */
+export const PageTitleContainer = React.memo(function PageTitleContainer({ children, alerts, alertsContainerClassName, className = "container" }){
+    return (
+        <div id="page-title-container" className={className}>
+            { children }
+            <Alerts alerts={alerts} className={alertsContainerClassName} />
+        </div>
+    );
+});
+
+
+export const OnlyTitle = React.memo(function OnlyTitle({ children, className, ...passProps }){
+    return (
+        <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
+            { children }
+        </h1>
+    );
+});
+
+export const TitleAndSubtitleUnder = React.memo(function TitleAndSubtitleUnder(props){
+    const { children, subtitle, title, className, subTitleClassName, ...passProps } = props;
+    return (
+        <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
+            { children || title }
+            <div className={"subtitle page-subtitle " + (subTitleClassName || '')}>
+                { subtitle }
+            </div>
+        </h1>
+    );
+});
+
+export const TitleAndSubtitleBeside = React.memo(function TitleAndSubtitleNextTo(props){
+    const { children, subtitle, className, subTitleClassName = "prominent", ...passProps } = props;
+    return (
+        <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
+            <span className="title">
+                { children }
+            </span>
+            <span className={"subtitle " + (subTitleClassName || '')}>
+                { subtitle }
+            </span>
+        </h1>
+    );
+});
+
+
+
+/** Composed Titles **/
+
+const StaticPageTitle = React.memo(function StaticPageTitle(props){
+    const { children, alerts, breadCrumbsVisible, session, context, href } = props;
+    const hasToc = (
+        context && Array.isArray(context['@type'])
+        && context['@type'].indexOf('StaticPage') > -1
+        && context['table-of-contents']
+        && context['table-of-contents'].enabled
+    );
+    const commonCls = "col-12" + hasToc ? " col-lg-9" : '';
+    return (
+        <PageTitleContainer alerts={alerts} className="container row" alertsContainerClassName={commonCls}>
+            { !breadCrumbsVisible ?
+                <StaticPageBreadcrumbs {...{ context, session, href }}
+                    key="breadcrumbs" className={commonCls}/>
+                : null }
+            <OnlyTitle className={commonCls}>{ children }</OnlyTitle>
+        </PageTitleContainer>
+    );
+});
+
+/** Based on 4DN content views & metadata, to be updated re: CGAP */
+const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
+    const { context, schemas, alerts } = props;
+    const itemTitle = object.itemUtil.getTitleStringFromContext(context);
+    const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
+    const isTitleAnAccession = itemTitle && object.itemUtil.isDisplayTitleAccession(context, itemTitle, true);
+
+    if (itemTitle && isTitleAnAccession){
+        // Don't show accession as title (Item Pages currently show it elsewhere)
+        // But show rest of title if it is in form 'Something - ACCESSION'
+        const isTherePrepend = typeof context.accession === 'string' && context.accession.length >= 12 && itemTitle.indexOf(' - ' + context.accession) > -1;
+        if (isTherePrepend){
+            const remainderTitle = itemTitle.replace(' - ' + context.accession, '');
+            if (remainderTitle.length > 0){
+                return (
+                    <PageTitleContainer alerts={alerts}>
+                        <TitleAndSubtitleBeside subtitle={remainderTitle}>
+                            { itemTypeTitle }
+                        </TitleAndSubtitleBeside>
+                    </PageTitleContainer>
+                );
             }
-            return null;
         }
-    },
-    '/health' : {
-        'title' : "Health"
-    },
-    '/indexing_status' : {
-        'title' : "Indexing Status"
-    },
-    '/users/*' : {
-        'title' : function(pathName, context){
-            var myDetails = JWT.getUserDetails(),
-                myEmail = myDetails && myDetails.email;
-            if (myEmail && context && context.email && myEmail === context.email){
-                return "My Profile";
-            }
-            return object.itemUtil.getTitleStringFromContext(context);
-        }
-    },
-    '/planned-submissions' : {
-        'title' : function(pathName, context){
-            if (context.status === 'error' && context.code && (context.code === 404 || context.code === 403)){
-                return 'Forbidden';
-            }
-            return object.itemUtil.getTitleStringFromContext(context);
+        // We currently render accession in ItemView so exclude it here if it is the title.
+        return <PageTitleContainer alerts={alerts}><OnlyTitle>{ itemTypeTitle }</OnlyTitle></PageTitleContainer>;
+    }
+
+    if (itemTitle && itemTitle.indexOf(context['@type'][0] + ' from ') === 0){
+        // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
+        // Becomes ~ `<title>CellCultureDetails</title><subtitle> from January 1st, 2018</subtitle>`
+        const dateCreatedTitle = (
+            (context.date_created && <span>from <LocalizedTime timestamp={context.date_created} /></span>) ||
+            itemTitle.replace(context['@type'][0] + ' ', '')
+        );
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleBeside subtitle={dateCreatedTitle}>{ itemTypeTitle }</TitleAndSubtitleBeside>
+            </PageTitleContainer>
+        );
+    }
+
+    if (itemTitle){
+        const itemTypeHierarchy = schemaTransforms.schemasToItemTypeHierarchy(schemas);
+        if (!context.accession && !itemTypeHierarchy[context['@type'][0]] && typeof itemTitle === 'string' && itemTitle.length > 20) {
+            // Item views will currently show accession &/or abstract type.
+            // While this is case, we need to test for them here for layouting.
+            // If itemTitle is < 20chars might as well show it beside itemTypeTitle, anyway.
+            return (
+                <PageTitleContainer alerts={alerts}>
+                    <TitleAndSubtitleUnder subtitle={itemTitle}>{ itemTypeTitle }</TitleAndSubtitleUnder>
+                </PageTitleContainer>
+            );
+        } else {
+            return (
+                <PageTitleContainer alerts={alerts}>
+                    <TitleAndSubtitleBeside subtitle={itemTitle}>{ itemTypeTitle }</TitleAndSubtitleBeside>
+                </PageTitleContainer>
+            );
         }
     }
-};
 
-// Duplicates
-TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
+    // Default
+    return <PageTitleContainer alerts={alerts}><OnlyTitle>{ itemTypeTitle }</OnlyTitle></PageTitleContainer>;
+
+});
+
+
+/** Check whether current context has an `@type` list containing "StaticPage". */
+const isStaticPage = memoize(function(context){
+    if (Array.isArray(context['@type'])){
+        if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
+            if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
+            return true;
+        }
+    }
+    return false;
+});
+
+const isHomePage = memoize(function(href){
+    const currentHrefParts = url.parse(href, false);
+    const pathName = currentHrefParts.pathname;
+    if (pathName === '/' || pathName === '/home'){
+        return true;
+    }
+    return false;
+});
+
+const isEditingFormView = memoize(function(context, currentAction){
+    return (
+        currentAction &&
+        { 'edit':1, 'create':1, 'add':1 }[currentAction] &&
+        (object.isAnItem(context) || (context['@type'] && context['@type'].indexOf('Search') > -1))
+    );
+});
+
 
 
 /**
@@ -86,40 +245,8 @@ TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP[
  * Also renders out static page breadcrumbs (if applicable) and any alerts if any
  * are needed to be displayed.
  */
-export default class PageTitle extends React.PureComponent {
+export default class PageTitleOld extends React.PureComponent {
 
-    /**
-     * Checks whether current context has an `@type` list containing "StaticPage".
-     *
-     * @public
-     * @param {JSONContentResponse} context - Current JSON Item or backend response representation.
-     * @returns {boolean} Whether is StaticPage view or not.
-     */
-    static isStaticPage(context){
-        if (Array.isArray(context['@type'])){
-            if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
-                if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether current URL/HREF is that of root or base page (e.g. pathname is '/').
-     *
-     * @public
-     * @param {string} href - Current URI/href.
-     * @returns {boolean} Whether is home page view or not.
-     */
-    static isHomePage(href){
-        var currentHrefParts = url.parse(href, false);
-        var pathName = currentHrefParts.pathname;
-        if (pathName === '/' || pathName === '/home'){
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
@@ -144,36 +271,6 @@ export default class PageTitle extends React.PureComponent {
         }
         if (!currentPathName && typeof currentHref === 'string'){
             currentPathName = currentHrefParts.pathname;
-        }
-
-        /**** Pre-mapping overrides ****/
-
-        // For Edit, Create, Add titles:
-        if (currentAction && (object.isAnItem(context) || currentPathName.indexOf('/search/') > -1)){
-            if (currentAction === 'edit'){
-                return {
-                    'title' : "Editing",
-                    'calloutTitle' : object.itemUtil.getTitleStringFromContext(context) // We can only edit on current context, so this should always be correct/relevant context.
-                };
-            }
-
-            if (currentAction === 'create') {
-                return {
-                    'title' : "Creating",
-                    'calloutTitle' : schemaTransforms.getItemTypeTitle(context, schemas) // Create is called from current item view.
-                };
-            }
-
-            if (currentAction === 'add') {
-                return {
-                    'title' : "Creating",
-                    'calloutTitle' : (
-                        currentPathName.indexOf('/search/') > -1 ?
-                            schemaTransforms.getSchemaTypeFromSearchContext(context, schemas) : schemaTransforms.getItemTypeTitle(context, schemas)
-                    )
-                };
-            }
-
         }
 
 
@@ -449,7 +546,7 @@ export class StaticPageBreadcrumbs extends React.Component {
      * @ignore
      */
     static defaultProps = {
-        'pageTitleStyle' : {}
+        'editBtnStyle' : {}
     };
 
     /** @ignore */
@@ -489,14 +586,14 @@ export class StaticPageBreadcrumbs extends React.Component {
      * @private
      */
     editButton(){
-        var { session, context, pageTitleStyle } = this.props;
+        const { session, context, style } = this.props;
         if (session && context && Array.isArray(context['@type']) && context['@type'].indexOf('StaticPage') > -1){
 
             if (Array.isArray(context.actions)){
                 var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
                 if (editAction && editAction.href){
                     return (
-                        <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
+                        <div className="static-edit-button pull-right" style={style}>
                             <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
@@ -539,12 +636,12 @@ export class StaticPageBreadcrumbs extends React.Component {
 
     /** @private */
     render(){
-        var { context, hasToc } = this.props,
+        var { context, className } = this.props,
             ancestors = StaticPageBreadcrumbs.getAncestors(context),
             crumbs = ancestors && _.map(ancestors, this.renderCrumb);
 
         return  (
-            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? 'empty' : '') + (hasToc ? ' page-has-toc' : '')}>
+            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? ' empty' : '') + (className ? ' ' + className : '')}>
                 { crumbs }
                 { this.editButton() }
                 { this.seoMetadata(ancestors) }

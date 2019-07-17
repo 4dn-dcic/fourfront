@@ -5,10 +5,11 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import url from 'url';
 
-import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
+import { getAbstractTypeForType, getSchemaTypeFromSearchContext } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/SearchView';
 import { columnExtensionMap } from './columnExtensionMap';
 import { Schemas } from './../util';
+import { TitleAndSubtitleBeside, PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews } from './../PageTitleSection';
 
 
 export default class SearchView extends React.PureComponent {
@@ -101,3 +102,31 @@ export default class SearchView extends React.PureComponent {
         );
     }
 }
+
+const SearchViewPageTitle = React.memo(function SearchViewPageTitle({ context, schemas, currentAction, alerts }){
+    console.log('TTTSEARCH');
+    if (currentAction === 'selection') {
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder subtitle="Drag and drop Items from this view into other window(s).">
+                    Selecting
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+    const thisTypeTitle = getSchemaTypeFromSearchContext(context, schemas);
+    const subtitle = thisTypeTitle ? (
+        <span><small className="text-300">for</small> { thisTypeTitle }</span>
+    ) : null;
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <TitleAndSubtitleBeside subtitle={subtitle}>
+                Search
+            </TitleAndSubtitleBeside>
+        </PageTitleContainer>
+    );
+});
+
+pageTitleViews.register(SearchViewPageTitle, "Search");
+pageTitleViews.register(SearchViewPageTitle, "Search", "selection");

@@ -4,6 +4,7 @@ import React from 'react';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
@@ -11,14 +12,15 @@ import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
-import { Footer } from './footer';
+import { Footer } from './Footer';
 import { store } from './../store';
+
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { ajax, JWT, console, isServerSide, object, layout, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
-import { ChartDataController } from './viz/chart-data-controller';
-import PageTitle from './PageTitle';
+
+import { PageTitleSection } from './PageTitleSection';
 
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
@@ -56,6 +58,15 @@ const portal = {
     ]
 };
 
+const getGoogleAnalyticsTrackingID = memoize(function(href){
+    const { host } = url.parse(href);
+    if (host.indexOf('testportal.4dnucleome') > -1){
+        // TODO
+        return 'UA-86655305-2';
+    }
+    return null;
+});
+
 
 /**
  * Creates a promise which completes after a delay, performing no network request.
@@ -75,26 +86,6 @@ class Timeout {
          */
         this.promise = new Promise((resolve) => setTimeout(resolve.bind(null, this), timeout));
     }
-}
-
-function getGoogleAnalyticsTrackingID(href){
-    if (!href && !isServerSide()){
-        href = window.location.href;
-    }
-    const { host } = url.parse(href);
-    if (host.indexOf('testportal.4dnucleome') > -1){
-        return 'UA-86655305-2';
-    }
-    if (host.indexOf('data.4dnucleome') > -1){
-        return 'UA-86655305-1';
-    }
-    if (host.indexOf('localhost') > -1){
-        return 'UA-86655305-3';
-    }
-    if (host.indexOf('4dn-web-alex') > -1){
-        return 'UA-86655305-4';
-    }
-    return null;
 }
 
 /**
@@ -273,10 +264,10 @@ export default class App extends React.PureComponent {
         }
 
         // Load up analytics & perform initial pageview track
-        analytics.initializeGoogleAnalytics(
-            getGoogleAnalyticsTrackingID(href),
-            context
-        );
+        const analyticsID = getGoogleAnalyticsTrackingID(href);
+        if (analyticsID){
+            analytics.initializeGoogleAnalytics(analyticsID, context);
+        }
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
@@ -410,14 +401,6 @@ export default class App extends React.PureComponent {
             if (this.state[key] !== prevState[key]) {
                 console.log('changed state: %s', key);
             }
-        }
-
-        // We could migrate this block of code to ChartDataController if it were stored in Redux.
-        if (prevState.session !== session && ChartDataController.isInitialized()){
-            setTimeout(function(){
-                console.log("SYNCING CHART DATA");
-                ChartDataController.sync();
-            }, 0);
         }
 
     }
@@ -1786,15 +1769,13 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-
-                            <NavigationBar
-                                {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
                                     'context', 'updateUserInfo', 'listActionsFor')} />
 
                             <div id="pre-content-placeholder"/>
 
-                            <PageTitle {...this.props} windowWidth={windowWidth} />
+                            <PageTitleSection {...this.props} windowWidth={windowWidth} />
 
                             <ContentErrorBoundary canonical={canonical}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
