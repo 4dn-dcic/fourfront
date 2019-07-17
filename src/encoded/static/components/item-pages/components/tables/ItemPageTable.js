@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import queryString from 'query-string';
+import queryString from 'querystring';
 import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
@@ -13,6 +13,8 @@ import {
 } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultDetailPane';
 
+
+/** @todo Move to shared components repo? */
 
 /** @todo - refactor. Not too important since parent components almost always a PureComponent so perf gain would b minimal */
 export class ItemPageTable extends React.Component {
@@ -91,8 +93,8 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var { results, loading, columnExtensionMap, columns, width, windowWidth,
-            defaultOpenIndices, renderDetailPane, minWidth } = this.props;
+        const { results, loading, columnExtensionMap, columns, width, windowWidth,
+            defaultOpenIndices, defaultOpenIds, renderDetailPane, minWidth } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -102,32 +104,32 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap),
-            responsiveGridState = layout.responsiveGridState(windowWidth);
+        let columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap);
+        const responsiveGridState = layout.responsiveGridState(windowWidth);
 
-        width = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
+        const useWidth = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
 
-        if (!width || isNaN(width)){
+        if (!useWidth || isNaN(useWidth)){
             throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
         columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
-            width,
+            useWidth,
             columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
         );
 
-        var commonRowProps = { width, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
+        const commonRowProps = { width: useWidth, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
 
         return (
             <div className="item-page-table-container clearfix">
-                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={width} />
+                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={useWidth} />
                 { _.map(results, (result, rowIndex) => {
                     var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow {...this.props} {...commonRowProps}
                             key={atId || rowIndex} result={result} rowNumber={rowIndex} defaultOpen={
-                                (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
-                                || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
+                                (Array.isArray(defaultOpenIndices) && _.contains(defaultOpenIndices, rowIndex))
+                                || (atId && Array.isArray(defaultOpenIds) && _.contains(defaultOpenIds, atId))
                             } />
                     );
                 }) }
@@ -239,7 +241,7 @@ export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
     }
 
     loadItems(){
-        const { itemUrls = [] } = this.props;
+        const { itemUrls = [], maxToLoad } = this.props;
         const onFinishLoad = _.after(Math.min(itemUrls.length, maxToLoad), ()=>{
             this.setState({ 'loading' : false });
         });

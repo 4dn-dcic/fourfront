@@ -4,8 +4,9 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { pie, arc } from 'd3-shape';
-import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import PropTypes from 'prop-types';
+
+import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 // eslint-disable-next-line no-unused-vars
 import { Item } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/typedefs';
@@ -401,8 +402,8 @@ class BadgeItem extends React.PureComponent {
         return (
             <div className="badge-item">
                 <div className="row flexrow">
-                    <div className="col-xs-12 col-sm-2 icon-col">{ image }</div>
-                    <div className="col-xs-12 col-sm-10 title-col">
+                    <div className="col-12 col-sm-2 icon-col">{ image }</div>
+                    <div className="col-12 col-sm-10 title-col">
                         <div className="inner mb-05">
                             <h4 className="text-500 mb-0 mt-0">
                                 { badgeTitle }

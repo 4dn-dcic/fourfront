@@ -4,8 +4,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
 import { ButtonToolbar } from 'react-bootstrap';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
@@ -13,9 +13,9 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
     static defaultProps = {
         'collapseButtonTitle' : function(isOpen){
             return (
-                <span>
+                <React.Fragment>
                     <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options
-                </span>
+                </React.Fragment>
             );
         }
     };
@@ -58,7 +58,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
 
         const { children, windowWidth, collapseButtonTitle, tooltip, constantButtons } = this.props;
         const gridState = mounted && layout.responsiveGridState(windowWidth);
-        const isMobileSize = gridState && gridState !== 'lg';
+        const isMobileSize = gridState && ['xs', 'sm', 'md'].indexOf(gridState) > -1;
         const isOpen = !isMobileSize || open;
 
         return (
@@ -74,8 +74,8 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                 <div className="toolbar-wrapper pull-right" key="toolbar">
                     <ButtonToolbar data-tip={ isMobileSize ? null : tooltip }>
                         { !isMobileSize && children }
-                        <button type="button" className="btn btn-outline-dark hidden-lg toggle-open-button"
-                            onClick={this.toggleOpenMenu} key="collapse-toggle-btn">
+                        <button className="btn btn-outline-dark d-lg-none d-xl-none toggle-open-button"
+                            onClick={this.toggleOpenMenu} key="collapse-toggle-btn" type="button">
                             { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }
                         </button>
                         { constantButtons }

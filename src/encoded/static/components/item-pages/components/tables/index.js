@@ -10,7 +10,3 @@
 
 export { ItemPageTable, ItemPageTableLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoaderPageController, ItemPageTableSearchLoader } from './ItemPageTable';
 
-export { ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoadedFromSearch, ExperimentSetTableTabView } from './ExperimentSetTables';
-
-export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
-

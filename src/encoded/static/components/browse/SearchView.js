@@ -8,6 +8,7 @@ import url from 'url';
 import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/SearchView';
 import { columnExtensionMap } from './columnExtensionMap';
+import { Schemas } from './../util';
 
 
 export default class SearchView extends React.PureComponent {
@@ -83,14 +84,11 @@ export default class SearchView extends React.PureComponent {
         return facets;
     });
 
-    /**
-     * Filter the `@type` facet options down to abstract types only (if none selected) for Search.
-     */
+    /** Filter the `@type` facet options down to abstract types only (if none selected) for Search. */
     transformedFacets(){
-        var { href, context, currentAction, session, schemas } = this.props;
+        const { href, context, currentAction, session, schemas } = this.props;
         return SearchView.transformedFacets(href, context, currentAction, session, schemas);
     }
-
 
     render(){
         const { isFullscreen, ...passProps } = this.props;
@@ -98,7 +96,8 @@ export default class SearchView extends React.PureComponent {
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
-            <CommonSearchView {...passProps} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}/>
+            <CommonSearchView {...passProps} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
+                termTransformFxn={Schemas.Term.toName} />
         );
     }
 }

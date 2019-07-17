@@ -14,13 +14,6 @@ export { navigate } from './navigate';
 import * as typeDefinitions from './typedefs';
 export const typedefs = typeDefinitions;
 
-import * as experimentTransformFunctions from './experiments-transforms';
-export const expFxn = experimentTransformFunctions;
-
-
-import * as experimentFilters from './experiments-filters';
-export const Filters = experimentFilters;
-
 import * as SchemaUtilities from './Schemas';
 export const Schemas = SchemaUtilities;
 

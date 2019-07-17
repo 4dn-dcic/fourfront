@@ -7,7 +7,6 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
 
-
 /**
  * A collapsible panel that is meant to be shown near top of Item views.
  * Is meant to display a grid of Item properties, rendered out via `OverViewBodyItem`s.
