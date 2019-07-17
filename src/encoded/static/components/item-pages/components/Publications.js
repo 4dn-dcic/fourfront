@@ -96,7 +96,7 @@ ShortAttribution.propTypes = {
  * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
  * component to create own <div> with whatever className is desired, among other element attributes.
  */
-const PublicationBelowHeaderRow = React.memo(function({ publication, singularTitle, outerClassName }){
+const PublicationBelowHeaderRow = React.memo(function PublicationBelowHeaderRow({ publication, singularTitle, outerClassName }){
     if (!publication || !object.itemUtil.atId(publication)) return null;
     return (
         <div className={outerClassName}>

@@ -42,11 +42,6 @@ export default class SchemaView extends React.PureComponent {
         'schemas' : PropTypes.any.isRequired
     };
 
-    constructor(props){
-        super(props);
-        this.render = this.render.bind(this);
-    }
-
     render() {
         const { context, schemas } = this.props;
         return (

@@ -12,7 +12,7 @@ import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
-import { Footer } from './footer';
+import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';

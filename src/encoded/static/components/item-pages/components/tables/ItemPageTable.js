@@ -14,6 +14,8 @@ import {
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultDetailPane';
 
 
+/** @todo Move to shared components repo? */
+
 /** @todo - refactor. Not too important since parent components almost always a PureComponent so perf gain would b minimal */
 export class ItemPageTable extends React.Component {
 

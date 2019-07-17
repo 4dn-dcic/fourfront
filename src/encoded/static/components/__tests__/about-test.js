@@ -59,8 +59,8 @@ describe('Testing about.js', function() {
     // Check that has functional navBar with links
     it('Has global navigation bar & links', function() {
 
-        var navBanner = TestUtils.scryRenderedDOMComponentsWithClass(page, 'navbar navbar-main');
-        var navBannerLinkWrapper = TestUtils.scryRenderedDOMComponentsWithClass(page, 'nav navbar-nav');
+        var navBanner = TestUtils.scryRenderedDOMComponentsWithClass(page, 'navbar-main navbar');
+        var navBannerLinkWrapper = TestUtils.scryRenderedDOMComponentsWithClass(page, 'navbar-collapse');
         expect(navBanner.length).toEqual(1);
         expect(navBannerLinkWrapper[0].children.length).toBeGreaterThan(0); // Doesn't matter if 1 or more links.
 
@@ -68,20 +68,21 @@ describe('Testing about.js', function() {
          * Test mobile dropdown (full menu)
          */
 
-        var menuToggleButton = navBanner[0].children[0].children[0].children[1]; // nav.navbar.navbar-main > .container > div.navbar-header > a.navbar-toggle
-        var menuCollapsibleSection = navBanner[0].children[0].children[1]; // nav.navbar.navbar-main > .container > div.navbar-collapse.collapse
+        var menuToggleButton = navBanner[0].children[1]; // nav.navbar.navbar-main > .container > div.navbar-header > a.navbar-toggle
+        var menuCollapsibleSection = navBanner[0].children[2]; // nav.navbar.navbar-main > .container > div.navbar-collapse.collapse
         expect(menuToggleButton.className.search('navbar-toggle')).toBeGreaterThan(-1);
-        expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
+        //expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
         // Make sure 'in' is not in className, as it controls section visibility @ mobile sizes.
-        expect(menuCollapsibleSection.className.search('in')).toBe(-1);
+        expect(menuCollapsibleSection.className.search('show')).toBe(-1);
         TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
-        expect(menuToggleButton.className.search('collapsed')).toBe(-1);
-        expect(menuCollapsibleSection.className.search('in')).toBeGreaterThan(-1);
-        TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
-
         jest.runOnlyPendingTimers();
-        expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
-        expect(menuCollapsibleSection.className.search('in')).toBe(-1);
+        //expect(menuToggleButton.className.search('collapsed')).toBe(-1);
+        expect(menuCollapsibleSection.className.search('show')).toBeGreaterThan(-1);
+        TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
+        jest.runOnlyPendingTimers();
+
+        //expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
+        expect(menuCollapsibleSection.className.search('show')).toBe(-1);
 
         /**
          * Test navbar dropdown menu items & sub-menus

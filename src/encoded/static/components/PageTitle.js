@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
+import memoize from 'memoize-one';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
@@ -81,6 +82,7 @@ const TITLE_PATHNAME_MAP = {
 TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
 
 
+
 /**
  * Calculates and renders out a title on every single front-end view.
  *
@@ -88,39 +90,6 @@ TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP[
  * are needed to be displayed.
  */
 export default class PageTitle extends React.PureComponent {
-
-    /**
-     * Checks whether current context has an `@type` list containing "StaticPage".
-     *
-     * @public
-     * @param {JSONContentResponse} context - Current JSON Item or backend response representation.
-     * @returns {boolean} Whether is StaticPage view or not.
-     */
-    static isStaticPage(context){
-        if (Array.isArray(context['@type'])){
-            if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
-                if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether current URL/HREF is that of root or base page (e.g. pathname is '/').
-     *
-     * @public
-     * @param {string} href - Current URI/href.
-     * @returns {boolean} Whether is home page view or not.
-     */
-    static isHomePage(href){
-        var currentHrefParts = url.parse(href, false);
-        var pathName = currentHrefParts.pathname;
-        if (pathName === '/' || pathName === '/home'){
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
@@ -204,7 +173,7 @@ export default class PageTitle extends React.PureComponent {
             };
         }
 
-        if (PageTitle.isStaticPage(context)){
+        if (isStaticPage(context)){
             return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
         }
 
@@ -325,7 +294,7 @@ export default class PageTitle extends React.PureComponent {
 
         let elementStyle;
 
-        if (PageTitle.isHomePage(href)){
+        if (isHomePage(href)){
             elementStyle = PageTitle.getStyles(context, href, mounted, false, windowWidth);
             return (
                 <div id="page-title-container" className="container">
@@ -370,6 +339,27 @@ export default class PageTitle extends React.PureComponent {
         );
     }
 }
+
+
+/** Check whether current context has an `@type` list containing "StaticPage". */
+const isStaticPage = memoize(function(context){
+    if (Array.isArray(context['@type'])){
+        if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
+            if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
+            return true;
+        }
+    }
+    return false;
+});
+
+const isHomePage = memoize(function(href){
+    const currentHrefParts = url.parse(href, false);
+    const pathName = currentHrefParts.pathname;
+    if (pathName === '/' || pathName === '/home'){
+        return true;
+    }
+    return false;
+});
 
 
 /**
