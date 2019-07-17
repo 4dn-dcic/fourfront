@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * In future could maybe move into app.js since file is so small.
  * But it may get bigger in future also and include things such as privacy policy, about page links, copyright, and so forth.
  */
-export const Footer = React.memo(function Footer(){
+export const Footer = React.memo(function Footer(props){
     return (
         <footer id="page-footer">
             <div className="page-footer">
