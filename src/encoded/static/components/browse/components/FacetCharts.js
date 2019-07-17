@@ -216,10 +216,12 @@ export class FacetCharts extends React.PureComponent {
 
         if (gridState === 'xs'){
             width = windowWidth - 20;
+        } else if (gridState === 'sm'){
+            width = layout.gridContainerWidth(windowWidth);
         } else if (isFullscreen){
             width = parseInt((windowWidth - 40) * 0.75) - 20;
         } else {
-            width = parseInt(layout.gridContainerWidth(windowWidth) * 0.75) - 20;
+            width = parseInt(layout.gridContainerWidth(windowWidth) * 0.75);
         }
 
         if (mounted && gridState === 'xs') height = Math.min(height, 240);
