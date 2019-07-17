@@ -226,91 +226,6 @@ body .rc-tabs-top {
 	}
 }
 
-.item-page-heading {
-    /** Extends .flexible-description-box **/
-	border-top:1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	//min-height: 42px;
-	padding: 10px 0px 10px;
-	transition: height .4s, border-color .4s;
-	text-align: justify;
-
-	h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 20px; }
-
-	h4 {
-		font-weight: 500;
-
-		small {
-			vertical-align: top;
-			line-height: inherit;
-			letter-spacing: normal;
-		}
-	}
-
-	&.no-description {
-		padding-top: 0;
-		padding-bottom: 0;
-		border-bottom: none;
-		border-top-color: #eee;
-		@include media-breakpoint-up(md){
-			width: 33%;
-			float: right;
-		}
-		& + div.bottom-row {
-			clear: both;
-		}
-	}
-
-	&.expanded {
-		border-bottom-color: #ddd;
-	}
-
-}
-
-.item-view-header {
-	.item-label-title {
-		/* Is some form of header elem, e.g. h5; shows like "Data File | ACCESSION" at top left of page */
-		font-weight: 300;
-		min-height: 30px;
-		/* line-height: 36px; */
-		margin: 0;
-		//padding-top: 10px;
-		padding-left: 12px;
-
-		@include media-breakpoint-down(sm){
-			/* Becomes row (not col) at this size, move closer to title */
-			min-height: 50px;
-			margin-top: -5px;
-		}
-
-		> div.inner {
-			padding-top: 10px;
-			> span:not(:last-child){
-				padding-right: 8px;
-				margin-right: 7px;
-				border-right: 1px solid #ccc;
-			}
-		}
-
-		.accession {
-			font-weight: 500;
-			font-size: 1rem;
-		}
-	}
-
-	.item-label-extra {
-		font-weight: 300;
-	}
-
-	@include media-breakpoint-down(sm){
-
-		.item-label-extra.text-right {
-			text-align: left !important;
-		}
-
-	}
-}
-
 .flexcol-heading,
 .submission-page-heading {
     position: relative;
@@ -430,96 +345,199 @@ i.item-status-indicator-dot {
 }
 
 
-.item-header-indicators {
+.item-page-container {
 
-	margin-top: 8px;
-	margin-bottom: 8px;
-
-	> .indicator-item {
-		display: inline-block;
-		box-sizing: border-box;
-		position: relative;
-		/* border: 1px solid rgba(0,0,0,0.125); */
-		/* border-radius: 5px; */
-		line-height: 20px;
-		color : #000;
-		font-weight: 400;
-		padding-left: 10px;
-		padding-right: 10px;
-		text-transform: capitalize;
-		color: #444;
-
-		max-width: 50%;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-
-		padding-right: 21px;
-		padding-left: 0;
-		max-width: 50%;
-		&:after {
-			content : "";
-			display: block;
-			position: absolute;
-			right: 10px;
-			height: 100%;
-			top: 0;
-			border-right: 1px solid rgba(0,0,0,0.125);
-		}
-		&:last-child {
-			padding-right: 0;
-			margin-right: 0;
-		}
-		&:last-child:after {
-			display: none;
+	.item-view-header {
+	
+		.item-label-extra {
+			font-weight: 300;
 		}
 
-		&.item-status:before {
-			content: "";
-			width: 9px;
-			height : 9px;
-			display: inline-block;
-			position: relative;
-			margin-right: 7px;
-			border-radius: 50%;
+		@include media-breakpoint-down(sm){
+	
+			.item-label-extra.text-right {
+				text-align: left !important;
+			}
+	
+		}		
+
+		> .top-row {
+
+			.item-label-title {
+				/* Is some form of header elem, e.g. h5; shows like "Data File | ACCESSION" at top left of page */
+				font-weight: 300;
+				min-height: 30px;
+				margin: 0;
+				min-height: 40px;
+				display: flex;
+				align-items: center;
+
+		
+				@include media-breakpoint-down(sm){
+					/* Becomes row (not col) at this size, move closer to title */
+					min-height: 50px;
+					padding-top: 5px;
+					align-items: start;
+				}
+		
+				> div.inner {
+					// padding-top: 10px;
+					> span:not(:last-child){
+						padding-right: 8px;
+						margin-right: 7px;
+						border-right: 1px solid #ccc;
+					}
+				}
+		
+				.accession {
+					font-weight: 500;
+					font-size: 1rem;
+				}
+			}	
+
+			.item-header-indicators {
+
+				margin-top: 0;
+				margin-bottom: 0;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				min-height: 40px;
+
+				@include media-breakpoint-down(sm){
+					/* Becomes row (not col) at this size, move closer to title */
+					justify-content: flex-start;
+				}
+			
+				> .indicator-item {
+					display: inline-block;
+					box-sizing: border-box;
+					position: relative;
+					/* border: 1px solid rgba(0,0,0,0.125); */
+					/* border-radius: 5px; */
+					line-height: 20px;
+					color : #000;
+					font-weight: 400;
+					padding-left: 10px;
+					padding-right: 10px;
+					text-transform: capitalize;
+					color: #444;
+			
+					max-width: 50%;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+			
+					padding-right: 21px;
+					padding-left: 0;
+
+					&:after {
+						content : "";
+						display: block;
+						position: absolute;
+						right: 10px;
+						height: 100%;
+						top: 0;
+						border-right: 1px solid rgba(0,0,0,0.125);
+					}
+					&:last-child {
+						padding-right: 0;
+						margin-right: 0;
+					}
+					&:last-child:after {
+						display: none;
+					}
+			
+					&.item-status:before {
+						content: "";
+						width: 9px;
+						height : 9px;
+						display: inline-block;
+						position: relative;
+						margin-right: 7px;
+						border-radius: 50%;
+					}
+			
+					&.item-status {
+						@include statusColorStyles;
+					}
+			
+					/*
+					&[data-set-type="replicates"]{
+						background-color: #56889b;
+					}
+			
+					&[data-set-type="replicates"]{
+						background-color: #397855;
+					}
+			
+					&[data-set-type="technical replicates"]{
+						background-color: #34677b;
+					}
+			
+					&[data-set-type="analysis set"]{
+						background-color: #812423;
+					}
+			
+					&[data-set-type="publication"]{
+						background-color: #47419a;
+					}
+			
+					&[data-set-type="unspecified"]{
+						background-color: #7b7b7b;
+						display: none;
+					}
+					*/
+				}
+			
+			}
+
 		}
 
-		&.item-status {
-			@include statusColorStyles;
+		> .item-page-heading {
+			/** Extends .flexible-description-box **/
+			border-top:1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+			//min-height: 42px;
+			padding: 10px 0px 10px;
+			transition: height .4s, border-color .4s;
+			text-align: justify;
+		
+			h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 20px; }
+		
+			h4 {
+				font-weight: 500;
+		
+				small {
+					vertical-align: top;
+					line-height: inherit;
+					letter-spacing: normal;
+				}
+			}
+		
+			&.no-description {
+				padding-top: 0;
+				padding-bottom: 0;
+				border-bottom: none;
+				border-top-color: #eee;
+				@include media-breakpoint-up(md){
+					width: 33%;
+					float: right;
+				}
+				& + div.bottom-row {
+					clear: both;
+				}
+			}
+		
+			&.expanded {
+				border-bottom-color: #ddd;
+			}
+		
 		}
+		
 
-		/*
-		&[data-set-type="replicates"]{
-			background-color: #56889b;
-		}
-
-		&[data-set-type="replicates"]{
-			background-color: #397855;
-		}
-
-		&[data-set-type="technical replicates"]{
-			background-color: #34677b;
-		}
-
-		&[data-set-type="analysis set"]{
-			background-color: #812423;
-		}
-
-		&[data-set-type="publication"]{
-			background-color: #47419a;
-		}
-
-		&[data-set-type="unspecified"]{
-			background-color: #7b7b7b;
-			display: none;
-		}
-		*/
 	}
 
-}
-
-
-.item-page-container {
     .info-area {
 	    margin-top: 17px;
 		//border-bottom: 1px solid #ddd;
@@ -1143,7 +1161,6 @@ $download-button-width : 100px;
 		}
 
 		.details {
-			padding-top: 3px;
 			> .details-row {
 				margin-top: 7px;
 			}

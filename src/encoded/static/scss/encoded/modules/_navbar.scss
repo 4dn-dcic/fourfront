@@ -704,7 +704,7 @@ div#top-nav.navbar-fixed-top {
             padding-right: 20px;
 
             .test-warning-close {
-                @include font-size(1.2);
+                @include font-size(1.2rem);
                 color: #fff;
                 cursor: pointer;
                 vertical-align: middle;

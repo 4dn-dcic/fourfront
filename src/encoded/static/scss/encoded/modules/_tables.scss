@@ -1,7 +1,7 @@
 /*  COMMON TABLES */
 
 table {
-    @include font-size(0.9);
+    @include font-size(0.9rem);
 }
 
 thead, tfoot {
@@ -153,7 +153,7 @@ table.matrix {
 	.files-tables-container {
 
 		// Only when present on item page(s)
-		@media screen and (max-width: $screen-sm-max){
+		@include media-breakpoint-down(sm){
 			.item-page-table-row-container & {
 				border-bottom: 1px solid #ddd;
 			}
@@ -853,7 +853,7 @@ $search-results-edge-shadow-color : rgba(0,0,0,0.125);
 							border-bottom-color: #808080;
 
 							//transition: height .35s ease, transform .1s ease;
-							@include font-size(0.85);
+							@include font-size(0.85rem);
 
 							> .close-button-container {
 								position: absolute;

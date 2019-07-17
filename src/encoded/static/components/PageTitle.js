@@ -93,6 +93,7 @@ export default class PageTitle extends React.PureComponent {
 
     /**
      * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
+     * Pretty hacky... we should replace this w. what doing on CGAP-side & use Registry of title views (?).
      *
      * @public
      * @param {JSONContentResponse} context - Current Item or backend response JSON representation.

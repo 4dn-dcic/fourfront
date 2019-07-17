@@ -10,7 +10,7 @@ html {
 body {
     text-rendering: optimizeLegibility;
     background: #f8f8f8 !important;
-    @include font-size(1);
+    @include font-size(1rem);
 }
 
 .float-wrap { overflow: hidden; }
@@ -32,18 +32,18 @@ hr { clear: both; }
 
 
 // Override Bootstrap's header sizes
-h1, .h1 { @include font-size(2.6); }
-h2, .h2 { @include font-size(2.1); }
-h3, .h3 { @include font-size(1.7); }
+h1, .h1 { @include font-size(2.6rem); }
+h2, .h2 { @include font-size(2.1rem); }
+h3, .h3 { @include font-size(1.7rem); }
 h4, .h4 {
-    @include font-size(1.3);
+    @include font-size(1.3rem);
     line-height: 140%;
 }
-h5, .h5 { @include font-size(1); }
-h6, .h6 { @include font-size(0.85); }
+h5, .h5 { @include font-size(1rem); }
+h6, .h6 { @include font-size(0.85rem); }
 
 blockquote {
-    @include font-size(1);
+    @include font-size(1rem);
 }
 
 
@@ -75,7 +75,7 @@ blockquote {
 	}
     margin-bottom: 10px;
 	display: block;
-	@include font-size(1.3);
+	@include font-size(1.3rem);
 }
 
 .text-panel {

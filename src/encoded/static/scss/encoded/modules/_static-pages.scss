@@ -3,52 +3,6 @@
 		Common static page components & styles
 ***********************************************************/
 
-.fourDN-header{
-	font-family: $font-family-sans-serif;
-	font-weight: 300;
-	margin-bottom: 20px;
-	margin-top: 20px;
-	padding-bottom: 15px;
-	border-bottom: 1px solid #f4f4f4;
-	font-size: 32px;
-	letter-spacing: -1px;
-	line-height: 38px;
-	position: relative;
-	
-	&[id]:before {
-		content : '';
-		position: relative;
-		top: -150px;
-	}
-}
-
-h4.fourDN-header {
-	font-size: 24px;
-	margin-bottom: 10px;
-	padding-bottom: 8px;
-}
-
-h5.fourDN-header {
-	font-size: 20px;
-}
-
-.fourDN-banner{
-	margin-top: 40px;
-	margin-bottom: 40px;
-	> h4 {
-		font-size: 1.4em;
-		color: #999999;
-		> div {
-			display: inline-block;
-		}
-	}
-}
-
-
-.fourDN-content-panel{
-	margin-top: 0px !important;
-}
-
 
 .static-section-entry,
 .home-content-area {
@@ -981,16 +935,6 @@ $carousel-height : 240px;
 	
 			.announcement-content {
 				margin-top: 3px;
-			}
-		}
-	
-	
-		.fourDN-section-toggle{
-			color: #555;
-			text-decoration: none !important;
-			&:hover,
-			&:focus {
-				color: #000000;
 			}
 		}
 	

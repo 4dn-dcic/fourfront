@@ -218,7 +218,7 @@ export class TopRow extends React.Component {
                             : null }
                     </div>
                 </h5>
-                <h5 className="col-12 col-md-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                <h5 className="col-12 col-md-7 text-300 text-capitalize item-header-indicators clearfix">
                     { this.parsedStatus() }{ this.wrapChildren() }{ this.itemActions() }{ this.viewJSONButton() }
                 </h5>
             </div>
@@ -311,8 +311,8 @@ export class BottomRow extends React.PureComponent {
         }
         return (
             <div className="row clearfix bottom-row">
-                <div className="col-sm-6 item-label-extra set-type-indicators">{ children }</div>
-                <h5 className="col-sm-6 text-right text-left-xs item-label-extra">{ this.parsedDate(dateToUse) }</h5>
+                <div className="col text-300 set-type-indicators">{ children }</div>
+                <h5 className="col-md-auto text-300 date-indicator">{ this.parsedDate(dateToUse) }</h5>
             </div>
         );
     }
