@@ -38,22 +38,22 @@ class Term extends React.Component {
         this.onClick = this.onClick.bind(this);
     }
 
+    componentWillUnmount(){
+        const { hoverTerm, selectedTerm, term } = this.props;
+        if (hoverTerm === term || selectedTerm === term){
+            this.onMouseLeave();
+        }
+    }
+
     generateNode(){
-        return {
-            'field' : this.props.field,
-            'term' : this.props.term,
-            'color' : this.props.color,
-            'position' : this.props.position,
-            'experiment_sets' : this.props.experiment_sets,
-            'experiments' : this.props.experiments,
-            'files' : this.props.files
-        };
+        return _.pick(this.props, 'field', 'term', 'color', 'position', 'experiment_sets', 'experiments', 'files');
     }
 
     onMouseEnter(e){
-        vizUtil.highlightTerm(this.props.field, this.props.term, this.props.color);
-        if (typeof this.props.onNodeMouseEnter === 'function'){
-            this.props.onNodeMouseEnter(this.generateNode(), e);
+        const { field, term, color, onNodeMouseEnter } = this.props;
+        vizUtil.highlightTerm(field, term, color);
+        if (typeof onNodeMouseEnter === 'function'){
+            onNodeMouseEnter(this.generateNode(), e);
         }
     }
 
@@ -240,7 +240,7 @@ export class Legend extends React.PureComponent {
 
     /**
      * @param {FieldObject} field - Field object containing at least a title, name, or field.
-     * @param {{Object}} schemas - Schemas object passed down from app.state. 
+     * @param {{Object}} schemas - Schemas object passed down from app.state.
      * @returns {FieldObject} Modified field object.
      */
     static parseFieldName(field, schemas = null){

@@ -240,7 +240,7 @@ export default class CursorViewBounds extends React.PureComponent {
             'hoverParentTerm' : null
         });
 
-        if (!ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
+        if (!evt || !ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
             this.cursorRef.current.reset(false);
         }
     }
