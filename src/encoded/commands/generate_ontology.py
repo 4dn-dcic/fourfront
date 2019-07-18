@@ -767,7 +767,7 @@ def main():
     if terms:
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
-        terms = verify_and_update_ontology(terms, ontologies, dbterms)
+        terms = verify_and_update_ontology(terms, ontologies, db_terms)
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
