@@ -35,12 +35,12 @@
       "libs/react-patches",
       "jsdom"
     ],
-    "transform" : {
+    "transform": {
       "^.+\\.jsx?$": "babel-jest",
-      ".+\/node_modules\/@hms-dbmi-bgm\/shared-portal-components\/.*" : "babel-jest"
+      ".+/node_modules/@hms-dbmi-bgm/shared-portal-components/.*": "babel-jest"
     },
-    "transformIgnorePatterns" : [
-      "/node_modules/(?!@hms-dbmi-bgm\/shared-portal-components).+\\.js$"
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@hms-dbmi-bgm/shared-portal-components).+\\.js$"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
