@@ -383,15 +383,15 @@ def get_slim_terms(connection):
     return slim_terms
 
 
-def get_existing_ontology_terms(connection, ontologies=None):
+def get_existing_ontology_terms(connection):  # , ontologies=None):
     '''Retrieves all existing ontology terms from the db
     '''
-    ont_list = ''
-    if ontologies is not None:
-        for o in ontologies:
-            ouuid = o.get('uuid')
-            ont_list += '&source_ontology.uuid={}'.format(ouuid)
-    search_suffix = 'search/?type=OntologyTerm' + ont_list
+    # ont_list = ''
+    # if ontologies is not None:
+    #    for o in ontologies:
+    #        ouuid = o.get('uuid')
+    #        ont_list += '&source_ontology.uuid={}'.format(ouuid)
+    search_suffix = 'search/?type=OntologyTerm'  # + ont_list
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
     return {t['term_id']: t for t in db_terms}
 
@@ -447,15 +447,18 @@ def remove_obsoletes_and_unnamed(terms):
     return terms
 
 
-def verify_and_update_ontology(terms, ontologies):
+def verify_and_update_ontology(terms, ontologies, dbterms):
     '''checks to be sure the ontology associated with the term agrees with
-        the term prefix.  If it doesn't it is likely that the term was
+        the term prefix as long as term does not already exist in db.
+        If it doesn't it is likely that the term was
         imported into a previously processed ontology and so the ontlogy
         of the term should be updated to the one that matches the prefix
     '''
     ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
     ont_prefi = {v: k for k, v in ont_lookup.items()}
     for termid, term in terms.items():
+        if termid in dbterms:
+            continue
         if ont_lookup.get(term['source_ontology'], None):
             prefix = termid.split(':')[0]
             if prefix in ont_prefi:
