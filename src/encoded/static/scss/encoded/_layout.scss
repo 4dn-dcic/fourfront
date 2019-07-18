@@ -58,7 +58,7 @@ blockquote {
 
 #layout {
 	height: auto !important;
-    margin: 0 auto -$footerHeight;
+    margin: 0 auto -$footer-height;
     min-height: 100%;
 	background-color: $appBackgroundColor;
 	overflow-x: hidden;
@@ -295,7 +295,6 @@ h1.page-title + .page-subtitle {
 
 .page-footer {
 	background-color: #f8f8f8;
-	//height: $footerHeight;
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
@@ -339,8 +338,54 @@ h1.page-title + .page-subtitle {
 		}
 	}
 
-
 }
+
+// make footer look good on larger screens
+// and activate sticky footer
+@include media-breakpoint-up(md){
+    .footer-row { margin-left: 0; margin-right: 0; }
+
+    #page-footer {
+        height: $footer-height;
+    }
+
+    .page-footer {
+        height: $footer-height - $appVersionHeight;
+    }
+
+    .app-version {
+        margin: 0 0 8px;
+        text-align: center;
+        display: block;
+        padding: 15px 15px;
+        text-align: left;
+    }
+
+    @include sticky-footer($footer-height, "#layout", "#layout-footer", "#page-footer");
+
+    .footer-links {
+        list-style: none outside none;
+        margin-left: -5px;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        a {
+            display: inline;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+        a:hover {
+            text-decoration: underline;
+            background-color: transparent;
+        }
+        a:active { background-color: transparent; }
+    }
+}
+
 
 
 

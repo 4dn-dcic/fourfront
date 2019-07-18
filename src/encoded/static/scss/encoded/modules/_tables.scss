@@ -184,7 +184,7 @@ table.matrix {
 
 /*** Stacked Block Table Import & 4DN-specific overrides ***/
 
-@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/stacked-block-table.scss";
+@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/stacked-block-table";
 
 .stacked-block-table {
 
@@ -362,7 +362,7 @@ table.matrix {
 /**********************/
 
 $search-results-above-results-row-height: 40px;
-@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss";
+@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table";
 
 // Extensions to shared-portal-components searchview table(s):
 .search-result-row .result-table-row .search-result-column-block {

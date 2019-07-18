@@ -9,8 +9,7 @@
 $mainThemeColor: 			#ffffff; /* i.e. the background color ..for now */
 
 $appVersionHeight:          0px;
-$footerHeight: 				50px + $appVersionHeight;
-$footerTopBorderHeight:		0px;
+$footer-height:             50px + $appVersionHeight;
 $appBackgroundColor:        #fff; /* Not sure where $mainThemeColor is used... definitely not #application background-color, so creating new one */
 
 $tableHeadFootBackgroundColor: #000000;
