@@ -957,14 +957,14 @@ def test_terms_match_w_ontology(matches):
     assert go._terms_match(t1, t2)
 
 
-def test_terms_match_unmatched_ontology(matches):
-    t1 = matches[0]
-    t2 = matches[1]
-    o1 = '530016bc-8535-4448-903e-854af460b254'
-    o2 = {'@id': '/ontologys/530016bc-8535-4448-903e-854af460b000/', 'display_title': 'blah'}
-    t1['source_ontology'] = o1
-    t2['source_ontology'] = o2
-    assert not go._terms_match(t1, t2)
+# def test_terms_match_unmatched_ontology(matches):
+#     t1 = matches[0]
+#     t2 = matches[1]
+#     o1 = '530016bc-8535-4448-903e-854af460b254'
+#     o2 = {'@id': '/ontologys/530016bc-8535-4448-903e-854af460b000/', 'display_title': 'blah'}
+#     t1['source_ontology'] = o1
+#     t2['source_ontology'] = o2
+#     assert not go._terms_match(t1, t2)
 
 
 @pytest.fixture
