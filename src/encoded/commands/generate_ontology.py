@@ -186,18 +186,19 @@ def process_intersection_of(class_, intersection, data, terms):
     return terms
 
 
-def process_blank_node(class_, data, terms):
+def process_blank_node(class_, data, terms, simple=False):
     '''Given a blank node determine if there are any parent resources
         of relevant types and if so process them appropriately
     '''
     for object_ in data.rdfGraph.objects(class_, subClassOf):
         # direct parents of blank nodes
         if not isBlankNode(object_):
-            # we have a resource
-            for intersection in data.rdfGraph.objects(class_, IntersectionOf):
-                # intersectionOf triples are checked for human part_of
-                # or develops_from
-                terms = process_intersection_of(class_, intersection, data, terms)
+            if not simple:
+                # we have a resource
+                for intersection in data.rdfGraph.objects(class_, IntersectionOf):
+                    # intersectionOf triples are checked for human part_of
+                    # or develops_from
+                    terms = process_intersection_of(class_, intersection, data, terms)
     return terms
 
 
@@ -645,7 +646,7 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, connection, terms):
+def download_and_process_owl(ontology, connection, terms, simple=False):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
@@ -654,9 +655,11 @@ def download_and_process_owl(ontology, connection, terms):
     for class_ in data.allclasses:
         if not _is_deprecated(class_, data):
             if isBlankNode(class_):
-                terms = process_blank_node(class_, data, terms)
+                terms = process_blank_node(class_, data, terms, simple)
             else:
                 termid = get_termid_from_uri(class_)
+                if simple and not termid.startswith(ontology.get('ontology_prefix')):
+                    continue
                 if terms.get(termid) is None:
                     terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
                 else:
@@ -767,8 +770,12 @@ def main():
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
+            # want only simple processing for HP
+            simple = False
+            if ontology.get('ontology_prefix') in ['HP', 'EFO']:
+                simple = True
             # get all the terms for an ontology
-            terms = download_and_process_owl(ontology, connection, terms)
+            terms = download_and_process_owl(ontology, connection, terms, simple)
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
