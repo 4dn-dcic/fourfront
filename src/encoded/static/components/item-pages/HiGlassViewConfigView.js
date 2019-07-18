@@ -3,14 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import { DropdownButton, DropdownItem, Dropdown, Button } from 'react-bootstrap';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
 
-import { Button } from 'react-bootstrap';
 import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
@@ -536,7 +535,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <StatusMenuItem eventKey="released to project" context={context}>Visible by Network</StatusMenuItem>
                 <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
                 <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
-                <DropdownItem divider />
+                <Dropdown.Divider />
                 {/* These statuses currently not available.
                 <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
                 <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
