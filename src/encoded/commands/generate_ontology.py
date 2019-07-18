@@ -754,10 +754,7 @@ def main():
         if o['ontology_name'].startswith('4DN'):
             ontologies.pop(i)
     slim_terms = get_slim_terms(connection)
-    from_ontologies = None
-    if (args.ontologies != 'all'):
-        from_ontologies = ontologies
-    db_terms = get_existing_ontology_terms(connection, from_ontologies)
+    db_terms = get_existing_ontology_terms(connection)
     terms = {}
 
     for ontology in ontologies:
