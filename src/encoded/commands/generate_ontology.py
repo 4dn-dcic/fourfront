@@ -456,15 +456,21 @@ def verify_and_update_ontology(terms, ontologies, dbterms):
     '''
     ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
     ont_prefi = {v: k for k, v in ont_lookup.items()}
+    to_delete = []
     for termid, term in terms.items():
-        if termid in dbterms:
-            continue
+        # if termid in dbterms:
+        #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
+        #         to_delete.append(termid)
         if ont_lookup.get(term['source_ontology'], None):
             prefix = termid.split(':')[0]
             if prefix in ont_prefi:
                 if prefix != ont_lookup[term['source_ontology']]:
                     term['source_ontology'] = ont_prefi[prefix]
-    return terms
+        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
+            to_delete.append(termid)
+            print('WARNING - {} is already present as a term in {}'.format(termid, dbterms[termid]['source_ontology']['display_title']))
+    keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
+    return keep_terms
 
 
 def _get_t_id(val):
@@ -503,10 +509,11 @@ def _terms_match(t1, t2):
                     if not found:
                         return False
             elif k == 'source_ontology':
+                continue
                 # same as above comment to potentially deal with different response
-                t2ont = _get_t_id(t2['source_ontology'])
-                if val not in t2ont:
-                    return False
+                # t2ont = _get_t_id(t2['source_ontology'])
+                # if val not in t2ont:
+                #     return False
             elif k == 'synonyms':
                 t2syns = t2.get('synonyms')
                 if not t2syns or (set(t2syns) != set(val)):
