@@ -1,5 +1,11 @@
+/* Deprecated in Bootstrap 4 & FontAwesome 5.9.0, still used by us */
+.pull-left {
+    float: left;
+}
 
-
+.pull-right {
+    float: right;
+}
 
 .btn {
     font-weight: 500;
