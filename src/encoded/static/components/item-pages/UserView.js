@@ -357,7 +357,6 @@ export default class UserView extends React.Component {
             'job_title' : PropTypes.string
         }),
         'href' : PropTypes.string.isRequired,
-        'listActionsFor' : PropTypes.func.isRequired,
         'schemas' : PropTypes.shape({
             'User' : PropTypes.shape({
                 'required' : PropTypes.array,
@@ -375,8 +374,8 @@ export default class UserView extends React.Component {
     };
 
     mayEdit(){
-        const { listActionsFor } = this.props;
-        return _.any(listActionsFor('context'), function(action){
+        const { context } = this.props;
+        return _.any((context && context.actions) || [], function(action){
             return action.name && action.name === 'edit';
         });
     }
