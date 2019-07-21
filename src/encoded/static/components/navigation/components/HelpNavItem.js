@@ -36,13 +36,16 @@ export class HelpNavItem extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleToggle = this.handleToggle.bind(this);
+        this.onCloseDropdown = this.onCloseDropdown.bind(this);
+        this.handleOpenDropdown = this.handleOpenDropdown.bind(this);
         this.loadHelpMenuTree = this.loadHelpMenuTree.bind(this);
         this.dropdownID = props.dropdownID || props.id;
 
         this.state = {
             'helpMenuTree'          : null,
             'isLoadingHelpMenuTree' : false,
-            'isDropdownVisible'     : false
+            'isDropdownVisible'     : false,
+            'closingDropdown'       : false
         };
     }
 
@@ -90,33 +93,48 @@ export class HelpNavItem extends React.PureComponent {
         });
     }
 
-    handleToggle(e, toState){
+    onCloseDropdown(cb){
+        this.setState(function({ isDropdownVisible }){
+            if (!isDropdownVisible && !closingDropdown) return null;
+            return { 'isDropdownVisible' : false, 'closingDropdown' : false };
+        }, cb);
+    }
+
+    handleOpenDropdown(){
+        this.setState({ 'isDropdownVisible' : true });
+    }
+
+    handleToggle(e){
         e && e.preventDefault();
         this.setState(function({ isDropdownVisible }){
-            if (typeof toState === 'boolean'){
-                if (toState === isDropdownVisible) return null;
-                return { 'isDropdownVisible' : toState };
+            if (!isDropdownVisible){
+                return { 'isDropdownVisible' : true };
+            } else {
+                // CSSTransition in BigDropdownMenu will transition out then call this.onCloseDropdown()
+                return { 'closingDropdown' : true };
             }
-            return { 'isDropdownVisible' : !isDropdownVisible };
         });
     }
 
     render(){
         const { mounted, href, helpItemHref, id, windowWidth, windowHeight, overlaysContainer, isFullscreen, testWarning } = this.props;
-        const { helpMenuTree, isLoadingHelpMenuTree, isDropdownVisible } = this.state;
+        const { helpMenuTree, isLoadingHelpMenuTree, isDropdownVisible, closingDropdown } = this.state;
         const active = href.indexOf(helpItemHref) > -1; // `helpItemHref` assumed to be /help/something.
         const commonProps = { id, active, 'key' : id, 'href': helpItemHref };
         const isDesktopView = HelpNavItem.isDesktopView(windowWidth);
         let cls = "id-" + id; // `id` is no longer pass as HTML attrib to[NavLink->]Dropdown so we add to className;
-        let navItem;
 
         if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView || isLoadingHelpMenuTree){
-            navItem = <Nav.Link {...commonProps} className={cls}>Help</Nav.Link>;
+            return <Nav.Link {...commonProps} className={cls}>Help</Nav.Link>;
         }
 
         cls += " dropdown-toggle" + (isDropdownVisible ? " dropdown-open-for" : "");
 
-        navItem = <Nav.Link {...commonProps} onClick={this.handleToggle} className={cls}>Help</Nav.Link>;
+        const navItem = (
+            <Nav.Link {...commonProps} onClick={this.handleToggle} className={cls}>
+                Help
+            </Nav.Link>
+        );
 
         const inclBigMenu = helpMenuTree && isDropdownVisible && isDesktopView && (helpMenuTree.children || []).length > 0 && isDesktopView;
 
@@ -128,7 +146,7 @@ export class HelpNavItem extends React.PureComponent {
                 <React.Fragment>
                     { navItem }
                     <BigDropdownMenu {...{ windowWidth, windowHeight, href, overlaysContainer, id }} className={testWarningVisible ? 'test-warning-visible' : null}
-                        onClose={this.handleToggle} open={isDropdownVisible} menuTree={helpMenuTree} />
+                        onClose={this.onCloseDropdown} open={isDropdownVisible} menuTree={helpMenuTree} closing={closingDropdown} />
                 </React.Fragment>
             );
         }
