@@ -193,7 +193,7 @@ export default class App extends React.PureComponent {
      */
     constructor(props){
         super(props);
-        _.bindAll(this, 'listActionsFor', 'currentAction', 'loadSchemas',
+        _.bindAll(this, 'currentAction', 'loadSchemas',
             'setIsSubmitting', 'stayOnSubmissionsPage', 'authenticateUser',
             'updateUserInfo', 'confirmNavigation', 'navigate',
             // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
@@ -425,31 +425,6 @@ export default class App extends React.PureComponent {
             }, 0);
         }
 
-    }
-
-    /**
-     * Calculates some actions available, given a category.
-     * Potentially deprecated-ish.
-     *
-     * @todo Potentially remove. Or document more.
-     * @public
-     * @param {string} category - Usually one of "user", "context", "global_sections".
-     * @returns {{ href: string }[]} - List of actions available for category.
-     */
-    listActionsFor(category) {
-        const { context } = this.props;
-        const { mounted } = this.state;
-        if (category === 'context') {
-            return (context && context.actions) || [];
-        }
-        if (category === 'user') {
-            if (!mounted) return [];
-            const userInfo = JWT.getUserInfo();
-            return (userInfo && userInfo.user_actions) || [];
-        }
-        if (category === 'global_sections') {
-            return portal.global_sections;
-        }
     }
 
     /**
@@ -1240,7 +1215,6 @@ export default class App extends React.PureComponent {
             hrefParts,
             'updateUploads'  : this.updateUploads,
             'updateUserInfo' : this.updateUserInfo,
-            'listActionsFor' : this.listActionsFor,
             'setIsSubmitting': this.setIsSubmitting,
             'onBodyClick'    : this.handleClick,
             'onBodySubmit'   : this.handleSubmit,
@@ -1256,7 +1230,7 @@ export default class App extends React.PureComponent {
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
-                    <HTMLTitle {...{ context, currentAction, canonical, status }} listActionsFor={this.listActionsFor} />
+                    <HTMLTitle {...{ context, currentAction, canonical, status }} />
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
@@ -1294,7 +1268,7 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-        var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
+        var { canonical, currentAction, context, status, contentViews } = this.props,
             title;
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1317,8 +1291,7 @@ class HTMLTitle extends React.PureComponent {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 title = 'Error';
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-
-                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     title = 'Action not permitted';
@@ -1335,7 +1308,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        const { canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props;
+        const { canonical, status, currentAction, context, routeLeaf, contentViews } = this.props;
         const contextAtID     = object.itemUtil.atId(context);
         const key             = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
 
@@ -1344,7 +1317,7 @@ class ContentRenderer extends React.PureComponent {
         // Object of common props passed to all content_views.
         const commonContentViewProps = _.pick(this.props,
             // Props from App:
-            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'listActionsFor',
+            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
             'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
             // Props from BodyElement:
             'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
@@ -1362,8 +1335,7 @@ class ContentRenderer extends React.PureComponent {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-
-                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     content = <ErrorPage status="forbidden" />;
@@ -1793,7 +1765,7 @@ class BodyElement extends React.PureComponent {
                         <div id="layout">
                             <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo', 'listActionsFor')} />
+                                    'context', 'updateUserInfo')} />
 
                             <div id="pre-content-placeholder"/>
 

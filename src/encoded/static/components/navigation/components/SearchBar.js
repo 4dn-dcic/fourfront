@@ -140,16 +140,6 @@ export class SearchBar extends React.PureComponent{
         const showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery) && (
             (searchTypeFromHref === 'Item' && searchAllItems) || (searchTypeFromHref === 'ExperimentSetReplicate' && !searchAllItems)
         );
-        const resetIconButton     = (
-            showingCurrentQuery ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null
-        );
-        const searchIconButton    = (
-            showingCurrentQuery ? null : (
-                <button type="submit" className="search-icon-button">
-                    <i className="icon icon-fw icon-search"/>
-                </button>
-            )
-        );
         const searchBoxHasInput   = SearchBar.hasInput(typedSearchQuery);
         const query               = {}; // Don't preserve facets.
         const browseBaseParams    = navigate.getBrowseBaseParams();

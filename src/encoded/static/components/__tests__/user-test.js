@@ -36,17 +36,7 @@ describe('Testing user.js', function() {
         props = {
             'context' : context,
             'href' : "http://localhost:8000/users/0abbd494-b852-433c-b360-93996f679dae/",
-            'navigate' : function(){ console.info("Mocked Navigate Function was called."); return; },
-            'listActionsFor' : function(category){ 
-                // 'Mocked' version
-                if (category === 'context') {
-                    return [
-                        {
-                            'name' : 'edit'
-                        }
-                    ];
-                }
-            }
+            'navigate' : function(){ console.info("Mocked Navigate Function was called."); return; }
         }
 
         // Mock this b/c certain data doesn't exist in test environment -- 

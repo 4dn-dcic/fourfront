@@ -1,11 +1,14 @@
 'use strict';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
+import { CSSTransition } from 'react-transition-group';
 import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
+/** @todo make more reusable? */
 export class BigDropdownMenu extends React.PureComponent {
 
     // TODO: Check openDropdownID vs ___MenuTree presence.
@@ -16,21 +19,32 @@ export class BigDropdownMenu extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
+        this.onMenuItemClick = _.throttle(this.onMenuItemClick.bind(this), 400);
+        this.onFinishTransitionOut = this.onFinishTransitionOut.bind(this);
         this.renderMenuItems = this.renderMenuItems.bind(this);
+        this.state = { 'closing' : false };
     }
 
+    componentDidUpdate(pastProps){
+        const { href } = this.props;
+        if (href !== pastProps.href){
+            this.onMenuItemClick();
+        }
+    }
 
-    handleMenuItemClick(e){
-        if (!e.metaKey){
-            setTimeout(this.props.setOpenDropdownID.bind(this.props.setOpenDropdownID, null), 100);
+    onMenuItemClick(e){
+        if (!e || !e.metaKey){
+            this.setState(function({ closing }){
+                if (closing) return null;
+                return { 'closing' : true };
+            });
         }
         // TODO: Google Analytics Hook-In
     }
 
     renderMenuItems(){
-        const { openDropdownID, menuTree, windowWidth, href, setOpenDropdownID } = this.props;
-        const handleMenuItemClick = this.handleMenuItemClick;
+        const { menuTree, windowWidth, href } = this.props;
+        const onMenuItemClick = this.onMenuItemClick;
         /*
         var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
             return (c.children || []).length > 0;
@@ -60,7 +74,7 @@ export class BigDropdownMenu extends React.PureComponent {
                 <div className={"help-menu-tree level-1 col-12 col-md-6 col-lg-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
                     <div className="level-1-title-container">
                         <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
-                            data-delay-show={1000} onClick={handleMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
+                            data-delay-show={1000} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
                             { childLevel1.display_title }
                         </a>
                     </div>
@@ -69,7 +83,7 @@ export class BigDropdownMenu extends React.PureComponent {
                             return (
                                 <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
                                     href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={1000}
-                                    key={childLevel2.name} onClick={handleMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
+                                    key={childLevel2.name} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
                                     { childLevel2.display_title }
                                 </a>
                             );
@@ -102,30 +116,46 @@ export class BigDropdownMenu extends React.PureComponent {
         });
     }
 
+    onFinishTransitionOut(nodeElement){
+        const { onClose } = this.props;
+        this.setState({ 'closing' : false }, function(){
+            onClose(null, false);
+        });
+    }
+
     introSection(){
         var { menuTree, windowHeight } = this.props;
         if (!menuTree || !menuTree.display_title || !menuTree.description || windowHeight < 800) return null;
         return (
             <div className="intro-section">
-                <h4><a href={'/' + menuTree.name} onClick={this.handleMenuItemClick}>{ menuTree.display_title }</a></h4>
+                <h4><a href={'/' + menuTree.name} onClick={this.onMenuItemClick}>{ menuTree.display_title }</a></h4>
                 <div className="description">{ menuTree.description }</div>
             </div>
         );
     }
 
     render(){
-        var { openDropdownID, windowWidth, windowHeight, scrolledPastTop, testWarning } = this.props;
-        var outerStyle = null;
+        const { closing } = this.state;
+        const { id, windowWidth, windowHeight, scrolledPastTop, testWarning, open, overlaysContainer, className } = this.props;
+        let outerStyle = null;
         if (windowWidth >= 992){
             outerStyle = { 'maxHeight' : windowHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
         }
-        return (
-            <div className={"big-dropdown-menu" + (openDropdownID ? ' is-open' : '')} data-open-id={openDropdownID} style={outerStyle}>
-                <div className="container">
-                    { this.introSection() }
-                    { this.renderMenuItems() }
+        const cls = "big-dropdown-menu-background" + (className ? ' ' + className : "");
+
+        return ReactDOM.createPortal(
+            <CSSTransition appear in={open && !closing} classNames="big-dropdown-menu-transition" unmountOnExit
+                timeout={{ appear: 0, exit: 250 }} key={id} onExited={this.onFinishTransitionOut}>
+                <div className={cls} onClick={this.onMenuItemClick}>
+                    <div className={"big-dropdown-menu" + (open ? ' is-open' : '')} data-open-id={id} style={outerStyle}>
+                        <div className="container">
+                            { this.introSection() }
+                            { this.renderMenuItems() }
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </CSSTransition>,
+            overlaysContainer
         );
     }
 
