@@ -119,7 +119,7 @@ export class BigDropdownMenu extends React.PureComponent {
     onFinishTransitionOut(nodeElement){
         const { onClose } = this.props;
         this.setState({ 'closing' : false }, function(){
-            onClose(null, false);
+            onClose();
         });
     }
 
@@ -135,8 +135,9 @@ export class BigDropdownMenu extends React.PureComponent {
     }
 
     render(){
-        const { closing } = this.state;
-        const { id, windowWidth, windowHeight, scrolledPastTop, testWarning, open, overlaysContainer, className } = this.props;
+        const { closing : stateClosing } = this.state;
+        const { id, windowWidth, windowHeight, scrolledPastTop, testWarning, open, overlaysContainer, className, closing: propClosing } = this.props;
+        const closing = propClosing || stateClosing;
         let outerStyle = null;
         if (windowWidth >= 992){
             outerStyle = { 'maxHeight' : windowHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
