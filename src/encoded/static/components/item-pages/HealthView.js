@@ -117,7 +117,7 @@ export default class HealthView extends React.PureComponent {
 
                 <button type="button" className="btn btn-outline-dark refresh-counts-button pull-right mt-2"
                     onClick={this.getCounts} disabled={db_es_total === 'loading...'}>
-                    <i className={"icon icon-fw icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
+                    <i className={"icon fas icon-fw icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
                 </button>
                 <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
 

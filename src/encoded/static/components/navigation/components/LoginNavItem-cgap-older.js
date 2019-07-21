@@ -3,28 +3,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { NavItem, DropdownItem, Nav } from 'react-bootstrap';
+import { DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserRegistrationModal } from './UserRegistrationModal';
 
+/** SPECIFIC to 4DN/CGAP - NOT COMMON */
 
 export const LoginNavItem = React.memo(function LoginNavItem(props){
-    const { id, isRegistrationModalVisible, showLock, isLoading } = props;
+    const { windowWidth, id, isRegistrationModalVisible, showLock, isLoading } = props;
+    const gridState = layout.responsiveGridState(windowWidth);
+    const cls = "nav-item user-account-item" + (isRegistrationModalVisible ? " active" : '');
     return (
         <React.Fragment>
-            <Nav.Link key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
+            <li className={cls} id={id} onClick={showLock}>
                 { isLoading ? (
                     <span className="pull-right">
                         <i className="account-icon icon icon-spin icon-circle-notch fas" style={{ verticalAlign : 'middle' }}/>
                     </span>
                 ) : (
-                    <React.Fragment>
+                    <a href="#" className="nav-link">
                         <i className="account-icon icon icon-user fas" />
-                        <span>Log In</span>
-                        <span className="d-none d-xl-inline"> / Register</span>
-                    </React.Fragment>
+                        { gridState === 'lg' ? "Log In / Register" : "Log In" }
+                    </a>
                 )}
-            </Nav.Link>
+            </li>
             { isRegistrationModalVisible ? <UserRegistrationModal {...props} /> : null }
         </React.Fragment>
     );

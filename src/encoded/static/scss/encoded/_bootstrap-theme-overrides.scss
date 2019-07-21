@@ -16,10 +16,10 @@
     @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
     font-weight: 400;
     padding-top: 2px;
-    > i.icon {
-        // Unset btn style
-        transform: none;
-    }
+    //> i.icon {
+    //    // Unset btn style
+    //    transform: none;
+    //}
 }
 
 .btn-xs.rounded,

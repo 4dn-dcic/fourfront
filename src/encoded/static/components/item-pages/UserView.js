@@ -235,7 +235,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                 return (
                     <AccessKeyTableContainer>
                         <div className="text-center pt-3 pb-3">
-                            <i className="icon icon-2x icon-fw icon-circle-o-notch icon-spin" style={{ 'color' : '#999' }}/>
+                            <i className="icon icon-2x icon-fw icon-circle-notch fas icon-spin" style={{ 'color' : '#999' }}/>
                         </div>
                     </AccessKeyTableContainer>
                 );
@@ -243,7 +243,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                 return (
                     <AccessKeyTableContainer>
                         <div className="text-center pt-3 pb-3">
-                            <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                            <i className="icon icon-2x icon-fw icon-times fas" style={{ 'color' : 'maroon' }}/>
                             <h4 className="text-400">Failed to load Access Keys</h4>
                         </div>
                     </AccessKeyTableContainer>
@@ -252,7 +252,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                 return (
                     <AccessKeyTableContainer>
                         <div className="text-center pt-3 pb-3">
-                            <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                            <i className="icon icon-2x icon-fw icon-times fas" style={{ 'color' : 'maroon' }}/>
                             <h4 className="text-400">Unknown Error</h4>
                         </div>
                     </AccessKeyTableContainer>
@@ -408,7 +408,7 @@ export default class UserView extends React.Component {
                                         <div className="col-md-3 gravatar-container">
                                             { object.itemUtil.User.gravatar(email, 70) }
                                             <a className="edit-button-remote text-center" target="_blank" rel="noopener noreferrer" href="https://gravatar.com">
-                                                <i className="icon icon-pencil"/>
+                                                <i className="icon icon-pencil fas"/>
                                             </a>
                                         </div>
                                         <div className="col-md-9 user-title-col">
@@ -463,19 +463,19 @@ function ProfileContactFields(props){
             schemas={schemas} href={href}>
 
             <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
-                <ProfileContactFieldsIcon icon="envelope" />&nbsp; <a href={'mailto:' + email}>{ email }</a>
+                <ProfileContactFieldsIcon icon="envelope far" />&nbsp; <a href={'mailto:' + email}>{ email }</a>
             </EditableField>
 
             <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
-                <ProfileContactFieldsIcon icon="phone" />&nbsp; { phone1 }
+                <ProfileContactFieldsIcon icon="phone fas" />&nbsp; { phone1 }
             </EditableField>
 
             <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
-                <ProfileContactFieldsIcon icon="fax" />&nbsp; { fax }
+                <ProfileContactFieldsIcon icon="fax fas" />&nbsp; { fax }
             </EditableField>
 
             <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
-                <ProfileContactFieldsIcon icon="skype" />&nbsp; { skype }
+                <ProfileContactFieldsIcon icon="skype fab" />&nbsp; { skype }
             </EditableField>
 
         </FieldSet>
@@ -601,7 +601,7 @@ class ProfileWorkFields extends React.PureComponent {
         return (
             <div className={containerClassName}>
                 <h3 className="text-300 block-title">
-                    <i className="icon icon-users icon-fw"></i> Organizations
+                    <i className="icon icon-users fas icon-fw"></i> Organizations
                 </h3>
                 <div className="row field-entry lab">
                     <div className="col-md-3 text-right text-left-xs">
@@ -690,7 +690,7 @@ class BasicForm extends React.PureComponent {
                 <FormControl className="mt-08" type="text" placeholder="Enter an email to impersonate..."
                     onChange={this.handleChange} value={value}/>
                 <button type="submit" className="btn btn-primary btn-md mt-15">
-                    <i className="icon icon-fw icon-user"/>&nbsp; Impersonate
+                    <i className="icon icon-fw icon-user icon-user-ninja fas"/>&nbsp; Impersonate
                 </button>
             </form>
         );

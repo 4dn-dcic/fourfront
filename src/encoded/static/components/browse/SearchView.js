@@ -92,19 +92,18 @@ export default class SearchView extends React.PureComponent {
     }
 
     render(){
-        const { isFullscreen, ...passProps } = this.props;
+        const { isFullscreen } = this.props;
         const facets = this.transformedFacets();
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
-            <CommonSearchView {...passProps} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
+            <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
                 termTransformFxn={Schemas.Term.toName} />
         );
     }
 }
 
 const SearchViewPageTitle = React.memo(function SearchViewPageTitle({ context, schemas, currentAction, alerts }){
-    console.log('TTTSEARCH');
     if (currentAction === 'selection') {
         return (
             <PageTitleContainer alerts={alerts}>

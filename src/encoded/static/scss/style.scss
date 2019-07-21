@@ -12,13 +12,19 @@
 @import "encoded/bootstrap-theme-overrides";
 
 // Font Awesome
-@import "fontawesome/font-awesome";
+//@import "fontawesome/font-awesome";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/v4-shims";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/solid";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/regular";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/brands";
 
-// Shared Components
+// Shared Components - own components might override or extend these
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
+@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss";
 
 // ENCODE Layout/Components
 
@@ -33,5 +39,3 @@
         "encoded/modules/tooltip",
         "encoded/modules/item-pages",
         "encoded/modules/static-pages";
-
-@import "encoded/state";

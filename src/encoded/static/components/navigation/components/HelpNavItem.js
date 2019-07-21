@@ -4,9 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { NavItem } from 'react-bootstrap';
-
-/** WILL BE PROJECT-SPECIFIC */
+import { Nav } from 'react-bootstrap';
 
 /**
  * Renders a Menu Item in NavBar for "Help".
@@ -28,7 +26,8 @@ export class HelpNavItem extends React.PureComponent {
     }
 
     handleToggle(e){
-        var { setOpenDropdownID, openDropdownID } = this.props;
+        const { setOpenDropdownID, openDropdownID } = this.props;
+        e.preventDefault();
         if (typeof setOpenDropdownID !== 'function') {
             throw new Error('No func setOpenDropdownID passed in props.');
         }
@@ -36,20 +35,23 @@ export class HelpNavItem extends React.PureComponent {
     }
 
     render(){
-        var { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowWidth } = this.props,
-            isOpen          = openDropdownID === this.dropdownID,
-            active          = href.indexOf(helpItemHref) > -1,
-            commonProps     = { id, active, 'key' : id },
-            isDesktopView   = windowWidth >= 768;
+        const { mounted, href, session, helpItemHref, id, openDropdownID, helpMenuTree, isLoadingHelpMenuTree, windowWidth } = this.props;
+        const isOpen = openDropdownID === this.dropdownID;
+        const active = href.indexOf(helpItemHref) > -1;
+        const commonProps = { id, active, 'key' : id, 'href': helpItemHref };
+        const isDesktopView = windowWidth >= 768;
+        let cls = "id-" + id; // `id` is no longer pass as HTML attrib to[NavLink->]Dropdown so we add to className;
 
         if (!helpMenuTree || (helpMenuTree.children || []).length === 0 || !mounted || !isDesktopView){
-            return <NavItem {...commonProps} href={helpItemHref} children="Help" />;
+            return <Nav.Link {...commonProps} className={cls}>Help</Nav.Link>;
         }
 
+        cls += " dropdown-toggle" + (isOpen ? " dropdown-open-for" : "");
+
         return (
-            <NavItem {...commonProps} onClick={this.handleToggle} className={isOpen ? 'dropdown-open-for' : null}>
-                Help <span className="caret"/>
-            </NavItem>
+            <Nav.Link {...commonProps} onClick={this.handleToggle} className={cls}>
+                Help
+            </Nav.Link>
         );
 
     }

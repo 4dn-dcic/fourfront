@@ -29,12 +29,12 @@
       "../../../jest/environment.js"
     ],
     "timers": "fake",
-    "transform" : {
+    "transform": {
       "^.+\\.jsx?$": "babel-jest",
-      ".+\/node_modules\/@hms-dbmi-bgm\/shared-portal-components\/.*" : "babel-jest"
+      ".+/node_modules/@hms-dbmi-bgm/shared-portal-components/.*": "babel-jest"
     },
-    "transformIgnorePatterns" : [
-      "/node_modules/(?!@hms-dbmi-bgm\/shared-portal-components).+\\.js$"
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@hms-dbmi-bgm/shared-portal-components).+\\.js$"
     ],
     "unmockedModulePathPatterns": [
       "node_modules/react",
@@ -99,7 +99,8 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.5",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.8",
+    "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",
     "detect-browser": "^3.0.1",

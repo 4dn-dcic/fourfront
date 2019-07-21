@@ -62,7 +62,7 @@ blockquote {
 
 #layout {
 	height: auto !important;
-    margin: 0 auto -$footerHeight;
+    margin: 0 auto -$footer-height;
     min-height: 100%;
 	background-color: $appBackgroundColor;
 	overflow-x: hidden;
@@ -144,7 +144,7 @@ blockquote {
 	display: none;
 	height: 0px;
 
-	@include media-breakpoint-up(md) {
+	@include media-breakpoint-up(lg) {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
 	}
@@ -197,90 +197,60 @@ body.is-full-screen {
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
 
+#page-title-container {
+	> h1.page-title {
 
-h1.page-title {
-	/* Only set font-weight: 200 for h1,
-	   200 doesn't look as nice on smaller sizes. */
-	font-weight: 200;
+		font-weight: 200;
 
-	&.top-of-page {
-		margin-bottom: 0px;
-		margin-left: -2px;
-		
-		body[data-pathname="/"] &,
-		body[data-pathname="/home"] &,
-		&.home-page-title {
-			@include media-breakpoint-up(sm) {
-				height: 64px;
-				margin-bottom: -3px;
-				//height: 70px;
-				//margin-bottom: 1px;
-				//padding-top: 5px;
+		&.top-of-page { // Never not this, I think..
+			margin-top: 0px;
+			margin-bottom: 0px;
+			&:first-child {
+				margin-top: 55px; // No breadcrumbs present
 			}
 
-			.subtitle {
-				font-size: 1.7rem;
+			body[data-pathname="/"] &,
+			body[data-pathname="/home"] &,
+			&.home-page-title {
+				> .subtitle.page-subtitle {
+					font-size: 1.6rem;
+					margin-top: 2px;
+				}
 			}
 		}
-		
-	}
 
-	.row > & {
-		margin-top: 0px; // Assuming 35px margin bottom on page sub-container
-	}
-
-	.row > div > & {
-		margin-top: 0px;
-	}
-
-	.title {
-		&.has-callout-title {
-			/* margin-right: 12px; */
-		}
-	}
-
-	.page-subtitle {
-		margin-left: 2px;
-		margin-top: 0px;
-		font-size: 18px;
-		//padding-bottom: 10px;
-		> .subtitle-prepend {
-			margin-right: 8px;
-			&.border-right {
-				padding-right : 8px;
-				border-right: 1px solid #ddd;
+		> .page-subtitle {
+			font-weight: 400;
+			margin-left: 2px;
+			margin-top: 0px;
+			font-size: 18px;
+			//padding-bottom: 10px;
+			> .subtitle-prepend {
+				margin-right: 8px;
+				&.border-right {
+					padding-right : 8px;
+					border-right: 1px solid #ddd;
+				}
 			}
 		}
-	}
-
-	.subtitle {
-		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
-		
-		&.prominent {
+	
+		> .subtitle.prominent {
+			/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
+	
 			font-weight: 400;
 			font-size : 0.75em;
 			display: inline-block;
 			margin-left: 9px;
 			vertical-align: middle;
-
+	
 			body[data-pathname="/search/"] & {
 				margin-left: 6px;
 			}
+	
 		}
 
 	}
-
 }
-
-h1.page-title + .page-subtitle {
-	margin-top: -27px; /* Assumes h1.page-title to have margin-bottom: 32px */
-	margin-bottom: 15px;
-}
-
-.page-subtitle {
-	font-weight: 400;
-}
-
 
 
 /* *********************************************************
@@ -289,7 +259,6 @@ h1.page-title + .page-subtitle {
 
 .page-footer {
 	background-color: #f8f8f8;
-	//height: $footerHeight;
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
@@ -332,8 +301,52 @@ h1.page-title + .page-subtitle {
 			color: #000000;
 		}
 	}
+}
 
+// make footer look good on larger screens
+// and activate sticky footer
+@include media-breakpoint-up(md) {
+    .footer-row { margin-left: 0; margin-right: 0; }
 
+    #page-footer {
+        height: $footer-height;
+    }
+
+    .page-footer {
+        height: $footer-height - $appVersionHeight;
+    }
+
+    .app-version {
+        margin: 0 0 8px;
+        text-align: center;
+        display: block;
+        padding: 15px 15px;
+        text-align: left;
+    }
+
+    @include sticky-footer($footer-height, "#layout", "#layout-footer", "#page-footer");
+
+    .footer-links {
+        list-style: none outside none;
+        margin-left: -5px;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        a {
+            display: inline;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+        a:hover {
+            text-decoration: underline;
+            background-color: transparent;
+        }
+        a:active { background-color: transparent; }
+    }
 }
 
 
@@ -462,6 +475,10 @@ h1.page-title + .page-subtitle {
 .off-screen {
 	position : absolute !important;
 	left : -9999px !important;
+}
+
+.pull-right { // Holdover from Bootstrap 3
+	float: right;
 }
 
 #slow-load-container {

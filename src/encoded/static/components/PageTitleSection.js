@@ -43,13 +43,14 @@ export const PageTitleSection = React.memo(function PageTitle(props){
     if (isEditingFormView(context, currentAction)){
         const subtitle = currentAction === 'edit' ? object.itemUtil.getTitleStringFromContext(context) // on item view
             : currentAction === 'create' ? schemaTransforms.getItemTypeTitle(context, schemas) // on item view
-                : currentAction === 'create' > -1 ? // on search view
-                    schemaTransforms.getSchemaTypeFromSearchContext(context, schemas)
+                : currentAction === 'add' ? schemaTransforms.getSchemaTypeFromSearchContext(context, schemas) // on search view
                     : schemaTransforms.getItemTypeTitle(context, schemas);
         return (
-            <TitleAndSubtitleBeside subtitle={subtitle}>
-                { currentAction === 'edit' ? 'Editing' : 'Creating' }
-            </TitleAndSubtitleBeside>
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleBeside subtitle={subtitle}>
+                    { currentAction === 'edit' ? 'Editing' : 'Creating' }
+                </TitleAndSubtitleBeside>
+            </PageTitleContainer>
         );
     }
 
@@ -220,295 +221,12 @@ const isStaticPage = memoize(function(context){
     return false;
 });
 
-const isHomePage = memoize(function(href){
-    const currentHrefParts = url.parse(href, false);
-    const pathName = currentHrefParts.pathname;
-    if (pathName === '/' || pathName === '/home'){
-        return true;
-    }
-    return false;
-});
-
 const isEditingFormView = memoize(function(context, currentAction){
     return (
         currentAction &&
         { 'edit':1, 'create':1, 'add':1 }[currentAction] &&
         (object.isAnItem(context) || (context['@type'] && context['@type'].indexOf('Search') > -1))
     );
-});
-
-
-
-/**
- * Calculates and renders out a title on every single front-end view.
- *
- * Also renders out static page breadcrumbs (if applicable) and any alerts if any
- * are needed to be displayed.
- */
-export default class PageTitleOld extends React.PureComponent {
-
-
-    /**
-     * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
-     *
-     * @public
-     * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
-     * @param {string} href - Current URI or href.
-     * @param {{}[]} [schemas=Schemas.get()] - List of schemas as returned from Redux.
-     * @param {boolean} [isMounted=false] - Whether page is currently mounted. Needed to determine whether can use LocalizedTime and similar.
-     * @param {string} currentAction - Current action if any, e.g. 'edit', 'add'.
-     * @returns {{ title: string, subtitle: ?string, calloutTitle: ?string }} Object with title and any subtitle/calloutTitle.
-     */
-    static calculateTitles(context, href, schemas, isMounted = false, currentAction){
-        var currentPathName = null,
-            currentPathRoot, title,
-            atId = object.atIdFromObject(context),
-            currentHref = isMounted ? (window && window.location && window.location.href) || href : href,
-            currentHrefParts = url.parse(currentHref);
-
-        if (typeof atId === 'string'){
-            currentPathName = url.parse(atId).pathname;
-        }
-        if (!currentPathName && typeof currentHref === 'string'){
-            currentPathName = currentHrefParts.pathname;
-        }
-
-
-        /**** Titles from mapping ****/
-        title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
-
-        if (!title) {
-
-            var pathRoot = currentPathName.split('/')[1] || null;
-            if (typeof pathRoot === 'string' && pathRoot.length > 0){
-                currentPathName = '/' + pathRoot + '/*';
-                title = TITLE_PATHNAME_MAP[currentPathName] && TITLE_PATHNAME_MAP[currentPathName].title;
-            }
-        }
-
-        function getProp(prop){
-            if (typeof prop === 'string') return prop;
-            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction, schemas);
-            return prop;
-        }
-
-        if (title){
-            return {
-                'title' : getProp(title),
-                'subtitle' : getProp(TITLE_PATHNAME_MAP[currentPathName].subtitle),
-                'calloutTitle' : getProp(TITLE_PATHNAME_MAP[currentPathName].calloutTitle)
-            };
-        }
-
-        if (PageTitle.isStaticPage(context)){
-            return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
-        }
-
-        /**** Post-mapping overrides ****/
-        if (object.isAnItem(context)){ // If Item
-
-            title = object.itemUtil.getTitleStringFromContext(context);
-            const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
-
-            // Handle long title strings by Item type
-            if (itemTypeTitle === 'Publication'){
-                if (context.title && context.short_attribution){
-                    return { 'title' : itemTypeTitle, 'subtitle' : context.title, 'subtitlePrepend' : <span className="text-300 subtitle-prepend border-right">{ context.short_attribution }</span>, 'subtitleEllipsis' : true };
-                }
-                return { 'title' : itemTypeTitle, 'subtitle' : title, 'subtitleEllipsis' : true };
-            }
-
-            // Don't show Accessions in titles.
-            if (object.itemUtil.isDisplayTitleAccession(context, title, true)){
-
-                // But show rest of title if it is in form 'Something - ACCESSION'
-                if (typeof context.accession === 'string' && context.accession.length >= 12 && title.indexOf(' - ' + context.accession) > -1){
-                    title = title.replace(' - ' + context.accession, '');
-                    if (title.length > 0){
-                        return { 'title' : itemTypeTitle, 'calloutTitle' : title };
-                    }
-                }
-
-                return { 'title' : itemTypeTitle };
-                // Re-Enable below if want Accessions as Page Subtitles.
-                // return { 'title' : itemTypeTitle, 'subtitle' : title };
-            } else {
-                if (title.indexOf(context['@type'][0] + ' from ') === 0){ // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
-                    title = (context.date_created && <span>from <LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
-                }
-                // Check if long title & no 'typeInfo' text right under it from Item page -- if so: render it _under_ Type title instead of to the right of it.
-                var viewForItem = content_views.lookup(context, null);
-                var viewReturnsTypeInfo = false;
-                try {
-                    viewReturnsTypeInfo = !!(viewForItem.prototype && viewForItem.prototype.typeInfo && viewForItem.prototype.typeInfo.call({ 'props' : { context, href, schemas } }).title ) || false;
-                } catch (e){
-                    viewReturnsTypeInfo = true; // Assume it failed because trying to access "this", which means typeInfo() most likely does & returns something.
-                    console.warn(e);
-                }
-                const itemTypeHierarchy = schemaTransforms.schemasToItemTypeHierarchy(schemas);
-                if (!context.accession && !itemTypeHierarchy[context['@type'][0]] && !viewReturnsTypeInfo && typeof title === 'string' && title.length > 20) {
-                    return { 'title' : itemTypeTitle, 'subtitle' : title };
-                }
-                return { 'title' : itemTypeTitle, 'calloutTitle' : title };
-            }
-
-        }
-
-        // Fallback-ish stuff.
-        title = object.itemUtil.getTitleStringFromContext(context);
-        if (!title) title = currentHrefParts.path;
-
-        return { title };
-    }
-
-    /**
-     * Calculates CSS style object in response to some parameters and current layout.
-     * Adds things like +38 top margin if QuickInfoBar is visible, or limits width to 75%
-     * if table of contents is visible for page.
-     *
-     * @public
-     * @param {JSONContentResponse} context     Current Item or backend response JSON representation.
-     * @param {string} href                     Current URI/href.
-     * @param {boolean} mounted                 Whether we are currently mounted.
-     * @param {boolean} hasToc                  Whether table of contents is enabled for this page. Might be calculated via presence of 'table-of-contents' in `context`.
-     * @param {number} windowWidth              Current window width, to trigger changes on window resize.
-     * @returns {{ 'marginTop' : number, 'width' : string }} - JS object representing some CSS styles.
-     */
-    static getStyles(context, href, mounted, hasToc, windowWidth){
-        var style = { 'marginTop' : 0 };
-        var gridSize = mounted && layout.responsiveGridState(windowWidth || null);
-
-        if (hasToc && (gridSize === 'lg' || !mounted)) style.width = '75%';
-
-        return style;
-    }
-
-    /** @ignore */
-    constructor(props){
-        super(props);
-
-        /**
-         * @private
-         * @type {Object}
-         * @property {boolean} state.mounted - Whether element is mounted or not.
-         */
-        this.state = { 'mounted' : false };
-    }
-
-    /** @ignore */
-    componentDidMount(){
-        this.setState({ 'mounted' : true });
-    }
-
-    /**
-     * Renders out title elements, any alerts, and breadcrumbs, if necessary.
-     *
-     * @private
-     * @returns {JSX.Element} Div with ID set to "page-title-container" and any child elements for representing title, subtitle, etc.
-     */
-    render(){
-        const { context, href, session, currentAction, windowWidth, alerts, schemas } = this.props;
-        const { mounted } = this.state;
-
-        let elementStyle;
-
-        if (PageTitle.isHomePage(href)){
-            elementStyle = PageTitle.getStyles(context, href, mounted, false, windowWidth);
-            return (
-                <div id="page-title-container" className="container">
-                    <div className="breadcrumb-placeholder" key="breadcrumbs" />
-                    <HomePageTitleElement {..._.pick(this.props, 'context', 'href', 'windowWidth', 'session')} mounted={mounted} style={elementStyle} />
-                    <Alerts alerts={alerts} />
-                </div>
-            );
-        }
-
-        var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(
-            context, href, schemas, mounted, currentAction
-        );
-
-        if (title) {
-            title = <span className={"title" + (calloutTitle ? ' has-callout-title' : '')}>{ title }</span>;
-        }
-
-        if (calloutTitle){
-            calloutTitle = <span className="subtitle prominent">{ calloutTitle }</span>;
-        }
-
-        if (subtitle){
-            subtitle = <div className={"page-subtitle smaller" + (subtitleEllipsis ? ' text-ellipsis-container' : '')}>{ subtitlePrepend }{ subtitle }{ subtitleAppend }</div>;
-        }
-
-        var hasToc = (
-            context && Array.isArray(context['@type'])
-            && context['@type'].indexOf('StaticPage') > -1
-            && context['table-of-contents']
-            && context['table-of-contents'].enabled
-        );
-
-        elementStyle = PageTitle.getStyles(context, href, mounted, hasToc, windowWidth);
-
-        return (
-            <div id="page-title-container" className="container">
-                <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
-                <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={mounted} style={elementStyle} />
-                <Alerts alerts={alerts} style={{ 'width' : elementStyle.width || null }} />
-            </div>
-        );
-    }
-}
-
-
-/**
- * Used for most page titles.
- *
- * @ignore
- * @prop {JSX.Element|string} title - Shown at top left, 300 font weight.
- * @prop {JSX.Element|string} calloutTitle - Shown at right of title in similar size, 400 font weight.
- * @prop {JSX.Element|string} subtitle - Shown at bottom title in small size, 400 font weight.
- * @returns {JSX.Element} br if no title to display or h1 element with appropriate className, style, content.
- */
-const PageTitleElement = React.memo(function PageTitleElement(props) {
-    const { title, calloutTitle, subtitle, style } = props;
-    return ((title || subtitle) && (
-        <h1 className="page-title top-of-page" style={style} >
-            { title }{ calloutTitle }{ subtitle }
-        </h1>
-    )) || <br/>;
-});
-
-
-const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
-    const { session } = props;
-    //let { style } = props;
-
-    if (session){
-        return (
-            <h1 className="home-page-title page-title top-of-page">
-                <span className="title">My Dashboard</span>
-            </h1>
-        );
-    }
-
-    return (
-        <h1 className="home-page-title page-title top-of-page">
-            <span className="title"><strong>TODO:</strong> Portal Title Here</span>
-            <div className="subtitle">Clinical Genomics Analysis Platform</div>
-        </h1>
-    );
-    /* old 4dn stuff -
-    console.log('SESS', session);
-
-    style = _.clone(style);
-    style.marginTop ? style.marginTop -= 3 : null;
-
-    return (
-        <h1 className="home-page-title page-title top-of-page" style={style} >
-            <span className="title"><strong>TODO:</strong> Portal Title Here</span>
-            <div className="subtitle">Clinical Genomics Analysis Platform</div>
-        </h1>
-    );
-    */
 });
 
 
@@ -574,7 +292,7 @@ export class StaticPageBreadcrumbs extends React.Component {
         }
         return (
             <div className="static-breadcrumb" data-name={ancestor.name} key={ancestor['@id']}>
-                { index > 0 ? <i className="icon icon-fw icon-angle-right"/> : null }
+                { index > 0 ? <i className="icon icon-fw icon-angle-right fas"/> : null }
                 { inner }
             </div>
         );
@@ -594,7 +312,7 @@ export class StaticPageBreadcrumbs extends React.Component {
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right" style={style}>
-                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
+                            <i className="icon icon-fw icon-pencil fas"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
                 }

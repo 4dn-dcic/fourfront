@@ -34,7 +34,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             }
             return (
                 <span>
-                    <i className="icon icon-fw icon-user-o user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
+                    <i className="icon icon-fw icon-user far user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
                     { labLink }
                 </span>
             );

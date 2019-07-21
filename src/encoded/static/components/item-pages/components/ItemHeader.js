@@ -92,7 +92,7 @@ export class TopRow extends React.Component {
         var viewUrl = url.format(urlParts);
         return (
             <div className="indicator-item view-ajax-button">
-                <i className="icon icon-fw icon-file-code-o"/>{' '}
+                <i className="icon icon-fw icon-file-code far"/>{' '}
                 <a href={viewUrl}
                     className="inline-block" target="_blank" rel="noreferrer noopener"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
@@ -294,7 +294,7 @@ export class BottomRow extends React.PureComponent {
         }
         return (
             <span data-tip={tooltip} className="inline-block">
-                <i className="icon icon-calendar-o"></i>&nbsp; &nbsp;
+                <i className="icon icon-calendar-alt far"></i>&nbsp; &nbsp;
                 <LocalizedTime timestamp={context[dateToUse]} formatType="date-time-md" dateTimeSeparator=" at " />
             </span>
         );

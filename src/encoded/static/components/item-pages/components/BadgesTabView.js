@@ -239,7 +239,7 @@ class SummaryIcon extends React.PureComponent {
                 const tooltip = countWarnings + " Warning" + (countWarnings > 1 ? "s" : "");
                 return (
                     <span className="active">
-                        <i className="icon icon-fw icon-warning" data-tip={tooltip}/>
+                        <i className="icon icon-fw icon-warning fas" data-tip={tooltip}/>
                     </span>
                 );
             }
@@ -292,7 +292,7 @@ class SummaryIcon extends React.PureComponent {
 
         if (!classificationRatios){
             // Shouldn't happen unless BadgesTabView is present on Item w/o any badges.
-            return <i className="icon icon-fw icon-circle-o"/>; // Todo: maybe different icon
+            return <i className="icon icon-fw icon-circle far"/>; // Todo: maybe different icon
         }
 
         if (classificationRatioPairs.length === 1){
@@ -402,12 +402,12 @@ class BadgeItem extends React.PureComponent {
         return (
             <div className="badge-item">
                 <div className="row flexrow">
-                    <div className="col-12 col-sm-2 icon-col">{ image }</div>
+                    <div className="col-12 col-sm-2 icon-columns fas">{ image }</div>
                     <div className="col-12 col-sm-10 title-col">
                         <div className="inner mb-05">
                             <h4 className="text-500 mb-0 mt-0">
                                 { badgeTitle }
-                                { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
+                                { description ? <i className="icon icon-fw icon-info-circle fas ml-05" data-tip={description} /> : null }
                             </h4>
                             { renderedMessages }
                             { linkMsg }

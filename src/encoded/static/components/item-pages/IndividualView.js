@@ -25,7 +25,7 @@ export const PedigreeTabView = React.memo(function PedigreeTabView({ context, sc
 });
 PedigreeTabView.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-sitemap icon-fw"/> Pedigree</span>,
+        'tab' : <span><i className="icon icon-sitemap fas icon-fw"/> Pedigree</span>,
         'key' : 'document-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

@@ -4,13 +4,11 @@
     font-size: 16px;
 }
 
-
 /* Variables */
 $mainThemeColor: 			#ffffff; /* i.e. the background color ..for now */
 
 $appVersionHeight:          0px;
-$footerHeight: 				50px + $appVersionHeight;
-$footerTopBorderHeight:		0px;
+$footer-height:             50px + $appVersionHeight;
 $appBackgroundColor:        #fff; /* Not sure where $mainThemeColor is used... definitely not #application background-color, so creating new one */
 
 $tableHeadFootBackgroundColor: #000000;
@@ -99,3 +97,9 @@ $brand-secondary: $secondary;
 
 // override 1.5, to help center text
 $btn-line-height: 1.45rem;
+
+
+/** FontAwesome Icon Stuff **/
+$fa-font-path: "/static/font/fontawesome5.9" !default;
+$fa-font-size-base: $font-size-base;
+$fa-css-prefix: icon;
