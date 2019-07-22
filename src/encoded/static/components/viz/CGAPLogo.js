@@ -50,7 +50,6 @@ const svgElemStyle = {
     'height' : '100%',
     'paddingTop' : 5,
     'paddingBottom' : 5,
-    'transition' : "padding .3s, transform .3s",
     'maxHeight' : 80
 };
 
@@ -178,7 +177,7 @@ export class CGAPLogo extends React.PureComponent {
                 </svg>
                 <span className="navbar-title">
                     CGAP
-                    <i className="icon icon-fw icon-angle-right fas"/>
+                    {/* <i className="icon icon-fw icon-angle-right fas"/> */}
                 </span>
             </div>
         );

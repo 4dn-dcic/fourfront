@@ -191,30 +191,42 @@ div#top-nav.navbar-fixed-top {
                 display: block;
                 font-size: 0rem;
                 float: left;
-                margin-right: 15px;
+                padding-right: 12px;
                 text-align: center;
                 max-height: inherit;
+                background-color: transparent;
+                transition: background-color $navbar-transition-length;
                 
                 //padding-top: 5px;
                 //padding-bottom: 5px;
                 > svg#logo_svg {
                     min-width: 80px;
+                    margin-right: 0px;
                     vertical-align: top;
                     display: inline-block;
                     height: 100%;
-                    transition: padding $navbar-transition-length, transform $navbar-transition-length;
+                    transition: padding $navbar-transition-length, transform $navbar-transition-length, margin-right $navbar-transition-length;
                     max-height: inherit;
                     > g > path {
                         transition: fill-opacity .3s ease, fill .3s ease, stroke-opacity .3s ease, stroke .3s ease, stroke-width .3s ease, transform .3s ease;
                     }
 
-                    //@include navbar-fixed-position {
-                    //    body.scrolled-past-top & {
-                    //        padding-top: 6px !important;
-                    //        padding-bottom: 6px !important;
-                    //    }
-                    //}
                 }
+
+                @include navbar-fixed-position {
+                    body.scrolled-past-top & {
+                        &:hover {
+                            background-color: #e8e8e8;
+                        }
+                        > svg#logo_svg {
+                                margin-right: -18px;
+                                //min-width: 40px;
+                                //padding-top: 6px !important;
+                                //padding-bottom: 6px !important;
+                        }
+                    }
+                }
+
                 > .navbar-title {
                     vertical-align: middle;
                     font-weight: 300;
@@ -230,7 +242,6 @@ div#top-nav.navbar-fixed-top {
                         font-size: 1.25rem;
                         line-height: inherit;
                         vertical-align: bottom;
-                        color: $navbar-link-active-background-color;
                         color: transparent;
                     }
         
@@ -248,6 +259,10 @@ div#top-nav.navbar-fixed-top {
                 .navbar-title {
                     color: #000;
                     text-shadow: 0 0 0 #000;
+                    > i.icon.icon-angle-right {
+                        color: #ccc !important;
+                        text-shadow: none;
+                    }
                 }
             }
 
@@ -334,6 +349,8 @@ div#top-nav.navbar-fixed-top {
 
                         > a {
                             @include navbar-link-button-item;
+                            display: flex;
+                            align-items: center;
                             white-space: nowrap;
                             overflow: hidden;
                             text-overflow: ellipsis;
@@ -375,7 +392,7 @@ div#top-nav.navbar-fixed-top {
                     border-radius: 3px;
                     border: 1px solid rgb(125,125,125);
                     height: inherit;
-                    padding: 4px 5px 3px 5px;
+                    padding: 4px 5px 2px 5px;
                     -ms-transition: width 0.3s ease-out;
                     -moz-transition: width 0.3s ease-out;
                     -webkit-transition: width 0.3s ease-out;

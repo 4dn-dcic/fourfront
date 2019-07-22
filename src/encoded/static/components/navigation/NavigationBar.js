@@ -161,14 +161,14 @@ const CollapsedNav = React.memo(function CollapsedNav(props){
 
 const LeftNav = React.memo(function LeftNav(props){
     const { href, ...passProps } = props;
-    const isBrowseActive =  href && href.indexOf('/browse/') > -1;
-    //const passProps ={ mobileDropdownOpen, mounted, overlaysContainer, windowHeight, windowWidth ..? }
+    const { query = {} } = url.parse(href, true);
+    const isCasesLinkActive = query.type === 'Case';
     return (
         <Nav className="mr-auto">
-            <Nav.Link key="browse-menu-item" href="#" active={isBrowseActive} className="browse-nav-btn">
+            <Nav.Link key="browse-menu-item" href="/cases/" active={isCasesLinkActive} className="browse-nav-btn">
                 Cases
             </Nav.Link>
-            <HelpNavItem {...passProps} href={href} />
+            <HelpNavItem {...props} />
         </Nav>
     );
 });
