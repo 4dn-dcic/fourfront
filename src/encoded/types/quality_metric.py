@@ -123,3 +123,16 @@ class QualityMetricAtacseq(QualityMetric):
     item_type = 'quality_metric_atacseq'
     schema = load_schema('encoded:schemas/quality_metric_atacseq.json')
     embedded_list = QualityMetric.embedded_list
+
+
+@collection(
+    name='quality-metrics-margi',
+    properties={
+        'title': 'QC Quality metrics for MARGI',
+        'description': 'Listing of QC Quality Metrics for MARGI.',
+    })
+class QualityMetricMargi(QualityMetric):
+    """Subclass of quality matrics for MARGI"""
+    item_type = 'quality_metric_margi'
+    schema = load_schema('encoded:schemas/quality_metric_margi.json')
+    embedded_list = QualityMetric.embedded_list
