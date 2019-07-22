@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
 import { PedigreeTabView } from './IndividualView';
-import { console } from './../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 

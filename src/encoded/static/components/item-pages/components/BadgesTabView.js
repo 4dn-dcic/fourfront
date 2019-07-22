@@ -4,11 +4,12 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { pie, arc } from 'd3-shape';
-import { object, Schemas } from './../../util';
 import PropTypes from 'prop-types';
 
+import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 // eslint-disable-next-line no-unused-vars
-import { Item } from '../../util/typedefs';
+import { Item } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/typedefs';
 
 
 export class BadgesTabView extends React.PureComponent {
@@ -238,7 +239,7 @@ class SummaryIcon extends React.PureComponent {
                 const tooltip = countWarnings + " Warning" + (countWarnings > 1 ? "s" : "");
                 return (
                     <span className="active">
-                        <i className="icon icon-fw icon-warning" data-tip={tooltip}/>
+                        <i className="icon icon-fw icon-warning fas" data-tip={tooltip}/>
                     </span>
                 );
             }
@@ -291,7 +292,7 @@ class SummaryIcon extends React.PureComponent {
 
         if (!classificationRatios){
             // Shouldn't happen unless BadgesTabView is present on Item w/o any badges.
-            return <i className="icon icon-fw icon-circle-o"/>; // Todo: maybe different icon
+            return <i className="icon icon-fw icon-circle far"/>; // Todo: maybe different icon
         }
 
         if (classificationRatioPairs.length === 1){
@@ -373,7 +374,7 @@ class BadgeItem extends React.PureComponent {
             let titleToShow = "Item";
             let tooltip = "Click to visit item containing badge.";
             const parentItem = this.getParent(embedded_path, parentID, context);
-            const parentTypeTitle = parentItem && Schemas.getItemTypeTitle(parentItem, schemas);
+            const parentTypeTitle = parentItem && schemaTransforms.getItemTypeTitle(parentItem, schemas);
             const parentDisplayTitle = parentItem && parentItem.display_title;
             if (parentTypeTitle && parentDisplayTitle){ // These two props are default embeds. If not present is most likely due to lack of view permissions.
                 titleToShow = <React.Fragment>{ parentTypeTitle } <span className="text-600">{ parentDisplayTitle }</span></React.Fragment>;
@@ -401,12 +402,12 @@ class BadgeItem extends React.PureComponent {
         return (
             <div className="badge-item">
                 <div className="row flexrow">
-                    <div className="col-xs-12 col-sm-2 icon-col">{ image }</div>
-                    <div className="col-xs-12 col-sm-10 title-col">
+                    <div className="col-12 col-sm-2 icon-columns fas">{ image }</div>
+                    <div className="col-12 col-sm-10 title-col">
                         <div className="inner mb-05">
                             <h4 className="text-500 mb-0 mt-0">
                                 { badgeTitle }
-                                { description ? <i className="icon icon-fw icon-info-circle ml-05" data-tip={description} /> : null }
+                                { description ? <i className="icon icon-fw icon-info-circle fas ml-05" data-tip={description} /> : null }
                             </h4>
                             { renderedMessages }
                             { linkMsg }

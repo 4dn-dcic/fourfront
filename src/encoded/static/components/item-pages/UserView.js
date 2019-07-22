@@ -6,12 +6,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, FormControl, Button } from 'react-bootstrap';
-var jwt = require('jsonwebtoken');
-import { ajax, JWT, console, DateUtility, navigate, object } from './../util';
-import { FormattedInfoBlock } from './components';
-import { EditableField, FieldSet } from './../forms/components';
-import Alerts from './../alerts';
+import { Modal, FormControl } from 'react-bootstrap';
+
+import { console, object, JWT, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/EditableField';
+
+import { store } from './../../store';
+import { FormattedInfoBlock } from './components/FormattedInfoBlock';
 
 // eslint-disable-next-line no-unused-vars
 import { Item } from './../util/typedefs';
@@ -108,7 +111,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
         const item = {};
         const idToken = JWT.get();
         if (idToken){
-            const decoded = jwt.decode(idToken);
+            const decoded = JWT.decode(idToken);
             item.user = decoded.email_verified ? decoded.email : "";
         } else {
             console.warn("Access key aborted");
@@ -135,13 +138,11 @@ class SyncedAccessKeyTable extends React.PureComponent {
 
     showNewSecret(response, reset = false) {
         const { secret_access_key, access_key_id } = response;
+        const modalTitle = "Your secret key has been " + (reset ? "reset" : "created" );
         this.setState({ 'modal' : (
             <Modal show onHide={this.hideModal}>
                 <Modal.Header closeButton>
-                    { reset ?
-                        <Modal.Title>Your secret key has been created.</Modal.Title>
-                        : <Modal.Title>Your secret key has been reset.</Modal.Title>
-                    }
+                    <Modal.Title>{ modalTitle }</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     Please make a note of the new secret access key.
@@ -149,18 +150,18 @@ class SyncedAccessKeyTable extends React.PureComponent {
                     <br/>(It might take a few minutes for the access key to show up in table after page refresh.)
 
                     <div className="row mt-15">
-                        <div className="col-xs-4 text-600 text-right no-user-select">
+                        <div className="col-4 text-600 text-right no-user-select">
                             Access Key ID
                         </div>
-                        <div className="col-xs-8">
+                        <div className="col-8">
                             <code>{ access_key_id }</code>
                         </div>
                     </div>
                     <div className="row mt-05">
-                        <div className="col-xs-4 text-600 text-right no-user-select">
+                        <div className="col-4 text-600 text-right no-user-select">
                             Secret Access Key
                         </div>
-                        <div className="col-xs-8">
+                        <div className="col-8">
                             <code>{ secret_access_key }</code>
                         </div>
                     </div>
@@ -234,7 +235,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                 return (
                     <AccessKeyTableContainer>
                         <div className="text-center pt-3 pb-3">
-                            <i className="icon icon-2x icon-fw icon-circle-o-notch icon-spin" style={{ 'color' : '#999' }}/>
+                            <i className="icon icon-2x icon-fw icon-circle-notch fas icon-spin" style={{ 'color' : '#999' }}/>
                         </div>
                     </AccessKeyTableContainer>
                 );
@@ -242,7 +243,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                 return (
                     <AccessKeyTableContainer>
                         <div className="text-center pt-3 pb-3">
-                            <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                            <i className="icon icon-2x icon-fw icon-times fas" style={{ 'color' : 'maroon' }}/>
                             <h4 className="text-400">Failed to load Access Keys</h4>
                         </div>
                     </AccessKeyTableContainer>
@@ -251,7 +252,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                 return (
                     <AccessKeyTableContainer>
                         <div className="text-center pt-3 pb-3">
-                            <i className="icon icon-2x icon-fw icon-times" style={{ 'color' : 'maroon' }}/>
+                            <i className="icon icon-2x icon-fw icon-times fas" style={{ 'color' : 'maroon' }}/>
                             <h4 className="text-400">Unknown Error</h4>
                         </div>
                     </AccessKeyTableContainer>
@@ -307,7 +308,7 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
                     return (
                         <tr key={id || idx}>
                             <td className="access-key-id">{ id }</td>
-                            <td>{ date_created ? <DateUtility.LocalizedTime timestamp={date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
+                            <td>{ date_created ? <LocalizedTime timestamp={date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
                             <td>{ description }</td>
                             <td className="access-key-buttons">
                                 <button type="button" className="btn btn-xs btn-success" onClick={resetKey}>Reset</button>
@@ -335,6 +336,12 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
 
 export default class UserView extends React.Component {
 
+    static onEditableFieldSave(nextContext){
+        store.dispatch({
+            type: { 'context': nextContext }
+        });
+    }
+
     static propTypes = {
         'context' : PropTypes.shape({
             '@id' : PropTypes.string.isRequired,
@@ -350,7 +357,6 @@ export default class UserView extends React.Component {
             'job_title' : PropTypes.string
         }),
         'href' : PropTypes.string.isRequired,
-        'listActionsFor' : PropTypes.func.isRequired,
         'schemas' : PropTypes.shape({
             'User' : PropTypes.shape({
                 'required' : PropTypes.array,
@@ -368,8 +374,8 @@ export default class UserView extends React.Component {
     };
 
     mayEdit(){
-        const { listActionsFor } = this.props;
-        return _.any(listActionsFor('context'), function(action){
+        const { context } = this.props;
+        return _.any((context && context.actions) || [], function(action){
             return action.name && action.name === 'edit';
         });
     }
@@ -391,23 +397,23 @@ export default class UserView extends React.Component {
 
                 <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
-                    <div className="row mt-5 mb-12 row-eq-height-md">
+                    <div className="row mt-5 mb-12">
 
-                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-7">
+                        <div className="col-12 col-lg-6 col-xl-7">
 
                             <div className="panel user-info shadow-border">
                                 <div className="user-title-row-container">
                                     <div className="row title-row">
-                                        <div className="col-sm-3 gravatar-container">
+                                        <div className="col-md-3 gravatar-container">
                                             { object.itemUtil.User.gravatar(email, 70) }
                                             <a className="edit-button-remote text-center" target="_blank" rel="noopener noreferrer" href="https://gravatar.com">
-                                                <i className="icon icon-pencil"/>
+                                                <i className="icon icon-pencil fas"/>
                                             </a>
                                         </div>
-                                        <div className="col-sm-9 user-title-col">
+                                        <div className="col-md-9 user-title-col">
                                             <h1 className="user-title">
                                                 <FieldSet context={user} parent={this} style="inline"
-                                                    inputSize="lg" absoluteBox objectType="User"
+                                                    inputSize="lg" absoluteBox objectType="User" onSave={UserView.onEditableFieldSave}
                                                     schemas={schemas} disabled={!mayEdit} href={href} windowWidth={windowWidth}>
                                                     <EditableField labelID="first_name" fallbackText="No first name set"
                                                         placeholder="First name" />
@@ -423,7 +429,7 @@ export default class UserView extends React.Component {
                             </div>
 
                         </div>
-                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
+                        <div className="col-12 col-lg-6 col-xl-5">
                             <ProfileWorkFields user={user} parent={this} href={href} />
                         </div>
 
@@ -450,25 +456,25 @@ function ProfileContactFields(props){
     const { user, windowWidth, parent, mayEdit, href, schemas } = props;
     const { email, phone1, fax, skype } = user;
     return (
-        <FieldSet context={user}
+        <FieldSet context={user} onSave={UserView.onEditableFieldSave}
             parent={parent} className="profile-contact-fields"
             disabled={!mayEdit} objectType="User" windowWidth={windowWidth}
             schemas={schemas} href={href}>
 
             <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
-                <ProfileContactFieldsIcon icon="envelope" />&nbsp; <a href={'mailto:' + email}>{ email }</a>
+                <ProfileContactFieldsIcon icon="envelope far" />&nbsp; <a href={'mailto:' + email}>{ email }</a>
             </EditableField>
 
             <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
-                <ProfileContactFieldsIcon icon="phone" />&nbsp; { phone1 }
+                <ProfileContactFieldsIcon icon="phone fas" />&nbsp; { phone1 }
             </EditableField>
 
             <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
-                <ProfileContactFieldsIcon icon="fax" />&nbsp; { fax }
+                <ProfileContactFieldsIcon icon="fax fas" />&nbsp; { fax }
             </EditableField>
 
             <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
-                <ProfileContactFieldsIcon icon="skype" />&nbsp; { skype }
+                <ProfileContactFieldsIcon icon="skype fab" />&nbsp; { skype }
             </EditableField>
 
         </FieldSet>
@@ -594,29 +600,29 @@ class ProfileWorkFields extends React.PureComponent {
         return (
             <div className={containerClassName}>
                 <h3 className="text-300 block-title">
-                    <i className="icon icon-users icon-fw"></i> Organizations
+                    <i className="icon icon-users fas icon-fw"></i> Organizations
                 </h3>
                 <div className="row field-entry lab">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
-                    <div id="lab" className="col-sm-9 value text-500">
+                    <div id="lab" className="col-md-9 value text-500">
                         { labTitle }
                     </div>
                 </div>
                 <div className="row field-entry job_title">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
-                    <div id="job_title" className="col-sm-9 value">
+                    <div id="job_title" className="col-md-9 value">
                         { job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
                 <div className="row field-entry submits_for">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submits For</label>
                     </div>
-                    <div className="col-sm-9 value text-500">
+                    <div className="col-md-9 value text-500">
                         <FormattedInfoBlock.List
                             renderItem={object.itemUtil.generateLink}
                             endpoints={_.filter(_.map(submits_for, object.itemUtil.atId))}
@@ -627,10 +633,10 @@ class ProfileWorkFields extends React.PureComponent {
                     </div>
                 </div>
                 <div className="row field-entry awards">
-                    <div className="col-sm-3 text-right text-left-xs">
+                    <div className="col-md-3 text-right text-left-xs">
                         <label htmlFor="awards">Awards</label>
                     </div>
-                    <div className="col-sm-9 value text-500">
+                    <div className="col-md-9 value text-500">
                         <FormattedInfoBlock.List
                             details={awards}
                             renderItem={object.linkFromItem}
@@ -682,9 +688,9 @@ class BasicForm extends React.PureComponent {
             <form onSubmit={this.handleSubmit}>
                 <FormControl className="mt-08" type="text" placeholder="Enter an email to impersonate..."
                     onChange={this.handleChange} value={value}/>
-                <Button className="mt-15 pull-right" type="submit" bsStyle="primary" bsSize="md">
-                    <i className="icon icon-fw icon-user"/>&nbsp; Impersonate
-                </Button>
+                <button type="submit" className="btn btn-primary btn-md mt-15">
+                    <i className="icon icon-fw icon-user icon-user-ninja fas"/>&nbsp; Impersonate
+                </button>
             </form>
         );
     }
@@ -752,7 +758,7 @@ export class ImpersonateUserForm extends React.PureComponent {
                 <hr />
                 <h2 className="text-400 mt-5">Impersonate a User</h2>
                 <div className="row">
-                    <div className="col-xs-12 col-lg-6">
+                    <div className="col-12 col-lg-6">
                         <BasicForm onSubmit={this.handleSubmit} />
                     </div>
                 </div>

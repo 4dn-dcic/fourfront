@@ -3,10 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, navigate, ajax } from'./../util';
-import { requestAnimationFrame } from './../viz/utilities';
-import { Collapse, Button } from 'react-bootstrap';
-import { Announcements, BasicStaticSectionBody } from './components';
+
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, OnlyTitle } from './../PageTitleSection';
 
 
 /**
@@ -16,7 +15,6 @@ import { Announcements, BasicStaticSectionBody } from './components';
  * @prop {Object} context - Should have properties typically needed for any static page.
  */
 export default class HomePage extends React.PureComponent {
-
 
     /**
      * The render function. Renders homepage contents.
@@ -53,22 +51,22 @@ const MyDashboard = React.memo(function MyDashboard(props){
             <div className="mt-4 homepage-dashboard">
                 <h2 className="homepage-section-title">Actions</h2>
                 <div className="row">
-                    <div className="col-xs-12 col-sm-6 col-md-4">
+                    <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add">New Case</a>
                     </div>
-                    <div className="col-xs-12 col-sm-6 col-md-4">
+                    <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled >Pipeline Admin</a>
                     </div>
-                    <div className="col-xs-12 col-sm-6 col-md-4">
+                    <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Quality Controls</a>
                     </div>
-                    <div className="col-xs-12 col-sm-6 col-md-4">
+                    <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Curation</a>
                     </div>
-                    <div className="col-xs-12 col-sm-6 col-md-4">
+                    <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Crowdsourcing</a>
                     </div>
-                    <div className="col-xs-12 col-sm-6 col-md-4">
+                    <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Item">Clinical Reports</a>
                     </div>
 
@@ -103,28 +101,28 @@ const GuestHomeView = React.memo(function GuestHomeView(props){
 class RecentCasesSection extends React.PureComponent { // Is PureComponent so can do AJAX request for cases later. Maybe.
     render(){
         return (
-            <div className="row mt-5">
-                <div className="col-xs-12">
-                    <h2 className="homepage-section-title">Recent Cases</h2>
+            <React.Fragment>
+                <h2 className="homepage-section-title mt-5">Recent Cases</h2>
+                <div className="row">
+                    <div className="col-12 col-md-4 col-xl-3 hidden-xs">
+                        <a href="/search/?type=Case" className="btn btn-lg btn-primary btn-block">View All</a>
+                    </div>
+                    <div className="col-12 col-md-8 col-xl-9">
+                        <p>
+                            <b>(TODO) Visible cases sorted by date-modified be here</b><br/>
+                            Per-role content or something else could go here also, such as searchview of recent
+                            cases or individuals if are clinician; new pipelines if are pipeline admin, etc.
+                            <br/><br/>
+                            (or per-role content can be above dashboard actions; final layout / location etc TBD)
+                            <br/><br/>
+                            <b>
+                            This could also be visible for public visitors as an entrance to a crowdsourcing UI/UX
+                            Or be daily cat facts here.
+                            </b>
+                        </p>
+                    </div>
                 </div>
-                <div className="col-xs-12 col-sm-4 col-md-3 hidden-xs">
-                    <a href="/search/?type=Case" className="btn btn-lg btn-primary btn-block">View All</a>
-                </div>
-                <div className="col-xs-12 col-sm-8 col-md-9">
-                    <p>
-                        <b>(TODO) Visible cases sorted by date-modified be here</b><br/>
-                        Per-role content or something else could go here also, such as searchview of recent
-                        cases or individuals if are clinician; new pipelines if are pipeline admin, etc.
-                        <br/><br/>
-                        (or per-role content can be above dashboard actions; final layout / location etc TBD)
-                        <br/><br/>
-                        <b>
-                        This could also be visible for public visitors as an entrance to a crowdsourcing UI/UX
-                        Or be daily cat facts here.
-                        </b>
-                    </p>
-                </div>
-            </div>
+            </React.Fragment>
         );
     }
 }
@@ -177,3 +175,27 @@ const LinksColumn = React.memo(function LinksColumn(props){
         </div>
     );
 });
+
+
+const HomePageTitle = React.memo(function HomePageTitle(props){
+    const { session, alerts } = props;
+
+    if (session){
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <OnlyTitle>My Dashboard</OnlyTitle>
+            </PageTitleContainer>
+        );
+    }
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <TitleAndSubtitleUnder subtitle="Clinical Genomics Analysis Platform" className="home-page-title">
+                <strong>TODO:</strong> Portal Title Here
+            </TitleAndSubtitleUnder>
+        </PageTitleContainer>
+    );
+});
+
+
+pageTitleViews.register(HomePageTitle, "HomePage");

@@ -3,9 +3,11 @@
 import React from 'react';
 import _ from 'underscore';
 import url from 'url';
-import queryString from 'querystring';
-import { console, DateUtility, Schemas, object } from './../../util';
-import { FlexibleDescriptionBox } from './FlexibleDescriptionBox';
+import queryString from 'query-string';
+
+import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -90,7 +92,8 @@ export class TopRow extends React.Component {
         var viewUrl = url.format(urlParts);
         return (
             <div className="indicator-item view-ajax-button">
-                <i className="icon icon-fw icon-file-code-o"/> <a href={viewUrl}
+                <i className="icon icon-fw icon-file-code far"/>{' '}
+                <a href={viewUrl}
                     className="inline-block" target="_blank" rel="noreferrer noopener"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
                         if (window && window.open){
@@ -143,14 +146,14 @@ export class TopRow extends React.Component {
             );
         }
 
-        var baseItemType = Schemas.getBaseItemType(context);
-        var itemType = Schemas.getItemType(context);
+        const baseItemType = schemaTransforms.getBaseItemType(context);
+        const itemType = schemaTransforms.getItemType(context);
 
         if (itemType === baseItemType) return null;
 
-        const baseTypeInfo = Schemas.getSchemaForItemType(baseItemType, schemas || null);
+        const baseTypeInfo = schemaTransforms.getSchemaForItemType(baseItemType, schemas || null);
         const title = (baseTypeInfo && baseTypeInfo.title) || baseItemType;
-        const detailTypeInfo = Schemas.getSchemaForItemType(itemType, schemas || null);
+        const detailTypeInfo = schemaTransforms.getSchemaForItemType(itemType, schemas || null);
         const detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
 
         return (
@@ -193,7 +196,9 @@ export class TopRow extends React.Component {
     render(){
         const { context, schemas } = this.props;
 
-        const typeSchema = Schemas.getSchemaForItemType(Schemas.getItemType(context), schemas || null);
+        const typeSchema = schemaTransforms.getSchemaForItemType(
+            schemaTransforms.getItemType(context), schemas || null
+        );
 
         let accessionTooltip = "Accession";
         if (typeSchema && typeSchema.properties.accession && typeSchema.properties.accession.description){
@@ -202,7 +207,7 @@ export class TopRow extends React.Component {
 
         return (
             <div className="row clearfix top-row">
-                <h5 className="col-sm-5 item-label-title">
+                <h5 className="col-12 col-md-5 item-label-title">
                     <div className="inner">
                         { this.typeInfoLabel() }
                         { context.accession ?
@@ -210,10 +215,10 @@ export class TopRow extends React.Component {
                                 wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -3 } }}>
                                 { context.accession }
                             </object.CopyWrapper>
-                        : null }
+                            : null }
                     </div>
                 </h5>
-                <h5 className="col-sm-7 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                <h5 className="col-12 col-md-7 text-300 text-capitalize item-header-indicators clearfix">
                     { this.parsedStatus() }{ this.wrapChildren() }{ this.itemActions() }{ this.viewJSONButton() }
                 </h5>
             </div>
@@ -289,8 +294,8 @@ export class BottomRow extends React.PureComponent {
         }
         return (
             <span data-tip={tooltip} className="inline-block">
-                <i className="icon icon-calendar-o"></i>&nbsp; &nbsp;
-                <DateUtility.LocalizedTime timestamp={context[dateToUse]} formatType='date-time-md' dateTimeSeparator=" at " />
+                <i className="icon icon-calendar-alt far"></i>&nbsp; &nbsp;
+                <LocalizedTime timestamp={context[dateToUse]} formatType="date-time-md" dateTimeSeparator=" at " />
             </span>
         );
     }
@@ -306,8 +311,8 @@ export class BottomRow extends React.PureComponent {
         }
         return (
             <div className="row clearfix bottom-row">
-                <div className="col-sm-6 item-label-extra set-type-indicators">{ children }</div>
-                <h5 className="col-sm-6 text-right text-left-xs item-label-extra">{ this.parsedDate(dateToUse) }</h5>
+                <div className="col text-300 set-type-indicators">{ children }</div>
+                <h5 className="col-md-auto text-300 date-indicator">{ this.parsedDate(dateToUse) }</h5>
             </div>
         );
     }
@@ -322,30 +327,14 @@ export class BottomRow extends React.PureComponent {
  * @prop {string} href - Location from Redux store or '@id' of current Item. Used for View JSON button.
  * @prop {Object} schemas - Pass from app.state. Used for tooltips and such.
  */
-export class Wrapper extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.adjustChildren = this.adjustChildren.bind(this);
-    }
-
-    /** Passes down own props to all children */
-    adjustChildren(){
-        var { context, href, schemas, children, windowWidth } = this.props;
-        if (!context) return children;
-        // We shouldn't ever receive a single Child.
-        return React.Children.map(children, (child)=>
-            React.cloneElement(child, { context, href, windowWidth, schemas })
-        );
-    }
-
-    render(){
-        const { context, className } = this.props;
-        return (
-            <div className={"item-view-header " + (className || '') + (!context.description ? ' no-description' : '')}>
-                { this.adjustChildren() }
-            </div>
-        );
-    }
-
-}
+export const Wrapper = React.memo(function Wrapper(props){
+    const { context, className, href, schemas, children, windowWidth  } = props;
+    const extendedChildren = !context ? children : React.Children.map(children, (child)=>
+        React.cloneElement(child, { context, href, windowWidth, schemas })
+    );
+    return (
+        <div className={"item-view-header " + (className || '') + (!context.description ? ' no-description' : '')}>
+            { extendedChildren }
+        </div>
+    );
+});
