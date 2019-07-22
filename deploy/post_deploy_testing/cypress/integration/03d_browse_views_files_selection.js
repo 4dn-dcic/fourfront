@@ -38,7 +38,7 @@ describe('Browse Views - Files Selection', function () {
         it("Can add column for date_created to results table", function(){
             // First we must add the column to the view
             // Open column selector panel
-            cy.get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
+            cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
                 // Check the 'Date Created' checkbox
                 .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]')
                 .scrollIntoView().click({ 'force' : true }).end()
@@ -49,7 +49,7 @@ describe('Browse Views - Files Selection', function () {
                     cy.get('i').should('have.class', 'icon-sort-desc');
                 }).end()
                 // Close columns panel
-                .get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end();
+                .get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end();
         });
 
         it('Can press buttons at right & left to scroll to right side of search results table', function(){

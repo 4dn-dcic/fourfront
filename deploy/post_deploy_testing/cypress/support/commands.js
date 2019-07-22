@@ -167,7 +167,7 @@ Cypress.Commands.add('getFileTypePanelButton', function(options = {}){
 // TODO: Change these functions to use the `id` attributes of these buttons once they make it to prod.
 
 Cypress.Commands.add('getDownloadButton', function(options = {}){
-    return cy.get('div.above-results-table-row div.clearfix > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:nth-child(1)');
+    return cy.get('div.above-results-table-row div.row > div:nth-child(1) > div:nth-child(2) > div.btn-group > button.btn:nth-child(1)');
 });
 
 /** Session Caching */
