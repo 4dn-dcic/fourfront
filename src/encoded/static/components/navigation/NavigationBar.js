@@ -160,14 +160,13 @@ const CollapsedNav = React.memo(function CollapsedNav(props){
 });
 
 const LeftNav = React.memo(function LeftNav(props){
-    const { href, browseBaseState, ...passProps } = props;
-    const browseHref = navigate.getBrowseBaseHref(browseBaseState);
+    const { href, ...passProps } = props;
     const isBrowseActive =  href && href.indexOf('/browse/') > -1;
     //const passProps ={ mobileDropdownOpen, mounted, overlaysContainer, windowHeight, windowWidth ..? }
     return (
         <Nav className="mr-auto">
-            <Nav.Link key="browse-menu-item" href={browseHref} active={isBrowseActive} className="browse-nav-btn">
-                Browse
+            <Nav.Link key="browse-menu-item" href="#" active={isBrowseActive} className="browse-nav-btn">
+                Cases
             </Nav.Link>
             <HelpNavItem {...passProps} href={href} />
         </Nav>

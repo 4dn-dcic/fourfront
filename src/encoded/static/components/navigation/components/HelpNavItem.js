@@ -37,7 +37,6 @@ export class HelpNavItem extends React.PureComponent {
         super(props);
         this.handleToggle = this.handleToggle.bind(this);
         this.onCloseDropdown = this.onCloseDropdown.bind(this);
-        this.handleOpenDropdown = this.handleOpenDropdown.bind(this);
         this.loadHelpMenuTree = this.loadHelpMenuTree.bind(this);
         this.dropdownID = props.dropdownID || props.id;
 
@@ -98,10 +97,6 @@ export class HelpNavItem extends React.PureComponent {
             if (!isDropdownVisible && !closingDropdown) return null;
             return { 'isDropdownVisible' : false, 'closingDropdown' : false };
         }, cb);
-    }
-
-    handleOpenDropdown(){
-        this.setState({ 'isDropdownVisible' : true });
     }
 
     handleToggle(e){

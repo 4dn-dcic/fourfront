@@ -34,11 +34,11 @@ export class SearchBar extends React.PureComponent{
 
     constructor(props){
         super(props);
-        this.toggleSearchAllItems   = this.toggleSearchAllItems.bind(this);
+        //this.toggleSearchAllItems   = this.toggleSearchAllItems.bind(this);
         this.onSearchInputChange    = this.onSearchInputChange.bind(this);
         this.onResetSearch          = this.onResetSearch.bind(this);
         this.onSearchInputBlur      = this.onSearchInputBlur.bind(this);
-        this.selectItemTypeDropdown = this.selectItemTypeDropdown.bind(this);
+        //this.selectItemTypeDropdown = this.selectItemTypeDropdown.bind(this);
 
         var initialQuery = '';
         if (props.href){
@@ -70,6 +70,7 @@ export class SearchBar extends React.PureComponent{
         return (hrefParts && hrefParts.query && hrefParts.query.q) || null;
     }
 
+    /*
     toggleSearchAllItems(willSearchAllItems = !this.state.searchAllItems){
         this.setState(function({ searchAllItems }){
             if (typeof willSearchAllItems === 'boolean'){
@@ -82,6 +83,7 @@ export class SearchBar extends React.PureComponent{
             }
         });
     }
+    */
 
     onSearchInputChange(e){
         const newValue = e.target.value;
@@ -111,6 +113,7 @@ export class SearchBar extends React.PureComponent{
         );
     }
 
+    /*
     selectItemTypeDropdown(visible = false){
         const { currentAction } = this.props;
         const { searchAllItems } = this.state;
@@ -130,19 +133,16 @@ export class SearchBar extends React.PureComponent{
             </Fade>
         );
     }
+    */
 
     render() {
         const { href, currentAction } = this.props;
-        const { searchAllItems, typedSearchQuery } = this.state;
+        const { typedSearchQuery } = this.state;
         const hrefParts           = url.parse(href, true);
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
-        const searchTypeFromHref  = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
-        const showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery) && (
-            (searchTypeFromHref === 'Item' && searchAllItems) || (searchTypeFromHref === 'ExperimentSetReplicate' && !searchAllItems)
-        );
+        const showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery);
         const searchBoxHasInput   = SearchBar.hasInput(typedSearchQuery);
         const query               = {}; // Don't preserve facets.
-        const browseBaseParams    = navigate.getBrowseBaseParams();
         const formClasses = [
             'form-inline',
             'navbar-search-form-container',
@@ -152,16 +152,12 @@ export class SearchBar extends React.PureComponent{
 
         if (currentAction === 'selection'){
             _.extend(query, _.omit(hrefParts.query || {}, 'q')); // Preserve facets (except 'q'), incl type facet.
-        } else if (searchAllItems && currentAction !== 'selection') {
-            _.extend(query, { 'type' : 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else {
-            _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
+            _.extend(query, { 'type' : 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         }
 
         return ( // Form submission gets serialized and AJAXed via onSubmit handlers in App.js
-            <form className={_.filter(formClasses).join(' ')} action={searchAllItems ? "/search/" : "/browse/" } method="GET">
-                <SelectItemTypeDropdownBtn currentAction={currentAction} visible={!!(searchBoxHasInput || searchQueryFromHref)}
-                    toggleSearchAllItems={this.toggleSearchAllItems} searchAllItems={searchAllItems} />
+            <form className={_.filter(formClasses).join(' ')} action="/search/" method="GET">
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
                     name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                 { showingCurrentQuery ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null }
@@ -174,25 +170,4 @@ export class SearchBar extends React.PureComponent{
         );
     }
 }
-
-const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
-    const { currentAction, searchAllItems, toggleSearchAllItems, visible } = props;
-    if (currentAction === 'selection' || !visible) return null;
-    return (
-        <Fade in={visible} appear>
-            <div className="search-item-type-wrapper">
-                <DropdownButton id="search-item-type-selector" size="sm" variant="outline-secondary"
-                    onSelect={(eventKey, evt)=>{ toggleSearchAllItems(eventKey === 'all' ? true : false); }}
-                    title={searchAllItems ? 'All Items' : 'Experiment Sets'}>
-                    <DropdownItem eventKey="sets" data-key="sets" active={!searchAllItems}>
-                        Experiment Sets
-                    </DropdownItem>
-                    <DropdownItem eventKey="all" data-key="all" active={searchAllItems}>
-                        All Items (advanced)
-                    </DropdownItem>
-                </DropdownButton>
-            </div>
-        </Fade>
-    );
-});
 
