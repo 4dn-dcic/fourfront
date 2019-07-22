@@ -5,6 +5,7 @@ $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .3s;
 $navbar-transition-easing: ease-out;
 
+$navbar-background-color: #f8f8f8 !default;
 $navbar-light-active-color: #000;
 $navbar-light-hover-color: #000;
 $navbar-link-active-bg: #eee !default;
@@ -93,7 +94,7 @@ div#top-nav.navbar-fixed-top {
     position: relative;
     top: 0;
     border: none;
-    border-bottom: 1px solid #dadada;
+    border-bottom: 1px solid darken($navbar-background-color, 5%);
     background: #ffffff;
     margin-bottom: 0;
     box-shadow: 0 0 3px rgba(0,0,0,0);
@@ -107,13 +108,13 @@ div#top-nav.navbar-fixed-top {
         background-color: rgba(255,255,255,0.933);
         body.scrolled-past-top &,
         body.is-full-screen .navbar-container & {
-            border-color: #d4d4d4;
+            border-color: darken($navbar-background-color, 10%);
             box-shadow: 0 0 3px rgba(0,0,0,0.2);
         }
     }
 
     > div.navbar-inner-container {
-        background-color: #f8f8f8;
+        background-color: $navbar-background-color;
     }
 
     > div.navbar-inner-container > nav.navbar-main,
@@ -216,7 +217,7 @@ div#top-nav.navbar-fixed-top {
                 @include navbar-fixed-position {
                     body.scrolled-past-top & {
                         &:hover {
-                            background-color: #e8e8e8;
+                            background-color: darken($navbar-background-color, 5%);
                         }
                         > svg#logo_svg {
                                 margin-right: -18px;
@@ -230,7 +231,7 @@ div#top-nav.navbar-fixed-top {
                 > .navbar-title {
                     vertical-align: middle;
                     font-weight: 300;
-                    color: #444;
+                    color: $navbar-default-brand-color;
                     margin-left: 15px;
                     font-size: 1.7rem;
                     display: inline-block;
@@ -257,8 +258,8 @@ div#top-nav.navbar-fixed-top {
             // Hover over title link state
             &:hover {
                 .navbar-title {
-                    color: #000;
-                    text-shadow: 0 0 0 #000;
+                    color: $navbar-link-hover-color;
+                    text-shadow: 0 0 0 $navbar-link-hover-color;
                     > i.icon.icon-angle-right {
                         color: #ccc !important;
                         text-shadow: none;
@@ -398,6 +399,11 @@ div#top-nav.navbar-fixed-top {
                     -webkit-transition: width 0.3s ease-out;
                     transition: width 0.3s ease-out;
                     margin-left: 5px;
+                    background-color: lighten($color: $navbar-background-color, $amount: 5%); //$brand-primary-dark;
+                    border-color: transparent; //$brand-primary;
+                    &::placeholder {
+                        color: rgba(0,0,0,0.33); // For dark bg navbar only
+                    }
                     &::-webkit-search-cancel-button {
                         display: none;
                     }
@@ -441,8 +447,9 @@ div#top-nav.navbar-fixed-top {
                     &.has-input #navbar-search,
                     #navbar-search:focus {
                         /* dont expand width here */
+                        background-color: #fff;
                         color: rgba(0,0,0,1.0);
-                        border-color: rgba(125,125,125,1.0);
+                        //border-color: $brand-primary; // rgba(125,125,125,1.0);
                         @include transition(width 0.3s ease-out);
                     }
                 }
@@ -460,8 +467,8 @@ div#top-nav.navbar-fixed-top {
                 i.reset-button {
                     position: absolute;
                     top: 50%;
-                    margin-top: -7px;
-                    right: 18px;
+                    margin-top: -8px;
+                    right: 10px;
                     opacity: 0.33;
                     cursor: pointer;
                     &:hover {

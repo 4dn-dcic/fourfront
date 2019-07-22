@@ -1,0 +1,22 @@
+<svg
+    id="logo_svg"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns="http://www.w3.org/2000/svg"
+    style="vertical-align:middle;display:inline-block;height:100%;padding-bottom: 5px;padding-top: 5px;transition:padding .3s, transform .3s;max-height:80px;"
+    viewBox="0 0 90 90">
+    <g transform="rotate(135,40.692863,29.984096) translate(0, -3)">
+        <path d="m 81.314453,24.175781 3.75,7.5 h 10.796875 l -3.71875,-7.5 z" style="fill: rgb(69, 121, 180); fill-opacity: 1; stroke: rgb(63, 111, 165); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="M 61.289062,4.3085938 55.621094,11.865234 84.261719,31.1875 80.705078,24.072266 Z" style="fill: rgb(69, 121, 180); fill-opacity: 1; stroke: rgb(63, 111, 165); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="M 0.66992188,4.5 4.3886719,12 h 9.8261721 l -3.75,-7.5 z" style="fill: rgb(69, 121, 180); fill-opacity: 1; stroke: rgb(63, 111, 165); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="m 11.253906,4.9628906 3.570313,7.1367184 20.412109,19.773438 5.669922,-7.558594 z" style="fill: rgb(69, 121, 180); fill-opacity: 1; stroke: rgb(63, 111, 165); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="M -0.56835938,19.923931 7.1035156,35.173892 H 25.59375 L 17.865234,19.923828 Z" style="fill: rgb(115, 165, 222); fill-opacity: 1; stroke: rgb(74, 126, 186); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="m 35.765625,4.1757812 5.625,7.4999998 h 13.748047 l 5.625,-7.4999998 z" style="fill: rgb(115, 165, 222); fill-opacity: 1; stroke: rgb(74, 126, 186); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="M 35.230469,4.296875 18.328125,19.728516 26.039062,34.94147 40.958984,11.933594 Z" style="fill: rgb(115, 165, 222); fill-opacity: 1; stroke: rgb(74, 126, 186); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="m 41.390625,24.5 -5.625,7.5 h 25 l -5.625,-7.5 z" style="fill: rgb(115, 165, 222); fill-opacity: 1; stroke: rgb(74, 126, 186); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="M 70.488281,1.25 55.570312,24.240234 61.300781,31.878906 78.205078,16.443359 Z" style="fill: rgb(115, 165, 222); fill-opacity: 1; stroke: rgb(74, 126, 186); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+        <path d="m 70.921875,1 7.746094,15.25 H 97.109375 L 89.423828,1 Z" style="fill: rgb(115, 165, 222); fill-opacity: 1; stroke: rgb(74, 126, 186); stroke-width: 0; stroke-linejoin: round; stroke-linecap: butt; stroke-dasharray: none; stroke-dashoffset: 0; stroke-opacity: 1; paint-order: fill markers;" transform="none"></path>
+    </g>
+</svg>

@@ -43,15 +43,17 @@ $input-border-radius:                       3px;
 
 $navbar-brand-font-size:                    1.7rem;
 $navbar-height:                             80px;
-$navbar-default-brand-color:                #999999;
 
 $navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
 
 //$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
-$navbar-link-color : #777;
-$navbar-link-hover-color : #000000;
-$navbar-link-active-color : #000;
-$navbar-link-active-background-color: #eee;
+$navbar-background-color: #083c52;
+$navbar-link-color : rgba(255,255,255,0.8);
+$navbar-link-hover-color : #fff;
+$navbar-link-active-color : #fff;
+$navbar-link-hover-bg: lighten($navbar-background-color, 10%);
+$navbar-link-active-bg: lighten($navbar-background-color, 5%);
+$navbar-default-brand-color: rgba(255,255,255,0.8);
 
 // We set navbar to become fixed position @ Bootstrap's medium size.
 @mixin navbar-fixed-position {

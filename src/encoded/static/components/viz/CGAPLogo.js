@@ -9,8 +9,8 @@ import * as d3 from 'd3';
 const commonStyle1 = {
     "fill" : "#4579b4",
     "fillOpacity" : 1,
-    "stroke" :"#f8f8f8",
-    "strokeWidth" : 0.25,
+    "stroke" :"#083c52",
+    "strokeWidth" : 0.5,
     "stroke-linejoin": "round",
     "stroke-linecap": "butt",
     "stroke-miterlimit": 4,
@@ -27,9 +27,9 @@ const commonStyle2 = _.extend({}, commonStyle1, {
 });
 
 const commonStyle1Hover = _.extend({}, commonStyle1, {
-    "fillOpacity" : 0.7,
-    "strokeWidth" : 1,
-    "stroke" :"#3f6fa5",
+    "fillOpacity": 0.2,
+    "strokeWidth": 1,
+    "stroke": "#73a5de" //"#3f6fa5",
     //"strokeOpacity": 0.7,
 });
 

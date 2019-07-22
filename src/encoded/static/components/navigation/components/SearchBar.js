@@ -160,7 +160,7 @@ export class SearchBar extends React.PureComponent{
             <form className={_.filter(formClasses).join(' ')} action="/search/" method="GET">
                 <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search"
                     name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
-                { showingCurrentQuery ? <i className="reset-button icon icon-close" onClick={this.onResetSearch}/> : null }
+                { showingCurrentQuery ? <i className="reset-button icon icon-times fas" onClick={this.onResetSearch}/> : null }
                 { showingCurrentQuery ? null : (
                     <button type="submit" className="search-icon-button">
                         <i className="icon icon-fw icon-search fas"/>
