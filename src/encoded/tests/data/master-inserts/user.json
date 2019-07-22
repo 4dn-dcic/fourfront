@@ -78,5 +78,15 @@
         "submits_for": ["hms-dbmi"],
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "uuid": "b5f738b6-455a-42e5-bc1c-77fbfd9b15d2"
+    },
+    {
+        "email": "koray_kirli@hms.harvard.edu",
+        "first_name": "Koray",
+        "last_name": "Kirli",
+        "role": "scientist",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267221234",
+        "groups": ["admin"],
+        "submits_for": ["hms-dbmi"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
     }
 ]
