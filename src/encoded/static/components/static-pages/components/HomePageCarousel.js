@@ -4,8 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Carousel from 'nuka-carousel';
-import { ajax, layout, object } from './../../util';
-import { BasicStaticSectionBody } from './BasicStaticSectionBody';
+import { console, ajax, layout, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { replaceString as placeholderReplacementFxn } from './../placeholders';
 
 
 export class HomePageCarouselSlide extends React.PureComponent {
@@ -15,12 +16,12 @@ export class HomePageCarouselSlide extends React.PureComponent {
 
         const link        = (options && options.link) || null;
         const image       = (options && options.image) || null;
-        const showTitle   = (!title ? null :
+        const showTitle   = (!title ? null : (
             <div className="title-container">
                 <h4 className="mt-0">{ title }</h4>
                 { description ? <p>{ description }</p> : null }
             </div>
-        );
+        ));
         const inner = (
             <React.Fragment>
                 <div className="inner-container">
@@ -29,9 +30,9 @@ export class HomePageCarouselSlide extends React.PureComponent {
                 </div>
                 { content ?
                     <div className="inner-body">
-                        <BasicStaticSectionBody {...{ filetype, content }} />
+                        <BasicStaticSectionBody {...{ filetype, content, placeholderReplacementFxn }} />
                     </div>
-                : null }
+                    : null }
             </React.Fragment>
         );
 
@@ -101,7 +102,7 @@ export class HomePageCarousel extends React.PureComponent {
         // Do some responsive stuff
         var gridState = layout.responsiveGridState(windowWidth);
 
-        if (gridState === 'sm' || sections.length === 2){
+        if (gridState === 'sm' || gridState === 'md' || sections.length === 2){
             settings = _.extend({}, settings, {
                 'slidesToShow' : 2
             });

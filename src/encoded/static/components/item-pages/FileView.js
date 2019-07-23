@@ -5,10 +5,13 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { Button } from 'react-bootstrap';
+
+import { isServerSide, console, object, layout, valueTransforms, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
-import { console, object, expFxn, Schemas, layout, fileUtil, isServerSide } from './../util';
-import { ExperimentSetTablesLoaded, OverviewHeadingContainer } from './components';
+
+import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
@@ -39,7 +42,7 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     shouldGraphExist(){
-        const context = this.props.context;
+        const { context } = this.props;
         return (
             (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
             // We can uncomment below line once do permissions checking on backend for graphing
@@ -48,9 +51,9 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
-        const context = this.props.context;
+        const { context } = this.props;
         const width = this.getTabViewWidth();
-        let tabs = [];
+        const tabs = [];
 
         tabs.push(FileViewOverview.getTabObject(this.props, width));
 
@@ -62,11 +65,10 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     itemMidSection(){
-        const gridState = layout.responsiveGridState(this.props.windowWidth);
         return (
             <React.Fragment>
                 { super.itemMidSection() }
-                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas')} gridState={gridState} />
+                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas', 'windowWidth')} />
             </React.Fragment>
         );
     }
@@ -117,13 +119,13 @@ class FileViewOverview extends React.PureComponent {
         return (
             <div>
                 <div className="row overview-blocks">
-                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-xs-12" />
+                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-12" />
                     <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                     <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                 </div>
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
                     <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                : null }
+                    : null }
             </div>
         );
     }
@@ -133,10 +135,14 @@ class FileViewOverview extends React.PureComponent {
 
 export class FileOverviewHeading extends React.PureComponent {
 
+    static fileSizeTitleRenderFxn(field, value){
+        return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
+    }
+
     constructor(props){
         super(props);
-        this.onTransitionSetOpen    = this.onTransition.bind(this, true);
-        this.onTransitionUnsetOpen  = this.onTransition.bind(this, false);
+        this.onTransitionSetOpen = this.onTransition.bind(this, true);
+        this.onTransitionUnsetOpen = this.onTransition.bind(this, false);
         this.state = {
             'isPropertiesOpen' : true,
             'mounted' : false
@@ -152,23 +158,23 @@ export class FileOverviewHeading extends React.PureComponent {
     }
 
     render(){
-        const { context, schemas, gridState } = this.props;
+        const { context, schemas, windowWidth } = this.props;
         const { mounted, isPropertiesOpen } = this.state;
-        const isSmallerSize = mounted && (gridState === 'xs' || gridState === 'sm');
-        const commonHeadingBlockProps = { 'tips' : FileView.schemaForFile(context, schemas), 'result' : context, 'wrapInColumn' : "col-sm-6 col-lg-3" };
+        const gridState = layout.responsiveGridState(windowWidth);
+        const isSmallerSize = mounted && (gridState === "xs" || gridState === "sm");
+        const commonHeadingBlockProps = { "tips" : FileView.schemaForFile(context, schemas), "result" : context, "wrapInColumn" : "col-sm-6 col-lg-3" };
         return (
-            <div className={"row" + (!isSmallerSize ? ' flexrow' : '')}>
-                <div className="col-xs-12 col-md-8">
+            <div className="row">
+                <div className="col-12 col-md-8">
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property='file_format' fallbackTitle="File Format" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property='file_type' fallbackTitle="File Type" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property='file_classification' fallbackTitle="General Classification" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property='file_size' fallbackTitle="File Size" titleRenderFxn={function(field, value){
-                            return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
-                        }} />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property="file_format" fallbackTitle="File Format" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property="file_type" fallbackTitle="File Type" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification" fallbackTitle="General Classification" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
+                            fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
                     </OverviewHeadingContainer>
                 </div>
-                <div className="col-xs-12 col-md-4 mt-1 mb-3">
+                <div className="col-12 col-md-4 mt-1 mb-3">
                     <FileViewDownloadButtonContainer file={context} size="lg" verticallyCentered={!isSmallerSize && isPropertiesOpen} />
                 </div>
 
@@ -182,12 +188,12 @@ export function FileViewDownloadButtonContainer(props){
     const { className, size, file, context, result } = props;
     const fileToUse = file || context || result;
     return (
-        <div className={"file-download-container" + (className ? ' ' + className : '')}>
+        <div className={"file-download-container" + (className ? " " + className : "")}>
             <fileUtil.FileDownloadButtonAuto result={fileToUse} size={size} />
         </div>
     );
 }
-FileViewDownloadButtonContainer.defaultProps = { 'size' : null };
+FileViewDownloadButtonContainer.defaultProps = { "size" : null };
 
 
 
@@ -196,7 +202,7 @@ FileViewDownloadButtonContainer.defaultProps = { 'size' : null };
 export class ExternalVisualizationButtons extends React.PureComponent {
 
     static defaultProps = {
-        'wrapInColumn' : "col-xs-12",
+        'wrapInColumn' : "col-12",
         'className' : "inner"
     };
 
@@ -206,10 +212,11 @@ export class ExternalVisualizationButtons extends React.PureComponent {
      * @returns {JSX.Element|null} A button which opens up file to be viewed at HiGlass onClick, or void.
      */
     renderJuiceboxBtn(fileHref){
+        const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
-            <Button bsStyle="primary" href={"http://aidenlab.org/juicebox/?hicUrl=" + fileHref} className="mr-05" tagret="_blank">
+            <button type="button" href={btnHref} className="btn btn-primary mr-05" tagret="_blank">
                 <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-            </Button>
+            </button>
         );
     }
 
@@ -232,17 +239,18 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
         if (!genome) return null;
 
-        // Build the Epigenome button
+        const btnHref = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" + fileHref;
         return (
-            <Button bsStyle="primary" href={"http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" +fileHref} target="_blank" rel="noreferrer noopener">
-                <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
-            </Button>
+            <button type="button" href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
+                <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
+                <i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+            </button>
         );
     }
 
     render(){
         const { file, href, wrapInColumn, className } = this.props;
-        var epigenomeBtn, juiceBoxBtn;
+        let epigenomeBtn, juiceBoxBtn;
 
         if (!(file.status === 'archived' || file.status === 'released')){
             return null; // External tools cannot access non-released files.
@@ -251,7 +259,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
             return null;
         }
 
-        const fileFormat = fileUtil.getFileFormatStr(file);
+        const fileFormat = commonFileUtil.getFileFormatStr(file);
         const hrefParts = url.parse(href || (store && store.getState().href));
         const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
 
@@ -287,10 +295,10 @@ function QCMetricFromEmbed(props){
     return (
         <div className="overview-list-element">
             <div className="row">
-                <div className="col-xs-4 text-right">
+                <div className="col-4 text-right">
                     <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} tips={tips} elementType="h5" fallbackTitle={fallbackTitle || qcProperty} className="mb-0 mt-02" />
                 </div>
-                <div className="col-xs-8">
+                <div className="col-8">
                     <div className="inner value">
                         { percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, metric[qcProperty], true) }
                     </div>
@@ -303,7 +311,7 @@ QCMetricFromEmbed.percentOfTotalReads = function(quality_metric, field){
     var numVal = object.getNestedProperty(quality_metric, field);
     if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
         var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
-        var numValRounded = Schemas.Term.roundLargeNumber(numVal);
+        var numValRounded = valueTransforms.roundLargeNumber(numVal);
         return (
             <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
         );
@@ -319,10 +327,10 @@ export function QCMetricFromSummary(props){
     return (
         <div className="overview-list-element">
             <div className="row">
-                <div className="col-xs-4 text-right">
+                <div className="col-4 text-right">
                     <h5 className="mb-0 mt-02">{ title }</h5>
                 </div>
-                <div className="col-xs-8">
+                <div className="col-8">
                     <div className="inner value">
                         { tooltip ? <i className="icon icon-fw icon-info-circle mr-05" data-tip={tooltip} /> : null }
                         { value }
@@ -340,9 +348,9 @@ QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }
     } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
         value = parseFloat(value);
         if (!tooltip && value >= 1000) {
-            tooltip = Schemas.Term.decorateNumberWithCommas(value);
+            tooltip = valueTransforms.decorateNumberWithCommas(value);
         }
-        value = Schemas.Term.roundLargeNumber(value);
+        value = valueTransforms.roundLargeNumber(value);
     }
     return { value, tooltip };
 };
@@ -357,7 +365,7 @@ export class QualityControlResults extends React.PureComponent {
     /** To be deprecated (?) */
     metricsFromEmbeddedReport(){
         const { file, schemas } = this.props;
-        const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas || Schemas.get(), file.quality_metric) };
+        const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas, file.quality_metric) };
         return (
             <div className="overview-list-elements-container">
                 <QCMetricFromEmbed {...commonProps} qcProperty="Total reads" fallbackTitle="Total Reads in File" />
@@ -383,11 +391,11 @@ export class QualityControlResults extends React.PureComponent {
                 { metricURL ?
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
-                            <a href={metricURL} target="_blank" rel="noopener noreferrer">{ Schemas.Term.hrefToFilename(metricURL) }</a>
+                            <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
                             <i className="ml-05 icon icon-fw icon-external-link text-small"/>
                         </React.Fragment>
                     } />
-                : null }
+                    : null }
             </div>
         );
 
@@ -415,7 +423,8 @@ export class QualityControlResults extends React.PureComponent {
         return (
             <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">
                 <div className="inner">
-                <object.TooltipInfoIconContainerAuto result={file} property={titleProperty} tips={tips} elementType="h5" fallbackTitle="Quality Metric Summary" />
+                    <object.TooltipInfoIconContainerAuto result={file} property={titleProperty} tips={tips}
+                        elementType="h5" fallbackTitle="Quality Metric Summary" />
                     { metrics || (<em>Not Available</em>) }
                 </div>
             </WrapInColumn>

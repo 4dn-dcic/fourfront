@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import { TransitionGroup, Transition } from 'react-transition-group';
-import { console } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import Edge from './Edge';
 
@@ -95,20 +95,20 @@ export default class EdgesLayer extends React.PureComponent {
                 <svg className="edges-layer" width={divWidth} height={outerHeight}>
                     { this.pathArrows() }
                     <TransitionGroup component={null}>
-                    {
-                        _.map(this.sortedEdges(edges, selectedNode, isNodeDisabled), (edge, index) => {
-                            var key = (edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name);
-                            return (
-                                <Transition unmountOnExit mountOnEnter timeout={500} key={key}
-                                    onEnter={EdgesLayer.edgeOnEnter} onEntering={EdgesLayer.edgeOnEntering}
-                                    onExit={EdgesLayer.edgeOnExit} onEntered={EdgesLayer.edgeOnEntered}>
-                                    <Edge {...this.props} {...{ key, edge, edgeCount }}
-                                        startX={edge.source.x} startY={edge.source.y}
-                                        endX={edge.target.x} endY={edge.target.y} />
-                                </Transition>
-                            );
-                        })
-                    }
+                        {
+                            _.map(this.sortedEdges(edges, selectedNode, isNodeDisabled), (edge, index) => {
+                                var key = (edge.source.id || edge.source.name) + "----" + (edge.target.id || edge.target.name);
+                                return (
+                                    <Transition unmountOnExit mountOnEnter timeout={500} key={key}
+                                        onEnter={EdgesLayer.edgeOnEnter} onEntering={EdgesLayer.edgeOnEntering}
+                                        onExit={EdgesLayer.edgeOnExit} onEntered={EdgesLayer.edgeOnEntered}>
+                                        <Edge {...this.props} {...{ key, edge, edgeCount }}
+                                            startX={edge.source.x} startY={edge.source.y}
+                                            endX={edge.target.x} endY={edge.target.y} />
+                                    </Transition>
+                                );
+                            })
+                        }
                     </TransitionGroup>
                 </svg>
             </div>

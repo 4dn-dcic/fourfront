@@ -42,7 +42,7 @@ describe("HiGlass Display pages", function(){
 
             // Log in, visit the page and look for the create button to assert ability to create.
             cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end()
-                .get(".above-results-table-row a.btn.btn-xs span").should('have.text', 'Create');
+                .get(".above-results-table-row a.btn.btn-xs").should('contain', 'Create');
 
             cy.visit(draftUrl).end().logout4DN();
 
@@ -69,21 +69,26 @@ describe("HiGlass Display pages", function(){
 
             // Delete all newly created higlass views.
             cy.wrap(testItemsToDelete).each(function(testItem){ // Synchronously process async stuff.
-                cy.request({
-                    method: "DELETE",
-                    url: testItem['@id'],
-                    headers: {
-                        "Content-Type" : "application/json",
-                        "Accept" : "application/json"
-                    }
-                }).end().request({
-                    method: "PATCH",
-                    url: testItem['@id'],
-                    headers: {
-                        "Content-Type" : "application/json",
-                        "Accept" : "application/json"
-                    },
-                    body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+                cy.window().then(function(w){
+                    const token = w.fourfront.JWT.get();
+                    cy.request({
+                        method: "DELETE",
+                        url: testItem['@id'],
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            "Content-Type" : "application/json",
+                            "Accept" : "application/json"
+                        }
+                    }).end().request({
+                        method: "PATCH",
+                        url: testItem['@id'],
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            "Content-Type" : "application/json",
+                            "Accept" : "application/json"
+                        },
+                        body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+                    });
                 });
             });
 
@@ -105,8 +110,8 @@ describe("HiGlass Display pages", function(){
             // Ensure HiGlassComponent has loaded (before Clone btn can be clicked w/o errors)
             cy.get('.higlass-instance .react-grid-layout').end()
                 // Click the 'Clone' button.
-                .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
-                .get(".tab-section-title .inner-panel.collapse.in").within(function($panel){
+                // for mobile size: .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
+                .get(".tab-section-title .tabview-title-controls-container").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
                 .get('.alert div').should('have.text', 'Saved new display.').end()
@@ -138,8 +143,8 @@ describe("HiGlass Display pages", function(){
             cy.get('.higlass-instance .react-grid-layout').end()
 
                 // Click the 'Clone' button.
-                .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
-                .get(".tab-section-title .inner-panel.collapse.in").within(function($panel){
+                // for mobile size: .get(".tab-section-title button.toggle-open-button").click().wait(3000).end()
+                .get(".tab-section-title .tabview-title-controls-container").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
 
@@ -197,14 +202,22 @@ describe("HiGlass Display pages", function(){
     context('Sharing on the Individual Higlass display page', function() {
 
         after(function(){
+
             // Edit the higlass display back to draft status.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end().request(
-                'PATCH',
-                draftUrl,
-                {
-                    "status":"draft"
-                }
-            ).logout4DN();
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end()
+                .window().then(function(w){
+                    const token = w.fourfront.JWT.get();
+                    return cy.request({
+                        method: "PATCH",
+                        url: draftUrl,
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            "Content-Type" : "application/json",
+                            "Accept" : "application/json"
+                        },
+                        body: JSON.stringify({ "status" : "draft" })
+                    });
+                }).logout4DN();
         });
 
         it('Can release HiGlass Item to public.', function() {
@@ -221,9 +234,9 @@ describe("HiGlass Display pages", function(){
 
             // This also tests the mobile menu as well as the share/release dropdown btn functionality.
             cy.visit(draftUrl).get('.item-view-header .indicator-item.item-status').should('have.text', 'draft').end()
-                .get(".tab-section-title button.toggle-open-button").click().wait(500).end()
-                .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle").click().wait(300).end()
-                .get(".tab-section-title .inner-panel.collapse.in button.btn-info.dropdown-toggle + ul").within(function($ul){
+                // for mobile size: .get(".tab-section-title button.toggle-open-button").click().wait(500).end()
+                .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle").click().wait(300).end()
+                .get(".tab-section-title .tabview-title-controls-container button.btn-info.dropdown-toggle + .dropdown-menu.show").within(function($menu){
                     return cy.contains("Visible by Everyone").click().wait(1000).end();
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()

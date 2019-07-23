@@ -6,7 +6,8 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 import { Popover, Button } from 'react-bootstrap';
-import { console, object, ajax } from'./../../util';
+
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { StackedBlockVisual } from './../components';
 
 
@@ -315,7 +316,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
         return (
             <div className="static-section joint-analysis-matrix">
                 <div className="row">
-                    <div className={"col-xs-12 col-md-" + (encode_results ? '6' : '12')}>
+                    <div className={"col-12 col-md-" + (encode_results ? '6' : '12')}>
                         { headerFor4DN }
                         <VisualBody
                             {..._.pick(this.props, 'self_planned_results_url', 'self_results_url', 'headerColumnsOrder',
@@ -332,7 +333,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
                         />
                     </div>
                     { encode_results ?
-                        <div className="col-xs-12 col-md-6">
+                        <div className="col-12 col-md-6">
                             { headerForEncode }
                             <VisualBody
                                 {..._.pick(this.props, 'encode_results_url', 'headerColumnsOrder', 'titleMap',
@@ -451,14 +452,14 @@ class VisualBody extends React.PureComponent {
         const yAxisGroupingValue = (isGroup ? data[0][columnGrouping] : data[columnGrouping]) || null;
         const popoverTitle = (
             <div className="clearfix matrix-popover-title">
-                <div className="x-axis-title pull-left">
+                <div className="x-axis-title">
                     <div className="text-300">{groupingPropertyCurrentTitle}</div>
                     <div className="text-400">{groupingPropertyCurrentValue}</div>
                 </div>
-                <div className="mid-icon pull-left">
+                <div className="mid-icon">
                     <i className="icon icon-times"/>
                 </div>
-                <div className="y-axis-title pull-left">
+                <div className="y-axis-title">
                     <div className="text-300">{yAxisGroupingTitle}</div>
                     <div className="text-400">{yAxisGroupingValue}</div>
                 </div>

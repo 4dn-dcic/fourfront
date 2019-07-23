@@ -4,9 +4,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { Nav, NavDropdown, MenuItem } from 'react-bootstrap';
-import { JWT, isServerSide, navigate, object } from './../../util';
-import { LoginNavItem } from './LoginNavItem';
+import { Nav, NavDropdown, Dropdown } from 'react-bootstrap';
+
+import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/LoginController';
+
+import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
+
 
 
 /**
@@ -19,85 +23,53 @@ import { LoginNavItem } from './LoginNavItem';
 /**
  * React-Bootstrap Dropdown with User Action menu items.
  *
- * @todo Refactor this into a BigDropdown menu. Get rid of listActionsFor at some point from App.js.
+ * @todo Refactor this into a BigDropdown menu.
  */
-export class UserActionDropdownMenu extends React.Component {
+export const UserActionDropdownMenu = React.memo(function UserActionDropdownMenu(props){
+    const { session, href, updateUserInfo } = props;
+    let acctBtn = null;
 
-    static propTypes = {
-        'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
-        'listActionsFor'  : PropTypes.func.isRequired,      /** Passed in by App TODO: Make this a global function, or have it be in util/json-web-token.js */
-        'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
-        'updateUserInfo'  : PropTypes.func.isRequired,      /** Passed in by App */
-        'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
-    };
+    if (session){
+        const { details: userDetails = {}, user_actions: userActions = [] } = JWT.getUserInfo() || {};
+        const { first_name: acctTitle = "Account", email } = userDetails;
+        const acctIcon = (typeof email === 'string' && email.indexOf('@') > -1 && (
+            object.itemUtil.User.gravatar(email, 30, { 'className' : 'account-icon-image' }, 'mm')
+        )) || <i className="account-icon icon icon-user-o" />;
+        const cls = 'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '');
 
-    constructor(props){
-        super(props);
-        this.performLogout = this.performLogout.bind(this);
-        this.listUserActionsAsMenuItems = this.listUserActionsAsMenuItems.bind(this);
-        this.state = { 'isLoading' : false };
-    }
-
-    /**
-     * Removes JWT from cookies, as well as userInfo from localStorage
-     * and then refreshes current view/href via navigate fxn.
-     */
-    performLogout(eventKey, eventObject){
-        const { updateUserInfo } = this.props;
-
-        // Removes both idToken (cookie) and userInfo (localStorage)
-        JWT.remove();
-
-        // Refetch page context without our old JWT to hide any forbidden content.
-        updateUserInfo();
-        navigate('', { 'inPlace':true });
-
-        if (typeof document !== 'undefined'){
-            // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
-            document.dispatchEvent(new MouseEvent('click'));
-        }
-    }
-
-    /** Shown for logged in users. */
-    listUserActionsAsMenuItems(){
-        const { listActionsFor, href } = this.props;
-        const actions = _.map(listActionsFor('user'), function(action){
-            return actionToMenuItem(action, href, { "data-no-cache" : true });
+        const renderedActions = _.map(userActions, function(action){
+            return (
+                <Dropdown.Item key={action.id} href={getActionURL(action, href)} onClick={actionToMenuItemOnClick}
+                    className="global-entry" active={isActionActive(action, href)} data-no-cache="true">
+                    { action.title }
+                </Dropdown.Item>
+            );
         });
 
-        actions.push(
-            <MenuItem id="logoutbtn" onSelect={this.performLogout} className="global-entry">
-                Log Out
-            </MenuItem>
+        acctBtn = (
+            <NavDropdown className={cls} title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} label="context">
+                { renderedActions }
+                <LogoutController updateUserInfo={updateUserInfo}>
+                    <LogoutDropdownItem/>
+                </LogoutController>
+            </NavDropdown>
         );
-
-        return actions;
+    } else {
+        acctBtn = (
+            <LoginController {..._.pick(props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}>
+                <LoginNavItem key="login-register" className="user-account-item" />
+            </LoginController>
+        );
     }
 
-    render() {
-        const { session } = this.props;
-        let acctBtn = null;
-
-        if (session){
-            const userDetails = JWT.getUserDetails();
-            const acctTitle = (userDetails && userDetails.first_name) || "Account";
-            const acctIcon = (userDetails && typeof userDetails.email === 'string' && userDetails.email.indexOf('@') > -1 && (
-                object.itemUtil.User.gravatar(userDetails.email, 30, { 'className' : 'account-icon-image' }, 'mm')
-            )) || <i className="account-icon icon icon-user-o" />;
-
-            acctBtn = (
-                <NavDropdown className={'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '')}
-                    title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} id="user_account_nav_button" label="context">
-                    { this.listUserActionsAsMenuItems() }
-                </NavDropdown>
-            );
-        } else {
-            acctBtn = <LoginNavItem {..._.pick(this.props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')} key="login-register" id="user_account_nav_button" />;
-        }
-
-        return <Nav className="navbar-acct" pullRight>{ acctBtn }</Nav>;
-    }
-}
+    return <Nav className="navbar-acct">{ acctBtn }</Nav>;
+});
+UserActionDropdownMenu.propTypes = {
+    'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
+    'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
+    'updateUserInfo'  : PropTypes.func.isRequired,      /** Passed in by App */
+    'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
+};
 
 
 
@@ -136,35 +108,7 @@ export function getActionURL(action, currentHref){
     return '#';
 }
 
-/**
- * Renders out a React-Bootstrap MenuItem for an action.
- *
- * @param {Action} action - Action to test.
- * @param {string} currentHref - Current URI, if available.
- * @param {Object} extraProps - Any extra props to add to MenuItem.
- * @returns {JSX.Element} A MenuItem instance.
- */
-export function actionToMenuItem(action, currentHref, extraProps){
-    return (
-        <MenuItem key={action.id} href={getActionURL(action, currentHref)} onClick={actionToMenuItem.onClick}
-            className="global-entry" active={isActionActive(action, currentHref)} {...extraProps}>
-            { action.title }
-        </MenuItem>
-    );
-}
-actionToMenuItem.onClick = function(e){
+
+function actionToMenuItemOnClick(e){
     return e.target && typeof e.target.blur === 'function' && e.target.blur();
-};
-
-
-
-/**
- * @deprecated
- * @returns {number|null} Height of NavBar
- */
-export function getCurrentNavHeight(){
-    if (!isServerSide() && document){
-        return parseInt(document.getElementById('top-nav').offsetHeight);
-    }
-    return null;
 }

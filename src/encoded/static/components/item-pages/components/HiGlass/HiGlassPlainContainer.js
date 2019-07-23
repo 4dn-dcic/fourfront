@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console, object } from './../../../util';
-import { requestAnimationFrame } from './../../../viz/utilities';
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 
 
 /**
@@ -216,7 +216,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
                 <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.5.7/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
-                <div className="higlass-wrapper row">{ hiGlassInstance }</div>
+                <div className="higlass-wrapper">{ hiGlassInstance }</div>
             </div>
         );
     }

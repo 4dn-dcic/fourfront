@@ -2,7 +2,7 @@
 
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /** @module parsing-functions */
 
@@ -118,7 +118,7 @@ var ParsingOptions;
 
 
 
- /** @type ParsingOptions */
+/** @type ParsingOptions */
 export const DEFAULT_PARSING_OPTIONS = {
     'direction'                 : 'output',
     'skipSortOnColumns'         : [1],
@@ -149,7 +149,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
     /** @type Node[] */
     let nodes = [];
     /** @type Edge[] */
-    let edges = [];
+    const edges = [];
 
     /*************
      * Temp Vars *
@@ -159,7 +159,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
      * Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
      * @type {Object.<string, number>}
      */
-    let ioIdsUsed = {};
+    const ioIdsUsed = {};
 
     /**
      * Keep track of steps already processed & added to graph.
@@ -168,7 +168,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
      *
      * @type {Object.<string, Node>}
      */
-    let processedSteps = {};
+    const processedSteps = {};
 
     /***************
      ** Functions **
