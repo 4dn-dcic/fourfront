@@ -3,10 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, navigate } from'./../util';
-import { requestAnimationFrame } from './../viz/utilities';
-import { Collapse, Button } from 'react-bootstrap';
-import { Announcements, BasicStaticSectionBody, HomePageCarousel } from './components';
+
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
+import { navigate } from'./../util';
+import { Announcements, HomePageCarousel } from './components';
 
 
 /**
@@ -47,11 +50,11 @@ export default class HomePage extends React.PureComponent {
 
                 <div className="container home-content-area" id="content">
                     <div className="row">
-                        <div className="col-xs-12 col-md-8">
+                        <div className="col-12 col-md-8">
                             <h2 className="homepage-section-title">Introduction</h2>
                             { this.introText() }
                         </div>
-                        <div className="col-xs-12 col-md-4 pull-right">
+                        <div className="col-12 col-md-4 pull-right">
                             <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
                         </div>
                     </div>
@@ -85,7 +88,7 @@ class BigBrowseButton extends React.Component {
 
     handleMouseEnter(){
         requestAnimationFrame(function(){
-            var topMenuBrowseButton = document.getElementById('browse-menu-item');
+            const [ topMenuBrowseButton ] = document.getElementsByClassName('browse-nav-btn');
             if (topMenuBrowseButton){
                 topMenuBrowseButton.style.textShadow = "0 0 0 #000";
                 topMenuBrowseButton.style.color = "#000";
@@ -96,7 +99,7 @@ class BigBrowseButton extends React.Component {
 
     handleMouseLeave(e){
         requestAnimationFrame(function(){
-            var topMenuBrowseButton = document.getElementById('browse-menu-item');
+            const [ topMenuBrowseButton ] = document.getElementsByClassName('browse-nav-btn');
             if (topMenuBrowseButton){
                 topMenuBrowseButton.style.textShadow = '';
                 topMenuBrowseButton.style.color = '';

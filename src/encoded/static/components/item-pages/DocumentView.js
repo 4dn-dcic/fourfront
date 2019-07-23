@@ -1,8 +1,8 @@
 'use strict';
 
 import React from 'react';
-import { console, object, Schemas } from './../util';
-import { ItemFileAttachment } from './components';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
 
 
@@ -19,11 +19,11 @@ export default class DocumentView extends DefaultItemView {
 
 
 const DocumentViewOverview = React.memo(function DocumentViewOverview({ context, schemas }){
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const tips = object.tipsFromSchema(schemas, context);
     return (
         <div>
             <div className="row overview-blocks">
-                <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-xs-12 col-md-6" includeTitle btnSize="lg" itemType="Document" />
+                <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-12 col-md-6" includeTitle btnSize="lg" itemType="Document" />
             </div>
         </div>
     );

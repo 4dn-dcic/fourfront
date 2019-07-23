@@ -2,8 +2,13 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { DropdownButton, Button, ButtonToolbar, ButtonGroup, MenuItem, Panel, Table} from 'react-bootstrap';
-import { ajax, DateUtility } from './../util';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+
+/** @deprecated - DropDownButton, Button */
+/** @todo use HTML elem(s) */
+import { ButtonToolbar, ButtonGroup } from 'react-bootstrap';
 
 /**
  * @typedef {Object} Subscription
@@ -14,6 +19,9 @@ import { ajax, DateUtility } from './../util';
  */
 var Subscription;
 
+
+/** @TODO REFACTOR RE: LINTING & REACT STANDARDS */
+
 /**
  * Container component for the submissions page. Fetches the user info and
  * coordinates individual subscriptions.
@@ -22,7 +30,7 @@ export default class SubscriptionsView extends React.PureComponent {
 
     constructor(props){
         super(props);
-
+        this.getUserInfo = this.getUserInfo.bind(this);
         /**
          * @private
          * @type {Object}
@@ -47,14 +55,14 @@ export default class SubscriptionsView extends React.PureComponent {
      * @private
      * @returns {void}
      */
-    getUserInfo = () => {
-        ajax.promise('/me?frame=embedded').then(response => {
+    getUserInfo() {
+        ajax.promise('/me?frame=embedded').then((response) => {
             if (!response.uuid || !response.subscriptions){
                 this.setState({
                     'subscriptions': null,
                     'initialized': true
                 });
-            }else{
+            } else {
                 this.setState({
                     'subscriptions': response.subscriptions,
                     'initialized': true
@@ -68,8 +76,8 @@ export default class SubscriptionsView extends React.PureComponent {
      * @returns {JSX.Element} Div containing list of subscription views.
      */
     render(){
-        var { subscriptions, initialized } = this.state,
-            subscrip_list, main_message;
+        const { subscriptions, initialized } = this.state;
+        let subscrip_list, main_message;
 
         if (Array.isArray(subscriptions) && subscriptions.length > 0){
             subscrip_list = _.map(subscriptions, function(scrip){
@@ -79,7 +87,7 @@ export default class SubscriptionsView extends React.PureComponent {
         } else if (initialized){
             main_message = "No submissions to track; you are not a submitter nor associated with any labs.";
         } else {
-            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': '0.5' }}/>;
+            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{ 'opacity': '0.5' }}/>;
         }
         return (
             <div id="content" className="container">
@@ -102,16 +110,16 @@ class SubscriptionEntry extends React.Component{
     constructor(props){
         super(props);
         this.changePage = _.throttle(this.changePage, 250);
-        var is_open = false;
-        // user submissions default to open
-        if (this.props.title == 'My submissions'){
-            is_open = true;
-        }
+        _.bindAll(this, 'toggleOpen', 'loadSubscriptionData', 'findTypesFromFacets', 'findTypesFromFacets',
+            'displayToggle', 'generateEntry', 'generateButtonToolbar', 'buildEnumEntry', 'submitEnumVal',
+            'filterEnumTitle'
+        );
+        const open = props.title == 'My submissions' ? true : false;
         this.state = {
             'data': null,
             'types': null,
             'selected_type': 'Item',
-            'open': is_open,
+            'open': open,
             'page': 1,
             'changing_page': false,
             'num_pages': null
@@ -126,18 +134,21 @@ class SubscriptionEntry extends React.Component{
         }
     }
 
-    toggleOpen = (e) => {
+    toggleOpen(e){
         e.preventDefault();
-        // load data if it hasn't been already
-        if(!this.state.data){
-            this.loadSubscriptionData(this.props.url, this.state.page, this.state.selected_type);
-        }
         this.setState(function({ open }){
-            return {'open': !open };
+            return { 'open': !open };
+        }, ()=>{
+            // load data if it hasn't been already
+            const { url } = this.props;
+            const { data, page, selected_type } = this.state;
+            if (!data){
+                this.loadSubscriptionData(url, page, selected_type);
+            }
         });
     }
 
-    loadSubscriptionData = (url, page, type) => {
+    loadSubscriptionData(url, page, type) {
         // search sorts by date_created as default. Thus, @graph results will be sorted
         // use page number to implement pagination
         var no_type_in_url = url.indexOf("?type=") == -1 && url.indexOf("&type=") == -1;
@@ -148,7 +159,7 @@ class SubscriptionEntry extends React.Component{
             fetch_url = fetch_url + '&type=' + type;
         }
 
-        ajax.promise(fetch_url).then(response => {
+        ajax.promise(fetch_url).then((response) => {
             if (!response['@graph'] || !response['facets']){
                 this.setState({
                     'data': null,
@@ -158,7 +169,7 @@ class SubscriptionEntry extends React.Component{
                     'page': 1,
                     'type': 'Item'
                 });
-            }else{
+            } else {
                 var types;
                 // no specified item type, so set the types state
                 // only want to run this once, with type=Item
@@ -178,7 +189,7 @@ class SubscriptionEntry extends React.Component{
 
     // find all item types represented in this result by parsing @graph
     // can't use facets because they ignore pagination
-    findTypesFromFacets = (facets) => {
+    findTypesFromFacets(facets){
         var types = [];
         for(var i=0; i<facets.length; i++){
             if(facets[i]['field'] == 'type'){
@@ -192,24 +203,25 @@ class SubscriptionEntry extends React.Component{
         }
         types.sort();
         types.unshift('Item'); // add Item to front of the array
-        this.setState({'types':types});
+        this.setState({ types });
     }
 
-    displayToggle = () => {
-        if(this.state.open && !this.state.data){
-            return(
-                <i className="icon icon-spin icon-circle-o-notch" style={{'marginLeft': '5px','opacity': '0.5' }}></i>
+    displayToggle(){ // TODO: Make into functional component
+        const { open, data } = this.state;
+        if (open && !data) {
+            return (
+                <i className="icon icon-spin icon-circle-o-notch" style={{ 'marginLeft': '5px','opacity': '0.5' }}/>
             );
-        }else{
-            return(
-                <Button bsSize="xsmall" className="icon-container submission-btn" onClick={this.toggleOpen}>
-                    <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
-                </Button>
+        } else {
+            return (
+                <button type="button" className="btn btn-xs btn-outline-dark icon-container submission-btn" onClick={this.toggleOpen}>
+                    <i className={"icon icon-" + (open ? "minus" : "plus")}/>
+                </button>
             );
         }
     }
 
-    generateEntry = (entry) => {
+    generateEntry(entry){
         if(!entry['@type'] || !entry.date_created || !entry.status || !entry.display_title || !entry['@id']){
             return;
         }
@@ -221,68 +233,78 @@ class SubscriptionEntry extends React.Component{
                 </td>
                 <td>
                     {(entry.aliases && entry.aliases.length > 0) ?
-                    <div style={{'wordWrap':'break-word','overflowWrap':'break-word'}}>
-                        {entry.aliases.join(', ')}
-                    </div>
-                    :""}
+                        <div style={{ 'wordWrap':'break-word','overflowWrap':'break-word' }}>
+                            {entry.aliases.join(', ')}
+                        </div>
+                        : ""
+                    }
                 </td>
                 <td>{entry['@type'][0]}</td>
                 <td>{entry.status}</td>
                 <td>
-                    <DateUtility.LocalizedTime timestamp={entry.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
+                    <LocalizedTime timestamp={entry.date_created} formatType="date-time-md" dateTimeSeparator=" at " />
                 </td>
             </tr>
         );
     }
 
-    generateButtonToolbar = () => {
-        if(!this.state.open){
+    generateButtonToolbar(){
+        const { open, selected_type, types, num_pages, page, changing_page } = this.state;
+        if (!open){
             return null;
         }
+        const prevPageClick = changing_page ? null : (e) => {
+            this.changePage(page - 1);
+        };
+        const nextPageClick = changing_page ? null : (e) => {
+            this.changePage(page + 1);
+        };
         return(
-            <ButtonToolbar className="pull-right" style={{'marginTop':'-5px'}}>
-                {this.state.types ?
-                    <DropdownButton id="dropdown-size-extra-small" title={this.filterEnumTitle(this.state.selected_type)} >
-                        {this.state.types.map((type) => this.buildEnumEntry(type))}
+            <ButtonToolbar className="pull-right" style={{ 'marginTop':'-5px' }}>
+                {types ?
+                    <DropdownButton id="dropdown-size-extra-small" title={this.filterEnumTitle(selected_type)} >
+                        {types.map((type) => this.buildEnumEntry(type))}
                     </DropdownButton>
-                : null}
+                    : null}
                 <ButtonGroup>
-                    <Button disabled={this.state.changing_page || !this.state.num_pages  || this.state.page === 1} onClick={this.state.changing_page === true ? null : (e)=>{
-                        this.changePage(this.state.page - 1);
-                    }}><i className="icon icon-angle-left icon-fw"></i></Button>
+                    <button type="button" disabled={changing_page || !num_pages  || page === 1}
+                        className="btn btn-secondary" onClick={prevPageClick}>
+                        <i className="icon icon-angle-left icon-fw"/>
+                    </button>
 
-                    <Button disabled style={{'minWidth': 120 }}>
-                        { this.state.changing_page === true || !this.state.num_pages ?
-                            <i className="icon icon-spin icon-circle-o-notch" style={{'opacity': 0.5 }}></i>
-                            : 'Page ' + this.state.page + ' of ' + this.state.num_pages
+                    <button type="button" className="btn btn-secondary" disabled style={{ 'minWidth': 120 }}>
+                        { changing_page === true || !num_pages ?
+                            <i className="icon icon-spin icon-circle-o-notch" style={{ 'opacity': 0.5 }}/>
+                            : 'Page ' + page + ' of ' + num_pages
                         }
-                    </Button>
+                    </button>
 
-                    <Button disabled={this.state.changing_page || !this.state.num_pages || this.state.page === this.state.num_pages} onClick={this.state.changing_page === true ? null : (e)=>{
-                        this.changePage(this.state.page + 1);
-                    }}><i className="icon icon-angle-right icon-fw"></i></Button>
+                    <button type="button" disabled={changing_page || !num_pages || page === num_pages}
+                        className="btn btn-secondary" onClick={nextPageClick}>
+                        <i className="icon icon-angle-right icon-fw"/>
+                    </button>
 
                 </ButtonGroup>
             </ButtonToolbar>
         );
     }
 
-    buildEnumEntry = (val) => {
+    buildEnumEntry(val){
         return(
-            <MenuItem key={val} title={this.filterEnumTitle(val) || ''} eventKey={val} onSelect={this.submitEnumVal}>
+            <DropdownItem key={val} title={this.filterEnumTitle(val) || ''} eventKey={val} onSelect={this.submitEnumVal}>
                 {this.filterEnumTitle(val) || ''}
-            </MenuItem>
+            </DropdownItem>
         );
     }
 
-    submitEnumVal = (eventKey) => {
+    submitEnumVal(eventKey){
         // reset page to 1 on a type change
         this.loadSubscriptionData(this.props.url, 1, eventKey);
-        this.setState({'page':1, 'selected_type': eventKey});
+        this.setState({ 'page':1, 'selected_type': eventKey });
     }
 
     // very simple. If title == Item, return 'All'
-    filterEnumTitle = (title) => {
+    filterEnumTitle(title){
         if(title == 'Item'){
             return 'All';
         }else{
@@ -290,12 +312,16 @@ class SubscriptionEntry extends React.Component{
         }
     }
 
-    changePage = (page) => {
-        if(page > this.state.num_pages || page < 1){
-            return;
-        }
-        this.loadSubscriptionData(this.props.url, page, this.state.selected_type);
-        this.setState({'page':page, 'changing_page':true});
+    changePage(page){
+        this.setState(function({ page: currPage, num_pages }){
+            if (page > num_pages || page < 1){
+                return null;
+            }
+            return { page, 'changing_page' : true };
+        }, ()=>{
+            const { url } = this.props, { selected_type } = this.state;
+            this.loadSubscriptionData(url, page, selected_type);
+        });
     }
 
     render(){
@@ -305,14 +331,14 @@ class SubscriptionEntry extends React.Component{
         }
         return(
             <div className="mb-1">
-                <div className='submission-page-heading'>
-                    <h3 className='submission-subtitle'>{this.props.title}</h3>
-                    <h3 className='submission-subtitle'>{this.displayToggle()}</h3>
+                <div className="submission-page-heading">
+                    <h3 className="submission-subtitle">{this.props.title}</h3>
+                    <h3 className="submission-subtitle">{this.displayToggle()}</h3>
                     {this.generateButtonToolbar()}
                 </div>
                 {this.state.open ?
-                    <div className="sub-panel panel-body-with-header" style={{'maxHeight':'300px', 'overflowY':'auto'}}>
-                        <Table striped fill>
+                    <div className="sub-panel panel-body-with-header" style={{ 'maxHeight':'300px', 'overflowY':'auto' }}>
+                        <table className="table table-striped table-fill">
                             <thead>
                                 <tr>
                                     <th>Item</th>
@@ -325,9 +351,9 @@ class SubscriptionEntry extends React.Component{
                             <tbody>
                                 {submissions}
                             </tbody>
-                        </Table>
+                        </table>
                     </div>
-                : null}
+                    : null}
             </div>
         );
     }

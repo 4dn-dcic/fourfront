@@ -2,61 +2,52 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, ajax, DateUtility, object, Schemas } from './../../util';
-import { store } from '../../../store';
-import * as globals from './../../globals';
-import { Collapse, Button } from 'react-bootstrap';
-import { PartialList } from './../../item-pages/components';
-import { BasicStaticSectionBody } from './BasicStaticSectionBody';
+import { console, ajax, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/PartialList';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+
 
 /**
  * A single Announcement block/view.
+ * @todo refactor into functional components, if not getting rid of
  */
-class Announcement extends React.Component {
 
-    subtitleAuthor(author){
-        if (!author) return null;
-    }
-
-    subtitle(){
-        var section = this.props.section;
-        var date = section.date_created;
-        var author = section.submitted_by;
-        var authorName = (author && author.display_title && <span className="text-500">{ author.display_title }</span>) || null;
-        var unreleasedStatus = section.status && section.status !== 'released' ? <span className="text-500"> - { Schemas.Term.capitalizeSentence(section.status) }</span> : null;
-        //var authorLink = authorName && object.itemUtil.atId(author);
-        //if (authorLink) authorName = <a href={authorLink}>{ authorName }</a>;
-        return (
-            <div className="fourDN-section-info announcement-subtitle">
-                { authorName ? <span>Posted by { authorName }</span>: null }
-                { date ? <span>{!authorName ? ' Posted ' : ' '}on <DateUtility.LocalizedTime timestamp={date}/></span> : null }
-                { unreleasedStatus }
+const Announcement = React.memo(function Announcement(props){
+    const { section } = props;
+    if (!section || !section.content) return null;
+    const filetype = section.filetype || 'html';
+    return (
+        <div className="announcement">
+            <div className="announcement-title">
+                <span dangerouslySetInnerHTML={{ __html: section.title || '<em>Untitled</em>' }}/>
             </div>
-        );
-    }
-
-    render() {
-        var section = this.props.section;
-        if (!section || !section.content) return null;
-
-        var filetype = section.filetype || 'html';
-
-        return (
-            <div className="announcement">
-                <div className="announcement-title">
-                    <span dangerouslySetInnerHTML={{__html: section.title || '<em>Untitled</em>' }}/>
-                </div>
-                { this.subtitle() }
-                <div className="announcement-content">
-                    <BasicStaticSectionBody content={section.content} filetype={filetype} />
-                </div>
+            <AnnouncementSubTitle {...props}/>
+            <div className="announcement-content">
+                <BasicStaticSectionBody content={section.content} filetype={filetype} />
             </div>
-        );
-    }
+        </div>
+    );
+});
 
-}
+const AnnouncementSubTitle = React.memo(function AnnouncementSubTitle(props){
+    const { section : { date_created : date = null, submitted_by : { display_title : authorDisplayTitle = null } = {}, status = null } } = props;
+    const authorName = (authorDisplayTitle && <span className="text-500">{ authorDisplayTitle }</span>) || null;
+    const unreleasedStatus = status && status !== 'released' ? (
+        <span className="text-500"> - { valueTransforms.capitalizeSentence(status) }</span>
+    ) : null;
+    //var authorLink = authorName && object.itemUtil.atId(author);
+    //if (authorLink) authorName = <a href={authorLink}>{ authorName }</a>;
+    return (
+        <div className="fourDN-section-info announcement-subtitle">
+            { authorName ? <span>Posted by { authorName }</span>: null }
+            { date ? <span>{!authorName ? ' Posted ' : ' '}on <LocalizedTime timestamp={date}/></span> : null }
+            { unreleasedStatus }
+        </div>
+    );
+});
 
-class AnnouncementsLoaded extends React.Component {
+class AnnouncementsLoaded extends React.PureComponent {
 
     static defaultProps = {
         'searchURL' : '/search/?type=StaticSection&section_type=Announcement&sort=-date_created'
@@ -116,13 +107,13 @@ class AnnouncementsLoaded extends React.Component {
  * @prop {string} className - Outer <div> element's className
  * @prop {string} id - Outer <div> element's id attribute.
  */
-export class Announcements extends React.Component {
+export class Announcements extends React.PureComponent {
 
     static defaultProps = {
         'announcements' : [],
         'loaded' : false,
         'initiallyVisible' : 3
-    }
+    };
 
     constructor(props){
         super(props);
@@ -139,13 +130,17 @@ export class Announcements extends React.Component {
     }
 
     render(){
-        var { loaded, announcements, initiallyVisible, className, id, total } = this.props;
+        const { loaded, announcements, initiallyVisible, className, id, total : propTotal, onSeeMoreClick } = this.props;
+        const { open } = this.state;
         if (loaded) return <AnnouncementsLoaded {...this.props} />;
 
-        var announcementsLength = (Array.isArray(announcements) && announcements.length) || 0;
+        let total = propTotal;
+
+        const announcementsLength = (Array.isArray(announcements) && announcements.length) || 0;
         if (!total) total = announcementsLength;
 
-        var persistent, collapsible = null;
+        let persistent;
+        let collapsible = null;
 
         function createAnnouncement(announce, idx){
             return <Announcement key={announce.title} index={idx} section={announce} icon={collapsible ? true : false} />;
@@ -162,15 +157,19 @@ export class Announcements extends React.Component {
             persistent = announcements;
         }
 
-        var onSeeMoreButtonClick = this.props.onSeeMoreClick || this.toggleOpen;
+        const onSeeMoreButtonClick = onSeeMoreClick || this.toggleOpen;
 
         return (
-            <div className={className} id={id}>{
-                collapsible ? [
-                    <PartialList key="list" open={this.state.open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,
-                    <Button key="button" bsSize="sm" className="pull-right" onClick={onSeeMoreButtonClick} bsStyle="default">{ !this.state.open ? 'See ' + (total - persistent.length) + ' More' : 'Hide' }</Button>
-                ] : persistent.map(createAnnouncement)
-            }</div>
+            <div className={(className || '') + " clearfix"} id={id}>
+                {
+                    collapsible ? [
+                        <PartialList key="list" open={open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,
+                        <button type="button" key="button" className="pull-right btn-sm btn-outline-dark" onClick={onSeeMoreButtonClick}>
+                            { !open ? 'See ' + (total - persistent.length) + ' More' : 'Hide' }
+                        </button>
+                    ] : persistent.map(createAnnouncement)
+                }
+            </div>
         );
     }
 }

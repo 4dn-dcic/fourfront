@@ -1,8 +1,8 @@
 import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import * as vizUtil from './../utilities';
-import { console, isServerSide, layout } from './../../util';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /**
  * If keep in RotatedLabel.statics, RotatedLabel doesn't exist at time that getDefaultProps() is hit.

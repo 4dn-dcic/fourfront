@@ -8,7 +8,7 @@
     "build-scss": "gulp build-scss",
     "watch-scss": "gulp build-scss-dev && node-sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --recursive --output-style expanded",
     "dev": "gulp dev",
-    "dev-quick": "gulp dev-quick",
+    "dev-quick": "gulp dev-quick --preserve-symlinks",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:open-local": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://localhost:8000",
@@ -34,6 +34,13 @@
       "node_modules/underscore",
       "libs/react-patches",
       "jsdom"
+    ],
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest",
+      ".+/node_modules/@hms-dbmi-bgm/shared-portal-components/.*": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@hms-dbmi-bgm/shared-portal-components).+\\.js$"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
@@ -63,8 +70,7 @@
     "babel-plugin-minify-dead-code-elimination": "^0.5.0",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.0.2",
-    "create-react-class": "^15.6.3",
-    "cypress": "^3.3.1",
+    "cypress": "^3.4.0",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-external-nodejs-plugin": "^1.0.0",
@@ -93,20 +99,14 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "acorn": "^6.0.5",
-    "auth0-lock": "^11.16.3",
-    "aws-sdk": "^2.421.0",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.8",
     "babel-polyfill": "^6.26.0",
-    "color": "^0.10.1",
-    "crypto-js": "^3.1.9-1",
     "d3": "^5.9.0",
     "detect-browser": "^3.0.1",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
     "higlass": "^1.5.7",
     "html-react-parser": "^0.4.7",
-    "js-md5": "^0.4.2",
-    "jsonwebtoken": "^7.4.3",
     "markdown-to-jsx": "^6.9.3",
     "memoize-one": "^5.0.1",
     "moment": "^2.24.0",
@@ -114,23 +114,18 @@
     "prop-types": "^15.7.2",
     "query-string": "^4.3.4",
     "radium": "^0.25.1",
-    "rc-progress": "^2.3.0",
     "rc-tabs": "^9.6.3",
     "react": "^16.8.6",
-    "react-bootstrap": "0.32.4",
+    "react-bootstrap": "1.0.0-beta.10",
     "react-dom": "^16.8.6",
-    "react-draggable": "^3.1.1",
-    "react-infinite": "^0.13.0",
+    "react-draggable": "^3.3.0",
     "react-json-tree": "^0.11.2",
     "react-jsx-parser": "^1.15.1",
-    "react-matrix-viz": "^0.2.2",
     "react-redux": "^6.0.1",
-    "react-sticky": "^6.0.3",
     "react-tooltip": "^3.10.0",
-    "react-transition-group": "^2.7.1",
+    "react-transition-group": "^4.2.0",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
-    "underscore": "^1.9.1",
-    "universal-cookie": "^4.0.0"
+    "underscore": "^1.9.1"
   }
 }

@@ -4,9 +4,11 @@ import _ from 'underscore';
 import React from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
-import { navigate } from './navigate';
-import { isServerSide } from './misc';
-import { getNestedProperty } from './object';
+import { getNestedProperty } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/object';
+import { isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/misc';
+import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/patched-console';
+
+import { navigate } from './navigate'; // We use own extended version for browse stuff.
 
 
 

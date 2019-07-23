@@ -1,12 +1,12 @@
 'use strict';
 
-var React = require('react');
-var _ = require('underscore');
+import React from 'react';
+import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 import Matrix from './../lib/matrix-viz';
-var { Fade } = require('react-bootstrap');
-var vizUtil = require('./../viz/utilities');
-var { layout, console, isServerSide } = require('./../util');
-var ReactTooltip = require('react-tooltip');
+import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
+import { style as styleFxn } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { layout, console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /**
  * This file and components are deprecated.
@@ -102,20 +102,20 @@ function XAxis(props){
                         {/*<div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>*/}
                         { yAxisTitle }
                     </div>
-                : null }
+                    : null }
                 { showXAxisTitle && xAxisTitle ?
                     <div className="matrix-x-axis-title text-right">
                         <div><small className="text-300">Column<i className="icon icon-arrow-right"/></small></div>
                         { xAxisTitle }
                     </div>
-                : null }
+                    : null }
             </div>
             {_.map(labels, function(label, i){
                 return (
                     <div className="x-axis-matrix-label-container" style={{ width : cellSize }} key={label || i}>
                         <Label label={label} className="x-axis-matrix-label"
                             height={cellSize} width={height} registerPostUpdateFxn={registerPostUpdateFxn}
-                            style={{ 'transform' : vizUtil.style.rotate3d(-45) + ' ' + vizUtil.style.translate3d(translateVector, translateVector) }} />
+                            style={{ 'transform' : styleFxn.rotate3d(-45) + ' ' + styleFxn.translate3d(translateVector, translateVector) }} />
                     </div>
                 );
             }) }

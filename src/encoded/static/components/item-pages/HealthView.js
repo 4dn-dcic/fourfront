@@ -3,12 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { Button } from 'react-bootstrap';
-import { ajax, layout, navigate } from './../util';
-import { ItemDetailList } from './components';
 import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
+
+import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -114,9 +115,10 @@ export default class HealthView extends React.PureComponent {
                     }
                 }} />
 
-                <Button className="refresh-counts-button pull-right mt-2" onClick={this.getCounts} disabled={db_es_total === 'loading...'}>
+                <button type="button" className="btn btn-outline-dark refresh-counts-button pull-right mt-2"
+                    onClick={this.getCounts} disabled={db_es_total === 'loading...'}>
                     <i className={"icon icon-fw icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
-                </Button>
+                </button>
                 <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
 
                 <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={_.pick(this.state, 'db_es_total', 'db_es_compare')} schemas={schemas} keyTitleDescriptionMap={{

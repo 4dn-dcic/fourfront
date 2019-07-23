@@ -5,15 +5,22 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
-import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
-import { StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel, StackedBlockTable, FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox } from './StackedBlockTable';
-import { expFxn, console, isServerSide, analytics, object, Schemas, typedefs, fileUtil, navigate } from './../../util';
 
-var { Item, ExperimentSet } = typedefs;
+import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/StackedBlockTable';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
+import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
+import { SelectedFilesController } from './SelectedFilesController';
+import { expFxn, Schemas, typedefs, fileUtil } from './../../util';
+
+
+// eslint-disable-next-line no-unused-vars
+const { Item, ExperimentSet } = typedefs;
 
 
 
-
+/** @todo: Maybe split out file-tables.js into a directory. Split FileColumnActionsBtn into multiple functional components. */
 class FileColumnActionsBtn extends React.PureComponent {
 
     static hostFromHref = memoize(function(href){
@@ -41,7 +48,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
     isFileHIC(){
         const file = this.props.file;
-        const fileFormat = fileUtil.getFileFormatStr(file);
+        const fileFormat = commonFileUtil.getFileFormatStr(file);
         return (file && file.href && (
             // Needs an href + either it needs a file format of 'hic' OR it has a detailed file type that contains 'hic'
             (fileFormat && fileFormat === 'hic')
@@ -72,16 +79,17 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         if (otherBtnsExist){
             return (
-                <MenuItem data-tip="Visualize this file using the HiGlass Browser" onClick={onClick} key="higlass">
+                <DropdownItem data-tip="Visualize this file using the HiGlass Browser" onClick={onClick} key="higlass">
                     HiGlass
-                </MenuItem>
+                </DropdownItem>
             );
         } else {
             return (
                 <div className="inline-block" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
-                    <Button bsSize="xs" className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize with HiGlass" onClick={onClick}>
+                    <button type="button" className="btn btn-xs btn-primary in-stacked-table-button"
+                        data-tip="Visualize with HiGlass" onClick={onClick}>
                         <i className="icon icon-fw icon-television"/>
-                    </Button>
+                    </button>
                 </div>
             );
         }
@@ -107,9 +115,9 @@ class FileColumnActionsBtn extends React.PureComponent {
         }
 
         return (
-            <MenuItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
+            <DropdownItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
                 JuiceBox <i className="icon icon-fw icon-external-link text-smaller"/>
-            </MenuItem>
+            </DropdownItem>
         );
 
     }
@@ -136,9 +144,9 @@ class FileColumnActionsBtn extends React.PureComponent {
         }
 
         return (
-            <MenuItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
+            <DropdownItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
                 Epigenome Browser <i className="icon icon-fw icon-external-link text-smaller"/>
-            </MenuItem>
+            </DropdownItem>
         );
     }
 
@@ -159,8 +167,8 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         if (hasJBOrEpigenomeBtn){
             return (
-                <DropdownButton className="in-stacked-table-button" bsStyle="primary" data-tip="Visualize this file..."
-                    title={<i className="icon icon-fw icon-television"/>} dropup bsSize="xs">
+                <DropdownButton className="in-stacked-table-button-container" variant="primary" data-tip="Visualize this file..."
+                    data-place="right" title={<i className="icon icon-fw icon-television"/>} drop="up" size="xs">
                     { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
                 </DropdownButton>
             );
@@ -233,7 +241,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
 
 
 export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
-    const fileFormat = fileUtil.getFileFormatStr(file);
+    const fileFormat = commonFileUtil.getFileFormatStr(file);
     const summary = (
         file.file_type_detailed ||
         ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
@@ -254,9 +262,10 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
     }
     const filename = Schemas.Term.toName('quality_metric.url', file.quality_metric.url, false);
     return (
-        <Button bsStyle="primary" bsSize="xs" data-tip={"View report - " + filename} href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
+        <button type="button" className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
+            href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
             <i className="icon icon-fw icon-file-text-o" />
-        </Button>
+        </button>
     );
 }
 
@@ -341,7 +350,7 @@ export class RawFilesStackedTable extends React.PureComponent {
      */
     static metricColumnHeaders(showMetricColumns, experimentSet){
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
-        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || fileUtil.filterFilesWithEmbeddedMetricItem(
+        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || commonFileUtil.filterFilesWithEmbeddedMetricItem(
             expFxn.allFilesFromExperimentSet(experimentSet, false), true
         ) ? true : false;
 
@@ -389,6 +398,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
 
@@ -400,14 +410,18 @@ export class RawFilesStackedTable extends React.PureComponent {
         };
     }
 
+    handleFileCheckboxChange(accessionTripleString, fileObj){
+        return handleFileCheckboxChangeFxn(accessionTripleString, fileObj, SelectedFilesController.pick(this.props));
+    }
+
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
         const { experimentSet, collapseLongLists, collapseShow, collapseLimit, columnHeaders, showMetricsColumns, href } = this.props;
 
         const allRawFiles = exp.files || [];
 
-        const allFilesInGroups = fileUtil.groupFilesByRelations(allRawFiles);
-        const [ fileGroups, ungroupedFiles ] = fileUtil.extractSinglyGroupedItems(allFilesInGroups);
+        const allFilesInGroups = commonFileUtil.groupFilesByRelations(allRawFiles);
+        const [ fileGroups, ungroupedFiles ] = commonFileUtil.extractSinglyGroupedItems(allFilesInGroups);
 
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
@@ -541,7 +555,7 @@ export class RawFilesStackedTable extends React.PureComponent {
      */
     render(){
         const { experimentSet, columnHeaders, showMetricsColumns, collapseLongLists } = this.props;
-        const { accession, experiments_in_set, replicate_exps } = experimentSet;
+        const { experiments_in_set, replicate_exps } = experimentSet;
 
         const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
             expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
@@ -555,8 +569,9 @@ export class RawFilesStackedTable extends React.PureComponent {
         const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
 
         return (
-            <StackedBlockTable {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'collapseLongLists', 'width')}
-                columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn allFiles={allRawFiles}>
+            <StackedBlockTable {...SelectedFilesController.pick(this.props)} {..._.pick(this.props, 'collapseLongLists', 'width')}
+                columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn allFiles={allRawFiles}
+                handleFileCheckboxChange={this.handleFileCheckboxChange}>
                 <StackedBlockList className="biosamples" showMoreExtTitle={showMoreExtTitle} title="Biosamples">
                     { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
                 </StackedBlockList>
@@ -606,11 +621,16 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.oddExpRow = false;
     }
 
     componentDidUpdate(){
         this.oddExpRow = false;
+    }
+
+    handleFileCheckboxChange(accessionTripleString, fileObj){
+        return handleFileCheckboxChangeFxn(accessionTripleString, fileObj, SelectedFilesController.pick(this.props));
     }
 
     renderFileBlocksForExperiment(filesForExperiment){
@@ -667,7 +687,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
 
             var nameBlock = (
-                <StackedBlockName style={replicateNumbersExists ? { paddingTop : 19, paddingBottom: 19 } : null}>
+                <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
                     { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
@@ -689,7 +709,6 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             );
 
         });
-
     }
 
     render(){
@@ -697,7 +716,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         const filesGroupedByExperimentOrGlobal = ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
         return (
-            <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn allFiles={files}>
+            <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn allFiles={files}
+                handleFileCheckboxChange={this.handleFileCheckboxChange}>
                 <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{ experimentBlocks }</StackedBlockList>
             </StackedBlockTable>
         );

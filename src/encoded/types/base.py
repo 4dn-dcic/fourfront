@@ -267,7 +267,11 @@ class Collection(snovault.Collection, AbstractCollection):
         'description': 'Abstract collection of all Items.',
     })
 class Item(snovault.Item):
-    """smth."""
+    """
+    The abstract base type for all other Items.
+    All methods & properties are inherited by
+    sub-types unless overridden.
+    """
     item_type = 'item'
     AbstractCollection = AbstractCollection
     Collection = Collection

@@ -51,8 +51,8 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
             'files' : 0
         };
 
-
-        return cy.get('#navbar-icon .navbar-header').hoverIn().end().wait(1000).then(function(){
+        // Hover in/out to top left navbar logo to reset x/y position of any 'mouse'.
+        return cy.get('#top-nav .navbar-main a.navbar-brand').hoverIn().end().wait(1000).then(function(){
 
             return cy.get('.bar-plot-chart.chart-container .chart-bar:not(.barplot-transition-exit):not(.barplot-transition-exit-active)').each(function($bar){
                 return cy.wrap($bar).children('.bar-part').each(($barPart, idx)=>{
@@ -66,7 +66,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
             expect(hoverCounts.experiment_sets).to.equal(quickInfoBarCounts.experiment_sets);
             expect(hoverCounts.experiments).to.equal(quickInfoBarCounts.experiments);
             expect(hoverCounts.files).to.equal(quickInfoBarCounts.files);
-        })*/.end().window().scrollTo('top').end().get('#navbar-icon .navbar-header').hoverIn().wait(300).then(()=>{
+        })*/.end().window().scrollTo('top').end().get('#top-nav .navbar-main a.navbar-brand').hoverIn().wait(300).then(()=>{
 
                 if (!options.countChildTypes) {
                     return cy.window().scrollTo('top').end();
@@ -75,7 +75,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
 
                 // Change to 'experiments' (2nd menu item in aggregate type drown); compare bar & legend counts
                 return cy.get('button#select-barplot-aggregate-type').should('contain', 'Experiment Sets').click({ 'force' : true }).then(function(){
-                    return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(2)')
+                    return cy.get('div.dropdown > div.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > a.dropdown-item:nth-child(2)')
                         .should('have.text', 'Experiments').click().end().window().scrollTo('top').wait(750).then(function(){
                             return getBarCounts().then((barCounts)=>{
                                 expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiments);
@@ -95,7 +95,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                         }).end();
                 // Change to 'files' (2nd menu item in aggregate type drown); compare bar & legend counts
                 })/*.get('button#select-barplot-aggregate-type').should('contain', 'Experiments').click({ 'force' : true }).then(()=>{
-                    return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(3)')
+                    return cy.get('div.dropdown > div.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > a.dropdown-item:nth-child(3)')
                         .should('have.text', 'Files').click().end().window().scrollTo('top').wait(750).then(()=>{
                             return getBarCounts().then((barCounts)=>{
                                 expect(sum(...barCounts)).to.equal(quickInfoBarCounts.files);
@@ -115,7 +115,7 @@ export function compareQuickInfoCountsVsBarPlotCounts(options = { 'skipLegend' :
                             });
                         }).end();
             })*/.get('button#select-barplot-aggregate-type').should('contain', /* 'Files' */ 'Experiments').click({ 'force' : true }).then(function(){
-                        return cy.get('div.dropdown > ul.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > li:nth-child(1)')
+                        return cy.get('div.dropdown > div.dropdown-menu[aria-labelledby="select-barplot-aggregate-type"] > a.dropdown-item:nth-child(1)')
                             .should('have.text', 'Experiment Sets').click().end().window().scrollTo('top').wait(750).then(function(){
                                 return getBarCounts().then((barCounts)=>{
                                     expect(sum(...barCounts)).to.equal(quickInfoBarCounts.experiment_sets);
@@ -175,3 +175,91 @@ export function testNodesText(listOfNodeTextNames, nodesListSelector = '.graph-w
     });
 
 }
+
+
+
+/** COPIED FROM SHARED COMPONENTS REPO **/
+
+
+/** Converts e.g. "/profiles/File.json" to "File" */
+function stripTypeFromProfilesHref(profilesHref){
+    return profilesHref.slice(10,-5);
+}
+
+// This is from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms', we redefine here
+// to avoid installing/compiling dependency in full.
+export function schemasToItemTypeHierarchy(schemas){
+    const allTypesArray = _.keys(schemas);
+    const resHierarchy = {};
+
+    // We don't get "Item" delivered from backend else would look for where
+    // lack of "rdfs:subClassOf" property value to find Item and make that root.
+    // Instead we look for where "Item" is parent to gather root schemas.
+    const [ rootTypeNames, remainingTypeNames ] = _.partition(allTypesArray, function(typeName){
+        const typeSchema = schemas[typeName];
+        if (typeSchema["rdfs:subClassOf"] === "/profiles/Item.json"){
+            return true;
+        }
+        return false;
+    });
+
+    function addChildrenRecursively(parentHier, parentTypeSchema){
+        _.forEach(parentTypeSchema.children || [], function(childTypeURI){
+            const childTypeName = stripTypeFromProfilesHref(childTypeURI);
+            parentHier[childTypeName] = {};
+            const childTypeSchema = schemas[childTypeName];
+            if (Array.isArray(childTypeSchema.children) && childTypeSchema.children.length > 0){
+                addChildrenRecursively(parentHier[childTypeName], childTypeSchema);
+            }
+        });
+    }
+
+    _.forEach(rootTypeNames, function(rootTypeName){
+        resHierarchy[rootTypeName] = {};
+
+        // We have 'children' property in schemas, so we just use these
+        // for a performance improvement. See below incomplete fxn for alternative
+        // implementation relying purely on rds:subClassOf.
+        const rootTypeSchema = schemas[rootTypeName];
+        const rootTypeHasChildren = Array.isArray(rootTypeSchema.children) && rootTypeSchema.children.length > 0;
+        if (rootTypeHasChildren){
+            addChildrenRecursively(resHierarchy[rootTypeName], rootTypeSchema);
+        } else {
+            // Cull top-level types to only contain types with children.
+            delete resHierarchy[rootTypeName];
+        }
+    });
+
+    /*
+    function findParentHierarchyObj(hier, typeName){ // Basic DFS
+        const hierKeys = _.keys(hier);
+        const hierKeyLen = hierKeys.length;
+        var i, currType, found;
+        for (i = 0; i < hierKeyLen; i++){
+            currType = hierKeys[i];
+            if (currType === typeName){
+                return hier[currType];
+            }
+            found = findParentHierarchyObj(hier[currType], typeName);
+            if (found){
+                return found;
+            }
+        }
+        return false; // Could also throw Err
+    }
+    */
+
+    /* rds:subClassOf implementation (incomplete)
+       TODO: handle parentHier not being found because parent not yet added (ordering)
+       Could do by making remainingTypeNames into priority queue of some sort or w. multiple iterations of this for-loop.
+    _.forEach(remainingTypeNames, function(typeName){
+        const typeSchema = schemas[typeName];
+        const parentTypeName = stripTypeFromProfilesHref(typeSchema["rdfs:subClassOf"]);
+        const parentHier = findParentHierarchyObj(resHierarchy, parentTypeName);
+        parentHier[typeName] = {};
+    });
+    */
+
+    return resHierarchy;
+}
+

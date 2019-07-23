@@ -5,10 +5,12 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
-import { Button, DropdownButton, MenuItem } from 'react-bootstrap';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
-import { console, layout, ajax, DateUtility } from'./../util';
+
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 
 /**
  * Various utilities for helping to draw area charts.
@@ -329,7 +331,7 @@ export class GroupByDropdown extends React.PureComponent {
     render(){
         const { groupByOptions, currentGroupBy, title, loadingStatus, buttonStyle, outerClassName, children, id } = this.props;
         const optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
-            <MenuItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</MenuItem>
+            <DropdownItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</DropdownItem>
         );
         const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
 
@@ -858,11 +860,11 @@ export class AreaChart extends React.PureComponent {
         const currentTerm   = (evt && evt.target.getAttribute('data-term')) || null;
         const tdp           = tooltipDataProperty || 'total';
 
-        let dateFormatFxn = function(aDate){ return DateUtility.format(aDate, 'date-sm'); };
+        let dateFormatFxn = function(aDate){ return formatDateTime(aDate, 'date-sm'); };
 
         if (dateRoundInterval === 'month'){
             dateFormatFxn = function(aDate){
-                return DateUtility.format(aDate, 'date-month');
+                return formatDateTime(aDate, 'date-month');
             };
         } else if (dateRoundInterval === 'week'){
             // TODO maybe. Currently just keeps day format.
@@ -1100,7 +1102,7 @@ export class AreaChartContainer extends React.Component {
     static isExpanded(props){
         const { windowWidth, chartToggles, id } = props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState && gridState !== 'lg') return false;
+        if (gridState && gridState !== 'xl') return false;
         return !!((chartToggles || {})[id]);
     }
 
@@ -1150,12 +1152,12 @@ export class AreaChartContainer extends React.Component {
     expandButton(){
         const { windowWidth } = this.props;
         const gridState = layout.responsiveGridState(windowWidth);
-        if (gridState !== 'lg') return null;
+        if (gridState !== 'xl') return null;
         const expanded = AreaChartContainer.isExpanded(this.props);
         return (
-            <Button bsSize="sm" onClick={this.toggleExpanded}>
+            <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>
                 <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
-            </Button>
+            </button>
         );
     }
 

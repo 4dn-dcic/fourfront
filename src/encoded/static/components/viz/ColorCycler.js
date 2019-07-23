@@ -1,6 +1,5 @@
 import _ from 'underscore';
-import * as d3 from 'd3';
-import { console, isServerSide } from './../util';
+import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 export class ColorCycler {
 

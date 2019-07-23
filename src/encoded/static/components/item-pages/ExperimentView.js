@@ -4,9 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Checkbox, MenuItem, Dropdown, DropdownButton } from 'react-bootstrap';
-import { console, object, Schemas, expFxn } from './../util';
-import { ExperimentSetTablesLoaded, SimpleFilesTableLoaded, SimpleFilesTable, Publications, OverviewHeadingContainer } from './components';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../util';
+
+import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
+import { Publications } from './components/Publications';
+import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
+
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 
@@ -105,7 +111,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const width = this.getTabViewWidth();
         const initTabs = [];
 
-        if (ExperimentSetsViewOverview.parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
+        if (parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
             initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
         }
 
@@ -187,7 +193,6 @@ const ExperimentSetsViewOverview = React.memo(function ExperimentSetsViewOvervie
 
     return null;
 });
-
 ExperimentSetsViewOverview.propTypes = {
     'context' : PropTypes.shape({
         'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
@@ -198,7 +203,6 @@ ExperimentSetsViewOverview.propTypes = {
     'windowWidth' : PropTypes.number,
     'href' : PropTypes.string
 };
-
 ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWidth }, width){
     return {
         'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
@@ -212,7 +216,7 @@ ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWid
     };
 };
 
-ExperimentSetsViewOverview.parentExpSetsExistForExp = memoize(function(exp){
+const parentExpSetsExistForExp = memoize(function(exp){
     return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
 });
 
@@ -224,12 +228,12 @@ ExperimentSetsViewOverview.parentExpSetsExistForExp = memoize(function(exp){
 const OverviewHeading = React.memo(function OverviewHeading(props){
     const { context, schemas } = props;
     const { biosample } = context;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({ '@type' : ['Biosample', 'Item'] }, biosample));
+    const tips = object.tipsFromSchema(schemas, context); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+    const tipsForBiosample = object.tipsFromSchema(schemas, _.extend({ '@type' : ['Biosample', 'Item'] }, biosample));
     const commonProps = {
         'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
         'result'        : context,              // The Item from which are getting value for 'property'.
-        'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        'wrapInColumn'  : "col-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
     };
     const commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
@@ -252,12 +256,12 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
  */
 const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
     const { context: exp, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
-    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), _.extend({ '@type' : ['Biosample', 'Item'] }, exp.biosample));
+    const tips = object.tipsFromSchema(schemas, exp); // In form of { 'description' : {'title', 'description', 'type'}, 'experiment_type' : {'title', 'description', ...}, ... }
+    const tipsForBiosample = object.tipsFromSchema(schemas, _.extend({ '@type' : ['Biosample', 'Item'] }, exp.biosample));
     const commonProps = {
         'tips'          : tips,                 // Object containing 'properties' from Schema for Experiment ItemType. Informs the property title (from schema) & tooltip you get when hover over property title. Obtained from schemas.
         'result'        : exp,                  // The Item from which are getting value for 'property'.
-        'wrapInColumn'  : "col-xs-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
+        'wrapInColumn'  : "col-6 col-md-3"   // Optional. Size of the block. @see http://getbootstrap.com/docs/3.3/examples/grid/.
     };
     const commonBioProps = _.extend({ 'tips' : tipsForBiosample, 'result' : exp.biosample }, { 'wrapInColumn' : commonProps.wrapInColumn });
 
@@ -271,7 +275,7 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
             <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
-                wrapInColumn="col-xs-12 col-md-6 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                wrapInColumn="col-12 col-md-6 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
 
             <OverViewBodyItem {...commonProps} property="microscopy_technique" fallbackTitle="Microscopy Technique" />

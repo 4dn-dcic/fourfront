@@ -4,37 +4,33 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
-import { console, layout } from './../../util';
-import { requestAnimationFrame } from './../../viz/utilities';
+import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 
 
-export class DraggableVerticalBorder extends React.PureComponent {
-
-    static defaultProps = {
-        'handleHeight' : 24
-    };
-
-    render(){
-        var { xOffset, height, left, handleHeight } = this.props;
-        return (
-            <Draggable axis="x" position={{ 'x': xOffset, 'y': 0 }} {..._.pick(this.props, 'onStart', 'onStop', 'onDrag', 'bounds')}>
-                <div className="draggable-border vertical-border" style={{ 'height' : height, 'left': left - 5 }}>
-                    <div className="inner">
-                        <div className="drag-handle" style={{ 'height' : handleHeight, 'top' : (Math.max(height - handleHeight, 10) / 2) }}/>
-                    </div>
+export const DraggableVerticalBorder = React.memo(function DraggableVerticalBorder(props){
+    const { xOffset, height, left, handleHeight } = props;
+    return (
+        <Draggable axis="x" position={{ 'x': xOffset, 'y': 0 }} {..._.pick(props, 'onStart', 'onStop', 'onDrag', 'bounds')}>
+            <div className="draggable-border vertical-border" style={{ 'height' : height, 'left': left - 5 }}>
+                <div className="inner">
+                    <div className="drag-handle" style={{ 'height' : handleHeight, 'top' : (Math.max(height - handleHeight, 10) / 2) }}/>
                 </div>
-            </Draggable>
-        );
-    }
-}
+            </div>
+        </Draggable>
+    );
+});
+DraggableVerticalBorder.defaultProps = {
+    'handleHeight' : 24
+};
 
 
+/** This is pretty ugly. @todo refactor, reimplement, something... */
 export class AdjustableDividerRow extends React.PureComponent {
 
     static defaultProps = {
         'leftPanelCollapseWidth'    : 240,
-        'leftPanelDefaultSizeMD'    : 5,
-        'leftPanelDefaultSizeLG'    : 4,
+        'leftPanelDefaultWidth'     : 300,
         'leftPanelClassName'        : null,
         'minLeftPanelWidth'         : 60,
         'minRightPanelWidth'        : 170,
@@ -76,15 +72,13 @@ export class AdjustableDividerRow extends React.PureComponent {
         this.rightPanelRef = React.createRef();
 
         if (props.mounted && props.leftPanelDefaultCollapsed && props.width){
-            var leftPanelCollapseWidth = Math.max(props.leftPanelCollapseWidth || 0, props.minLeftPanelWidth);
-            var layoutSize = layout.responsiveGridState(props.windowWidth) || null;
-            if (layoutSize === 'md' || layoutSize === 'lg'){
-                var leftPanelWidth;
-                if (layoutSize === 'md'){
-                    leftPanelWidth = props.width * ( props.leftPanelDefaultSizeMD / 12 );
-                } else {
-                    leftPanelWidth = props.width * ( props.leftPanelDefaultSizeLG / 12 );
-                }
+            const leftPanelCollapseWidth = Math.max(
+                props.leftPanelCollapseWidth || 0,
+                props.minLeftPanelWidth
+            );
+            const layoutSize = layout.responsiveGridState(props.windowWidth) || null;
+            if (layoutSize === 'lg' || layoutSize === 'xl'){
+                const leftPanelWidth = props.leftPanelDefaultWidth || 240;
                 this.state.xOffset = - leftPanelWidth + props.minLeftPanelWidth;
             }
         }
@@ -128,9 +122,9 @@ export class AdjustableDividerRow extends React.PureComponent {
     }
 
     handleStopDrag(evt, data){
-        var { leftPanelCollapseWidth, minLeftPanelWidth } = this.props,
-            xOffset = data.x,
-            leftPanelCollapseWidthCurr = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
+        const { leftPanelCollapseWidth, minLeftPanelWidth } = this.props;
+        let xOffset = data.x;
+        const leftPanelCollapseWidthCurr = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
 
         if (this.leftPanelWidth + xOffset < leftPanelCollapseWidthCurr){ // If in "collapse" width size lower half
             xOffset = this.draggableBounds.left;
@@ -139,8 +133,8 @@ export class AdjustableDividerRow extends React.PureComponent {
     }
 
     handleDrag(evt, data){
-        requestAnimationFrame(()=>{
-            this.setState({ 'xOffset' : data.x }, (this.props && this.props.onDrag));
+        raf(()=>{
+            this.setState({ 'xOffset' : data.x }, this.props.onDrag);
         });
     }
 
@@ -149,58 +143,82 @@ export class AdjustableDividerRow extends React.PureComponent {
     }
 
     render(){
-        var { mounted, width, height, leftPanelCollapseWidth, minRightPanelWidth, minLeftPanelWidth, leftPanelDefaultSizeMD, leftPanelDefaultSizeLG,
+        const { leftPanelDefaultWidth, mounted, width, height, leftPanelCollapseWidth, minRightPanelWidth, minLeftPanelWidth,
             className, rightPanelClassName, leftPanelClassName, renderLeftPanel, renderRightPanel, leftPanelCollapseHeight, windowWidth } = this.props;
 
         if (!mounted) return null;
+        const { rightPanelHeight, xOffset } = this.state;
 
-        leftPanelCollapseWidth = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
+        const useLeftPanelCollapseWidth = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
+        let useHeight = height;
 
-        var xOffset = this.state.xOffset,
-            layoutSize = layout.responsiveGridState(windowWidth) || null,
-            rightPanelDefaultSizeMD = 12 - leftPanelDefaultSizeMD,
-            rightPanelDefaultSizeLG = 12 - leftPanelDefaultSizeLG;
+        const layoutSize = layout.responsiveGridState(windowWidth) || null;
+        const isDraggableSize = layoutSize === 'lg' || layoutSize === 'xl';
 
-        this.rightPanelWidth = width; // Original full width. Used for <= small layout size.
+        // Original full width. Used for <= small layout size.
+        this.rightPanelWidth = width;
         this.leftPanelWidth = width;
 
-        if (layoutSize === 'md' || layoutSize === 'lg'){
-            if (layoutSize === 'md'){
-                this.rightPanelWidth = this.rightPanelWidth * ( rightPanelDefaultSizeMD / 12 ) - 10;
-            } else {
-                this.rightPanelWidth = this.rightPanelWidth * ( rightPanelDefaultSizeLG / 12 ) - 10;
-            }
-            this.leftPanelWidth = width - this.rightPanelWidth - 10;
+        if (isDraggableSize){
+            this.leftPanelWidth = leftPanelDefaultWidth;
+            this.rightPanelWidth = width - leftPanelDefaultWidth;
         }
+
         this.draggableBounds = {
             'top': 0,
             'bottom': 0,
             'left': - this.leftPanelWidth + minLeftPanelWidth,
             'right' : this.rightPanelWidth - minRightPanelWidth
         };
-        var leftPanelCollapsed = xOffset - (leftPanelCollapseWidth - minLeftPanelWidth) <= this.draggableBounds.left;
+
+        const leftPanelCollapsed = xOffset - (useLeftPanelCollapseWidth - minLeftPanelWidth) <= this.draggableBounds.left;
         if (leftPanelCollapsed && typeof leftPanelCollapseHeight === 'number'){
-            height = leftPanelCollapseHeight;
-        } else if (leftPanelCollapsed && typeof this.state.rightPanelHeight === 'number'){
-            height = this.state.rightPanelHeight;
-        } else if (!leftPanelCollapsed && typeof this.state.rightPanelHeight === 'number'){
-            height = Math.max(this.state.rightPanelHeight, height);
+            useHeight = leftPanelCollapseHeight;
+        } else if (leftPanelCollapsed && typeof rightPanelHeight === 'number'){
+            useHeight = rightPanelHeight;
+        } else if (!leftPanelCollapsed && typeof rightPanelHeight === 'number'){
+            useHeight = Math.max(rightPanelHeight, height);
         }
 
-        var rightPanel = renderRightPanel(  (layoutSize === 'md' || layoutSize === 'lg') ? this.rightPanelWidth + 10 - xOffset : width,  this.resetXOffset,  !!(leftPanelCollapsed)  );
+        // minus 10 to account for padding/gap between the things.
+        const leftPanel = renderLeftPanel(
+            isDraggableSize ? this.leftPanelWidth - 10 + xOffset : width,
+            this.resetXOffset, leftPanelCollapsed, rightPanelHeight
+        );
+        const rightPanel = renderRightPanel(
+            isDraggableSize ? this.rightPanelWidth - 10 - xOffset : width,
+            this.resetXOffset,  !!(leftPanelCollapsed)
+        );
+
+        const leftPanelCls = (
+            "left-panel" +
+            (leftPanelClassName ? ' ' + leftPanelClassName : '')
+        );
+        const leftPanelStyle = {
+            'height' : useHeight,
+            'width' : isDraggableSize ? this.leftPanelWidth + xOffset : width + 20
+        };
+
+        const rightPanelCls = (
+            "right-panel" +
+            (rightPanelClassName ? ' ' + rightPanelClassName : '')
+        );
+        const rightPanelStyle = isDraggableSize ? {
+            'width' : this.rightPanelWidth - xOffset
+        } : null;
 
         return (
-            <div className={"row" + (className ? ' ' + className : '')}>
-                <div className={"left-panel col-xs-12 col-md-" + leftPanelDefaultSizeMD + " col-lg-" + leftPanelDefaultSizeMD + (leftPanelClassName ? ' ' + leftPanelClassName : '')}
-                    style={{ 'width' : (layoutSize === 'lg' || layoutSize === 'md') ? this.leftPanelWidth + xOffset : width + 20, height }}>
-                    { renderLeftPanel((layoutSize === 'md' || layoutSize === 'lg') ? this.leftPanelWidth + xOffset : width, this.resetXOffset, leftPanelCollapsed, this.state.rightPanelHeight) }
-                    { (layoutSize === 'lg' || layoutSize === 'md') ?
-                        <DraggableVerticalBorder xOffset={xOffset} height={height || null} left={this.leftPanelWidth}
+            <div className={"row adjustable-divider-row" + (className ? ' ' + className : '')}>
+                <div className={leftPanelCls} style={leftPanelStyle}>
+                    { leftPanel }
+                    { isDraggableSize ?
+                        <DraggableVerticalBorder xOffset={xOffset} height={useHeight || null} left={this.leftPanelWidth}
                             onStop={this.handleStopDrag} onDrag={this.handleDrag} bounds={this.draggableBounds} />
                         : null }
                 </div>
-                <div className={"right-panel col-xs-12 col-md-" + rightPanelDefaultSizeMD + " col-lg-" + rightPanelDefaultSizeLG + (rightPanelClassName ? ' ' + rightPanelClassName : '')}
-                    ref={this.rightPanelRef} style={(layoutSize === 'lg' || layoutSize === 'md') ? { width : (this.rightPanelWidth + 30) - xOffset } : null} children={rightPanel} />
+                <div className={rightPanelCls} ref={this.rightPanelRef} style={rightPanelStyle}>
+                    { rightPanel }
+                </div>
             </div>
         );
     }

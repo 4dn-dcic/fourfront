@@ -6,7 +6,6 @@ Made for 1st round browse (without file selectors).*/
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 /**
  * Some test portions currently disabled re: edits. Will need to rewrite some eventually after another round of Browse page edits.
@@ -16,7 +15,7 @@ jest.autoMockOff();
 // Fixes https://github.com/facebook/jest/issues/78
 jest.dontMock('react');
 jest.dontMock('underscore');
-jest.mock('../util/ajax');
+jest.mock('@hms-dbmi-bgm/shared-portal-components/src/components/util/ajax');
 jest.mock('../viz/chart-data-controller');
 
 function mapStateToProps(store) {

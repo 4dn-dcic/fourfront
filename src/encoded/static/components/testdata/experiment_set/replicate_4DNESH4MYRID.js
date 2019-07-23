@@ -304,7 +304,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"dbd37686-1427-4ed0-ba74-bf2ba9367554"
+                                "uuid":"dbd37686-1427-4ed0-ba74-bf2ba9367554",
+                                "@id":"/files-fastq/4DNFI397I6JO/",
                             }
                         }
                     ],
@@ -337,7 +338,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"8e39bf85-02e2-4cbf-8352-55ca1ab402c7"
+                                "uuid":"8e39bf85-02e2-4cbf-8352-55ca1ab402c7",
+                                "@id":"/files-fastq/4DNFI4HKT2OG/",
                             }
                         }
                     ],
@@ -539,7 +541,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"53eea9be-7b36-42d5-baba-8b138b73ba8d"
+                                "uuid":"53eea9be-7b36-42d5-baba-8b138b73ba8d",
+                                "@id":"/files-fastq/4DNFIYJESQV8/",
                             }
                         }
                     ],
@@ -572,7 +575,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"177a19b9-5801-4523-a1bf-c0f174a72864"
+                                "uuid":"177a19b9-5801-4523-a1bf-c0f174a72864",
+                                "@id":"/files-fastq/4DNFIW6GQC2H/"
                             }
                         }
                     ],
@@ -774,7 +778,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"c315f5ae-62d4-4413-8606-9cd5556c2341"
+                                "uuid":"c315f5ae-62d4-4413-8606-9cd5556c2341",
+                                "@id":"/files-fastq/4DNFIAIZUF8R/",
                             }
                         }
                     ],
@@ -807,7 +812,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"30b99b06-3134-41e4-b326-bf922e2d178a"
+                                "uuid":"30b99b06-3134-41e4-b326-bf922e2d178a",
+                                "@id":"/files-fastq/4DNFIX7DX8L7/",
                             }
                         }
                     ],
@@ -1009,7 +1015,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"202fc668-bb49-4b1c-8d96-f9e0ab6677bc"
+                                "uuid":"202fc668-bb49-4b1c-8d96-f9e0ab6677bc",
+                                "@id":"/files-fastq/4DNFIT2RPDDV/",
                             }
                         }
                     ],
@@ -1042,7 +1049,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1"
+                                "uuid":"f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1",
+                                "@id":"/files-fastq/4DNFI3CR1FRH/",
                             }
                         }
                     ],
@@ -1244,7 +1252,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"bb4fc880-3af2-43b9-ad79-766d2b176592"
+                                "uuid":"bb4fc880-3af2-43b9-ad79-766d2b176592",
+                                "@id":"/files-fastq/4DNFICQYVEU8/"
                             }
                         }
                     ],
@@ -1277,7 +1286,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"210a7047-37cc-406d-8246-62fbe3400fc3"
+                                "uuid":"210a7047-37cc-406d-8246-62fbe3400fc3",
+                                "@id":"/files-fastq/4DNFIWB6WXPG/",
                             }
                         }
                     ],
@@ -1479,7 +1489,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"182247e1-aa03-4614-ab15-21d215891295"
+                                "uuid":"182247e1-aa03-4614-ab15-21d215891295",
+                                "@id":"/files-fastq/4DNFIBPIIH4C/",
                             }
                         }
                     ],
@@ -1512,7 +1523,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"28ec2ef7-6d30-4a4d-8424-caa09c529898"
+                                "uuid":"28ec2ef7-6d30-4a4d-8424-caa09c529898",
+                                "@id":"/files-fastq/4DNFIHI4TVBE/",
                             }
                         }
                     ],
@@ -1714,7 +1726,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"a0fd6b54-152d-445e-ad88-3cbf40a1c6ef"
+                                "uuid":"a0fd6b54-152d-445e-ad88-3cbf40a1c6ef",
+                                "@id":"/files-fastq/4DNFIDFWAQTK/",
                             }
                         }
                     ],
@@ -1747,7 +1760,8 @@ module.exports = {
                         {
                             "relationship_type":"paired with",
                             "file":{
-                                "uuid":"43a6d196-396d-466c-aab7-f54e05b9bb5a"
+                                "uuid":"43a6d196-396d-466c-aab7-f54e05b9bb5a",
+                                "@id":"/files-fastq/4DNFIA6D63FT/",
                             }
                         }
                     ],

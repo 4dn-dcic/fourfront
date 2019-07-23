@@ -2,7 +2,7 @@ var gulp        = require('gulp'),
     PluginError = require('plugin-error'),
     log         = require('fancy-log'),
     webpack     = require('webpack'),
-    sass        = require('node-sass')
+    sass        = require('node-sass'),
     fs          = require('fs');
 
 

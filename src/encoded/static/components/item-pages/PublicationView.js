@@ -3,9 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse } from 'react-bootstrap';
-import { console, object, DateUtility } from './../util';
-import { ExperimentSetTableTabView } from './components';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
 
@@ -118,13 +120,13 @@ class PublicationSummary extends React.PureComponent {
     details(){
         const { context } = this.props;
         const { journal, categories, date_published, ID } = context;
-        const datePublished = DateUtility.formatPublicationDate(date_published);
+        const datePublished = formatPublicationDate(date_published);
 
         return (
             <React.Fragment>
                 <hr className="mb-0" />
                 <div className="row">
-                    <div className="col-xs-12 col-md-8">
+                    <div className="col-12 col-md-8">
                         { journal ?
                             <React.Fragment>
                                 <h4 className="mt-2 mb-15 text-500">
@@ -143,7 +145,7 @@ class PublicationSummary extends React.PureComponent {
                             </React.Fragment>
                             : null }
                     </div>
-                    <div className="col-xs-12 col-md-4">
+                    <div className="col-12 col-md-4">
                         { Array.isArray(categories) && categories.length > 0 ?
                             <React.Fragment>
                                 <h4 className="mt-2 mb-15 text-500">
@@ -151,10 +153,10 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <Button bsSize="xs" bsStyle="info" className="mr-02 mb-02 text-capitalize"
+                                        <button type="button" className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
                                             href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
                                             { cat }
-                                        </Button>
+                                        </button>
                                     )
                                 }
                             </React.Fragment>
@@ -216,11 +218,11 @@ class PublicationSummary extends React.PureComponent {
             <div>
                 <div className="row">
                     { abstractCol ?
-                        <div className="col-xs-12 col-md-8">
+                        <div className="col-12 col-md-8">
                             { abstractCol }
                         </div>
                         : null }
-                    <div className={"col-xs-12 col-md-" + (abstractCol ? '4' : '12' )}>
+                    <div className={"col-12 col-md-" + (abstractCol ? '4' : '12' )}>
                         { this.attribution() }
                     </div>
                 </div>

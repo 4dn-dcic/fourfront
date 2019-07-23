@@ -4,9 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Collapse, Popover, OverlayTrigger } from 'react-bootstrap';
-import ReactTooltip from 'react-tooltip';
-import { console, object } from'./../../util';
+import { OverlayTrigger } from 'react-bootstrap';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 export function groupByMultiple(objList, propertiesList){
@@ -140,12 +139,12 @@ export class StackedBlockVisual extends React.PureComponent {
 
             const rowElem = (
                 <div className="row popover-entry mb-07" key={property}>
-                    <div className="col-xs-5 col-md-4">
+                    <div className="col-5 col-md-4">
                         <div className="text-500 text-ellipsis-continer text-right">
                             { ((titleMap && titleMap[property]) || property) + (val ? ':' : '') }
                         </div>
                     </div>
-                    <div className={"col-xs-7 col-md-8" + (boldIt ? ' text-600' : '')}>{ val }</div>
+                    <div className={"col-7 col-md-8" + (boldIt ? ' text-600' : '')}>{ val }</div>
                 </div>
             );
 
@@ -576,7 +575,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
                 <div className="row grouping-row">
-                    <div className="col col-xs-4 label-section" style={labelSectionStyle}>
+                    <div className="col col-4 label-section" style={labelSectionStyle}>
                         <div className="label-container" style={{ 'minHeight' : rowHeight }}>
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
@@ -588,7 +587,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         </div>
                         {/* this.childLabels() */}
                     </div>
-                    <div className={"col col-xs-8 list-section" + (header ? ' has-header' : '')} style={listSectionStyle}>
+                    <div className={"col col-8 list-section" + (header ? ' has-header' : '')} style={listSectionStyle}>
                         { header }
                         { childBlocks }
                     </div>

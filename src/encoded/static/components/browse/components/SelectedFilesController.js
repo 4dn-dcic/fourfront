@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { expFxn, object } from './../../util';
+import { object, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../../util';
 
 
 // Memoized helper functions for getting counts of files performantly-er.

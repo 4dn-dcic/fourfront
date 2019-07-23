@@ -4,19 +4,13 @@
 /* Note: most base styles handled by Bootstrap, with variable settings in bootstrap/_variables.scss */
 
 html {
-    font-size: $font-size-base * $mobile-font-factor;
-
-    @media screen and (min-width: $screen-sm-min) {
-        font-size: $font-size-base;
-
-    /* overflow-y: scroll; */
-    }
+    font-size: $font-size-base;
 }
 
 body {
     text-rendering: optimizeLegibility;
     background: #f8f8f8 !important;
-    @include font-size(1);
+    @include font-size(1rem);
 }
 
 .float-wrap { overflow: hidden; }
@@ -38,18 +32,18 @@ hr { clear: both; }
 
 
 // Override Bootstrap's header sizes
-h1, .h1 { @include font-size(2.6); }
-h2, .h2 { @include font-size(2.1); }
-h3, .h3 { @include font-size(1.7); }
+h1, .h1 { @include font-size(2.6rem); }
+h2, .h2 { @include font-size(2.1rem); }
+h3, .h3 { @include font-size(1.7rem); }
 h4, .h4 {
-    @include font-size(1.3);
+    @include font-size(1.3rem);
     line-height: 140%;
 }
-h5, .h5 { @include font-size(1); }
-h6, .h6 { @include font-size(0.85); }
+h5, .h5 { @include font-size(1rem); }
+h6, .h6 { @include font-size(0.85rem); }
 
 blockquote {
-    @include font-size(1);
+    @include font-size(1rem);
 }
 
 
@@ -64,7 +58,7 @@ blockquote {
 
 #layout {
 	height: auto !important;
-    margin: 0 auto -$footerHeight;
+    margin: 0 auto -$footer-height;
     min-height: 100%;
 	background-color: $appBackgroundColor;
 	overflow-x: hidden;
@@ -81,7 +75,7 @@ blockquote {
 	}
     margin-bottom: 10px;
 	display: block;
-	@include font-size(1.3);
+	@include font-size(1.3rem);
 }
 
 .text-panel {
@@ -146,7 +140,7 @@ blockquote {
 	display: none;
 	height: 0px;
 
-	@media (min-width: $navbar-fixed-breakpoint) {
+	@include navbar-fixed-position {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
 	}
@@ -184,9 +178,10 @@ body.is-full-screen {
 		}
 	}
 
-	@media screen and (min-width: $screen-lg-min){
+	@include media-breakpoint-up(xl){
 		.container {
 			width: auto;
+			max-width: none;
 			margin-left: 20px;
 			margin-right: 20px;
 		}
@@ -216,9 +211,9 @@ h1.page-title {
 		body[data-pathname="/"] &,
 		body[data-pathname="/home"] &,
 		&.home-page-title {
-			@media screen and (min-width: $screen-sm-min){
+			//@include media-breakpoint-up(xl){
+			@include navbar-fixed-position {
 				height: 64px;
-				margin-bottom: -3px;
 				//height: 70px;
 				//margin-bottom: 1px;
 				//padding-top: 5px;
@@ -243,6 +238,11 @@ h1.page-title {
 		&.has-callout-title {
 			/* margin-right: 12px; */
 		}
+
+		@include media-breakpoint-up(md){
+			margin-right: 9px;
+		}
+
 	}
 
 	.page-subtitle {
@@ -261,17 +261,17 @@ h1.page-title {
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
-		
+
 		&.prominent {
 			font-weight: 400;
 			font-size : 0.75em;
 			display: inline-block;
-			margin-left: 9px;
 			vertical-align: middle;
 
-			body[data-pathname="/search/"] & {
-				margin-left: 6px;
+			@include media-breakpoint-down(sm){
+				display: block;
 			}
+
 		}
 
 	}
@@ -295,7 +295,6 @@ h1.page-title + .page-subtitle {
 
 .page-footer {
 	background-color: #f8f8f8;
-	//height: $footerHeight;
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
@@ -317,8 +316,8 @@ h1.page-title + .page-subtitle {
 		text-align: center;
 		color: #bfbfbf;
 		padding: 15px 0px 14px;
-		@media (min-width: $screen-md-min) {
 
+		@include media-breakpoint-up(md){
 			text-align: right;
 			&.copy-notice {
 				text-align: left;
@@ -339,8 +338,54 @@ h1.page-title + .page-subtitle {
 		}
 	}
 
-
 }
+
+// make footer look good on larger screens
+// and activate sticky footer
+@include media-breakpoint-up(md){
+    .footer-row { margin-left: 0; margin-right: 0; }
+
+    #page-footer {
+        height: $footer-height;
+    }
+
+    .page-footer {
+        height: $footer-height - $appVersionHeight;
+    }
+
+    .app-version {
+        margin: 0 0 8px;
+        text-align: center;
+        display: block;
+        padding: 15px 15px;
+        text-align: left;
+    }
+
+    @include sticky-footer($footer-height, "#layout", "#layout-footer", "#page-footer");
+
+    .footer-links {
+        list-style: none outside none;
+        margin-left: -5px;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        a {
+            display: inline;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+        a:hover {
+            text-decoration: underline;
+            background-color: transparent;
+        }
+        a:active { background-color: transparent; }
+    }
+}
+
 
 
 
@@ -352,7 +397,7 @@ h1.page-title + .page-subtitle {
 .flexrow {
     @extend .row;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(md){
         .flexbox & {
             display: flex;
         }
@@ -362,7 +407,7 @@ h1.page-title + .page-subtitle {
 .flexcol-sm-6 {
     @extend .col-sm-6;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(md){
         .flexbox & {
             flex: 1 1 0px;
             width: auto;
@@ -400,70 +445,14 @@ h1.page-title + .page-subtitle {
 
 .clickable {
 	cursor: pointer;
+	> label {
+		cursor: pointer;
+	}
 }
 
 .no-user-select {
 	@include user-select(none);
 }
-
-/** Extending Bootstrap grid to allow blocks to flow right in a row **/
-
-@media screen                           		 { .col-xs-float-right { float : right; } }
-@media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
-@media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
-@media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
-
-/** Equal Height Columns in Bootstrap Row on IE9+ **/
-
-.row.row-eq-height-xs {
-	display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-}
-
-@media screen and (min-width: $screen-sm-min) {
-	.row.row-eq-height-sm {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-		.panel {
-			margin-top: 0;
-			margin-bottom: 0;
-			height: 100%;
-		}
-	}
-}
-
-@media screen and (min-width: $screen-md-min) {
-	.row.row-eq-height-md {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-		.panel {
-			margin-top: 0;
-			margin-bottom: 0;
-			height: 100%;
-		}
-	}
-}
-
-@media screen and (min-width: $screen-lg-min) {
-	.row.row-eq-height-lg {
-		display: -webkit-box;
-		display: -webkit-flex;
-		display: -ms-flexbox;
-		display: flex;
-		.panel {
-			margin-top: 0;
-			margin-bottom: 0;
-			height: 100%;
-		}
-	}
-}
-
 
 
 .off-screen {
@@ -579,47 +568,6 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 
 
 
-/** Modal Stuff **/
-
-.modal-dialog {
-
-	padding-left: 15px;
-	padding-right: 15px;
-
-	.modal-content {
-
-		.modal-header > button.close {
-			margin-top: 2px;
-			margin-right: 5px;
-		}
-
-		.modal-body p {
-			font-family: inherit;
-		}
-
-	}
-}
-
-div[role="dialog"] {
-
-	> .modal {
-
-		> .modal-dialog {
-
-			/* Re-create some modern Bootstrap v4 effects, e.g. vertical centering */
-			display: flex;
-			align-items: center;
-			height: 100%;
-
-			> .modal-content {
-				width: 100%;
-			}
-
-		}
-
-	}
-}
-
 /************** Common Typography ************/
 
 .text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
@@ -650,16 +598,6 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 	font-family: $font-family-monospace;
 }
 
-@media screen and (max-width: $screen-xs-max){
-
-	.text-left-xs {
-		// Make text left-aligned for collapsed mobile view(s),
-		// e.g. if is aligned right on larger screens.
-		text-align: left !important;
-	}
-
-}
-
 .text-ellipsis-container {
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -672,26 +610,6 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 
 /************** MORE BUTTON STYLES ***********/
 
-/* Light gray BG, more prominent button style than btn-default */
-.btn.btn-secondary {
-  @include button-variant(#000, #e4e4e4, rgba(0,0,0,0.125));
-  &:active, &:focus {
-	  background-color: #e4e4e4;
-  }
-}
-
-/* Moving caret to always right position */
-.dropdown-toggle.btn {
-	position: relative;
-	padding-right: 24px;
-	padding-left: 10px;
-	span.caret {
-		position: absolute;
-		top: 50%;
-		margin-top: -2px;
-		right: 10px;
-	}
-}
 
 /*
 TODO: Re-enable for split buttons w/ specific className maybe.
@@ -720,10 +638,6 @@ div.dropdown.btn-group {
 	top: 1px;
 }
 
-/* Override sizing of btn-sm button re: our font */
-.btn.btn-sm {
-	padding-bottom: 4px;
-}
 
 /**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
 
@@ -732,57 +646,6 @@ body .__react_component_tooltip {
 }
 
 
-/* *********************************************************
-		CARL'S LOGIN BOX
-********************************************************** */
-
-.login-box{
-    width: inherit;
-	height: inherit;
-    border: 2px solid #000000;
-    background-color: #ffffff;
-    padding: 5px;
-	display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-.sexy-btn{
-    background-color: #ffffff;
-	color: #b3b3b3;
-    border: 2px solid #b3b3b3;
-    padding: 5px 10px;
-    text-align: center;
-    font-size: 16px;
-    cursor: pointer;
-	font-family: $font-family-sans-serif;
-}
-.sexy-btn:hover, .sexy-btn:focus {
-  color: #000000;
-  border: 2px solid #000000;
-}
-
-.sexy-btn span{
-  display: inline-block;
-  position: relative;
-  transition: 0.5s;
-}
-.sexy-btn span:after {
-  content: '»';
-  position: absolute;
-  opacity: 0;
-  top: 0;
-  right: -20px;
-  transition: 0.5s;
-}
-
-.sexy-btn:hover span, .sexy-btn:focus span {
-  padding-right: 25px;
-}
-
-.sexy-btn:hover span:after, .sexy-btn:focus span:after {
-  opacity: 1;
-  right: 0;
-}
 
 
 .links {

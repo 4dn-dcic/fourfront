@@ -6,12 +6,15 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
-import { object, ajax, Schemas, layout, isServerSide } from './../../../util';
+import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton } from './../../../browse/components/table-commons';
-import { SearchResultDetailPane } from './../../../browse/components/SearchResultDetailPane';
+    HeadersRow, TableRowToggleOpenButton
+} from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
+import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultDetailPane';
 
+
+/** @todo Move to shared components repo? */
 
 /** @todo - refactor. Not too important since parent components almost always a PureComponent so perf gain would b minimal */
 export class ItemPageTable extends React.Component {
@@ -48,7 +51,7 @@ export class ItemPageTable extends React.Component {
 
                     var typeTitle = null;
                     if (!props.hideTypeTitle){
-                        typeTitle = Schemas.getItemTypeTitle(result);
+                        typeTitle = schemaTransforms.getItemTypeTitle(result);
                         if (typeof typeTitle === 'string'){
                             typeTitle += ' ';
                         }
@@ -90,8 +93,8 @@ export class ItemPageTable extends React.Component {
     }
 
     render(){
-        var { results, loading, columnExtensionMap, columns, width, windowWidth,
-            defaultOpenIndices, renderDetailPane, minWidth } = this.props;
+        const { results, loading, columnExtensionMap, columns, width, windowWidth,
+            defaultOpenIndices, defaultOpenIds, renderDetailPane, minWidth } = this.props;
 
         if (loading || !Array.isArray(results)){
             return (
@@ -101,32 +104,32 @@ export class ItemPageTable extends React.Component {
             );
         }
 
-        var columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap),
-            responsiveGridState = layout.responsiveGridState(windowWidth);
+        let columnDefinitions = columnsToColumnDefinitions(columns, columnExtensionMap);
+        const responsiveGridState = layout.responsiveGridState(windowWidth);
 
-        width = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
+        const useWidth = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
 
-        if (!width || isNaN(width)){
+        if (!useWidth || isNaN(useWidth)){
             throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
         columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
-            width,
+            useWidth,
             columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
         );
 
-        var commonRowProps = { width, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
+        const commonRowProps = { width: useWidth, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
 
         return (
             <div className="item-page-table-container clearfix">
-                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={width} />
+                <HeadersRow mounted columnDefinitions={columnDefinitions} renderDetailPane={renderDetailPane} width={useWidth} />
                 { _.map(results, (result, rowIndex) => {
                     var atId = object.atIdFromObject(result);
                     return (
                         <ItemPageTableRow {...this.props} {...commonRowProps}
                             key={atId || rowIndex} result={result} rowNumber={rowIndex} defaultOpen={
-                                (Array.isArray(this.props.defaultOpenIndices) && _.contains(this.props.defaultOpenIndices, rowIndex))
-                                || (atId && Array.isArray(this.props.defaultOpenIds) && _.contains(this.props.defaultOpenIds, atId))
+                                (Array.isArray(defaultOpenIndices) && _.contains(defaultOpenIndices, rowIndex))
+                                || (atId && Array.isArray(defaultOpenIds) && _.contains(defaultOpenIds, atId))
                             } />
                     );
                 }) }
@@ -211,12 +214,17 @@ class ItemPageTableRow extends React.PureComponent {
 
 
 
-export class ItemPageTableLoader extends React.PureComponent {
+export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
 
     static propTypes = {
         'children' : PropTypes.element.isRequired,
         'itemUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
-        'windowWidth': PropTypes.number.isRequired
+        'windowWidth': PropTypes.number.isRequired,
+        'maxToLoad' : PropTypes.number.isRequired
+    };
+
+    static defaultProps = {
+        'maxToLoad' : 7
     };
 
     constructor(props){
@@ -233,13 +241,13 @@ export class ItemPageTableLoader extends React.PureComponent {
     }
 
     loadItems(){
-        const { itemUrls = [] } = this.props;
-        const onFinishLoad = _.after(itemUrls.length, ()=>{
+        const { itemUrls = [], maxToLoad } = this.props;
+        const onFinishLoad = _.after(Math.min(itemUrls.length, maxToLoad), ()=>{
             this.setState({ 'loading' : false });
         });
 
         if (itemUrls.length > 0){
-            _.forEach(itemUrls, (uri)=>{
+            _.forEach(itemUrls.slice(0, maxToLoad), (uri)=>{
                 ajax.load(uri, (r)=>{
                     this.setState(function({ items, itemIndexMapping }){
                         items = (items || []).slice(0);
@@ -257,14 +265,45 @@ export class ItemPageTableLoader extends React.PureComponent {
     }
 
     render(){
-        const { children } = this.props, { loading, items } = this.state;
-        return React.cloneElement(children, _.extend({}, this.props, { 'loading' : loading, 'results' : items }) );
+        const { children, itemUrls } = this.props;
+        const { loading, items } = this.state;
+        return React.cloneElement(
+            children,
+            _.extend({ 'countTotalResults' : itemUrls.length }, this.props, { 'loading' : loading, 'results' : items })
+        );
     }
 
 }
 
 
 export class ItemPageTableSearchLoader extends React.PureComponent {
+
+    /** We set the default number of results to get here to be 7, unless is overriden in href */
+    static getLimit = memoize(function(href){
+        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
+        const { query : { limit = 0 } = { limit : 0 } } = url.parse(href, true);
+        return (limit && parseInt(limit)) || 7;
+    });
+
+    static hrefWithoutLimit = memoize(function(href){
+        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
+        const hrefParts = url.parse(href, true);
+        const { query = {} } = hrefParts;
+        delete query.limit;
+        hrefParts.search = '?' + queryString.stringify(query);
+        return url.format(hrefParts);
+    });
+
+    static hrefWithLimit = memoize(function(href, limit=null){
+        // TODO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
+        // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
+
+        const hrefParts = url.parse(href, true);
+        const { query = {} } = hrefParts;
+        query.limit = query.limit || limit || ItemPageTableSearchLoader.getLimit(href);
+        hrefParts.search = '?' + queryString.stringify(query);
+        return url.format(hrefParts);
+    });
 
     static propTypes = {
         "requestHref" : PropTypes.string.isRequired,
@@ -274,10 +313,12 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.getCountCallback = this.getCountCallback.bind(this);
         this.handleResponse = this.handleResponse.bind(this);
         this.state = {
             'loading' : false,
-            'results' : null
+            'results' : null,
+            'countTotalResults' : null
         };
     }
 
@@ -302,9 +343,11 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
     handleResponse(resp){
         const { onLoad } = this.props;
         const results = (resp && resp['@graph']) || [];
+        const totalResults = (resp && typeof resp.total === 'number' && (resp.total || 0)) || null;
         this.setState({
             'loading' : false,
-            'results' : results
+            'results' : results,
+            'countTotalResults' : totalResults
         });
         if (typeof onLoad === 'function'){
             onLoad(resp);
@@ -314,7 +357,15 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
     render(){
         const { requestHref, children } = this.props;
         if (!requestHref) return null;
-        return React.cloneElement(children, _.extend({}, this.props, this.state) );
+
+        const limit = ItemPageTableSearchLoader.getLimit(requestHref);
+        const hrefWithLimit = ItemPageTableSearchLoader.hrefWithLimit(requestHref, limit);
+        const hrefWithoutLimit = ItemPageTableSearchLoader.hrefWithoutLimit(requestHref, limit);
+
+        return React.cloneElement(
+            children,
+            _.extend({ hrefWithoutLimit, hrefWithLimit }, this.props, this.state)
+        );
     }
 
 }
@@ -328,9 +379,9 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
  *
  * @export
  * @class ItemPageTableBatchLoader
- * @extends {ItemPageTableLoader}
+ * @extends {ItemPageTableIndividualUrlLoader}
  */
-export class ItemPageTableBatchLoader extends ItemPageTableLoader {
+export class ItemPageTableBatchLoader extends ItemPageTableIndividualUrlLoader {
     constructor(props){
         super(props);
         if (this.item_uris){

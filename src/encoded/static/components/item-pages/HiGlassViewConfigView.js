@@ -3,13 +3,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button, Collapse, MenuItem, DropdownButton } from 'react-bootstrap';
-import Alerts from './../alerts';
-import { JWT, console, object, ajax, layout, navigate } from './../util';
-import { HiGlassPlainContainer, CollapsibleItemViewButtonToolbar } from './components';
-import { LinkToSelector } from './../forms/components';
+import { DropdownButton, DropdownItem, Dropdown, Button } from 'react-bootstrap';
+
+import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
+
+import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
+import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
+import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import DefaultItemView from './DefaultItemView';
-import { ItemHeader } from './components';
+
 
 
 export default class HiGlassViewConfigView extends DefaultItemView {
@@ -20,21 +25,18 @@ export default class HiGlassViewConfigView extends DefaultItemView {
         };
 
         return (
-            <ItemHeader.Wrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
-                <ItemHeader.TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
-                <ItemHeader.MiddleRow />
-                <ItemHeader.BottomRow />
-            </ItemHeader.Wrapper>
+            <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
+                <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
+                <MiddleRow />
+                <BottomRow />
+            </ItemHeaderWrapper>
         );
     }
 
     getTabViewContents(){
-
-        var initTabs    = [],
-            width       = this.getTabViewWidth();
-
+        const initTabs = [];
+        const width = this.getTabViewWidth();
         initTabs.push(HiGlassViewConfigTabView.getTabObject(this.props, width));
-
         return initTabs.concat(this.getCommonTabs());
     }
 
@@ -182,11 +184,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      * @returns {void}
     */
     handleSave(evt){
+        const { href, context } = this.props;
+        const { genome_assembly } = this.state;
         evt.preventDefault();
 
-        var hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -198,25 +202,23 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         // We're updating this object's view conf and the genome assembly.
-        var payload = {
-            'viewconfig' : currentViewConf
-        };
+        const payload = { 'viewconfig' : currentViewConf };
 
-        if (this.state.genome_assembly){
+        if (genome_assembly){
             // If we always include this and its null, then we get validation error because
             // is not of type string. It must be explictly excluded, not just set to null
             // or undefined.
-            payload.genome_assembly = this.state.genome_assembly;
+            payload.genome_assembly = genome_assembly;
         }
 
         this.setState({ 'saveLoading' : true }, ()=>{
             ajax.load(
-                this.props.href,
+                href,
                 (resp)=>{
                     // Success callback... maybe update state.originalViewConfigString or something...
                     // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
                     Alerts.queue({
-                        'title' : "Saved " + this.props.context.title,
+                        'title' : "Saved " + context.title,
                         'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
@@ -244,25 +246,24 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     handleClone(evt){
         evt.preventDefault();
 
-        var { context }         = this.props,
-            hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const { context } = this.props;
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
 
         // Generate a new title and description based on the current display.
-        var userDetails     = JWT.getUserDetails(),
-            userUUID        = (userDetails && userDetails.uuid) || null,
-            userFirstName   = "Unknown";
+        const userDetails     = JWT.getUserDetails();
+        let userFirstName   = "Unknown";
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        var viewConfTitleAppendStr  = " - " + userFirstName + "'s copy",
-            viewConfDesc            = context.description,
-            viewConfTitle           = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
+        const viewConfTitleAppendStr  = " - " + userFirstName + "'s copy";
+        const viewConfDesc = context.description;
+        let viewConfTitle = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
 
         // Check if our title already has " - user's copy" substring and if so,
         // increment an appended counter instead of re-adding the substring.
@@ -291,7 +292,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
         }
 
-        var fallbackCallback = (errResp, xhr) => {
+        const fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
                 'title' : "Failed to save display.",
@@ -301,7 +302,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({ 'cloneLoading' : false });
         };
 
-        var payload = {
+        const payload = {
             'title'          : viewConfTitle,
             'description'    : viewConfDesc,
             'viewconfig'     : currentViewConf,
@@ -411,7 +412,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 ajax.load(
                     "/add_files_to_higlass_viewconf/",
                     (resp) => {
-                        let stateChange = { 'addFileLoading' : false };
+                        const stateChange = { 'addFileLoading' : false };
                         if (resp.success) {
                             // Update the genome assembly and view config.
                             if (resp.new_genome_assembly) {
@@ -507,24 +508,24 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     statusChangeButton(){
-        var { session, context } = this.props,
-            { saveLoading, cloneLoading, releaseLoading } = this.state,
-            editPermission = this.havePermissionToEdit();
+        const { session, context } = this.props;
+        const { saveLoading, cloneLoading, releaseLoading } = this.state;
+        const editPermission = this.havePermissionToEdit();
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
 
         var btnProps  = {
             'onSelect'      : this.handleStatusChange,
             //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
-            'bsStyle'       : context.status === 'released' ? 'default' : 'info',
+            'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
             'disabled'      : releaseLoading,
             'key'           : 'statuschangebtn',
             'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
             'title'         : (
-                    <React.Fragment>
-                        <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'id-badge')}/>&nbsp; Manage
-                    </React.Fragment>
-                ),
+                <React.Fragment>
+                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'id-badge')}/>&nbsp; Manage
+                </React.Fragment>
+            ),
             'pullRight'     : true
         };
 
@@ -534,7 +535,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <StatusMenuItem eventKey="released to project" context={context}>Visible by Network</StatusMenuItem>
                 <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
                 <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
-                <MenuItem divider />
+                <Dropdown.Divider />
                 {/* These statuses currently not available.
                 <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
                 <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
@@ -545,42 +546,43 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     saveButton(){
-        var { session, context } = this.props,
-            { saveLoading } = this.state,
-            tooltip = "Save the current view shown below to this display";
+        const { session, context } = this.props;
+        const { saveLoading } = this.state;
+        const tooltip = "Save the current view shown below to this display";
 
-        var editPermission  = this.havePermissionToEdit();
+        const editPermission  = this.havePermissionToEdit();
 
         return (
-            <Button onClick={this.handleSave} disabled={!editPermission || saveLoading} bsStyle="success" key="savebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
-            </Button>
+            </button>
         );
     }
 
     cloneButton(){
-        var { session } = this.props,
-            { cloneLoading } = this.state,
-            tooltip = "Create your own new HiGlass Display based off of this one";
+        const { session } = this.props;
+        const { cloneLoading } = this.state;
+        const tooltip = "Create your own new HiGlass Display based off of this one";
 
         return (
-            <Button onClick={this.handleClone} disabled={!session || cloneLoading} bsStyle="success" key="clonebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'clone')}/>&nbsp; Clone
-            </Button>
+            </button>
         );
     }
 
     copyURLButton(){
-        var gridState   = layout.responsiveGridState(this.props.windowWidth),
-            isMobile    = gridState !== 'lg',
-            valToCopy   = this.props.href;
+        const { windowWidth, href } = this.props;
+        const gridState = layout.responsiveGridState(windowWidth);
+        const isMobile = gridState !== 'lg' && gridState !== 'xl';
         return (
-            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement={Button} value={valToCopy}>
-                <i className="icon icon-fw icon-copy"/>{ isMobile ?
+            <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button" value={href}>
+                <i className="icon icon-fw icon-copy"/>
+                { isMobile ?
                     <React.Fragment>
                         &nbsp;&nbsp; Copy URL
                     </React.Fragment>
-                : null }
+                    : null }
             </object.CopyWrapper>
         );
     }
@@ -599,9 +601,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var { isFullscreen, toggleFullScreen } = this.props;
         if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
-                <Button onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
+                <button type="button" className="btn btn-outline-dark" onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
-                </Button>
+                </button>
             );
         }
         return null;
@@ -622,8 +624,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     render(){
-        var { isFullscreen, windowWidth, windowHeight, width, session } = this.props,
-            { addFileLoading, genome_assembly } = this.state;
+        const { isFullscreen, windowWidth, windowHeight, width, session } = this.props;
+        const { addFileLoading, genome_assembly, viewConfig } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
 
@@ -666,7 +668,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={this.state.viewConfig}
+                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={viewConfig}
                             ref={this.higlassRef} />
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
@@ -720,14 +722,14 @@ class AddFileButton extends React.PureComponent {
     }
 
     render(){
-        var { loading, genome_assembly } = this.props,
-            { isSelecting } = this.state,
-            tooltip         = "Search for a file and add it to the display.",
-            dropMessage     = "Drop a File here.",
-            searchURL       = (
-                '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
-                + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
-            );
+        const { loading, genome_assembly } = this.props;
+        const { isSelecting } = this.state;
+        const tooltip         = "Search for a file and add it to the display.";
+        const dropMessage     = "Drop a File here.";
+        const searchURL       = (
+            '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
+            + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
+        );
 
         return (
             <React.Fragment>
@@ -741,19 +743,16 @@ class AddFileButton extends React.PureComponent {
     }
 }
 
-class StatusMenuItem extends React.PureComponent {
-    render(){
-        var { eventKey, context, children } = this.props,
-            active = context.status === eventKey;
-
-        children = (
+function StatusMenuItem(props){
+    const { eventKey, context, children } = props;
+    const active = context.status === eventKey;
+    return (
+        <DropdownItem {..._.omit(props, 'context')} active={active}>
             <span className={active ? "text-500" : null}>
                 <i className="item-status-indicator-dot" data-status={eventKey} />&nbsp;  { children }
             </span>
-        );
-
-        return <MenuItem {..._.omit(this.props, 'context')} active={active} children={children} />;
-    }
+        </DropdownItem>
+    );
 }
 
 

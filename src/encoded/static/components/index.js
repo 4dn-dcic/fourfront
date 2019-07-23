@@ -39,7 +39,7 @@ import ProtocolView             from './item-pages/ProtocolView';
 import DocumentView             from './item-pages/DocumentView';
 import PublicationView          from './item-pages/PublicationView';
 import StaticSectionView        from './item-pages/StaticSectionView';
-import SubmissionView           from './forms/SubmissionView';
+import FourfrontSubmissionView  from './forms/FourfrontSubmissionView';
 import BrowseView               from './browse/BrowseView';
 import SearchView               from './browse/SearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
@@ -79,10 +79,10 @@ content_views.register(WorkflowRunView,         'WorkflowRunAwsem');
 content_views.register(WorkflowView,            'Workflow');
 content_views.register(StaticSectionView,       'StaticSection');
 
-content_views.register(SubmissionView,          'Item', 'edit');
-content_views.register(SubmissionView,          'Item', 'create');
-content_views.register(SubmissionView,          'Item', 'clone');
-content_views.register(SubmissionView,          'Search', 'add');
+content_views.register(FourfrontSubmissionView, 'Item', 'edit');
+content_views.register(FourfrontSubmissionView, 'Item', 'create');
+content_views.register(FourfrontSubmissionView, 'Item', 'clone');
+content_views.register(FourfrontSubmissionView, 'Search', 'add');
 
 content_views.register(BrowseView,              'Browse');
 content_views.register(SearchView,              'Search');

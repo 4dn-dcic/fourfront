@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, layout } from './../../../util';
+import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import { Legend } from './Legend';
 import { FileDetailBody } from './FileDetailBody';
@@ -15,9 +15,9 @@ import { WFRStepDetailBody } from './WFRStepDetailBody';
 /**
  * This is the entry-point to the somewhat big-ish WorkflowDetailPane component.
  * It handles (meta-)data specific to the 4DN portal.
- * 
+ *
  * It requires at minimum a 'selectedNode' prop, from which it reads 'selectedNode.meta' and shows stuff like a FileDetailBody if there's a file associated with the node.
- * 
+ *
  * @class WorkflowDetailPane
  * @extends {React.Component}
  * @prop {./../../../viz/Workflow/parsing-functions.Node} selectedNode - Currently-selected node as passed in callback /viz/Workflow/Graph props.renderDetailPane( {Node} selectedNode, {Object} graphProps )
@@ -29,7 +29,7 @@ export class WorkflowDetailPane extends React.PureComponent {
 
     static propTypes = {
         'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])
-    }
+    };
 
     static defaultProps = {
         'minHeight' : 800,
@@ -39,11 +39,10 @@ export class WorkflowDetailPane extends React.PureComponent {
                 'title' : 'Link'
             }
         }
-    }
+    };
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.route = this.route.bind(this);
     }
 
@@ -51,7 +50,7 @@ export class WorkflowDetailPane extends React.PureComponent {
      * This function acts as a router to different types of DetailPane views, depending on Node type.
      */
     route(){
-        var node = this.props.selectedNode;
+        const { selectedNode: node, isFullscreen, context, legendItems } = this.props;
 
         if (node){
 
@@ -60,7 +59,7 @@ export class WorkflowDetailPane extends React.PureComponent {
                 { 'key' : 'body', 'node' : node }
             );
 
-            if (!this.props.isFullscreen){
+            if (!isFullscreen){
                 commonDetailProps.minWidth = 800;
             }
 
@@ -87,7 +86,7 @@ export class WorkflowDetailPane extends React.PureComponent {
                 var stepProps = _.extend({
                     'step' : node.meta,
                     'typeTitle' : nodeTypeVisible,
-                    'context' : this.props.context
+                    'context' : context
                 }, commonDetailProps);
 
                 // Check if we have an @id, and if it is of workflow-run-*.
@@ -103,8 +102,8 @@ export class WorkflowDetailPane extends React.PureComponent {
         }
 
         // Default / no node
-        if (this.props.legendItems){
-            return <Legend items={this.props.legendItems} />;
+        if (legendItems){
+            return <Legend items={legendItems} />;
         }
 
         return (
