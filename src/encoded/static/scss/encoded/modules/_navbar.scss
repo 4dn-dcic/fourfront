@@ -1,15 +1,16 @@
 /* NavBar */
 
+$navbar-link-color: #333 !default;
 $navbar-full-height : 80px;
 $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .3s;
 $navbar-transition-easing: ease-out;
 
 $navbar-background-color: #f8f8f8 !default;
-$navbar-light-active-color: #000;
-$navbar-light-hover-color: #000;
 $navbar-link-active-bg: #eee !default;
 $navbar-link-hover-bg: #d7d7d7 !default;
+
+$navbar-separator-color : scale-color($navbar-link-color, $alpha: -80%) !default;
 
 @mixin navbar-link-button-item {
     position: relative;
@@ -64,7 +65,7 @@ $navbar-link-hover-bg: #d7d7d7 !default;
     }
 
     &.dropdown-toggle {
-        padding-right: 25px;
+        padding-right: 1.675rem;
         &:after {
             position: absolute;
             right: 10px;
@@ -128,18 +129,18 @@ div#top-nav.navbar-fixed-top {
         line-height: $navbar-small-height; /* Mobile default - overriden for desktop (fixed-position) size */
         position: relative;
 
-        padding: 0 10px;
+        padding: 0;
 
         // Container size for just XL -
-        @include media-breakpoint-up(xl){
-            body:not(.is-full-screen) & {
-                max-width: map-get($container-max-widths, "xl");
-                margin: 0 auto;
-            }
-        }
+        //@include media-breakpoint-up(xl){
+        //    body:not(.is-full-screen) & {
+        //        max-width: map-get($container-max-widths, "xl");
+        //        margin: 0 auto;
+        //    }
+        //}
 
         @include navbar-fixed-position {
-
+            padding: 0 10px;
             min-height: $navbar-small-height;
             height: $navbar-full-height;
             line-height: $navbar-full-height;
@@ -177,7 +178,7 @@ div#top-nav.navbar-fixed-top {
             margin-right: 0;
 
             @include navbar-fixed-position { // = md
-                min-width: 225px;
+                min-width: 210px;
             }
 
             @include navbar-static-position { // Unsure if needed
@@ -189,14 +190,19 @@ div#top-nav.navbar-fixed-top {
                 position: relative;
                 height: inherit;
                 line-height: inherit;
-                display: block;
-                font-size: 0rem;
-                float: left;
-                padding-right: 12px;
-                text-align: center;
+                display: flex;
+                align-items: center;
+                padding-right: 20px;
+                padding-left: 20px;
                 max-height: inherit;
                 background-color: transparent;
-                transition: background-color $navbar-transition-length;
+                transition:
+                    background-color $navbar-transition-length,
+                    padding-left $navbar-transition-length;
+
+                &:hover {
+                    background-color: darken($navbar-background-color, 5%);
+                }
                 
                 //padding-top: 5px;
                 //padding-bottom: 5px;
@@ -206,19 +212,28 @@ div#top-nav.navbar-fixed-top {
                     vertical-align: top;
                     display: inline-block;
                     height: 100%;
-                    transition: padding $navbar-transition-length, transform $navbar-transition-length, margin-right $navbar-transition-length;
+                    transition:
+                        padding $navbar-transition-length,
+                        transform $navbar-transition-length,
+                        margin-right $navbar-transition-length;
                     max-height: inherit;
-                    > g > path {
-                        transition: fill-opacity .3s ease, fill .3s ease, stroke-opacity .3s ease, stroke .3s ease, stroke-width .3s ease, transform .3s ease;
+                    > g {
+                        > path {
+                            transition:
+                                fill-opacity .3s .15s ease-out,
+                                fill .3s .15s ease-out,
+                                stroke-opacity .3s .15s ease-out,
+                                stroke .3s .15s ease-out,
+                                stroke-width .3s .15s ease-out;
+                        }
                     }
 
                 }
 
                 @include navbar-fixed-position {
+                    float: left; // To decrease width
                     body.scrolled-past-top & {
-                        &:hover {
-                            background-color: darken($navbar-background-color, 5%);
-                        }
+                        padding-left: 0px; // To offset logo shrinkage & keeping its min-width
                         > svg#logo_svg {
                                 margin-right: -18px;
                                 //min-width: 40px;
@@ -271,15 +286,20 @@ div#top-nav.navbar-fixed-top {
 
         /** Most of the NavBar elements reside here **/
         > .navbar-collapse {
-            border-top-color: #ddd;
-            &.show { // Applicable only @ smaller screen width
-                border-top-style: solid;
-                border-top-width: 1px;
-            }
 
             @include navbar-fixed-position {
                 height: inherit;
                 line-height: inherit;
+            }
+
+            @include navbar-static-position {
+                // Applicable only @ smaller screen width
+                border-top: 1px solid $navbar-separator-color;
+                padding-left: 10px;
+                padding-right: 10px;
+                &.show {
+                    //border-top-color: $navbar-link-color;
+                }
             }
 
             > .navbar-nav {
@@ -352,9 +372,6 @@ div#top-nav.navbar-fixed-top {
                             @include navbar-link-button-item;
                             display: flex;
                             align-items: center;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
                         }
 
                         .dropdown-menu {
@@ -366,7 +383,7 @@ div#top-nav.navbar-fixed-top {
                         }
 
                         @include navbar-fixed-position {
-                            max-width: 100px;
+                            max-width: 120px;
                         }
 
                         @include media-breakpoint-between(lg, xl) {
@@ -389,24 +406,33 @@ div#top-nav.navbar-fixed-top {
                 > input#navbar-search {
                     font-size: 1em;
                     width: 140px;
-                    color: rgba(0,0,0,0.5);
+                    color: #000;
                     border-radius: 3px;
-                    border: 1px solid rgb(125,125,125);
+                    //border: 1px solid rgb(125,125,125);
+                    border-width: 1px;
                     height: inherit;
                     padding: 4px 5px 2px 5px;
                     -ms-transition: width 0.3s ease-out;
                     -moz-transition: width 0.3s ease-out;
                     -webkit-transition: width 0.3s ease-out;
-                    transition: width 0.3s ease-out;
-                    margin-left: 5px;
-                    background-color: lighten($color: $navbar-background-color, $amount: 5%); //$brand-primary-dark;
-                    border-color: transparent; //$brand-primary;
+                    transition: width 0.3s ease-out, background-color .3s ease-out;
+                    background-color: $brand-primary; //desaturate(lighten($color: $navbar-background-color, $amount: 15%), 20%); //$brand-primary-dark;
+                    border-color: $brand-primary;
+
                     &::placeholder {
                         color: rgba(0,0,0,0.33); // For dark bg navbar only
                     }
                     &::-webkit-search-cancel-button {
                         display: none;
                     }
+                }
+
+                &.has-input #navbar-search,
+                #navbar-search:focus {
+                    /* dont expand width here */
+                    background-color: #fff;
+                    color: rgba(0,0,0,1.0);
+                    border-color: unset; //$brand-primary; // rgba(125,125,125,1.0);
                 }
 
                 .search-item-type-wrapper {
@@ -430,8 +456,8 @@ div#top-nav.navbar-fixed-top {
                     display: flex;
                     line-height: normal;
                     padding: 10px 0;
-                    border-top: 1px solid #ddd;
-                    border-bottom: 1px solid #ddd;
+                    border-top: 1px solid $navbar-separator-color;
+                    border-bottom: 1px solid $navbar-separator-color;
 
                     > input#navbar-search {
                         flex-grow: 1;
@@ -444,14 +470,6 @@ div#top-nav.navbar-fixed-top {
                         width: 130px;
                     }
 
-                    &.has-input #navbar-search,
-                    #navbar-search:focus {
-                        /* dont expand width here */
-                        background-color: #fff;
-                        color: rgba(0,0,0,1.0);
-                        //border-color: $brand-primary; // rgba(125,125,125,1.0);
-                        @include transition(width 0.3s ease-out);
-                    }
                 }
 
                 @include media-breakpoint-up(lg){
@@ -496,20 +514,19 @@ div#top-nav.navbar-fixed-top {
         /** When on xs & sm sizes **/
         > .navbar-toggler,
         > .navbar-toggler {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            height: 40px;
-            line-height: 40px;
+            height: $navbar-full-height;
+            line-height: $navbar-full-height;
             padding-top: 0;
             padding-bottom: 0;
-            padding-left: 8px;
-            padding-right: 8px;
+            padding-left: 20px;
+            padding-right: 20px;
             font-size: 1.5rem;
             border: none;
+            color: $navbar-link-color;
 
             &:hover, &:active, &:focus {
                 background-color: rgba(0,0,0,0.125);
-                color: $gray-800;
+                color: $navbar-link-hover-color;
             }
 
             > i.icon {

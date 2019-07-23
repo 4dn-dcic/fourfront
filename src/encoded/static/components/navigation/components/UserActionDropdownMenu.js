@@ -47,7 +47,12 @@ export const UserActionDropdownMenu = React.memo(function UserActionDropdownMenu
         });
 
         acctBtn = (
-            <NavDropdown className={cls} title={<React.Fragment>{ acctIcon }{ acctTitle }</React.Fragment>} label="context">
+            <NavDropdown className={cls} title={
+                <React.Fragment>
+                    { acctIcon }
+                    <span className="text-ellipsis-container">{ acctTitle }</span>
+                </React.Fragment>
+            } label="context">
                 { renderedActions }
                 <LogoutController updateUserInfo={updateUserInfo}>
                     <LogoutDropdownItem/>
