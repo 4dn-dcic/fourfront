@@ -139,7 +139,7 @@ def create_term_dict(class_, termid, data, ontology_id=None):
         'term_url': class_.__str__(),
     }
     if ontology_id is not None:
-        term['source_ontology'] = ontology_id
+        term.setdefault('source_ontologies', []).append(ontology_id)
     (name, ns) = splitNameFromNamespace(term['term_url'])
     term['namespace'] = ns
     name = get_term_name_from_rdf(class_, data)
@@ -448,30 +448,30 @@ def remove_obsoletes_and_unnamed(terms):
     return terms
 
 
-def verify_and_update_ontology(terms, ontologies, dbterms):
-    '''checks to be sure the ontology associated with the term agrees with
-        the term prefix as long as term does not already exist in db.
-        If it doesn't it is likely that the term was
-        imported into a previously processed ontology and so the ontlogy
-        of the term should be updated to the one that matches the prefix
-    '''
-    ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
-    ont_prefi = {v: k for k, v in ont_lookup.items()}
-    to_delete = []
-    for termid, term in terms.items():
-        # if termid in dbterms:
-        #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
-        #         to_delete.append(termid)
-        if ont_lookup.get(term['source_ontology'], None):
-            prefix = termid.split(':')[0]
-            if prefix in ont_prefi:
-                if prefix != ont_lookup[term['source_ontology']]:
-                    term['source_ontology'] = ont_prefi[prefix]
-        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
-            to_delete.append(termid)
-            print('WARNING - {} is already present as a term in {}'.format(termid, dbterms[termid]['source_ontology']['display_title']))
-    keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
-    return keep_terms
+# def verify_and_update_ontology(terms, ontologies, dbterms):
+#     '''checks to be sure the ontology associated with the term agrees with
+#         the term prefix as long as term does not already exist in db.
+#         If it doesn't it is likely that the term was
+#         imported into a previously processed ontology and so the ontlogy
+#         of the term should be updated to the one that matches the prefix
+#     '''
+#     ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
+#     ont_prefi = {v: k for k, v in ont_lookup.items()}
+#     to_delete = []
+#     for termid, term in terms.items():
+#         # if termid in dbterms:
+#         #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
+#         #         to_delete.append(termid)
+#         if ont_lookup.get(term['source_ontology'], None):
+#             prefix = termid.split(':')[0]
+#             if prefix in ont_prefi:
+#                 if prefix != ont_lookup[term['source_ontology']]:
+#                     term['source_ontology'] = ont_prefi[prefix]
+#         if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
+#             to_delete.append(termid)
+#             print('WARNING - {} is already present as a term in {}'.format(termid, dbterms[termid]['source_ontology']['display_title']))
+#     keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
+#     return keep_terms
 
 
 def _get_t_id(val):
@@ -509,7 +509,7 @@ def _terms_match(t1, t2):
                             pass
                     if not found:
                         return False
-            elif k == 'source_ontology':
+            elif k == 'source_ontologies':
                 continue
                 # same as above comment to potentially deal with different response
                 # t2ont = _get_t_id(t2['source_ontology'])
@@ -557,7 +557,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
 
         for tid, term in dbterms.items():
             if tid not in terms:
-                if not term.get('source_ontology') or term['source_ontology'] not in ontids:
+                if not term.get('source_ontologies') or not [o in term['source_ontologies'] for o in ontids]:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
                 dbuid = term['uuid']
@@ -665,8 +665,8 @@ def download_and_process_owl(ontology, connection, terms, simple=False):
                 else:
                     if 'term_name' not in terms[termid]:
                         terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                    if 'source_ontology' not in terms[termid]:
-                        terms[termid]['source_ontology'] = ontology['uuid']
+                    if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
+                        terms[termid].set_default('source_ontologies', []).append(ontology['uuid'])
                 # deal with parents
                 terms = process_parents(class_, data, terms)
     # add synonyms and definitions
@@ -781,7 +781,7 @@ def main():
     if terms:
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
-        terms = verify_and_update_ontology(terms, ontologies, db_terms)
+        # terms = verify_and_update_ontology(terms, ontologies, db_terms)
         filter_unchanged = True
         if args.full:
             filter_unchanged = False

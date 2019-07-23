@@ -53,7 +53,7 @@ class Biosource(Item):
         "tissue.preferred_name",
         "tissue.slim_terms",
         "tissue.synonyms",
-        "tissue.source_ontology.ontology_name",
+        "tissue.source_ontologies.ontology_name",
         "cell_line.term_name",
         "cell_line.preferred_name",
         "cell_line.slim_terms",
@@ -143,13 +143,13 @@ def validate_biosource_tissue(context, request):
         except AttributeError:
             getter = context.collection
         term = getter.get(termuid)
-        ontology = getter.get(term.properties['source_ontology'])
-        ontology_name = ontology.properties.get('ontology_name')
+        ontologies = getter.get(term.properties['source_ontologies'])
+        # ontology_name = ontology.properties.get('ontology_name')
     except AttributeError:
         pass
 
-    if ontology_name is not None and (
-            ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
+    if ontology_name is None:  # and (
+        #    ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
         term_ok = True
     if not term_ok:
         try:

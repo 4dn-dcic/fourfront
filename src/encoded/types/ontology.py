@@ -22,7 +22,7 @@ class OntologyTerm(Item):
 
     item_type = 'ontology_term'
     schema = load_schema('encoded:schemas/ontology_term.json')
-    embedded_list = ['slim_terms.is_slim_for', 'slim_terms.term_name', 'source_ontology.ontology_name']
+    embedded_list = ['slim_terms.is_slim_for', 'slim_terms.term_name', 'source_ontologies.ontology_name']
     name_key = 'term_id'
 
     def _update(self, properties, sheets=None):

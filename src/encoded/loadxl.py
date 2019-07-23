@@ -395,7 +395,10 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     skip_existing_items.add(an_item['uuid'])
                 yield str.encode('SKIP: %s\n' % an_item['uuid'])
             else:
-                post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+                try:
+                    post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+                except:
+                    import pdb; pdb.set_trace()
                 post_first = format_for_attachment(post_first, docsdir)
                 try:
                     res = testapp.post_json('/'+a_type, post_first)

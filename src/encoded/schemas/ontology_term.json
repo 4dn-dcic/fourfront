@@ -73,12 +73,16 @@
                 "permission": "import_items"
             }
         },
-        "source_ontology": {
-            "title": "Ontology that this term is part of",
-            "descripton": "The ontology from whence this term EFO, OBI, UBERON",
+        "source_ontologies": {
+            "title": "Ontologies that this term is part of",
+            "descripton": "The ontologies from whence this term EFO, OBI, UBERON",
             "permission": "import_items",
-            "type": "string",
-            "linkTo": "Ontology"
+            "type": "array",
+            "items": {
+                "title": "Ontology",
+                "type": "string",
+                "linkTo": "Ontology"
+            }
         },
         "namespace": {
             "title": "Term namespace",
@@ -117,7 +121,7 @@
         }
     },
     "facets": {
-        "source_ontology.ontology_name" : {
+        "source_ontologies.ontology_name" : {
             "title" : "Ontology"
         },
         "namespace": {
@@ -134,7 +138,7 @@
         "term_id": {
             "title": "Term ID"
         },
-        "source_ontology": {
+        "source_ontologies": {
             "title": "Ontology"
         }
     },
