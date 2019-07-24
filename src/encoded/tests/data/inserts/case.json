@@ -9,13 +9,13 @@
             {
                 "members": ["5ec91041-78a0-4758-abef-21c7f5fd9f12", "5ec91041-78a0-4758-abef-21c7f5fd9f34","5ec91041-78a0-4758-abef-21c7f5fd9f56","5ec91041-78a0-4758-abef-21c7f5fd9f78","5ec91041-78a0-4758-abef-21c7f5fd9f91","5ec91041-78a0-4758-abef-21c7f5fd9f92"],
                 "proband": "5ec91041-78a0-4758-abef-21c7f5fd9f12",
-                "ped_file": "will be a file object"
+                "ped_file": "dcf15d5e-40aa-43bc-b81c-32c70c9afc50"
             },
             {
                 "members": ["5ec91041-78a0-4758-abef-21c7f5fd9f21", "5ec91041-78a0-4758-abef-21c7f5fd9f22","5ec91041-78a0-4758-abef-21c7f5fd9f23","5ec91041-78a0-4758-abef-21c7f5fd9f24","5ec91041-78a0-4758-abef-21c7f5fd9f25"],
                 "proband": "5ec91041-78a0-4758-abef-21c7f5fd9f21",
-                "ped_file": "will be a file object"
-            },
+                "ped_file": "dcf15d5e-40aa-43bc-b81c-32c70c9afc52"
+            }
         ],
         "descrption": "",
         "case_phenotypic_features": []

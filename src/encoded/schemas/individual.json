@@ -55,6 +55,11 @@
             "title" : "Year of Birth",
             "type" : "integer"
         },
+        "development_stage" : {
+            "title" : "Development Stage",
+            "type" : "string",
+            "notes": "might be useful for cases like individual from pregnancy loss, not sure if needed"
+        },
         "life_status": {
             "title": "Life Status",
             "type": "string",
