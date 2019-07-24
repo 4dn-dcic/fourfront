@@ -1,23 +1,18 @@
 [
     {
-        "title": "Person Family WGS",
+        "title": "People with Blue Thumbs",
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "institution": "hms-dbmi",
         "status": "released",
         "uuid": "cc7d83a2-6886-4ca0-9402-7c49734cf3c4",
-        "case_samples": [
+        "families": [
             {
-                "sample": "4fdb481a-fbdb-4c0f-a68d-aac87f847bec",
-                "proband": true
-            },
-            {
-                "sample": "283f6047-61cd-4ddb-8881-ec1c87082569",
-                "proband": false
-            },
-            {
-                "sample": "f4bbc709-40fe-48a4-afde-8e886b571903",
-                "proband": false
+                "members": [],
+                "proband": "",
+                "ped_file": "will be a file object"
             }
-        ]
+        ],
+        "descrption": "",
+        "case_phenotypic_features": []
     }
 ]
