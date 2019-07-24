@@ -97,10 +97,6 @@ class Case(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/case.json')
     embedded_list = [
-        'case_samples.sample.specimen_type',
-        'case_samples.sample.individual.sex',
-        'case_samples.sample.individual.institutional_id.id',
-        'case_samples.sample.individual.institutional_id.institution'
     ]
 
     # @calculated_property(schema={
@@ -164,9 +160,6 @@ class Sample(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/sample.json')
     embedded_list = [
-        "individual.sex",
-        "individual.institutional_id.id",
-        "individual.institutional_id.institution"
     ]
 
 

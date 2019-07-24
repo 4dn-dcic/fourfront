@@ -52,7 +52,8 @@
                     "ped_file": {
                         "title" : "Pedigree File",
                         "description": "Ped format file with pedigree information",
-                        "type" : "string"
+                        "type" : "string",
+                        "linkTo": "Document"
                     }
                 }
             }
