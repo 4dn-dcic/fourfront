@@ -867,7 +867,7 @@ def test_add_additional_term_info(mocker, simple_terms):
                 result = go.add_additional_term_info(simple_terms, 'data', 'synterms', 'defterms')
                 for tid, term in result.items():
                     if tid == 't3':
-                        assert term['definition'] == 'def1'
+                        assert term['definition'] == 'def1 -- def2'
                         assert len(term['synonyms']) == 2
                         assert 'syn1' in term['synonyms']
                         assert 'syn2' in term['synonyms']

@@ -636,7 +636,7 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
         if term.get('definition') is None:
             definitions = get_definitions(termuri, data, definition_terms)
             if definitions:
-                term['definition'] = ' '.join(sorted(definitions))
+                term['definition'] = ' -- '.join(sorted(definitions))
     return terms
 
 
