@@ -7,10 +7,15 @@
         "uuid": "cc7d83a2-6886-4ca0-9402-7c49734cf3c4",
         "families": [
             {
-                "members": [],
-                "proband": "",
+                "members": ["5ec91041-78a0-4758-abef-21c7f5fd9f12", "5ec91041-78a0-4758-abef-21c7f5fd9f34","5ec91041-78a0-4758-abef-21c7f5fd9f56","5ec91041-78a0-4758-abef-21c7f5fd9f78","5ec91041-78a0-4758-abef-21c7f5fd9f91","5ec91041-78a0-4758-abef-21c7f5fd9f92"],
+                "proband": "5ec91041-78a0-4758-abef-21c7f5fd9f12",
                 "ped_file": "will be a file object"
-            }
+            },
+            {
+                "members": ["5ec91041-78a0-4758-abef-21c7f5fd9f21", "5ec91041-78a0-4758-abef-21c7f5fd9f22","5ec91041-78a0-4758-abef-21c7f5fd9f23","5ec91041-78a0-4758-abef-21c7f5fd9f24","5ec91041-78a0-4758-abef-21c7f5fd9f25"],
+                "proband": "5ec91041-78a0-4758-abef-21c7f5fd9f21",
+                "ped_file": "will be a file object"
+            },
         ],
         "descrption": "",
         "case_phenotypic_features": []
