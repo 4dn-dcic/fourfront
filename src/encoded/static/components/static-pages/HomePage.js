@@ -55,16 +55,16 @@ const MyDashboard = React.memo(function MyDashboard(props){
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add">New Case</a>
                     </div>
                     <div className="col-xs-12 col-md-6 col-lg-4">
-                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled >Pipeline Admin</a>
+                        <a className="btn btn-primary btn-block btn-lg mb-2 disabled" href="#" >Pipeline Admin</a>
                     </div>
                     <div className="col-xs-12 col-md-6 col-lg-4">
-                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Quality Controls</a>
+                        <a className="btn btn-primary btn-block btn-lg mb-2 disabled" href="#">Quality Controls</a>
                     </div>
                     <div className="col-xs-12 col-md-6 col-lg-4">
-                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Curation</a>
+                        <a className="btn btn-primary btn-block btn-lg mb-2 disabled" href="#">Curation</a>
                     </div>
                     <div className="col-xs-12 col-md-6 col-lg-4">
-                        <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Case&currentAction=add" disabled>Crowdsourcing</a>
+                        <a className="btn btn-primary btn-block btn-lg mb-2 disabled" href="#">Crowdsourcing</a>
                     </div>
                     <div className="col-xs-12 col-md-6 col-lg-4">
                         <a className="btn btn-primary btn-block btn-lg mb-2" href="/search/?type=Item">Clinical Reports</a>

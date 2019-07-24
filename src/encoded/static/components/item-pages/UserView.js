@@ -15,6 +15,7 @@ import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/
 
 import { store } from './../../store';
 import { FormattedInfoBlock } from './components/FormattedInfoBlock';
+import { OnlyTitle, PageTitleContainer, pageTitleViews } from './../PageTitleSection';
 
 // eslint-disable-next-line no-unused-vars
 import { Item } from './../util/typedefs';
@@ -767,3 +768,26 @@ export class ImpersonateUserForm extends React.PureComponent {
     }
 
 }
+
+
+/*** Page Tttles ***/
+
+
+const UserViewPageTitle = React.memo(function UserViewPageTitle({ context, schemas, currentAction, alerts }){
+    const myDetails = JWT.getUserDetails();
+    const myEmail = myDetails && myDetails.email;
+    let titleStr;
+    if (myEmail && context && context.email && myEmail === context.email){
+        titleStr = "My Profile";
+    } else {
+        titleStr = object.itemUtil.getTitleStringFromContext(context);
+    }
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <OnlyTitle>{ titleStr }</OnlyTitle>
+        </PageTitleContainer>
+    );
+});
+
+pageTitleViews.register(UserViewPageTitle, "User");

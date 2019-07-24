@@ -47,7 +47,7 @@ $navbar-height:                             80px;
 $navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
 
 //$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
-$navbar-background-color: #083c52;
+$navbar-background-color: #20445f; //#144567; //#083c52;  // ALT: #19314d;
 $navbar-link-color : rgba(255,255,255,0.8);
 $navbar-link-hover-color : #fff;
 $navbar-link-active-color : #fff;
@@ -77,7 +77,7 @@ $link-color: #428bca;
 $expset-table-border-color : #eee;
 
 
-$primary:       #057eaf;
+$primary:       #3691d2; //#2684ad; //#057eaf;
 $secondary:     #6c757d;
 $success:       #4C994C;
 $info:          #4F689E;
@@ -87,8 +87,8 @@ $light:         #f8f9fa;
 $dark:          #343a40;
 
 // Ext:
-$primary-dark: darken($primary, 15%);
-
+//$primary-dark: darken($primary, 15%);
+$primary-dark: #2b6088; //#0c5979;
 
 $brand-warning: $warning;
 $brand-success: $success;

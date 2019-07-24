@@ -24,7 +24,9 @@
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss";
+
+// Imported in encoded/modules/_tables.scss:
+// @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss";
 
 // ENCODE Layout/Components
 
