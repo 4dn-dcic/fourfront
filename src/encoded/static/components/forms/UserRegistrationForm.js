@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import serialize from 'form-serialize';
 import memoize from 'memoize-one';
-import { FormGroup, FormLabel, FormControl } from 'react-bootstrap';
+import { FormGroup, FormLabel, FormControl, Form } from 'react-bootstrap';
 
 import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
@@ -268,54 +268,57 @@ export default class UserRegistrationForm extends React.PureComponent {
 
                 { heading }
 
-                <form method="POST" name="user-registration-form" ref={this.formRef} onSubmit={this.onFormSubmit}>
+                <form method="POST" name="user-registration-form was-validated" ref={this.formRef} onSubmit={this.onFormSubmit}>
 
-                    <FormGroup controlId="email-address" validationState={null}>
-                        <FormLabel>Primary E-Mail or Username</FormLabel>
+                    <div className="form-group">
+                        <label htmlFor="email-address">Primary E-Mail or Username</label>
                         <h4 id="email-address" className="text-300 mt-0">
                             { object.itemUtil.User.gravatar(email, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
                             { email }
                         </h4>
-                    </FormGroup>
+                    </div>
 
                     <div className="row">
                         <div className="col-sm-12 col-md-6">
-                            <FormGroup controlId="firstName" validationState={value_for_first_name === '' ? 'error' : null}>
-                                <FormLabel>First Name <span className="text-danger">*</span></FormLabel>
-                                <FormControl name="first_name" type="text" onChange={this.onFirstNameChange}/>
-                                <FormControl.Feedback />
-                                { value_for_first_name === '' ? <span className="help-block">First name cannot be blank</span> : null }
-                            </FormGroup>
+                            <div className="form-group">
+                                <label htmlFor="firstName">First Name <span className="text-danger">*</span></label>
+                                <input name="first_name" type="text" onChange={this.onFirstNameChange}
+                                    className={"form-control" + (value_for_first_name === '' ? " is-invalid" : "")} />
+                                <div className="invalid-feedback">First name cannot be blank</div>
+                            </div>
                         </div>
                         <div className="col-sm-12 col-md-6">
-                            <FormGroup controlId="lastName" validationState={value_for_last_name === '' ? 'error' : null}>
-                                <FormLabel>Last Name <span className="text-danger">*</span></FormLabel>
-                                <FormControl name="last_name" type="text" onChange={this.onLastNameChange}/>
-                                <FormControl.Feedback />
-                                { value_for_last_name === '' ? <span className="help-block">Last name cannot be blank</span> : null }
-                            </FormGroup>
+                            <div className="form-group">
+                                <label htmlFor="lastName">Last Name <span className="text-danger">*</span></label>
+                                <input name="last_name" type="text" onChange={this.onLastNameChange}
+                                    className={"form-control" + (value_for_last_name === '' ? " is-invalid" : "")} />
+                                <div className="invalid-feedback">Last name cannot be blank</div>
+                            </div>
                         </div>
                     </div>
 
                     <hr className="mt-1 mb-2" />
 
-                    <FormGroup controlId="pendingLab" validationState={null}>
-                        <FormLabel>Lab / Affiliation <span className="text-300">(for 4DN members)</span></FormLabel>
+                    <div className="form-group">
+                        <label htmlFor="pendingLab">Preferred Contact Email <span className="text-300">(Optional)</span></label>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
-                        <span className="help-block">Lab or Institute with which you are associated.</span>
-                    </FormGroup>
+                        <small className="form-text text-muted">
+                            Lab or Institute with which you are associated.
+                        </small>
+                    </div>
 
                     <JobTitleField {...{ value_for_pending_lab, value_for_pending_lab_details, schemas }}  />
 
-                    <FormGroup controlId="contactEmail" validationState={!isContactEmailValid ? 'error' : null}>
-                        <FormLabel>Preferred Contact Email <span className="text-300">(Optional)</span></FormLabel>
-                        <FormControl name="preferred_email" type="text" onChange={this.onContactEmailChange}/>
-                        <span className="help-block">
+                    <div className="form-group">
+                        <label htmlFor="contactEmail">Preferred Contact Email <span className="text-300">(Optional)</span></label>
+                        <input name="preferred_email" type="text" onChange={this.onContactEmailChange}
+                            className={"form-control" + (!isContactEmailValid ? " is-invalid" : "")} />
+                        <small className="form-text text-muted">
                             { isContactEmailValid ? "Preferred contact email, if different from login/primary email." : "Please enter a valid e-mail address." }
-                        </span>
-                    </FormGroup>
+                        </small>
+                    </div>
 
                     <div className={"recaptcha-container" + (captchaError ? ' has-error' : '')}>
                         <div className="g-recaptcha" ref={this.recaptchaContainerRef} />
@@ -323,7 +326,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     </div>
 
                     <div className="clearfix">
-                        <button type="submit" disabled={!(maySubmit)} className="btn btn-lg btn-primary right text-300 btn-block mt-2">
+                        <button type="submit" disabled={!(maySubmit)} className="btn btn-lg btn-primary text-300 btn-block mt-2">
                             Sign Up
                         </button>
                     </div>
@@ -445,27 +448,26 @@ function JobTitleField(props) {
 
     if (fieldSchema && Array.isArray(fieldSchema.suggested_enum) && fieldSchema.suggested_enum.length > 0){
         formControl = (
-            <FormControl componentClass="select" name="job_title" defaultValue="null">
+            <select name="job_title" defaultValue="null" className="form-control">
                 <option hidden disabled value="null"> -- select an option -- </option>
                 { _.map(fieldSchema.suggested_enum, function(val){ return <option value={val} key={val}>{ val }</option>; }) }
-            </FormControl>
+            </select>
         );
     } else {
-        formControl = <FormControl name="job_title" type="text"/>;
+        formControl = <input type="text" name="job_title" className="form-control"/>;
     }
 
     return (
         <Collapse in={!!(value_for_pending_lab)}>
             <div className="clearfix">
-                <FormGroup controlId="jobTitle" validationState={null}>
-                    <FormLabel>
+                <div className="form-group">
+                    <label htmlFor="jobTitle">
                         Job Title
                         { value_for_pending_lab_details && value_for_pending_lab_details.display_title &&
                         <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
                         <span className="text-300"> (Optional)</span>
-                    </FormLabel>
-                    { formControl }
-                </FormGroup>
+                    </label>
+                </div>
             </div>
         </Collapse>
     );
