@@ -1,0 +1,5 @@
+FAM0000015 Bart Homer Marge 1 2
+FAM0000015 Marge 0 0 2 -9
+FAM0000015 Homer 0 0 1 -9
+FAM0000015 Maggie Homer Marge 2 -9
+FAM0000015 Lisa Homer Marge 2 -9
