@@ -1,0 +1,127 @@
+{
+    "title": "Disorder",
+    "description": "Disorders - Diseases, Syndromes, Anomolies",
+    "id": "/profiles/disorder.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["disorder_name", "disorder_id"],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": true,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/static_embeds" }
+    ],
+    "properties": {
+        "disorder_name" : {
+            "title" : "Standard Name of the Disorder",
+            "type" : "string"
+        },
+        "disorder_id" : {
+            "title" : "Disorder Identifier",
+            "description" : "Identifier of disease. E.g. \"ORPHA:529962\"",
+            "type" : "string",
+            "uniqueKey": true
+        },
+        "associated_phenotypes": {
+            "title": "Associated Phenotypes",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title" : "Phenotype Annotation",
+                "type" : "object",
+                "required": ["phenotype"],
+                "properties" : {
+                    "phenotype": {
+                        "title": "Phenotype",
+                        "type": "string",
+                        "linkTo": "OntologyTerm"
+                    },
+                    "evidence_code": {
+                        "title": "Data obtained from external source on the evidence underlying the association",
+                        "type": "string",
+                        "note":  "This required field indicates the level of evidence supporting the annotation. Annotations that have been extracted by parsing the Clinical Features sections of the omim.txt file are assigned the evidence code IEA (inferred from electronic annotation). Please note that you need to contact OMIM in order to reuse these annotations in other software products. Other codes include PCS for published clinical study. This should be used for information extracted from articles in the medical literature. Generally, annotations of this type will include the PubMed id of the published study in the DB_Reference field. ICE can be used for annotations based on individual clinical experience. This may be appropriate for disorders with a limited amount of published data. This must be accompanied by an entry in the DB:Reference field denoting the individual or center performing the annotation together with an identifier. For instance, GH:007 might be used to refer to the seventh such annotation made by a specialist from Gotham Hospital (assuming the prefix GH has been registered with the HPO). Finally we have TAS, which stands for “traceable author statement”, usually reviews or disease entries (e.g. OMIM) that only refers to the original publication.",
+                        "enum": ["TAS", "IEA", "PCS"]
+                    },
+                    "frequency_info": {
+                        "title": "Frequeny Info",
+                        "description": "A term-id from the HPO-sub-ontology below the term Frequency. There are three allowed options for this field. A term-id from the HPO-sub-ontology below the term Frequency. A count of patiennts affected within a cohort. For instance, 7/13 would indicate that 7 of the 13 patients with the specified disease were found to have the phenotypic abnormality referred to by the HPO term in question in the study referred to by the DB_Reference. A percentage value such as 17%, again referring to the percentage of patients found to have the phenotypic abnormality referred to by the HPO term in question in the study referred to by the DB_Reference. If possible, the 7/13 format is preferred over the percentage format if the exact data is available",
+                        "type": "string",
+                        "comment": "this will be a controlled enum"
+                    },
+                    "frequency_value": {
+                        "title": "Frequency Value",
+                        "description": "A calculated value using the values in frequency info that indicate the frequency of linkage between disease and phenotype",
+                        "type": "string"
+                    },
+                    "attribution_id": {
+                        "title": "Attribution",
+                        "description": "source of the information used for the annotation. This may be the clinical experience of the annotator or may be taken from an article as indicated by a PubMed id.",
+                        "type": "string"
+                    },
+                    "onset": {
+                        "title": "Onset",
+                        "description": "A term-id from the HPO-sub-ontology below the term Age of onset.",
+                        "type": "string",
+                        "linkTo": "OntologyTerm"
+                    },
+                    "modifier_term": {
+                        "title": "Modifier",
+                        "description": "A term from the clinical modifier sub ontology",
+                        "type": "string",
+                        "linkTo": "OntologyTerm"
+                    },
+                    "aspect": {
+                        "title": "Aspect",
+                        "description": "one of P (Phenotypic abnormality), I (inheritance), C (onset and clinical course).",
+                        "type": "string",
+                        "enum": ["phenotypic abnormality", "inheritance", "onset and clinical course"]
+                    },
+                    "date_curated": {
+                       "title": "Date added",
+                       "description": "The date YYYY-MM-DD that the association was made",
+                       "type": "string",
+                       "anyOf": [
+                           {"format": "date-time"},
+                           {"format": "date"}
+                       ]
+                    },
+                    "curated_by": {
+                        "title": "Curated by",
+                        "description": "Designation for who made the curation of the association",
+                        "type": "string"
+                    },
+                    "sex": {
+                        "title": "Affected sex",
+                        "description": " MALE or FEMALE if the annotation in question is limited to males or females. This field refers to the phenotypic (and not the chromosomal) sex, and does not intend to capture the further complexities of sex determination. If a phenotype is limited to one or the other sex, then the corresponding term from the Clinical modifier subontology should also be used in the Modifier field",
+                        "type": "string",
+                        "enum": ["MALE", "FEMALE"]
+                    }
+                }
+            }
+        },
+        "associated_genes": {
+            "title": "Associated Genes",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title" : "Gene",
+                "type" : "string",
+                "comment": "Likely a linkTo, but wait until Gene is defined"
+            }
+        },
+        "definition" : {
+            "title" : "Definition",
+            "description": "Definition of this disease",
+            "type" : "string"
+        },
+        "comment" : {
+            "type" : "string",
+            "title" : "Comment",
+            "formInput": "textarea"
+        }
+    }
+}

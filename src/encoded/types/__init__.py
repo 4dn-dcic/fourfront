@@ -172,14 +172,14 @@ class Sample(Item):
 
 
 @collection(
-    name='diseases',
+    name='disorderss',
     properties={
-        'title': 'Diseases',
-        'description': 'Listing of Diseases',
+        'title': 'Disorders',
+        'description': 'Listing of Disorders',
     })
-class Disease(Item):
+class Disorder(Item):
     item_type = 'disease'
-    schema = load_schema('encoded:schemas/disease.json')
+    schema = load_schema('encoded:schemas/disorder.json')
     embedded_list = [
         'associated_phenotypes.term_name',
         'associated_phenotypes.term_id',
@@ -191,8 +191,34 @@ class Disease(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, term_name):
-        return term_name
+    def display_title(self, disorder_name):
+        return disorder_name
+
+
+@collection(
+    name='genes',
+    unique_key='gene:geneid',
+    lookup_key='preferred_symbol',
+    properties={
+        'title': 'Genes',
+        'description': 'Gene items',
+    })
+class Gene(Item):
+    """Gene class."""
+    item_type = 'gene'
+    name_key = 'geneid'
+    schema = load_schema('encoded:schemas/gene.json')
+    embedded_list = lab_award_attribution_embed_list + ["organism.scientific_name"]
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, geneid, preferred_symbol=None):
+        if preferred_symbol:
+            return preferred_symbol
+        return 'GENE ID:{}'.format(geneid)
 
 
 @collection(
