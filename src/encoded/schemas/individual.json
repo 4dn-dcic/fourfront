@@ -30,6 +30,17 @@
                 "unknown"
             ]
         },
+        "phenotypic_features": {
+            "title": "Phenotypic Features",
+            "description": "Phenotypic Features as listed in HPO",
+            "type": "array",
+            "uniqueItems": true,
+            "items":{
+                "title": "Phenotypic Feature",
+                "type": "string",
+                "linkTo": "Phenotype"
+            }
+        },
         "diseases" : {
             "title" : "Diseases",
             "type" : "array",
@@ -43,6 +54,11 @@
         "birth_year" : {
             "title" : "Year of Birth",
             "type" : "integer"
+        },
+        "development_stage" : {
+            "title" : "Development Stage",
+            "type" : "string",
+            "notes": "might be useful for cases like individual from pregnancy loss, not sure if needed"
         },
         "life_status": {
             "title": "Life Status",
@@ -84,12 +100,6 @@
                 }
             }
         },
-        "clinical_indication": {
-            "title": "Clinical Indication",
-            "description": "Clinical indication for referral",
-            "type": "string",
-            "formInput": "textarea"
-        },
         "age_of_onset": {
             "title": "Age of Onset",
             "type": "string",
@@ -105,29 +115,24 @@
                 "adult onset"
             ]
         },
-        "related_individuals": {
-            "title": "Related Individuals",
-            "type": "array",
+        "mother": {
+            "title": "Mother",
+            "type": "string",
+            "linkTo": "Individual"
+        },
+        "father": {
+            "title": "Father",
+            "type": "string",
+            "linkTo": "Individual"
+        },
+        "samples" : {
+            "title" : "Samples",
+            "type" : "array",
             "uniqueItems": true,
-            "items": {
-                "title": "Related Individual",
-                "type": "object",
-                "required": ["related_individual", "relationship_type"],
-                "properties": {
-                    "related_individual": {
-                        "title": "Individual",
-                        "type": "string",
-                        "linkTo": "Individual"
-                    },
-                    "relationship_type": {
-                        "title": "Relationship Type",
-                        "type": "string",
-                        "enum": [
-                            "parent",
-                            "child"
-                        ]
-                    }
-                }
+            "items" : {
+                "title" : "Sample",
+                "type" : "string",
+                "linkTo" : "Sample"
             }
         }
     }
