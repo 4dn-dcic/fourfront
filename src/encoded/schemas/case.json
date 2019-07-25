@@ -49,9 +49,9 @@
                         "type" : "string",
                         "linkTo" : "Individual"
                     },
-                    "ped_file": {
-                        "title" : "Pedigree File",
-                        "description": "Ped format file with pedigree information",
+                    "original_pedigree": {
+                        "title" : "Original Pedigree File",
+                        "description": "The original pedigree file used for this family",
                         "type" : "string",
                         "linkTo": "Document"
                     }
