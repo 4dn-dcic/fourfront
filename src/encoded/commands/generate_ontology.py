@@ -550,14 +550,19 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                 to_patch[uuid] = term
 
     if set_obsoletes:
+        prefixes = [o['ontology_prefix'] for o in ontologies]
+        if prefixes == ['EFO'] or prefixes == ['HP']:
+            use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
+        else:
+            use_terms = {tid: term for tid, term in dbterms.items()}
         # go through db terms and find which aren't in terms and set status
         # to obsolete by adding to to_patch
         # need a way to exclude our own terms and synonyms and definitions
         ontids = [o['uuid'] for o in ontologies]
 
-        for tid, term in dbterms.items():
+        for tid, term in use_terms.items():
             if tid not in terms:
-                if not term.get('source_ontology') or term['source_ontology'] not in ontids:
+                if not term.get('source_ontology') or term['source_ontology']['uuid'] not in ontids:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
                 dbuid = term['uuid']
@@ -637,6 +642,7 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
             definitions = get_definitions(termuri, data, definition_terms)
             if definitions:
                 term['definition'] = ' -- '.join(sorted(definitions))
+
     return terms
 
 
