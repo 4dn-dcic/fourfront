@@ -126,39 +126,42 @@ class Biosource(Item):
         pass
 
 
-# validator for tissue field
-def validate_biosource_tissue(context, request):
-    data = request.json
-    if 'tissue' not in data:
-        return
-    term_ok = False
-    tissue = data['tissue']
-    ontology_name = None
-    try:
-        termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
-        try:
-            # checking to see if our context is a collection or an item to set get
-            context.get('blah')
-            getter = context
-        except AttributeError:
-            getter = context.collection
-        term = getter.get(termuid)
-        ontologies = getter.get(term.properties['source_ontologies'])
-        # ontology_name = ontology.properties.get('ontology_name')
-    except AttributeError:
-        pass
+# # validator for tissue field
+# def validate_biosource_tissue(context, request):
+#     data = request.json
+#     if 'tissue' not in data:
+#         return
+#     term_ok = False
+#     tissue = data['tissue']
+#     ontology_name = None
+#     try:
+#         termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
+#         try:
+#             # checking to see if our context is a collection or an item to set get
+#             context.get('blah')
+#             getter = context
+#         except AttributeError:
+#             getter = context.collection
+#         term = getter.get(termuid)
+#         ontologies = getter.get(term.properties['source_ontologies'])
+#         ontology_name = ontology.properties.get('ontology_name')
+#     except AttributeError:
+#         pass
+#
+#     if (ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
+#         term_ok = True
+#     if not term_ok:
+#         try:
+#             tissuename = tissue.get('term_name')
+#         except AttributeError:
+#             tissuename = str(tissue)
+#         request.errors.add('body', 'Biosource: invalid tissue term', 'Term: ' + tissuename + ' is not found in UBERON')
+#     else:
+#         request.validated.update({})
 
-    if ontology_name is None:  # and (
-        #    ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
-        term_ok = True
-    if not term_ok:
-        try:
-            tissuename = tissue.get('term_name')
-        except AttributeError:
-            tissuename = str(tissue)
-        request.errors.add('body', 'Biosource: invalid tissue term', 'Term: ' + tissuename + ' is not found in UBERON')
-    else:
-        request.validated.update({})
+
+def validate_biosource_tissue(context, request):
+    request.validated.update({})
 
 
 # validator for cell_line field
@@ -199,7 +202,7 @@ def validate_biosource_cell_line(context, request):
 
 
 @view_config(context=Biosource.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_biosource_tissue, validate_biosource_cell_line])
+             validators=[validate_item_content_post, validate_biosource_cell_line, validate_biosource_tissue])
 @view_config(context=Biosource.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
@@ -208,9 +211,9 @@ def biosource_add(context, request, render=None):
 
 
 @view_config(context=Biosource, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line])
+             validators=[validate_item_content_put, validate_biosource_cell_line, validate_biosource_tissue])  # , validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
+             validators=[validate_item_content_patch, validate_biosource_cell_line, validate_biosource_tissue])  # , validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit_unvalidated', request_method='PUT',
              validators=[no_validate_item_content_put],
              request_param=['validate=false'])
@@ -218,7 +221,7 @@ def biosource_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=Biosource, permission='index', request_method='GET',
-             validators=[validate_item_content_in_place, validate_biosource_tissue, validate_biosource_cell_line],
+             validators=[validate_item_content_in_place, validate_biosource_cell_line, validate_biosource_tissue],  # , validate_biosource_cell_line],
              request_param=['check_only=true'])
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)

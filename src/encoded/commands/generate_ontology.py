@@ -666,7 +666,7 @@ def download_and_process_owl(ontology, connection, terms, simple=False):
                     if 'term_name' not in terms[termid]:
                         terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
                     if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
-                        terms[termid].set_default('source_ontologies', []).append(ontology['uuid'])
+                        terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
                 # deal with parents
                 terms = process_parents(class_, data, terms)
     # add synonyms and definitions
@@ -772,7 +772,7 @@ def main():
         if ontology.get('download_url', None) is not None:
             # want only simple processing for HP
             simple = False
-            if ontology.get('ontology_prefix') in ['HP', 'EFO']:
+            if ontology.get('ontology_prefix') in ['HP']:  # , 'EFO']:
                 simple = True
             # get all the terms for an ontology
             terms = download_and_process_owl(ontology, connection, terms, simple)

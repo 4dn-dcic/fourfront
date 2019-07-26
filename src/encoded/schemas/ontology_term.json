@@ -4,7 +4,7 @@
     "id": "/profiles/ontology_term.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["term_id"],
+    "required": ["term_id", "source_ontologies"],
     "identifyingProperties": ["uuid", "term_id", "preferred_name"],
     "additionalProperties": false,
     "mixinProperties": [
