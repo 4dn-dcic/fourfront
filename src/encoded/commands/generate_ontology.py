@@ -5,6 +5,7 @@ import argparse
 from dateutil.relativedelta import relativedelta
 import datetime
 import boto3
+from uuid import uuid4
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
@@ -530,13 +531,18 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
     '''
-    to_post = {}
-    to_patch = {}
+    to_update = {}
+    to_post = 0
+    to_patch = 0
     tid2uuid = {}  # to keep track of existing uuids
     for tid, term in terms.items():
         if tid not in dbterms:
             # new term
-            to_post[tid] = term
+            uid = str(uuid4())
+            term['uuid'] = uid
+            to_update[tid] = term
+            tid2uuid[tid] = uid
+            to_post += 1
         else:
             # add uuid to mapping
             dbterm = dbterms[tid]
@@ -547,25 +553,37 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                 continue
             else:
                 term['uuid'] = uuid
-                to_patch[uuid] = term
+                to_update[uuid] = term
+                to_patch += 1
 
     if set_obsoletes:
+        prefixes = [o.get('ontology_prefix', '') for o in ontologies]
+        if prefixes == ['EFO'] or prefixes == ['HP']:
+            use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
+        else:
+            use_terms = {tid: term for tid, term in dbterms.items()}
         # go through db terms and find which aren't in terms and set status
         # to obsolete by adding to to_patch
         # need a way to exclude our own terms and synonyms and definitions
         ontids = [o['uuid'] for o in ontologies]
 
-        for tid, term in dbterms.items():
+        for tid, term in use_terms.items():
             if tid not in terms:
                 if not term.get('source_ontologies') or not [o in term['source_ontologies'] for o in ontids]:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
                 dbuid = term['uuid']
                 # add simple term with only status and uuid to to_patch
-                to_patch[dbuid] = {'status': 'obsolete', 'uuid': dbuid}
+                to_update[dbuid] = {'status': 'obsolete', 'uuid': dbuid}
                 tid2uuid[term['term_id']] = dbuid
+                to_patch += 1
 
-    return {'post': to_post, 'patch': to_patch, 'idmap': tid2uuid}
+    for term in to_update.values():
+        puuids = _get_uuids_for_linked(term, tid2uuid)
+        for rt, uuids in puuids.items():
+            term[rt] = uuids
+
+    return to_update, tid2uuid, to_post, to_patch
 
 
 def _get_uuids_for_linked(term, idmap):
@@ -581,42 +599,41 @@ def _get_uuids_for_linked(term, idmap):
     return puuids
 
 
-def add_uuids_and_combine(partitioned_terms):
-    '''adds new uuids to terms to post and existing uuids to patch terms
-        this function depends on the partitioned term dictionary that
-        contains keys 'post', 'patch' and 'idmap'
-    '''
-    from uuid import uuid4
-    # go through all the new terms and add uuids to them and idmap
-    idmap = partitioned_terms.get('idmap', {})
-    newterms = partitioned_terms.get('post', None)
-    if newterms:
-        for tid, term in newterms.items():
-            uid = str(uuid4())
-            idmap[tid] = uid
-            term['uuid'] = uid
-        # now that we should have all uuids go through again
-        # and switch parent term ids for uuids
-        for term in newterms.values():
-            puuids = _get_uuids_for_linked(term, idmap)
-            for rt, uuids in puuids.items():
-                term[rt] = uuids
-    # and finally do the same for the patches
-    patches = partitioned_terms.get('patch', None)
-    if patches:
-        for term in patches.values():
-            puuids = _get_uuids_for_linked(term, idmap)
-            for rt, uuids in puuids.items():
-                term[rt] = uuids
-    try:
-        post = list(newterms.values())
-    except AttributeError:
-        post = []
-    try:
-        patch = list(patches.values())
-    except AttributeError:
-        patch = []
-    return post + patch
+# def add_uuids_and_combine(partitioned_terms):
+#     '''adds new uuids to terms to post and existing uuids to patch terms
+#         this function depends on the partitioned term dictionary that
+#         contains keys 'post', 'patch' and 'idmap'
+#     '''
+#     # go through all the new terms and add uuids to them and idmap
+#     idmap = partitioned_terms.get('idmap', {})
+#     newterms = partitioned_terms.get('post', None)
+#     if newterms:
+#         for tid, term in newterms.items():
+#             uid = str(uuid4())
+#             idmap[tid] = uid
+#             term['uuid'] = uid
+#         # now that we should have all uuids go through again
+#         # and switch parent term ids for uuids
+#         for term in newterms.values():
+#             puuids = _get_uuids_for_linked(term, idmap)
+#             for rt, uuids in puuids.items():
+#                 term[rt] = uuids
+#     # and finally do the same for the patches
+#     patches = partitioned_terms.get('patch', None)
+#     if patches:
+#         for term in patches.values():
+#             puuids = _get_uuids_for_linked(term, idmap)
+#             for rt, uuids in puuids.items():
+#                 term[rt] = uuids
+#     try:
+#         post = list(newterms.values())
+#     except AttributeError:
+#         post = []
+#     try:
+#         patch = list(patches.values())
+#     except AttributeError:
+#         patch = []
+#     return post + patch
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
@@ -636,13 +653,17 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
         if term.get('definition') is None:
             definitions = get_definitions(termuri, data, definition_terms)
             if definitions:
-                term['definition'] = ' '.join(sorted(definitions))
+                term['definition'] = ' -- '.join(sorted(definitions))
+
     return terms
 
 
 def _is_deprecated(class_, data):
-    if list(data.rdfGraph.objects(class_, Deprecated)):
-        return True
+    dep = list(data.rdfGraph.objects(class_, Deprecated))
+    if dep:
+        for d in dep:
+            if d.datatype and d.datatype.endswith('boolean') and d.value:
+                return True
     return False
 
 
@@ -785,13 +806,14 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        partitioned_terms = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
-        terms2write = add_uuids_and_combine(partitioned_terms)
+        updates, idmap, post_cnt, patch_cnt = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
+        # terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False
         if args.pretty:
             pretty = True
-        write_outfile(terms2write, postfile, pretty)
+        write_outfile(updates, postfile, pretty)
+        print("Generated {} new terms and patches for {} existing terms".format(post_cnt, patch_cnt))
 
 
 if __name__ == '__main__':
