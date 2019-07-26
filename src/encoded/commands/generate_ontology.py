@@ -582,7 +582,6 @@ def _get_uuids_for_linked(term, idmap):
                 if p in idmap:
                     puuids[rt].append(idmap[p])
                 else:
-                    import pdb; pdb.set_trace()
                     print('WARNING - ', p, ' MISSING FROM IDMAP')
     return puuids
 
