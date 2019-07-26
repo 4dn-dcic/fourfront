@@ -5,6 +5,7 @@ import argparse
 from dateutil.relativedelta import relativedelta
 import datetime
 import boto3
+from uuid import uuid4
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
@@ -530,13 +531,18 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
     '''
-    to_post = {}
-    to_patch = {}
+    to_update = {}
+    to_post = 0
+    to_patch = 0
     tid2uuid = {}  # to keep track of existing uuids
     for tid, term in terms.items():
         if tid not in dbterms:
             # new term
-            to_post[tid] = term
+            uid = str(uuid4())
+            term['uuid'] = uid
+            to_update[tid] = term
+            tid2uuid[tid] = uid
+            to_post += 1
         else:
             # add uuid to mapping
             dbterm = dbterms[tid]
@@ -582,7 +588,6 @@ def _get_uuids_for_linked(term, idmap):
                 if p in idmap:
                     puuids[rt].append(idmap[p])
                 else:
-                    import pdb; pdb.set_trace()
                     print('WARNING - ', p, ' MISSING FROM IDMAP')
     return puuids
 
@@ -592,7 +597,6 @@ def add_uuids_and_combine(partitioned_terms):
         this function depends on the partitioned term dictionary that
         contains keys 'post', 'patch' and 'idmap'
     '''
-    from uuid import uuid4
     # go through all the new terms and add uuids to them and idmap
     idmap = partitioned_terms.get('idmap', {})
     newterms = partitioned_terms.get('post', None)
