@@ -4,8 +4,8 @@
     "id": "/profiles/gene.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["geneid", "lab", "award"],
-    "identifyingProperties": ["uuid", "geneid", "preferred_symbol"],
+    "required": ["gene_id", "lab", "award"],
+    "identifyingProperties": ["uuid", "gene_id", "preferred_symbol"],
     "additionalProperties": false,
     "mixinProperties": [
       { "$ref": "mixins.json#/schema_version" },
@@ -28,7 +28,7 @@
             "type": "string",
             "uniqueKey": true
         },
-        "entrez_geneid": {
+        "entrez_gene_id": {
           "title": "NCBI Entrez Gene ID",
           "type": "string",
           "uniqueKey": true,
@@ -89,19 +89,11 @@
         "fullname": {
             "title": "Gene name"
         },
-        "geneid": {
+        "gene_id": {
             "title": "NCBI Entrez GeneID"
-        },
-        "organism.scientific_name": {
-            "title": "Organism"
         },
         "url": {
             "title": "NCBI link"
-        }
-    },
-    "facets": {
-        "organism.scientific_name": {
-            "title": "Organism"
         }
     }
 }

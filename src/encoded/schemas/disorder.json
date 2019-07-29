@@ -22,7 +22,7 @@
         },
         "disorder_id" : {
             "title" : "Disorder Identifier",
-            "description" : "Identifier of disease. E.g. \"ORPHA:529962\"",
+            "description" : "Identifier of disorder. E.g. \"ORPHA:529962\"",
             "type" : "string",
             "uniqueKey": true
         },
@@ -54,7 +54,7 @@
                     },
                     "frequency_value": {
                         "title": "Frequency Value",
-                        "description": "A calculated value using the values in frequency info that indicate the frequency of linkage between disease and phenotype",
+                        "description": "A calculated value using the values in frequency info that indicate the frequency of linkage between disorder and phenotype",
                         "type": "string"
                     },
                     "attribution_id": {
@@ -115,7 +115,7 @@
         },
         "definition" : {
             "title" : "Definition",
-            "description": "Definition of this disease",
+            "description": "Definition of this disorder",
             "type" : "string"
         },
         "comment" : {
