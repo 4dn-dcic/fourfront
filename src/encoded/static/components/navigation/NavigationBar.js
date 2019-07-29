@@ -34,7 +34,6 @@ export class NavigationBar extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
 
@@ -43,7 +42,6 @@ export class NavigationBar extends React.PureComponent {
          *
          * @private
          * @constant
-         * @property {boolean} state.testWarning        Whether Test Data warning banner is visible. Initially determined according to if are on production hostname.
          * @property {boolean} state.mounted            Whether are mounted.
          * @property {boolean} state.mobileDropdownOpen Helper state to keep track of if menu open on mobile because mobile menu doesn't auto-close after navigation.
          * @property {!string} state.openDropdown       ID of currently-open dropdown menu. Use for BigDropdown(s) e.g. Help menu directory.
@@ -51,7 +49,6 @@ export class NavigationBar extends React.PureComponent {
          * @property {boolean} state.isLoadingHelpMenuTree - Whether menu tree is currently being loaded.
          */
         this.state = {
-            'testWarning'           : !productionHost[url.parse(props.href).hostname] || false,
             'mounted'               : false,
             'mobileDropdownOpen'    : false
         };
@@ -87,43 +84,20 @@ export class NavigationBar extends React.PureComponent {
         });
     }
 
-    /**
-     * Sets `state.testWarning` to be false and scrolls the window if sticky header is visible (BrowseView, SearchView)
-     * so that sticky header gets its dimension(s) updated.
-     *
-     * @param {React.SyntheticEvent} [e] An event, if any. Unused.
-     * @returns {void}
-     */
-    hideTestWarning(e) {
-        // Remove the warning banner because the user clicked the close icon
-        this.setState({ 'testWarning': false });
-
-        // If collection with .sticky-header on page, jiggle scroll position
-        // to force the sticky header to jump to the top of the page.
-        var hdrs = document.getElementsByClassName('sticky-header');
-        if (hdrs.length) {
-            window.scrollBy(0,-1);
-            window.scrollBy(0,1);
-        }
-    }
-
     onToggleNavBar(open){
         this.setState({ 'mobileDropdownOpen' : open });
     }
 
     render() {
         const { testWarning, mobileDropdownOpen, mounted } = this.state;
-        const { href, context, schemas, browseBaseState, isFullscreen } = this.props;
-        const testWarningVisible = testWarning & !isFullscreen; // Hidden on full screen mode.
-        const navClassName = (
-            "navbar-container" +
-            (testWarningVisible ? ' test-warning-visible' : '')
-        );
+        const { href, context, schemas, browseBaseState, isFullscreen, testWarningPresent, hideTestWarning } = this.props;
+        const testWarningVisible = testWarningPresent & !isFullscreen; // Hidden on full screen mode.
+        //const navClassName = "navbar-container" + (testWarningVisible ? ' test-warning-visible' : '');
 
         return (
-            <div className={navClassName}>
+            <div className="navbar-container">
                 <div id="top-nav" className="navbar-fixed-top" role="navigation">
-                    <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
+                    <TestWarning visible={testWarningVisible} setHidden={hideTestWarning} href={href} />
                     <div className="navbar-inner-container">
                         <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon"
                             onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
