@@ -724,6 +724,10 @@ def parse_args(args):
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
+    parser.add_argument('--imports',
+                        default=False,
+                        action='store_true',
+                        help="For EFO or HP, imports option includes terms imported from other ontologies.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
@@ -770,7 +774,7 @@ def main():
     connection = connect2server(args.env, args.key)
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
-        if o['ontology_name'].startswith('4DN'):
+        if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
     slim_terms = get_slim_terms(connection)
     db_terms = get_existing_ontology_terms(connection)
@@ -781,7 +785,7 @@ def main():
         if ontology.get('download_url', None) is not None:
             # want only simple processing for HP
             simple = False
-            if ontology.get('ontology_prefix') in ['HP', 'EFO']:
+            if ontology.get('ontology_prefix') in ['HP', 'EFO'] and not args.imports:
                 simple = True
             # get all the terms for an ontology
             terms = download_and_process_owl(ontology, connection, terms, simple)
