@@ -6,16 +6,8 @@
         "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9ffc",
         "sex": "male",
         "life_status": "alive",
-        "related_individuals": [
-            {
-                "related_individual": "5c302401-88f6-44b8-9cf9-f062dfaa98c4",
-                "relationship_type": "parent"
-            },
-            {
-                "related_individual": "96974f2e-de0a-4f3a-9be5-543359da74a1",
-                "relationship_type": "parent"
-            }
-        ]
+        "mother": "5c302401-88f6-44b8-9cf9-f062dfaa98c4",
+        "father": "96974f2e-de0a-4f3a-9be5-543359da74a1"
     },
     {
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
@@ -23,13 +15,7 @@
         "status": "released",
         "uuid": "5c302401-88f6-44b8-9cf9-f062dfaa98c4",
         "sex": "female",
-        "life_status": "alive",
-        "related_individuals": [
-            {
-                "related_individual": "5ec91041-78a0-4758-abef-21c7f5fd9ffc",
-                "relationship_type": "child"
-            }
-        ]
+        "life_status": "alive"
     },
     {
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
@@ -37,12 +23,106 @@
         "status": "released",
         "uuid": "96974f2e-de0a-4f3a-9be5-543359da74a1",
         "sex": "male",
-        "life_status": "deceased",
-        "related_individuals": [
-            {
-                "related_individual": "5ec91041-78a0-4758-abef-21c7f5fd9ffc",
-                "relationship_type": "child"
-            }
-        ]
+        "life_status": "deceased"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f12",
+        "sex": "female",
+        "life_status": "alive",
+        "mother": "5ec91041-78a0-4758-abef-21c7f5fd9f92",
+        "father": "5ec91041-78a0-4758-abef-21c7f5fd9f91"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f34",
+        "sex": "male",
+        "life_status": "alive",
+        "mother": "5ec91041-78a0-4758-abef-21c7f5fd9f92",
+        "father": "5ec91041-78a0-4758-abef-21c7f5fd9f91"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f56",
+        "sex": "male",
+        "life_status": "alive",
+        "mother": "5ec91041-78a0-4758-abef-21c7f5fd9f92",
+        "father": "5ec91041-78a0-4758-abef-21c7f5fd9f91"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f78",
+        "sex": "female",
+        "life_status": "alive"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f91",
+        "sex": "male",
+        "life_status": "alive"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f92",
+        "sex": "female",
+        "life_status": "alive"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f21",
+        "sex": "male",
+        "life_status": "alive",
+        "mother": "5ec91041-78a0-4758-abef-21c7f5fd9f25",
+        "father": "5ec91041-78a0-4758-abef-21c7f5fd9f24"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f22",
+        "sex": "female",
+        "life_status": "alive",
+        "mother": "5ec91041-78a0-4758-abef-21c7f5fd9f25",
+        "father": "5ec91041-78a0-4758-abef-21c7f5fd9f24"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f23",
+        "sex": "female",
+        "life_status": "alive",
+        "mother": "5ec91041-78a0-4758-abef-21c7f5fd9f25",
+        "father": "5ec91041-78a0-4758-abef-21c7f5fd9f24"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f24",
+        "sex": "male",
+        "life_status": "alive"
+    },
+    {
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "status": "released",
+        "uuid": "5ec91041-78a0-4758-abef-21c7f5fd9f25",
+        "sex": "female",
+        "life_status": "alive"
     }
 ]

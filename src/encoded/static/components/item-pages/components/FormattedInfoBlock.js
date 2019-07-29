@@ -3,9 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
-import { ajax, console, isServerSide, analytics, object } from './../../util';
-import { PartialList } from './PartialList';
+import { ajax, console, isServerSide, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/PartialList';
 import { generateAddressString, generateContactPersonListItem } from './AttributionTabView';
 
 
@@ -21,50 +20,43 @@ import { generateAddressString, generateContactPersonListItem } from './Attribut
  * @prop {string} [className]       - Additional className to be added to wrapper element.
  * @prop {string} [iconClass='book']- CSS class for icon to be displayed. Defaults to 'book'.
  */
-export class FormattedInfoWrapper extends React.PureComponent {
-
-    static defaultProps = {
-        'isSingleItem'  : false,
-        'singularTitle' : 'Publication',
-        'iconClass'     : 'book',
-        'className'     : null,
-        'noDetails'     : false
-    }
-
-    render(){
-        var { isSingleItem, className, singularTitle, iconClass, children, noDetails } = this.props;
-        var outerClassName = (
-            "publications-block formatted-info-panel formatted-wrapper" +
-            (isSingleItem ? ' single-item' : '') +
-            (className ? ' ' + className : '')
-        );
-        return (
-            <div className={outerClassName}>
-                <h6 className="publication-label">{ singularTitle }{ isSingleItem ? '' : 's' }</h6>
-                <div className="row">
-                    <div className="icon-container col-xs-2 col-lg-1">
-                        <i className={"icon icon-" + iconClass} />
-                    </div>
-                    <div className={"col-xs-10 col-lg-11" + (isSingleItem && noDetails ? ' no-more-details' : '')} children={children}/>
+export const FormattedInfoWrapper =  React.memo(function FormattedInfoWrapper(props){
+    const { isSingleItem, className, singularTitle, iconClass, children, noDetails } = props;
+    const outerClassName = (
+        "publications-block formatted-info-panel formatted-wrapper" +
+        (isSingleItem ? ' single-item' : '') +
+        (className ? ' ' + className : '')
+    );
+    return (
+        <div className={outerClassName}>
+            <h6 className="publication-label">{ singularTitle }{ isSingleItem ? '' : 's' }</h6>
+            <div className="row">
+                <div className="icon-container col-2 col-lg-1">
+                    <i className={"icon icon-" + iconClass} />
                 </div>
+                <div className={"col-10 col-lg-11" + (isSingleItem && noDetails ? ' no-more-details' : '')}>{ children }</div>
             </div>
-        );
-    }
+        </div>
+    );
+});
+FormattedInfoWrapper.defaultProps = {
+    'isSingleItem'  : false,
+    'singularTitle' : 'Publication',
+    'iconClass'     : 'book fas',
+    'className'     : null,
+    'noDetails'     : false
+};
 
-}
 
-
-export class WrappedListBlock extends React.PureComponent {
-    render(){
-        var { context, className } = this.props,
-            atId = object.itemUtil.atId(context);
-        return (
-            <li className={className} key={atId}>
-                <a className="text-500" href={atId}>{ context.display_title || context.title }</a>
-            </li>
-        );
-    }
-}
+export const WrappedListBlock = React.memo(function WrappedListBlock(props){
+    const { context, className } = props;
+    const atId = object.itemUtil.atId(context);
+    return (
+        <li className={className} key={atId}>
+            <a className="text-500" href={atId}>{ context.display_title || context.title }</a>
+        </li>
+    );
+});
 
 
 export class WrappedCollapsibleList extends React.Component {
@@ -77,7 +69,7 @@ export class WrappedCollapsibleList extends React.Component {
         'iconClass'         : 'book',
         'itemRenderFxn'     : null,
         'wrapperElement'    : 'ul'
-    }
+    };
 
     constructor(props){
         super(props);
@@ -100,16 +92,16 @@ export class WrappedCollapsibleList extends React.Component {
     }
 
     renderItems(){
-        var { itemClassName, persistentCount, items, itemRenderFxn, wrapperElement } = this.props;
-
-        var itemsToElements = (pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback);
+        const { itemClassName, persistentCount, items, itemRenderFxn, wrapperElement } = this.props;
+        const { open } = this.state;
+        const itemsToElements = (pubs) => _.map(pubs, itemRenderFxn || this.itemRenderFxnFallback);
 
         if (items.length <= persistentCount){
             return React.createElement(wrapperElement || 'ul', {}, itemsToElements(items));
         } else {
             // Only show first 3 (props.persistentCount), then a 'more' button.
             return (
-                <PartialList containerType={wrapperElement} open={this.state && this.state.open}
+                <PartialList containerType={wrapperElement} open={open}
                     persistent={itemsToElements(items.slice(0, persistentCount))}
                     collapsible={itemsToElements(items.slice(persistentCount)) } />
             );
@@ -117,22 +109,23 @@ export class WrappedCollapsibleList extends React.Component {
     }
 
     render(){
-        var { items, iconClass, singularTitle, persistentCount } = this.props;
+        const { items, iconClass, singularTitle, persistentCount } = this.props;
+        const { open } = this.state;
         // publications = testData; // Uncomment to test listview.
 
         if (!Array.isArray(items) || items.length < 1) return null;
 
-        var isSingleItem = items.length === 1;
+        const isSingleItem = items.length === 1;
 
         return (
             <FormattedInfoWrapper isSingleItem={isSingleItem} singularTitle={singularTitle} iconClass={iconClass}>
                 <div>
                     { this.renderItems() }
                     { items.length > persistentCount ?
-                        <Button bsStyle="default" bsSize="small" onClick={this.onToggle}>
-                            { this.state.open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }
-                        </Button>
-                    : null }
+                        <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.onToggle}>
+                            { open ? "Collapse" : "See " + (items.length - persistentCount) + " More" }
+                        </button>
+                        : null }
                 </div>
             </FormattedInfoWrapper>
         );
@@ -199,12 +192,12 @@ class FormattedInfoBlockList extends React.Component {
         fallbackMsg     : PropTypes.any,      // Fallback text or component(s) if endpoints not set.
         loading         : PropTypes.bool,         // Override this.state.loading - only do so if providing details array prop.
         debug           : PropTypes.bool            // Verbose lifecycle logging.
-    }
+    };
 
     static defaultProps = {
-        propertyName : 'property',
-        fallbackMsg : 'Not set'
-    }
+        'propertyName' : 'property',
+        'fallbackMsg' : 'Not set'
+    };
 
     static propEndpointsValid(props){
         return props.endpoints && Array.isArray(props.endpoints) && props.endpoints.length > 0 && _.every(props.endpoints, function(ep){ return typeof ep === 'string' && ep.length > 0; });
@@ -250,25 +243,27 @@ class FormattedInfoBlockList extends React.Component {
         this.setState({ mounted : true });
     }
 
-    componentWillReceiveProps(newProps){
-        var stateChange = {};
-        if (this.props.details !== newProps.details){
-            stateChange = FormattedInfoBlockList.getInitialDetailsState(newProps);
+    componentDidUpdate(pastProps){
+        const { details, loading } = this.props;
+        let stateChange = {};
+        if (details !== pastProps.details){
+            stateChange = FormattedInfoBlockList.getInitialDetailsState(this.props);
         }
-        if (this.props.loading !== newProps.loading && this.state.loading !== newProps.loading){
+        if (loading !== pastProps.loading && this.state.loading !== pastProps.loading){
             stateChange.loading = newProps.loading;
         }
-        this.setState(stateChange);
+        if (_.keys(stateChange).length > 0){
+            this.setState(stateChange);
+        }
     }
 
     render(){
-
-        var { fallbackMsg, renderItem, propertyName, endpoints, details } = this.props,
-            { loading, transitionDelayElapsed } = this.state;
+        const { fallbackMsg, renderItem, propertyName, endpoints, details } = this.props;
+        const { loading, transitionDelayElapsed } = this.state;
 
         if (!FormattedInfoBlockList.propDetailsValid(this.props) && !FormattedInfoBlockList.propEndpointsValid(this.props) && !loading){
             return (
-                <span className="not-set">{ this.props.fallbackMsg }</span>
+                <span className="not-set">{ fallbackMsg }</span>
             );
         }
 
@@ -276,34 +271,26 @@ class FormattedInfoBlockList extends React.Component {
 
         if (this.state && Array.isArray(this.state['details_' + propertyName])){
             blocks = _.map(this.state['details_' + propertyName], (item,i) => {
-                if (this.state.loading && !item){
+                if (loading && !item){
                     return (
                         <li key={propertyName + '-' + i} className={propertyName + "-item"}>
-                            <i className="icon icon-spin icon-circle-o-notch"></i>
+                            <i className="icon icon-spin icon-circle-notch fas"></i>
                         </li>
                     );
                 }
                 return <li key={propertyName + '-' + i} className={propertyName + "-item"}>{ renderItem(item) }</li>;
             });
-        } else if (this.state.loading){
+        } else if (loading){
             blocks = _.map(endpoints || [null], function(item,i){
                 return (
                     <li key={propertyName + '-' + i} className={propertyName + "-item"}>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                        <i className="icon icon-spin icon-circle-notch fas"></i>
                     </li>
                 );
             });
         }
-
-        return (
-            <ul
-                className={
-                    "formatted-info-panel-list" +
-                    (this.state.loading ? ' loading' : (this.state.loading === false ? ' loaded' : ''))
-                }
-                id={this.props.propertyName}
-            >{ blocks }</ul>
-        );
+        const ulCls = "formatted-info-panel-list" + (loading ? ' loading' : (loading === false ? ' loaded' : ''));
+        return <ul id={propertyName} className={ulCls}>{ blocks }</ul>;
     }
 
 }
@@ -439,7 +426,7 @@ export class FormattedInfoBlock extends React.Component {
 
         return FormattedInfoBlock.generate(
             details_lab,                                                                                // detail
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null), // includeIcon
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users fas" : null), // includeIcon
             includeLabel ? "Lab" : null,                                                                // includeLabel
             innerContent,                                                                               // contents
             'lab',                                                                                      // extraContainerClassName
@@ -459,7 +446,7 @@ export class FormattedInfoBlock extends React.Component {
         }
         return FormattedInfoBlock.generate(
             details_award,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution fas" : null),
             includeLabel ? "Award" : null,
             details_award && includeDetail ? details_award.project : null,
             'award',
@@ -479,7 +466,7 @@ export class FormattedInfoBlock extends React.Component {
         }
         return FormattedInfoBlock.generate(
             details_user,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user fas" : null),
             includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
             details_user && includeDetail ? (
                 (details_user.lab && details_user.lab.display_title) || details_user.job_title || details_user.timezone
@@ -493,7 +480,7 @@ export class FormattedInfoBlock extends React.Component {
     static Error(details_error, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
         return FormattedInfoBlock.generate(
             details_error.body,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle fas" : null),
             includeLabel ? "Error" : null,
             details_error && details_error.body && includeDetail ? details_error.body.detail : null,
             'error-block',
@@ -585,21 +572,21 @@ export class FormattedInfoBlock extends React.Component {
         if (loading) {
             innerContent = (
                 <div className="row">
-                    <div className="col-xs-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    <div className="col-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
+                        <i className="icon icon-spin icon-circle-notch fas"></i>
                     </div>
                 </div>
             );
         } else {
             innerContent = (
                 <div className="row loaded">
-                    { iconClass ? <div className="col-xs-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
-                    <div className={"details-col " + (iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
+                    { iconClass ? <div className="col-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
+                    <div className={"details-col " + (iconClass ? "col-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
                         { title ?
                             titleHref ?
                                 <h5 className="block-title"><a href={ titleHref } title={title}>{ title }</a></h5>
                                 : <h5 className="block-title no-link">{ title }</h5>
-                        : null }
+                            : null }
                         { detailContent || children ? <div className={"more-details " + extraDetailClassName} children={detailContent || children} /> : null }
                     </div>
                 </div>

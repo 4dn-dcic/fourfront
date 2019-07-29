@@ -1,0 +1,6 @@
+FAM0000008 1 Father Mother 2 2
+FAM0000008 Mother 0 0 2 -9
+FAM0000008 Father 0 0 1 -9
+FAM0000008 Fester Father Mother 1 -9
+FAM0000008 Gomez Father Mother 1 -9
+FAM0000008 Morticia 0 0 2 -9

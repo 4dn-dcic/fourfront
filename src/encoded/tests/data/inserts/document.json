@@ -8,5 +8,23 @@
         "submitted_by": "carl_vitzthum@hms.harvard.edu",
         "status": "released",
         "uuid": "dcf15d5e-40aa-43bc-b81c-32c70c9afb48"
+    },
+    {
+        "aliases": ["admin-admin:addams_ped"],
+        "attachment": "addams.txt",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "status": "released",
+        "uuid": "dcf15d5e-40aa-43bc-b81c-32c70c9afc50"
+    },
+    {
+        "aliases": ["admin-admin:simpsons_ped"],
+        "attachment": "simpsons.txt",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "status": "released",
+        "uuid": "dcf15d5e-40aa-43bc-b81c-32c70c9afc52"
     }
 ]

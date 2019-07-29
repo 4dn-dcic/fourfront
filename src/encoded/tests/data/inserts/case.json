@@ -1,23 +1,23 @@
 [
     {
-        "title": "Person Family WGS",
+        "title": "People with Blue Thumbs",
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "institution": "hms-dbmi",
         "status": "released",
         "uuid": "cc7d83a2-6886-4ca0-9402-7c49734cf3c4",
-        "case_samples": [
+        "families": [
             {
-                "sample": "4fdb481a-fbdb-4c0f-a68d-aac87f847bec",
-                "proband": true
+                "members": ["5ec91041-78a0-4758-abef-21c7f5fd9f12", "5ec91041-78a0-4758-abef-21c7f5fd9f34","5ec91041-78a0-4758-abef-21c7f5fd9f56","5ec91041-78a0-4758-abef-21c7f5fd9f78","5ec91041-78a0-4758-abef-21c7f5fd9f91","5ec91041-78a0-4758-abef-21c7f5fd9f92"],
+                "proband": "5ec91041-78a0-4758-abef-21c7f5fd9f12",
+                "ped_file": "dcf15d5e-40aa-43bc-b81c-32c70c9afc50"
             },
             {
-                "sample": "283f6047-61cd-4ddb-8881-ec1c87082569",
-                "proband": false
-            },
-            {
-                "sample": "f4bbc709-40fe-48a4-afde-8e886b571903",
-                "proband": false
+                "members": ["5ec91041-78a0-4758-abef-21c7f5fd9f21", "5ec91041-78a0-4758-abef-21c7f5fd9f22","5ec91041-78a0-4758-abef-21c7f5fd9f23","5ec91041-78a0-4758-abef-21c7f5fd9f24","5ec91041-78a0-4758-abef-21c7f5fd9f25"],
+                "proband": "5ec91041-78a0-4758-abef-21c7f5fd9f21",
+                "ped_file": "dcf15d5e-40aa-43bc-b81c-32c70c9afc52"
             }
-        ]
+        ],
+        "descrption": "",
+        "case_phenotypic_features": []
     }
 ]

@@ -5,12 +5,11 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
-import { console, ajax } from './../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { CGAPLogo } from './../viz/CGAPLogo';
 import { productionHost } from './../globals';
-import { SearchBar, TestWarning, HelpNavItem, BigDropdownMenu, UserActionDropdownMenu, isActionActive, getActionURL } from './components';
-import QuickInfoBar from './../viz/QuickInfoBar';
-import { ChartDataController } from './../viz/chart-data-controller';
+import { navigate } from './../util';
+import { SearchBar, TestWarning, HelpNavItem, UserActionDropdownMenu } from './components';
 
 
 /**
@@ -27,32 +26,16 @@ export class NavigationBar extends React.PureComponent {
     static propTypes = {
         'href'              : PropTypes.string,
         'session'           : PropTypes.bool,
-        'listActionsFor'    : PropTypes.func,
         'updateUserInfo'    : PropTypes.func.isRequired,
         'context'           : PropTypes.object,
-        'schemas'           : PropTypes.any
-    };
-
-    /**
-     * Default properties.
-     *
-     * @public
-     * @constant
-     * @property {string} helpItemTreeURI - ID/URI to get DirectoryPage containing other children pages to show in menu.
-     * @property {string} helpItemHref - URL to root help page.
-     */
-    static defaultProps = {
-        'helpItemTreeURI'   : '/pages/311d0f4f-56ee-4450-8cbb-780c10229284/@@embedded',
-        'helpItemHref'      : '/help'
+        'schemas'           : PropTypes.any,
+        'browseBaseState'   : PropTypes.string
     };
 
     constructor(props){
         super(props);
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
-        this.loadHelpMenuTree = this.loadHelpMenuTree.bind(this);
-        this.setOpenDropdownID = _.throttle(this.setOpenDropdownID.bind(this), 500);
-        this.resetOpenDropdownID = this.resetOpenDropdownID.bind(this);
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
 
         /**
@@ -68,12 +51,9 @@ export class NavigationBar extends React.PureComponent {
          * @property {boolean} state.isLoadingHelpMenuTree - Whether menu tree is currently being loaded.
          */
         this.state = {
-            'testWarning'           : !productionHost[url.parse(this.props.href).hostname] || false,
+            'testWarning'           : !productionHost[url.parse(props.href).hostname] || false,
             'mounted'               : false,
-            'mobileDropdownOpen'    : false,
-            'openDropdown'          : null,
-            'helpMenuTree'          : null,
-            'isLoadingHelpMenuTree' : false
+            'mobileDropdownOpen'    : false
         };
     }
 
@@ -85,9 +65,6 @@ export class NavigationBar extends React.PureComponent {
      */
     componentDidMount(){
         this.setState({ 'mounted' : true });
-        if (!this.state.helpMenuTree && !this.state.isLoadingHelpMenuTree){
-            this.loadHelpMenuTree();
-        }
     }
 
     /**
@@ -97,25 +74,9 @@ export class NavigationBar extends React.PureComponent {
      * @returns {void}
      */
     componentDidUpdate(prevProps, prevState){
-        if (typeof this.props.session === 'boolean' && this.props.session !== prevProps.session){
-            this.loadHelpMenuTree({ 'openDropdown' : null });
-        }
-    }
-
-    /**
-     * @todo Refactor into `getDerivedStateFromProps` or other approach.
-     */
-    UNSAFE_componentWillReceiveProps(nextProps){
-        var closeMobileMenuWhenChangeIn = ['href', 'session'],
-            len = closeMobileMenuWhenChangeIn.length,
-            i, propName;
-
-        for (i = 0; i < len; i++){
-            propName = closeMobileMenuWhenChangeIn[i];
-            if (nextProps[propName] !== this.props[propName]){
-                this.closeMobileMenu();
-                break;
-            }
+        const { href, session } = this.props;
+        if ((typeof session === 'boolean' && session !== prevProps.session) || href !== prevProps.href){
+            this.closeMobileMenu();
         }
     }
 
@@ -146,95 +107,68 @@ export class NavigationBar extends React.PureComponent {
         }
     }
 
-    /**
-     * Performs AJAX request to `props.helpItemTreeURI` and saves response to
-     * `state.helpMenuTree`. Manages `state.isLoadingHelpMenuTree` appropriately.
-     *
-     * @param {Object} [extraState={}] Any extra state values to save prior to starting AJAX load.
-     * @returns {void}
-     */
-    loadHelpMenuTree(extraState = {}){
-        if (this.state.isLoadingHelpMenuTree) {
-            console.error("Already loading Help tree");
-            return;
-        }
-        this.setState(_.extend(extraState, { 'isLoadingHelpMenuTree' : true }), ()=>{
-            ajax.load(this.props.helpItemTreeURI, (res)=>{
-                if (res && res.children){
-                    this.setState({ 'helpMenuTree' : res, 'isLoadingHelpMenuTree' : false });
-                } else {
-                    this.setState({ 'helpMenuTree' : null, 'isLoadingHelpMenuTree' : false });
-                }
-            }, 'GET', ()=>{
-                this.setState({ 'helpMenuTree' : null, 'isLoadingHelpMenuTree' : false });
-            });
-
-        });
-    }
-
     onToggleNavBar(open){
         this.setState({ 'mobileDropdownOpen' : open });
     }
 
-    setOpenDropdownID(id = null){
-        this.setState({ 'openDropdown' : id });
-    }
-
-    resetOpenDropdownID(){
-        this.setOpenDropdownID(null);
-    }
-
     render() {
-        var { testWarning, mobileDropdownOpen, mounted, helpMenuTree, isLoadingHelpMenuTree, openDropdown } = this.state,
-            { href, context, listActionsFor, session, updateUserInfo, schemas, browseBaseState, currentAction, windowWidth, windowHeight, isFullscreen, overlaysContainer } = this.props,
-            testWarningVisible = testWarning & !isFullscreen, // Hidden on full screen mode.
-            navClassName        = (
-                "navbar-container" +
-                (testWarningVisible ? ' test-warning-visible' : '') +
-                (openDropdown ? ' big-menu-open' : '')
-            ),
-            primaryActions      = listActionsFor('global_sections'),
-            browseMenuItemOpts  = _.findWhere(primaryActions, { 'id' : 'browse-menu-item' }),
-            inclBigMenu         = helpMenuTree && (helpMenuTree.children || []).length > 0 && windowWidth >= 768;
+        const { testWarning, mobileDropdownOpen, mounted } = this.state;
+        const { href, context, schemas, browseBaseState, isFullscreen } = this.props;
+        const testWarningVisible = testWarning & !isFullscreen; // Hidden on full screen mode.
+        const navClassName = (
+            "navbar-container" +
+            (testWarningVisible ? ' test-warning-visible' : '')
+        );
 
         return (
             <div className={navClassName}>
-                { inclBigMenu ? <div className="big-dropdown-menu-background" onClick={this.resetOpenDropdownID} /> : null }
-                <div id="top-nav" className="navbar-fixed-top">
+                <div id="top-nav" className="navbar-fixed-top" role="navigation">
                     <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
-                    <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main"
-                        id="navbar-icon" onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
-                        <Navbar.Header>
-                            <CGAPLogo onClick={this.resetOpenDropdownID} />
+                    <div className="navbar-inner-container">
+                        <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon"
+                            onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
+
+                            <a className="navbar-brand" href="/">
+                                <CGAPLogo />
+                            </a>
+
                             <Navbar.Toggle>
-                                <i className="icon icon-bars icon-fw"></i>
+                                <i className="icon icon-bars icon-fw fas" />
                             </Navbar.Toggle>
-                        </Navbar.Header>
-                        <Navbar.Collapse>
-                            <Nav>
-                                { browseMenuItemOpts ?
-                                    <NavItem key={browseMenuItemOpts.id} id={browseMenuItemOpts.id}
-                                        href={getActionURL(browseMenuItemOpts, href)}
-                                        active={isActionActive(browseMenuItemOpts, href)}>
-                                        { browseMenuItemOpts.title || "Browse" }
-                                    </NavItem>
-                                    : null }
-                                <HelpNavItem {...this.props} {...{ windowWidth, windowHeight, mobileDropdownOpen, helpMenuTree, isLoadingHelpMenuTree, mounted }}
-                                    setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} />
-                            </Nav>
-                            <UserActionDropdownMenu {...{ session, href, updateUserInfo, listActionsFor, mounted, overlaysContainer, schemas, windowWidth }} />
-                            <SearchBar href={href} currentAction={currentAction} />
-                        </Navbar.Collapse>
-                    </Navbar>
-                    { inclBigMenu ?
-                        <BigDropdownMenu {...{ windowWidth, windowHeight, mobileDropdownOpen, href }}
-                            setOpenDropdownID={this.setOpenDropdownID} openDropdownID={openDropdown} menuTree={helpMenuTree} />
-                        : null }
-                    <ChartDataController.Provider id="quick_info_bar1">
-                        <QuickInfoBar href={href} schemas={schemas} context={context} browseBaseState={browseBaseState} invisible={!!(openDropdown)} />
-                    </ChartDataController.Provider>
+
+                            <CollapsedNav {...this.state} {...this.props} />
+                        </Navbar>
+                    </div>
                 </div>
             </div>
         );
     }
 }
+
+const CollapsedNav = React.memo(function CollapsedNav(props){
+    const { href, currentAction } = props;
+    const leftNavProps = _.pick(props, 'mobileDropdownOpen', 'windowWidth', 'windowHeight', 'browseBaseState', 'href',
+        'mounted', 'overlaysContainer', 'session', 'testWarning', 'isFullscreen');
+    const userActionNavProps = _.pick(props, 'session', 'href', 'updateUserInfo', 'mounted', 'overlaysContainer', 'schemas', 'windowWidth');
+    return (
+        <Navbar.Collapse>
+            <LeftNav {...leftNavProps} />
+            <SearchBar href={href} currentAction={currentAction} />
+            <UserActionDropdownMenu {...userActionNavProps} />
+        </Navbar.Collapse>
+    );
+});
+
+const LeftNav = React.memo(function LeftNav(props){
+    const { href, ...passProps } = props;
+    const { query = {} } = url.parse(href, true);
+    const isCasesLinkActive = query.type === 'Case';
+    return (
+        <Nav className="mr-auto">
+            <Nav.Link key="browse-menu-item" href="/cases/" active={isCasesLinkActive} className="browse-nav-btn">
+                Cases
+            </Nav.Link>
+            <HelpNavItem {...props} />
+        </Nav>
+    );
+});

@@ -53,6 +53,8 @@ var rules = [
         test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
+            path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components'),
+            path.resolve(__dirname, '../ext-projects/shared-portal-components')
         ],
         use: [
             {
@@ -150,7 +152,7 @@ module.exports = [
             dns: "empty",
         },
         externals: [
-            {'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}'}
+            { 'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}' }
         ],
         module: {
             rules: rules

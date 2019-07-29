@@ -1,259 +1,18 @@
 'use strict';
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import url from 'url';
-import _ from 'underscore';
 import memoize from 'memoize-one';
-import ReactTooltip from 'react-tooltip';
-import Alerts from './../alerts';
-import { ajax, console, object, Filters, Schemas, DateUtility, navigate, JWT, typedefs } from './../util';
-import { SortController, SearchResultTable, SearchResultDetailPane,
-    AboveTableControls, CustomColumnController, FacetList, onFilterHandlerMixin,
-    AboveSearchTablePanel, defaultColumnExtensionMap, columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns
-} from './components';
+import _ from 'underscore';
+import url from 'url';
 
-var { SearchResponse, Item, ColumnDefinition, URLParts } = typedefs;
+import { getAbstractTypeForType, getSchemaTypeFromSearchContext } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
+import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/SearchView';
+import { columnExtensionMap } from './columnExtensionMap';
+import { Schemas } from './../util';
+import { TitleAndSubtitleBeside, PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews } from './../PageTitleSection';
 
-/**
- * Provides callbacks for FacetList to filter on term click and check if a term is selected by interfacing with the
- * `href` prop and the `navigate` callback prop or fxn (usually utils/navigate.js).
- *
- * Manages and updates `state.defaultHiddenColumns`, which in turn resets CustomColumnController state with new columns,
- * if search type has changed.
- *
- * Passes other props down to ControlsAndResults.
- */
-export class SearchControllersContainer extends React.PureComponent {
-
-    static defaultProps = {
-        'navigate' : navigate
-    };
-
-    constructor(props){
-        super(props);
-        this.onFilter = onFilterHandlerMixin.bind(this);
-        this.isTermSelected = this.isTermSelected.bind(this);
-    }
-
-    isTermSelected(term, facet){
-        return Filters.determineIfTermFacetSelected(term, facet, this.props);
-    }
-
-    render(){
-        var { context } = this.props,
-            defaultHiddenColumns = defaultHiddenColumnMapFromColumns(context.columns);
-
-        return (
-            <CustomColumnController defaultHiddenColumns={defaultHiddenColumns}>
-                <SortController {..._.pick(this.props, 'href', 'context', 'navigate')}>
-                    <ControlsAndResults {...this.props} isTermSelected={this.isTermSelected} onFilter={this.onFilter} />
-                </SortController>
-            </CustomColumnController>
-        );
-    }
-
-}
-
-
-
-class ControlsAndResults extends React.PureComponent {
-
-    /**
-     * Parses out the specific item type from `props.href` and finds the abstract item type, if any.
-     *
-     * @param {Object} props Component props.
-     * @returns {{ specificType: string, abstractType: string }} The leaf specific Item type and parent abstract type (before 'Item' in `@type` array) as strings in an object.
-     * Ex: `{ abstractType: null, specificType: "Item" }`, `{ abstractType: "Experiment", specificType: "ExperimentHiC" }`
-     */
-    static searchItemTypesFromHref = memoize(function(href){
-        var specificType        = 'Item', // Default
-            abstractType        = null,   // Will be equal to specificType if no parent type.
-            itemTypeForSchemas  = null,
-            urlParts            = url.parse(href, true);
-
-        // Non-zero chance of having array here - though shouldn't occur unless URL entered into browser manually
-        // If we do get multiple Item types defined, we treat as if searching `type=Item` (== show `type` facet + column).
-        if (typeof urlParts.query.type === 'string') {
-            if (urlParts.query.type !== 'Item') {
-                specificType = itemTypeForSchemas = urlParts.query.type;
-            }
-        }
-
-        abstractType = Schemas.getAbstractTypeForType(specificType) || null;
-        return { specificType, abstractType };
-    });
-
-    constructor(props){
-        super(props);
-        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
-        this.handleClearFilters = this.handleClearFilters.bind(this);
-        this.columnExtensionMapWithSelectButton = this.columnExtensionMapWithSelectButton.bind(this);
-        this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
-
-        this.searchResultTableRef = React.createRef();
-    }
-
-    /**
-     * This is the callback for the "select" button shown in the
-     * display_title column when `props.currentAction` is set to "selection".
-     */
-    handleSelectItemClick(result, evt){
-        var eventJSON = { 'json' : result, 'id' : object.itemUtil.atId(result), 'eventType' : 'fourfrontselectionclick' };
-
-        // Standard - postMessage
-        try {
-            window.opener.postMessage(eventJSON, '*');
-        } catch (err){
-            // Check for presence of parent window and alert if non-existent.
-            if (!(typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window)){
-                Alerts.queue({
-                    'title' : 'Failed to send data to parent window.',
-                    'message' : 'Please ensure there is a parent window to which this selection is being sent to. Alternatively, try to drag & drop the Item over instead.'
-                });
-            } else {
-                console.err('Unexpecter error -- browser may not support postMessage', err);
-            }
-        }
-
-        // Nonstandard - in case browser doesn't support postMessage but does support other cross-window events (unlikely).
-        window.dispatchEvent(new CustomEvent('fourfrontselectionclick', { 'detail' : eventJSON }));
-    }
-
-    columnExtensionMapWithSelectButton = memoize((columnExtensionMap, currentAction, specificType, abstractType) => {
-        var inSelectionMode = currentAction === 'selection';
-
-        if (!inSelectionMode && (!abstractType || abstractType !== specificType)){
-            return columnExtensionMap;
-        }
-
-        columnExtensionMap = _.clone(columnExtensionMap); // Avoid modifying in place
-
-        // Kept for reference in case we want to re-introduce constrain that for 'select' button(s) to be visible in search result rows, there must be parent window.
-        //var isThereParentWindow = inSelectionMode && typeof window !== 'undefined' && window.opener && window.opener.fourfront && window.opener !== window;
-
-        if (inSelectionMode) {
-            // Render out button and add to title render output for "Select" if we have a 'selection' currentAction.
-            // Also add the popLink/target=_blank functionality to links
-            // Remove lab.display_title and type columns on selection
-            columnExtensionMap['display_title'] = _.extend({}, columnExtensionMap['display_title'], {
-                'minColumnWidth' : 120,
-                'render' : (result, columnDefinition, props, width) => {
-                    var currentTitleBlock = SearchResultTable.defaultColumnExtensionMap.display_title.render(
-                            result, columnDefinition, _.extend({}, props, { currentAction }), width, true
-                        ),
-                        newChildren = currentTitleBlock.props.children.slice(0);
-                    newChildren.unshift(
-                        <div className="select-button-container">
-                            <button type="button" className="select-button" onClick={this.handleSelectItemClick.bind(this, result)}>
-                                <i className="icon icon-fw icon-check"/>
-                            </button>
-                        </div>
-                    );
-                    return React.cloneElement(currentTitleBlock, { 'children' : newChildren });
-                }
-            });
-        }
-        return columnExtensionMap;
-    });
-
-    forceUpdateOnSelf(){
-        var searchResultTable   = this.searchResultTableRef.current,
-            dimContainer        = searchResultTable && searchResultTable.getDimensionContainer();
-        return dimContainer && dimContainer.resetWidths();
-    }
-
-    handleClearFilters(evt){
-        evt.preventDefault();
-        evt.stopPropagation();
-        var { href, context } = this.props;
-        var clearFiltersURL = (typeof context.clear_filters === 'string' && context.clear_filters) || null;
-        if (!clearFiltersURL) {
-            console.error("No Clear Filters URL");
-            return;
-        }
-
-        // If we have a '#' in URL, add to target URL as well.
-        var hashFragmentIdx = href.indexOf('#');
-        if (hashFragmentIdx > -1 && clearFiltersURL.indexOf('#') === -1){
-            clearFiltersURL += href.slice(hashFragmentIdx);
-        }
-
-        this.props.navigate(clearFiltersURL, {});
-    }
-
-    isClearFiltersBtnVisible(){
-        var { href, context } = this.props,
-            urlPartsQuery                   = url.parse(href, true).query,
-            clearFiltersURL                 = (typeof context.clear_filters === 'string' && context.clear_filters) || null,
-            clearFiltersURLQuery            = clearFiltersURL && url.parse(clearFiltersURL, true).query;
-
-        return !!(clearFiltersURLQuery && !_.isEqual(clearFiltersURLQuery, urlPartsQuery));
-    }
-
-    renderSearchDetailPane(result, rowNumber, containerWidth){
-        return <SearchResultDetailPane {...{ result, rowNumber, containerWidth }} windowWidth={this.props.windowWidth} />;
-    }
-
-    render() {
-        var { context, hiddenColumns, columnExtensionMap, currentAction, isFullscreen, href } = this.props,
-            results                         = context['@graph'],
-            inSelectionMode                 = currentAction === 'selection',
-            // Facets are transformed by the SearchView component to make adjustments to the @type facet re: currentAction.
-            facets                          = this.props.facets || context.facets,
-            { specificType, abstractType }  = ControlsAndResults.searchItemTypesFromHref(href),
-            selfExtendedColumnExtensionMap  = this.columnExtensionMapWithSelectButton(columnExtensionMap, currentAction, specificType, abstractType),
-            columnDefinitions               = columnsToColumnDefinitions(context.columns || {}, selfExtendedColumnExtensionMap);
-
-        return (
-            <div className="row">
-                { facets.length ?
-                    <div className={"col-sm-5 col-md-4 col-lg-" + (isFullscreen ? '2' : '3')}>
-                        <div className="above-results-table-row"/>{/* <-- temporary-ish */}
-                        <FacetList {..._.pick(this.props, 'isTermSelected', 'schemas', 'session', 'onFilter', 'windowWidth',
-                        'currentAction', 'windowHeight')}
-                            className="with-header-bg" facets={facets} filters={context.filters}
-                            onClearFilters={this.handleClearFilters} itemTypeForSchemas={specificType}
-                            showClearFiltersButton={this.isClearFiltersBtnVisible()} />
-                        </div>
-                : null }
-                <div className={!facets.length ? "col-sm-12 expset-result-table-fix" : ("expset-result-table-fix col-sm-7 col-md-8 col-lg-" + (isFullscreen ? '10' : '9'))}>
-                    <AboveTableControls {..._.pick(this.props, 'addHiddenColumn', 'removeHiddenColumn', 'isFullscreen',
-                        'context', 'columns', 'selectedFiles', 'currentAction', 'windowWidth', 'windowHeight', 'toggleFullScreen')}
-                        {...{ hiddenColumns, columnDefinitions }} showTotalResults={context.total} parentForceUpdate={this.forceUpdateOnSelf} />
-                    <SearchResultTable {..._.pick(this.props, 'href', 'sortBy', 'sortColumn', 'sortReverse',
-                        'currentAction', 'windowWidth', 'registerWindowOnScrollHandler', 'schemas')}
-                        {...{ hiddenColumns, results, columnDefinitions }}
-                        ref={this.searchResultTableRef} renderDetailPane={this.renderSearchDetailPane} totalExpected={context.total} />
-                </div>
-            </div>
-        );
-    }
-
-}
 
 export default class SearchView extends React.PureComponent {
-
-    static propTypes = {
-        'context'       : PropTypes.object.isRequired,
-        'currentAction' : PropTypes.string,
-        'href'          : PropTypes.string.isRequired,
-        'session'       : PropTypes.bool.isRequired,
-        'navigate'      : PropTypes.func
-    };
-
-    /**
-     * @public
-     * @type {Object}
-     * @property {string} href - Current URI.
-     * @property {string} [currentAction=null] - Current action, if any.
-     * @property {Object.<ColumnDefinition>} columnExtensionMap - Object keyed by field name with overrides for column definition.
-     */
-    static defaultProps = {
-        'href'          : null,
-        'currentAction' : null,
-        'columnExtensionMap' : defaultColumnExtensionMap
-    };
 
     /**
      * Function which is passed into a `.filter()` call to
@@ -283,7 +42,7 @@ export default class SearchView extends React.PureComponent {
         return true;
     }
 
-    static transformedFacets = memoize(function(href, context, currentAction, session){
+    static transformedFacets = memoize(function(href, context, currentAction, session, schemas){
         var facets,
             typeFacetIndex,
             hrefQuery,
@@ -319,50 +78,54 @@ export default class SearchView extends React.PureComponent {
 
         // Show only base types for when itemTypesInSearch.length === 0 (aka 'type=Item').
         facets[typeFacetIndex].terms = _.filter(facets[typeFacetIndex].terms, function(itemType){
-            var parentType = Schemas.getAbstractTypeForType(itemType.key);
+            const parentType = getAbstractTypeForType(itemType.key, schemas);
             return !parentType || parentType === itemType.key;
         });
 
         return facets;
     });
 
-    /*
-    constructor(props){
-        super(props);
-        this.filterFacet = this.filterFacet.bind(this);
-        this.transformedFacets = this.transformedFacets.bind(this);
-        this.state = {
-            'transformedFacets' : this.transformedFacets(props)
-        };
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (this.props.context !== nextProps.context){
-            this.setState({ 'transformedFacets' : this.transformedFacets(nextProps) });
-        }
-    }
-    */
-
-    componentDidMount(){
-        ReactTooltip.rebuild();
-    }
-
-    /**
-     * Filter the `@type` facet options down to abstract types only (if none selected) for Search.
-     */
+    /** Filter the `@type` facet options down to abstract types only (if none selected) for Search. */
     transformedFacets(){
-        var { href, context, currentAction, session } = this.props;
-        return SearchView.transformedFacets(href, context, currentAction, session);
+        const { href, context, currentAction, session, schemas } = this.props;
+        return SearchView.transformedFacets(href, context, currentAction, session, schemas);
     }
 
-    render() {
+    render(){
+        const { isFullscreen } = this.props;
+        const facets = this.transformedFacets();
+        const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
+        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
-            <div className="container" id="content">
-                <div className="search-page-container">
-                    <AboveSearchTablePanel {..._.pick(this.props, 'href', 'context')} />
-                    <SearchControllersContainer {...this.props} facets={this.transformedFacets()} navigate={this.props.navigate || navigate} />
-                </div>
-            </div>
+            <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
+                termTransformFxn={Schemas.Term.toName} />
         );
     }
 }
+
+const SearchViewPageTitle = React.memo(function SearchViewPageTitle({ context, schemas, currentAction, alerts }){
+    if (currentAction === 'selection') {
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder subtitle="Drag and drop Items from this view into other window(s).">
+                    Selecting
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+    const thisTypeTitle = getSchemaTypeFromSearchContext(context, schemas);
+    const subtitle = thisTypeTitle ? (
+        <span><small className="text-300">for</small> { thisTypeTitle }</span>
+    ) : null;
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <TitleAndSubtitleBeside subtitle={subtitle}>
+                Search
+            </TitleAndSubtitleBeside>
+        </PageTitleContainer>
+    );
+});
+
+pageTitleViews.register(SearchViewPageTitle, "Search");
+pageTitleViews.register(SearchViewPageTitle, "Search", "selection");

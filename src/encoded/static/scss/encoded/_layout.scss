@@ -4,19 +4,17 @@
 /* Note: most base styles handled by Bootstrap, with variable settings in bootstrap/_variables.scss */
 
 html {
-    font-size: $font-size-base * $mobile-font-factor;
+	font-size: $font-size-base * $mobile-font-factor;
+	
+	@include media-breakpoint-up(sm) {
+		font-size: $font-size-base;
+	}
 
-    @media screen and (min-width: $screen-sm-min) {
-        font-size: $font-size-base;
-
-    /* overflow-y: scroll; */
-    }
 }
 
 body {
     text-rendering: optimizeLegibility;
     background: #f8f8f8 !important;
-    @include font-size(1);
 }
 
 .float-wrap { overflow: hidden; }
@@ -38,18 +36,18 @@ hr { clear: both; }
 
 
 // Override Bootstrap's header sizes
-h1, .h1 { @include font-size(2.6); }
-h2, .h2 { @include font-size(2.1); }
-h3, .h3 { @include font-size(1.7); }
+h1, .h1 { @include font-size(2.6rem); }
+h2, .h2 { @include font-size(2.1rem); }
+h3, .h3 { @include font-size(1.7rem); }
 h4, .h4 {
-    @include font-size(1.3);
+    @include font-size(1.3rem);
     line-height: 140%;
 }
-h5, .h5 { @include font-size(1); }
-h6, .h6 { @include font-size(0.85); }
+h5, .h5 { @include font-size(1rem); }
+h6, .h6 { @include font-size(0.85rem); }
 
 blockquote {
-    @include font-size(1);
+    @include font-size(1rem);
 }
 
 
@@ -64,7 +62,7 @@ blockquote {
 
 #layout {
 	height: auto !important;
-    margin: 0 auto -$footerHeight;
+    margin: 0 auto -$footer-height;
     min-height: 100%;
 	background-color: $appBackgroundColor;
 	overflow-x: hidden;
@@ -81,7 +79,7 @@ blockquote {
 	}
     margin-bottom: 10px;
 	display: block;
-	@include font-size(1.3);
+	@include font-size(1.3rem);
 }
 
 .text-panel {
@@ -146,7 +144,7 @@ blockquote {
 	display: none;
 	height: 0px;
 
-	@media (min-width: $navbar-fixed-breakpoint) {
+	@include media-breakpoint-up(lg) {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
 	}
@@ -184,9 +182,10 @@ body.is-full-screen {
 		}
 	}
 
-	@media screen and (min-width: $screen-lg-min){
+	@include media-breakpoint-up(lg) {
 		.container {
 			width: auto;
+			max-width: none;
 			margin-left: 20px;
 			margin-right: 20px;
 		}
@@ -198,90 +197,60 @@ body.is-full-screen {
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
 
+#page-title-container {
+	> h1.page-title {
 
-h1.page-title {
-	/* Only set font-weight: 200 for h1,
-	   200 doesn't look as nice on smaller sizes. */
-	font-weight: 200;
+		font-weight: 200;
 
-	&.top-of-page {
-		margin-bottom: 0px;
-		margin-left: -2px;
-		
-		body[data-pathname="/"] &,
-		body[data-pathname="/home"] &,
-		&.home-page-title {
-			@media screen and (min-width: $screen-sm-min){
-				height: 64px;
-				margin-bottom: -3px;
-				//height: 70px;
-				//margin-bottom: 1px;
-				//padding-top: 5px;
+		&.top-of-page { // Never not this, I think..
+			margin-top: 0px;
+			margin-bottom: 0px;
+			&:first-child {
+				margin-top: 55px; // No breadcrumbs present
 			}
 
-			.subtitle {
-				font-size: 1.7rem;
+			body[data-pathname="/"] &,
+			body[data-pathname="/home"] &,
+			&.home-page-title {
+				> .subtitle.page-subtitle {
+					font-size: 1.6rem;
+					margin-top: 2px;
+				}
 			}
 		}
-		
-	}
 
-	.row > & {
-		margin-top: 0px; // Assuming 35px margin bottom on page sub-container
-	}
-
-	.row > div > & {
-		margin-top: 0px;
-	}
-
-	.title {
-		&.has-callout-title {
-			/* margin-right: 12px; */
-		}
-	}
-
-	.page-subtitle {
-		margin-left: 2px;
-		margin-top: 0px;
-		font-size: 18px;
-		//padding-bottom: 10px;
-		> .subtitle-prepend {
-			margin-right: 8px;
-			&.border-right {
-				padding-right : 8px;
-				border-right: 1px solid #ddd;
+		> .page-subtitle {
+			font-weight: 400;
+			margin-left: 2px;
+			margin-top: 0px;
+			font-size: 18px;
+			//padding-bottom: 10px;
+			> .subtitle-prepend {
+				margin-right: 8px;
+				&.border-right {
+					padding-right : 8px;
+					border-right: 1px solid #ddd;
+				}
 			}
 		}
-	}
-
-	.subtitle {
-		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
-		
-		&.prominent {
+	
+		> .subtitle.prominent {
+			/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
+	
 			font-weight: 400;
 			font-size : 0.75em;
 			display: inline-block;
 			margin-left: 9px;
 			vertical-align: middle;
-
+	
 			body[data-pathname="/search/"] & {
 				margin-left: 6px;
 			}
+	
 		}
 
 	}
-
 }
-
-h1.page-title + .page-subtitle {
-	margin-top: -27px; /* Assumes h1.page-title to have margin-bottom: 32px */
-	margin-bottom: 15px;
-}
-
-.page-subtitle {
-	font-weight: 400;
-}
-
 
 
 /* *********************************************************
@@ -289,12 +258,11 @@ h1.page-title + .page-subtitle {
 ********************************************************** */
 
 .page-footer {
-	background-color: #f8f8f8;
-	//height: $footerHeight;
+	background-color: $navbar-background-color;
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
-	border-top: 1px solid #f0f0f0;
+	border-top: 1px solid darken($navbar-background-color, 10%);
 	//@include filter-gradient(#ffffff, #f8f8f8, vertical);
 
 
@@ -312,7 +280,7 @@ h1.page-title + .page-subtitle {
 		text-align: center;
 		color: #bfbfbf;
 		padding: 15px 0px 14px;
-		@media (min-width: $screen-md-min) {
+		@include media-breakpoint-up(sm) {
 
 			text-align: right;
 			&.copy-notice {
@@ -333,8 +301,52 @@ h1.page-title + .page-subtitle {
 			color: #000000;
 		}
 	}
+}
 
+// make footer look good on larger screens
+// and activate sticky footer
+@include media-breakpoint-up(md) {
+    .footer-row { margin-left: 0; margin-right: 0; }
 
+    #page-footer {
+        height: $footer-height;
+    }
+
+    .page-footer {
+        height: $footer-height - $appVersionHeight;
+    }
+
+    .app-version {
+        margin: 0 0 8px;
+        text-align: center;
+        display: block;
+        padding: 15px 15px;
+        text-align: left;
+    }
+
+    @include sticky-footer($footer-height, "#layout", "#layout-footer", "#page-footer");
+
+    .footer-links {
+        list-style: none outside none;
+        margin-left: -5px;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        a {
+            display: inline;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+        a:hover {
+            text-decoration: underline;
+            background-color: transparent;
+        }
+        a:active { background-color: transparent; }
+    }
 }
 
 
@@ -347,7 +359,7 @@ h1.page-title + .page-subtitle {
 .flexrow {
     @extend .row;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(sm) {
         .flexbox & {
             display: flex;
         }
@@ -357,7 +369,7 @@ h1.page-title + .page-subtitle {
 .flexcol-sm-6 {
     @extend .col-sm-6;
 
-    @media screen and (min-width: $screen-sm-min) {
+    @include media-breakpoint-up(sm) {
         .flexbox & {
             flex: 1 1 0px;
             width: auto;
@@ -395,18 +407,17 @@ h1.page-title + .page-subtitle {
 
 .clickable {
 	cursor: pointer;
+	> label {
+		cursor: pointer;
+	}
 }
 
 .no-user-select {
-	@include user-select(none);
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
-
-/** Extending Bootstrap grid to allow blocks to flow right in a row **/
-
-@media screen                           		 { .col-xs-float-right { float : right; } }
-@media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
-@media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
-@media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
 
 /** Equal Height Columns in Bootstrap Row on IE9+ **/
 
@@ -417,7 +428,7 @@ h1.page-title + .page-subtitle {
     display: flex;
 }
 
-@media screen and (min-width: $screen-sm-min) {
+@include media-breakpoint-up(sm) {
 	.row.row-eq-height-sm {
 		display: -webkit-box;
 		display: -webkit-flex;
@@ -431,7 +442,7 @@ h1.page-title + .page-subtitle {
 	}
 }
 
-@media screen and (min-width: $screen-md-min) {
+@include media-breakpoint-up(md) {
 	.row.row-eq-height-md {
 		display: -webkit-box;
 		display: -webkit-flex;
@@ -445,7 +456,7 @@ h1.page-title + .page-subtitle {
 	}
 }
 
-@media screen and (min-width: $screen-lg-min) {
+@include media-breakpoint-up(lg) {
 	.row.row-eq-height-lg {
 		display: -webkit-box;
 		display: -webkit-flex;
@@ -464,6 +475,10 @@ h1.page-title + .page-subtitle {
 .off-screen {
 	position : absolute !important;
 	left : -9999px !important;
+}
+
+.pull-right { // Holdover from Bootstrap 3
+	float: right;
 }
 
 #slow-load-container {
@@ -645,7 +660,7 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 	font-family: $font-family-monospace;
 }
 
-@media screen and (max-width: $screen-xs-max){
+@include media-breakpoint-down(xs) {
 
 	.text-left-xs {
 		// Make text left-aligned for collapsed mobile view(s),
@@ -676,15 +691,9 @@ a.text-600, button.text-600 { font-weight: 600 !important; }
 }
 
 /* Moving caret to always right position */
-.dropdown-toggle.btn {
-	position: relative;
-	padding-right: 24px;
-	padding-left: 10px;
-	span.caret {
-		position: absolute;
-		top: 50%;
-		margin-top: -2px;
-		right: 10px;
+.dropdown-toggle {
+	&:after {
+		vertical-align: 0.125em;
 	}
 }
 

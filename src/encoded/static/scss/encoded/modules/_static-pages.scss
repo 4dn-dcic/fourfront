@@ -3,52 +3,6 @@
 		Common static page components & styles
 ***********************************************************/
 
-.fourDN-header{
-	font-family: $font-family-sans-serif;
-	font-weight: 300;
-	margin-bottom: 20px;
-	margin-top: 20px;
-	padding-bottom: 15px;
-	border-bottom: 1px solid #f4f4f4;
-	font-size: 32px;
-	letter-spacing: -1px;
-	line-height: 38px;
-	position: relative;
-	
-	&[id]:before {
-		content : '';
-		position: relative;
-		top: -150px;
-	}
-}
-
-h4.fourDN-header {
-	font-size: 24px;
-	margin-bottom: 10px;
-	padding-bottom: 8px;
-}
-
-h5.fourDN-header {
-	font-size: 20px;
-}
-
-.fourDN-banner{
-	margin-top: 40px;
-	margin-bottom: 40px;
-	> h4 {
-		font-size: 1.4em;
-		color: #999999;
-		> div {
-			display: inline-block;
-		}
-	}
-}
-
-
-.fourDN-content-panel{
-	margin-top: 0px !important;
-}
-
 
 .static-section-entry,
 .home-content-area {
@@ -186,7 +140,7 @@ h5.fourDN-header {
 
 	position: relative;
 
-	@media screen and (min-width : $screen-lg-min){
+	@include media-breakpoint-up(xl){
 		position: fixed;
 		margin: 0 -10px;
 		padding: 0 10px;
@@ -212,7 +166,7 @@ h5.fourDN-header {
 		//}
 	}
 
-	@media screen and (max-width : $screen-md-max){
+	@include media-breakpoint-down(lg){
 		> ol.inner {
 			border-top: 1px solid #eee;
 		}
@@ -419,7 +373,7 @@ h5.fourDN-header {
 	padding-top: 29px; 
 
 	&.page-has-toc {
-		@media screen and (min-width: $screen-lg-min) {
+		@include media-breakpoint-up(xl){
 			width: 75%;
 		}
 	}
@@ -450,7 +404,7 @@ h5.fourDN-header {
 			padding: 8px 16px;
 			background-color: #f8f8f8;
 			transition: border-color .25s;
-			color: $text-color;
+			color: $body-color;
 
 			.title-link {
 				color: $link-color;
@@ -475,7 +429,7 @@ h5.fourDN-header {
 					display: none;
 				}
 
-				@media screen and (min-width: $screen-sm-min) {
+				@include media-breakpoint-up(md){
 					height: 98px;
 					.section-page-count {
 						display: block;
@@ -489,7 +443,7 @@ h5.fourDN-header {
 
 
 				&:hover {
-					@media screen and (min-width: $screen-sm-min) {
+					@include media-breakpoint-up(md){
 						.section-page-count {
 							opacity: 1;
 						}
@@ -510,169 +464,6 @@ h5.fourDN-header {
 		
 		h6 > a {
 			font-size: 1rem;
-		}
-	}
-
-}
-
-/**********************************************************
-		Big NavBar DropDown Menu
-***********************************************************/
-
-.navbar-container {
-
-	.big-dropdown-menu {
-		z-index: -100;
-		border-top: 2px solid #333;
-		//border-bottom: 1px solid transparent;
-		margin-bottom: -1px;
-		transform: translate3d(0px,0px,0px);
-		color: #ddd;
-		left: 0;
-		right: 0;
-		position: absolute;
-		transition: opacity 0.1s linear, z-index 0s .2s, visibility 0s .3s, background-color .2s linear;
-		visibility: hidden;
-		opacity: 0;
-		background-color: transparent;
-
-		h1,h2,h3,h4,h5,h6 { color: #eee; }
-
-		> .container {
-			padding-bottom: 25px;
-
-			> .intro-section {
-				margin-bottom: 10px;
-				padding-bottom: 18px;
-				border-bottom: 1px solid #5d5d5d;
-				h4 {
-					font-weight: 300;
-					margin-top: 20px;
-					margin-bottom: 0px;
-					> a {
-						display: inline-block;
-						color: #fff;
-						&:after {
-							content: "\f105";
-							font-family: FontAwesome;
-							opacity: 0;
-							margin-left: 5px;
-						}
-						&:hover {
-							color: #5d8a8e;
-							text-shadow: 0 0 0;
-							text-decoration: none;
-							&:after {
-								opacity: 1;
-							}
-						}
-					}
-				}
-			}
-
-			> .row.help-menu-row {
-				margin-top: 10px;
-				> .help-menu-tree {
-
-					> .level-1-title-container > a.level-1-title,
-					> a.level-2-title {
-						display: block;
-					}
-
-					> .level-1-title-container{
-						border-bottom: 1px solid #ddd;
-						margin-top: 0;
-						margin-bottom: 7px;
-						> a.level-1-title {
-							//border: 1px solid transparent;
-							display: inline-block;
-							color: #333;
-							color: #fff;
-							font-weight: 500;
-							padding: 8px 0 6px 0;
-							//margin-left: -12px;
-							//margin-right: -11px;
-							border-radius: 2px;
-							//margin-bottom: -1px;
-							&:hover {
-								border-color: #5d8a8e; 
-								//background-color: #e7e7e7;
-								//color: #fff;
-								text-decoration: none;
-								color: #000;
-								color: #5d8a8e; 
-								text-shadow: 0 0 0;
-							}
-						}
-					}
-
-					> a.level-2-title {
-						//color: #333;
-						position: relative;
-						color: #eee;
-						font-weight: 400;
-						padding: 5px 10px 4px;
-						margin-bottom: -4px;
-						margin-top: -4px;
-						z-index: 2;
-						&:hover {
-							z-index: 5;
-							background-color: #5d8a8e;
-							color: #fff;
-							text-decoration: none;
-						}
-						&.active {
-							z-index: 1;
-							//background-color: #34959d;
-							color: #fff;
-							font-weight: 600;
-							text-decoration: none;
-							background-color: #484848;
-							&:before {
-								font-family: "FontAwesome";
-								content: "\f105";
-								position: absolute;
-								left: 0px;
-								top: 4px;
-							}
-						}
-					}
-
-				}
-
-			}
-		}
-	}
-
-	> .big-dropdown-menu-background {
-		content: '';
-		width: 100%;
-		background-color: rgba(28,28,30,.7);
-		position: fixed;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		opacity: 0;
-		z-index: -1000;
-		transition: opacity .2s linear, z-index 0s .25s;
-		transform: translate3d(0px,0px,0px);
-	}
-
-	&.big-menu-open > .big-dropdown-menu-background {
-		opacity: 1;
-		z-index: 100;
-		transition: opacity .2s ease-out;
-	}
-
-	&.big-menu-open .big-dropdown-menu {
-		transition: opacity 0.2s linear, background-color .2s linear;
-		visibility: visible;
-		z-index: 5;
-		opacity: 1;
-		background-color: #444;
-		&.fade.in {
-			overflow-y: auto;
 		}
 	}
 
@@ -955,55 +746,9 @@ $carousel-height : 240px;
 			}
 		}
 
-		/** TODO: Reduce this if any is deprecated **/
-
-		.announcement {
-			padding-bottom: 10px;
-			margin-top: 20px;
-	
-			.announcement-title {
-				font-weight: 300;
-				font-size: 1.35rem;
-				border-bottom: 2px solid #168369;
-				padding-bottom: 5px;
-				margin-bottom: 5px;
-				i.icon.icon-minus,
-				i.icon.icon-plus {
-					margin-right: 5px;
-				}
-			}
-	
-			.announcement-subtitle {
-				color: #999;
-				font-weight: 400;
-				font-size: 0.9rem;
-			}
-	
-			.announcement-content {
-				margin-top: 3px;
-			}
-		}
-	
-	
-		.fourDN-section-toggle{
-			color: #555;
-			text-decoration: none !important;
-			&:hover,
-			&:focus {
-				color: #000000;
-			}
-		}
-	
-		.fourDN-section-info{
-			color: #999 !important;
-			font-weight: 300;
-			font-size: 1.2em;
-		}
-
 	}
 
 }
-
 // Error
 
 .error-page{
@@ -1024,108 +769,6 @@ $carousel-height : 240px;
 }
 
 
-/*********************************************
- *** Temporary NOFIC Matrices Side by Side ***
- *********************************************/
-
-@media screen and (min-width: $screen-lg-min){
-
-	#content.container > .static-page.row #nofic-matrix-1,
-	#content.container > .static-page.row #nofic-matrix-2,
-	#content.container > .static-page.row #nofic-matrix-3,
-	#content.container > .static-page.row #nofic-matrix-4 {
-		position: relative;
-		float: left;
-		width: 50%;
-		margin-top: 0px;
-		margin-bottom: 20px;
-	}
-
-	#content.container > .static-page.row #nofic-matrix-1 {
-		padding-right: 15px;
-	}
-
-	#content.container > .static-page.row #nofic-matrix-2,
-	#content.container > .static-page.row #nofic-matrix-3,
-	#content.container > .static-page.row #nofic-matrix-4 {
-		padding-left: 15px;
-	}
-
-	body[data-path="/joint-analysis-data-plans"],
-	body[data-path="/joint-analysis-data-plans/dev"],
-	body[data-path="/joint-analysis-data-plans/jan2018"],
-	body[data-path="/joint-analysis-data-plans/jan2018/dev"],
-	body[data-path="/joint-analysis-data-plans/july2018"],
-	body[data-path="/joint-analysis-data-plans/july2018/dev"]{
-
-		#content.container > .static-page.row #matrix-1,
-		#content.container > .static-page.row #matrix-2,
-		#content.container > .static-page.row #matrix-3,
-		#content.container > .static-page.row #matrix-4 {
-			position: relative;
-			float: left;
-			width: 50%;
-			margin-top: 0px;
-			margin-bottom: 20px;
-			padding-right: 15px;
-		}
-
-		#content.container > .static-page.row #matrix-2,
-		#content.container > .static-page.row #matrix-3,
-		#content.container > .static-page.row #matrix-4 {
-			float: right;
-			padding-left: 15px;
-		}
-
-		#content.container > .static-page.row #matrix-2,
-		#content.container > .static-page.row #matrix-3 {
-			> div:first-child {
-				border-bottom: 1px solid #bbb;
-			}
-		}
-
-	}
-
-}
 
 
-
-#legend.static-section-entry .section-title,
-#release-updates-section.static-section-entry .section-title {
-	font-weight: 500;
-	padding-bottom: 12px;
-	border-bottom: 1px solid #eee;
-}
-
-
-#content.container,
-#legend.static-section-entry {
-
-	div.rm-cell, div.color-patch {
-		@include planned-submitted-cell-styles;
-	}
-
-}
-
-#legend.static-section-entry {
-	margin-bottom: 10px;
-    padding-bottom: 10px;
-	border-bottom: 1px solid #eee;
-	.section-joint-anlysis-data-legend {
-		font-size: 1rem;
-		> .col-sm-3 {
-			text-align: center;
-		}
-		.color-patch {
-			height: 20px;
-			width: 20px;
-			display: inline-block;
-			margin-right: 5px;
-			vertical-align: text-bottom;
-		}
-		span.legend-label {
-			vertical-align: top;
-		}
-	}
-}
 

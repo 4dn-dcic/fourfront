@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { console, DateUtility, object } from './../../util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
 import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 
@@ -16,122 +17,101 @@ import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlo
  * @prop {Object} publication           - Publication whose link and display_title to display.
  * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
  */
-class DetailBlock extends React.PureComponent {
+const DetailBlock = React.memo(function DetailBlock(props){
+    const { publication, singularTitle, children } = props;
+    if (!publication || !object.itemUtil.atId(publication)) return null;
 
-    static defaultProps = {
-        'singularTitle' : 'Publication'
-    };
+    let title = publication.display_title;
+    const url = object.itemUtil.atId(publication);
 
-    render(){
-        var { publication, singularTitle, children } = this.props;
-        if (!publication || !object.itemUtil.atId(publication)) return null;
-
-        var title = publication.display_title,
-            url = object.itemUtil.atId(publication);
-
-        if (publication.short_attribution && title.indexOf(publication.short_attribution + ' ') > -1){
-            // Short Attribution is added to display_title on back-end; clear it off here since we craft our own attribution string manually.
-            title = title.replace(publication.short_attribution + ' ', '');
-        }
-
-        return (
-            <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
-                <h5 className="block-title">
-                    <a href={url}>{ title }</a>
-                </h5>
-                <div className="details">{ children }</div>
-            </FormattedInfoWrapper>
-        );
+    if (publication.short_attribution && title.indexOf(publication.short_attribution + ' ') > -1){
+        // Short Attribution is added to display_title on back-end; clear it off here since we craft our own attribution string manually.
+        title = title.replace(publication.short_attribution + ' ', '');
     }
 
-}
+    return (
+        <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
+            <h5 className="block-title">
+                <a href={url}>{ title }</a>
+            </h5>
+            <div className="details">{ children }</div>
+        </FormattedInfoWrapper>
+    );
+});
+DetailBlock.defaultProps = {
+    'singularTitle' : 'Publication'
+};
 
+const ShortAttribution = React.memo(function ShortAttribution({ publication : pub }){
+    if (!pub || !object.itemUtil.atId(pub)) return null;
+    const { authors = [], journal = null, date_published = null } = pub;
+    const authorsLen = authors.length;
 
-class ShortAttribution extends React.PureComponent {
-
-    static propTypes = {
-        'publication'   : PropTypes.shape({
-            'authors'       : PropTypes.arrayOf(PropTypes.string),
-            'journal'       : PropTypes.string,
-            'date_published': PropTypes.string
-        }).isRequired
-    };
-
-    render(){
-        var pub = this.props.publication;
-        if (!pub || !object.itemUtil.atId(pub)) return null;
-
-        var authorsString = null;
-        if (Array.isArray(pub.authors)){
-            if (pub.authors.length === 1){
-                authorsString = pub.authors[0];
-            } else {
-                authorsString = pub.authors[0];
-                if (pub.authors[1]) authorsString += ', ' + pub.authors[1];
-                if (pub.authors[2]) authorsString += ', et al.';
-            }
+    let authorsString = null;
+    if (authorsLen > 0){
+        if (authorsLen === 1){
+            authorsString = pub.authors[0];
+        } else {
+            authorsString = pub.authors[0];
+            if (pub.authors[1]) authorsString += ', ' + pub.authors[1];
+            if (pub.authors[2]) authorsString += ', et al.';
         }
-
-        var journalString = null;
-        if (typeof pub.journal === 'string'){
-            journalString = pub.journal;
-        }
-
-        if (journalString){
-            authorsString += ', ';
-        }
-
-        var yearPublished = null;
-        try {
-            if (pub.date_published && typeof pub.date_published === 'string'){
-                yearPublished = DateUtility.formatPublicationDate(pub.date_published, false);
-            }
-            if (journalString && yearPublished){
-                yearPublished = ' ' + yearPublished;
-            }
-        } catch (e){
-            yearPublished = null;
-        }
-
-        return (
-            <span>
-                { authorsString }
-                { journalString? <em>{ journalString }</em> : null }
-                { yearPublished }
-            </span>
-        );
     }
 
-}
-
-
-class PublicationBelowHeaderRow extends React.Component {
-
-    static defaultProps = {
-        'singularTitle' : "Source Publication",
-        'outerClassName' : "mb-2"
-    };
-
-    /**
-     * @todo
-     * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
-     * component to create own <div> with whatever className is desired, among other element attributes.
-     */
-    render(){
-        var { publication, singularTitle, outerClassName } = this.props;
-        if (!publication || !object.itemUtil.atId(publication)) return null;
-        return (
-            <div className={outerClassName}>
-                <DetailBlock publication={publication} singularTitle={singularTitle} >
-                    <div className="more-details">
-                        <ShortAttribution publication={publication} />
-                    </div>
-                </DetailBlock>
-            </div>
-        );
+    if (journal){
+        authorsString += ', ';
     }
-}
 
+    let yearPublished = null;
+    try {
+        if (date_published && typeof date_published === 'string'){
+            yearPublished = formatPublicationDate(date_published, false);
+        }
+        if (journal && yearPublished){
+            yearPublished = ' ' + yearPublished;
+        }
+    } catch (e){
+        yearPublished = null;
+    }
+
+    return (
+        <span>
+            { authorsString }
+            { journal? <em>{ journal }</em> : null }
+            { yearPublished }
+        </span>
+    );
+});
+ShortAttribution.propTypes = {
+    'publication'   : PropTypes.shape({
+        'authors'       : PropTypes.arrayOf(PropTypes.string),
+        'journal'       : PropTypes.string,
+        'date_published': PropTypes.string
+    }).isRequired
+};
+
+
+/**
+ * @todo
+ * Maybe get rid of `<div className={outerClassName}>` completely and allow parent/containing
+ * component to create own <div> with whatever className is desired, among other element attributes.
+ */
+const PublicationBelowHeaderRow = React.memo(function PublicationBelowHeaderRow({ publication, singularTitle, outerClassName }){
+    if (!publication || !object.itemUtil.atId(publication)) return null;
+    return (
+        <div className={outerClassName}>
+            <DetailBlock publication={publication} singularTitle={singularTitle} >
+                <div className="more-details">
+                    <ShortAttribution publication={publication} />
+                </div>
+            </DetailBlock>
+        </div>
+    );
+});
+PublicationBelowHeaderRow.defaultProps = {
+    'singularTitle' : "Source Publication",
+    'outerClassName' : "mb-2"
+};
 
 /**
  * Shows publications for current Item.
@@ -191,12 +171,13 @@ export class Publications extends React.PureComponent {
             return null;
         }
         return (
-            <i className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
+            <i className={"icon abstract-toggle icon-fw fas icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
                 data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'} onClick={this.onToggleAbstractIconClick} />
         );
     }
 
-    detailRows(publication = this.props.context.produced_in_pub){
+    detailRows(){
+        const { context : { produced_in_pub : publication } } = this.props;
         if (!publication || !object.itemUtil.atId(publication)){
             return [];
         }
@@ -232,7 +213,7 @@ export class Publications extends React.PureComponent {
         if (typeof publication.date_published === 'string'){
             details.push({
                 'label' : 'Published',
-                'content' : DateUtility.formatPublicationDate(publication.date_published)
+                'content' : formatPublicationDate(publication.date_published)
             });
         }
 
@@ -240,17 +221,18 @@ export class Publications extends React.PureComponent {
     }
 
     render(){
-        var context = this.props.context,
-            producedInPubID = (context.produced_in_pub && object.itemUtil.atId(context.produced_in_pub)) || null,
-            usedInPublications;
+        const { context } = this.props;
+        const { produced_in_pub = null, publications_of_set = [] } = context || {};
+        const producedInPubID = (produced_in_pub && object.itemUtil.atId(produced_in_pub)) || null;
+        let usedInPublications;
 
-        if (!Array.isArray(context.publications_of_set) || context.publications_of_set.length === 0){
+        if (publications_of_set.length === 0){
             usedInPublications = [];
         } else if (!producedInPubID){
-            usedInPublications = context.publications_of_set;
+            usedInPublications = publications_of_set;
         } else {
-            usedInPublications = _.filter(context.publications_of_set, function(pub){
-                var pubID = object.itemUtil.atId(pub);
+            usedInPublications = _.filter(publications_of_set, function(pub){
+                const pubID = object.itemUtil.atId(pub);
                 if (!pubID || (pubID && pubID === producedInPubID)){
                     return false;
                 }
@@ -260,13 +242,13 @@ export class Publications extends React.PureComponent {
 
         return (
             <div className="publications-section">
-                <Publications.DetailBlock publication={context.produced_in_pub} singularTitle="Publication Details">
+                <Publications.DetailBlock publication={produced_in_pub} singularTitle="Publication Details">
                     {
-                        _.map(this.detailRows(context.produced_in_pub), function({ key, label, content }, i){
+                        _.map(this.detailRows(produced_in_pub), function({ key, label, content }, i){
                             return (
                                 <div className="row details-row" key={ key || label || i }>
-                                    <div className="col-xs-2 text-600 text-right label-col">{ label }</div>
-                                    <div className="col-xs-10">{ content }</div>
+                                    <div className="col-2 text-600 text-right label-col">{ label }</div>
+                                    <div className="col-10">{ content }</div>
                                 </div>
                             );
                         })
