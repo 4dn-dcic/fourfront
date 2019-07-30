@@ -144,6 +144,11 @@ class Biosource(Item):
 #             getter = context.collection
 #         term = getter.get(termuid)
 #         ontologies = getter.get(term.properties['source_ontologies'])
+#         import pdb; pdb.set_trace()
+#         print(ontologies)
+#     except AttributeError:
+#         pass
+#     request.validated.update({})
 #         ontology_name = ontology.properties.get('ontology_name')
 #     except AttributeError:
 #         pass
