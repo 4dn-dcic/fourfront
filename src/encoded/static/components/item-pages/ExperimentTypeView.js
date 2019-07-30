@@ -3,9 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object, Schemas } from './../util';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
-import { Publications, SOPBelowHeaderRow, LinkBelowHeaderRow, WrappedCollapsibleList, ExperimentSetTableTabView } from './components';
+import { Publications } from './components/Publications';
+import { SOPBelowHeaderRow, LinkBelowHeaderRow } from './components/LinkBelowHeaderRow';
+import { WrappedCollapsibleList } from './components/FormattedInfoBlock';
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import { UserContentBodyList } from './../static-pages/components';
 
 
@@ -107,12 +111,12 @@ ExperimentTypeViewOverview.getTabObject = function({ context, schemas }){
 const OverViewBody = React.memo(function OverViewBody(props){
 
     const { result, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), result);
-    const commonProps = { result, tips, 'wrapInColumn' : 'col-xs-6 col-md-3' };
+    const tips = object.tipsFromSchema(schemas, result);
+    const commonProps = { result, tips, 'wrapInColumn' : 'col-6 col-md-3' };
 
     return (
         <div className="row">
-            <div className="col-md-12 col-xs-12">
+            <div className="col-md-12 col-12">
                 <div className="row overview-blocks">
 
                     <OverViewBodyItem {...commonProps} property="experiment_category" fallbackTitle="Experiment Category" />

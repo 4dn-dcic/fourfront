@@ -1,3 +1,4 @@
+import { navBrowseBtnSelector } from './../support/variables';
 
 describe('Browse Views - Basic Tests', function () {
 
@@ -7,7 +8,7 @@ describe('Browse Views - Basic Tests', function () {
 
             cy.visit('/');
 
-            cy.get('#browse-menu-item').click().then(()=>{
+            cy.get(navBrowseBtnSelector).click().then(()=>{
                 cy.get('#page-title-container .page-title span.title').should('have.text', 'Data Browser');
             });
 
@@ -43,8 +44,8 @@ describe('Browse Views - Basic Tests', function () {
         });
 
         it('There is at least one Replaced item under the Status facet', function(){
-            cy.get('.facet.row.closed[data-field="status"] > h5').scrollToCenterElement().click({ force: true }).end()
-                .get('.facet.row[data-field="status"]').should('have.class', 'open').contains('Replaced');
+            cy.get('.facet.closed[data-field="status"] > h5').scrollToCenterElement().click({ force: true }).end()
+                .get('.facet[data-field="status"]').should('have.class', 'open').contains('Replaced');
         });
 
     });

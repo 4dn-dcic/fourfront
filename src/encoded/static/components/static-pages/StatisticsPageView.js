@@ -4,16 +4,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
-import { DropdownButton, MenuItem, Checkbox } from 'react-bootstrap';
 import url from 'url';
-import { console, navigate, ajax, analytics, DateUtility } from './../util';
+import * as d3 from 'd3';
+import moment from 'moment';
+
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { console, navigate, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import {
     StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
 } from './../viz/AreaChart';
 import StaticPage from './StaticPage';
-import * as d3 from 'd3';
-import moment from 'moment';
+
 
 
 
@@ -848,7 +851,7 @@ class UsageChartsCountByDropdown extends React.PureComponent {
                 <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID}
                     onSelect={this.handleSelection} title={dropdownTitle}>
                     {_.map([ ...menuOptions.entries() ], function([ k, title ]){
-                        return <MenuItem eventKey={k} key={k}>{ title }</MenuItem>;
+                        return <DropdownItem eventKey={k} key={k}>{ title }</DropdownItem>;
                     })}
                 </DropdownButton>
             </div>
@@ -1029,7 +1032,7 @@ class UsageStatsView extends React.PureComponent {
                             <DropdownButton id="select_fields_faceted_group_by" onSelect={this.changeFieldFacetedByGrouping}
                                 title={<span className="text-500">{ UsageStatsView.fieldsFacetedByOptions[fields_faceted_group_by] }</span>}>
                                 { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) =>
-                                    <MenuItem eventKey={key} key={key}>{ title }</MenuItem>
+                                    <DropdownItem eventKey={key} key={key}>{ title }</DropdownItem>
                                 ) }
                             </DropdownButton>
                         </div>

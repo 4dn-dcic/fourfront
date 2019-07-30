@@ -165,23 +165,19 @@ export class FourfrontLogo extends React.PureComponent {
         const { hover } = this.state;
 
         return (
-            <Navbar.Brand>
-                <NavItem href="/" onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
-                    <span className={"img-container" + (hover ? " is-hovering" : "")}>
-                        <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={FourfrontLogo.svgElemStyle}>
-                            { this.renderDefs() }
-                            <path d={circlePathDefinitionOrig} style={FourfrontLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
-                            <text transform={textTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgTextStyleOut, FourfrontLogo.svgTextStyleIn) : FourfrontLogo.svgTextStyleOut} ref={this.fgTextRef}>
-                                4DN
-                            </text>
-                            <text transform={fgCircleTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgInnerCircleStyleOut, FourfrontLogo.svgInnerCircleStyleIn) : FourfrontLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
-                                O
-                            </text>
-                        </svg>
-                    </span>
-                    <span className="navbar-title">{ title }</span>
-                </NavItem>
-            </Navbar.Brand>
+            <div className={"img-container" + (hover ? " is-hovering" : "")} onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
+                <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={FourfrontLogo.svgElemStyle}>
+                    { this.renderDefs() }
+                    <path d={circlePathDefinitionOrig} style={FourfrontLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
+                    <text transform={textTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgTextStyleOut, FourfrontLogo.svgTextStyleIn) : FourfrontLogo.svgTextStyleOut} ref={this.fgTextRef}>
+                        4DN
+                    </text>
+                    <text transform={fgCircleTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgInnerCircleStyleOut, FourfrontLogo.svgInnerCircleStyleIn) : FourfrontLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
+                        O
+                    </text>
+                </svg>
+                <span className="navbar-title">Data Portal</span>
+            </div>
         );
     }
 

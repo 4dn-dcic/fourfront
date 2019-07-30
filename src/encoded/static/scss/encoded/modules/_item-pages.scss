@@ -10,16 +10,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-@media screen and (min-width: $screen-md-min){
-	/* Nudge accession #, etc. closer to title on wide desktop views */
-	/*
-	.item-view-header {
-		margin-top: -27px;
-	}
-	*/
-
-}
-
 /*************************
         TabbedView
 **************************/
@@ -56,7 +46,7 @@ body .rc-tabs-top {
 	.rc-tabs-bar.extra-style-2 {
 		border-top: none;
 		border-bottom: none;
-		background: #22656d;
+		background: $brand-primary-dark;
 
 		.rc-tabs-nav {
 			padding: 4px 0px 4px;
@@ -193,7 +183,7 @@ body .rc-tabs-top {
 .rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
 	height: 48px;
 	background: none;
-	border: 2px solid #22656d;
+	border: 2px solid $brand-primary-dark;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 	border-bottom: none;
 	border-left: none;
@@ -233,101 +223,6 @@ body .rc-tabs-top {
 		&:last-child {
 			margin-bottom : 0;
 		}
-	}
-}
-
-.item-page-heading {
-    /** Extends .flexible-description-box **/
-	border-top:1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	//min-height: 42px;
-	padding: 10px 0px 10px;
-	transition: height .4s, border-color .4s;
-	text-align: justify;
-
-	h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 20px; }
-
-	h4 {
-		font-weight: 500;
-
-		small {
-			vertical-align: top;
-			line-height: inherit;
-			letter-spacing: normal;
-		}
-	}
-
-	&.no-description {
-		padding-top: 0;
-		padding-bottom: 0;
-		border-bottom: none;
-		border-top-color: #eee;
-		@media screen and (min-width: $screen-md-min){
-			width: 33%;
-			float: right;
-		}
-		& + div.bottom-row {
-			clear: both;
-		}
-	}
-
-	&.expanded {
-		border-bottom-color: #ddd;
-	}
-
-}
-
-.item-view-header {
-	.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
-		font-weight: 300;
-		min-height: 30px;
-		/* line-height: 36px; */
-		margin: 0;
-		//padding-top: 10px;
-		padding-left: 12px;
-
-		@media screen and (max-width: $screen-xs-max){
-			min-height: 42px;
-		}
-
-		> div.inner {
-			padding-top: 10px;
-			> span:not(:last-child){
-				padding-right: 8px;
-				margin-right: 7px;
-				border-right: 1px solid #ccc;
-			}
-		}
-
-		/*
-		.accession-label {
-			font-size: 1rem;
-			font-weight: 400;
-			color: #888;
-		}
-		*/
-
-		.accession {
-			font-weight: 500;
-			font-size: 1rem;
-		}
-	}
-
-	//&.no-description .item-label-title > div.inner {
-	//	border-top: 1px solid #ddd;
-	//	margin-top: 10px;
-	//}
-
-	.item-label-extra {
-		font-weight: 300;
-	}
-
-	@media screen and (max-width: $screen-xs-max){
-
-		.item-label-extra.text-right {
-			text-align: left !important;
-		}
-
 	}
 }
 
@@ -450,96 +345,199 @@ i.item-status-indicator-dot {
 }
 
 
-.item-header-indicators {
+.item-page-container {
 
-	margin-top: 8px;
-	margin-bottom: 8px;
-
-	> .indicator-item {
-		display: inline-block;
-		box-sizing: border-box;
-		position: relative;
-		/* border: 1px solid rgba(0,0,0,0.125); */
-		/* border-radius: 5px; */
-		line-height: 20px;
-		color : #000;
-		font-weight: 400;
-		padding-left: 10px;
-		padding-right: 10px;
-		text-transform: capitalize;
-		color: #444;
-
-		max-width: 50%;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-
-		padding-right: 21px;
-		padding-left: 0;
-		max-width: 50%;
-		&:after {
-			content : "";
-			display: block;
-			position: absolute;
-			right: 10px;
-			height: 100%;
-			top: 0;
-			border-right: 1px solid rgba(0,0,0,0.125);
-		}
-		&:last-child {
-			padding-right: 0;
-			margin-right: 0;
-		}
-		&:last-child:after {
-			display: none;
+	.item-view-header {
+	
+		.item-label-extra {
+			font-weight: 300;
 		}
 
-		&.item-status:before {
-			content: "";
-			width: 9px;
-			height : 9px;
-			display: inline-block;
-			position: relative;
-			margin-right: 7px;
-			border-radius: 50%;
+		@include media-breakpoint-down(sm){
+	
+			.item-label-extra.text-right {
+				text-align: left !important;
+			}
+	
+		}		
+
+		> .top-row {
+
+			.item-label-title {
+				/* Is some form of header elem, e.g. h5; shows like "Data File | ACCESSION" at top left of page */
+				font-weight: 300;
+				min-height: 30px;
+				margin: 0;
+				min-height: 40px;
+				display: flex;
+				align-items: center;
+
+		
+				@include media-breakpoint-down(sm){
+					/* Becomes row (not col) at this size, move closer to title */
+					min-height: 50px;
+					padding-top: 5px;
+					align-items: start;
+				}
+		
+				> div.inner {
+					// padding-top: 10px;
+					> span:not(:last-child){
+						padding-right: 8px;
+						margin-right: 7px;
+						border-right: 1px solid #ccc;
+					}
+				}
+		
+				.accession {
+					font-weight: 500;
+					font-size: 1rem;
+				}
+			}	
+
+			.item-header-indicators {
+
+				margin-top: 0;
+				margin-bottom: 0;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				min-height: 40px;
+
+				@include media-breakpoint-down(sm){
+					/* Becomes row (not col) at this size, move closer to title */
+					justify-content: flex-start;
+				}
+			
+				> .indicator-item {
+					display: inline-block;
+					box-sizing: border-box;
+					position: relative;
+					/* border: 1px solid rgba(0,0,0,0.125); */
+					/* border-radius: 5px; */
+					line-height: 20px;
+					color : #000;
+					font-weight: 400;
+					padding-left: 10px;
+					padding-right: 10px;
+					text-transform: capitalize;
+					color: #444;
+			
+					max-width: 50%;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+			
+					padding-right: 21px;
+					padding-left: 0;
+
+					&:after {
+						content : "";
+						display: block;
+						position: absolute;
+						right: 10px;
+						height: 100%;
+						top: 0;
+						border-right: 1px solid rgba(0,0,0,0.125);
+					}
+					&:last-child {
+						padding-right: 0;
+						margin-right: 0;
+					}
+					&:last-child:after {
+						display: none;
+					}
+			
+					&.item-status:before {
+						content: "";
+						width: 9px;
+						height : 9px;
+						display: inline-block;
+						position: relative;
+						margin-right: 7px;
+						border-radius: 50%;
+					}
+			
+					&.item-status {
+						@include statusColorStyles;
+					}
+			
+					/*
+					&[data-set-type="replicates"]{
+						background-color: #56889b;
+					}
+			
+					&[data-set-type="replicates"]{
+						background-color: #397855;
+					}
+			
+					&[data-set-type="technical replicates"]{
+						background-color: #34677b;
+					}
+			
+					&[data-set-type="analysis set"]{
+						background-color: #812423;
+					}
+			
+					&[data-set-type="publication"]{
+						background-color: #47419a;
+					}
+			
+					&[data-set-type="unspecified"]{
+						background-color: #7b7b7b;
+						display: none;
+					}
+					*/
+				}
+			
+			}
+
 		}
 
-		&.item-status {
-			@include statusColorStyles;
+		> .item-page-heading {
+			/** Extends .flexible-description-box **/
+			border-top:1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+			//min-height: 42px;
+			padding: 10px 0px 10px;
+			transition: height .4s, border-color .4s;
+			text-align: justify;
+		
+			h1, h2, h3, h4, h5, h6 { margin: 0; line-height: 20px; }
+		
+			h4 {
+				font-weight: 500;
+		
+				small {
+					vertical-align: top;
+					line-height: inherit;
+					letter-spacing: normal;
+				}
+			}
+		
+			&.no-description {
+				padding-top: 0;
+				padding-bottom: 0;
+				border-bottom: none;
+				border-top-color: #eee;
+				@include media-breakpoint-up(md){
+					width: 33%;
+					float: right;
+				}
+				& + div.bottom-row {
+					clear: both;
+				}
+			}
+		
+			&.expanded {
+				border-bottom-color: #ddd;
+			}
+		
 		}
+		
 
-		/*
-		&[data-set-type="replicates"]{
-			background-color: #56889b;
-		}
-
-		&[data-set-type="replicates"]{
-			background-color: #397855;
-		}
-
-		&[data-set-type="technical replicates"]{
-			background-color: #34677b;
-		}
-
-		&[data-set-type="analysis set"]{
-			background-color: #812423;
-		}
-
-		&[data-set-type="publication"]{
-			background-color: #47419a;
-		}
-
-		&[data-set-type="unspecified"]{
-			background-color: #7b7b7b;
-			display: none;
-		}
-		*/
 	}
 
-}
-
-
-.item-page-container {
     .info-area {
 	    margin-top: 17px;
 		//border-bottom: 1px solid #ddd;
@@ -578,14 +576,7 @@ i.item-status-indicator-dot {
 		overflow: hidden;
 	}
 
-	.list-item {
-		@media screen and (min-width: $screen-sm-min) {
-			/* Equalize Height of Columns, unsupported for IE9 and below: */
-			display: -webkit-box;
-			display: -webkit-flex;
-			display: -ms-flexbox;
-			display: flex;
-		}
+	.list-item.row {
 
 		.item-label, .item-value {
 			> div {
@@ -600,7 +591,7 @@ i.item-status-indicator-dot {
 		.item-label {
 			font-weight: 500;
 			flex-grow: 1;
-			@media screen and (min-width: $screen-sm-min) {
+			@include media-breakpoint-up(md){
 				> div {
 					border-bottom: 1px solid #eee;
 					padding-bottom: 8px;
@@ -783,7 +774,8 @@ i.item-status-indicator-dot {
 
 	}
 
-	@media screen and (max-width: $screen-xs-max) {
+	@include media-breakpoint-down(sm){
+		/* Deprecated ? */
 		.array-group .array-group-row.list-item:not(.first-item) {
 			.item-label {
 				display: none;
@@ -964,23 +956,14 @@ $download-button-width : 100px;
 }
 
 // Tablet & mobile screen size adjustments
-@media screen and (max-width : $screen-sm-max){
+@include media-breakpoint-down(md){
 	.files-in-set-table .row > .download-button {
 		margin-bottom: -50px;
 	}
 }
 
-// Mobile screen size
-@media screen and (max-width : $screen-xs-max){
-	.files-in-set-table .row > .download-button {
-		> .button-dl-file {
-			margin-bottom: 5px;
-		}
-	}
-}
-
 // Large screen adjustments
-@media screen and (min-width : $screen-md-min){
+@include media-breakpoint-up(lg){
 
 	.files-in-set-table-title {
 		margin-top: 20px;
@@ -1178,7 +1161,6 @@ $download-button-width : 100px;
 		}
 
 		.details {
-			padding-top: 3px;
 			> .details-row {
 				margin-top: 7px;
 			}
@@ -1621,6 +1603,22 @@ $badge-item-min-height: 90px;
 	}
 }
 
+/**********************************************************
+					AdjustableDividerRow
+**********************************************************/
+
+.adjustable-divider-row {
+	margin-left: 0;
+	margin-right: 0;
+	@include media-breakpoint-up(lg) {
+		> .left-panel {
+			padding-right: 10px;
+		}
+		> .right-panel {
+			padding-left: 10px;
+		}
+	}
+}
 
 /**********************************************************
 				Experiments Set View
@@ -1637,7 +1635,7 @@ $badge-item-min-height: 90px;
 	}
 
 	.expset-higlass-panel {
-		@media screen and (min-width: $screen-md-min) {
+		@include media-breakpoint-up(lg){
 			margin-bottom: -20px;
 		}
 	}
@@ -1745,6 +1743,7 @@ $badge-item-min-height: 90px;
 	.graph-wrapper {
 		opacity : 1;
 		transition: opacity .5s ease-out;
+		overflow: hidden;
 	}
 
 	// Full Screen Styling
@@ -1753,7 +1752,7 @@ $badge-item-min-height: 90px;
 		left: 0;
 		right: 0;
 		top: 0;
-		@media (min-width: $screen-md-min) {
+		@include navbar-fixed-position {
 			top: 41px;
 			z-index: 1000;
 		}
@@ -1779,16 +1778,10 @@ $badge-item-min-height: 90px;
 			padding-left: 16px;
 			padding-right: 16px;
 			body:not(.is-full-screen) & {
-				@media (min-width: $screen-sm-min) {
-					max-width: $container-sm;
-				}
-				@media (min-width: $screen-md-min) {
-					max-width: $container-md;
+				@include make-max-widths-container-width();
+				@include media-breakpoint-up(md) {
 					padding-left: 0;
 					padding-right: 0;
-				}
-				@media (min-width: $screen-lg-min) {
-					max-width: $container-lg;
 				}
 			}
 		}
@@ -1854,7 +1847,7 @@ $badge-item-min-height: 90px;
 
 				&.buttons-container {
 					text-align: left;
-					@media screen and (min-width: $screen-sm-min){
+					@include media-breakpoint-up(md){
 						text-align: right;
 					}
 				}
@@ -1900,7 +1893,7 @@ $badge-item-min-height: 90px;
 				}
 
 				.download-button-container.exists + h3.node-file-title {
-					@media screen and (max-width: $screen-md-max){
+					@include media-breakpoint-down(lg){
 						padding-right: 30px;
 					}
 				}
@@ -1956,7 +1949,6 @@ $badge-item-min-height: 90px;
 
 		> a.btn-block.btn-lg {
 			font-weight: 400;
-			padding-top: 11px;
 			> i {
 				position: relative;
 				top: 1px;
@@ -1976,9 +1968,13 @@ $badge-item-min-height: 90px;
 
 	.higlass-instance {
 
-		height: 600px;
+		margin-left: -10px;
+		margin-right: -10px;
+		height: 600px; // Default. May be overriden.
 		transition: opacity 1s;
 		opacity: 0;
+
+
 		.TrackControl-module_track-control-2zDf3 { // Menu which appears on hover
 			.TrackControl-module_track-control-button-2fdIb { // Hide "add track" button.
 				display: none;
@@ -2083,7 +2079,7 @@ div.user-profile-page {
 
 	.panel.shadow-border {
 		background-color: inherit;
-		margin-top: 15px;
+		//margin-top: 15px;
 		margin-bottom: 15px;
 		padding: 15px 20px;
 		overflow: visible;
@@ -2099,7 +2095,20 @@ div.user-profile-page {
 	.panel.user-info,
 	.panel.user-work-info {
 
-		margin-bottom: 0;
+		margin-bottom: 20px;
+		margin-top: 0;
+
+		@include media-breakpoint-up(lg){
+			margin-bottom: 0;
+			height: 100%;
+		}
+
+		// Override of prev CSS
+		.col-md-3.text-right.text-left-xs {
+			@include media-breakpoint-down(sm){
+				text-align: left !important;
+			}
+		}
 
 		#email {
 			font-weight: 500;
@@ -2171,12 +2180,11 @@ div.user-profile-page {
 
 		}
 
-		@media screen and (min-width: $screen-sm-min){
+		@include media-breakpoint-up(md){
 
 			.user-title-col {
 				padding-top: 15px;
 				min-height: 85px;
-				padding-bottom: 30px;
 			}
 
 			.user-title {
@@ -2186,7 +2194,7 @@ div.user-profile-page {
 			}
 		}
 
-		@media screen and (max-width: $screen-xs-max){
+		@include media-breakpoint-down(sm){
 
 			.user-title-col {
 				padding-top: 2px;
@@ -2235,13 +2243,13 @@ div.user-profile-page {
 				}
 			}
 
-			@media screen and (max-width: $screen-xs-max){
+			@include media-breakpoint-down(sm){
 				img.gravatar {
 					width: 94px; /* Account for border */
 					height: 70px;
 					position: relative;
 					z-index: 2;
-					margin-bottom: -30px;
+					margin-bottom: -70px;
 					margin-top: 5px;
 					border-left: 24px solid #FFF;
 				}
@@ -2250,7 +2258,7 @@ div.user-profile-page {
 
 	}
 
-	@media screen and (min-width: $screen-sm-min){
+	@include media-breakpoint-up(md){
 		.editing .user-title .editable-field-entry.inline:not(.editing) {
 			display: inline-block;
 			//max-width: 30%;
@@ -2261,7 +2269,7 @@ div.user-profile-page {
 
 		> .block-title {
 			margin-bottom: 20px;
-			padding-bottom: 15px;
+			padding-bottom: 20px;
 			border-bottom: 1px solid #eee;
 			padding-top: 0;
 

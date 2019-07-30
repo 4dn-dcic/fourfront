@@ -1,21 +1,20 @@
+// Root HTML doc variables/settings
+
+:root {
+    font-size: 14px;
+}
+
+
 /* Variables */
 $mainThemeColor: 			#ffffff; /* i.e. the background color ..for now */
 
 $appVersionHeight:          0px;
-$footerHeight: 				50px + $appVersionHeight;
-$footerTopBorderHeight:		0px;
+$footer-height:             50px + $appVersionHeight;
 $appBackgroundColor:        #fff; /* Not sure where $mainThemeColor is used... definitely not #application background-color, so creating new one */
 
 $tableHeadFootBackgroundColor: #000000;
 
 $mobile-font-factor: 1;
-
-$navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
-$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
-$navbar-link-color : #777;
-$navbar-link-hover-color : #000000;
-$navbar-link-active-color : #000;
-$navbar-link-active-background-color: #eee;
 
 $modal-backdrop-opacity : 0.8;
 
@@ -25,31 +24,78 @@ $badge-color-warning : #e29302;
 $badge-color-error : #bd0000;
 $badge-color-internal-action: #d0d0d0;
 
-$font-family-sans-serif     : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
-$font-family-serif          : "Yrsa", "Times New Roman", Georgia, Times, serif;
-$font-family-monospace      : "Source Code Pro", Consolas, monospace;
+$font-family-sans-serif : "Mada", "Work Sans", Helvetica, Arial, sans-serif;
+$font-family-serif : "Yrsa", "Times New Roman", Georgia, Times, serif;
+/** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`. */
+$font-family-monospace : "Source Code Pro", Consolas, monospace;
+$font-family-base: $font-family-sans-serif;
 
-// Pass value with CSS units and get just the value back
-@function strip-units($value) {
-    @return $value / ($value * 0 + 1);
+$font-size-base: 1rem;
+
+$dropdown-link-hover-bg: #ddd;
+
+
+// Override Bootstrap default variables:
+
+$border-radius-base:                        3px;
+$border-radius-large:                       4px;
+$border-radius-small:                       2px;
+$input-border-radius:                       3px;
+
+$navbar-brand-font-size:                    1.7rem;
+$navbar-height:                             80px;
+$navbar-default-brand-color:                #999999;
+
+$navbar-default-bg: #f8f8f8; // Bootstrap default is #F8F8F8
+
+//$navbar-fixed-breakpoint: $screen-md-min; // Use instead of Bootstrap's $grid-float-breakpoint as we want nav to become fixed later.
+$navbar-link-color : #777;
+$navbar-link-hover-color : #000000;
+$navbar-link-active-color : #000;
+$navbar-link-active-background-color: #eee;
+
+// We set navbar to become fixed position @ Bootstrap's medium size.
+@mixin navbar-fixed-position {
+    @include media-breakpoint-up(md) {
+        @content;
+    }
+}
+@mixin navbar-static-position {
+    @include media-breakpoint-down(sm) {
+        @content;
+    }
 }
 
-// rem font sizing with pre-CSS3 fallback. Pass "true" in 2nd parm to add !important
-// Conversions from px (not exact -- just convenient)
-// 10px: 0.7
-// 11px: 0.8
-// 12px: 0.85
-// 13px: 0.9
-// 14px: 1.0
-// 15px: 1.1
-// 16px: 1.2
-// 18px: 1.3
-// 20px: 1.4
+$headings-font-weight:                      bold;
+$grid-gutter-width:                         20px;
 
-@mixin font-size($size, $important: false) {
-    font-size: round($size * strip-units($font-size-base)) + px + (if($important, ' !important',''));
-    font-size: $size + rem + (if($important, ' !important',''));
-}
+$link-color: #428bca;
+
+/** Setup some other variables for tables, etc. **/
+$expset-table-border-color : #eee;
+
+
+$primary:       #009aad;
+$secondary:     #6c757d;
+$success:       #4C994C;
+$info:          #4F689E;
+$warning:       #E59545;
+$danger:        #B24342;
+$light:         #f8f9fa;
+$dark:          #343a40;
+// Ext:
+$primary-dark: #22656d;
+
+
+$brand-warning: $warning;
+$brand-success: $success;
+$brand-danger: $danger;
+$brand-info: $info;
+$brand-primary: $primary;
+$brand-primary-dark: $primary-dark;
+$brand-secondary: $secondary;
+
+
 
 
 @mixin planned-submitted-cell-styles {

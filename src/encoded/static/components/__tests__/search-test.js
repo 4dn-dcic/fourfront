@@ -6,7 +6,6 @@ biosources). Test data captured from Nov. 2016 metadata.*/
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import createReactClass from 'create-react-class';
 
 jest.autoMockOff();
 

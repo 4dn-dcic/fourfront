@@ -4,10 +4,12 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
-import * as vizUtil from './../utilities';
+
+import { console, layout, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas } from './../../util';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 import { Legend } from './../components';
-import { console, Filters, Schemas, layout, analytics } from './../../util';
 
 /**
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
@@ -70,7 +72,8 @@ export class UIControlsWrapper extends React.PureComponent {
             { title : "Status", field : "status" }
         ],
         'legend' : false,
-        'chartHeight' : 300
+        'chartHeight' : 300,
+        'btnVariant' : "outline-secondary"
     };
 
     static getDerivedStateFromProps({ barplot_data_filtered }, { showState }){
@@ -122,7 +125,7 @@ export class UIControlsWrapper extends React.PureComponent {
     // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
     filterObjExistsAndNoFiltersSelected(){
         const { expSetFilters, href } = this.props;
-        return Filters.filterObjExistsAndNoFiltersSelected(expSetFilters) && !Filters.searchQueryStringFromHref(href);
+        return searchFilters.filterObjExistsAndNoFiltersSelected(expSetFilters) && !searchFilters.searchQueryStringFromHref(href);
     }
 
     titleMap(key = null, fromDropdown = false){
@@ -234,9 +237,9 @@ export class UIControlsWrapper extends React.PureComponent {
             }
 
             return (
-                <MenuItem key={key} eventKey={key} active={key === active} disabled={disabled}>
+                <DropdownItem key={key} eventKey={key} active={key === active} disabled={disabled}>
                     { title || this.titleMap(key, true) }
-                </MenuItem>
+                </DropdownItem>
             );
         });
     }
@@ -252,14 +255,17 @@ export class UIControlsWrapper extends React.PureComponent {
     }
 
     renderShowTypeDropdown(){
-        const { href, barplot_data_filtered } = this.props;
+        const { href, barplot_data_filtered, btnVariant } = this.props;
         const { aggregateType, showState } = this.state;
         const contextualView = UIControlsWrapper.contextualView(href);
         if (contextualView === 'home'){
             return null;
         }
         // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
-        const isSelectedDisabled = (this.filterObjExistsAndNoFiltersSelected() && !Filters.searchQueryStringFromHref(href)) || (barplot_data_filtered && barplot_data_filtered.total.experiment_sets === 0);
+        const isSelectedDisabled = !!(
+            (this.filterObjExistsAndNoFiltersSelected() && !searchFilters.searchQueryStringFromHref(href)) ||
+            (barplot_data_filtered && barplot_data_filtered.total.experiment_sets === 0)
+        );
         const aggrTypeTitle = this.titleMap(aggregateType);
         const showStateTitle = showState === 'all' ? 'All' : 'Selected';
         return (
@@ -267,10 +273,9 @@ export class UIControlsWrapper extends React.PureComponent {
                 <h6 className="dropdown-heading">
                     <span className="inline-block" data-tip={isSelectedDisabled ? "Enable some filters to enable toggling between viewing all and selected items." : null}>Show</span>
                 </h6>
-                <DropdownButton
-                    id="select-barplot-show-type"
+                <DropdownButton id="select-barplot-show-type"
                     onSelect={this.handleExperimentsShowType}
-                    bsSize="xsmall"
+                    size="xs" variant={btnVariant}
                     disabled={isSelectedDisabled}
                     title={
                         <React.Fragment>
@@ -302,7 +307,7 @@ export class UIControlsWrapper extends React.PureComponent {
     }
 
     renderGroupByFieldDropdown(){
-        const { isLoadingChartData, barplot_data_fields, availableFields_Subdivision } = this.props;
+        const { isLoadingChartData, barplot_data_fields, availableFields_Subdivision, btnVariant } = this.props;
         let title;
         if (isLoadingChartData){
             title = <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
@@ -315,7 +320,7 @@ export class UIControlsWrapper extends React.PureComponent {
             <div className="field-1-change-section">
                 <h6 className="dropdown-heading">Group By</h6>
                 <DropdownButton id="select-barplot-field-1" onSelect={this.handleSecondFieldSelect}
-                    disabled={isLoadingChartData} title={title}
+                    disabled={isLoadingChartData} title={title} variant={btnVariant}
                     onToggle={this.handleDropDownSubdivisionFieldToggle}>
                     {
                         this.renderDropDownMenuItems(
@@ -342,7 +347,7 @@ export class UIControlsWrapper extends React.PureComponent {
 
     render(){
         const {
-            barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, href,
+            barplot_data_filtered, barplot_data_unfiltered, barplot_data_fields, isLoadingChartData, href, btnVariant,
             availableFields_XAxis, availableFields_Subdivision, schemas, chartHeight, windowWidth, cursorDetailActions
         } = this.props;
         const { aggregateType, showState } = this.state;
@@ -353,7 +358,7 @@ export class UIControlsWrapper extends React.PureComponent {
         const contextualView = UIControlsWrapper.contextualView(href);
 
         const legendContainerHeight = windowGridSize === 'xs' ? null
-            : chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 50;
+            : chartHeight - (49 * (contextualView === 'home' ? 1 : 2 )) - 49;
 
         vizUtil.unhighlightTerms();
 
@@ -376,13 +381,13 @@ export class UIControlsWrapper extends React.PureComponent {
                         top: chartHeight - 4
                     }}>
                         <div className="row" style={{ 'maxWidth' : 210, 'float': 'right' }}>
-                            <div className="col-xs-3" style={{ 'width' : 51 }}>
+                            <div className="col-3" style={{ 'width' : 51 }}>
                                 <h6 className="dropdown-heading">Y Axis</h6>
                             </div>
-                            <div className="col-xs-9" style={{ 'width' : 159, 'textAlign' : 'left' }}>
+                            <div className="col-9" style={{ 'width' : 159, 'textAlign' : 'left' }}>
                                 <DropdownButton
                                     id="select-barplot-aggregate-type"
-                                    bsSize="xsmall"
+                                    size="xs" variant={btnVariant}
                                     onSelect={this.handleAggregateTypeSelect}
                                     title={this.titleMap(aggregateType)}
                                     onToggle={this.handleDropDownYAxisFieldToggle}>
@@ -395,8 +400,8 @@ export class UIControlsWrapper extends React.PureComponent {
                 </div>
 
                 <div className="row">
-                    <div className="col-sm-9">{ this.adjustedChildChart() }</div>
-                    <div className="col-sm-3 chart-aside" style={{ 'height' : chartHeight }}>
+                    <div className="col-12 col-md-9">{ this.adjustedChildChart() }</div>
+                    <div className="col-12 col-md-3 chart-aside" style={{ 'height' : chartHeight }}>
                         { this.renderShowTypeDropdown() }
                         { this.renderGroupByFieldDropdown() }
                         <div className="legend-container" style={{ 'height' : legendContainerHeight }}>
@@ -407,15 +412,12 @@ export class UIControlsWrapper extends React.PureComponent {
                         </div>
                         <div className="x-axis-right-label">
                             <div className="row">
-                                <div className="col-xs-3" style={{ width : 51 }}>
+                                <div className="col-3" style={{ width : 51 }}>
                                     <h6 className="dropdown-heading">X Axis</h6>
                                 </div>
-                                <div className="col-xs-9 pull-right" style={{ "width" : (layout.gridContainerWidth(windowWidth) * (windowGridSize !== 'xs' ? 0.25 : 1)) + 5 - 52 }}>
-                                    <DropdownButton
-                                        id="select-barplot-field-0"
-                                        onSelect={this.handleFirstFieldSelect}
-                                        disabled={isLoadingChartData}
-                                        title={xAxisDropdownTitle}
+                                <div className="col-9 pull-right" style={{ "width" : (layout.gridContainerWidth(windowWidth) * (windowGridSize !== 'xs' ? 0.25 : 1)) + 5 - 52 }}>
+                                    <DropdownButton id="select-barplot-field-0" onSelect={this.handleFirstFieldSelect}
+                                        disabled={isLoadingChartData} title={xAxisDropdownTitle} variant={btnVariant}
                                         onToggle={this.handleDropDownXAxisFieldToggle}>
                                         {
                                             this.renderDropDownMenuItems(

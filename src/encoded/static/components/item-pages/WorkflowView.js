@@ -3,16 +3,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import {
-    ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, AttributionTabView,
-    ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, WorkflowDetailPane,
-    WorkflowNodeElement, CollapsibleItemViewButtonToolbar, WorkflowGraphSectionControls
-} from './components';
-import DefaultItemView from './DefaultItemView';
-import { console, DateUtility, navigate } from './../util';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
-import { requestAnimationFrame } from './../viz/utilities';
 import ReactTooltip from 'react-tooltip';
+
+import { console, object, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
+import { WorkflowDetailPane } from './components/WorkflowDetailPane';
+import { WorkflowNodeElement } from './components/WorkflowNodeElement';
+import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
+import DefaultItemView from './DefaultItemView';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
 
 
 
@@ -102,30 +103,26 @@ export default class WorkflowView extends DefaultItemView {
     }
 
     getTabViewContents(){
+        const { context, windowHeight } = this.props;
+        const width   = this.getTabViewWidth();
+        const tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+            {
+                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
+                key : 'graph',
+                content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} width={width} />
+            }
+        ];
 
-        var { context, windowHeight } = this.props,
-            width   = this.getTabViewWidth(),
-            tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
-                {
-                    tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
-                    key : 'graph',
-                    content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} width={width} />
-                }
-            ];
-
-        tabs.push(AttributionTabView.getTabObject(this.props));
-        tabs.push(ItemDetailList.getTabObject(this.props));
-
-        return _.map(tabs, (tabObj) =>{ // Common properties
-            return _.extend(tabObj, {
+        return _.map(tabs.concat(this.getCommonTabs()), (tabObj) => // Common properties
+            _.extend(tabObj, {
                 'style' : { 'minHeight' : Math.max((this.state.mounted && windowHeight && windowHeight - 300) || 0, 600) }
-            });
-        });
+            })
+        );
     }
 
     typeInfo(){
-        var context = this.props.context,
-            categories = Array.isArray(context.categories) && context.categories.length > 0 && context.categories;
+        const { context } = this.props;
+        const categories = Array.isArray(context.categories) && context.categories.length > 0 && context.categories;
         if (!categories) return null;
         return {
             'title'         : categories.join(', '),

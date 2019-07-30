@@ -3,13 +3,13 @@
 
 .__react_component_tooltip {
     max-width: 630px;
-    @media screen and (max-width: $screen-xs-max){
+    @include media-breakpoint-down(sm){
         max-width : 400px;
     }
-    @media screen and (max-width: $screen-sm-max){
+    @include media-breakpoint-down(md){
         max-width : 500px;
     }
-    @media screen and (max-width: $screen-md-max){
+    @include media-breakpoint-down(lg){
         max-width : 600px;
     }
 

@@ -2,9 +2,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
 import url from 'url';
-import { console, object } from './../../util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 
@@ -23,151 +22,117 @@ import { console, object } from './../../util';
  * @prop {string} labName - Name of Lab to show if props.showLabName is true.
  * @prop {boolean} [showLabName=false] - Show lab name instead of props.user.display_title if true.
  */
-class SubmitterLink extends React.PureComponent {
-
-    render (){
-        var user = this.props.user;
-        var labName = this.props.labName;
-
-        if (labName && (this.props.showLabName || !user)){
-            return (
-                <span>
-                    <small>Lab: </small>{ labName }
-                </span>)
-            ;
-        }
-
-        var atId = object.atIdFromObject(user);
-        var title = user.display_title || user.title || (typeof user === 'string' ? user : null) || "Submitter";
-        if (!atId && title === 'Submitter') return null;
-        else if (!atId) return title;
-
+const SubmitterLink = React.memo(function SubmitterLink({ user, labName, showLabName }){
+    if (labName && (showLabName || !user)){
         return (
             <span>
-                <a href={atId}>{ title }</a>
-            </span>
-        );
+                <small>Lab: </small>{ labName }
+            </span>)
+        ;
     }
 
-}
+    const atId = object.atIdFromObject(user);
+    const title = user.display_title || user.title || (typeof user === 'string' ? user : null) || "Submitter";
+    if (!atId && title === 'Submitter') return null;
+    else if (!atId) return title;
+
+    return (
+        <span>
+            <a href={atId}>{ title }</a>
+        </span>
+    );
+});
 
 
 /**
  * Renders a "users group" icon which links to submitter's lab.
  *
+ * @todo Move somewhere, re-use in columnExtensionMap.js to avoid redundancy.
  * @prop {Object} lab - Lab object.
  * @prop {function} onMouseEnter - Callback for cursor entering icon.
  * @prop {function} onMouseLeave - Callback for cursor leaving icon.
  */
-class LabIcon extends React.PureComponent {
-
-    static defaultProps = {
-        onMouseEnter : null,
-        onMouseLeave : null
-    }
-
-    noLab(){
+const LabIcon = React.memo(function LabIcon(props){
+    const { lab, onMouseEnter, onMouseLeave } = props;
+    const atId = lab && object.atIdFromObject(lab);
+    if (!atId){
+        console.error("We need lab with @id.");
         return (
             <span className="lab-icon no-lab">
                 <i className="icon icon-users"/>
             </span>
         );
     }
-
-    render(){
-        var lab = this.props.lab;
-        if (!lab) return this.noLab();
-        var atId = object.atIdFromObject(lab);
-        if (!atId) {
-            console.error("We need lab with @id.");
-            return this.noLab();
-        }
-        return (
-            <a
-                href={atId}
-                className="lab-icon inline-block"
-                onMouseEnter={this.props.onMouseEnter}
-                onMouseLeave={this.props.onMouseLeave}
-                data-tip={lab.display_title}
-            >
-                <i className="icon icon-users"/>
-            </a>
-        );
-    }
-
-}
+    return (
+        <a href={atId} className="lab-icon inline-block" data-tip={lab.display_title}
+            onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            <i className="icon icon-users"/>
+        </a>
+    );
+});
+LabIcon.defaultProps = {
+    onMouseEnter : null,
+    onMouseLeave : null
+};
 
 /**
  * Renders a div element with '.row' Bootstrap class, containing details about a file.
  * Meant to fill a large-width area, but scales down responsively for smaller screen sizes.
  */
-export class FileItemRow extends React.Component {
+export const FileItemRow = React.memo(function FileItemRow(props){
+    const { file } = props;
+    const atId = object.atIdFromObject(file);
+    const { display_title, accession, href: fileDownloadHref = null } = file || {};
+    const title = display_title || accession;
 
-    constructor(props){
-        super(props);
-        this.state = {
-            'showLabName' : false
-        };
-    }
+    const attachmentDownloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
 
-    render(){
-        var file = this.props.file;
-        var atId = object.atIdFromObject(file);
-        var title = file.display_title || file.accession;
+    const fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format && (file.file_format.file_format || file.file_format.display_title));
+    const attachmentIconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
 
-        var fileDownloadHref = (file && file.href) || null;
-        var attachmentDownloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
-
-        var fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format && (file.file_format.file_format || file.file_format.display_title));
-        var attachmentIconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
-
-        return (
-            <div className="row" key={atId || title}>
-                <div className="col-xs-9 col-md-2 col-lg-2 title">
-                    <h6 className="accession">
-                        { atId ? <a href={atId}>{ title }</a> : title }
-                    </h6>
-                </div>
-
-                <div className="col-xs-3 col-md-2 text-right download-button pull-right">
-                    <Button className="button-dl-file" bsStyle="primary" bsSize="small" href={ fileDownloadHref } download disabled={!fileDownloadHref}>
-                        <i className={"icon icon-" + (fileItemClass) }/>
-                        { '\u00A0  Download' }
-                    </Button>
-                    <Button
-                        className={"button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}
-                        bsStyle="default"
-                        bsSize="small"
-                        href={ attachmentDownloadHref }
-                        download
-                        disabled={!attachmentDownloadHref}
-                        children={<i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>}
-                    />
-                </div>
-
-                <div className="col-xs-12 col-md-4 col-lg-5 description">
-                    { file.description }
-                </div>
-
-                <div className="col-xs-1 col-md-1 lab">
-                    <LabIcon
-                        lab={file && file.lab}
-                    />
-                </div>
-
-                <div className="col-xs-11 col-md-3 col-lg-2 submitter">
-                    <SubmitterLink
-                        user={file && file.submitted_by}
-                    />
-                </div>
-
-                <div className="col-xs-12 col-md-12 divider-column">
-                    <div className="divider"/>
-                </div>
+    return (
+        <div className="row" key={atId || title}>
+            <div className="col col-6 col-lg-2 title">
+                <h6 className="accession">
+                    { atId ? <a href={atId}>{ title }</a> : title }
+                </h6>
             </div>
-        );
-    }
-}
+
+            <div className="col col-6 col-lg-2 text-right download-button pull-right">
+                <a className="btn btn-primary btn-sm button-dl-file"
+                    href={fileDownloadHref} download disabled={!fileDownloadHref}>
+                    <i className={"icon icon-" + (fileItemClass) }/>
+                    { '\u00A0  Download' }
+                </a>
+                <a href={attachmentDownloadHref} download disabled={!attachmentDownloadHref}
+                    className={"btn btn-sm btn-outline-dark button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}>
+                    <i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>
+                </a>
+            </div>
+
+            <div className="col-12 col-lg-4 col-xl-5 description">
+                { file.description }
+            </div>
+
+            <div className="col-1 col-md-1 lab">
+                <LabIcon
+                    lab={file && file.lab}
+                />
+            </div>
+
+            <div className="col-11 col-md-3 col-lg-2 submitter">
+                <SubmitterLink
+                    user={file && file.submitted_by}
+                />
+            </div>
+
+            <div className="col-12 col-md-12 divider-column">
+                <div className="divider"/>
+            </div>
+        </div>
+    );
+});
+
 
 
 /** These props are shared between FilesInSetTable and FilesInSetTable.Small */
@@ -181,54 +146,49 @@ const propTypes = {
 };
 
 
-/**
- * Small version of the full-width FilesInSetTable. Used for default item view page SubIPanels.
- */
-class Small extends React.Component {
-
-    static propTypes = propTypes
-
-    render(){
-        return (
-            <div className="files-in-set-table smaller-version">
-                {
-                    this.props.files.map(function(file, i){
-                        var atId = object.atIdFromObject(file);
-                        var title = file.display_title || file.accession;
-                        var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
-                        return (
-                            <div className="row" key={atId || title || i}>
-                                <div className="col-xs-12 col-md-4 title">
-                                    <h6 className="text-500">
-                                        { atId ? <a href={atId}>{ title }</a> : title }
-                                    </h6>
-                                </div>
-                                <div className="col-xs-12 col-md-6 description">
-                                    { file.description }
-                                </div>
-                                <div className="col-xs-12 col-md-2 text-right download-button">
-                                    <Button bsSize="small" href={ downloadHref } download disabled={!downloadHref}>
-                                        <i className="icon icon-download"/>
-                                    </Button>
-                                </div>
+/** Small version of the full-width FilesInSetTable. Used for default item view page SubIPanels. */
+export const Small = React.memo(function Small({ files }){
+    return (
+        <div className="files-in-set-table smaller-version">
+            {
+                files.map(function(file, i){
+                    const atId = object.atIdFromObject(file);
+                    const title = file.display_title || file.accession;
+                    const downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
+                    return (
+                        <div className="row" key={atId || title || i}>
+                            <div className="col-12 col-md-4 title">
+                                <h6 className="text-500">
+                                    { atId ? <a href={atId}>{ title }</a> : title }
+                                </h6>
                             </div>
-                        );
-                    })
-                }
-            </div>
-        );
-    }
-}
+                            <div className="col-12 col-md-6 description">
+                                { file.description }
+                            </div>
+                            <div className="col-12 col-md-2 text-right download-button">
+                                <a className="btn btn-sm btn-primary" href={downloadHref} download disabled={!downloadHref}>
+                                    <i className="icon icon-download"/>
+                                </a>
+                            </div>
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
+});
+Small.propTypes = propTypes;
 
 
 /**
  * Component for displaying Files from a list.
  *
+ * @todo Maybe make into functional component.
  * @prop {Object[]} files - List of file objects, e.g. a FileCalbirationSet's 'files_in_set' property.
  */
-export class FilesInSetTable extends React.Component {
+export class FilesInSetTable extends React.PureComponent {
 
-    static Small = Small
+    static Small = Small;
 
     static getTabObject(context, title, schemas = null){
         title = title || 'Files in Set';
@@ -313,7 +273,7 @@ export class FilesInSetTable extends React.Component {
         }
     }
 
-    static propTypes = propTypes
+    static propTypes = propTypes;
 
     /**
      * Renders heading with titles for table on medium and large width screens.
@@ -322,30 +282,30 @@ export class FilesInSetTable extends React.Component {
     */
     header(){
         return (
-            <div className="row hidden-xs hidden-sm header-row">
-                <div className="col-xs-9 col-md-2 col-lg-2 title">
+            <div className="row d-none d-lg-flex header-row">
+                <div className="col-9 col-lg-2 title">
                     Accession
                 </div>
 
-                <div className="col-xs-3 col-md-2 text-right download-button-title pull-right">
+                <div className="col-3 col-lg-2 text-right download-button-title pull-right">
                     {/* <i className="icon icon-download"/> */}
                     <span className="file">Image Files</span>
                     <span className="docs">Doc</span>
                 </div>
 
-                <div className="col-xs-12 col-md-4 col-lg-5  description">
+                <div className="col-12 col-lg-4 col-xl-5 description">
                     Description
                 </div>
 
-                <div className="col-xs-1 col-md-1 lab" style={{ paddingRight : 6 }}>
+                <div className="col-1 lab" style={{ paddingRight : 6 }}>
                     Lab
                 </div>
 
-                <div className="col-xs-12 col-md-3 col-lg-2 submitter">
+                <div className="col-12 col-lg-2 submitter">
                     Submitter
                 </div>
 
-                <div className="col-xs-12 col-md-12 divider-column">
+                <div className="col-12 col-md-12 divider-column">
                     <div className="divider"/>
                 </div>
             </div>

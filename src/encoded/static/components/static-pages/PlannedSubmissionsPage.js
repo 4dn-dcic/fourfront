@@ -10,10 +10,10 @@ import { StackedBlockVisual, sumPropertyFromList, StackedBlockGroupedRow } from 
 
 
 /**************
- * 
- * TODO LATER: 
+ *
+ * TODO LATER:
  * Move these utility functions to (probably) util/object.js, since they are generic transforms of JSON lists of objects and should be re-used if possible (rather than new ones created later).
- * 
+ *
  ************/
 
 
