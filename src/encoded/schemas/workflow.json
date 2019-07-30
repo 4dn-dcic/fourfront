@@ -26,7 +26,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "7"
+            "default": "8"
         },
         "accession": {
             "accessionType": "WF"
@@ -264,6 +264,41 @@
                             "zip",
                             "other"
                         ]
+                    },
+                    "argument_to_be_attached_to": {
+                        "title": "Argument To Be Attached To",
+                        "description": "Argument to be attached to, for qc files and input extra files",
+                        "type": "string"
+                    },
+                    "qc_zipped": {
+                        "title": "QC Zipped",
+                        "description": "Name of QC file if in .zip format",
+                        "type": "string"
+                    },
+                    "qc_html": {
+                        "title": "QC Html",
+                        "description": "Name of QC file if in .html format, either as it is or in the zipped file",
+                        "type": "string"
+                    },
+                    "qc_json": {
+                        "title": "QC Json",
+                        "description": "Name of QC file if in .json format, either as it is or in the zipped file",
+                        "type": "string"
+                    },
+                    "qc_datafiles": {
+                        "title": "QC Datafiles",
+                        "description": "Names of QC files if in .txt format, either as it is or in the zipped file",
+                        "type": "array",
+                        "items": {
+                             "title": "QC Datafile",
+                             "description": "Name of QC file if in .txt format, either as it is or in the zipped file",
+                             "type": "string"
+                        }
+                    },
+                    "qc_type": {
+                        "title": "QC Type",
+                        "description": "QC object type inherited from quality_metric to be used to represent QC",
+                        "type": "string"
                     },
                     "description": {
                         "title": "Description",
