@@ -512,7 +512,13 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "report_zip"
+                "workflow_argument_name": "report_zip",
+                "argument_to_be_attached_to": "input_fastq",
+                "qc_zipped": true,
+                "qc_html": true,
+                "qc_json": false,
+                "qc_datafiles": ["summary.txt", "fastqc_data.txt"],
+                "qc_type": "quality_metric_fastqc"
             }
         ],
         "award": "1U01CA200059-01",
