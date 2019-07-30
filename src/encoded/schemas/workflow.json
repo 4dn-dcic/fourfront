@@ -285,13 +285,18 @@
                         "description": "Name of QC file if in .json format, either as it is or in the zipped file",
                         "type": "boolean"
                     },
-                    "qc_datafiles": {
-                        "title": "QC Datafiles",
-                        "description": "Names or suffices of QC files if in .txt format, either as it is or in the zipped file",
+                    "qc_table": {
+                        "title": "QC table",
+                        "description": "Name of QC file if in a tab-delimited text format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_zipped_tables": {
+                        "title": "QC Zipped Tables",
+                        "description": "Names or suffices of QC table files in the zipped file",
                         "type": "array",
                         "items": {
                              "title": "QC Datafile",
-                             "description": "Name or suffix of QC file if in .txt format, either as it is or in the zipped file",
+                             "description": "Name or suffix of QC table file in the zipped file",
                              "type": "string"
                         }
                     },
