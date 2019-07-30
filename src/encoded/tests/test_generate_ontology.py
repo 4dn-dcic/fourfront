@@ -998,66 +998,46 @@ def db_terms(ont_terms):
 
 
 def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result['post']) == 1
-    assert 't3' in result['post']
-    assert not result['patch']
-    assert len(result['idmap']) == 2
-    for k, v in result['idmap'].items():
-        assert k in ['t1', 't2']
-        assert v in ['1234', '5678']
+    result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    assert len(result) == 1
+    assert 't3' == result[0].get('term_id')
+    assert len(idmap) == 3
+    for k, v in idmap.items():
+        assert k in ['t1', 't2', 't3']
+        if k != 't3':  # t1 and t2 already had uuids
+            assert v in ['1234', '5678']
 
 
 def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
-    assert len(result['post']) == 1
-    assert 't3' in result['post']
-    assert len(result['patch']) == 2
-    for k in result['patch'].keys():
-        assert k in '12345678'
-    assert len(result['idmap']) == 2
-    for k, v in result['idmap'].items():
-        assert k in ['t1', 't2']
-        assert v in ['1234', '5678']
+    tids = ['t1', 't2', 't3']
+    result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
+    assert len(result) == 3
+    for t in result:
+        assert t.get('term_id') in idmap
+        assert t.get('term_id') in tids
 
 
 def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
     db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result['patch']) == 1
-    for k in result['patch'].keys():
-        assert k == '7890'
-    assert 't4' in result['idmap']
+    result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    assert len(result) == 2
+    assert '7890' in [t.get('uuid') for t in result]
+    assert 't4' in idmap
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
     db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
-    assert not result['patch']
-    assert 't4' not in result['idmap']
+    result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
+    assert 't4' not in [t.get('term_id') for t in result]
+    assert 't4' not in idmap
 
 
 def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
     db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     print(result)
-    assert not result['patch']
-    assert 't4' not in result['idmap']
-
-
-@pytest.fixture
-def partitioned_terms():
-    return {
-        'post': {'t1': {'term_id': 't1', 'a': 1, 'b': 2, 'c': 3, 'parents': ['OBI:01', 'EFO:01']},
-                 't2': {'term_id': 't2', 'a': 4, 'b': 5},
-                 't3': {'term_id': 't3', 'parents': ['t1']}},
-        'patch': {'12f908f9-a55d-4d31-acb8-eaf5278db6dc': {'term_id': 't4', 'uuid': '12f908f9-a55d-4d31-acb8-eaf5278db6dc', 'a': 6, 'parents': ['OBI:01']}},
-        'idmap': {
-            't4': '12f908f9-a55d-4d31-acb8-eaf5278db6dc',
-            'OBI:01': '22f908f9-a55d-4d31-acb8-eaf5278db6dc',
-            'EFO:01': '32f908f9-a55d-4d31-acb8-eaf5278db6dc'
-        }
-    }
+    assert 't4' not in [t.get('term_id') for t in result]
+    assert 't4' not in idmap
 
 
 def valid_uuid(uid):
@@ -1069,25 +1049,3 @@ def valid_uuid(uid):
         if c not in validchars:
             return False
     return True
-
-
-def test_add_uuids_and_combine(partitioned_terms):
-    result = go.add_uuids_and_combine(partitioned_terms)
-    assert len(result) == 4
-    for t in result:
-        assert 'uuid' in t
-        assert valid_uuid(t['uuid'])
-        if t['term_id'] == 't1':
-            t1uuid = t['uuid']
-        elif t['term_id'] == 't3':
-            t3puuid = t['parents'][0]
-        if 'parents' in t:
-            for p in t['parents']:
-                assert valid_uuid(p)
-    assert t1uuid == t3puuid
-
-
-def test_add_uuids_and_combine_no_terms():
-    partitioned_terms = {'post': [], 'patch': [], 'idmap': {}}
-    result = go.add_uuids_and_combine(partitioned_terms)
-    assert not result
