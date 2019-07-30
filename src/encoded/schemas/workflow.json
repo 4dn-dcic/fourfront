@@ -290,6 +290,11 @@
                         "description": "Name of QC file if in a tab-delimited text format, either as it is or in the zipped file",
                         "type": "boolean"
                     },
+                    "qc_zipped_html": {
+                        "title": "QC Zipped Html",
+                        "description": "Name of QC html file in the zipped file",
+                        "type": "string"
+                    },
                     "qc_zipped_tables": {
                         "title": "QC Zipped Tables",
                         "description": "Names or suffices of QC table files in the zipped file",

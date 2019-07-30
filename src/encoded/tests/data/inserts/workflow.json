@@ -518,6 +518,7 @@
                 "qc_html": true,
                 "qc_json": false,
                 "qc_table": true,
+                "qc_zipped_html": "fastqc_report.html",
                 "qc_zipped_tables": ["summary.txt", "fastqc_data.txt"],
                 "qc_type": "quality_metric_fastqc"
             }
