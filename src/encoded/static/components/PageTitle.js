@@ -4,9 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import Alerts from './alerts';
+import memoize from 'memoize-one';
+
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 import { content_views } from './globals';
-import { console, object, Schemas, JWT, layout, DateUtility, typedefs, itemTypeHierarchy } from './util';
+import { typedefs } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
 
@@ -36,8 +41,8 @@ const TITLE_PATHNAME_MAP = {
             if (currentAction === 'selection') return 'Selecting';
             return 'Search';
         },
-        'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction){
-            var thisTypeTitle = Schemas.getSchemaTypeFromSearchContext(context);
+        'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
+            var thisTypeTitle = schemaTransforms.getSchemaTypeFromSearchContext(context, schemas);
             return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){
@@ -77,6 +82,7 @@ const TITLE_PATHNAME_MAP = {
 TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP['/'];
 
 
+
 /**
  * Calculates and renders out a title on every single front-end view.
  *
@@ -86,50 +92,18 @@ TITLE_PATHNAME_MAP['/home'] = TITLE_PATHNAME_MAP['/home/'] = TITLE_PATHNAME_MAP[
 export default class PageTitle extends React.PureComponent {
 
     /**
-     * Checks whether current context has an `@type` list containing "StaticPage".
-     *
-     * @public
-     * @param {JSONContentResponse} context - Current JSON Item or backend response representation.
-     * @returns {boolean} Whether is StaticPage view or not.
-     */
-    static isStaticPage(context){
-        if (Array.isArray(context['@type'])){
-            if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
-                if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether current URL/HREF is that of root or base page (e.g. pathname is '/').
-     *
-     * @public
-     * @param {string} href - Current URI/href.
-     * @returns {boolean} Whether is home page view or not.
-     */
-    static isHomePage(href){
-        var currentHrefParts = url.parse(href, false);
-        var pathName = currentHrefParts.pathname;
-        if (pathName === '/' || pathName === '/home'){
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Calculates which title (and subtitle(s)) to show depending on the current page, URI, schema, etc.
+     * Pretty hacky... we should replace this w. what doing on CGAP-side & use Registry of title views (?).
      *
      * @public
      * @param {JSONContentResponse} context - Current Item or backend response JSON representation.
      * @param {string} href - Current URI or href.
-     * @param {{}[]} [schemas=Schemas.get()] - List of schemas as returned from Redux.
+     * @param {{}[]} schemas - List of schemas as returned from Redux.
      * @param {boolean} [isMounted=false] - Whether page is currently mounted. Needed to determine whether can use LocalizedTime and similar.
      * @param {string} currentAction - Current action if any, e.g. 'edit', 'add'.
      * @returns {{ title: string, subtitle: ?string, calloutTitle: ?string }} Object with title and any subtitle/calloutTitle.
      */
-    static calculateTitles(context, href, schemas = Schemas.get(), isMounted = false, currentAction){
+    static calculateTitles(context, href, schemas, isMounted = false, currentAction){
         var currentPathName = null,
             currentPathRoot, title,
             atId = object.atIdFromObject(context),
@@ -157,7 +131,7 @@ export default class PageTitle extends React.PureComponent {
             if (currentAction === 'create') {
                 return {
                     'title' : "Creating",
-                    'calloutTitle' : Schemas.getItemTypeTitle(context, schemas) // Create is called from current item view.
+                    'calloutTitle' : schemaTransforms.getItemTypeTitle(context, schemas) // Create is called from current item view.
                 };
             }
 
@@ -166,7 +140,7 @@ export default class PageTitle extends React.PureComponent {
                     'title' : "Creating",
                     'calloutTitle' : (
                         currentPathName.indexOf('/search/') > -1 ?
-                            Schemas.getSchemaTypeFromSearchContext(context) : Schemas.getItemTypeTitle(context, schemas)
+                            schemaTransforms.getSchemaTypeFromSearchContext(context) : schemaTransforms.getItemTypeTitle(context, schemas)
                     )
                 };
             }
@@ -188,7 +162,7 @@ export default class PageTitle extends React.PureComponent {
 
         function getProp(prop){
             if (typeof prop === 'string') return prop;
-            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction);
+            if (typeof prop === 'function') return prop(currentPathName, context, href, currentAction, schemas);
             return prop;
         }
 
@@ -200,7 +174,7 @@ export default class PageTitle extends React.PureComponent {
             };
         }
 
-        if (PageTitle.isStaticPage(context)){
+        if (isStaticPage(context)){
             return { 'title' : object.itemUtil.getTitleStringFromContext(context) };
         }
 
@@ -208,7 +182,9 @@ export default class PageTitle extends React.PureComponent {
         if (object.isAnItem(context)){ // If Item
 
             title = object.itemUtil.getTitleStringFromContext(context);
-            var itemTypeTitle = Schemas.getItemTypeTitle(context, schemas);
+
+            const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
+            const itemTypeHierarchy = schemaTransforms.schemasToItemTypeHierarchy(schemas);
 
             // Handle long title strings by Item type
             if (itemTypeTitle === 'Publication'){
@@ -234,7 +210,7 @@ export default class PageTitle extends React.PureComponent {
                 // return { 'title' : itemTypeTitle, 'subtitle' : title };
             } else {
                 if (title.indexOf(context['@type'][0] + ' from ') === 0){ // Our title is in form of 'CellCultureDetails from 2018-01-01' or something, lets make it prettier.
-                    title = (context.date_created && <span>from <DateUtility.LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
+                    title = (context.date_created && <span>from <LocalizedTime timestamp={context.date_created} /></span>) || title.replace(context['@type'][0] + ' ', '');
                 }
                 // Check if long title & no 'typeInfo' text right under it from Item page -- if so: render it _under_ Type title instead of to the right of it.
                 var viewForItem = content_views.lookup(context, null);
@@ -285,7 +261,7 @@ export default class PageTitle extends React.PureComponent {
             }
         }
 
-        if (hasToc && (gridSize === 'lg' || !mounted)) style.width = '75%';
+        if (hasToc && (gridSize === 'xl' || !mounted)) style.width = '75%';
 
         return style;
     }
@@ -319,7 +295,7 @@ export default class PageTitle extends React.PureComponent {
 
         let elementStyle;
 
-        if (PageTitle.isHomePage(href)){
+        if (isHomePage(href)){
             elementStyle = PageTitle.getStyles(context, href, mounted, false, windowWidth);
             return (
                 <div id="page-title-container" className="container">
@@ -331,7 +307,7 @@ export default class PageTitle extends React.PureComponent {
         }
 
         var { title, subtitle, calloutTitle, subtitlePrepend, subtitleAppend, subtitleEllipsis } = PageTitle.calculateTitles(
-            context, href, (schemas || Schemas.get()), mounted, currentAction
+            context, href, schemas, mounted, currentAction
         );
 
         if (title) {
@@ -366,6 +342,27 @@ export default class PageTitle extends React.PureComponent {
 }
 
 
+/** Check whether current context has an `@type` list containing "StaticPage". */
+const isStaticPage = memoize(function(context){
+    if (Array.isArray(context['@type'])){
+        if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
+            if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
+            return true;
+        }
+    }
+    return false;
+});
+
+const isHomePage = memoize(function(href){
+    const currentHrefParts = url.parse(href, false);
+    const pathName = currentHrefParts.pathname;
+    if (pathName === '/' || pathName === '/home'){
+        return true;
+    }
+    return false;
+});
+
+
 /**
  * Used for most page titles.
  *
@@ -389,7 +386,7 @@ const HomePageTitleElement = React.memo(function HomePageTitleElement(props) {
     let { style } = props;
 
     style = _.clone(style);
-    style.marginTop ? style.marginTop -= 3 : null;
+    //style.marginTop ? style.marginTop -= 3 : null;
 
     return (
         <h1 className="home-page-title page-title top-of-page" style={style} >

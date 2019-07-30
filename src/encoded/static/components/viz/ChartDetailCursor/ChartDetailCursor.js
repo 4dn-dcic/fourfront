@@ -2,18 +2,17 @@
 
 import React from 'react';
 import _ from 'underscore';
-import * as d3 from 'd3';
-import * as vizUtil from './../utilities';
 import { barplot_color_cycler } from './../ColorCycler';
-import { expFxn, Schemas, console, object, isServerSide } from './../../util';
+import { console, object, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+// `Schemas` kept for project-specific transforms
+import { Schemas } from './../../util';
 import CursorComponent from './CursorComponent';
-import { Button } from 'react-bootstrap';
-
 
 /**
  * A plain JS object which contains at least 'title' and 'function' properties.
  * These become transformed into buttons.
- * 
+ * @todo Refactor lil bit
+ *
  * @typedef {Object} Action
  * @property {string} title - Title or text of the button to be shown.
  * @property {function} function - A function to be called when the button is pressed.
@@ -21,7 +20,7 @@ import { Button } from 'react-bootstrap';
  */
 
 
-class Body extends React.Component {
+class Body extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -39,41 +38,39 @@ class Body extends React.Component {
 
     /**
      * Under development.
-     * 
+     *
      * @private
      * @instance
      * @returns {JSX.Element} React DIV element with .row class.
      */
     renderActions(){
-        if (!this.props.sticky) return null;
-        if (!Array.isArray(this.props.actions) || !this.props.actions.length === 0) return null;
+        const { sticky, actions } = this.props;
+        if (!sticky) return null;
+        if (!Array.isArray(actions) || !actions.length === 0) return null;
 
-        var colWidth = 12 / Math.min(4, this.props.actions.length);
+        const colWidth = 12 / Math.min(4, actions.length);
 
-        var actions = _.map(this.props.actions, (action, i, a)=>{
-            var title       = typeof action.title === 'function'    ? action.title(this.props) : action.title,
-                disabled    = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
-
+        const renderedActions = _.map(actions, (action, i, a)=>{
+            const title = typeof action.title === 'function' ? action.title(this.props) : action.title;
+            const disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+            const cls = "btn btn-primary btn-sm" + (a.length < 2 ? " btn-block" : "");
             return (
-                <div className={"button-container col-xs-" + colWidth} key={title || i}>
-                    <Button
-                        bsSize="small"
-                        bsStyle={action.bsStyle || 'primary'}
-                        onClick={action.function.bind(action.function, this.props)}
-                        className={a.length < 2 ? "btn-block" : null}
-                        disabled={disabled || false}
-                    >{ title }</Button>
+                <div className={"button-container col-" + colWidth} key={title || i}>
+                    <button type="button" className={cls} disabled={disabled || false}
+                        onClick={action.function.bind(action.function, this.props)}>
+                        { title }
+                    </button>
                 </div>
             );
         });
         return (
-            <div className="actions buttons-container">{ actions }</div>
+            <div className="actions buttons-container">{ renderedActions }</div>
         );
     }
 
     /**
      * Renders out a row containing 2 counts out of [Exp Sets, Exps, Files], minus whatever is the primary count.
-     * 
+     *
      * @param {Object} props - Props of this component.
      * @returns {JSX.Element} - A DIV React element with a 'row' className.
      */
@@ -94,15 +91,15 @@ class Body extends React.Component {
             if (countPair[0] === 'files')           name = "Files";
 
             return (
-                <div key={countPair[0] || i} className={"text-right col-xs-" + colSize}>
+                <div key={countPair[0] || i} className={"text-right col-" + colSize}>
                     { countPair[1] }<small> { name }</small>
                 </div>
             );
         });
-        
+
         return (
-            <div className='row'>
-                { this.props.primaryCount !== 'files' ? <div className="col-xs-2"></div> : null }
+            <div className="row">
+                { this.props.primaryCount !== 'files' ? <div className="col-2"></div> : null }
                 { countsToShow }
             </div>
         );
@@ -127,19 +124,21 @@ class Body extends React.Component {
     }
 
     render(){
-        if (Array.isArray(this.props.path) && this.props.path.length === 0){
+        const { path, schemas, includeTitleDescendentPrefix , primaryCount } = this.props;
+        if (Array.isArray(path) && path.length === 0){
             return null;
         }
-        var leafNode = this.props.path[this.props.path.length - 1];
-        var leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, this.props.schemas);
+        const leafNode = path[path.length - 1];
+        const leafNodeFieldTitle = Schemas.Field.toName(leafNode.field, schemas);
+
         return (
             <div className="mosaic-cursor-body">
-                <Crumbs path={this.props.path} schemas={this.props.schemas} />
+                <Crumbs path={path} schemas={schemas} primaryCount={primaryCount} />
                 <h6 className="field-title">
                     { this.primaryCountLabel() }
-                    { 
-                        this.props.includeTitleDescendentPrefix && this.props.path.length > 1 ?
-                        <small className="descendent-prefix"> &gt; </small> : null
+                    {
+                        includeTitleDescendentPrefix && props.path.length > 1 ?
+                            <small className="descendent-prefix"> &gt; </small> : null
                     }{ leafNodeFieldTitle }
                     {/* this.props.filteredOut ?
                         <small className="filtered-out-label"> (filtered out)</small>
@@ -152,7 +151,7 @@ class Body extends React.Component {
                     />
                     { this.primaryCount(leafNode) }
                     <span>{ Schemas.Term.toName(leafNode.field, leafNode.term) }</span>
-                    
+
                 </h3>
                 <div className="details row">
                     <div className="col-sm-12">
@@ -165,61 +164,38 @@ class Body extends React.Component {
     }
 }
 
-class Crumbs extends React.Component {
+const Crumbs = React.memo(function Crumbs({ path, schemas, primaryCount }){
+    const offsetPerDescendent = 10;
+    const isEmpty = path.length < 2;
+    if (isEmpty) return null;
+    //var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
 
-    header(isEmpty = false){
-        return (
-            <div className="crumb-header row">
-                <div className="field col-xs-5">
-                    Looking at
-                </div>
-                <div className="name col-xs-2">
-                    
-                </div>
-                { isEmpty ? null :
-                <div className="count col-xs-5 text-right">
-                    # Sets
-                </div>
-                }
-            </div>
-        );
-    }
-
-    render(){
-        var offsetPerDescendent = 10;
-        var isEmpty = this.props.path.length < 2;
-        if (isEmpty) return null;
-        //var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
-        
-        return (
-            <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
-                {/* this.header(isEmpty) */}
-                {
-                    this.props.path.slice(0,-1).map((n, i)=>{
-                        return (
-                            <div
-                                data-depth={i}
-                                className={"crumb row" + (i===0 ? ' first' : '')}
-                                key={i}
-                            >
-                                <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
-                                    { Schemas.Field.toName(n.field, Schemas.get()) }
-                                </div>
-                                <div className="name col-xs-5">
-                                    { n.name || Schemas.Term.toName(n.field, n.term) }
-                                </div>
-                                <div className="count col-xs-2 pull-right text-right">
-                                    { n.experiment_sets }
-                                </div>
+    return (
+        <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
+            {
+                path.slice(0,-1).map(function(n, i){
+                    return (
+                        <div
+                            data-depth={i}
+                            className={"crumb row" + (i===0 ? ' first' : '')}
+                            key={i}
+                        >
+                            <div className="field col-auto" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
+                                { Schemas.Field.toName(n.field, schemas) }
                             </div>
-                        );
-                    })
-                }
-            </div>
-        );
-    }
-
-}
+                            <div className="name col">
+                                { n.name || Schemas.Term.toName(n.field, n.term) }
+                            </div>
+                            <div className="count col-auto pull-right text-right">
+                                { n[primaryCount] || n.count }
+                            </div>
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
+});
 
 
 const initialDetailCursorState = {
@@ -297,7 +273,7 @@ export default class ChartDetailCursor extends React.PureComponent {
 
     componentDidMount(){
         console.log('Mounted MouseDetailCursor');
-        this.setState({'mounted' : true});
+        this.setState({ 'mounted' : true });
     }
 
     getCursorOffset(){
@@ -368,13 +344,14 @@ export default class ChartDetailCursor extends React.PureComponent {
     }
 
     render(){
-        var { containingElement, hideWhenNoContainingElement, cursorContainmentDimensions, windowWidth, windowHeight } = this.props,
-            containDims = {};
+        const { containingElement, hideWhenNoContainingElement, cursorContainmentDimensions, windowWidth, windowHeight, visibilityMargin } = this.props;
+        const { sticky, path, xCoordOverride, mounted, bodyComponent } = this.state;
+        let containDims = {};
 
         if (!containingElement){
             if (hideWhenNoContainingElement) return null;
             containDims = cursorContainmentDimensions;
-            if (this.state.mounted && !isServerSide()){
+            if (mounted && !isServerSide()){
                 containDims = {
                     'containingWidth'   : windowWidth,
                     'containingHeight'  : windowHeight,
@@ -384,34 +361,29 @@ export default class ChartDetailCursor extends React.PureComponent {
             }
         }
 
-        var isVisible = this.state.sticky || (Array.isArray(this.state.path) && this.state.path.length > 0);
+        const isVisible = sticky || (Array.isArray(path) && path.length > 0);
 
         //if (!isVisible) return null;
         return (
-            <CursorComponent
-                {...containDims}
+            <CursorComponent {...containDims}
                 {..._.pick(this.props, 'width', 'height', 'horizontalAlign', 'debugStyle')}
-                containingElement={this.props.containingElement}
-                cursorOffset={this.getCursorOffset()}
-                xCoordOverride={this.state.xCoordOverride}
-                className="mosaic-detail-cursor"
-                isVisible={isVisible}
-                visibilityMargin={this.props.visibilityMargin || {
+                containingElement={containingElement} cursorOffset={this.getCursorOffset()}
+                xCoordOverride={xCoordOverride} className="mosaic-detail-cursor"
+                isVisible={isVisible} visibilityMargin={visibilityMargin || {
                     left: 0,
                     right: 0,
                     bottom: -50,
                     top: -10
                 }}
-                ref={this.cursorComponentRef}
-                sticky={this.state.sticky}
-                children={React.createElement(
-                    this.state.bodyComponent,
+                ref={this.cursorComponentRef} sticky={sticky}>
+                { React.createElement(
+                    bodyComponent,
                     _.extend(
                         _.omit(this.props, 'children'),
                         this.state
                     )
-                )}
-            />
+                ) }
+            </CursorComponent>
         );
     }
 

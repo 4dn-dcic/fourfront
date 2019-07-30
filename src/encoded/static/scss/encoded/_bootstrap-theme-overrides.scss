@@ -1,0 +1,293 @@
+/* Deprecated in Bootstrap 4 & FontAwesome 5.9.0, still used by us */
+.pull-left {
+    float: left;
+}
+
+.pull-right {
+    float: right;
+}
+
+.btn {
+    font-weight: 500;
+    /* @include box-shadow(0 1px 3px rgba(0,0,0,.1), inset 0 -2px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.3)); */
+    //@include box-shadow(0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 4px rgba(0,0,0,0.2),inset 0 1px 4px rgba(255,255,255,0.3));
+
+    > i.icon {
+        transform: translate3d(0, 1.5px, 0);
+    }
+}
+
+.btn.btn-lg {
+    > i.icon {
+        transform: translate3d(0, 2px, 0);
+        transform: translate3d(0, 1.75px, 0);
+    }
+}
+
+/** Overrides for own styled btns **/
+
+/** Extending Bootstrap button w/ rounded & ext-padding class **/
+/** btn-xs was removed in Bootstrap v4 so we recreate it here **/
+.btn.btn-xs {
+    @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
+    font-weight: 400;
+    padding-top: 2px;
+    > i.icon {
+        // Unset btn style
+        transform: none;
+    }
+}
+
+.btn-xs.rounded,
+.btn-xs.ext-padding {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+.btn-xs.rounded {
+	border-radius: 11px;
+}
+
+
+.btn.btn-sm {
+    /* increased from 0.25rem */
+    padding-top: 0.275rem;
+}
+
+.btn.btn-primary-dark {
+    @include button-variant($brand-primary-dark, $brand-primary-dark);
+}
+
+.btn.btn-primary {
+    /* Using brand-primary-dark color in place of default "darken(...)" to match rest of UI more nicely. */
+    /* border-color: $brand-primary-dark; */
+    &:hover, &:active, &.active {
+        background-color: $brand-primary-dark;
+        border-color: $brand-primary-dark;
+    }
+}
+
+/* Light gray BG, more prominent button style than btn-default */
+.btn.btn-secondary {
+    @include button-variant(#e4e4e4, rgba(0,0,0,0.125));
+    &:active, &:focus {
+        //background-color: #e4e4e4;
+    }
+}
+
+/* Styling dropdown menus */
+.dropdown-menu {
+    background-color: #fafafa;
+    border-top: 1px solid #e7e7e7;
+    -webkit-box-shadow: 0 5px 12px -2px rgba(0,0,0,0.175);
+    box-shadow: 0 5px 12px -2px rgba(0,0,0,0.175);
+
+    > a {
+        padding: 3px 24px;
+        &.active {
+            background-color: #34959d;
+        }
+        &:hover {
+            background-color: #5d8a8e !important;
+            color: #fff !important;
+        }
+        >div>a {
+            font-weight: 300;
+        }
+    }
+    @include navbar-fixed-position {
+        /* left: -1px; */
+        /* margin-top: 1px !important; */
+        padding: 10px 0;
+    }
+}
+
+
+/* Moving caret to always right position */
+.dropdown-toggle.btn {
+	position: relative;
+	padding-right: 24px;
+	padding-left: 10px;
+	&:after {
+		position: absolute;
+		top: 50%;
+		margin-top: -2px;
+        right: 10px;
+    }
+    &.btn-xs {
+        &:after {
+            margin-top: -1px;
+        }
+    }
+}
+
+/** Adding Bootstrap 4 CSS button 'Outline' styles **/
+/** Copied from https://v4-alpha.getbootstrap.com/components/buttons/ **/
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-default,
+.btn-outline-success,
+.btn-outline-info,
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-outline-dark,
+.btn-outline-white {
+    background-image: none;
+    background-color: transparent;
+}
+
+.btn-outline-primary-light {
+    @include button-outline-variant($brand-primary, $brand-primary);
+    /*
+    color: $brand-primary;
+    border-color: $brand-primary;
+    &:hover, &:active, &.active {
+        color: $btn-primary-color;
+        background-color: $brand-primary;
+    }
+    */
+}
+
+.btn-outline-primary {
+    @include button-outline-variant($brand-primary-dark);
+    /*
+    color: $brand-primary-dark;
+    border-color: $brand-primary-dark;
+    &:hover, &:active, &.active {
+        color: $btn-primary-color;
+        background-color: $brand-primary-dark;
+    }
+    */
+}
+
+.btn-outline-default {
+    @include button-outline-variant($dark);
+    /*
+    color: $btn-default-color;
+    border-color: $btn-default-color;
+    &:hover, &:active, &.active {
+        color: $btn-default-bg;
+        background-color: $btn-default-color;
+    }
+    */
+}
+
+/** Uses Bootstrap v4 (gray-600) colors, not default colors **/
+.btn-outline-secondary {
+    @include button-outline-variant($gray-400);
+    color: $gray-800;
+    /* color: #6c757d; */
+    /*
+    color: #333; // Might change back to above
+    border-color: #6c757d;
+    &:hover, &:active, &.active {
+        color: #fff;
+        background-color: #6c757d;
+    }
+    */
+}
+
+/*
+.btn-outline-success {
+    color: $brand-success;
+    border-color: $brand-success;
+    &:hover, &:active, &.active {
+        color: $btn-success-color;
+        background-color: $brand-success;
+    }
+}
+
+.btn-outline-info {
+    color: $brand-info;
+    border-color: $brand-info;
+    &:hover, &:active, &.active {
+        color: $btn-info-color;
+        background-color: $brand-info;
+    }
+}
+
+.btn-outline-warning {
+    color: $brand-warning;
+    border-color: $brand-warning;
+    &:hover, &:active, &.active {
+        color: $btn-warning-color;
+        background-color: $brand-warning;
+    }
+}
+
+.btn-outline-danger {
+    color: $brand-danger;
+    border-color: $brand-danger;
+    &:hover, &:active, &.active {
+        color: $btn-danger-color;
+        background-color: $brand-danger;
+    }
+}
+
+.btn-outline-dark {
+    color: #343a40;
+    border-color: #343a40;
+    &:hover, &:active, &.active {
+        color: #fff;
+        background-color: #343a40;
+    }
+}
+
+.btn-outline-white {
+    color: $btn-primary-color;
+    border-color: $btn-primary-color;
+    &:hover, &:active, &.active, &:focus {
+        color: $btn-default-color;
+        background-color: $btn-primary-color;
+    }
+    
+    //&:focus {
+    //    color: $btn-primary-color;
+    //    border-color: $btn-primary-color;
+    //    background-color: transparent;
+    //}
+}
+*/
+
+/** Modal Stuff **/
+
+.modal-dialog {
+
+	padding-left: 15px;
+	padding-right: 15px;
+
+	.modal-content {
+
+		> .modal-header {
+			padding-top: 1.125rem; // Overrides 1rem.
+			> button.close {
+				margin-top: -0.875rem; // Overrides -1rem.
+			}
+		}
+
+		.modal-body p {
+			font-family: inherit;
+		}
+
+	}
+}
+
+div[role="dialog"] {
+
+	> .modal-dialog {
+
+		/* Vertical Centering */
+		display: flex;
+		align-items: center;
+		height: 100%;
+		margin-top: 0;
+		margin-bottom: 0;
+
+		> .modal-content {
+			width: 100%;
+		}
+
+	}
+}
+

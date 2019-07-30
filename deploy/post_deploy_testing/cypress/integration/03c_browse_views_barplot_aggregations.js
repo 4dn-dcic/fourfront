@@ -47,7 +47,7 @@ describe('Browse Views - BarPlotChart II', function () {
         it('Counts persist on setting groupBy --> "Project"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
-                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(function($ul){
+                    .get('#select-barplot-field-1 + div.dropdown-menu').within(function($ul){
                         return cy.contains('Project').click();
                     }).end().wait(1500)
                     .getQuickInfoBarCounts().then((nextCounts)=>{
@@ -63,7 +63,7 @@ describe('Browse Views - BarPlotChart II', function () {
         it.skip('Counts persist on setting groupBy --> "Biosource"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
-                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(function($ul){
+                    .get('#select-barplot-field-1 + div.dropdown-menu').within(function($ul){
                         return cy.contains('Biosource').click();
                     }).end().wait(1500)
                     .getQuickInfoBarCounts().then((nextCounts)=>{
@@ -79,7 +79,7 @@ describe('Browse Views - BarPlotChart II', function () {
         it('Counts persist on setting xAxis --> "Biosource Type"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-0').click().wait(100).end()
-                    .get('#select-barplot-field-0 + ul.dropdown-menu').within(function($ul){
+                    .get('#select-barplot-field-0 + div.dropdown-menu').within(function($ul){
                         return cy.contains('Biosource Type').click();
                     }).end().wait(1500)
                     .getQuickInfoBarCounts().then((nextCounts)=>{
@@ -97,7 +97,7 @@ describe('Browse Views - BarPlotChart II', function () {
         it('Counts persist on setting groupBy --> "None"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
-                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(function($ul){
+                    .get('#select-barplot-field-1 + div.dropdown-menu').within(function($ul){
                         return cy.contains('None').click();
                     }).end().wait(1500)
                     .getQuickInfoBarCounts().then((nextCounts)=>{
@@ -113,7 +113,7 @@ describe('Browse Views - BarPlotChart II', function () {
         it('Counts persist on setting groupBy --> "Status"', function(){
             cy.window().scrollTo('top').end().getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
-                    .get('#select-barplot-field-1 + ul.dropdown-menu').within(function($ul){
+                    .get('#select-barplot-field-1 + div.dropdown-menu').within(function($ul){
                         return cy.contains('Status').click();
                     }).end().wait(1500)
                     .getQuickInfoBarCounts().then((nextCounts)=>{

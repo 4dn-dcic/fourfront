@@ -5,18 +5,6 @@ import React from 'react';
 /** Component which displays a banner at top of page informing users about this portal containing test data. */
 export class TestWarning extends React.PureComponent {
 
-    /**
-     * @public
-     * @constant
-     * @ignore
-     */
-    static defaultProps = {
-        'infoIconStyle' : {
-            'marginRight'   : 10,
-            'marginTop'     : -2
-        }
-    }
-
     constructor(props){
         super(props);
         this.handleClose = this.handleClose.bind(this);
@@ -32,17 +20,19 @@ export class TestWarning extends React.PureComponent {
     }
 
     render(){
-        var { visible, infoIconStyle } = this.props;
+        const { visible } = this.props;
         if (!visible) return null;
         return (
             <div className="test-warning">
                 <div className="container">
-                    <div>
-                        <span style={{ fontSize : '13.5px' }}>
-                            <i className="icon icon-fw icon-info circle-icon hidden-xs" style={infoIconStyle}/>
+                    <div className="row">
+                        <div className="col-10 text-container" style={{ fontSize : '13.5px' }}>
+                            <i className="icon icon-fw icon-info-circle circle-icon d-none d-md-inline-block"/>
                             The data displayed on this page is not official and only for testing purposes.
-                        </span>
-                        <a className="test-warning-close icon icon-times" title="Hide" onClick={this.handleClose}/>
+                        </div>
+                        <div className="col-2 close-button-container">
+                            <a className="test-warning-close icon icon-times" title="Hide" onClick={this.handleClose}/>
+                        </div>
                     </div>
                 </div>
             </div>

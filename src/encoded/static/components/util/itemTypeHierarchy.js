@@ -1,6 +1,9 @@
 'use strict';
 
 /**
+ * Kept for historical purposes & (temporarily) Cypress tests.
+ *
+ * @deprecated
  * This lives in own file to allow us to import it in from Cypress tests without any other
  * dependencies needing to be installed.
  */

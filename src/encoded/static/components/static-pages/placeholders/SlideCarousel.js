@@ -3,7 +3,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Button } from 'react-bootstrap';
 import Carousel from 'nuka-carousel';
 
 

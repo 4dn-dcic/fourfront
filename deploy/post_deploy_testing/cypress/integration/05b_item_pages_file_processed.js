@@ -16,7 +16,7 @@ describe("Individual Item Views", function(){
         it('Default sort ordering is by date_created', function(){
             // First we must add the column to the view
             // Open column selector panel
-            cy.get('#content div.above-results-table-row div.pull-right.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
+            cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
                 // Check the 'Date Created' checkbox
                 .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]').click().end()
                 // Perform check
@@ -47,7 +47,7 @@ describe("Individual Item Views", function(){
             testGraphTabClick();
 
             it('Have 3+ graph nodes & 2+ edges including self', function(){
-                cy.get('.graph-wrapper .nodes-layer .node').should('have.length.greaterThan', 2).then(($nodes)=>{
+                cy.get('.graph-wrapper .nodes-layer .node').should('have.length.greaterThan', 2).then(function($nodes){
                     return cy.location('pathname').then((pathName)=>{
                         pathName = Cypress._.filter(pathName.split('/'));
                         const fileAccession = pathName[pathName.length - 1];

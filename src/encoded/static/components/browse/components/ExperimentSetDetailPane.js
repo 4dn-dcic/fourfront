@@ -3,10 +3,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from 'react-bootstrap';
+
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
 import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
-import { FlexibleDescriptionBox } from './../../item-pages/components';
-import { expFxn, layout, object } from './../../util';
+import { expFxn } from './../../util';
 import { SelectedFilesController } from './SelectedFilesController';
 
 export class ExperimentSetDetailPane extends React.PureComponent {
@@ -64,6 +67,10 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 
     renderRawFilesSection(paddingWidth){
         const { containerWidth, result, href, minimumWidth } = this.props;
+
+        // For debugging stacked tables
+        //const useResult = require('./../../testdata/experiment_set/replicate_4DNESH4MYRID');
+
         const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
 
         if (rawFilesCount === 0) return null;
@@ -140,18 +147,18 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                         </div>
                         <div className="col-md-6 addinfo-properties-section">
                             <div className="row mb-05 clearfix">
-                                <div className="col-xs-4 col-sm-3 text-500">
+                                <div className="col-4 col-sm-3 text-500">
                                     Lab:
                                 </div>
-                                <div className="col-xs-8 col-sm-9 expset-addinfo-val">
+                                <div className="col-8 col-sm-9 expset-addinfo-val">
                                     { object.itemUtil.generateLink(result.lab) || <small><em>None</em></small> }
                                 </div>
                             </div>
                             <div className="row mb-05 clearfix">
-                                <div className="col-xs-4 col-sm-3 text-500">
+                                <div className="col-4 col-sm-3 text-500">
                                     Publication:
                                 </div>
-                                <div className="col-xs-8 col-sm-9 expset-addinfo-val">
+                                <div className="col-8 col-sm-9 expset-addinfo-val">
                                     { object.itemUtil.generateLink(result.produced_in_pub) || <small><em>None</em></small> }
                                 </div>
                             </div>

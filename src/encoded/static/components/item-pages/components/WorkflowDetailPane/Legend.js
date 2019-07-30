@@ -5,21 +5,19 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 
-class LegendItem extends React.Component {
 
-    render(){
-        var { title, className, tooltip } = this.props;
-        return (
-            <div className="legend-item">
-                <span className="inline-block" data-tip={tooltip || null} data-place="right" data-html>
-                    <div className={"color-patch " + className}/> { title }
-                </span>
-            </div>
-        );
-    }
-}
+const LegendItem = React.memo(function Legend({ title, className, tooltip }){
+    return (
+        <div className="legend-item">
+            <span className="inline-block" data-tip={tooltip || null} data-place="right" data-html>
+                <div className={"color-patch " + className}/> { title }
+            </span>
+        </div>
+    );
+});
 
-export class Legend extends React.Component {
+
+export class Legend extends React.PureComponent {
 
     static defaultProps = {
         'items' : {
@@ -62,16 +60,17 @@ export class Legend extends React.Component {
     }
 
     render(){
+        const { title, items } = this.props;
         return (
             <div className="workflow-legend-container overflow-hidden mt-1">
                 <div className="inner">
-                    { this.props.title?
+                    { title?
                         <div>
-                            <h4 className="text-300">{ this.props.title }</h4>
+                            <h4 className="text-300">{ title }</h4>
                             <hr className="mb-1 mt-1"/>
                         </div>
-                    : null}
-                    { _.map(_.pairs(this.props.items), (p)=> <LegendItem {...p[1]} title={p[0]} key={p[0]} /> ) }
+                        : null}
+                    { _.map(_.pairs(items), ([ itemTitle, details ])=> <LegendItem {...details} title={itemTitle} key={itemTitle} /> ) }
                 </div>
             </div>
         );

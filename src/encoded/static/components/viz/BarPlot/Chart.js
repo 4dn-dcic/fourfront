@@ -5,10 +5,11 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas } from './../../util';
 import { barplot_color_cycler } from './../ColorCycler';
 import { RotatedLabel } from './../components';
-import { console, isServerSide, Schemas } from './../../util';
 import { PopoverViewContainer } from './ViewContainer';
 
 
@@ -340,8 +341,10 @@ export class Chart extends React.PureComponent {
         // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
         barplot_color_cycler.resetCache();
 
-        const { width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
-            aggregateType, useOnlyPopulatedFields, cursorDetailActions, href } = this.props;
+        const {
+            width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
+            aggregateType, useOnlyPopulatedFields, cursorDetailActions, href, schemas
+        } = this.props;
         const styleOptions = this.styleOptions();
         const topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
 
@@ -356,7 +359,7 @@ export class Chart extends React.PureComponent {
         );
 
         return (
-            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href }}
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href, schemas }}
                 actions={cursorDetailActions}
                 leftAxis={this.renderParts.leftAxis(width, height, barData, styleOptions)}
                 bottomAxis={this.renderParts.bottomXAxis(width, height, barData.bars, styleOptions)}
