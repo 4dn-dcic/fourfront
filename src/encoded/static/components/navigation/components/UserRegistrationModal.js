@@ -67,7 +67,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
     );
 
     return (
-        <Modal show bsSize="large" onHide={onRegistrationCancel}>
+        <Modal show size="lg" onHide={onRegistrationCancel}>
             <Modal.Header closeButton>
                 <Modal.Title>Registration</Modal.Title>
             </Modal.Header>

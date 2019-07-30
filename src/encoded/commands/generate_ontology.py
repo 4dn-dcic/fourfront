@@ -449,6 +449,7 @@ def remove_obsoletes_and_unnamed(terms):
     return terms
 
 
+<<<<<<< HEAD
 # def verify_and_update_ontology(terms, ontologies, dbterms):
 #     '''checks to be sure the ontology associated with the term agrees with
 #         the term prefix as long as term does not already exist in db.
@@ -473,6 +474,32 @@ def remove_obsoletes_and_unnamed(terms):
 #             print('WARNING - {} is already present as a term in {}'.format(termid, dbterms[termid]['source_ontology']['display_title']))
 #     keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
 #     return keep_terms
+=======
+def verify_and_update_ontology(terms, ontologies, dbterms):
+    '''checks to be sure the ontology associated with the term agrees with
+        the term prefix as long as term does not already exist in db.
+        If it doesn't it is likely that the term was
+        imported into a previously processed ontology and so the ontlogy
+        of the term should be updated to the one that matches the prefix
+    '''
+    ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
+    ont_prefi = {v: k for k, v in ont_lookup.items()}
+    to_delete = []
+    for termid, term in terms.items():
+        # if termid in dbterms:
+        #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
+        #         to_delete.append(termid)
+        if ont_lookup.get(term['source_ontology'], None):
+            prefix = termid.split(':')[0]
+            if prefix in ont_prefi:
+                if prefix != ont_lookup[term['source_ontology']]:
+                    term['source_ontology'] = ont_prefi[prefix]
+        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
+            to_delete.append(termid)
+            print('WARNING - {} is already present as a term in {} and not {}'.format(termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']))
+    keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
+    return keep_terms
+>>>>>>> go_ow_fix
 
 
 def _get_t_id(val):
@@ -531,30 +558,42 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
     '''
-    to_update = {}
+    to_update = []
     to_post = 0
     to_patch = 0
+    obsoletes = 0
     tid2uuid = {}  # to keep track of existing uuids
     for tid, term in terms.items():
         if tid not in dbterms:
             # new term
             uid = str(uuid4())
             term['uuid'] = uid
-            to_update[tid] = term
+            if tid in tid2uuid:
+                print("WARNING HAVE SEEN {} BEFORE!".format(tid))
+                print("PREVIOUS={}; NEW={}".format(tid2uuid[tid], uid))
+            to_update.append(term)
             tid2uuid[tid] = uid
             to_post += 1
         else:
             # add uuid to mapping
             dbterm = dbterms[tid]
             uuid = dbterm['uuid']
+            if tid in tid2uuid:
+                print("WARNING HAVE SEEN {} BEFORE!".format(tid))
+                print("PREVIOUS={}; NEW={}".format(tid2uuid[tid], uuid))
             tid2uuid[term['term_id']] = uuid
             if rm_unchanged and _terms_match(term, dbterm):
                 # check to see if contents of term are also in db_term
                 continue
             else:
                 term['uuid'] = uuid
-                to_update[uuid] = term
+                to_update.append(term)
                 to_patch += 1
+
+    for term in to_update:
+        puuids = _get_uuids_for_linked(term, tid2uuid)
+        for rt, uuids in puuids.items():
+            term[rt] = uuids
 
     if set_obsoletes:
         prefixes = [o.get('ontology_prefix', '') for o in ontologies]
@@ -574,16 +613,14 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                     continue
                 dbuid = term['uuid']
                 # add simple term with only status and uuid to to_patch
-                to_update[dbuid] = {'status': 'obsolete', 'uuid': dbuid}
+                obsoletes += 1
+                to_update.append({'status': 'obsolete', 'uuid': dbuid})
                 tid2uuid[term['term_id']] = dbuid
                 to_patch += 1
-
-    for term in to_update.values():
-        puuids = _get_uuids_for_linked(term, tid2uuid)
-        for rt, uuids in puuids.items():
-            term[rt] = uuids
-
-    return to_update, tid2uuid, to_post, to_patch
+    print("Will obsolete {} TERMS".format(obsoletes))
+    print("{} TERMS ARE NEW".format(to_post))
+    print("{} LIVE TERMS WILL BE PATCHED".format(to_patch - obsoletes))
+    return to_update, tid2uuid
 
 
 def _get_uuids_for_linked(term, idmap):
@@ -597,43 +634,6 @@ def _get_uuids_for_linked(term, idmap):
                 else:
                     print('WARNING - ', p, ' MISSING FROM IDMAP')
     return puuids
-
-
-# def add_uuids_and_combine(partitioned_terms):
-#     '''adds new uuids to terms to post and existing uuids to patch terms
-#         this function depends on the partitioned term dictionary that
-#         contains keys 'post', 'patch' and 'idmap'
-#     '''
-#     # go through all the new terms and add uuids to them and idmap
-#     idmap = partitioned_terms.get('idmap', {})
-#     newterms = partitioned_terms.get('post', None)
-#     if newterms:
-#         for tid, term in newterms.items():
-#             uid = str(uuid4())
-#             idmap[tid] = uid
-#             term['uuid'] = uid
-#         # now that we should have all uuids go through again
-#         # and switch parent term ids for uuids
-#         for term in newterms.values():
-#             puuids = _get_uuids_for_linked(term, idmap)
-#             for rt, uuids in puuids.items():
-#                 term[rt] = uuids
-#     # and finally do the same for the patches
-#     patches = partitioned_terms.get('patch', None)
-#     if patches:
-#         for term in patches.values():
-#             puuids = _get_uuids_for_linked(term, idmap)
-#             for rt, uuids in puuids.items():
-#                 term[rt] = uuids
-#     try:
-#         post = list(newterms.values())
-#     except AttributeError:
-#         post = []
-#     try:
-#         patch = list(patches.values())
-#     except AttributeError:
-#         patch = []
-#     return post + patch
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
@@ -736,6 +736,10 @@ def parse_args(args):
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
+    parser.add_argument('--imports',
+                        default=False,
+                        action='store_true',
+                        help="For EFO or HP, imports option includes terms imported from other ontologies.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
@@ -780,9 +784,10 @@ def main():
 
     # fourfront connection
     connection = connect2server(args.env, args.key)
+    print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontologies)
     for i, o in enumerate(ontologies):
-        if o['ontology_name'].startswith('4DN'):
+        if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
     slim_terms = get_slim_terms(connection)
     db_terms = get_existing_ontology_terms(connection)
@@ -793,27 +798,31 @@ def main():
         if ontology.get('download_url', None) is not None:
             # want only simple processing for HP
             simple = False
+<<<<<<< HEAD
             if ontology.get('ontology_prefix') in ['HP']:  # , 'EFO']:
+=======
+            if ontology.get('ontology_prefix') in ['HP', 'EFO'] and not args.imports:
+>>>>>>> go_ow_fix
                 simple = True
             # get all the terms for an ontology
             terms = download_and_process_owl(ontology, connection, terms, simple)
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
+        print("Post-processing")
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
         # terms = verify_and_update_ontology(terms, ontologies, db_terms)
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates, idmap, post_cnt, patch_cnt = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
+        updates, idmap = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
         # terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False
         if args.pretty:
             pretty = True
         write_outfile(updates, postfile, pretty)
-        print("Generated {} new terms and patches for {} existing terms".format(post_cnt, patch_cnt))
 
 
 if __name__ == '__main__':
