@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { replaceString as placeholderReplacementFxn } from './../static-pages/placeholders';
 import { HomePageCarouselSlide } from './../static-pages/components/HomePageCarousel';
 
 
@@ -35,9 +36,14 @@ const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ 
         );
     }
 
+    const passProps = {
+        placeholderReplacementFxn,
+        ..._.pick(context, 'content', 'filetype')
+    };
+
     return (
         <div className="mt-18 static-section-entry">
-            <BasicStaticSectionBody {..._.pick(context, 'content', 'filetype')} />
+            <BasicStaticSectionBody {...passProps} />
         </div>
     );
 });
