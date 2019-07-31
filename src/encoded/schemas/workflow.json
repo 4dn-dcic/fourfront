@@ -310,6 +310,15 @@
                         "description": "QC object type inherited from quality_metric to be used to represent QC",
                         "type": "string"
                     },
+                    "to_be_unzippped": {
+                        "title": "to_be_unzipped",
+                        "description": "unzip program if the file must be unzipped before workflow run",
+                        "type": "string",
+                        "enum": [
+                            "gzip",
+                            "bz2"
+                        ]
+                    },
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",
