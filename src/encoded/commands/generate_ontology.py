@@ -449,59 +449,6 @@ def remove_obsoletes_and_unnamed(terms):
     return terms
 
 
-<<<<<<< HEAD
-# def verify_and_update_ontology(terms, ontologies, dbterms):
-#     '''checks to be sure the ontology associated with the term agrees with
-#         the term prefix as long as term does not already exist in db.
-#         If it doesn't it is likely that the term was
-#         imported into a previously processed ontology and so the ontlogy
-#         of the term should be updated to the one that matches the prefix
-#     '''
-#     ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
-#     ont_prefi = {v: k for k, v in ont_lookup.items()}
-#     to_delete = []
-#     for termid, term in terms.items():
-#         # if termid in dbterms:
-#         #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
-#         #         to_delete.append(termid)
-#         if ont_lookup.get(term['source_ontology'], None):
-#             prefix = termid.split(':')[0]
-#             if prefix in ont_prefi:
-#                 if prefix != ont_lookup[term['source_ontology']]:
-#                     term['source_ontology'] = ont_prefi[prefix]
-#         if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
-#             to_delete.append(termid)
-#             print('WARNING - {} is already present as a term in {}'.format(termid, dbterms[termid]['source_ontology']['display_title']))
-#     keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
-#     return keep_terms
-=======
-def verify_and_update_ontology(terms, ontologies, dbterms):
-    '''checks to be sure the ontology associated with the term agrees with
-        the term prefix as long as term does not already exist in db.
-        If it doesn't it is likely that the term was
-        imported into a previously processed ontology and so the ontlogy
-        of the term should be updated to the one that matches the prefix
-    '''
-    ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
-    ont_prefi = {v: k for k, v in ont_lookup.items()}
-    to_delete = []
-    for termid, term in terms.items():
-        # if termid in dbterms:
-        #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
-        #         to_delete.append(termid)
-        if ont_lookup.get(term['source_ontology'], None):
-            prefix = termid.split(':')[0]
-            if prefix in ont_prefi:
-                if prefix != ont_lookup[term['source_ontology']]:
-                    term['source_ontology'] = ont_prefi[prefix]
-        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
-            to_delete.append(termid)
-            print('WARNING - {} is already present as a term in {} and not {}'.format(termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']))
-    keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
-    return keep_terms
->>>>>>> go_ow_fix
-
-
 def _get_t_id(val):
     # val can be: uuid string, dict with @id, dict with uuid if fully embedded
     try:
@@ -553,7 +500,7 @@ def _terms_match(t1, t2):
     return True
 
 
-def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True):
+def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True, simple=False):
     '''compares terms to terms that are already in db - if no change
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
@@ -597,7 +544,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
 
     if set_obsoletes:
         prefixes = [o.get('ontology_prefix', '') for o in ontologies]
-        if prefixes == ['EFO'] or prefixes == ['HP']:
+        if simple:
             use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
         else:
             use_terms = {tid: term for tid, term in dbterms.items()}
@@ -718,6 +665,10 @@ def parse_args(args):
                         default='all',
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
+    parser.add_argument('--simple',
+                        default=False,
+                        action='store_true',
+                        help="Default false - WARNING can only be used if processing a single ontology!!! - will process only terms that share the prefix ontology and skip terms imported from other ontologies")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -736,10 +687,6 @@ def parse_args(args):
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
-    parser.add_argument('--imports',
-                        default=False,
-                        action='store_true',
-                        help="For EFO or HP, imports option includes terms imported from other ontologies.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
@@ -786,6 +733,9 @@ def main():
     connection = connect2server(args.env, args.key)
     print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontologies)
+    if len(ontologies) > 1 and args.simple:
+        print("INVALID USAGE - simple can only be used while processing a single ontology")
+        sys.exit(1)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
@@ -796,27 +746,18 @@ def main():
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
-            # want only simple processing for HP
-            simple = False
-<<<<<<< HEAD
-            if ontology.get('ontology_prefix') in ['HP']:  # , 'EFO']:
-=======
-            if ontology.get('ontology_prefix') in ['HP', 'EFO'] and not args.imports:
->>>>>>> go_ow_fix
-                simple = True
             # get all the terms for an ontology
-            terms = download_and_process_owl(ontology, connection, terms, simple)
+            terms = download_and_process_owl(ontology, connection, terms, args.simple)
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
         print("Post-processing")
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
-        # terms = verify_and_update_ontology(terms, ontologies, db_terms)
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates, idmap = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
+        updates, idmap = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, args.simple)
         # terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False

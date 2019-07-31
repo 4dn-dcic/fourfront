@@ -225,7 +225,7 @@ def gene_term(testapp, so_ont):
     gterm = {
         'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000704', 'term_name': 'gene',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -234,7 +234,7 @@ def region_term(testapp, so_ont):
     gterm = {
         'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000001', 'term_name': 'region',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -244,7 +244,7 @@ def protein_term(testapp, so_ont):
         'uuid': '8bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000104', 'term_name': 'polypeptide',
         'preferred_name': 'protein',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -253,7 +253,7 @@ def transcript_term(testapp, so_ont):
     gterm = {
         'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000673', 'term_name': 'transcript',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -262,7 +262,7 @@ def component_term(testapp, so_ont):
     gterm = {
         'uuid': '4bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'GO:0005575', 'term_name': 'cellular_component',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -274,7 +274,7 @@ def cell_line_term(testapp, ontology):
         "term_id": "EFO:0000322",
         "term_name": "cell line",
         "uuid": "111189bc-8535-4448-903e-854af460a233",
-        "source_ontology": ontology['@id'],
+        "source_ontologies": [ontology['@id']],
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
@@ -286,7 +286,7 @@ def f123_oterm(testapp, ontology, cell_line_term):
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "term_name": "F123-CASTx129",
         "term_id": "EFO:0000008",
-        "source_ontology": ontology['@id'],
+        "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
@@ -298,7 +298,7 @@ def gm12878_oterm(testapp, ontology, cell_line_term):
         "uuid": "530056bc-8535-4448-903e-854af460b111",
         "term_name": "GM12878",
         "term_id": "EFO:0000009",
-        "source_ontology": ontology['@id'],
+        "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
@@ -1067,7 +1067,7 @@ def oterm(uberon_ont):
         "term_name": "lung",
         "term_id": "UBERON:0002048",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
-        "source_ontology": uberon_ont['@id']
+        "source_ontologies": [uberon_ont['@id']]
     }
 
 
@@ -1078,7 +1078,7 @@ def lung_oterm(oterm, testapp):
 
 @pytest.fixture
 def quality_metric_fastqc(testapp, award, lab):
-    item =  {
+    item = {
         "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
         "award": award['@id'],
         "lab": lab['@id']

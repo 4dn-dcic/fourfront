@@ -127,46 +127,39 @@ class Biosource(Item):
 
 
 # # validator for tissue field
-# def validate_biosource_tissue(context, request):
-#     data = request.json
-#     if 'tissue' not in data:
-#         return
-#     term_ok = False
-#     tissue = data['tissue']
-#     ontology_name = None
-#     try:
-#         termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
-#         try:
-#             # checking to see if our context is a collection or an item to set get
-#             context.get('blah')
-#             getter = context
-#         except AttributeError:
-#             getter = context.collection
-#         term = getter.get(termuid)
-#         ontologies = getter.get(term.properties['source_ontologies'])
-#         import pdb; pdb.set_trace()
-#         print(ontologies)
-#     except AttributeError:
-#         pass
-#     request.validated.update({})
-#         ontology_name = ontology.properties.get('ontology_name')
-#     except AttributeError:
-#         pass
-#
-#     if (ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
-#         term_ok = True
-#     if not term_ok:
-#         try:
-#             tissuename = tissue.get('term_name')
-#         except AttributeError:
-#             tissuename = str(tissue)
-#         request.errors.add('body', 'Biosource: invalid tissue term', 'Term: ' + tissuename + ' is not found in UBERON')
-#     else:
-#         request.validated.update({})
-
-
 def validate_biosource_tissue(context, request):
+    data = request.json
+    if 'tissue' not in data:
+        return
+    term_ok = False
+    tissue = data['tissue']
+    ontology_name = None
+    try:
+        termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
+        try:
+            # checking to see if our context is a collection or an item to set get
+            context.get('blah')
+            getter = context
+        except AttributeError:
+            getter = context.collection
+        term = getter.get(termuid)
+        ontologies = term.properties['source_ontologies']
+    except AttributeError:
+        pass
     request.validated.update({})
+    for o in ontologies:
+        oname = get_item_if_you_can(request, o, 'ontologys').get('ontology_name')
+        if oname in ['Uberon', '4DN Controlled Vocabulary']:
+            term_ok = True
+            break
+    if not term_ok:
+        try:
+            tissuename = tissue.get('term_name')
+        except AttributeError:
+            tissuename = str(tissue)
+        request.errors.add('body', 'Biosource: invalid tissue term', 'Term: ' + tissuename + ' is not found in UBERON')
+    else:
+        request.validated.update({})
 
 
 # validator for cell_line field
