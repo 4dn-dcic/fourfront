@@ -34,7 +34,7 @@
         "number_of_lines": {
             "type": "number",
             "description": "number of lines in the bam file"
-        },
+        }
     },
     "facets": {
         "overall_quality_status": {
