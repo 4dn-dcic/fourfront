@@ -709,7 +709,7 @@ def test_create_term_dict(mocker, ll_class, uberon_owler):
         term = go.create_term_dict(ll_class, 'termid', uberon_owler, 'ontid')
         assert term['term_name'] == 'lung lobe'
         assert term['term_id'] == 'termid'
-        assert term['source_ontology'] == 'ontid'
+        assert 'ontid' in term['source_ontologies']
         assert term['namespace'] == 'http://purl.obolibrary.org/obo'
         assert term['term_url'] == 'http://purl.obolibrary.org/obo/UBERON_0000101'
 
@@ -952,19 +952,9 @@ def test_terms_match_w_ontology(matches):
     t2 = matches[1]
     o1 = '530016bc-8535-4448-903e-854af460b254'
     o2 = {'@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/', 'display_title': 'blah'}
-    t1['source_ontology'] = o1
-    t2['source_ontology'] = o2
+    t1['source_ontologies'] = [o1]
+    t2['source_ontologies'] = [o2]
     assert go._terms_match(t1, t2)
-
-
-# def test_terms_match_unmatched_ontology(matches):
-#     t1 = matches[0]
-#     t2 = matches[1]
-#     o1 = '530016bc-8535-4448-903e-854af460b254'
-#     o2 = {'@id': '/ontologys/530016bc-8535-4448-903e-854af460b000/', 'display_title': 'blah'}
-#     t1['source_ontology'] = o1
-#     t2['source_ontology'] = o2
-#     assert not go._terms_match(t1, t2)
 
 
 @pytest.fixture
@@ -1018,7 +1008,7 @@ def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
 
 
 def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
+    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1'}], 'uuid': '7890'}
     result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     assert len(result) == 2
     assert '7890' in [t.get('uuid') for t in result]
@@ -1026,18 +1016,17 @@ def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
+    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1'}], 'uuid': '7890'}
     result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
     assert 't4' not in [t.get('term_id') for t in result]
     assert 't4' not in idmap
 
 
 def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
+    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': [{'uuid': '4', 'ontology_name': '4DN controlled vocabulary'}], 'uuid': '7890'}
     result, idmap = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     print(result)
     assert 't4' not in [t.get('term_id') for t in result]
-    assert 't4' not in idmap
 
 
 def valid_uuid(uid):
