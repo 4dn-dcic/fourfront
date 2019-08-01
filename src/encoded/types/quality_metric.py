@@ -56,6 +56,20 @@ class QualityMetricFastqc(QualityMetric):
 
 
 @collection(
+    name='quality-metrics-bamcheck',
+    properties={
+        'title': 'Bam Check Quality Metrics',
+        'description': 'Listing of Bam Check Quality Metrics'
+    })
+class QualityMetricBamCheck(QualityMetric):
+    """Subclass of quality matrics for bam files."""
+
+    item_type = 'quality_metric_bamcheck'
+    schema = load_schema('encoded:schemas/quality_metric_bamcheck.json')
+    embedded_list = QualityMetric.embedded_list
+
+
+@collection(
     name='quality-metrics-bamqc',
     properties={
         'title': 'BamQC Quality Metrics',
