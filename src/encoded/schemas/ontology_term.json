@@ -138,7 +138,7 @@
         "term_id": {
             "title": "Term ID"
         },
-        "source_ontologies": {
+        "source_ontologies.ontology_name": {
             "title": "Ontology"
         }
     },
