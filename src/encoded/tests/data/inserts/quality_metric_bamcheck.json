@@ -1,0 +1,10 @@
+[
+    {
+        "uuid": "af8e47c1-35bd-46fd-8a2e-e5d7b89560eb",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "number_of_lines": 1234567,
+        "quickcheck": "OK",
+        "overall_quality_status": "PASS"
+    }
+]
