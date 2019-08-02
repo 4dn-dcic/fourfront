@@ -468,9 +468,17 @@ def verify_and_update_ontology(terms, ontologies, dbterms):
             if prefix in ont_prefi:
                 if prefix != ont_lookup[term['source_ontology']]:
                     term['source_ontology'] = ont_prefi[prefix]
-        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
-            to_delete.append(termid)
-            print('WARNING - {} is already present as a term in {} and not {}'.format(termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']))
+        try:
+            if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
+                to_delete.append(termid)
+                print('WARNING - {} is already present as a term in {} and not {}'.format(
+                    termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']
+                ))
+        except KeyError:
+            print(termid)
+            print(term)
+            print(dbterms[termid])
+            continue
     keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
     return keep_terms
 
@@ -665,19 +673,19 @@ def download_and_process_owl(ontology, connection, terms, simple=False):
                 terms = process_parents(class_, data, terms)
     # add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
-    return terms
+    return terms, data.version
 
 
-def write_outfile(terms, filename, pretty=False):
+def write_outfile(to_write, filename, pretty=False):
     '''terms is a list of dicts
         write to file by default as a json list or if pretty
         then same with indents and newlines
     '''
     with open(filename, 'w') as outfile:
         if pretty:
-            json.dump(terms, outfile, indent=4)
+            json.dump(to_write, outfile, indent=4)
         else:
-            json.dump(terms, outfile)
+            json.dump(to_write, outfile)
 
 
 def parse_args(args):
@@ -774,7 +782,13 @@ def main():
             if ontology.get('ontology_prefix') in ['HP', 'EFO'] and not args.imports:
                 simple = True
             # get all the terms for an ontology
-            terms = download_and_process_owl(ontology, connection, terms, simple)
+            terms, v = download_and_process_owl(ontology, connection, terms, simple)
+            if v != ontology.get('current_ontology_version', ''):
+                if ontology.get('current_ontology_version'):
+                    if not ontology.get('ontology_versions'):
+                        ontology['ontology_versions'] = []
+                    ontology['ontology_versions'].append(ontology['current_ontology_version'])
+                ontology['current_ontology_version'] = v
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
@@ -791,7 +805,14 @@ def main():
         pretty = False
         if args.pretty:
             pretty = True
-        write_outfile(updates, postfile, pretty)
+        out_dict = {
+            'ontologies': {o['uuid']:
+                {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
+                for o in ontologies if o.get('current_ontology_version')
+            },
+            'terms': updates
+        }
+        write_outfile(out_dict, postfile, pretty)
 
 
 if __name__ == '__main__':

@@ -133,6 +133,7 @@ class Owler(object):
                 raise exceptions.Error("Could not parse the file! Is it a valid RDF/OWL ontology?")
         finally:
             self.baseURI = self.__get_OntologyURI() or uri
+            self.version = self.__get_OntologyVersion()
             self.allclasses = self.__getAllClasses(includeDomainRange=True, includeImplicit=True, removeBlankNodes=False, excludeRDF_OWL=False)
 
     def __get_OntologyURI(self, return_as_string=True):
@@ -144,6 +145,29 @@ class Owler(object):
                 return test[0]
         else:
             return None
+
+    def __get_OntologyVersion(self, return_as_string=True):
+        vinfo = [z for x, y, z in self.rdfGraph.triples((None, OWLNS["versionInfo"], None))]
+        if vinfo:
+            if return_as_string:
+                return str(vinfo[0])
+            else:
+                return vinfo[0]
+        uris = [z for x, y, z in self.rdfGraph.triples((None, OWLNS["versionIRI"], None))]
+        if uris:
+            try:
+                v = uris[0].split('/')
+                if 'releases' in v:
+                    v = v[v.index('releases') + 1]
+                else:
+                    v = uris[0]
+                if return_as_string:
+                    return str(v[0])
+                else:
+                    return v[0]
+            except Exception:
+                return None
+        return None
 
     def __getAllClasses(self, classPredicate="", includeDomainRange=False, includeImplicit=False, removeBlankNodes=True, addOWLThing=True, excludeRDF_OWL=True):
 
