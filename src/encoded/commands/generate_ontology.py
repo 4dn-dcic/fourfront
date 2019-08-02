@@ -29,6 +29,7 @@ from dcicutils.ff_utils import (
 )
 from dcicutils.s3_utils import s3Utils
 import mimetypes
+import requests
 from pyramid.paster import get_app
 
 EPILOG = __doc__
@@ -783,12 +784,23 @@ def main():
                 simple = True
             # get all the terms for an ontology
             terms, v = download_and_process_owl(ontology, connection, terms, simple)
-            if v != ontology.get('current_ontology_version', ''):
+            if not v and ontology.get('ontology_name').upper() == 'UBERON':
+                try:
+                    result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
+                    release = result._content.decode('utf-8').split('</li>\n  <li>')[-1]
+                    v = release[release.index('>') + 1: release.index('</a>')].rstrip('/')
+                except Exception:
+                    print('Unable to fetch Uberon version')
+            onts_to_update = {}
+            if v and v != ontology.get('current_ontology_version', ''):
+                o_dict = {}
                 if ontology.get('current_ontology_version'):
                     if not ontology.get('ontology_versions'):
-                        ontology['ontology_versions'] = []
-                    ontology['ontology_versions'].append(ontology['current_ontology_version'])
+                        o_dict['ontology_versions'] = [ontology['current_ontology_version']]
+                    else:
+                        o_dict['ontology_versions'] = [ontology['current_ontology_version']] + ontology['ontology_versions']
                 ontology['current_ontology_version'] = v
+
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
