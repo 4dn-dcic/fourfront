@@ -61,7 +61,7 @@ class QualityMetricFastqc(QualityMetric):
         'title': 'Bam Check Quality Metrics',
         'description': 'Listing of Bam Check Quality Metrics'
     })
-class QualityMetricBamCheck(QualityMetric):
+class QualityMetricBamcheck(QualityMetric):
     """Subclass of quality matrics for bam files."""
 
     item_type = 'quality_metric_bamcheck'
