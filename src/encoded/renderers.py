@@ -118,6 +118,9 @@ def validate_request_tween_factory(handler, registry):
             if request.content_type == 'application/x-www-form-urlencoded' and request.path[0:10] == '/metadata/':
                 # Special case to allow us to POST to metadata TSV requests via form submission
                 return handler(request)
+            elif request.content_type == 'application/xml' and request.path[:17] == '/process-pedigree':
+                # Special case to allow us to POST to metadata TSV requests via form submission
+                return handler(request)
             detail = "Request content type %s is not 'application/json'" % request.content_type
             raise HTTPUnsupportedMediaType(detail)
 
