@@ -4992,7 +4992,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -5393,7 +5400,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -5801,7 +5815,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -6252,7 +6273,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
