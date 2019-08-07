@@ -660,7 +660,15 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "report"
+                "workflow_argument_name": "report",
+                "argument_to_be_attached_to": "pairs",
+                "qc_zipped": true,
+                "qc_html": true,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_html": "pairsqc_report.html",
+                "qc_zipped_tables": ["summary.out"],
+                "qc_type": "quality_metric_pairsqc"
             }
         ],
         "award": "1U01CA200059-01",
@@ -801,6 +809,17 @@
             {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "report"
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "report",
+                "argument_to_be_attached_to": "pairs",
+                "qc_zipped": true,
+                "qc_html": true,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_html": "pairsqc_report.html",
+                "qc_zipped_tables": ["summary.out"],
+                "qc_type": "quality_metric_pairsqc"
             }
         ],
         "award": "1U01CA200059-01",
