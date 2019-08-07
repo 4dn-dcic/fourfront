@@ -307,7 +307,6 @@ export class GroupByDropdown extends React.PureComponent {
     static defaultProps = {
         'title' : "Group By",
         'buttonStyle' : {
-            'minWidth' : 120,
             'marginLeft' : 12,
             'textAlign' : 'left'
         },
