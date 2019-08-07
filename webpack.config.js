@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const env = process.env.NODE_ENV;
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const fs = require('fs');
 
 const PATHS = {
     "static": path.resolve(__dirname, 'src/encoded/static'),
@@ -36,8 +37,24 @@ if (mode === 'production') {
     devTool = 'inline-source-map';
 }
 
+let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
 
-var rules = [
+if (mode === "development"){
+    let isLinked = false;
+    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
+        for (var i = 0; i < 10; i++) { // Incase multiple links.
+            sharedComponentPath = fs.readlinkSync(sharedComponentPath);
+            isLinked = true;
+        }
+    } catch (e){ /* .. */ }
+
+    console.log(
+        "`@hms-dbmi-bgm/shared-portal-components` directory is",
+        isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
+    );
+}
+
+const rules = [
     // Strip @jsx pragma in react-forms, which makes babel abort
     {
         test: /\.js$/,
@@ -53,8 +70,7 @@ var rules = [
         test: /\.(js|jsx)$/,
         include: [
             path.resolve(__dirname, 'src/encoded/static'),
-            path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components'),
-            path.resolve(__dirname, '../ext-projects/shared-portal-components')
+            sharedComponentPath
         ],
         use: [
             {
@@ -64,11 +80,16 @@ var rules = [
     }
 ];
 
-var resolve = {
-    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx']
+const resolve = {
+    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx'],
+    //symlinks: false,
+    //modules: [
+    //    path.resolve(__dirname, '..', 'node_modules'),
+    //    'node_modules'
+    //]
 };
 
-var optimization = {
+const optimization = {
     minimize: mode === "production",
     minimizer: [
         //new UglifyJsPlugin({
@@ -135,9 +156,16 @@ module.exports = [
         output: {
             path: PATHS.build,
             publicPath: '/static/build/',
-            filename: '[name].js',          // TODO: Eventually we can change this to be chunkFilename as well, however this can only occur after we refactor React to only render <body> element and then we can use
-                                            // this library, https://www.npmjs.com/package/chunkhash-replace-webpack-plugin, to replace the <script> tag's src attribute.
-                                            // For now, to prevent caching JS, we append a timestamp to JS request.
+            /**
+             * @todo
+             * Eventually we can change this to be chunkFilename as well, however this can only occur
+             * after we refactor React to only render <body> element and then we can use
+             * https://www.npmjs.com/package/chunkhash-replace-webpack-plugin, to replace the <script>
+             * tag's src attribute. Alternatively could use an `inline.js`, to be included in serverside
+             * html render, as entrypoint instd of `browser.js`.
+             * For now, to prevent caching JS, we append a timestamp to JS request.
+             */
+            filename: '[name].js',
             chunkFilename: chunkFilename,
 
             libraryTarget: "umd",
@@ -159,7 +187,7 @@ module.exports = [
         },
         optimization: optimization,
         resolve : resolve,
-        resolveLoader : resolve,
+        //resolveLoader : resolve,
         devtool: devTool,
         plugins: webPlugins
     },
@@ -201,7 +229,7 @@ module.exports = [
         },
         optimization: optimization,
         resolve : resolve,
-        resolveLoader : resolve,
+        //resolveLoader : resolve,
         devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
         plugins: serverPlugins
     }

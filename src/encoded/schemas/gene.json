@@ -1,0 +1,99 @@
+{
+    "title": "Gene",
+    "description": "Schema for submitting a gene (adapted from ENCODE).",
+    "id": "/profiles/gene.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["gene_id", "lab", "award"],
+    "identifyingProperties": ["uuid", "gene_id", "preferred_symbol"],
+    "additionalProperties": false,
+    "mixinProperties": [
+      { "$ref": "mixins.json#/schema_version" },
+      { "$ref": "mixins.json#/uuid" },
+      { "$ref": "mixins.json#/aliases" },
+      { "$ref": "mixins.json#/submitted" },
+      { "$ref": "mixins.json#/modified" },
+      { "$ref": "mixins.json#/status" },
+      { "$ref": "mixins.json#/attribution" },
+      { "$ref": "mixins.json#/notes" },
+      { "$ref": "mixins.json#/dbxrefs" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "gene_id": {
+            "title": "GeneID",
+            "description": "GeneID from reference datasource eg. HGNC",
+            "type": "string",
+            "uniqueKey": true
+        },
+        "entrez_gene_id": {
+          "title": "NCBI Entrez Gene ID",
+          "type": "string",
+          "uniqueKey": true,
+          "pattern": "^[1-9][0-9]{,8}$"
+        },
+        "official_symbol": {
+            "title": "Gene symbol",
+            "description": "Gene symbol approved by the official nomenclature.",
+            "type": "string",
+            "permission": "import_items"
+        },
+        "preferred_symbol": {
+            "title": "Common symbol",
+            "description": "Preferred gene symbol commonly used by the community.",
+            "type": "string"
+        },
+        "fullname": {
+            "title": "Gene name",
+            "description": "The full gene name preferably approved by the official nomenclature.",
+            "type": "string",
+            "permission": "import_items"
+        },
+        "synonyms": {
+            "title": "Synonyms",
+            "description": "Alternative symbols and names that have been used to refer to the gene.",
+            "comment": "The list of synonyms is maintained using information from NCBI Entrez. Synonyms not included in NCBI gene_info can be added but are not actively maintained.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Synonym",
+                "description": "An alternative symbol/name referring to the gene.",
+                "type":  "string"
+            }
+        },
+        "organism": {
+            "title": "Organism",
+            "description": "Organism of the gene.",
+            "comment": "See organism.json for available identifiers.",
+            "type": "string",
+            "linkTo": "Organism",
+            "permission": "import_items"
+        },
+        "genomic_location":  {
+            "title": "Genomic Location",
+            "description": "Location of the gene on it's genome",
+            "type": "string",
+            "linkTo": "GenomicRegion"
+        },
+        "url": {
+            "title": "Link to Gene",
+            "description": "Link to the gene record in its source database",
+            "type": "string",
+            "format": "uri",
+            "permission": "import_items"
+        }
+    },
+    "columns": {
+        "fullname": {
+            "title": "Gene name"
+        },
+        "gene_id": {
+            "title": "NCBI Entrez GeneID"
+        },
+        "url": {
+            "title": "NCBI link"
+        }
+    }
+}
