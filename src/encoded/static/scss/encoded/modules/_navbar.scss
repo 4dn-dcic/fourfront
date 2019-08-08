@@ -81,13 +81,18 @@ $navbar-separator-color : scale-color($navbar-link-color, $alpha: -80%) !default
 }
 
 
-@include navbar-fixed-position {
-    /** Parent DIV of div#top-nav.navbar-fixed-top **/
-    div.navbar-container.scrolled-at-top {
+
+/** Parent DIV of div#top-nav.navbar-fixed-top **/
+div.navbar-container {
+    position: relative;
+    z-index: 200;
+    padding-bottom: 0px;
+
+    @include navbar-fixed-position {
         transition: padding-bottom .5s ease-out;
-    }
-    div.navbar-container.test-warning-visible {
-        padding-bottom: 52px;
+        body.test-warning-visible & {
+            padding-bottom: 52px;
+        }
     }
 }
 
@@ -669,6 +674,7 @@ div#top-nav.navbar-fixed-top {
 }
 
 
+
 /** Shown above navbar sometimes **/
 .test-warning {
     position: relative;
@@ -680,11 +686,11 @@ div#top-nav.navbar-fixed-top {
     transition: margin-top $navbar-transition-length $navbar-transition-easing;
     transform: translate3d(0,0,0);
 
-    body.scrolled-past-80 & {
+    body.scrolled-past-top & {
         margin-top: -52px;
     }
 
-    > .container > div.row{
+    > .container > div.row {
          > div.text-container {
     
             position: relative;
@@ -777,8 +783,8 @@ div#top-nav.navbar-fixed-top {
         transform: translate3d(0px,0px,0px);
         transition: opacity .2s linear, z-index 0s .25s, top $navbar-transition-length $navbar-transition-easing;
 
-        &.test-warning-visible {
-            top: 132px;
+        body.test-warning-visible & {
+            top: $navbar-full-height + 52px;
         }
 
         body.scrolled-past-top &,

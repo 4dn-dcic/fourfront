@@ -43,6 +43,7 @@
         },
         "disorders" : {
             "title" : "Disorders",
+
             "type" : "array",
             "uniqueItems": true,
             "items" : {

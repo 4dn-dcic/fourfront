@@ -27,36 +27,10 @@ const { NavigateOpts } = typedefs;
 
 
 /**
- * Top bar navigation & link schema definition.
- *
- * @private
- * @constant
- * @type {Object}
+ * Title of app, used as appendix in browser <head> <title> and similar.
  */
-const portal = {
-    "portal_title": 'Clinical Genomic Analysis Platform',
-    "global_sections": [ // DEPRECATED ?
-        {
-            'id': 'browse-menu-item', 'sid':'sBrowse', 'title': 'Browse',
-            'url' : function(hrefParts){
-                return navigate.getBrowseBaseHref();
-            },
-            'active' : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
-        },
-        {
-            'id': 'help-menu-item', 'sid':'sHelp', 'title': 'Help',
-            'children': [
-                { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
-                { id: 'getting-started-menu-item',  title: 'Data Submission - Getting Started', url: '/help/getting-started' },
-                { id: 'cell-culture-menu-item',     title: 'Biosample Metadata',                url: '/help/biosample' },
-                { id: 'web-submission-menu-item',   title: 'Online Submission',                 url: '/help/web-submission' },
-                { id: 'spreadsheet-menu-item',      title: 'Spreadsheet Submission',            url: '/help/spreadsheet' },
-                { id: 'rest-api-menu-item',         title: 'REST API',                          url: '/help/rest-api' },
-                { id: 'about-menu-item',            title: 'About',                             url: '/about' }
-            ]
-        }
-    ]
-};
+const PORTAL_TITLE = "Clinical Genomic Analysis Platform";
+
 
 const getGoogleAnalyticsTrackingID = memoize(function(href){
     const { host } = url.parse(href);
@@ -1250,7 +1224,7 @@ class HTMLTitle extends React.PureComponent {
             title;
 
         if (canonical === "about:blank"){   // first case is fallback
-            title = portal.portal_title;
+            title = PORTAL_TITLE;
         } else if (status) {                // error catching
             title = 'Error';
         } else if (context) {               // What should occur (success)
@@ -1261,9 +1235,9 @@ class HTMLTitle extends React.PureComponent {
             title = object.itemUtil.getTitleStringFromContext(context);
 
             if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
+                title = title + ' – ' + PORTAL_TITLE;
             } else {
-                title = portal.portal_title;
+                title = PORTAL_TITLE;
             }
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
@@ -1299,7 +1273,8 @@ class ContentRenderer extends React.PureComponent {
             'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
             // Props from BodyElement:
             'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
-            'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen'
+            'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen',
+            'overlaysContainer', 'innerOverlaysContainer'
         );
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1370,6 +1345,7 @@ class BodyElement extends React.PureComponent {
      */
     constructor(props){
         super(props);
+        this.hideTestWarning = this.hideTestWarning.bind(this);
         this.onResize = _.debounce(this.onResize.bind(this), 300);
         this.setupScrollHandler = this.setupScrollHandler.bind(this);
 
@@ -1402,7 +1378,9 @@ class BodyElement extends React.PureComponent {
             // Because componentWillReceiveProps is deprecated in favor of (static) getDerivedStateFromProps,
             // we ironically must now clone href in state to be able to do comparisons...
             // See: https://stackoverflow.com/questions/49723019/compare-with-previous-props-in-getderivedstatefromprops
-            'lastHref'              : props.href
+            'lastHref'              : props.href,
+            // Whether Test Data warning banner is visible.
+            'testWarningPresent'    : false, //!globals.productionHost[props.hrefParts.hostname] || false
         };
 
         /**
@@ -1431,6 +1409,9 @@ class BodyElement extends React.PureComponent {
          * Modal Components.
          */
         this.overlaysContainerRef = React.createRef();
+
+        /** Similar to above, but keeping navbar & footer visible if needed */
+        this.innerOverlaysContainerRef = React.createRef();
     }
 
     /**
@@ -1482,6 +1463,26 @@ class BodyElement extends React.PureComponent {
                 window.fourfront.app.historyEnabled = false;
             }
         });
+    }
+
+    /**
+     * Sets `state.testWarningPresent` to be false and scrolls the window if sticky header is visible (SearchView)
+     * so that sticky header gets its dimension(s) updated.
+     *
+     * @param {React.SyntheticEvent} [e] An event, if any. Unused.
+     * @returns {void}
+     */
+    hideTestWarning(e) {
+        // Remove the warning banner because the user clicked the close icon
+        this.setState({ 'testWarningPresent': false });
+
+        // If collection with .sticky-header on page, jiggle scroll position
+        // to force the sticky header to jump to the top of the page.
+        const hdrs = document.getElementsByClassName('sticky-header');
+        if (hdrs.length) {
+            window.scrollBy(0,-1);
+            window.scrollBy(0,1);
+        }
     }
 
     /**
@@ -1693,8 +1694,7 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className="done error">
                         <div id="layout">
-                            <div id="pre-content-placeholder"/>
-                            { ContentErrorBoundary.errorNotice() }
+                            <ErrorNotice />
                             <div id="layout-footer"/>
                         </div>
                     </div>
@@ -1705,19 +1705,36 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, isLoading, slowLoad } = this.props;
-        const { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, isLoading, slowLoad, mounted } = this.props;
+        const { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen, testWarningPresent } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
         const bodyClassList = (classList && classList.slice(0)) || [];
         const overlaysContainer = this.overlaysContainerRef.current;
+        const innerOverlaysContainer = this.innerOverlaysContainerRef.current;
 
         if (hasError) return this.renderErrorState();
 
         if (isLoading)          bodyClassList.push('loading-request');
         if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
         if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
-        if (isFullscreen)       bodyClassList.push('is-full-screen');
+        if (isFullscreen){
+            bodyClassList.push("is-full-screen");
+        } else if (testWarningPresent) {
+            bodyClassList.push("test-warning-visible");
+        }
+
+        let innerContainerMinHeight;
+        if (mounted && windowHeight){
+            const rgs = layout.responsiveGridState(windowWidth);
+            if ({ 'xl' : 1, 'lg' : 1, 'md' : 1 }[rgs]){
+                innerContainerMinHeight = (
+                    // Hardcoded:
+                    // - minus top nav full height, footer, [testWarning]
+                    windowHeight - ((testWarningPresent && 52) || 0)
+                );
+            }
+        }
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
@@ -1739,21 +1756,25 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
+
+                            <NavigationBar {...{ windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer, testWarningPresent }}
+                                hideTestWarning={this.hideTestWarning}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo')} />
+                                    'context', 'updateUserInfo')}/>
 
-                            <div id="pre-content-placeholder"/>
+                            <div id="post-navbar-container" style={{ minHeight : innerContainerMinHeight }}>
 
-                            <PageTitleSection {...this.props} windowWidth={windowWidth} />
+                                <PageTitleSection {...this.props} windowWidth={windowWidth} />
 
-                            <ContentErrorBoundary canonical={canonical}>
-                                <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
-                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
-                                    overlaysContainer } } />
-                            </ContentErrorBoundary>
+                                <ContentErrorBoundary canonical={canonical}>
+                                    <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                        registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
+                                        overlaysContainer, innerOverlaysContainer } } />
+                                </ContentErrorBoundary>
 
-                            <div id="layout-footer"/>
+                                <div id="inner-overlays-container" ref={this.innerOverlaysContainerRef} />
+
+                            </div>
                         </div>
                         <Footer version={context.app_version} />
                     </div>
@@ -1772,21 +1793,19 @@ class BodyElement extends React.PureComponent {
 
 
 
-
+function ErrorNotice(props){
+    return (
+        <div className="error-boundary container" id="content">
+            <hr/>
+            <div className="mb-2 mt-2">
+                <h3 className="text-400">A client-side error has occured, please go back or try again later.</h3>
+            </div>
+        </div>
+    );
+}
 
 
 class ContentErrorBoundary extends React.Component {
-
-    static errorNotice(){
-        return (
-            <div className="error-boundary container" id="content">
-                <hr/>
-                <div className="mb-2 mt-2">
-                    <h3 className="text-400">A client-side error has occured, please go back or try again later.</h3>
-                </div>
-            </div>
-        );
-    }
 
     constructor(props){
         super(props);
@@ -1824,7 +1843,7 @@ class ContentErrorBoundary extends React.Component {
     render(){
         const { children } = this.props, { hasError } = this.state;
         if (hasError){
-            return ContentErrorBoundary.errorNotice();
+            return <ErrorNotice />;
         }
         return children;
     }
