@@ -24,7 +24,6 @@ from pyramid.traversal import (
     split_path_info,
     _join_path_tuple,
 )
-
 from snovault.validation import CSRFTokenError
 from subprocess_middleware.tween import SubprocessTween
 from subprocess_middleware.worker import TransformWorker
@@ -115,11 +114,11 @@ def validate_request_tween_factory(handler, registry):
             return handler(request)
 
         elif request.content_type != 'application/json':
-            if request.content_type == 'application/x-www-form-urlencoded' and request.path[0:10] == '/metadata/':
-                # Special case to allow us to POST to metadata TSV requests via form submission
-                return handler(request)
+            if request.content_type == 'application/x-www-form-urlencoded':
+                # Special case to allow us to POST to certain endpoints via form submission
+                if request.path[0:10] == '/metadata/' or request.path[:17] == '/process-pedigree':
+                    return handler(request)
             elif request.content_type == 'application/xml' and request.path[:17] == '/process-pedigree':
-                # Special case to allow us to POST to metadata TSV requests via form submission
                 return handler(request)
             detail = "Request content type %s is not 'application/json'" % request.content_type
             raise HTTPUnsupportedMediaType(detail)
@@ -140,7 +139,6 @@ def security_tween_factory(handler, registry):
         indexed in ES) and all DB transactions must complete before transaction
         management tween is completed.
         """
-
         expected_user = request.headers.get('X-If-Match-User')
         if expected_user is not None: # Not sure when this is the case
             if request.authenticated_userid != 'mailto.' + expected_user:
