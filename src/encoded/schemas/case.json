@@ -54,6 +54,15 @@
                         "description": "The original pedigree file used for this family",
                         "type" : "string",
                         "linkTo": "Document"
+                    },
+                    "timestamp": {
+                        "title": "Pedigree Timestamp",
+                        "description": "Date of original pedigree file generation",
+                        "type": "string",
+                        "anyOf": [
+                            {"format": "date-time"},
+                            {"format": "date"}
+                        ]
                     }
                 }
             }
