@@ -86,69 +86,6 @@ class Individual(Item):
 
 
 @collection(
-    name='cases',
-    unique_key='accession',
-    properties={
-        'title': 'Cases',
-        'description': 'Listing of Cases',
-    })
-class Case(Item):
-    item_type = 'case'
-    name_key = 'accession'
-    schema = load_schema('encoded:schemas/case.json')
-    embedded_list = [
-    ]
-
-    # @calculated_property(schema={
-    #     "title" : "Family Trio",
-    #     "type" : "array",
-    #     "items" : {
-    #         "type" : "object",
-    #         "title" : "Trio Relationship",
-    #         "properties" : {
-    #             "individual": {
-    #                 "title": "Individual",
-    #                 "type": "string",
-    #                 "linkTo": "Individual"
-    #             },
-    #             "relationship_type": {
-    #                 "title": "Relationship Type",
-    #                 "type": "string"
-    #             }
-    #         }
-    #     }
-    # })
-    # def trio(self, request, proband=None):
-    #     if not proband:
-    #         return []
-    #     individual_list = [{ "individual" : proband, "relationship_type" : "self" }]
-    #     proband_object = get_item_if_you_can(request, proband, "Individual")
-    #     for relation in proband_object.get("related_individuals", []):
-    #         if relation["relationship_type"] in ["mother", "father", "parent"]:
-    #             relationship_type = relation["relationship_type"]
-    #             if relationship_type == "parent": # no gender defined
-    #                 related_individual_object = get_item_if_you_can(request, relation['related_individual'], "Individual")
-    #                 related_individual_gender = related_individual_object.get("gender")
-    #                 if related_individual_gender == "male":
-    #                     relationship_type = "father"
-    #                 elif related_individual_gender == "female":
-    #                     relationship_type = "mother"
-    #             individual_list.append({
-    #                 "individual" : relation['related_individual'],
-    #                 "relationship_type" : relationship_type
-    #             })
-    #     return individual_list
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, title):
-        return title
-
-
-@collection(
     name='samples',
     unique_key='accession',
     properties={
@@ -239,8 +176,8 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
-
     embedded_list = []
+    mimetype_map = {'application/proband+xml': ['text/plain']}
 
     @calculated_property(schema={
         "title": "Display Title",
