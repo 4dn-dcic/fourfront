@@ -265,6 +265,23 @@
             }
         }
     },
+    "dbxrefs": {
+        "dbxrefs": {
+            "@type": "@id",
+            "rdfs:subPropertyOf": "rdfs:seeAlso",
+            "title": "External identifiers",
+            "comment": "Enter as a database name:identifier eg. HGNC:PARK2",
+            "description": "Unique identifiers from external resources.",
+            "type": "array",
+            "ff_flag": "clear clone",
+            "uniqueItems": true,
+            "items": {
+                "title": "External identifier",
+                "description": "A unique identifier from external resource.",
+                "type":  "string"
+            }
+        }
+    },
     "tags": {
         "tags": {
             "title": "Tags",

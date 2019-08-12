@@ -4,6 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
+import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { PedigreeJSLibContainer } from './../../libs/pedigreejs';
 
 
 export default class IndividualView extends DefaultItemView {
@@ -16,14 +18,18 @@ export default class IndividualView extends DefaultItemView {
 
 }
 
-export const PedigreeTabView = React.memo(function PedigreeTabView({ context, schemas }){
+
+export const PedigreeTabView = React.memo(function PedigreeTabView({ context, schemas, windowWidth, windowHeight }){
+    const width = layout.gridContainerWidth(windowWidth);
+    const height = Math.max(Math.floor(windowHeight / 2), 600);
     return (
         <div>
-            <h4>TODO</h4>
+            <PedigreeJSLibContainer width={width} height={height} />
         </div>
     );
 });
-PedigreeTabView.getTabObject = function({ context, schemas }){
+
+PedigreeTabView.getTabObject = function(props){
     return {
         'tab' : <span><i className="icon icon-sitemap fas icon-fw"/> Pedigree</span>,
         'key' : 'document-info',
@@ -34,7 +40,7 @@ PedigreeTabView.getTabObject = function({ context, schemas }){
                     <span>Pedigree</span>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                <PedigreeTabView context={context} schemas={schemas} />
+                <PedigreeTabView {...props} />
             </div>
         )
     };

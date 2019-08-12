@@ -40,14 +40,15 @@
                 "linkTo": "Phenotype"
             }
         },
-        "diseases" : {
-            "title" : "Diseases",
+        "disorders" : {
+            "title" : "Disorders",
+
             "type" : "array",
             "uniqueItems": true,
             "items" : {
-                "title" : "Disease",
+                "title" : "Disorder",
                 "type" : "string",
-                "linkTo" : "Disease"
+                "linkTo" : "Disorder"
             }
         },
         "birth_year" : {

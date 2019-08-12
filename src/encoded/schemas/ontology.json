@@ -40,6 +40,19 @@
             "type": "string",
             "format": "uri"
         },
+        "current_ontology_version": {
+            "title": "Current ontology version",
+            "type": "string"
+        },
+        "ontology_versions": {
+            "title": "Version History",
+            "description": "List of all deployed versions of ontology",
+            "type": "array",
+            "items": {
+                "title": "Version",
+                "type": "string"
+            }
+        },
         "namespace_url": {
             "title": "Namespace URL",
             "description": "The base URL to which a term identifier can be added to construct a url to a term.",

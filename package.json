@@ -99,7 +99,7 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.8",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.9",
     "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",
@@ -108,6 +108,7 @@
     "form-serialize": "^0.6.0",
     "higlass": "^1.5.7",
     "html-react-parser": "^0.4.7",
+    "jquery": "^3.4.1",
     "markdown-to-jsx": "^6.9.3",
     "memoize-one": "^5.0.1",
     "moment": "^2.24.0",

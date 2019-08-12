@@ -101,14 +101,14 @@ class Sample(Item):
 
 
 @collection(
-    name='diseases',
+    name='disorderss',
     properties={
-        'title': 'Diseases',
-        'description': 'Listing of Diseases',
+        'title': 'Disorders',
+        'description': 'Listing of Disorders',
     })
-class Disease(Item):
-    item_type = 'disease'
-    schema = load_schema('encoded:schemas/disease.json')
+class Disorder(Item):
+    item_type = 'disorder'
+    schema = load_schema('encoded:schemas/disorder.json')
     embedded_list = [
         'associated_phenotypes.term_name',
         'associated_phenotypes.term_id',
@@ -120,8 +120,34 @@ class Disease(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, term_name):
-        return term_name
+    def display_title(self, disorder_name):
+        return disorder_name
+
+
+@collection(
+    name='genes',
+    unique_key='gene:gene_id',
+    lookup_key='preferred_symbol',
+    properties={
+        'title': 'Genes',
+        'description': 'Gene items',
+    })
+class Gene(Item):
+    """Gene class."""
+    item_type = 'gene'
+    name_key = 'gene_id'
+    schema = load_schema('encoded:schemas/gene.json')
+    embedded_list = []
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, gene_id, preferred_symbol=None):
+        if preferred_symbol:
+            return preferred_symbol
+        return 'GENE ID:{}'.format(gene_id)
 
 
 @collection(
@@ -134,27 +160,27 @@ class Phenotype(Item):
     item_type = 'phenotype'
     schema = load_schema('encoded:schemas/phenotype.json')
     rev = {
-        'associated_diseases': ('Disease', 'associated_phenotypes')
+        'associated_disorders': ('Disorder', 'associated_phenotypes')
     }
     embedded_list = [
-        'associated_diseases.term_name',
-        'associated_diseases.term_id',
-        'associated_diseases.associated_genes'
+        'associated_disorders.term_name',
+        'associated_disorders.term_id',
+        'associated_disorders.associated_genes'
     ]
 
     @calculated_property(schema={
-        "title": "Associated Diseases",
-        "description": "Diseases associated with this phenotype",
+        "title": "Associated Disorders",
+        "description": "Disorders associated with this phenotype",
         "type": "array",
         "exclude_from": ["submit4dn", "FFedit-create"],
         "items": {
-            "title": "Disease",
+            "title": "Disorder",
             "type": "string",
-            "linkTo": "Disease"
+            "linkTo": "Disorder"
         }
     })
-    def associated_diseases(self, request):
-        return self.rev_link_atids(request, "associated_diseases")
+    def associated_disorders(self, request):
+        return self.rev_link_atids(request, "associated_disorders")
 
     @calculated_property(schema={
         "title": "Display Title",

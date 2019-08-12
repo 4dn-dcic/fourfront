@@ -1,0 +1,374 @@
+$pedigree-viz-bg-color: #f8f8f8 !default;
+$pedigree-viz-node-stroke-color: #444 !default;
+
+
+$pedigree-disease-colors :
+    #f15854,
+    #4d90c1,
+    #faa43a,
+    #e4db06,
+    #b2912f,
+    #4d4d4d,
+    #60bd68,
+    #b276b2;
+
+
+@mixin color-cycle-fill {
+    $pedigree-colors-length: length($pedigree-disease-colors);
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{$i}"] {
+            fill: $color;
+        }
+    }
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{$pedigree-colors-length + $i}"] {
+            fill: darken($color, 10%);
+        }
+    }
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{2 * $pedigree-colors-length + $i}"] {
+            fill: lighten($color, 10%);
+        }
+    }
+}
+
+
+
+
+.pedigree-viz-container {
+    transform: translate3d(0,0,0);
+    background: $pedigree-viz-bg-color;
+    overflow: auto;
+
+    > .viz-area {
+
+        > .individuals-layer {
+            position: relative;
+            > .pedigree-individual {
+                position: absolute;
+                text-align: center;
+                cursor: pointer;
+                z-index: 100;
+                overflow: visible;
+                //transition: overflow 0s .2s;
+                .btns-container {
+                    position: absolute;
+                    right: -15px;
+                    bottom: -19px;
+                    opacity: 0;
+                    z-index: -100;
+                    transition: z-index .0s .2s, opacity .2s, right .2s, bottom .2s;
+                    > button {
+                        display: block;
+                        border: 1px solid transparent;
+                        color: #fff;
+                        margin-bottom: 5px;
+                        border-radius: 50%;
+                        width: 0px;
+                        height: 0px;
+                        text-align: center;
+                        padding: 0;
+                        background: $brand-primary;
+                        font-size: 0.9rem;
+                        transition: width 0s .2s, height 0s .2s;
+                    }
+                }
+
+                .detail-text {
+                    position: absolute;
+                    border: 1px solid transparent;
+                    //left: 100%;
+                    //top: 100%;
+                    padding: 0px 6px;
+                    transition: padding-top .2s;
+                    .line-item {
+                        width: 100%;
+                        display: block;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+                }
+
+                &.is-hovered-over,
+                &.is-selected {
+                    //overflow: visible;
+                    //transition: overflow 0s;
+                    .btns-container {
+                        opacity: 1;
+                        z-index: 1;
+                        right: -15px;
+                        transition: z-index 0s, opacity .2s, right .2s, bottom .2s;
+                        > button {
+                            width: 30px;
+                            height: 30px;
+                            transition: width 0s 0s, height 0s 0s;
+                        }
+                    }
+                    .detail-text {
+                        max-width: none !important;
+                        background-color: $pedigree-viz-bg-color;
+                    }
+                    &.is-editable {
+                        .detail-text {
+                            padding-top: 12px;
+                        }
+                    }
+                }
+
+                &.is-hovered-over:not(.is-selected) {
+                    .btns-container {
+                        right: -18px;
+                        bottom: -21px;
+                        > button {
+                            
+                        }
+                    }
+                    &.is-editable {
+                        .detail-text {
+                            padding-top: 18px;
+                        }
+                    }
+                }
+            }
+        }
+        > .relationships-layer {
+            .pedigree-relationship {
+                position: absolute;
+                border: 2px solid transparent;
+                border-radius: 50%;
+                background-color: #521f1fad;
+                background: transparent;
+                padding: 9px;
+                transition: padding .2s;
+                cursor: pointer;
+                &:after {
+                    content: '';
+                    position: relative;
+                    width: 18px;
+                    height: 18px;
+                    background-color: #521f1fad;
+                    border: 2px solid #521f1f;
+                    border-radius: 50%;
+                    display: block;
+                    transition: width .2s, height .2s;
+                }
+
+                &.is-hovered-over:not(.is-selected) {
+                    padding: 6px;
+                    &:after {
+                        width: 24px;
+                        height: 24px;
+                    }
+                }
+            }
+        }
+
+        > .shapes-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            > .individuals-bg-shape-layer {
+
+                > g.pedigree-individual-shape {
+                    // Shapes will inherit group styles unless overriding
+                    stroke-width: 3px;
+                    stroke: $pedigree-viz-node-stroke-color;
+                    transition: transform .2s;
+
+                    .bg-shape-copy {
+                        stroke-width: 0px;
+                        fill: $pedigree-viz-bg-color;
+                    }
+
+                    .fg-shape {
+                        stroke-width: 3px;
+                        fill: transparent;
+                        transition: stroke-width .2s;
+                    }
+
+                    text {
+                        stroke-width: 0px;
+                        fill: $pedigree-viz-node-stroke-color;
+                        &.proband-identifier {
+                            font-weight: 700;
+                        }
+                    }
+
+                    circle.circle-disease-dot,
+                    rect.rect-disease-partition {
+                        stroke-width: 1;
+                        @include color-cycle-fill;
+                    }
+
+                    &.is-hovered-over,
+                    &.is-selected {
+                        .fg-shape {
+                            stroke-width: 4px;
+                            stroke: darken($pedigree-viz-node-stroke-color, 20%);
+                        }
+                    }
+
+                    &.is-affected {
+                        fill: transparent; // Colors of disease-arcs behind it will show through.
+                        path.disease-arc {
+                            stroke-width: 1;
+                            @include color-cycle-fill;
+                        }
+                    }
+                }
+
+            }
+
+            > .individuals-edge-shape-layer {
+                path.edge-path {
+                    stroke: $pedigree-viz-node-stroke-color;
+                    fill: none;
+                    stroke-width: 2;
+                    &.is-adjustable {
+                        stroke: #7d0000;
+                        //stroke: orange;
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+/** Default Detail Pane Styling **/
+/** This is specific to CGAP portal and will likely change per use case **/
+/** Should be put into dif stylesheet than above **/
+
+@mixin partner-links {
+    > span.partner-link {
+        &:not(:last-child):after {
+            content: ", ";
+        }
+        > a {
+            color: $body-color;
+        }
+    }
+    &[data-partner-count="2"]{
+        > span.partner-link {
+            &:not(:last-child):after {
+                content: " & ";
+                font-size: 75%;
+            }
+        }
+    }
+}
+
+#pedigree-detail-pane-container {
+
+    > .overlay-bg {
+        display: none;
+        @include media-breakpoint-up(md){
+            display: block;
+            position: fixed;
+            z-index: 100;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            pointer-events: none;
+            transition: background-color .4s ease-out;
+            transform: translate3d(0,0,0);
+        }
+    }
+
+    > .detail-pane-outer {
+        position: relative;
+        width: 100%;
+
+        @include media-breakpoint-up(md){
+            
+            position: fixed;
+            z-index: 100;
+            top: 0;
+            bottom: 0;
+            right: -33%; //0;
+            width: 33%;
+            opacity: 0;
+            overflow-y: auto;
+            transform: translate3d(0,0,0);
+            //border-left: 1px solid #333;
+            box-shadow: 0 0 4px -1px #000;
+
+            /** Very portal-specific **/
+            transition:
+                padding-top $navbar-transition-length $navbar-transition-easing,
+                right .4s ease-out,
+                opacity .3s ease-out;
+            padding-top: 81px; // Offset re: fixed navbar
+            padding-bottom: 50px;
+            body.test-warning-visible & {
+                padding-top: 133px;
+            }
+            body.scrolled-past-top & {
+                padding-top: 41px;
+            }
+        }
+
+        background-color: #fff;
+
+        > .detail-pane-inner {
+
+            > .title-box {
+                padding: 12px 18px;
+                border-bottom: 1px solid #ccc;
+                box-shadow: inset 0 -2px 5px -5px #000;
+                > label {
+                    font-weight: 400;
+                    margin-bottom: 1px;
+                    color: #777;
+                }
+                > h3 {
+                    font-weight: 300;
+                    margin: 0;
+                    white-space: nowrap;
+                    overflow-x: hidden;
+                    text-overflow: ellipsis;
+                    @include partner-links;
+                }
+            }
+            > .details {
+            > .detail-row {
+                    padding: 12px 18px;
+
+                    label {
+                        font-weight: 400;
+                        margin-bottom: 1px;
+                    }
+
+                    &[data-describing="parents"],
+                    &[data-describing="children"] {
+                        .partners-links {
+                            @include partner-links;
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    /** Transition in/out **/
+    @include media-breakpoint-up(md){
+        &.pedigree-detail-pane-transition-enter-done {
+            > .overlay-bg {
+                background-color: #0003;
+            }
+            > .detail-pane-outer {
+                right: 0%;
+                opacity: 1;
+            }
+        }
+    }
+}
