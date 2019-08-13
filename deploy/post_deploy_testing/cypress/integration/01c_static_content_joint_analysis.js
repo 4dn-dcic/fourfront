@@ -10,21 +10,48 @@ describe('Joint Analysis Page', function () {
 
     context("Expandable Matrix Section", function(){
 
-        const yAxisTerms = ['DNA Binding', 'Open Chromatin', 'Organelle-seq', 'Repli-seq'];
+        const yAxisTerms = ['DNA Binding', 'Open Chromatin', 'DNA FISH', 'Proximity-seq'];
         const xAxisTerms = ['H1-hESC', 'H1-DE', 'HFFc6'];
 
-
         it('Have at least one of each term - ' + yAxisTerms.join(', ') + ' + ' + xAxisTerms.join(', '), function(){
+            const seenY = new Set();
+            const seenX = new Set();
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+                cy
+                    .get(".header-for-viz .column-group-header > .inner").each(function($el, idx){
+                        const colHeaderText = $el.text().toLowerCase();
+                        xAxisTerms.forEach(function(xTerm){
+                            if (seenX.has(xTerm)) return;
+                            if (colHeaderText.indexOf(xTerm.toLowerCase()) > -1){
+                                seenX.add(xTerm);
+                            }
+                        });
+                    }).end()
+                    .get(".row.grouping-row > .label-section > .label-container > h4").each(function($el, idx){
+                        const rowLabelText = $el.text().toLowerCase();
+                        yAxisTerms.forEach(function(yTerm){
+                            if (seenY.has(yTerm)) return;
+                            if (rowLabelText.indexOf(yTerm.toLowerCase()) > -1){
+                                seenY.add(yTerm);
+                            }
+                        });
+                    }).end()
+                    .then(function(){
+                        expect(seenX.size).to.equal(xAxisTerms.length);
+                        expect(seenY.size).to.equal(yAxisTerms.length);
+                    });
+                /* Deprecated because labels might slightly change and below tests exactness.
                 Cypress._.forEach(yAxisTerms, function(term){
                     cy.contains(term);
                 });
                 Cypress._.forEach(xAxisTerms, function(term){
                     cy.contains(term);
                 });
+                */
             });
         });
 
+        /*
         it('X-Axis headers are in proper order', function(){
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 cy.get('.header-for-viz .column-group-header').should('have.length.greaterThan', 1).then(($headers)=>{
@@ -34,6 +61,7 @@ describe('Joint Analysis Page', function () {
                 });
             });
         });
+        */
 
         it('Have at least 16 sets depicted in tiles (logged out)', function(){
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{

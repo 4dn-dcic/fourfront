@@ -1901,6 +1901,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
 
     min-height: 1400px;
 
+    .dropdown-container {
+        display: flex;
+        align-items: center;
+    }
+
     .area-chart-inner-container {
         position: relative;
 
