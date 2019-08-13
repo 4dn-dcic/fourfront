@@ -469,17 +469,11 @@ def verify_and_update_ontology(terms, ontologies, dbterms):
             if prefix in ont_prefi:
                 if prefix != ont_lookup[term['source_ontology']]:
                     term['source_ontology'] = ont_prefi[prefix]
-        try:
-            if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
-                to_delete.append(termid)
-                print('WARNING - {} is already present as a term in {} and not {}'.format(
-                    termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']
-                ))
-        except KeyError:
-            print(termid)
-            print(term)
-            print(dbterms[termid])
-            continue
+        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
+            to_delete.append(termid)
+            print('WARNING - {} is already present as a term in {} and not {}'.format(
+                termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']
+            ))
     keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
     return keep_terms
 
