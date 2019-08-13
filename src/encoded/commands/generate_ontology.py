@@ -602,7 +602,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
     print("Will obsolete {} TERMS".format(obsoletes))
     print("{} TERMS ARE NEW".format(to_post))
     print("{} LIVE TERMS WILL BE PATCHED".format(to_patch - obsoletes))
-    return to_update, tid2uuid
+    return to_update
 
 
 def _get_uuids_for_linked(term, idmap):
@@ -811,7 +811,7 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates, idmap = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
+        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
         # terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False

@@ -16,7 +16,8 @@
                 "PASS",
                 "FAIL",
                 "WARN"
-            ]
+            ],
+            "default": "PASS"
         },
         "url": {
             "type": "string",
