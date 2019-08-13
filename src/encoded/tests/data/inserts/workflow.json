@@ -809,6 +809,7 @@
             {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "report"
+            },
             {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "report",
