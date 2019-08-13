@@ -25,7 +25,7 @@ describe('Static Page & Content Tests', function () {
 
         // Wait until help menu has loaded via AJAX and is a dropdown.
         // todo: Ensure we're selecting right 1 incase later add more -- test for `a.id-help-menu-item` once in place upstream.
-        cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').click().wait(500).then(()=>{
+        cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').wait(100).click().wait(500).then(()=>{
             cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{
                 console.log(listItems);
 

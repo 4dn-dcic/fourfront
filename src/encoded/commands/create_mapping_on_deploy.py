@@ -81,6 +81,7 @@ ITEM_INDEX_ORDER = [
     'HiglassViewConfig',
     'QualityMetricAtacseq',
     'QualityMetricBamqc',
+    'QualityMetricBamcheck',
     'QualityMetricChipseq',
     'QualityMetricDedupqcRepliseq',
     'QualityMetricFastqc',

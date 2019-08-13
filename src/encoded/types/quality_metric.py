@@ -12,6 +12,14 @@ from .base import (
     lab_award_attribution_embed_list
 )
 
+"""OVERALL QAULITY SCORE INFO
+All QC objects come with a field 'overall_quality_status', which is by default set to 'PASS'
+For some qc object we don't have a current protocol to judge the overall quality based on the
+fields in the qc item.
+When there is a way to make this assesment, add this algorithm as a function to the corresponding
+qc class, and update the value. If you implement it for a class with existing items, you will need
+to trigger the update with empty patches."""
+
 
 @collection(
     name='quality-metric-flags',
@@ -53,6 +61,33 @@ class QualityMetricFastqc(QualityMetric):
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
     embedded_list = QualityMetric.embedded_list
+
+
+@collection(
+    name='quality-metrics-bamcheck',
+    properties={
+        'title': 'Bam Check Quality Metrics',
+        'description': 'Listing of Bam Check Quality Metrics'
+    })
+class QualityMetricBamcheck(QualityMetric):
+    """Subclass of quality matrics for bam files."""
+
+    item_type = 'quality_metric_bamcheck'
+    schema = load_schema('encoded:schemas/quality_metric_bamcheck.json')
+    embedded_list = QualityMetric.embedded_list
+
+    def _update(self, properties, sheets=None):
+        qc_val = properties.get('quickcheck', '')
+        overall = ''
+        if not properties.get('overall_quality_status'):
+            overall = 'WARN'
+        elif qc_val == 'OK':
+            overall = 'PASS'
+        else:
+            overall = 'FAIL'
+        # set name based on what is entered into title
+        properties['overall_quality_status'] = overall
+        super(QualityMetricBamcheck, self)._update(properties, sheets)
 
 
 @collection(

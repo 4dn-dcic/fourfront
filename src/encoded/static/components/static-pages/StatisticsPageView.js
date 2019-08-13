@@ -10,7 +10,8 @@ import moment from 'moment';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
 import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
-import { console, navigate, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate } from './../util';
 import {
     StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
@@ -848,7 +849,7 @@ class UsageChartsCountByDropdown extends React.PureComponent {
 
         return (
             <div className="inline-block mr-05">
-                <DropdownButton data-tip="Count By" bsSize="sm" id={"select_count_for_" + chartID}
+                <DropdownButton data-tip="Count By" size="sm" id={"select_count_for_" + chartID}
                     onSelect={this.handleSelection} title={dropdownTitle}>
                     {_.map([ ...menuOptions.entries() ], function([ k, title ]){
                         return <DropdownItem eventKey={k} key={k}>{ title }</DropdownItem>;
