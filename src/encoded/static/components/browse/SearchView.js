@@ -96,8 +96,10 @@ export default class SearchView extends React.PureComponent {
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
-            <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
-                termTransformFxn={Schemas.Term.toName} />
+            <div className="container" id="content">
+                <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
+                    termTransformFxn={Schemas.Term.toName} />
+            </div>
         );
     }
 }

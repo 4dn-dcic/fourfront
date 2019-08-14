@@ -21,7 +21,8 @@ export default class BiosampleView extends DefaultItemView {
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
 
-        const expSetTableProps = _.extend({}, this.props, {
+        const expSetTableProps = {
+            ...this.props,
             'requestHref' : (
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
@@ -30,7 +31,7 @@ export default class BiosampleView extends DefaultItemView {
             'title' : function(props, { totalCount }){
                 return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
             }
-        });
+        };
 
         initTabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
 

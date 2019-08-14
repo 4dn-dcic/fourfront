@@ -1727,25 +1727,50 @@ class BodyElement extends React.PureComponent {
         );
     }
 
+    bodyClassName(){
+        const { isLoading, context } = this.props;
+        const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
+        const bodyClassList = (classList && classList.slice(0)) || [];
+
+        // Common UI
+        if (isLoading)          bodyClassList.push("loading-request");
+        if (scrolledPastTop)    bodyClassList.push("scrolled-past-top");
+        if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
+        if (isFullscreen){
+            bodyClassList.push("is-full-screen");
+        }
+
+        // TODO migrate test-warning-visible class to here from NavBar (done on CGAP already).
+
+        // If is a typical ItemView, we want to show a full-width view.
+        // StaticPages, unless on ItemView for them, _do not_ contain "Item"
+        // in their @type field and instead have Portal, StaticPage, etc.
+        if (Array.isArray(context['@type'])){
+            if (context['@type'].indexOf('Item') > -1){
+                bodyClassList.push("is-item-view");
+            }
+        }
+
+        if (bodyClassList.length > 0){
+            return bodyClassList.join(' ');
+        } else {
+            return null;
+        }
+    }
+
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, isLoading, slowLoad } = this.props;
-        const { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, slowLoad } = this.props;
+        const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
-        const bodyClassList = (classList && classList.slice(0)) || [];
         const overlaysContainer = this.overlaysContainerRef.current;
 
         if (hasError) return this.renderErrorState();
 
-        if (isLoading)          bodyClassList.push('loading-request');
-        if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
-        if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
-        if (isFullscreen)       bodyClassList.push('is-full-screen');
-
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={(bodyClassList.length > 0 && bodyClassList.join(' ')) || null}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
