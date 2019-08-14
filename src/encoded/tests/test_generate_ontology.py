@@ -1008,7 +1008,7 @@ def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
 
 
 def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
+    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     assert len(result) == 2
     assert '7890' in [t.get('uuid') for t in result]
@@ -1016,14 +1016,14 @@ def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
+    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
     assert 't4' not in [t.get('term_id') for t in result]
     # assert 't4' not in idmap
 
 
 def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontology': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
+    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     print(result)
     assert 't4' not in [t.get('term_id') for t in result]

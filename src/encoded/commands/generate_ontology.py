@@ -540,7 +540,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
     for term in to_update:
         puuids = _get_uuids_for_linked(term, tid2uuid)
         for rt, uuids in puuids.items():
-            term[rt] = uuids
+            term[rt] = list(set(uuids))  # to avoid redundant terms
 
     if set_obsoletes:
         prefixes = [o.get('ontology_prefix', '') for o in ontologies]
