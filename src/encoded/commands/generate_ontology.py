@@ -158,6 +158,8 @@ def _add_term_and_info(class_, parent_uri, relationship, data, terms):
     for subclass in data.rdfGraph.objects(class_, subClassOf):
         term_id = get_termid_from_uri(parent_uri)
         if terms.get(term_id) is None:
+            if _is_deprecated(parent_uri, data):
+                continue
             terms[term_id] = create_term_dict(parent_uri, term_id, data)
         if terms[term_id].get(relationship) is None:
             terms[term_id][relationship] = []
@@ -213,6 +215,8 @@ def _find_and_add_parent_of(parent, child, data, terms, has_part=False, relation
     '''
     child_id = get_termid_from_uri(child)
     for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
+        if _is_deprecated(obj, data):
+            continue
         if not isBlankNode(obj):
             objid = get_termid_from_uri(obj)
             term2add = objid
@@ -254,6 +258,8 @@ def process_parents(class_, data, terms):
                     # terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
                     terms = _find_and_add_parent_of(parent, class_, data, terms, has_part, relation)
         else:
+            if _is_deprecated(parent, data):
+                continue
             if not terms[termid].get('parents'):
                 terms[termid]['parents'] = []
             terms[termid]['parents'].append(get_termid_from_uri(parent))
@@ -441,12 +447,24 @@ def connect2server(env=None, key=None):
     return auth
 
 
-def remove_obsoletes_and_unnamed(terms):
-    terms = {termid: term for termid, term in terms.items()
-             if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
-    terms = {termid: term for termid, term in terms.items()
-             if 'term_name' in term and (term['term_name'] and not term['term_name'].lower().startswith('obsolete'))}
-    return terms
+def remove_obsoletes_and_unnamed(terms, deprecated):
+    live_terms = {}
+    for termid, term in terms.items():
+        if termid in deprecated:
+            continue
+        parents = term.get('parents')
+        if parents:
+            if 'ObsoleteClass' in parents:
+                continue
+            for p in parents:
+                if p in deprecated:
+                    parents.remove(p)
+            term['parents'] = parents
+
+        if 'term_name' in term and term['term_name'].lower().startswith('obsolete'):
+            continue
+        live_terms[termid] = term
+    return live_terms
 
 
 def _get_t_id(val):
@@ -614,32 +632,36 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, connection, terms, simple=False):
+def download_and_process_owl(ontology, connection, terms, deprecated, simple=False):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
     if not terms:
         terms = {}
+    if not deprecated:
+        deprecated = []
     for class_ in data.allclasses:
-        if not _is_deprecated(class_, data):
-            if isBlankNode(class_):
-                terms = process_blank_node(class_, data, terms, simple)
+        if _is_deprecated(class_, data):
+            deprecated.append(get_termid_from_uri(class_))
+    for class_ in data.allclasses:
+        if isBlankNode(class_):
+            terms = process_blank_node(class_, data, terms, simple)
+        else:
+            termid = get_termid_from_uri(class_)
+            if simple and not termid.startswith(ontology.get('ontology_prefix')):
+                continue
+            if terms.get(termid) is None:
+                terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
             else:
-                termid = get_termid_from_uri(class_)
-                if simple and not termid.startswith(ontology.get('ontology_prefix')):
-                    continue
-                if terms.get(termid) is None:
-                    terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
-                else:
-                    if 'term_name' not in terms[termid]:
-                        terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                    if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
-                        terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
-                # deal with parents
-                terms = process_parents(class_, data, terms)
-    # add synonyms and definitions
+                if 'term_name' not in terms[termid]:
+                    terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
+                if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
+                    terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
+            # deal with parents
+            terms = process_parents(class_, data, terms)
+# add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
-    return terms
+    return terms, list(set(deprecated))
 
 
 def write_outfile(terms, filename, pretty=False):
@@ -742,18 +764,21 @@ def main():
     slim_terms = get_slim_terms(connection)
     db_terms = get_existing_ontology_terms(connection)
     terms = {}
-
+    deprecated = []
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
-            terms = download_and_process_owl(ontology, connection, terms, args.simple)
+            terms, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, args.simple)
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
         print("Post-processing")
         terms = add_slim_terms(terms, slim_terms)
-        terms = remove_obsoletes_and_unnamed(terms)
+        # doing this after adding slims in case an ontology is not in sync with one it imports
+        # will preserve slimming but remove obsolete terms and parents in next step
+        import pdb; pdb.set_trace()
+        terms = remove_obsoletes_and_unnamed(terms, deprecated)
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
