@@ -119,7 +119,7 @@ export const ExperimentSetTablesLoadedFromSearch = React.memo(function Experimen
     );
 });
 
-/** @todo Make into functional component */
+
 export class ExperimentSetTableTabView extends React.PureComponent {
 
     /**
@@ -154,6 +154,20 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         }
     };
 
+    constructor(props){
+        super(props);
+        this.getCountCallback = this.getCountCallback.bind(this);
+        this.state = {
+            'totalCount' : null
+        };
+    }
+
+    getCountCallback(resp){
+        if (resp && typeof resp.total === 'number'){
+            this.setState({ 'totalCount' : resp.total });
+        }
+    }
+
     render(){
         const { windowWidth, href : currentPageHref } = this.props;
         let { requestHref, title } = this.props;
@@ -163,7 +177,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
 
         return (
             <div>
-                <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, 'href' : currentPageHref }} />
+                <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, 'href' : currentPageHref }} onLoad={this.getCountCallback} />
             </div>
         );
     }

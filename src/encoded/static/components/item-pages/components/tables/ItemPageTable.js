@@ -313,7 +313,7 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.getCountCallback = this.getCountCallback.bind(this);
+        this.doRequest = this.doRequest.bind(this);
         this.handleResponse = this.handleResponse.bind(this);
         this.state = {
             'loading' : false,
