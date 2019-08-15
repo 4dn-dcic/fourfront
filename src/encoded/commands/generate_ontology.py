@@ -779,7 +779,6 @@ def main():
         terms = add_slim_terms(terms, slim_terms)
         # doing this after adding slims in case an ontology is not in sync with one it imports
         # will preserve slimming but remove obsolete terms and parents in next step
-        import pdb; pdb.set_trace()
         terms = remove_obsoletes_and_unnamed(terms, deprecated)
         filter_unchanged = True
         if args.full:
