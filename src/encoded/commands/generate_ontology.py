@@ -461,6 +461,8 @@ def remove_obsoletes_and_unnamed(terms, deprecated):
                     parents.remove(p)
             term['parents'] = parents
 
+        if not term.get('term_name'):
+            continue
         if 'term_name' in term and term['term_name'].lower().startswith('obsolete'):
             continue
         live_terms[termid] = term
