@@ -171,3 +171,16 @@ class QualityMetricMargi(QualityMetric):
     item_type = 'quality_metric_margi'
     schema = load_schema('encoded:schemas/quality_metric_margi.json')
     embedded_list = QualityMetric.embedded_list
+
+
+@collection(
+    name='quality-metrics-workflowrun',
+    properties={
+        'title': 'QC Quality metrics for Workflow Run',
+        'description': 'Listing of QC Quality Metrics for Workflow Run.',
+    })
+class QualityMetricWorkflowrun(QualityMetric):
+    """Subclass of quality matrics for Workflow run"""
+    item_type = 'quality_metric_workflowrun'
+    schema = load_schema('encoded:schemas/quality_metric_workflowrun.json')
+    embedded_list = QualityMetric.embedded_list

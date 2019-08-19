@@ -88,6 +88,7 @@ ITEM_INDEX_ORDER = [
     'QualityMetricFlag',
     'QualityMetricPairsqc',
     'QualityMetricMargi',
+    'QualityMetricWorkflowRun',
 
     'ExperimentAtacseq',
     'ExperimentCaptureC',
