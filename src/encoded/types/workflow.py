@@ -426,12 +426,14 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     if outfile['uuid'] == current_file_model_object['uuid']:
                         output['meta']['in_path'] = True
                         runs_current_file_goes_to = current_file_model_object.get('workflow_run_inputs', [])
+
                         for target_workflow_run_uuid in runs_current_file_goes_to:
                             if isinstance(target_workflow_run_uuid, dict): # Case if current_file_model_object is embedded representation
                                 target_workflow_run_uuid = target_workflow_run_uuid['uuid']
+                            # REMOVED OPTIMIZATION - we might encounter these other target WFRs _later_ so we keep them.
                             # Slight Optimization - skip creating target conntections to steps/wfrs which we have not (yet) encountered
-                            if uuidCacheTracedHistory.get(target_workflow_run_uuid) is None:
-                                continue
+                            #if uuidCacheTracedHistory.get(target_workflow_run_uuid) is None:
+                            #    continue
                             target_workflow_run_model_obj = get_model_obj(target_workflow_run_uuid)
                             input_files_by_argument_name = group_files_by_workflow_argument_name(target_workflow_run_model_obj.get('input_files', []))
                             for argument_name, input_files_for_arg in input_files_by_argument_name.items():
