@@ -201,6 +201,12 @@
             "description": "Url to AWS run info",
             "format": "uri"
         },
+        "quality_metric": {
+            "type": "string",
+            "title": "Quality Metric",
+            "description": "The associated QC reports",
+            "linkTo": "QualityMetricWorkflowrun"
+        },
         "commands": {
             "title": "Run Commands",
             "description": "list of commands run for the workflow, simplified",
