@@ -519,7 +519,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
             file_uuids       = [ (f.get('value') or f.get('value_qc') or None) for f in output_files_for_arg ]
             file_items       = []
-            file_format      = None
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             original_file_in_output = False
             for file_uuid in file_uuids:
@@ -528,8 +527,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                     if file_item['uuid'] == current_file_model_object['uuid']:
                         original_file_in_output = True
                     file_items.append(common_props_from_file(file_item))
-                    if not file_format:
-                        file_format = file_item.get('file_format')
 
             step['outputs'].append({
                 "name"      : argument_name,
@@ -537,7 +534,6 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
                 "meta"      : {
                     "type"          : io_type,                  # 'data file', 'reference file', 'parameter', etc. (enum, see schemas)
                     "global"        : True,                     # All traced Files are global inputs or outputs of their respective WorkflowRuns
-                    "file_format"   : file_format,              # 'pairs', 'fastq', etc. (not enum)
                     "in_path"       : original_file_in_output   # Whether this file is directly in tracing path (True) or just an extra output file (False). Used for 'show more context' UI control.
                 },
                 "run_data"  : {
@@ -555,21 +551,17 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
             workflow_step_io = get_step_io_for_argument_name(argument_name, workflow_model_obj or workflow_run_model_obj)
             file_uuids       = [ (f.get('value') or f.get('value_qc') or None) for f in input_files_for_arg ]
             file_items       = []
-            file_format      = None
             io_type          = (workflow_step_io and workflow_step_io.get('meta', {}).get('type')) or 'data file'
             for file_uuid in file_uuids:
                 file_item = get_model_embed(file_uuid)
                 if file_item is not None:
                     file_items.append(file_item)
-                    if not file_format:
-                        file_format = file_item.get('file_format')
 
             step['inputs'].append({
                 "name" : argument_name, # TODO: Try to fallback to ... in_file.file_type_detailed?
                 "source" : generate_sources_for_input(file_items, argument_name, depth),
                 "meta" : {
                     "in_path" : True,
-                    "file_format" : file_format,
                     "global" : True,
                     "type" : io_type
                 },
@@ -810,19 +802,28 @@ class WorkflowRun(Item):
 
             if len(matched_runtime_io_data) > 0:
                 matched_runtime_io_data = sorted(matched_runtime_io_data, key=lambda io_object: io_object.get('ordinal', 1))
+
+                # List of file or Item UUIDs.
+                value_list = []
+
+                # Aligned-to-file-list-indices list of file metadata(s)
+                meta_list = []
+
+                for io_dict in matched_runtime_io_data:
+                    # Quality Metrics might be saved with `value_qc` instead of `value`
+                    linked_to_item_uuid = io_dict.get('value') or io_dict.get('value_qc')
+                    value_list.append(linked_to_item_uuid)
+                    # Add all remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
+                    # Contains things like dimension, ordinal, file_format, and so forth.
+                    meta_dict = { k:v for (k,v) in io_dict.items() if k not in [ 'value', 'value_qc', 'type', 'workflow_argument_name' ] }
+                    # There is a chance we do not have the file_format in the input_files list. Most often this would occur if multiple
+                    # files in input argument list 
+                    meta_list.append(meta_dict)
+
                 step_io_arg['run_data'] = {
-                    value_field_name : [
-                        # List of file UUIDs
-                        # Also, Quality Metrics might be saved with `value_qc` instead of `value`
-                        (io_object.get('value') or io_object.get('value_qc')) for io_object in matched_runtime_io_data
-                    ],
+                    value_field_name : value_list,
                     "type" : io_type,
-                    "meta" : [ # Aligned-to-file-list list of file metadata
-                        {   # All remaining properties from dict in (e.g.) 'input_files','output_files',etc. list.
-                            k:v for (k,v) in p.items()
-                            if k not in [ 'value', 'value_qc', 'type', 'workflow_argument_name' ]
-                        } for p in matched_runtime_io_data
-                    ]
+                    "meta" : meta_list
                 }
                 return True
             return False
