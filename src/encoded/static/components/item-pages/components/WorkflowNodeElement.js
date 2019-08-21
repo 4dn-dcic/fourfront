@@ -8,7 +8,7 @@ import { expFxn } from './../../util';
 import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
 
 
-/** TODO codify what we want shown here and cleanup code */
+/** TODO codify what we want shown here and cleanup code - breakup into separate functional components */
 
 export class WorkflowNodeElement extends React.PureComponent {
 
@@ -66,16 +66,45 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
     }
 
-    icon(){
-        var node                = this.props.node,
-            ioType              = node.ioType,
-            nodeMetaType        = (node.meta && node.meta.type) || null,
-            fileFormatAsString  = (node.meta && node.meta.file_format && (node.meta.file_format.file_format || node.meta.file_format.display_title)) || null,
-            iconClass;
+    static getFileFormat(node){
+        /** @see https://medium.com/@JasonCust/fun-with-destructuring-assignments-ba5717c8d7e **/
+        const {
+            meta : {
+                file_format: metaFileFormat = null,
+                run_data: nodeRunData = null
+            }
+        } = node;
+        const { file : { file_format : fileFileFormat = null } = {} } = (nodeRunData || {});
+        if (object.itemUtil.isAnItem(fileFileFormat)) {
+            // The file_format attached to file itself (if any) is most accurate.
+            return fileFileFormat;
+        } else if (object.itemUtil.isAnItem(metaFileFormat)) {
+            // This might be inaccurate if multiple files of different formats are in an array for same input/output argument.
+            // Is only option available for when viewing a Workflow Item (vs WorkflowRun, Provenance Graph)
+            return metaFileFormat;
+        }
+        return null;
+    }
 
-        if (node.nodeType === 'input-group' || node.nodeType === 'output-group'){
+    static getFileFormatString(node){
+        const fileFormatItem = WorkflowNodeElement.getFileFormat(node);
+        if (!fileFormatItem && (!node.meta || !node.meta.run_data)) {
+            // Some extra glitter to show lack of defined file_format.
+            // Assuming is Workflow visualization with no run data or file_format definition pre-defined.
+            return "Any file format";
+        }
+        return (fileFormatItem && (fileFormatItem.file_format || fileFormatItem.display_title)) || null;
+    }
+
+    icon(){
+        const { node } = this.props;
+        const { ioType, nodeType } = node;
+        const fileFormatAsString = WorkflowNodeElement.getFileFormatString(node);
+        let iconClass;
+
+        if (nodeType === 'input-group' || nodeType === 'output-group'){
             iconClass = 'folder-open';
-        } else if (node.nodeType === 'input' || node.nodeType === 'output'){
+        } else if (nodeType === 'input' || nodeType === 'output'){
             // By file_format
             if (fileFormatAsString === 'zip' || fileFormatAsString === 'tar' || fileFormatAsString === 'gz') {
                 iconClass = 'file-zip-o';
@@ -107,7 +136,7 @@ export class WorkflowNodeElement extends React.PureComponent {
                 }
             }
 
-        } else if (node.nodeType === 'step'){
+        } else if (nodeType === 'step'){
             iconClass = 'cogs';
         }
         if (!iconClass) return null;
@@ -115,60 +144,61 @@ export class WorkflowNodeElement extends React.PureComponent {
     }
 
     tooltip(){
-        var node            = this.props.node,
-            output          = '',
-            hasRunDataFile  = false;
+        const { node } = this.props;
+        const { nodeType, meta, name } = node;
+        let output = '';
+        let hasRunDataFile = false;
 
         // Titles
         // Node Type -specific
-        if (node.nodeType === 'step'){
-            if (node.meta && node.meta.workflow){
+        if (nodeType === 'step'){
+            if (meta && meta.workflow){
                 output += '<small>Workflow Run</small>'; // Workflow Run
             } else {
                 output += '<small>Step</small>'; // Reg Step
             }
             // Step Title
-            output += '<h5 class="text-600 tooltip-title">' + ((node.meta && node.meta.display_title) || node.title || node.name) + '</h5>';
+            output += '<h5 class="text-600 tooltip-title">' + ((meta && (meta.display_title || meta.name)) || name) + '</h5>';
         }
 
-        if (node.nodeType === 'input-group'){
+        if (nodeType === 'input-group'){
             output += '<small>Input Argument</small>';
         }
 
-        if (node.nodeType === 'input' || node.nodeType === 'output'){
-            var argumentName = node.nodeType;
+        if (nodeType === 'input' || nodeType === 'output'){
+            let argumentName = nodeType;
             argumentName = argumentName.charAt(0).toUpperCase() + argumentName.slice(1);
             hasRunDataFile = WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node);
-            var fileTitle = hasRunDataFile && (node.meta.run_data.file.display_title || node.meta.run_data.file.accession);
+            const fileTitle = hasRunDataFile && (meta.run_data.file.display_title || meta.run_data.file.accession);
             if (fileTitle) {
                 output += '<small>' + argumentName + ' File</small>';
                 output += '<h5 class="text-600 tooltip-title">' + fileTitle + '</h5>';
                 output += '<hr class="mt-08 mb-05"/>';
             }
             if (argumentName === 'Input' || argumentName === 'Output'){
-                argumentName += ' Argument &nbsp; <span class="text-500 mono-text">' + node.name + '</span>';
+                argumentName += ' Argument &nbsp; <span class="text-500 mono-text">' + name + '</span>';
             }
             output += '<small class="mb-03 inline-block">' + argumentName + '</small>';
         }
 
         // If file, and has file-size, add it (idk, why not)
-        var fileSize = hasRunDataFile && typeof node.meta.run_data.file.file_size === 'number' && node.meta.run_data.file.file_size;
+        const fileSize = hasRunDataFile && typeof meta.run_data.file.file_size === 'number' && meta.run_data.file.file_size;
         if (fileSize){
-            output += '<div class="mb-05"><span class="text-300">Size:</span> ' + valueTransforms.bytesToLargerUnit(node.meta.run_data.file.file_size) + '</div>';
+            output += '<div class="mb-05"><span class="text-300">Size:</span> ' + valueTransforms.bytesToLargerUnit(meta.run_data.file.file_size) + '</div>';
         }
 
         // Workflow name, if any
-        if (node.nodeType === 'step' && node.meta && node.meta.workflow && node.meta.workflow.display_title){ // Workflow
+        if (nodeType === 'step' && meta && meta.workflow && meta.workflow.display_title){ // Workflow
             //title
             output += '<hr class="mt-08 mb-05"/><div class="mb-05 mt-08"><span class="text-600">Workflow: </span><span class="text-400">' + node.meta.workflow.display_title + '</span></div>';
         }
 
         // Description
-        var description = (
+        const description = (
             (typeof node.description === 'string' && node.description)
-            || (node.meta && typeof node.meta.description === 'string' && typeof node.meta.description)
-            || (node.meta.run_data && node.meta.run_data.meta && node.meta.run_data.meta.description)
-            || (node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file === 'object' && node.meta.run_data.file.description)
+            || (meta && typeof meta.description === 'string' && meta.description)
+            || (meta.run_data && meta.run_data.meta && meta.run_data.meta.description)
+            || (meta.run_data && meta.run_data.file && typeof meta.run_data.file === 'object' && meta.run_data.file.description)
         );
         if (description){
             output += '<hr class="mt-05 mb-05"/>';
@@ -179,15 +209,13 @@ export class WorkflowNodeElement extends React.PureComponent {
     }
 
     aboveNodeTitle(){
-
-        var { node, title, columnWidth } = this.props,
-            fileFormat          = node.meta && node.meta.file_format, // Is a linkTo FileFormat Item (if not null)
-            fileFormatAsString  = fileFormat && (fileFormat.file_format || fileFormat.display_title),
-            elemProps = {
-                'style'         : { 'maxWidth' : columnWidth },
-                'className'     : "text-ellipsis-container above-node-title",
-                'key'           : 'above-node-title'
-            };
+        const { node, title, columnWidth } = this.props;
+        const fileFormatAsString = WorkflowNodeElement.getFileFormatString(node);
+        const elemProps = {
+            'style'         : { 'maxWidth' : columnWidth },
+            'className'     : "text-ellipsis-container above-node-title",
+            'key'           : 'above-node-title'
+        };
 
         if (node.nodeType === 'input-group'){
             return <div {...elemProps}>{ title }</div>;
@@ -214,10 +242,9 @@ export class WorkflowNodeElement extends React.PureComponent {
 
         // If File
         if (WorkflowNodeElement.isNodeFile(node)){
-            //if (typeof node.meta.run_data.file.file_format === 'string' && node.meta.run_data.file.file_format !== 'other'){
-            //    return <div {...elemProps}>{ node.meta.run_data.file.file_format }</div>;
-            //}
-            if (fileFormat) return <div {...elemProps}>{ fileFormatAsString }</div>;
+            if (fileFormatAsString) {
+                return <div {...elemProps}>{ fileFormatAsString }</div>;
+            }
             elemProps.className += ' mono-text';
             return <div {...elemProps}>{ title }</div>;
         }
@@ -238,7 +265,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
 
         // If IO Arg w/o file but w/ format
-        if ((node.nodeType === 'input' || node.nodeType === 'output') && fileFormat){
+        if ((node.nodeType === 'input' || node.nodeType === 'output') && fileFormatAsString){
             return <div {...elemProps}>{ fileFormatAsString }</div>;
         }
 
@@ -257,12 +284,12 @@ export class WorkflowNodeElement extends React.PureComponent {
     }
 
     belowNodeTitle(){
-        var { node, columnWidth } = this.props,
-            elemProps = {
-                'style'     : { 'maxWidth' : columnWidth },
-                'className' : "text-ellipsis-container below-node-title",
-                'key'       : 'below-node-title'
-            };
+        const { node, columnWidth } = this.props;
+        const elemProps = {
+            'style'     : { 'maxWidth' : columnWidth },
+            'className' : "text-ellipsis-container below-node-title",
+            'key'       : 'below-node-title'
+        };
 
         /*
         if (node.meta && typeof node.meta.argument_type === 'string') {
