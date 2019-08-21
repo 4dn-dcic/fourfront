@@ -143,7 +143,7 @@ def validate_biosource_tissue(context, request):
         except AttributeError:
             getter = context.collection
         term = getter.get(termuid)
-        ontologies = term.properties['source_ontologies']
+        ontologies = term.upgrade_properties()['source_ontologies']
     except AttributeError:
         pass
     request.validated.update({})
@@ -179,10 +179,10 @@ def validate_biosource_cell_line(context, request):
     try:
         termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
         term = getter.get(termuid)
-        slims = term.properties.get('slim_terms', [])
+        slims = term.upgrade_properties().get('slim_terms', [])
         for slim in slims:
             slim_term = getter.get(slim)
-            slimfor = slim_term.properties.get('is_slim_for')
+            slimfor = slim_term.upgrade_properties().get('is_slim_for')
             if slimfor is not None and slimfor == 'cell':
                 term_ok = True
                 break
