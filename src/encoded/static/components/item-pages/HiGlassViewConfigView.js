@@ -201,6 +201,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
+        if(context.status && typeof context.status === 'string' && (context.status === 'released' || context.status === 'released_to_project')) {
+            if(!confirm('You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?\r\n\r\nNote that you can also clone this display and share the new copy.'))
+                return;
+        }
+
         // We're updating this object's view conf and the genome assembly.
         const payload = { 'viewconfig' : currentViewConf };
 
