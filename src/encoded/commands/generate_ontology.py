@@ -783,7 +783,7 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
+        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, simple=args.simple)
         # terms2write = add_uuids_and_combine(partitioned_terms)
 
         pretty = False
