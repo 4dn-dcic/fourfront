@@ -336,9 +336,8 @@ class TabPlaceHolder extends React.PureComponent {
 
 /**
  * Error Boundary component to wrap an individual tab in a page.
- * TODO: move to a more generic js file instead of ItemDetailList.js
  */
-class TabErrorBoundary extends React.PureComponent {
+class TabErrorBoundary extends React.Component {
 
     constructor(props) {
         super(props);
